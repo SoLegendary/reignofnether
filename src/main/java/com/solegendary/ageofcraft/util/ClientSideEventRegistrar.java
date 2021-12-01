@@ -17,6 +17,7 @@ public class ClientSideEventRegistrar {
      * is executing code on the client side and not the dedicated server.
      */
     public void registerClientEvents() {
+        OrthoViewClientEvents.init();
         vanillaEventBus.register(OrthoViewClientEvents.class);
         modEventBus.register(TopdownGuiClientEvents.class);
     }

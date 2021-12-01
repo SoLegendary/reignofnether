@@ -58,7 +58,7 @@ public class OrthoViewClientEvents {
     private static final KeyBinding keyBindReset = new KeyBinding("key.ageofcraft.orthoview.reset", GLFW.GLFW_KEY_RIGHT_CONTROL, KEY_CATEGORY);
     private static final KeyBinding keyBindShiftMod = new KeyBinding("key.ageofcraft.orthoview.shiftMod", GLFW.GLFW_KEY_LEFT_SHIFT, KEY_CATEGORY);
     private static final KeyBinding keyBindCtrlMod = new KeyBinding("key.ageofcraft.orthoview.ctrlMod", GLFW.GLFW_KEY_LEFT_CONTROL, KEY_CATEGORY);
-    private static boolean enabled = false;
+    public static boolean enabled = false;
     private static float zoom = 30;
     private static float camRotX = 0;
     private static float camRotY = 45;
@@ -70,9 +70,12 @@ public class OrthoViewClientEvents {
     private static float mouseRightDownY = 0;
     private static float mouseLeftDownX = 0;
     private static float mouseLeftDownY = 0;
-    private static boolean isRegistered = false;
+    private static int winWidth = 0;
+    private static int winHeight = 0;
+    private static final int screenWidth = MC.getWindow().getScreenWidth();
+    private static final int screenHeight = MC.getWindow().getScreenHeight();
 
-    private static void registerKeybinds() {
+    public static void init() {
         ClientRegistry.registerKeyBinding(keyBindToggle);
         ClientRegistry.registerKeyBinding(keyBindZoomIn);
         ClientRegistry.registerKeyBinding(keyBindZoomOut);
@@ -83,7 +86,6 @@ public class OrthoViewClientEvents {
         ClientRegistry.registerKeyBinding(keyBindReset);
         ClientRegistry.registerKeyBinding(keyBindShiftMod);
         ClientRegistry.registerKeyBinding(keyBindCtrlMod);
-        isRegistered = true;
     }
 
     private static void reset() {
@@ -122,14 +124,19 @@ public class OrthoViewClientEvents {
         return evt.getGui().getTitle().getString().equals(TopdownGuiContainer.TITLE.getString());
     }
 
+    public static boolean isEnabled() {
+        return enabled;
+    }
+
     // only fires on key down, only when a gui screen is up
     @SubscribeEvent
     public static void onKeyPressed (GuiScreenEvent.KeyboardKeyPressedEvent.Pre evt) {
         Integer keyPressed = evt.getKeyCode();
 
         // can't use keyBindToggle.isDown() as it doesn't happen on the same tick as this event
-        if (keyPressed.equals(keyBindToggle.getKey().getValue()))
+        if (keyPressed.equals(keyBindToggle.getKey().getValue())) {
             enabled = !enabled;
+        }
 
         if (keyBindReset.isDown())
             reset();
@@ -144,24 +151,49 @@ public class OrthoViewClientEvents {
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
         if (!isTopdownGui(evt) || !enabled) return;
 
-        // no idea why but mouse x and y are half of what's expected
-        int winWidth = MC.getWindow().getWidth();
-        int winHeight = MC.getWindow().getHeight();
-        int mouseX = evt.getMouseX() * 2;
-        int mouseY = evt.getMouseY() * 2;
+        if (keyBindShiftMod.isDown()) return;
 
-        System.out.println(winWidth + " " + winHeight);
-        System.out.println(mouseX + " " + mouseY);
+        // no idea why but mouse x and y are half of what's expected
+        int mouseX = evt.getMouseX();
+        int mouseY = evt.getMouseY();
 
         // mouse (0,0) is top left of screen
+        /*
         if (mouseX < PAN_MOUSE_EDGE_BUFFER)
-            panCam(PAN_KEY_STEP * 2,0);
+            panCam(PAN_KEY_STEP * 2, 0);
         else if (mouseX > winWidth - PAN_MOUSE_EDGE_BUFFER)
-            panCam(-PAN_KEY_STEP * 2,0);
+            panCam(-PAN_KEY_STEP * 2, 0);
         if (mouseY < PAN_MOUSE_EDGE_BUFFER)
             panCam(0, PAN_KEY_STEP * 2);
         else if (mouseY > winHeight - PAN_MOUSE_EDGE_BUFFER)
-            panCam(0,-PAN_KEY_STEP * 2);
+            panCam(0, -PAN_KEY_STEP * 2);
+         */
+
+        if (MC.player != null) {
+
+            float pixelsToBlocks = 10;
+
+            // make mouse coordinate origin centre of screen
+            double x = (mouseX - (float) winWidth / 2) / pixelsToBlocks;
+            double y = 0;
+            double z = (mouseY - (float) winHeight / 2) / pixelsToBlocks;
+
+            float camXRotRads = (float) Math.toRadians(-camRotX - camRotAdjX);
+            double xRotated = (x * cos(camXRotRads)) - (z * sin(camXRotRads));
+            double zRotated = (z * cos(camXRotRads)) + (x * sin(camXRotRads));
+
+            System.out.println(xRotated + " " + zRotated);
+
+            double xFinal = MC.player.xo - xRotated;
+            double yFinal = MC.player.yo + y;
+            double zFinal = MC.player.zo - zRotated;
+            OrthoViewCommonEvents.moveCursorEntity(xFinal, yFinal, zFinal);
+
+            //System.out.println(xFinal + " " + yFinal + " " + zFinal);
+        }
+
+
+
     }
     @SubscribeEvent
     public static void onMouseClick(GuiScreenEvent.MouseClickedEvent evt) {
@@ -171,6 +203,10 @@ public class OrthoViewClientEvents {
             mouseLeftDown = true;
             mouseLeftDownX = (float) evt.getMouseX();
             mouseLeftDownY = (float) evt.getMouseY();
+
+            System.out.println(mouseLeftDownX + " " + mouseLeftDownY);
+            System.out.println(screenWidth + " " + screenHeight);
+            System.out.println(winWidth + " " + winHeight);
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             mouseRightDown = true;
@@ -199,8 +235,8 @@ public class OrthoViewClientEvents {
         if (!isTopdownGui(evt) || !enabled) return;
 
         if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && keyBindShiftMod.isDown()) {
-            float moveX = (float) evt.getDragX() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX);
-            float moveZ = (float) evt.getDragY() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX);
+            float moveX = (float) evt.getDragX() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX) * ((float) screenWidth / winWidth);
+            float moveZ = (float) evt.getDragY() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX) * ((float) screenHeight / winHeight);
             panCam(moveX, moveZ);
         }
         if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && keyBindShiftMod.isDown()) {
@@ -216,12 +252,10 @@ public class OrthoViewClientEvents {
 
     public static final FloatBuffer projection = GLAllocation.createFloatBuffer(16);
     public static final FloatBuffer modelview = GLAllocation.createFloatBuffer(16);
-
     // In EntityViewRenderEvent.CameraSetup compute whatever frustum you want and set MC.levelRenderer.capturedFrustum
     // to it. Then the game will use that frustum instead of whatever it computes based on player position.
     @SubscribeEvent
     public static void onCameraSetup(EntityViewRenderEvent.CameraSetup evt) {
-
         //Matrix4f projectionMatrix = new Matrix4f(projection.asReadOnlyBuffer().array());
         //Matrix4f modelViewMatrix = new Matrix4f(modelview.asReadOnlyBuffer().array());
 
@@ -239,10 +273,11 @@ public class OrthoViewClientEvents {
     // on what I assume is whenever the view distance fog changes (ie. whenever camera moves or rotates at all)
     @SubscribeEvent
     public static void onFogDensity(EntityViewRenderEvent.FogDensity evt) {
-        if (!isRegistered)
-            registerKeybinds();
         if (!enabled)
             return;
+
+        winWidth = MC.getWindow().getGuiScaledWidth();
+        winHeight = MC.getWindow().getGuiScaledHeight();
 
         // zoom in/out with keys
         if (keyBindZoomIn.isDown())
@@ -270,7 +305,7 @@ public class OrthoViewClientEvents {
         else if (keyBindPanMinusZ.isDown())
             panCam(0,-PAN_KEY_STEP);
 
-        float width = zoom * (MC.getWindow().getWidth() / (float) MC.getWindow().getHeight());
+        float width = zoom * (winWidth / (float) winHeight);
         float height = zoom;
 
         // override projection matrix

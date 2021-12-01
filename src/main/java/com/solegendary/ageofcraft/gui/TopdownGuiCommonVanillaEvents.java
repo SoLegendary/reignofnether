@@ -1,5 +1,6 @@
 package com.solegendary.ageofcraft.gui;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.IContainerProvider;
 import net.minecraft.inventory.container.INamedContainerProvider;
@@ -18,10 +19,9 @@ import net.minecraftforge.fml.network.NetworkHooks;
 public class TopdownGuiCommonVanillaEvents {
 
     //private static final String KEY_CATEGORY = "key.categories.ageofcraft";
-    //private static final Minecraft MC = Minecraft.getInstance();
+    private static final Minecraft MC = Minecraft.getInstance();
 
     //private final KeyBinding keyToggleTdgui = new KeyBinding("key.ageofcraft.orthoview.toggleTdgui", GLFW.GLFW_KEY_L, KEY_CATEGORY);
-    private static boolean isGuiOpen = false;
 
     @SubscribeEvent
     public static void onServerChat(ServerChatEvent evt) {
@@ -45,6 +45,7 @@ public class TopdownGuiCommonVanillaEvents {
     public static void beforeGuiRender(GuiScreenEvent.DrawScreenEvent.Pre evt) {
         String guiTitle = evt.getGui().getTitle().getString();
 
+        // cancel drawing the GUI
         if (guiTitle.equals("topdowngui_container")) {
             evt.setCanceled(true);
         }
