@@ -1,11 +1,14 @@
 package com.solegendary.ageofcraft.orthoview;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.solegendary.ageofcraft.cursorentity.CursorEntityCommonEvents;
 import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -15,6 +18,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import com.solegendary.ageofcraft.gui.TopdownGuiContainer;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 
 import static net.minecraft.util.math.MathHelper.cos;
 import static net.minecraft.util.math.MathHelper.sin;
@@ -59,7 +63,7 @@ public class OrthoViewClientEvents {
     private static final KeyBinding keyBindShiftMod = new KeyBinding("key.ageofcraft.orthoview.shiftMod", GLFW.GLFW_KEY_LEFT_SHIFT, KEY_CATEGORY);
     private static final KeyBinding keyBindCtrlMod = new KeyBinding("key.ageofcraft.orthoview.ctrlMod", GLFW.GLFW_KEY_LEFT_CONTROL, KEY_CATEGORY);
     public static boolean enabled = false;
-    private static float zoom = 30;
+    private static float zoom = 30; // * 2 = number of blocks in height
     private static float camRotX = 0;
     private static float camRotY = 45;
     private static float camRotAdjX = 0;
@@ -112,14 +116,23 @@ public class OrthoViewClientEvents {
         if (zoom > ZOOM_MAX)
             zoom = ZOOM_MAX;
     }
+
+
+
     public static void panCam(float x, float z) { // pan camera relative to rotation
         if (MC.player != null) {
-            float camXRotRads = (float) Math.toRadians(-camRotX - camRotAdjX);
-            float moveXRotated = (x * cos(camXRotRads)) - (z * sin(camXRotRads));
-            float moveZRotated = (z * cos(camXRotRads)) + (x * sin(camXRotRads));
-            MC.player.move(MoverType.SELF, new Vector3d(moveXRotated, 0, moveZRotated));
+            Vector2f XZRotated = rotateCoords(x,z);
+            MC.player.move(MoverType.SELF, new Vector3d(XZRotated.x, 0, XZRotated.y));
         }
     }
+
+    private static Vector2f rotateCoords(float x, float y) {
+        float camXRotRads = (float) Math.toRadians(-camRotX - camRotAdjX);
+        float moveXRotated = (x * cos(camXRotRads)) - (y * sin(camXRotRads));
+        float moveyRotated = (y * cos(camXRotRads)) + (x * sin(camXRotRads));
+        return new Vector2f(moveXRotated, moveyRotated);
+    }
+
     private static boolean isTopdownGui(GuiScreenEvent evt) {
         return evt.getGui().getTitle().getString().equals(TopdownGuiContainer.TITLE.getString());
     }
@@ -134,9 +147,8 @@ public class OrthoViewClientEvents {
         Integer keyPressed = evt.getKeyCode();
 
         // can't use keyBindToggle.isDown() as it doesn't happen on the same tick as this event
-        if (keyPressed.equals(keyBindToggle.getKey().getValue())) {
+        if (keyPressed.equals(keyBindToggle.getKey().getValue()))
             enabled = !enabled;
-        }
 
         if (keyBindReset.isDown())
             reset();
@@ -171,29 +183,26 @@ public class OrthoViewClientEvents {
 
         if (MC.player != null) {
 
-            float pixelsToBlocks = 10;
+            // at winHeight=240, zoom=10, screen is 20 blocks high, so PTB=240/20=24
+            float pixelsToBlocks = winHeight / zoom; // then /2 for blocks from centre of screen
 
             // make mouse coordinate origin centre of screen
-            double x = (mouseX - (float) winWidth / 2) / pixelsToBlocks;
-            double y = 0;
-            double z = (mouseY - (float) winHeight / 2) / pixelsToBlocks;
+            float x = (mouseX - (float) winWidth / 2) / (pixelsToBlocks / 2);
+            float y = 0;
+            float z = (mouseY - (float) winHeight / 2) / (pixelsToBlocks / 2);
 
-            float camXRotRads = (float) Math.toRadians(-camRotX - camRotAdjX);
-            double xRotated = (x * cos(camXRotRads)) - (z * sin(camXRotRads));
-            double zRotated = (z * cos(camXRotRads)) + (x * sin(camXRotRads));
+            double camRotYRads = Math.toRadians(camRotY);
+            z += (z * Math.tan(camRotYRads) / 2);
 
-            System.out.println(xRotated + " " + zRotated);
+            Vector2f XZRotated = rotateCoords(x,z);
 
-            double xFinal = MC.player.xo - xRotated;
+            double xFinal = MC.player.xo - XZRotated.x;
             double yFinal = MC.player.yo + y;
-            double zFinal = MC.player.zo - zRotated;
-            OrthoViewCommonEvents.moveCursorEntity(xFinal, yFinal, zFinal);
+            double zFinal = MC.player.zo - XZRotated.y;
+            CursorEntityCommonEvents.moveCursorEntity(xFinal, yFinal, zFinal);
 
             //System.out.println(xFinal + " " + yFinal + " " + zFinal);
         }
-
-
-
     }
     @SubscribeEvent
     public static void onMouseClick(GuiScreenEvent.MouseClickedEvent evt) {
@@ -203,10 +212,6 @@ public class OrthoViewClientEvents {
             mouseLeftDown = true;
             mouseLeftDownX = (float) evt.getMouseX();
             mouseLeftDownY = (float) evt.getMouseY();
-
-            System.out.println(mouseLeftDownX + " " + mouseLeftDownY);
-            System.out.println(screenWidth + " " + screenHeight);
-            System.out.println(winWidth + " " + winHeight);
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             mouseRightDown = true;
