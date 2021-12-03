@@ -192,7 +192,11 @@ public class OrthoViewClientEvents {
             float z = (mouseY - (float) winHeight / 2) / (pixelsToBlocks / 2);
 
             double camRotYRads = Math.toRadians(camRotY);
-            z += (z * Math.tan(camRotYRads) / 2);
+            //z += (z * Math.tan(camRotYRads) / 2);
+            z =  z / (float) (Math.cos(camRotYRads));
+            //z += zAdj;
+
+            System.out.println(z);
 
             Vector2f XZRotated = rotateCoords(x,z);
 
