@@ -1,6 +1,6 @@
 package com.solegendary.ageofcraft.gui;
 
-import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -16,7 +16,7 @@ public class TopdownGuiCommonModEvents {
     private static boolean isGuiOpen = false;
 
     @SubscribeEvent
-    public static void registerContainers(final RegistryEvent.Register<ContainerType<?>> event)
+    public static void registerContainers(final RegistryEvent.Register<MenuType<?>> event)
     {
         System.out.println("registerContainers");
         TopdownGuiObjects.CONTAINER_TYPE = IForgeContainerType.create(TopdownGuiContainer::createContainerClientSide);

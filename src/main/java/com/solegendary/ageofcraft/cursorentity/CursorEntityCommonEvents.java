@@ -1,9 +1,9 @@
 package com.solegendary.ageofcraft.cursorentity;
 
 import com.solegendary.ageofcraft.orthoview.OrthoViewClientEvents;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.solegendary.ageofcraft.cursorentity.CursorEntity;
@@ -15,13 +15,13 @@ import com.solegendary.ageofcraft.cursorentity.CursorEntity;
  */
 public class CursorEntityCommonEvents {
 
-    private static ArmorStandEntity cursorEntity;
+    private static ArmorStand cursorEntity;
     private static boolean cursorEntityAdded = false;
 
     // create an entity to track the position of the cursor in game space
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
-        ServerWorld world = (ServerWorld) evt.world;
+        ServerLevel world = (ServerLevel) evt.world;
 
         if (!evt.world.isClientSide() && cursorEntity == null)
             cursorEntity = EntityType.ARMOR_STAND.create(world);

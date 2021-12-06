@@ -1,14 +1,14 @@
 package com.solegendary.ageofcraft.gui;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.IContainerProvider;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.inventory.container.SimpleNamedContainerProvider;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.MenuConstructor;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.fmllegacy.network.NetworkHooks;
 
 /**
  * Handler for TopdownGui, doing stuff like initialising it and controlling where it comes up in the game client
@@ -28,12 +28,12 @@ public class TopdownGuiCommonVanillaEvents {
         System.out.println(evt.getMessage());
 
         // containers have to be opened server side so that the server can track its data
-        ServerPlayerEntity serverPlayer = evt.getPlayer();
+        ServerPlayer serverPlayer = evt.getPlayer();
         String chatMsg = evt.getMessage();
 
         if (serverPlayer != null) {
-            IContainerProvider provider = TopdownGuiContainer.getServerContainerProvider();
-            INamedContainerProvider namedProvider = new SimpleNamedContainerProvider(provider, TopdownGuiContainer.TITLE);
+            MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
+            MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
             NetworkHooks.openGui(serverPlayer, namedProvider);
         }
         else {
