@@ -19,6 +19,7 @@ import com.solegendary.ageofcraft.gui.TopdownGuiContainer;
 import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
 import static net.minecraft.util.Mth.sign;
+import static org.lwjgl.opengl.GL11.GL_PROJECTION;
 
 /**
  * Handler that implements and manages hotkeys for the orthographic camera.
@@ -313,8 +314,10 @@ public class OrthoViewClientEvents {
         float height = zoom;
 
         // override projection matrix
-        RenderSystem.matrixMode(GL_PROJECTION);
-        RenderSystem.loadIdentity();
+        //RenderSystem.matrixMode(GL_PROJECTION);
+        //RenderSystem.loadIdentity();
+
+        RenderSystem.projectionMatrix.setIdentity();
 
         // actually apply the orthogonal camera settings on the GL_PROJECTION matrix
         //GL11.glTranslated(0, 0, 0);
