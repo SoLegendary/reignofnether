@@ -130,7 +130,10 @@ public class OrthoViewClientEvents {
     }
 
     private static boolean isTopdownGui(GuiScreenEvent evt) {
-        return evt.getGui().getTitle().getString().equals(TopdownGuiContainer.TITLE.getString());
+        if (evt.getGui() != null)
+            return evt.getGui().getTitle().getString().equals(TopdownGuiContainer.TITLE.getString());
+        else
+            return false;
     }
 
     public static boolean isEnabled() {
@@ -191,8 +194,6 @@ public class OrthoViewClientEvents {
             //z += (z * Math.tan(camRotYRads) / 2);
             z =  z / (float) (Math.cos(camRotYRads));
             //z += zAdj;
-
-            System.out.println(z);
 
             Vec2 XZRotated = rotateCoords(x,z);
 
@@ -275,7 +276,7 @@ public class OrthoViewClientEvents {
         if (enabled)
             evt.setFOV(180);
     }
-    // on what I assume is whenever the view distance fog changes (ie. whenever camera moves or rotates at all)
+    // on each game render frame
     @SubscribeEvent
     public static void onFogDensity(EntityViewRenderEvent.FogDensity evt) {
         if (!enabled)
@@ -314,20 +315,22 @@ public class OrthoViewClientEvents {
         float height = zoom;
 
         // override projection matrix
+
         //RenderSystem.matrixMode(GL_PROJECTION);
         //RenderSystem.loadIdentity();
-
         RenderSystem.projectionMatrix.setIdentity();
+        //GL11.glMatrixMode(GL_PROJECTION);
+        //GL11.glLoadIdentity();
 
         // actually apply the orthogonal camera settings on the GL_PROJECTION matrix
         //GL11.glTranslated(0, 0, 0);
-        GL11.glScaled(1, 1, 1);
-        GL11.glOrtho(-width, width, -height, height,-9999, 9999);
+        //GL11.glScaled(1, 1, 1);
+        //GL11.glOrtho(-width, width, -height, height,-9999, 9999);
 
         // the actual rendering camera is no longer tied to this client entity camera (ie. the player 1st person view)
         // but frustum culling is so to solve that we set FOV to max (180deg), point the viewing entity (player) looking
         // directly down so we render as much as possible, then manually rotate the camera separately.
-        GL11.glRotated(-camRotY - camRotAdjY, 1,0,0);
+        //GL11.glRotated(-camRotY - camRotAdjY, 1,0,0);
 
         Player player = MC.player;
 

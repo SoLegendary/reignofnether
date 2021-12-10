@@ -25,7 +25,6 @@ public class TopdownGuiCommonVanillaEvents {
 
     @SubscribeEvent
     public static void onServerChat(ServerChatEvent evt) {
-        System.out.println(evt.getMessage());
 
         // containers have to be opened server side so that the server can track its data
         ServerPlayer serverPlayer = evt.getPlayer();

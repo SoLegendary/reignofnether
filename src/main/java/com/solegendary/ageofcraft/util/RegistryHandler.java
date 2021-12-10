@@ -3,7 +3,7 @@ package com.solegendary.ageofcraft.util;
 import com.solegendary.ageofcraft.AgeOfCraft;
 import com.solegendary.ageofcraft.items.ItemBase;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
