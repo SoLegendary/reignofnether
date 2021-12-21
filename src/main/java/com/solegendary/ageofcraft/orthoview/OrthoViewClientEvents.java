@@ -15,6 +15,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import com.solegendary.ageofcraft.gui.TopdownGuiContainer;
+import com.mojang.math.Matrix4f;
+
+import java.nio.FloatBuffer;
 
 import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
@@ -318,7 +321,7 @@ public class OrthoViewClientEvents {
 
         //RenderSystem.matrixMode(GL_PROJECTION);
         //RenderSystem.loadIdentity();
-        RenderSystem.projectionMatrix.setIdentity();
+        //RenderSystem.projectionMatrix.setIdentity();
         //GL11.glMatrixMode(GL_PROJECTION);
         //GL11.glLoadIdentity();
 
@@ -340,5 +343,35 @@ public class OrthoViewClientEvents {
             player.xRotO = 90;
             player.yRotO = (float) -camRotX - camRotAdjX;
         }
+    }
+
+    static float isometricViewLength = 50;
+    public static Matrix4f getIsometricProjection() {
+        int w = MC.getWindow().getScreenWidth();
+        int h = MC.getWindow().getScreenHeight();
+
+        float wView = (isometricViewLength / h) * w;
+
+        float near = -2000;
+        float far = 2000;
+
+        float left = -wView / 2;
+        float right = wView / 2;
+
+        float top = isometricViewLength / 2;
+        float bottom = -isometricViewLength / 2;
+
+        float[] arr = new float[]{
+                2.0f / (right - left), 0, 0, -(right + left) / (right - left),
+                0, 2.0f / (top - bottom), 0, -(top + bottom) / (top - bottom),
+                0, 0, -2.0f / (far - near), -(far + near) / (far - near),
+                0, 0, 0, 1
+        };
+
+        FloatBuffer fb = FloatBuffer.wrap(arr);
+        Matrix4f m1 = new Matrix4f();
+        m1.load(fb);
+
+        return m1;
     }
 }
