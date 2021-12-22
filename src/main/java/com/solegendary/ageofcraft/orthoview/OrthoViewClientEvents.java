@@ -282,6 +282,17 @@ public class OrthoViewClientEvents {
     // on each game render frame
     @SubscribeEvent
     public static void onFogDensity(EntityViewRenderEvent.FogDensity evt) {
+
+        Player player = MC.player;
+        System.out.println("player.xRotO: " + Float.toString(player.xRotO));
+        System.out.println("player.yRotO: " + Float.toString(player.yRotO));
+        System.out.println("player.getXRot: " + Float.toString(player.getXRot()));
+        System.out.println("player.getYRot: " + Float.toString(player.getYRot()));
+        System.out.println("player.yHeadRot: " + Float.toString(player.yHeadRot));
+        System.out.println("player.yHeadRotO: " + Float.toString(player.yHeadRotO));
+        System.out.println("player.yBodyRot: " + Float.toString(player.yBodyRot));
+        System.out.println("player.yBodyRotO: " + Float.toString(player.yBodyRotO));
+
         if (!enabled)
             return;
 
@@ -317,55 +328,53 @@ public class OrthoViewClientEvents {
         float width = zoom * (winWidth / (float) winHeight);
         float height = zoom;
 
-        // override projection matrix
-
-        //RenderSystem.matrixMode(GL_PROJECTION);
-        //RenderSystem.loadIdentity();
-        //RenderSystem.projectionMatrix.setIdentity();
-        //GL11.glMatrixMode(GL_PROJECTION);
-        //GL11.glLoadIdentity();
-
-        // actually apply the orthogonal camera settings on the GL_PROJECTION matrix
-        //GL11.glTranslated(0, 0, 0);
-        //GL11.glScaled(1, 1, 1);
-        //GL11.glOrtho(-width, width, -height, height,-9999, 9999);
+        /*
+        System.out.println("zoom: " + Float.toString(zoom));
+        System.out.println("camRotX: " + Float.toString(camRotX));
+        System.out.println("camRotY: " + Float.toString(camRotY));
+        System.out.println("camRotAdjX: " + Float.toString(camRotAdjX));
+        System.out.println("camRotAdjY: " + Float.toString(camRotAdjY));
+        System.out.println("mouseLeftDown: " + Boolean.toString(mouseLeftDown));
+        System.out.println("mouseRightDown: " + Boolean.toString(mouseRightDown));
+        System.out.println("mouseRightDownX: " + Float.toString(mouseRightDownX));
+        System.out.println("mouseRightDownY: " + Float.toString(mouseRightDownY));
+        System.out.println("mouseLeftDownX: " + Float.toString(mouseLeftDownX));
+        System.out.println("mouseLeftDownY: " + Float.toString(mouseLeftDownY));
+        */
 
         // the actual rendering camera is no longer tied to this client entity camera (ie. the player 1st person view)
         // but frustum culling is so to solve that we set FOV to max (180deg), point the viewing entity (player) looking
         // directly down so we render as much as possible, then manually rotate the camera separately.
-        //GL11.glRotated(-camRotY - camRotAdjY, 1,0,0);
-
-        Player player = MC.player;
 
         // rotate the player instead of GL11.glRotate so we still move with WASD in the expected directions
         // note that we treat x and y rot as horizontal and vertical, but MC treats it the other way around...
         if (player != null) {
-            player.xRotO = 90;
-            player.yRotO = (float) -camRotX - camRotAdjX;
+            player.xRotO = 90; // always face directly down
+            player.setYHeadRot((float) -camRotX - camRotAdjX);
         }
     }
 
-    static float isometricViewLength = 50;
-    public static Matrix4f getIsometricProjection() {
-        int w = MC.getWindow().getScreenWidth();
-        int h = MC.getWindow().getScreenHeight();
-
-        float wView = (isometricViewLength / h) * w;
+    // OrthoViewMixin uses this to generate a customisation orthographic view to replace the usual view
+    //static float isometricViewLength = 50;
+    public static Matrix4f getOrthographicProjection() {
+        int width = MC.getWindow().getScreenWidth();
+        int height= MC.getWindow().getScreenHeight();
 
         float near = -2000;
         float far = 2000;
 
+        float wView = (zoom / height) * width;
         float left = -wView / 2;
-        float right = wView / 2;
+        float rgt = wView / 2;
 
-        float top = isometricViewLength / 2;
-        float bottom = -isometricViewLength / 2;
+        float top = zoom / 2;
+        float bot = -zoom / 2;
 
         float[] arr = new float[]{
-                2.0f / (right - left), 0, 0, -(right + left) / (right - left),
-                0, 2.0f / (top - bottom), 0, -(top + bottom) / (top - bottom),
-                0, 0, -2.0f / (far - near), -(far + near) / (far - near),
-                0, 0, 0, 1
+                2.0f/(rgt-left), 0,              0,                -(rgt+left)/(rgt-left),
+                0,               2.0f/(top-bot), 0,                -(top+bot)/(top-bot),
+                0,               0,              -2.0f/(far-near), -(far+near)/(far-near),
+                0,               0,              0,                1
         };
 
         FloatBuffer fb = FloatBuffer.wrap(arr);

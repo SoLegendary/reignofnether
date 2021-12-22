@@ -1,27 +1,26 @@
 package com.solegendary.ageofcraft.mixin;
 
 import com.solegendary.ageofcraft.orthoview.OrthoViewClientEvents;
-import net.minecraft.client.renderer.GameRenderer;
-import com.mojang.math.Matrix4f;
+import net.minecraft.client.renderer.culling.Frustum;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(GameRenderer.class)
-public class OrthoViewMixin {
-    // applies an orthographic projection matrix
+@Mixin(Frustum.class)
+public class FrustumCullingMixin {
+    // disables frustum culling
     @Inject(
-            method = "getProjectionMatrix(D)Lcom/mojang/math/Matrix4f;",
+            method = "cubeInFrustum(FFFFFF)Z;",
             at = @At("HEAD"),
             cancellable = true
     )
-    private void getProjectionMatrix(
-            double d,
-            CallbackInfoReturnable<Matrix4f> cir
+    private void cubeInFrustum(
+            float f1, float f2, float f3, float f4, float f5, float f6,
+            CallbackInfoReturnable<Boolean> cir
     ) {
         if (OrthoViewClientEvents.isEnabled()) {
-            cir.setReturnValue(OrthoViewClientEvents.getOrthographicProjection());
+            cir.setReturnValue(true);
         }
     }
 }
