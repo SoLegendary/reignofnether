@@ -5,7 +5,8 @@
   "refmap": "ageofcraft.refmap.json",
   "mixins": [
     "OrthoViewMixin",
-    "FrustumCullingMixin"
+    "FrustumCullingMixin",
+    "BlockBehaviourMixin"
   ],
   "minVersion": "0.8"
 }

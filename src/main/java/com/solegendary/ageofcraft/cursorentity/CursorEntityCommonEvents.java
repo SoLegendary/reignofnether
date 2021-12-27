@@ -1,5 +1,6 @@
 package com.solegendary.ageofcraft.cursorentity;
 
+import com.mojang.math.Vector3d;
 import com.solegendary.ageofcraft.orthoview.OrthoViewClientEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -23,6 +24,7 @@ public class CursorEntityCommonEvents {
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
         ServerLevel world = (ServerLevel) evt.world;
 
+        // on startup, remove all existing cursorEntities and create a new one
         if (!evt.world.isClientSide() && cursorEntity == null)
             cursorEntity = EntityType.ARMOR_STAND.create(world);
 
@@ -40,8 +42,8 @@ public class CursorEntityCommonEvents {
         }
     }
 
-    public static void moveCursorEntity(double x, double y, double z) {
+    public static void moveCursorEntity(Vector3d moveVec) {
         if (cursorEntity != null)
-            cursorEntity.absMoveTo(x, y, z);
+            cursorEntity.absMoveTo(moveVec.x, moveVec.y, moveVec.z);
     }
 }

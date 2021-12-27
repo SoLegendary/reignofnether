@@ -1,19 +1,23 @@
 package com.solegendary.ageofcraft.orthoview;
 
+import com.mojang.math.Vector3d;
 import com.solegendary.ageofcraft.cursorentity.CursorEntityCommonEvents;
 import net.minecraft.client.Minecraft;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.fmlclient.registry.ClientRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 import com.solegendary.ageofcraft.gui.TopdownGuiContainer;
 import com.mojang.math.Matrix4f;
 
@@ -22,7 +26,6 @@ import java.nio.FloatBuffer;
 import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
 import static net.minecraft.util.Mth.sign;
-import static org.lwjgl.opengl.GL11.GL_PROJECTION;
 
 /**
  * Handler that implements and manages hotkeys for the orthographic camera.
@@ -30,6 +33,12 @@ import static org.lwjgl.opengl.GL11.GL_PROJECTION;
  * @author SoLegendary, adapted from Mineshot by Nico Bergemann <barracuda415 at yahoo.de>
  */
 public class OrthoViewClientEvents {
+
+    public static boolean enabled = false;
+    public static BlockPos mouseoverPos = new BlockPos(0,0,0);
+
+    private static Vector3d cursorPos = new Vector3d(0,0,0);
+    private static Vector3d cursorPosLast = new Vector3d(0,0,0);
 
     private static final String topdownGuiName = "topdowngui_container";
     private static final Minecraft MC = Minecraft.getInstance();
@@ -42,8 +51,8 @@ public class OrthoViewClientEvents {
     private static final float PAN_MOUSE_STEP = 0.5f;
     private static final float PAN_MOUSE_EDGE_BUFFER = 20; // if mouse < this distance from screen edge: start panning
     private static final float ROTATE_STEP = 0.35f;
-    private static final float CAMROTY_MAX = 70;
-    private static final float CAMROTY_MIN = 0;
+    private static final float CAMROTY_MAX = -20;
+    private static final float CAMROTY_MIN = -90;
     private static final float CAMROT_MOUSE_SENSITIVITY = 0.12f;
     private static final float CAMPAN_MOUSE_SENSITIVITY = 0.2f;
 
@@ -61,10 +70,10 @@ public class OrthoViewClientEvents {
     private static final KeyMapping keyBindReset = new KeyMapping("key.ageofcraft.orthoview.reset", GLFW.GLFW_KEY_RIGHT_CONTROL, KEY_CATEGORY);
     private static final KeyMapping keyBindShiftMod = new KeyMapping("key.ageofcraft.orthoview.shiftMod", GLFW.GLFW_KEY_LEFT_SHIFT, KEY_CATEGORY);
     private static final KeyMapping keyBindCtrlMod = new KeyMapping("key.ageofcraft.orthoview.ctrlMod", GLFW.GLFW_KEY_LEFT_CONTROL, KEY_CATEGORY);
-    public static boolean enabled = false;
+
     private static float zoom = 30; // * 2 = number of blocks in height
     private static float camRotX = 0;
-    private static float camRotY = 45;
+    private static float camRotY = -45;
     private static float camRotAdjX = 0;
     private static float camRotAdjY = 0;
     private static boolean mouseLeftDown = false;
@@ -73,10 +82,10 @@ public class OrthoViewClientEvents {
     private static float mouseRightDownY = 0;
     private static float mouseLeftDownX = 0;
     private static float mouseLeftDownY = 0;
-    private static int winWidth = 0;
-    private static int winHeight = 0;
-    private static final int screenWidth = MC.getWindow().getScreenWidth();
-    private static final int screenHeight = MC.getWindow().getScreenHeight();
+    private static int winWidth = MC.getWindow().getGuiScaledWidth();
+    private static int winHeight = MC.getWindow().getGuiScaledHeight();
+    private static int screenWidth = MC.getWindow().getScreenWidth();
+    private static int screenHeight = MC.getWindow().getScreenHeight();
 
     public static void init() {
         ClientRegistry.registerKeyBinding(keyBindToggle);
@@ -115,8 +124,6 @@ public class OrthoViewClientEvents {
         if (zoom > ZOOM_MAX)
             zoom = ZOOM_MAX;
     }
-
-
 
     public static void panCam(float x, float z) { // pan camera relative to rotation
         if (MC.player != null) {
@@ -161,6 +168,7 @@ public class OrthoViewClientEvents {
 
         zoomCam((float) sign(evt.getScrollDelta()) * -ZOOM_STEP_SCROLL);
     }
+
     @SubscribeEvent
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
         if (!isTopdownGui(evt) || !enabled) return;
@@ -171,6 +179,7 @@ public class OrthoViewClientEvents {
         int mouseX = evt.getMouseX();
         int mouseY = evt.getMouseY();
 
+        // panCam when cursor is at edge of screen
         // mouse (0,0) is top left of screen
         /*
         if (mouseX < PAN_MOUSE_EDGE_BUFFER)
@@ -186,28 +195,90 @@ public class OrthoViewClientEvents {
         if (MC.player != null) {
 
             // at winHeight=240, zoom=10, screen is 20 blocks high, so PTB=240/20=24
-            float pixelsToBlocks = winHeight / zoom; // then /2 for blocks from centre of screen
+            float pixelsToBlocks = winHeight / zoom;
 
             // make mouse coordinate origin centre of screen
-            float x = (mouseX - (float) winWidth / 2) / (pixelsToBlocks / 2);
+            float x = (mouseX - (float) winWidth / 2) / pixelsToBlocks;
             float y = 0;
-            float z = (mouseY - (float) winHeight / 2) / (pixelsToBlocks / 2);
+            float z = (mouseY - (float) winHeight / 2) / pixelsToBlocks;
 
             double camRotYRads = Math.toRadians(camRotY);
-            //z += (z * Math.tan(camRotYRads) / 2);
-            z =  z / (float) (Math.cos(camRotYRads));
-            //z += zAdj;
+            z = z / (float) (Math.sin(-camRotYRads));
 
-            Vec2 XZRotated = rotateCoords(x,z);
+            // get look vector of the player (and therefore the camera)
+            // calcs from https://stackoverflow.com/questions/65897792/3d-vector-coordinates-from-x-and-y-rotation
+            float a = (float) Math.toRadians(MC.player.getYRot());
+            float b = (float) Math.toRadians(MC.player.getXRot());
+            final Vector3d lookVector = new Vector3d(-cos(b) * sin(a), -sin(b), cos(b) * cos(a));
 
-            double xFinal = MC.player.xo - XZRotated.x;
-            double yFinal = MC.player.yo + y;
-            double zFinal = MC.player.zo - XZRotated.y;
-            CursorEntityCommonEvents.moveCursorEntity(xFinal, yFinal, zFinal);
+            Vec2 XZRotated = rotateCoords(x, z);
 
-            //System.out.println(xFinal + " " + yFinal + " " + zFinal);
+            Vector3d finalVec = new Vector3d(
+                    MC.player.xo - XZRotated.x,
+                    MC.player.yo + y,
+                    MC.player.zo - XZRotated.y
+            );
+            cursorPosLast = new Vector3d(
+                    cursorPos.x,
+                    cursorPos.y,
+                    cursorPos.z
+            );
+            cursorPos = new Vector3d(
+                    finalVec.x,
+                    finalVec.y,
+                    finalVec.z
+            );
+
+            // only spend time doing calcs if we actually moved the cursor
+            if (cursorPos.x != cursorPosLast.x || cursorPos.y != cursorPosLast.y || cursorPos.z != cursorPosLast.z) {
+
+                System.out.println(cursorPos);
+                System.out.println(cursorPosLast);
+
+                // if we add a multiple of the lookVector, we can 'raytrace' back and forth from the camera without
+                // changing the on-screen position of the cursorEntity
+                boolean lastBlockSolid = false;
+                double vectorScale = -50;
+                Vector3d lookVectorScaled;
+                BlockPos bp;
+                BlockState bs;
+
+                while (true) {
+                    Vector3d searchVec = new Vector3d(0,0,0);
+                    searchVec.set(finalVec);
+
+                    lookVectorScaled = new Vector3d(0,0,0);
+                    lookVectorScaled.set(lookVector);
+                    lookVectorScaled.scale(vectorScale); // has to be high enough to be at the 'front' of the screen
+                    searchVec.add(lookVectorScaled);
+
+                    bp = new BlockPos(searchVec.x, searchVec.y, searchVec.z);
+                    bs = MC.level.getBlockState(bp);
+
+                    if (!bs.isAir()) {
+                        mouseoverPos = bp;
+                        //System.out.println("Set new position:");
+                        //System.out.println(mouseoverPos.toShortString());
+                        break;
+                    }
+                    vectorScale += 1;
+                }
+
+                // subtract to have the cursorentity always show at the front of the screen
+                finalVec.add(lookVectorScaled);
+
+                CursorEntityCommonEvents.moveCursorEntity(finalVec);
+            }
         }
     }
+
+    // prevents stuff like fire and water effects being shown on your HUD
+    @SubscribeEvent
+    public static void onRenderBlockOverlay(RenderBlockOverlayEvent evt) {
+        if (enabled)
+            evt.setCanceled(true);
+    }
+    
     @SubscribeEvent
     public static void onMouseClick(GuiScreenEvent.MouseClickedEvent evt) {
         if (!isTopdownGui(evt) || !enabled) return;
@@ -233,8 +304,7 @@ public class OrthoViewClientEvents {
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             mouseRightDown = false;
-            rotateCam(camRotAdjX,0);
-            rotateCam(0,camRotAdjY);
+            rotateCam(camRotAdjX,camRotAdjY);
             camRotAdjX = 0;
             camRotAdjY = 0;
         }
@@ -259,21 +329,6 @@ public class OrthoViewClientEvents {
         }
     }
 
-    //public static final FloatBuffer projection = MemoryTracker.createFloatBuffer(16);
-    //public static final FloatBuffer modelview = MemoryTracker.createFloatBuffer(16);
-    // In EntityViewRenderEvent.CameraSetup compute whatever frustum you want and set MC.levelRenderer.capturedFrustum
-    // to it. Then the game will use that frustum instead of whatever it computes based on player position.
-    @SubscribeEvent
-    public static void onCameraSetup(EntityViewRenderEvent.CameraSetup evt) {
-        //Matrix4f projectionMatrix = new Matrix4f(projection.asReadOnlyBuffer().array());
-        //Matrix4f modelViewMatrix = new Matrix4f(modelview.asReadOnlyBuffer().array());
-
-        //System.out.println(projectionMatrix);
-        //System.out.println(modelViewMatrix);
-
-        //ClippingHelper orthoFrustum = new ClippingHelper(null, null);
-        //MC.levelRenderer.capturedFrustum = orthoFrustum;
-    }
     @SubscribeEvent
     public static void onFovModifier(EntityViewRenderEvent.FOVModifier evt) {
         if (enabled)
@@ -282,22 +337,15 @@ public class OrthoViewClientEvents {
     // on each game render frame
     @SubscribeEvent
     public static void onFogDensity(EntityViewRenderEvent.FogDensity evt) {
-
-        Player player = MC.player;
-        System.out.println("player.xRotO: " + Float.toString(player.xRotO));
-        System.out.println("player.yRotO: " + Float.toString(player.yRotO));
-        System.out.println("player.getXRot: " + Float.toString(player.getXRot()));
-        System.out.println("player.getYRot: " + Float.toString(player.getYRot()));
-        System.out.println("player.yHeadRot: " + Float.toString(player.yHeadRot));
-        System.out.println("player.yHeadRotO: " + Float.toString(player.yHeadRotO));
-        System.out.println("player.yBodyRot: " + Float.toString(player.yBodyRot));
-        System.out.println("player.yBodyRotO: " + Float.toString(player.yBodyRotO));
-
         if (!enabled)
             return;
 
         winWidth = MC.getWindow().getGuiScaledWidth();
         winHeight = MC.getWindow().getGuiScaledHeight();
+        screenWidth = MC.getWindow().getScreenWidth();
+        screenHeight = MC.getWindow().getScreenHeight();
+
+        Player player = MC.player;
 
         // zoom in/out with keys
         if (keyBindZoomIn.isDown())
@@ -325,43 +373,21 @@ public class OrthoViewClientEvents {
         else if (keyBindPanMinusZ.isDown())
             panCam(0,-PAN_KEY_STEP);
 
-        float width = zoom * (winWidth / (float) winHeight);
-        float height = zoom;
-
-        /*
-        System.out.println("zoom: " + Float.toString(zoom));
-        System.out.println("camRotX: " + Float.toString(camRotX));
-        System.out.println("camRotY: " + Float.toString(camRotY));
-        System.out.println("camRotAdjX: " + Float.toString(camRotAdjX));
-        System.out.println("camRotAdjY: " + Float.toString(camRotAdjY));
-        System.out.println("mouseLeftDown: " + Boolean.toString(mouseLeftDown));
-        System.out.println("mouseRightDown: " + Boolean.toString(mouseRightDown));
-        System.out.println("mouseRightDownX: " + Float.toString(mouseRightDownX));
-        System.out.println("mouseRightDownY: " + Float.toString(mouseRightDownY));
-        System.out.println("mouseLeftDownX: " + Float.toString(mouseLeftDownX));
-        System.out.println("mouseLeftDownY: " + Float.toString(mouseLeftDownY));
-        */
-
-        // the actual rendering camera is no longer tied to this client entity camera (ie. the player 1st person view)
-        // but frustum culling is so to solve that we set FOV to max (180deg), point the viewing entity (player) looking
-        // directly down so we render as much as possible, then manually rotate the camera separately.
-
-        // rotate the player instead of GL11.glRotate so we still move with WASD in the expected directions
         // note that we treat x and y rot as horizontal and vertical, but MC treats it the other way around...
         if (player != null) {
-            player.xRotO = 90; // always face directly down
-            player.setYHeadRot((float) -camRotX - camRotAdjX);
+            player.setXRot((float) -camRotY - camRotAdjY);
+            player.setYRot((float) -camRotX - camRotAdjX);
         }
     }
 
     // OrthoViewMixin uses this to generate a customisation orthographic view to replace the usual view
-    //static float isometricViewLength = 50;
+    // shamelessly copied from ImmersivePortals 1.16
     public static Matrix4f getOrthographicProjection() {
         int width = MC.getWindow().getScreenWidth();
-        int height= MC.getWindow().getScreenHeight();
+        int height = MC.getWindow().getScreenHeight();
 
-        float near = -2000;
-        float far = 2000;
+        float near = -3000;
+        float far = 3000;
 
         float wView = (zoom / height) * width;
         float left = -wView / 2;
@@ -376,7 +402,6 @@ public class OrthoViewClientEvents {
                 0,               0,              -2.0f/(far-near), -(far+near)/(far-near),
                 0,               0,              0,                1
         };
-
         FloatBuffer fb = FloatBuffer.wrap(arr);
         Matrix4f m1 = new Matrix4f();
         m1.load(fb);

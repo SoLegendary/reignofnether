@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class FrustumCullingMixin {
     // disables frustum culling
     @Inject(
-            method = "cubeInFrustum(FFFFFF)Z;",
+            method = "cubeInFrustum(FFFFFF)Z",
             at = @At("HEAD"),
             cancellable = true
     )
