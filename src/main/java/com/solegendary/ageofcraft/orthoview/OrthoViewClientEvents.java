@@ -213,20 +213,15 @@ public class OrthoViewClientEvents {
 
             Vec2 XZRotated = rotateCoords(x, z);
 
-            Vector3d finalVec = new Vector3d(
-                    MC.player.xo - XZRotated.x,
-                    MC.player.yo + y,
-                    MC.player.zo - XZRotated.y
-            );
             cursorPosLast = new Vector3d(
                     cursorPos.x,
                     cursorPos.y,
                     cursorPos.z
             );
             cursorPos = new Vector3d(
-                    finalVec.x,
-                    finalVec.y,
-                    finalVec.z
+                    MC.player.xo - XZRotated.x,
+                    MC.player.yo + y,
+                    MC.player.zo - XZRotated.y
             );
 
             // only spend time doing calcs if we actually moved the cursor
@@ -245,7 +240,7 @@ public class OrthoViewClientEvents {
 
                 while (true) {
                     Vector3d searchVec = new Vector3d(0,0,0);
-                    searchVec.set(finalVec);
+                    searchVec.set(cursorPos);
 
                     lookVectorScaled = new Vector3d(0,0,0);
                     lookVectorScaled.set(lookVector);
@@ -265,9 +260,13 @@ public class OrthoViewClientEvents {
                 }
 
                 // subtract to have the cursorentity always show at the front of the screen
-                finalVec.add(lookVectorScaled);
-
-                CursorEntityCommonEvents.moveCursorEntity(finalVec);
+                Vector3d cursorPosFront = new Vector3d(
+                        cursorPos.x,
+                        cursorPos.y,
+                        cursorPos.z
+                );
+                cursorPosFront.add(lookVectorScaled);
+                CursorEntityCommonEvents.moveCursorEntity(cursorPosFront);
             }
         }
     }
