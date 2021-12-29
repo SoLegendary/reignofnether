@@ -6,7 +6,6 @@
   "mixins": [
     "OrthoViewMixin",
     "FrustumCullingMixin",
-    "BlockBehaviourMixin"
   ],
   "minVersion": "0.8"
 }

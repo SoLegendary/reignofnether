@@ -1,6 +1,6 @@
 package com.solegendary.ageofcraft.util;
 
-import com.solegendary.ageofcraft.cursorentity.CursorEntityCommonEvents;
+import com.solegendary.ageofcraft.cursorentity.CursorCommonEvents;
 import com.solegendary.ageofcraft.gui.TopdownGuiCommonModEvents;
 import com.solegendary.ageofcraft.gui.TopdownGuiCommonVanillaEvents;
 
@@ -20,6 +20,6 @@ public class CommonEventRegistrar {
     public void registerCommonEvents() {
         modEventBus.register(TopdownGuiCommonModEvents.class);
         vanillaEventBus.register(TopdownGuiCommonVanillaEvents.class);
-        vanillaEventBus.register(CursorEntityCommonEvents.class);
+        vanillaEventBus.register(CursorCommonEvents.class);
     }
 }

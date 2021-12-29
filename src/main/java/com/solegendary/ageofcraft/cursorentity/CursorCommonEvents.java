@@ -11,10 +11,8 @@ import com.solegendary.ageofcraft.cursorentity.CursorEntity;
 
 /**
  * Handler that implements and manages the cursor entity that converts screen space to game space
- *
- * @author SoLegendary, adapted from Mineshot by Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class CursorEntityCommonEvents {
+public class CursorCommonEvents {
 
     private static ArmorStand cursorEntity;
     private static boolean cursorEntityAdded = false;

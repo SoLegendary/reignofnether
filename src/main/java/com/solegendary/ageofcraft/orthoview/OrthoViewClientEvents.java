@@ -1,17 +1,12 @@
 package com.solegendary.ageofcraft.orthoview;
 
-import com.mojang.math.Vector3d;
-import com.solegendary.ageofcraft.cursorentity.CursorEntityCommonEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.DrawSelectionEvent;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
@@ -35,10 +30,6 @@ import static net.minecraft.util.Mth.sign;
 public class OrthoViewClientEvents {
 
     public static boolean enabled = false;
-    public static BlockPos mouseoverPos = new BlockPos(0,0,0);
-
-    private static Vector3d cursorPos = new Vector3d(0,0,0);
-    private static Vector3d cursorPosLast = new Vector3d(0,0,0);
 
     private static final String topdownGuiName = "topdowngui_container";
     private static final Minecraft MC = Minecraft.getInstance();
@@ -132,14 +123,15 @@ public class OrthoViewClientEvents {
         }
     }
 
-    private static Vec2 rotateCoords(float x, float y) {
+    public static Vec2 rotateCoords(float x, float y) {
         float camXRotRads = (float) Math.toRadians(-camRotX - camRotAdjX);
         float moveXRotated = (x * cos(camXRotRads)) - (y * sin(camXRotRads));
         float moveyRotated = (y * cos(camXRotRads)) + (x * sin(camXRotRads));
         return new Vec2(moveXRotated, moveyRotated);
     }
 
-    private static boolean isTopdownGui(GuiScreenEvent evt) {
+    // are we on the top-down gui screen?
+    public static boolean isTopdownGui(GuiScreenEvent evt) {
         if (evt.getGui() != null)
             return evt.getGui().getTitle().getString().equals(TopdownGuiContainer.TITLE.getString());
         else
@@ -149,6 +141,11 @@ public class OrthoViewClientEvents {
     public static boolean isEnabled() {
         return enabled;
     }
+    public static float getZoom() { return zoom; }
+    public static float getCamRotX() {
+        return camRotX;
+    }
+    public static float getCamRotY() { return camRotY; }
 
     // only fires on key down, only when a gui screen is up
     @SubscribeEvent
@@ -191,84 +188,6 @@ public class OrthoViewClientEvents {
         else if (mouseY > winHeight - PAN_MOUSE_EDGE_BUFFER)
             panCam(0, -PAN_KEY_STEP * 2);
          */
-
-        if (MC.player != null) {
-
-            // at winHeight=240, zoom=10, screen is 20 blocks high, so PTB=240/20=24
-            float pixelsToBlocks = winHeight / zoom;
-
-            // make mouse coordinate origin centre of screen
-            float x = (mouseX - (float) winWidth / 2) / pixelsToBlocks;
-            float y = 0;
-            float z = (mouseY - (float) winHeight / 2) / pixelsToBlocks;
-
-            double camRotYRads = Math.toRadians(camRotY);
-            z = z / (float) (Math.sin(-camRotYRads));
-
-            // get look vector of the player (and therefore the camera)
-            // calcs from https://stackoverflow.com/questions/65897792/3d-vector-coordinates-from-x-and-y-rotation
-            float a = (float) Math.toRadians(MC.player.getYRot());
-            float b = (float) Math.toRadians(MC.player.getXRot());
-            final Vector3d lookVector = new Vector3d(-cos(b) * sin(a), -sin(b), cos(b) * cos(a));
-
-            Vec2 XZRotated = rotateCoords(x, z);
-
-            cursorPosLast = new Vector3d(
-                    cursorPos.x,
-                    cursorPos.y,
-                    cursorPos.z
-            );
-            cursorPos = new Vector3d(
-                    MC.player.xo - XZRotated.x,
-                    MC.player.yo + y,
-                    MC.player.zo - XZRotated.y
-            );
-
-            // only spend time doing calcs if we actually moved the cursor
-            if (cursorPos.x != cursorPosLast.x || cursorPos.y != cursorPosLast.y || cursorPos.z != cursorPosLast.z) {
-
-                System.out.println(cursorPos);
-                System.out.println(cursorPosLast);
-
-                // if we add a multiple of the lookVector, we can 'raytrace' back and forth from the camera without
-                // changing the on-screen position of the cursorEntity
-                boolean lastBlockSolid = false;
-                double vectorScale = -50;
-                Vector3d lookVectorScaled;
-                BlockPos bp;
-                BlockState bs;
-
-                while (true) {
-                    Vector3d searchVec = new Vector3d(0,0,0);
-                    searchVec.set(cursorPos);
-
-                    lookVectorScaled = new Vector3d(0,0,0);
-                    lookVectorScaled.set(lookVector);
-                    lookVectorScaled.scale(vectorScale); // has to be high enough to be at the 'front' of the screen
-                    searchVec.add(lookVectorScaled);
-
-                    bp = new BlockPos(searchVec.x, searchVec.y, searchVec.z);
-                    bs = MC.level.getBlockState(bp);
-
-                    if (!bs.isAir()) {
-                        mouseoverPos = bp;
-                        //System.out.println("Set new position:");
-                        //System.out.println(mouseoverPos.toShortString());
-                        break;
-                    }
-                    vectorScale += 1;
-                }
-
-                // subtract to have the cursorentity always show at the front of the screen
-                Vector3d cursorPosFront = new Vector3d(
-                        cursorPos.x,
-                        cursorPos.y,
-                        cursorPos.z
-                );
-                cursorPosFront.add(lookVectorScaled);
-                CursorEntityCommonEvents.moveCursorEntity(cursorPosFront);
-            }
-        }
     }
 
     // prevents stuff like fire and water effects being shown on your HUD

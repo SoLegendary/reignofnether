@@ -1,5 +1,6 @@
 package com.solegendary.ageofcraft.util;
 
+import com.solegendary.ageofcraft.cursorentity.CursorClientEvents;
 import com.solegendary.ageofcraft.gui.TopdownGuiClientEvents;
 import com.solegendary.ageofcraft.orthoview.OrthoViewClientEvents;
 import net.minecraftforge.common.MinecraftForge;
@@ -19,6 +20,7 @@ public class ClientSideEventRegistrar {
     public void registerClientEvents() {
         OrthoViewClientEvents.init();
         vanillaEventBus.register(OrthoViewClientEvents.class);
+        vanillaEventBus.register(CursorClientEvents.class);
         modEventBus.register(TopdownGuiClientEvents.class);
     }
 }
