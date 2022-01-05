@@ -1,15 +1,14 @@
 package com.solegendary.ageofcraft.orthoview;
 
+import com.solegendary.ageofcraft.gui.TopdownGuiCommonVanillaEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.DrawSelectionEvent;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
-import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.client.event.RenderBlockOverlayEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.fmlclient.registry.ClientRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -47,6 +46,7 @@ public class OrthoViewClientEvents {
     private static final float CAMROT_MOUSE_SENSITIVITY = 0.12f;
     private static final float CAMPAN_MOUSE_SENSITIVITY = 0.2f;
 
+    private static final KeyMapping keyBindEscape = new KeyMapping("key.ageofcraft.orthoview.escape", GLFW.GLFW_KEY_ESCAPE, KEY_CATEGORY);
     private static final KeyMapping keyBindToggle = new KeyMapping("key.ageofcraft.orthoview.toggle", GLFW.GLFW_KEY_KP_5, KEY_CATEGORY);
     private static final KeyMapping keyBindZoomIn = new KeyMapping("key.ageofcraft.orthoview.zoomIn", GLFW.GLFW_KEY_KP_ADD, KEY_CATEGORY);
     private static final KeyMapping keyBindZoomOut = new KeyMapping("key.ageofcraft.orthoview.zoomOut", GLFW.GLFW_KEY_KP_SUBTRACT, KEY_CATEGORY);
@@ -77,6 +77,15 @@ public class OrthoViewClientEvents {
     private static int winHeight = MC.getWindow().getGuiScaledHeight();
     private static int screenWidth = MC.getWindow().getScreenWidth();
     private static int screenHeight = MC.getWindow().getScreenHeight();
+
+    public static boolean isEnabled() {
+        return enabled;
+    }
+    public static float getZoom() { return zoom; }
+    public static float getCamRotX() {
+        return camRotX;
+    }
+    public static float getCamRotY() { return camRotY; }
 
     public static void init() {
         ClientRegistry.registerKeyBinding(keyBindToggle);
@@ -138,37 +147,42 @@ public class OrthoViewClientEvents {
             return false;
     }
 
-    public static boolean isEnabled() {
-        return enabled;
-    }
-    public static float getZoom() { return zoom; }
-    public static float getCamRotX() {
-        return camRotX;
-    }
-    public static float getCamRotY() { return camRotY; }
+    public static void toggleEnable() {
+        enabled = !enabled;
 
-    // only fires on key down, only when a gui screen is up
+        if (enabled) {
+            TopdownGuiCommonVanillaEvents.openTopdownGui();
+        }
+        else {
+            TopdownGuiCommonVanillaEvents.closeTopdownGui();
+        }
+    }
+
     @SubscribeEvent
-    public static void onKeyPressed (GuiScreenEvent.KeyboardKeyPressedEvent.Pre evt) {
-        Integer keyPressed = evt.getKeyCode();
+    public static void onInput(InputEvent.KeyInputEvent evt) {
 
-        // can't use keyBindToggle.isDown() as it doesn't happen on the same tick as this event
-        if (keyPressed.equals(keyBindToggle.getKey().getValue()))
-            enabled = !enabled;
+        if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
+            if (evt.getKey() == keyBindToggle.getKey().getValue())
+                toggleEnable();
 
-        if (keyBindReset.isDown())
-            reset();
+            if (evt.getKey() == keyBindReset.getKey().getValue())
+                reset();
+
+            if (evt.getKey() == keyBindEscape.getKey().getValue())
+                TopdownGuiCommonVanillaEvents.openEscMenu();
+        }
     }
+
     @SubscribeEvent
     public static void onMouseScroll(GuiScreenEvent.MouseScrollEvent evt) {
-        if (!isTopdownGui(evt) || !enabled) return;
+        if (!enabled) return;
 
         zoomCam((float) sign(evt.getScrollDelta()) * -ZOOM_STEP_SCROLL);
     }
 
     @SubscribeEvent
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
-        if (!isTopdownGui(evt) || !enabled) return;
+        if (!enabled) return;
 
         if (keyBindShiftMod.isDown()) return;
 
@@ -199,7 +213,7 @@ public class OrthoViewClientEvents {
     
     @SubscribeEvent
     public static void onMouseClick(GuiScreenEvent.MouseClickedEvent evt) {
-        if (!isTopdownGui(evt) || !enabled) return;
+        if (!enabled) return;
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             mouseLeftDown = true;
@@ -214,7 +228,7 @@ public class OrthoViewClientEvents {
     }
     @SubscribeEvent
     public static void onMouseRelease(GuiScreenEvent.MouseReleasedEvent evt) {
-        if (!isTopdownGui(evt) || !enabled) return;
+        if (!enabled) return;
 
         // stop treating the rotation as adjustments and add them to the base amount
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -229,7 +243,7 @@ public class OrthoViewClientEvents {
     }
     @SubscribeEvent
     public static void onMouseDrag(GuiScreenEvent.MouseDragEvent evt) {
-        if (!isTopdownGui(evt) || !enabled) return;
+        if (!enabled) return;
 
         if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && keyBindShiftMod.isDown()) {
             float moveX = (float) evt.getDragX() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX) * ((float) screenWidth / winWidth);
@@ -252,6 +266,7 @@ public class OrthoViewClientEvents {
         if (enabled)
             evt.setFOV(180);
     }
+
     // on each game render frame
     @SubscribeEvent
     public static void onFogDensity(EntityViewRenderEvent.FogDensity evt) {

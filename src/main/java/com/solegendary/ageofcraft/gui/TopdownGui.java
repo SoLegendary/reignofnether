@@ -1,6 +1,7 @@
 package com.solegendary.ageofcraft.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.network.chat.Component;
@@ -22,5 +23,10 @@ public class TopdownGui extends AbstractContainerScreen<TopdownGuiContainer> {
     @Override
     protected void renderBg(PoseStack p_230450_1_, float p_230450_2_, int p_230450_3_, int p_230450_4_) {
 
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return false;
     }
 }
