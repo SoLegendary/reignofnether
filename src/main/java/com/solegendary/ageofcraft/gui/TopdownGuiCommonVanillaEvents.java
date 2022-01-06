@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.level.GameType;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -32,6 +33,7 @@ public class TopdownGuiCommonVanillaEvents {
             MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
             MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
             NetworkHooks.openGui(serverPlayer, namedProvider);
+            serverPlayer.setGameMode(GameType.SPECTATOR);
         }
         else {
             System.out.println("serverPlayer is null, cannot open topdown gui");
@@ -40,6 +42,9 @@ public class TopdownGuiCommonVanillaEvents {
 
     public static void closeTopdownGui() {
         MC.popGuiLayer();
+        GameType previousGameMode = serverPlayer.gameMode.getPreviousGameModeForPlayer();
+        if (previousGameMode != null)
+            serverPlayer.setGameMode(previousGameMode);
     }
 
     // open the menu that would normally be opened on pressing esc, while the topdown gui is open

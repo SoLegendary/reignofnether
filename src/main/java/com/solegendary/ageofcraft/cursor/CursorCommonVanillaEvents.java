@@ -11,7 +11,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 /**
  * Handler that implements and manages the cursor entity that converts screen space to game space
  */
-public class CursorCommonEvents {
+public class CursorCommonVanillaEvents {
 
     private static ArmorStand cursorEntity;
     private static boolean cursorEntityAdded = false;

@@ -1,8 +1,9 @@
 package com.solegendary.ageofcraft.util;
 
-import com.solegendary.ageofcraft.cursor.CursorCommonEvents;
+import com.solegendary.ageofcraft.cursor.CursorCommonVanillaEvents;
 import com.solegendary.ageofcraft.gui.TopdownGuiCommonModEvents;
 import com.solegendary.ageofcraft.gui.TopdownGuiCommonVanillaEvents;
+import com.solegendary.ageofcraft.units.UnitCommonVanillaEvents;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -20,6 +21,7 @@ public class CommonEventRegistrar {
     public void registerCommonEvents() {
         modEventBus.register(TopdownGuiCommonModEvents.class);
         vanillaEventBus.register(TopdownGuiCommonVanillaEvents.class);
-        vanillaEventBus.register(CursorCommonEvents.class);
+        vanillaEventBus.register(CursorCommonVanillaEvents.class);
+        vanillaEventBus.register(UnitCommonVanillaEvents.class);
     }
 }

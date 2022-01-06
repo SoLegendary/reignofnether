@@ -3,11 +3,13 @@ package com.solegendary.ageofcraft.cursor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3d;
+import com.solegendary.ageofcraft.units.UnitCommonVanillaEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
@@ -29,7 +31,7 @@ import java.util.List;
 /**
  * Handler that implements and manages screen-to-world translations of the cursor and block/entity selection
  */
-public class CursorClientEvents {
+public class CursorClientVanillaEvents {
 
     // pos of block moused over
     private static BlockPos cursorBlockPos = new BlockPos(0,0,0);
@@ -40,8 +42,8 @@ public class CursorClientEvents {
     private static Vector3d cursorPosFar = new Vector3d(0,0,0);
     private static Vector3d lookVector = new Vector3d(0,0,0);
     // entity moused over, vs entity selected by clicking
-    private static Entity mousedEntity = null;
-    private static Entity selectedEntity = null;
+    private static PathfinderMob mousedEntity = null;
+    private static PathfinderMob selectedEntity = null;
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static int winWidth = MC.getWindow().getGuiScaledWidth();
@@ -53,8 +55,11 @@ public class CursorClientEvents {
     public static Vector3d getCursorPos() {
         return cursorPos;
     }
-    public static Entity getMousedEntity() {
+    public static PathfinderMob getMousedEntity() {
         return mousedEntity;
+    }
+    public static PathfinderMob getSelectedEntity() {
+        return selectedEntity;
     }
 
     @SubscribeEvent
@@ -138,7 +143,7 @@ public class CursorClientEvents {
                     cursorBlockPos = refineBlockPos(cursorBlockPos);
                 }
                 cursorPos = new Vector3d(hitPos.x, hitPos.y, hitPos.z);
-                CursorCommonEvents.moveCursorEntity(cursorPos);
+                CursorCommonVanillaEvents.moveCursorEntity(cursorPos);
             }
         }
 
