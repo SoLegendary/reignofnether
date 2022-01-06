@@ -1,6 +1,6 @@
 package com.solegendary.ageofcraft.util;
 
-import com.solegendary.ageofcraft.cursorentity.CursorClientEvents;
+import com.solegendary.ageofcraft.cursor.CursorClientEvents;
 import com.solegendary.ageofcraft.gui.TopdownGuiClientEvents;
 import com.solegendary.ageofcraft.orthoview.OrthoViewClientEvents;
 import net.minecraftforge.common.MinecraftForge;

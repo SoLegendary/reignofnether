@@ -1,7 +1,10 @@
-package com.solegendary.ageofcraft.cursorentity;
+package com.solegendary.ageofcraft.cursor;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BannerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 // entity used to track where the game-space location of the cursor is
 
@@ -13,9 +16,9 @@ import net.minecraft.world.level.Level;
 
 // think of like the right click flag in an RTS game
 
-public class CursorEntity extends ArmorStand {
+public class CursorEntity extends BannerBlockEntity {
 
-    public CursorEntity(Level p_i45855_1_, double p_i45855_2_, double p_i45855_4_, double p_i45855_6_) {
-        super(p_i45855_1_, p_i45855_2_, p_i45855_4_, p_i45855_6_);
+    public CursorEntity(BlockPos p_155035_, BlockState p_155036_) {
+        super(p_155035_, p_155036_);
     }
 }

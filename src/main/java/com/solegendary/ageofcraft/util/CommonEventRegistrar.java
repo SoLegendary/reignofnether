@@ -1,6 +1,6 @@
 package com.solegendary.ageofcraft.util;
 
-import com.solegendary.ageofcraft.cursorentity.CursorCommonEvents;
+import com.solegendary.ageofcraft.cursor.CursorCommonEvents;
 import com.solegendary.ageofcraft.gui.TopdownGuiCommonModEvents;
 import com.solegendary.ageofcraft.gui.TopdownGuiCommonVanillaEvents;
 

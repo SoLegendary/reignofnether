@@ -3,7 +3,6 @@ package com.solegendary.ageofcraft.orthoview;
 import com.solegendary.ageofcraft.gui.TopdownGuiCommonVanillaEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
@@ -29,8 +28,8 @@ import static net.minecraft.util.Mth.sign;
 public class OrthoViewClientEvents {
 
     public static boolean enabled = false;
+    private static boolean cameraMovingByMouse = false; // is the camera being moved using the mouse?
 
-    private static final String topdownGuiName = "topdowngui_container";
     private static final Minecraft MC = Minecraft.getInstance();
     private static final String KEY_CATEGORY = "key.categories.ageofcraft";
     private static final float ZOOM_STEP_KEY = 5;
@@ -63,12 +62,10 @@ public class OrthoViewClientEvents {
     private static final KeyMapping keyBindCtrlMod = new KeyMapping("key.ageofcraft.orthoview.ctrlMod", GLFW.GLFW_KEY_LEFT_CONTROL, KEY_CATEGORY);
 
     private static float zoom = 30; // * 2 = number of blocks in height
-    private static float camRotX = 0;
+    private static float camRotX = 45;
     private static float camRotY = -45;
     private static float camRotAdjX = 0;
     private static float camRotAdjY = 0;
-    private static boolean mouseLeftDown = false;
-    private static boolean mouseRightDown = false;
     private static float mouseRightDownX = 0;
     private static float mouseRightDownY = 0;
     private static float mouseLeftDownX = 0;
@@ -81,6 +78,7 @@ public class OrthoViewClientEvents {
     public static boolean isEnabled() {
         return enabled;
     }
+    public static boolean isCameraMovingByMouse() { return cameraMovingByMouse; }
     public static float getZoom() { return zoom; }
     public static float getCamRotX() {
         return camRotX;
@@ -102,8 +100,8 @@ public class OrthoViewClientEvents {
 
     private static void reset() {
         zoom = 30;
-        camRotX = 0;
-        camRotY = 45;
+        camRotX = 45;
+        camRotY = -45;
     }
     public static void rotateCam(float x, float y) {
         camRotX += x;
@@ -216,12 +214,10 @@ public class OrthoViewClientEvents {
         if (!enabled) return;
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-            mouseLeftDown = true;
             mouseLeftDownX = (float) evt.getMouseX();
             mouseLeftDownY = (float) evt.getMouseY();
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-            mouseRightDown = true;
             mouseRightDownX = (float) evt.getMouseX();
             mouseRightDownY = (float) evt.getMouseY();
         }
@@ -232,10 +228,10 @@ public class OrthoViewClientEvents {
 
         // stop treating the rotation as adjustments and add them to the base amount
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-            mouseLeftDown = false;
+            cameraMovingByMouse = false;
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-            mouseRightDown = false;
+            cameraMovingByMouse = false;
             rotateCam(camRotAdjX,camRotAdjY);
             camRotAdjX = 0;
             camRotAdjY = 0;
@@ -246,11 +242,13 @@ public class OrthoViewClientEvents {
         if (!enabled) return;
 
         if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && keyBindShiftMod.isDown()) {
+            cameraMovingByMouse = true;
             float moveX = (float) evt.getDragX() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX) * ((float) screenWidth / winWidth);
             float moveZ = (float) evt.getDragY() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX) * ((float) screenHeight / winHeight);
             panCam(moveX, moveZ);
         }
-        if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && keyBindShiftMod.isDown()) {
+        else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && keyBindShiftMod.isDown()) {
+            cameraMovingByMouse = true;
             camRotAdjX = (float) (evt.getMouseX() - mouseRightDownX) * CAMROT_MOUSE_SENSITIVITY;
             camRotAdjY = (float) -(evt.getMouseY() - mouseRightDownY) * CAMROT_MOUSE_SENSITIVITY;
 

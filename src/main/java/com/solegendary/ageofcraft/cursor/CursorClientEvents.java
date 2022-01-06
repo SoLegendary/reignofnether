@@ -1,4 +1,4 @@
-package com.solegendary.ageofcraft.cursorentity;
+package com.solegendary.ageofcraft.cursor;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
 import net.minecraftforge.client.event.DrawSelectionEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -17,10 +17,13 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.solegendary.ageofcraft.orthoview.OrthoViewClientEvents;
 import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static net.minecraft.util.Mth.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -83,7 +86,7 @@ public class CursorClientEvents {
         // calcs from https://stackoverflow.com/questions/65897792/3d-vector-coordinates-from-x-and-y-rotation
         float a = (float) Math.toRadians(MC.player.getYRot());
         float b = (float) Math.toRadians(MC.player.getXRot());
-        final Vector3d lookVector = new Vector3d(-cos(b) * sin(a), -sin(b), cos(b) * cos(a));
+        lookVector = new Vector3d(-cos(b) * sin(a), -sin(b), cos(b) * cos(a));
 
         Vec2 XZRotated = OrthoViewClientEvents.rotateCoords(x, z);
 
@@ -102,55 +105,41 @@ public class CursorClientEvents {
         // calc near and far cursorPos to get a cursor line vector
         Vector3d lookVectorNear = new Vector3d(0, 0, 0);
         lookVectorNear.set(lookVector);
-        lookVectorNear.scale(-10);
+        lookVectorNear.scale(-100);
         cursorPosNear.set(cursorPos);
         cursorPosNear.add(lookVectorNear);
         Vector3d lookVectorFar = new Vector3d(0, 0, 0);
         lookVectorFar.set(lookVector);
-        lookVectorFar.scale(10);
+        lookVectorFar.scale(100);
         cursorPosFar.set(cursorPos);
         cursorPosFar.add(lookVectorFar);
 
-        // ****************************************************
-        // Find the first non-air block along the cursorPos ray
-        // ****************************************************
+        // ************************************************************
+        // Find the first solid walkable block along the cursorPos ray
+        // ************************************************************
 
         // only spend time doing calcs for cursorEntity if we actually moved the cursor
         if (cursorPos.x != cursorPosLast.x || cursorPos.y != cursorPosLast.y || cursorPos.z != cursorPosLast.z) {
 
-            // if we add a multiple of the lookVector, we can 'raytrace' forward from the camera without
-            // changing the on-screen position of the cursorEntity
-            double vectorScale = -50;
-            Vector3d lookVectorScaled;
-            BlockPos bp = null;
-            BlockState bs = null;
-            BlockState lastbs = null;
+            if (MC.level != null) {
+                Vec3 vectorNear = new Vec3(cursorPosNear.x, cursorPosNear.y, cursorPosNear.z);
+                Vec3 vectorFar = new Vec3(cursorPosFar.x, cursorPosFar.y, cursorPosFar.z);
 
-            while (true) {
-                lastbs = bs;
-                Vector3d searchVec = new Vector3d(0, 0, 0);
-                searchVec.set(cursorPos);
+                HitResult hitResult = MC.level.clip(new ClipContext(vectorNear, vectorFar, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, null));
+                Vec3 hitPos = hitResult.getLocation().add(new Vec3(0,-0.001,0));
+                cursorBlockPos = new BlockPos(hitPos);
 
-                lookVectorScaled = new Vector3d(0, 0, 0);
-                lookVectorScaled.set(lookVector);
-                lookVectorScaled.scale(vectorScale); // has to be high enough to be at the 'front' of the screen
-                searchVec.add(lookVectorScaled);
-
-                bp = new BlockPos(searchVec.x, searchVec.y, searchVec.z);
-                bs = MC.level.getBlockState(bp);
-
-                if (bs.getMaterial().isLiquid()) {
-                    break;
+                // clip() returns the point of clip, not the clipped block, so we get off-by-one errors
+                // in some directions so try moving very slightly to get the properly clipped block
+                if (!MC.level.getBlockState(cursorBlockPos).getMaterial().isSolidBlocking()) {
+                    hitPos = hitPos.add(new Vec3(-0.001, 0, -0.001));
+                    cursorBlockPos = new BlockPos(hitPos);
+                    // if we clipped a non-solid block (eg. tall grass) search adjacent blocks for a next-best match
+                    cursorBlockPos = refineBlockPos(cursorBlockPos);
                 }
-                // found the target block; only pick solid blocking blocks
-                if (bs.getMaterial().isSolidBlocking()) {
-                    cursorBlockPos = bp;
-                    break;
-                }
-                vectorScale += 1;
+                cursorPos = new Vector3d(hitPos.x, hitPos.y, hitPos.z);
+                CursorCommonEvents.moveCursorEntity(cursorPos);
             }
-            cursorPos.add(lookVectorScaled);
-            CursorCommonEvents.moveCursorEntity(cursorPos);
         }
 
         // ****************************************
@@ -169,23 +158,14 @@ public class CursorClientEvents {
         mousedEntity = null;
 
         for (Villager villager : villagers) {
-            AABB entityaabb = villager.getBoundingBox();
-            entityaabb = entityaabb.setMaxY(entityaabb.maxY);
-            entityaabb = entityaabb.setMinY(entityaabb.minY);
-            entityaabb = entityaabb.inflate(0.1); // inflate by set amount to improve click accuracy
+            // inflate by set amount to improve click accuracy
+            AABB entityaabb = villager.getBoundingBox().inflate(0.1);
 
             if (rayIntersectsAABBCustom(cursorPosNear, lookVector, entityaabb)) {
                 mousedEntity = villager;
             }
         }
-
-        // ****************************************
-        // Highlight the block moused over
-        // ****************************************
-
-        //drawSelectionBox(evt.getMatrixStack(), cursorBlockPos);
     }
-
 
     @SubscribeEvent
     public static void onMouseClick(GuiScreenEvent.MouseClickedEvent evt) {
@@ -198,6 +178,75 @@ public class CursorClientEvents {
             else
                 selectedEntity = null;
         }
+    }
+
+    // prevent moused over blocks being outlined in the usual way (ie. by raytracing from player to block)
+    @SubscribeEvent
+    public static void onHighlightBlockEvent(DrawSelectionEvent.HighlightBlock evt) {
+        if (MC.level != null && OrthoViewClientEvents.isEnabled())
+            evt.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void onRenderWorld(RenderWorldLastEvent evt) {
+        if (MC.level != null && OrthoViewClientEvents.isEnabled()) {
+            if (selectedEntity != null)
+                drawEntityOutline(evt.getMatrixStack(), selectedEntity, 1.0f);
+            if (mousedEntity != null)
+                drawEntityOutline(evt.getMatrixStack(), mousedEntity, 0.5f);
+            else if (!OrthoViewClientEvents.isCameraMovingByMouse())
+                drawBlockOutline(evt.getMatrixStack(), cursorBlockPos, 0.5f);
+        }
+    }
+
+    private static BlockPos refineBlockPos(BlockPos bp) {
+        ArrayList<BlockPos> blocks = new ArrayList<BlockPos>();
+
+        blocks.add(bp);
+        blocks.add(bp.north());
+        blocks.add(bp.south());
+        blocks.add(bp.east());
+        blocks.add(bp.west());
+        blocks.add(bp.north().east());
+        blocks.add(bp.south().east());
+        blocks.add(bp.north().west());
+        blocks.add(bp.south().west());
+
+        blocks.add(bp.above());
+        blocks.add(bp.above().north());
+        blocks.add(bp.above().south());
+        blocks.add(bp.above().east());
+        blocks.add(bp.above().west());
+        blocks.add(bp.above().north().east());
+        blocks.add(bp.above().south().east());
+        blocks.add(bp.above().north().west());
+        blocks.add(bp.above().south().west());
+
+        blocks.add(bp.below());
+        blocks.add(bp.below().north());
+        blocks.add(bp.below().south());
+        blocks.add(bp.below().east());
+        blocks.add(bp.below().west());
+        blocks.add(bp.below().north().east());
+        blocks.add(bp.below().south().east());
+        blocks.add(bp.below().north().west());
+        blocks.add(bp.below().south().west());
+
+        BlockPos bestBp = bp;
+        double smallestDist = 10000;
+
+        for (int i = 0; i < blocks.size(); i++) {
+            BlockPos block = blocks.get(i);
+            double dist = new Vec3(0,0,0)
+                    .distanceTo(new Vec3(0,0,0));
+            if (MC.level.getBlockState(block).getMaterial().isSolidBlocking()
+                    && rayIntersectsAABBCustom(cursorPosNear, lookVector, new AABB(block))
+                    && dist < smallestDist ) {
+                smallestDist = dist;
+                bestBp = block;
+            }
+        }
+        return bestBp;
     }
 
     private static boolean rayIntersectsAABBCustom(Vector3d origin, Vector3d rayVector, AABB aabb) {
@@ -220,52 +269,32 @@ public class CursorClientEvents {
         float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
 
         // if tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
-        if (tmax < 0) return false;
+        // if (tmax < 0) return false;
         // if tmin > tmax, ray doesn't intersect AABB
         if (tmin > tmax) return false;
 
         return true;
     }
 
-    // prevent moused over blocks being outlined in the usual way (ie. by raytracing from player to block)
-    @SubscribeEvent
-    public static void onHighlightBlockEvent(DrawSelectionEvent.HighlightBlock evt) {
-        if (MC.level != null && OrthoViewClientEvents.isEnabled())
-            evt.setCanceled(true);
-    }
-    @SubscribeEvent
-    public static void onRenderWorldLastEvent(RenderWorldLastEvent evt) {
-        if (MC.level != null && OrthoViewClientEvents.isEnabled()) {
-            if (selectedEntity != null)
-                drawEntityOutline(evt.getMatrixStack(), selectedEntity, 1.0f);
-            if (mousedEntity != null)
-                drawEntityOutline(evt.getMatrixStack(), mousedEntity, 0.5f);
-            else
-                drawBlockOutline(evt.getMatrixStack(), cursorBlockPos, 0.25f);
-        }
-    }
-
     public static void drawBlockOutline(PoseStack matrixStack, BlockPos blockpos, float alpha) {
-        BlockState blockstate = MC.level.getBlockState(blockpos);
-
-        if (blockstate.getMaterial().isSolidBlocking())
-            drawOutline(matrixStack, new AABB(blockpos), alpha);
+        AABB aabb = new AABB(blockpos).move(0,0.01,0);
+        drawOutline(matrixStack, aabb, alpha);
     }
 
     public static void drawEntityOutline(PoseStack matrixStack, Entity entity, float alpha) {
         drawOutline(matrixStack, entity.getBoundingBox(), alpha);
     }
 
-    // TODO: lines are showing through blocks for some reason; look at the vanilla render blocks code to fix?
     public static void drawOutline(PoseStack matrixStack, AABB aabb, float alpha) {
         Entity camEntity = MC.getCameraEntity();
         double d0 = camEntity.getX();
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
         double d2 = camEntity.getZ();
 
+        RenderSystem.depthMask(false); // disable showing lines through blocks
         VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.lines());
         matrixStack.pushPose();
-        matrixStack.translate(-d0, -d1, -d2);
+        matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
         LevelRenderer.renderLineBox(matrixStack, vertexConsumer, aabb, 1.0f, 1.0f, 1.0f, alpha);
         matrixStack.popPose();
     }

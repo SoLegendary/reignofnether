@@ -1,4 +1,4 @@
-package com.solegendary.ageofcraft.cursorentity;
+package com.solegendary.ageofcraft.cursor;
 
 import com.mojang.math.Vector3d;
 import com.solegendary.ageofcraft.orthoview.OrthoViewClientEvents;
@@ -7,7 +7,6 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import com.solegendary.ageofcraft.cursorentity.CursorEntity;
 
 /**
  * Handler that implements and manages the cursor entity that converts screen space to game space
@@ -44,4 +43,5 @@ public class CursorCommonEvents {
         if (cursorEntity != null)
             cursorEntity.absMoveTo(moveVec.x, moveVec.y, moveVec.z);
     }
+
 }
