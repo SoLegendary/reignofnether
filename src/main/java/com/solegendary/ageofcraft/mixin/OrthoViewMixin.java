@@ -1,6 +1,6 @@
 package com.solegendary.ageofcraft.mixin;
 
-import com.solegendary.ageofcraft.orthoview.OrthoViewClientEvents;
+import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import net.minecraft.client.renderer.GameRenderer;
 import com.mojang.math.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,8 +20,8 @@ public class OrthoViewMixin {
             double d,
             CallbackInfoReturnable<Matrix4f> cir
     ) {
-        if (OrthoViewClientEvents.isEnabled()) {
-            cir.setReturnValue(OrthoViewClientEvents.getOrthographicProjection());
+        if (OrthoviewClientVanillaEvents.isEnabled()) {
+            cir.setReturnValue(OrthoviewClientVanillaEvents.getOrthographicProjection());
         }
     }
 }

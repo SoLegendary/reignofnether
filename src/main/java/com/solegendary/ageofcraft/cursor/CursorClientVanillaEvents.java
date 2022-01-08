@@ -3,21 +3,24 @@ package com.solegendary.ageofcraft.cursor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3d;
-import com.solegendary.ageofcraft.units.UnitCommonVanillaEvents;
+import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.animal.Panda;
+import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
 import net.minecraftforge.client.event.DrawSelectionEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import com.solegendary.ageofcraft.orthoview.OrthoViewClientEvents;
 import org.lwjgl.glfw.GLFW;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -33,8 +36,13 @@ import java.util.List;
  */
 public class CursorClientVanillaEvents {
 
+    private static boolean leftClickDown = false;
+    private static boolean rightClickDown = false;
+
     // pos of block moused over
-    private static BlockPos cursorBlockPos = new BlockPos(0,0,0);
+    private static BlockPos mousedBlockPos = new BlockPos(0,0,0);
+    // pos of block selected by right click (to move units to)
+    private static BlockPos selectedBlockPos = new BlockPos(0,0,0);
     // pos of cursor exactly on: first non-air block, last frame, near to screen, far from screen
     private static Vector3d cursorPos = new Vector3d(0,0,0);
     private static Vector3d cursorPosLast = new Vector3d(0,0,0);
@@ -42,31 +50,34 @@ public class CursorClientVanillaEvents {
     private static Vector3d cursorPosFar = new Vector3d(0,0,0);
     private static Vector3d lookVector = new Vector3d(0,0,0);
     // entity moused over, vs entity selected by clicking
-    private static PathfinderMob mousedEntity = null;
-    private static PathfinderMob selectedEntity = null;
+    private static Chicken mousedEntity = null;
+    private static Chicken selectedEntity = null;
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static int winWidth = MC.getWindow().getGuiScaledWidth();
     private static int winHeight = MC.getWindow().getGuiScaledHeight();
 
-    public static BlockPos getCursorBlockPos() {
-        return cursorBlockPos;
-    }
     public static Vector3d getCursorPos() {
         return cursorPos;
     }
-    public static PathfinderMob getMousedEntity() {
+    public static Chicken getMousedEntity() {
         return mousedEntity;
     }
-    public static PathfinderMob getSelectedEntity() {
+    public static Chicken getSelectedEntity() {
         return selectedEntity;
+    }
+    public static BlockPos getMousedBlockPos() {
+        return mousedBlockPos;
+    }
+    public static BlockPos getSelectedBlockPos() {
+        return selectedBlockPos;
     }
 
     @SubscribeEvent
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
-        if (!OrthoViewClientEvents.isEnabled()) return;
+        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
-        float zoom = OrthoViewClientEvents.getZoom();
+        float zoom = OrthoviewClientVanillaEvents.getZoom();
         int mouseX = evt.getMouseX();
         int mouseY = evt.getMouseY();
 
@@ -84,7 +95,7 @@ public class CursorClientVanillaEvents {
         float y = 0;
         float z = (mouseY - (float) winHeight / 2) / pixelsToBlocks;
 
-        double camRotYRads = Math.toRadians(OrthoViewClientEvents.getCamRotY());
+        double camRotYRads = Math.toRadians(OrthoviewClientVanillaEvents.getCamRotY());
         z = z / (float) (Math.sin(-camRotYRads));
 
         // get look vector of the player (and therefore the camera)
@@ -93,7 +104,7 @@ public class CursorClientVanillaEvents {
         float b = (float) Math.toRadians(MC.player.getXRot());
         lookVector = new Vector3d(-cos(b) * sin(a), -sin(b), cos(b) * cos(a));
 
-        Vec2 XZRotated = OrthoViewClientEvents.rotateCoords(x, z);
+        Vec2 XZRotated = OrthoviewClientVanillaEvents.rotateCoords(x, z);
 
         cursorPosLast = new Vector3d(
                 cursorPos.x,
@@ -132,15 +143,15 @@ public class CursorClientVanillaEvents {
 
                 HitResult hitResult = MC.level.clip(new ClipContext(vectorNear, vectorFar, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, null));
                 Vec3 hitPos = hitResult.getLocation().add(new Vec3(0,-0.001,0));
-                cursorBlockPos = new BlockPos(hitPos);
+                mousedBlockPos = new BlockPos(hitPos);
 
                 // clip() returns the point of clip, not the clipped block, so we get off-by-one errors
                 // in some directions so try moving very slightly to get the properly clipped block
-                if (!MC.level.getBlockState(cursorBlockPos).getMaterial().isSolidBlocking()) {
+                if (!MC.level.getBlockState(mousedBlockPos).getMaterial().isSolidBlocking()) {
                     hitPos = hitPos.add(new Vec3(-0.001, 0, -0.001));
-                    cursorBlockPos = new BlockPos(hitPos);
+                    mousedBlockPos = new BlockPos(hitPos);
                     // if we clipped a non-solid block (eg. tall grass) search adjacent blocks for a next-best match
-                    cursorBlockPos = refineBlockPos(cursorBlockPos);
+                    mousedBlockPos = refineBlockPos(mousedBlockPos);
                 }
                 cursorPos = new Vector3d(hitPos.x, hitPos.y, hitPos.z);
                 CursorCommonVanillaEvents.moveCursorEntity(cursorPos);
@@ -158,50 +169,94 @@ public class CursorClientVanillaEvents {
                 cursorPos.y + 5,
                 cursorPos.z + 5
         );
-        List<Villager> villagers = MC.level.getEntitiesOfClass(Villager.class, aabb);
+        List<Chicken> entities = MC.level.getEntitiesOfClass(Chicken.class, aabb);
 
         mousedEntity = null;
 
-        for (Villager villager : villagers) {
+        for (Chicken entity : entities) {
             // inflate by set amount to improve click accuracy
-            AABB entityaabb = villager.getBoundingBox().inflate(0.1);
+            AABB entityaabb = entity.getBoundingBox().inflate(0.1);
 
             if (rayIntersectsAABBCustom(cursorPosNear, lookVector, entityaabb)) {
-                mousedEntity = villager;
+                mousedEntity = entity;
             }
         }
     }
 
     @SubscribeEvent
+    public static void onMobDeath(EntityLeaveWorldEvent evt) {
+        if (mousedEntity != null && evt.getEntity().getId() == mousedEntity.getId())
+            mousedEntity = null;
+        if (selectedEntity != null && evt.getEntity().getId() == selectedEntity.getId())
+            selectedEntity = null;
+    }
+
+    @SubscribeEvent
     public static void onMouseClick(GuiScreenEvent.MouseClickedEvent evt) {
-        if (!OrthoViewClientEvents.isEnabled()) return;
+        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            leftClickDown = true;
             if (mousedEntity != null)
                 selectedEntity = mousedEntity;
             else
                 selectedEntity = null;
+        }
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            rightClickDown = true;
+
+            if (selectedEntity != null) {
+                selectedBlockPos = mousedBlockPos;
+                System.out.println("Moving chicken (id " + selectedEntity.getId() + ") to " + selectedBlockPos);
+            }
+        }
+    }
+    @SubscribeEvent
+    public static void onMouseRelease(GuiScreenEvent.MouseReleasedEvent evt) {
+        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
+
+        // select a moused over entity by left clicking it
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            leftClickDown = false;
+        }
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            rightClickDown = false;
         }
     }
 
     // prevent moused over blocks being outlined in the usual way (ie. by raytracing from player to block)
     @SubscribeEvent
     public static void onHighlightBlockEvent(DrawSelectionEvent.HighlightBlock evt) {
-        if (MC.level != null && OrthoViewClientEvents.isEnabled())
+        if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled())
             evt.setCanceled(true);
     }
 
     @SubscribeEvent
     public static void onRenderWorld(RenderWorldLastEvent evt) {
-        if (MC.level != null && OrthoViewClientEvents.isEnabled()) {
+        if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled()) {
             if (selectedEntity != null)
                 drawEntityOutline(evt.getMatrixStack(), selectedEntity, 1.0f);
             if (mousedEntity != null)
                 drawEntityOutline(evt.getMatrixStack(), mousedEntity, 0.5f);
-            else if (!OrthoViewClientEvents.isCameraMovingByMouse())
-                drawBlockOutline(evt.getMatrixStack(), cursorBlockPos, 0.5f);
+            else if (!OrthoviewClientVanillaEvents.isCameraMovingByMouse()) {
+                if (rightClickDown)
+                    drawBlockOutline(evt.getMatrixStack(), mousedBlockPos, 1.0f);
+                else
+                    drawBlockOutline(evt.getMatrixStack(), mousedBlockPos, 0.5f);
+            }
+
         }
+    }
+
+    @SubscribeEvent
+    public static void onEntityLeave(EntityLeaveWorldEvent evt) {
+        Entity entity = evt.getEntity();
+
+        if (mousedEntity != null && mousedEntity.getId() == entity.getId())
+            mousedEntity = null;
+        if (selectedEntity != null && selectedEntity.getId() == entity.getId())
+            selectedEntity = null;
     }
 
     private static BlockPos refineBlockPos(BlockPos bp) {

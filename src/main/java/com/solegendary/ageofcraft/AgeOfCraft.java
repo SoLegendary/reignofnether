@@ -1,17 +1,11 @@
 package com.solegendary.ageofcraft;
 
-import com.solegendary.ageofcraft.util.CommonEventRegistrar;
-import com.solegendary.ageofcraft.util.RegistryHandler;
-import com.solegendary.ageofcraft.util.ServerSideEventRegistrar;
+import com.solegendary.ageofcraft.registrars.*;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.solegendary.ageofcraft.util.ClientSideEventRegistrar;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("ageofcraft")
@@ -23,7 +17,8 @@ public class AgeOfCraft
     public static final String MOD_ID = "ageofcraft";
 
     public AgeOfCraft() {
-        RegistryHandler.init();
+        ItemRegistrar.init();
+        EntityRegistrar.init();
 
         // Use MinecraftForge.EVENT_BUS.register() for non-mod events (eg. onKeyInput, onServerChat)
         // and FMLJavaModLoadingContext...register() for IModEventBus events (eg, FMLClientSetupEvent)

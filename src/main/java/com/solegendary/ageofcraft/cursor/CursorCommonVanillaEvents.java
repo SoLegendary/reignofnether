@@ -1,7 +1,7 @@
 package com.solegendary.ageofcraft.cursor;
 
 import com.mojang.math.Vector3d;
-import com.solegendary.ageofcraft.orthoview.OrthoViewClientEvents;
+import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.server.level.ServerLevel;
@@ -26,12 +26,12 @@ public class CursorCommonVanillaEvents {
             cursorEntity = EntityType.ARMOR_STAND.create(world);
 
         if (cursorEntity != null) {
-            if (!cursorEntityAdded && OrthoViewClientEvents.isEnabled()) {
+            if (!cursorEntityAdded && OrthoviewClientVanillaEvents.isEnabled()) {
                 world.addFreshEntity(cursorEntity);
                 cursorEntity.setNoGravity(true);
                 cursorEntityAdded = true;
             }
-            if (cursorEntityAdded && !OrthoViewClientEvents.isEnabled()) {
+            if (cursorEntityAdded && !OrthoviewClientVanillaEvents.isEnabled()) {
                 world.removeEntity(cursorEntity, true);
                 cursorEntity = null;
                 cursorEntityAdded = false;

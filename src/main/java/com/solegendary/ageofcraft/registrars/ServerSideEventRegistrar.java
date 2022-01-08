@@ -1,5 +1,6 @@
-package com.solegendary.ageofcraft.util;
+package com.solegendary.ageofcraft.registrars;
 
+import com.solegendary.ageofcraft.units.UnitCommonVanillaEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;

@@ -2,13 +2,12 @@ package com.solegendary.ageofcraft.orthoview;
 
 import com.solegendary.ageofcraft.gui.TopdownGuiCommonVanillaEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.KeyMapping;
+import com.solegendary.ageofcraft.registrars.Keybinds;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
-import net.minecraftforge.fmlclient.registry.ClientRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 import com.solegendary.ageofcraft.gui.TopdownGuiContainer;
@@ -25,13 +24,12 @@ import static net.minecraft.util.Mth.sign;
  *
  * @author SoLegendary, adapted from Mineshot by Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class OrthoViewClientEvents {
+public class OrthoviewClientVanillaEvents {
 
     public static boolean enabled = false;
     private static boolean cameraMovingByMouse = false; // is the camera being moved using the mouse?
 
     private static final Minecraft MC = Minecraft.getInstance();
-    private static final String KEY_CATEGORY = "key.categories.ageofcraft";
     private static final float ZOOM_STEP_KEY = 5;
     private static final float ZOOM_STEP_SCROLL = 1;
     private static final float ZOOM_MIN = 10;
@@ -44,22 +42,6 @@ public class OrthoViewClientEvents {
     private static final float CAMROTY_MIN = -90;
     private static final float CAMROT_MOUSE_SENSITIVITY = 0.12f;
     private static final float CAMPAN_MOUSE_SENSITIVITY = 0.2f;
-
-    private static final KeyMapping keyBindEscape = new KeyMapping("key.ageofcraft.orthoview.escape", GLFW.GLFW_KEY_ESCAPE, KEY_CATEGORY);
-    private static final KeyMapping keyBindToggle = new KeyMapping("key.ageofcraft.orthoview.toggle", GLFW.GLFW_KEY_KP_5, KEY_CATEGORY);
-    private static final KeyMapping keyBindZoomIn = new KeyMapping("key.ageofcraft.orthoview.zoomIn", GLFW.GLFW_KEY_KP_ADD, KEY_CATEGORY);
-    private static final KeyMapping keyBindZoomOut = new KeyMapping("key.ageofcraft.orthoview.zoomOut", GLFW.GLFW_KEY_KP_SUBTRACT, KEY_CATEGORY);
-    private static final KeyMapping keyBindRotPlusX = new KeyMapping("key.ageofcraft.orthoview.rotPlusY", GLFW.GLFW_KEY_LEFT, KEY_CATEGORY);
-    private static final KeyMapping keyBindRotMinusX = new KeyMapping("key.ageofcraft.orthoview.rotMinusY", GLFW.GLFW_KEY_RIGHT, KEY_CATEGORY);
-    private static final KeyMapping keyBindRotPlusY = new KeyMapping("key.ageofcraft.orthoview.rotPlusX", GLFW.GLFW_KEY_UP, KEY_CATEGORY);
-    private static final KeyMapping keyBindRotMinusY = new KeyMapping("key.ageofcraft.orthoview.rotMinusX", GLFW.GLFW_KEY_DOWN, KEY_CATEGORY);
-    private static final KeyMapping keyBindPanPlusX = new KeyMapping("key.ageofcraft.orthoview.panPlusZ", GLFW.GLFW_KEY_A, KEY_CATEGORY);
-    private static final KeyMapping keyBindPanMinusX = new KeyMapping("key.ageofcraft.orthoview.panMinusZ", GLFW.GLFW_KEY_D, KEY_CATEGORY);
-    private static final KeyMapping keyBindPanPlusZ = new KeyMapping("key.ageofcraft.orthoview.panPlusX", GLFW.GLFW_KEY_W, KEY_CATEGORY);
-    private static final KeyMapping keyBindPanMinusZ = new KeyMapping("key.ageofcraft.orthoview.panMinusX", GLFW.GLFW_KEY_S, KEY_CATEGORY);
-    private static final KeyMapping keyBindReset = new KeyMapping("key.ageofcraft.orthoview.reset", GLFW.GLFW_KEY_RIGHT_CONTROL, KEY_CATEGORY);
-    private static final KeyMapping keyBindShiftMod = new KeyMapping("key.ageofcraft.orthoview.shiftMod", GLFW.GLFW_KEY_LEFT_SHIFT, KEY_CATEGORY);
-    private static final KeyMapping keyBindCtrlMod = new KeyMapping("key.ageofcraft.orthoview.ctrlMod", GLFW.GLFW_KEY_LEFT_CONTROL, KEY_CATEGORY);
 
     private static float zoom = 30; // * 2 = number of blocks in height
     private static float camRotX = 45;
@@ -84,19 +66,6 @@ public class OrthoViewClientEvents {
         return camRotX;
     }
     public static float getCamRotY() { return camRotY; }
-
-    public static void init() {
-        ClientRegistry.registerKeyBinding(keyBindToggle);
-        ClientRegistry.registerKeyBinding(keyBindZoomIn);
-        ClientRegistry.registerKeyBinding(keyBindZoomOut);
-        ClientRegistry.registerKeyBinding(keyBindRotPlusX);
-        ClientRegistry.registerKeyBinding(keyBindRotMinusX);
-        ClientRegistry.registerKeyBinding(keyBindRotPlusY);
-        ClientRegistry.registerKeyBinding(keyBindRotMinusY);
-        ClientRegistry.registerKeyBinding(keyBindReset);
-        ClientRegistry.registerKeyBinding(keyBindShiftMod);
-        ClientRegistry.registerKeyBinding(keyBindCtrlMod);
-    }
 
     private static void reset() {
         zoom = 30;
@@ -160,13 +129,13 @@ public class OrthoViewClientEvents {
     public static void onInput(InputEvent.KeyInputEvent evt) {
 
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-            if (evt.getKey() == keyBindToggle.getKey().getValue())
+            if (evt.getKey() == Keybinds.toggle.getKey().getValue())
                 toggleEnable();
 
-            if (evt.getKey() == keyBindReset.getKey().getValue())
+            if (evt.getKey() == Keybinds.reset.getKey().getValue())
                 reset();
 
-            if (evt.getKey() == keyBindEscape.getKey().getValue())
+            if (evt.getKey() == Keybinds.escape.getKey().getValue())
                 TopdownGuiCommonVanillaEvents.openEscMenu();
         }
     }
@@ -182,7 +151,7 @@ public class OrthoViewClientEvents {
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
         if (!enabled) return;
 
-        if (keyBindShiftMod.isDown()) return;
+        if (Keybinds.shiftMod.isDown()) return;
 
         // no idea why but mouse x and y are half of what's expected
         int mouseX = evt.getMouseX();
@@ -241,13 +210,13 @@ public class OrthoViewClientEvents {
     public static void onMouseDrag(GuiScreenEvent.MouseDragEvent evt) {
         if (!enabled) return;
 
-        if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && keyBindShiftMod.isDown()) {
+        if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybinds.shiftMod.isDown()) {
             cameraMovingByMouse = true;
             float moveX = (float) evt.getDragX() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX) * ((float) screenWidth / winWidth);
             float moveZ = (float) evt.getDragY() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX) * ((float) screenHeight / winHeight);
             panCam(moveX, moveZ);
         }
-        else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && keyBindShiftMod.isDown()) {
+        else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybinds.shiftMod.isDown()) {
             cameraMovingByMouse = true;
             camRotAdjX = (float) (evt.getMouseX() - mouseRightDownX) * CAMROT_MOUSE_SENSITIVITY;
             camRotAdjY = (float) -(evt.getMouseY() - mouseRightDownY) * CAMROT_MOUSE_SENSITIVITY;
@@ -279,29 +248,29 @@ public class OrthoViewClientEvents {
         Player player = MC.player;
 
         // zoom in/out with keys
-        if (keyBindZoomIn.isDown())
+        if (Keybinds.zoomIn.isDown())
             zoomCam(-ZOOM_STEP_KEY);
-        if (keyBindZoomOut.isDown())
+        if (Keybinds.zoomOut.isDown())
             zoomCam(ZOOM_STEP_KEY);
 
         // rotate with keys
-        if (keyBindRotPlusX.isDown())
+        if (Keybinds.rotPlusX.isDown())
             rotateCam(ROTATE_STEP,0);
-        else if (keyBindRotMinusX.isDown())
+        else if (Keybinds.rotMinusX.isDown())
             rotateCam(-ROTATE_STEP,0);
-        if (keyBindRotPlusY.isDown())
+        if (Keybinds.rotPlusY.isDown())
             rotateCam(0,ROTATE_STEP);
-        else if (keyBindRotMinusY.isDown())
+        else if (Keybinds.rotMinusY.isDown())
             rotateCam(0,-ROTATE_STEP);
 
         // pan camera with keys
-        if (keyBindPanPlusX.isDown())
+        if (Keybinds.panPlusX.isDown())
             panCam(PAN_KEY_STEP,0);
-        else if (keyBindPanMinusX.isDown())
+        else if (Keybinds.panMinusX.isDown())
             panCam(-PAN_KEY_STEP,0);
-        if (keyBindPanPlusZ.isDown())
+        if (Keybinds.panPlusZ.isDown())
             panCam(0, PAN_KEY_STEP);
-        else if (keyBindPanMinusZ.isDown())
+        else if (Keybinds.panMinusZ.isDown())
             panCam(0,-PAN_KEY_STEP);
 
         // note that we treat x and y rot as horizontal and vertical, but MC treats it the other way around...

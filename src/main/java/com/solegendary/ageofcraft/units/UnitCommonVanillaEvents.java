@@ -1,43 +1,47 @@
 package com.solegendary.ageofcraft.units;
 
+import com.solegendary.ageofcraft.AgeOfCraft;
 import com.solegendary.ageofcraft.cursor.CursorClientVanillaEvents;
-import com.solegendary.ageofcraft.orthoview.OrthoViewClientEvents;
+import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
+import com.solegendary.ageofcraft.units.goals.MoveToCursorBlockGoal;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityEvent;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import net.minecraft.world.entity.animal.Chicken;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
+import java.util.Set;
+
+@Mod.EventBusSubscriber(modid=AgeOfCraft.MOD_ID, bus=Mod.EventBusSubscriber.Bus.MOD, value=Dist.DEDICATED_SERVER)
 public class UnitCommonVanillaEvents {
 
+    // note this seems to fire twice per entity, once serverside and once clientside
+    // the clientside entity has no goals registered
     @SubscribeEvent
-    public static void onMouseClick(GuiScreenEvent.MouseReleasedEvent evt) {
-        if (!OrthoViewClientEvents.isEnabled()) return;
+    public static void onEntityJoin(EntityJoinWorldEvent evt) {
+        Entity entity = evt.getEntity();
 
-        PathfinderMob selectedEntity = CursorClientVanillaEvents.getSelectedEntity();
-        BlockPos cursorBlockPos = CursorClientVanillaEvents.getCursorBlockPos();
-
-
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-            if (selectedEntity != null) {
-                System.out.println("Moving " + selectedEntity.getName().getString() + " to: " + cursorBlockPos.getX() + " " + cursorBlockPos.getY() + " " + cursorBlockPos.getZ());
-
-                Goal goal = new MoveToBlockGoal(selectedEntity, 1.0, 100, 10) {
-                    @Override
-                    protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
-                        return blockPos.getX() == cursorBlockPos.getX() && blockPos.getZ() == cursorBlockPos.getZ();
-                    }
-                    public boolean canContinueToUse() { return true; }
-                    public boolean canUse() { return true; }
-                };
-                // move at maximum priority towards block
-                selectedEntity.goalSelector.addGoal(0, goal);
-                goal.start();
-            }
+        // TODO: for some reason changing the selectedBlockPos briefly stops the goal from succeeding, maybe because recalculation takes way too long?
+        if (entity instanceof Chicken && entity.getServer() != null) {
+            Chicken chicken = (Chicken) entity;
+            Set<WrappedGoal> goals = chicken.goalSelector.getAvailableGoals();
+            System.out.println("Chicken (id " + chicken.getId() + ") joined world with " + goals.size() + " goals");
+            chicken.goalSelector.removeAllGoals();
+            chicken.goalSelector.addGoal(1, new MoveToCursorBlockGoal(chicken));
+            System.out.println("Replaced all goals with MoveToCursorBlockGoal");
         }
     }
-
 }

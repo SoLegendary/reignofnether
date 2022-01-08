@@ -1,6 +1,6 @@
 package com.solegendary.ageofcraft.mixin;
 
-import com.solegendary.ageofcraft.orthoview.OrthoViewClientEvents;
+import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import net.minecraft.client.renderer.culling.Frustum;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,7 +19,7 @@ public class FrustumCullingMixin {
             float f1, float f2, float f3, float f4, float f5, float f6,
             CallbackInfoReturnable<Boolean> cir
     ) {
-        if (OrthoViewClientEvents.isEnabled()) {
+        if (OrthoviewClientVanillaEvents.isEnabled()) {
             cir.setReturnValue(true);
         }
     }
