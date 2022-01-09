@@ -1,52 +1,50 @@
 package com.solegendary.ageofcraft.units.goals;
 
 import com.solegendary.ageofcraft.cursor.CursorClientVanillaEvents;
-import com.solegendary.ageofcraft.units.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
-import net.minecraft.world.entity.animal.Chicken;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
+import java.util.EnumSet;
 
-public class MoveToCursorBlockGoal extends MoveToBlockGoal {
+public class MoveToCursorBlockGoal extends Goal {
 
-    // TODO: make work with actual units once implemented
-    private final Chicken unit;
+    private final PathfinderMob mob;
+    private final double speedModifier;
+    private final Level level;
+    private final int maxDist = 20;
 
-    public MoveToCursorBlockGoal(Chicken p_32409_) {
-        // entity, speedModifier, searchRange, verticalSearchRange
-        super(p_32409_, 1.0D, 8, 2);
-        this.unit = p_32409_;
+    public MoveToCursorBlockGoal(PathfinderMob mob, double speedModifier) {
+        this.mob = mob;
+        this.speedModifier = speedModifier;
+        this.level = mob.level;
+        this.setFlags(EnumSet.of(Goal.Flag.MOVE));
     }
 
+    // only use if the target pos is close enough and the mob is selected
     public boolean canUse() {
-        return super.canUse();
+        PathfinderMob selectedMob = CursorClientVanillaEvents.getSelectedEntity();
+        BlockPos bp = CursorClientVanillaEvents.getSelectedBlockPos();
+        if (selectedMob != null) {
+            BlockPos mobbp = this.mob.blockPosition();
+            int dist = bp.distManhattan(new Vec3i(mobbp.getX(), mobbp.getY()-1, mobbp.getZ()));
+            return dist <= maxDist && mob.getId() == selectedMob.getId();
+        }
+        else
+            return false;
     }
+
     public boolean canContinueToUse() {
-        return super.canContinueToUse();
-    }
-
-    // TODO: try unit.getNavigation().createPath(targetbp,0); to go exactly to the target block (not sure if this has to be in a goal?)
-    protected boolean isValidTarget(LevelReader levelReader, BlockPos bp) {
-        BlockPos targetbp = CursorClientVanillaEvents.getSelectedBlockPos();
-
-        int dist = targetbp.distManhattan(new Vec3i(bp.getX(), bp.getY(), bp.getZ()));
-
-        boolean valid = bp.getX() == targetbp.getX() &&
-                bp.getY() == targetbp.getY() &&
-                bp.getZ() == targetbp.getZ() &&
-                dist < 20;
-
-        if (valid) System.out.println("Found valid blockpos!");
-
-
-        return valid;
+        return !this.mob.getNavigation().isDone();
     }
 
     public void start() {
-        super.start();
-    }
+        BlockPos bp = CursorClientVanillaEvents.getSelectedBlockPos();
 
-    public void stop() { super.stop(); }
+        // move to exact goal instead of 1 block away
+        Path path = mob.getNavigation().createPath(bp.getX(), bp.getY(), bp.getZ(),0);
+        this.mob.getNavigation().moveTo(path, speedModifier);
+    }
 }

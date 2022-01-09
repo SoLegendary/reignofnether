@@ -77,6 +77,9 @@ public class CursorClientVanillaEvents {
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
+        winWidth = MC.getWindow().getGuiScaledWidth();
+        winHeight = MC.getWindow().getGuiScaledHeight();
+
         float zoom = OrthoviewClientVanillaEvents.getZoom();
         int mouseX = evt.getMouseX();
         int mouseY = evt.getMouseY();
@@ -154,7 +157,8 @@ public class CursorClientVanillaEvents {
                     mousedBlockPos = refineBlockPos(mousedBlockPos);
                 }
                 cursorPos = new Vector3d(hitPos.x, hitPos.y, hitPos.z);
-                CursorCommonVanillaEvents.moveCursorEntity(cursorPos);
+                // TODO: make this be CursorEntity and only show when moving a mob instead of following cursor
+                //CursorCommonVanillaEvents.moveCursorEntity(cursorPos);
             }
         }
 
