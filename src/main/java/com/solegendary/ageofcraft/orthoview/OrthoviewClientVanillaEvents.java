@@ -240,13 +240,10 @@ public class OrthoviewClientVanillaEvents {
         if (!enabled)
             return;
 
-        // TODO: stops working on window resize?
         winWidth = MC.getWindow().getGuiScaledWidth();
         winHeight = MC.getWindow().getGuiScaledHeight();
         screenWidth = MC.getWindow().getScreenWidth();
         screenHeight = MC.getWindow().getScreenHeight();
-        System.out.println(winWidth);
-        System.out.println(screenWidth);
 
         Player player = MC.player;
 

@@ -5,19 +5,17 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3d;
 import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.animal.Chicken;
-import net.minecraft.world.entity.animal.Panda;
-import net.minecraft.world.entity.monster.piglin.Piglin;
-import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
 import net.minecraftforge.client.event.DrawSelectionEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -49,6 +47,9 @@ public class CursorClientVanillaEvents {
     private static Vector3d cursorPosNear = new Vector3d(0,0,0);
     private static Vector3d cursorPosFar = new Vector3d(0,0,0);
     private static Vector3d lookVector = new Vector3d(0,0,0);
+    // pos of cursor on screen for box selections
+    private static Vec2 leftClickDownPos = new Vec2(0,0);
+    private static Vec2 leftClickDragPos = new Vec2(0,0);
     // entity moused over, vs entity selected by clicking
     private static Chicken mousedEntity = null;
     private static Chicken selectedEntity = null;
@@ -89,6 +90,8 @@ public class CursorClientVanillaEvents {
         // ************************************
         // Calculate cursor position on screen
         // ************************************
+
+        // TODO: convert this to a reusable function
 
         // at winHeight=240, zoom=10, screen is 20 blocks high, so PTB=240/20=24
         float pixelsToBlocks = winHeight / zoom;
@@ -144,7 +147,7 @@ public class CursorClientVanillaEvents {
                 Vec3 vectorNear = new Vec3(cursorPosNear.x, cursorPosNear.y, cursorPosNear.z);
                 Vec3 vectorFar = new Vec3(cursorPosFar.x, cursorPosFar.y, cursorPosFar.z);
 
-                HitResult hitResult = MC.level.clip(new ClipContext(vectorNear, vectorFar, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, null));
+                HitResult hitResult = MC.level.clip(new ClipContext(vectorNear, vectorFar, ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, null));
                 Vec3 hitPos = hitResult.getLocation().add(new Vec3(0,-0.001,0));
                 mousedBlockPos = new BlockPos(hitPos);
 
@@ -187,6 +190,19 @@ public class CursorClientVanillaEvents {
         }
     }
 
+    // TODO: draw box selection rectangle
+    @SubscribeEvent
+    public static void renderOverlay(RenderGameOverlayEvent.Post evt) {
+        // x1,y1, x2,y2,
+
+        GuiComponent.fill(evt.getMatrixStack(),
+                Math.round(leftClickDownPos.x),
+                Math.round(leftClickDownPos.y),
+                Math.round(leftClickDragPos.x),
+                Math.round(leftClickDragPos.y),
+                0x0341e868); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
+    }
+
     @SubscribeEvent
     public static void onMobDeath(EntityLeaveWorldEvent evt) {
         if (mousedEntity != null && evt.getEntity().getId() == mousedEntity.getId())
@@ -201,6 +217,8 @@ public class CursorClientVanillaEvents {
 
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            leftClickDownPos = new Vec2((float) evt.getMouseX(), (float) evt.getMouseY());
+            leftClickDragPos = new Vec2((float) evt.getMouseX(), (float) evt.getMouseY());
             leftClickDown = true;
             if (mousedEntity != null)
                 selectedEntity = mousedEntity;
@@ -216,6 +234,18 @@ public class CursorClientVanillaEvents {
             }
         }
     }
+
+    @SubscribeEvent
+    public static void onMouseDrag(GuiScreenEvent.MouseDragEvent evt) {
+        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
+
+        // select a moused over entity by left clicking it
+        if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            leftClickDown = false;
+            leftClickDragPos = new Vec2((float) evt.getMouseX(), (float) evt.getMouseY());
+        }
+    }
+
     @SubscribeEvent
     public static void onMouseRelease(GuiScreenEvent.MouseReleasedEvent evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
@@ -223,6 +253,11 @@ public class CursorClientVanillaEvents {
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             leftClickDown = false;
+            leftClickDownPos = new Vec2(0,0);
+            leftClickDragPos = new Vec2(0,0);
+
+            // TODO: enact box select
+
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             rightClickDown = false;
@@ -243,13 +278,12 @@ public class CursorClientVanillaEvents {
                 drawEntityOutline(evt.getMatrixStack(), selectedEntity, 1.0f);
             if (mousedEntity != null)
                 drawEntityOutline(evt.getMatrixStack(), mousedEntity, 0.5f);
-            else if (!OrthoviewClientVanillaEvents.isCameraMovingByMouse()) {
+            else if (!OrthoviewClientVanillaEvents.isCameraMovingByMouse() && shouldDrawBlockOutline()) {
                 if (rightClickDown)
                     drawBlockOutline(evt.getMatrixStack(), mousedBlockPos, 1.0f);
                 else
                     drawBlockOutline(evt.getMatrixStack(), mousedBlockPos, 0.5f);
             }
-
         }
     }
 
@@ -261,6 +295,11 @@ public class CursorClientVanillaEvents {
             mousedEntity = null;
         if (selectedEntity != null && selectedEntity.getId() == entity.getId())
             selectedEntity = null;
+    }
+
+    // don't draw block outline if we are box selecting and only if we have an entity selected
+    private static boolean shouldDrawBlockOutline() {
+        return !leftClickDown && selectedEntity != null;
     }
 
     private static BlockPos refineBlockPos(BlockPos bp) {
@@ -301,8 +340,8 @@ public class CursorClientVanillaEvents {
 
         for (int i = 0; i < blocks.size(); i++) {
             BlockPos block = blocks.get(i);
-            double dist = new Vec3(0,0,0)
-                    .distanceTo(new Vec3(0,0,0));
+            double dist = new Vec3(block.getX(), block.getY(), block.getZ())
+                    .distanceTo(new Vec3(cursorPosNear.x, cursorPosNear.y, cursorPosNear.z));
             if (MC.level.getBlockState(block).getMaterial().isSolidBlocking()
                     && rayIntersectsAABBCustom(cursorPosNear, lookVector, new AABB(block))
                     && dist < smallestDist ) {
@@ -361,6 +400,7 @@ public class CursorClientVanillaEvents {
         matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
         LevelRenderer.renderLineBox(matrixStack, vertexConsumer, aabb, 1.0f, 1.0f, 1.0f, alpha);
         matrixStack.popPose();
+
     }
 }
 
