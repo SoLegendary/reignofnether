@@ -29,7 +29,6 @@ import static net.minecraft.util.Mth.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * Handler that implements and manages screen-to-world translations of the cursor and block/entity selection
@@ -89,7 +88,7 @@ public class CursorClientVanillaEvents {
                 cursorWorldPos.y,
                 cursorWorldPos.z
         );
-        cursorWorldPos = convertScreenPosToWorldPos(evt.getMouseX(), evt.getMouseY());
+        cursorWorldPos = screenPosToWorldPos(evt.getMouseX(), evt.getMouseY());
 
         // calc near and far cursorWorldPos to get a cursor line vector
         Vector3d lookVector = getPlayerLookVector();
@@ -190,27 +189,48 @@ public class CursorClientVanillaEvents {
 
             Vector3d lookVector = getPlayerLookVector();
 
-            System.out.println(cursorLeftClickPos.x + " " + cursorLeftClickPos.y);
-            System.out.println(cursorPos.x + " " + cursorPos.y);
+            // can't use AABB here as it's always axis-aligned (ie. no camera-rotation)
+            // instead, improvise our own quad
+            // https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
 
-            // TODO: for some reason the AABB doesnt get assigned properly
+            // calculate 4 vertices
+            Vector3d worldPosTL = screenPosToWorldPos((int) cursorLeftClickPos.x, (int) cursorLeftClickPos.y); // top-left
+            Vector3d worldPosBL = screenPosToWorldPos((int) cursorLeftClickPos.x, (int) cursorPos.y); // bottom-left
+            Vector3d worldPosBR = screenPosToWorldPos((int) cursorPos.x, (int) cursorPos.y); // bottom-right
 
-            Vector3d startWorldPos = convertScreenPosToWorldPos((int) cursorLeftClickPos.x, (int) cursorLeftClickPos.y);
-            startWorldPos = addVector3d(startWorldPos, lookVector, -100);
-            boxSelectAABB.setMaxX(startWorldPos.x);
-            boxSelectAABB.setMaxY(startWorldPos.y);
-            boxSelectAABB.setMaxZ(startWorldPos.z);
+            Vector3d vp5 = addVector3d(worldPosTL, lookVector, -100);
+            Vector3d vp1 = addVector3d(worldPosBL, lookVector, -100);
+            Vector3d vp4 = addVector3d(worldPosBR, lookVector, -100);
+            Vector3d vp2 = addVector3d(worldPosBL, lookVector, 100);
 
-            Vector3d endWorldPos = convertScreenPosToWorldPos((int) cursorPos.x, (int) cursorPos.y);
-            endWorldPos = addVector3d(endWorldPos, lookVector, 100);
-            boxSelectAABB.setMinX(endWorldPos.x);
-            boxSelectAABB.setMinY(endWorldPos.y);
-            boxSelectAABB.setMinZ(endWorldPos.z);
+            // convert all to Vec3s so we can do math without modifying in-place
+            Vec3 p5 = new Vec3(vp5.x, vp5.y, vp5.z);
+            Vec3 p1 = new Vec3(vp1.x, vp1.y, vp1.z);
+            Vec3 p4 = new Vec3(vp4.x, vp4.y, vp4.z);
+            Vec3 p2 = new Vec3(vp2.x, vp2.y, vp2.z);
+            Vec3 x = new Vec3(342,65,-282);
 
+            Vec3 u = p1.subtract(p4).cross(p1.subtract(p5));
+            Vec3 v = p1.subtract(p2).cross(p1.subtract(p5));
+            Vec3 w = p1.subtract(p2).cross(p1.subtract(p4));
 
-            System.out.println(boxSelectAABB);
+            double ux = u.dot(x);
+            double vx = v.dot(x);
+            double wx = w.dot(x);
+
+            if (isBetween(u.dot(p1), ux, u.dot(p2)) &&
+                isBetween(v.dot(p1), vx, v.dot(p4)) &&
+                isBetween(w.dot(p1), wx, w.dot(p5))) {
+
+            }
         }
     }
+
+    // returns whether b is between a and c
+    private static boolean isBetween(double a, double b, double c) {
+        return (a <= b && b <= c) || (a >= b && b >= c);
+    }
+
 
     @SubscribeEvent
     public static void onMouseRelease(GuiScreenEvent.MouseReleasedEvent evt) {
@@ -249,6 +269,8 @@ public class CursorClientVanillaEvents {
                 else
                     drawBlockOutline(evt.getMatrixStack(), preselectedBlockPos, 0.5f);
             }
+
+            drawOutline(evt.getMatrixStack(), boxSelectAABB, 1.0f);
         }
     }
 
@@ -271,7 +293,7 @@ public class CursorClientVanillaEvents {
     }
 
     // converts
-    public static Vector3d convertScreenPosToWorldPos(int mouseX, int mouseY) {
+    public static Vector3d screenPosToWorldPos(int mouseX, int mouseY) {
         int winWidth = MC.getWindow().getGuiScaledWidth();
         int winHeight = MC.getWindow().getGuiScaledHeight();
 
