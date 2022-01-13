@@ -7,6 +7,8 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
+
+import java.util.ArrayList;
 import java.util.EnumSet;
 
 public class MoveToCursorBlockGoal extends Goal {
@@ -25,15 +27,17 @@ public class MoveToCursorBlockGoal extends Goal {
 
     // only use if the target pos is close enough and the mob is selected
     public boolean canUse() {
-        PathfinderMob selectedMob = CursorClientVanillaEvents.getSelectedEntity();
-        BlockPos bp = CursorClientVanillaEvents.getSelectedBlockPos();
-        if (selectedMob != null) {
-            BlockPos mobbp = this.mob.blockPosition();
-            int dist = bp.distManhattan(new Vec3i(mobbp.getX(), mobbp.getY()-1, mobbp.getZ()));
-            return dist <= maxDist && mob.getId() == selectedMob.getId();
+        ArrayList<PathfinderMob> selectedUnits = CursorClientVanillaEvents.getSelectedUnits();
+
+        for (PathfinderMob unit : selectedUnits) {
+            if (unit.getId() == mob.getId()) {
+                BlockPos bp = CursorClientVanillaEvents.getSelectedBlockPos();
+                BlockPos mobbp = this.mob.blockPosition();
+                int dist = bp.distManhattan(new Vec3i(mobbp.getX(), mobbp.getY()-1, mobbp.getZ()));
+                return dist <= maxDist;
+            }
         }
-        else
-            return false;
+        return false;
     }
 
     public boolean canContinueToUse() {

@@ -11,13 +11,14 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
 import net.minecraftforge.client.event.DrawSelectionEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -46,11 +47,12 @@ public class CursorClientVanillaEvents {
     private static Vector3d cursorWorldPos = new Vector3d(0,0,0);
     private static Vector3d cursorWorldPosLast = new Vector3d(0,0,0);
     // pos of cursor on screen for box selections
-    private static Vec2 cursorLeftClickPos = new Vec2(0,0);
+    private static Vec2 cursorLeftClickDownPos = new Vec2(0,0);
+    private static Vec2 cursorLeftClickDragPos = new Vec2(0,0);
     private static Vec2 cursorPos = new Vec2(0,0);
     // entity moused over, vs entity selected by clicking
-    private static Chicken preselectedEntity = null;
-    private static Chicken selectedEntity = null;
+    private static ArrayList<PathfinderMob> preselectedUnits = new ArrayList<>();
+    private static ArrayList<PathfinderMob> selectedUnits = new ArrayList<>();
 
     private static AABB boxSelectAABB = new AABB(0,0,0,0,0,0);
 
@@ -59,11 +61,11 @@ public class CursorClientVanillaEvents {
     public static Vector3d getCursorWorldPos() {
         return cursorWorldPos;
     }
-    public static Chicken getPreselectedEntity() {
-        return preselectedEntity;
+    public static ArrayList<PathfinderMob> getPreselectedUnits() {
+        return preselectedUnits;
     }
-    public static Chicken getSelectedEntity() {
-        return selectedEntity;
+    public static ArrayList<PathfinderMob> getSelectedUnits() {
+        return selectedUnits;
     }
     public static BlockPos getPreselectedBlockPos() {
         return preselectedBlockPos;
@@ -76,7 +78,7 @@ public class CursorClientVanillaEvents {
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
-        cursorPos = new Vec2((float) evt.getMouseX(), (float) evt.getMouseY());
+        cursorPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
 
         if (MC.player == null || MC.level == null) return;
 
@@ -92,8 +94,8 @@ public class CursorClientVanillaEvents {
 
         // calc near and far cursorWorldPos to get a cursor line vector
         Vector3d lookVector = getPlayerLookVector();
-        Vector3d cursorWorldPosNear = addVector3d(cursorWorldPos, lookVector, -100);
-        Vector3d cursorWorldPosFar = addVector3d(cursorWorldPos, lookVector, 100);
+        Vector3d cursorWorldPosNear = addVector3d(cursorWorldPos, lookVector, -200);
+        Vector3d cursorWorldPosFar = addVector3d(cursorWorldPos, lookVector, 200);
 
         // only spend time doing refining calcs for if we actually moved the cursor (or if this is the first time)
         if (cursorWorldPos.x != cursorWorldPosLast.x || cursorWorldPos.y != cursorWorldPosLast.y || cursorWorldPos.z != cursorWorldPosLast.z) {
@@ -115,23 +117,71 @@ public class CursorClientVanillaEvents {
         // Find entity moused over and/or selected
         // ****************************************
         AABB aabb = new AABB(
-                cursorWorldPos.x - 5,
-                cursorWorldPos.y - 5,
-                cursorWorldPos.z - 5,
-                cursorWorldPos.x + 5,
-                cursorWorldPos.y + 5,
-                cursorWorldPos.z + 5
+                cursorWorldPos.x - 200,
+                cursorWorldPos.y - 200,
+                cursorWorldPos.z - 200,
+                cursorWorldPos.x + 200,
+                cursorWorldPos.y + 200,
+                cursorWorldPos.z + 200
         );
-        List<Chicken> entities = MC.level.getEntitiesOfClass(Chicken.class, aabb);
+        List<PathfinderMob> entities = MC.level.getEntitiesOfClass(PathfinderMob.class, aabb);
 
-        preselectedEntity = null;
+        preselectedUnits = new ArrayList<>();
 
-        for (Chicken entity : entities) {
+        for (PathfinderMob entity : entities) {
             // inflate by set amount to improve click accuracy
             AABB entityaabb = entity.getBoundingBox().inflate(0.1);
 
             if (rayIntersectsAABBCustom(cursorWorldPosNear, getPlayerLookVector(), entityaabb)) {
-                preselectedEntity = entity;
+                preselectedUnits.add(entity);
+                break; // only allow one moused unit at a time
+            }
+        }
+
+        // *******************************
+        // Calculate box-preselected units
+        // *******************************
+        // weird bug when downPos == dragPos makes random entities get selected by this algorithm
+        float dist = cursorLeftClickDownPos.distanceToSqr(cursorLeftClickDragPos);
+
+        if (leftClickDown && dist > 0 && !Keybinds.shiftMod.isDown()) {
+
+            // can't use AABB here as it's always axis-aligned (ie. no camera-rotation)
+            // instead, improvise our own quad
+            // https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
+
+            // calculate 4 vertices
+            Vector3d worldPosTL = screenPosToWorldPos((int) cursorLeftClickDownPos.x, (int) cursorLeftClickDownPos.y); // top-left
+            Vector3d worldPosBL = screenPosToWorldPos((int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y); // bottom-left
+            Vector3d worldPosBR = screenPosToWorldPos((int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y); // bottom-right
+
+            Vector3d vp5 = addVector3d(worldPosTL, lookVector, -200);
+            Vector3d vp1 = addVector3d(worldPosBL, lookVector, -200);
+            Vector3d vp4 = addVector3d(worldPosBR, lookVector, -200);
+            Vector3d vp2 = addVector3d(worldPosBL, lookVector, 200);
+
+            // convert all to Vec3s so we can do math without modifying in-place
+            Vec3 p5 = new Vec3(vp5.x, vp5.y, vp5.z);
+            Vec3 p1 = new Vec3(vp1.x, vp1.y, vp1.z);
+            Vec3 p4 = new Vec3(vp4.x, vp4.y, vp4.z);
+            Vec3 p2 = new Vec3(vp2.x, vp2.y, vp2.z);
+
+            Vec3 u = p1.subtract(p4).cross(p1.subtract(p5));
+            Vec3 v = p1.subtract(p2).cross(p1.subtract(p5));
+            Vec3 w = p1.subtract(p2).cross(p1.subtract(p4));
+
+            for (PathfinderMob entity : entities) {
+                Vec3 x = entity.getBoundingBox().getCenter();
+
+                double ux = u.dot(x);
+                double vx = v.dot(x);
+                double wx = w.dot(x);
+
+                if (isBetween(u.dot(p1), ux, u.dot(p2)) &&
+                    isBetween(v.dot(p1), vx, v.dot(p4)) &&
+                    isBetween(w.dot(p1), wx, w.dot(p5))) {
+                    preselectedUnits.add(entity);
+                }
             }
         }
     }
@@ -141,87 +191,34 @@ public class CursorClientVanillaEvents {
     public static void renderOverlay(RenderGameOverlayEvent.Post evt) {
         if (leftClickDown && !Keybinds.shiftMod.isDown()) {
             GuiComponent.fill(evt.getMatrixStack(), // x1,y1, x2,y2,
-                    Math.round(cursorLeftClickPos.x),
-                    Math.round(cursorLeftClickPos.y),
-                    Math.round(cursorPos.x),
-                    Math.round(cursorPos.y),
+                    Math.round(cursorLeftClickDownPos.x),
+                    Math.round(cursorLeftClickDownPos.y),
+                    Math.round(cursorLeftClickDragPos.x),
+                    Math.round(cursorLeftClickDragPos.y),
                     0x0341e868); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
     }
 
     @SubscribeEvent
-    public static void onMobDeath(EntityLeaveWorldEvent evt) {
-        if (preselectedEntity != null && evt.getEntity().getId() == preselectedEntity.getId())
-            preselectedEntity = null;
-        if (selectedEntity != null && evt.getEntity().getId() == selectedEntity.getId())
-            selectedEntity = null;
-    }
-
-    @SubscribeEvent
-    public static void onMouseClick(GuiScreenEvent.MouseClickedEvent evt) {
+    public static void onMouseClick(GuiScreenEvent.MouseClickedEvent.Post evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-            cursorLeftClickPos = new Vec2((float) evt.getMouseX(), (float) evt.getMouseY());
+            cursorLeftClickDownPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
+            cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
             leftClickDown = true;
-            if (preselectedEntity != null)
-                selectedEntity = preselectedEntity;
-            else
-                selectedEntity = null;
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             rightClickDown = true;
 
-            if (selectedEntity != null) {
+            // TODO: various fixes:
+            // 1. mobs always want to finish moving to the first block if moved again before they finish their journey
+            // 2. MoveToCursorBlockGoal should have targetBlockPos as a field (or newly selected mobs move to the same spot without being told)
+            // 3. improve performance of movement and selection in general
+            if (selectedUnits != null) {
                 selectedBlockPos = preselectedBlockPos;
-                System.out.println("Moving chicken (id " + selectedEntity.getId() + ") to " + selectedBlockPos);
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onMouseDrag(GuiScreenEvent.MouseDragEvent evt) {
-        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
-
-        // box select update AABB vertices
-        if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && !Keybinds.shiftMod.isDown()) {
-
-            Vector3d lookVector = getPlayerLookVector();
-
-            // can't use AABB here as it's always axis-aligned (ie. no camera-rotation)
-            // instead, improvise our own quad
-            // https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
-
-            // calculate 4 vertices
-            Vector3d worldPosTL = screenPosToWorldPos((int) cursorLeftClickPos.x, (int) cursorLeftClickPos.y); // top-left
-            Vector3d worldPosBL = screenPosToWorldPos((int) cursorLeftClickPos.x, (int) cursorPos.y); // bottom-left
-            Vector3d worldPosBR = screenPosToWorldPos((int) cursorPos.x, (int) cursorPos.y); // bottom-right
-
-            Vector3d vp5 = addVector3d(worldPosTL, lookVector, -100);
-            Vector3d vp1 = addVector3d(worldPosBL, lookVector, -100);
-            Vector3d vp4 = addVector3d(worldPosBR, lookVector, -100);
-            Vector3d vp2 = addVector3d(worldPosBL, lookVector, 100);
-
-            // convert all to Vec3s so we can do math without modifying in-place
-            Vec3 p5 = new Vec3(vp5.x, vp5.y, vp5.z);
-            Vec3 p1 = new Vec3(vp1.x, vp1.y, vp1.z);
-            Vec3 p4 = new Vec3(vp4.x, vp4.y, vp4.z);
-            Vec3 p2 = new Vec3(vp2.x, vp2.y, vp2.z);
-            Vec3 x = new Vec3(342,65,-282);
-
-            Vec3 u = p1.subtract(p4).cross(p1.subtract(p5));
-            Vec3 v = p1.subtract(p2).cross(p1.subtract(p5));
-            Vec3 w = p1.subtract(p2).cross(p1.subtract(p4));
-
-            double ux = u.dot(x);
-            double vx = v.dot(x);
-            double wx = w.dot(x);
-
-            if (isBetween(u.dot(p1), ux, u.dot(p2)) &&
-                isBetween(v.dot(p1), vx, v.dot(p4)) &&
-                isBetween(w.dot(p1), wx, w.dot(p5))) {
-
+                System.out.println("Moving selected units to " + selectedBlockPos);
             }
         }
     }
@@ -231,18 +228,33 @@ public class CursorClientVanillaEvents {
         return (a <= b && b <= c) || (a >= b && b >= c);
     }
 
-
     @SubscribeEvent
-    public static void onMouseRelease(GuiScreenEvent.MouseReleasedEvent evt) {
+    public static void onMouseDrag(GuiScreenEvent.MouseDragEvent.Pre evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
+
+        cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
+    }
+    @SubscribeEvent
+    public static void onMouseRelease(GuiScreenEvent.MouseReleasedEvent.Post evt) {
+        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
+
 
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             leftClickDown = false;
-            cursorLeftClickPos = new Vec2(0,0);
 
-            // TODO: enact box select
+            // enact selection
+            selectedUnits = (ArrayList<PathfinderMob>) preselectedUnits.clone();
 
+            if (selectedUnits.size() > 0) {
+                System.out.println(" ");
+                System.out.println("downPos: " + cursorLeftClickDownPos.x + " " + cursorLeftClickDownPos.y);
+                System.out.println("dragPos: " + cursorLeftClickDragPos.x + " " + cursorLeftClickDragPos.y);
+                System.out.println("cursorPos: " + cursorPos.x + " " + cursorPos.y);
+            }
+
+            cursorLeftClickDownPos = new Vec2(0,0);
+            cursorLeftClickDragPos = new Vec2(0,0);
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             rightClickDown = false;
@@ -259,29 +271,37 @@ public class CursorClientVanillaEvents {
     @SubscribeEvent
     public static void onRenderWorld(RenderWorldLastEvent evt) {
         if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled()) {
-            if (selectedEntity != null)
-                drawEntityOutline(evt.getMatrixStack(), selectedEntity, 1.0f);
-            if (preselectedEntity != null)
-                drawEntityOutline(evt.getMatrixStack(), preselectedEntity, 0.5f);
-            else if (!OrthoviewClientVanillaEvents.isCameraMovingByMouse() && shouldDrawBlockOutline()) {
+            if (selectedUnits != null) {
+                for (PathfinderMob unit : selectedUnits)
+                    drawEntityOutline(evt.getMatrixStack(), unit, 1.0f);
+            }
+            if (preselectedUnits != null) {
+                for (PathfinderMob unit : preselectedUnits)
+                    drawEntityOutline(evt.getMatrixStack(), unit, 0.5f);
+            }
+            if (!OrthoviewClientVanillaEvents.isCameraMovingByMouse() && shouldDrawBlockOutline()) {
                 if (rightClickDown)
-                    drawBlockOutline(evt.getMatrixStack(), preselectedBlockPos, 1.0f);
-                else
+                    drawBlockOutline(evt.getMatrixStack(), selectedBlockPos, 1.0f);
+                if (selectedUnits.size() > 0)
                     drawBlockOutline(evt.getMatrixStack(), preselectedBlockPos, 0.5f);
             }
-
             drawOutline(evt.getMatrixStack(), boxSelectAABB, 1.0f);
         }
     }
 
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveWorldEvent evt) {
-        Entity entity = evt.getEntity();
+        int entityId = evt.getEntity().getId();
+        preselectedUnits.removeIf(e -> e.getId() == entityId);
+        selectedUnits.removeIf(e -> e.getId() == entityId);
+    }
 
-        if (preselectedEntity != null && preselectedEntity.getId() == entity.getId())
-            preselectedEntity = null;
-        if (selectedEntity != null && selectedEntity.getId() == entity.getId())
-            selectedEntity = null;
+    @SubscribeEvent
+    public static void onWorldTick(TickEvent.WorldTickEvent evt) {
+        //System.out.println(" ");
+        //System.out.println("downPos: " + cursorLeftClickDownPos.x + " " + cursorLeftClickDownPos.y);
+        //System.out.println("dragPos: " + cursorLeftClickDragPos.x + " " + cursorLeftClickDragPos.y);
+        //System.out.println("cursorPos: " + cursorPos.x + " " + cursorPos.y);
     }
 
     // gets the unit vector in the direction of player facing (same as camera)
@@ -319,14 +339,14 @@ public class CursorClientVanillaEvents {
     }
 
     // returns vec3d with a set amount of the given unit vector added to it
-    private static Vector3d addVector3d(Vector3d vec3d, Vector3d unitVec3d, float scale) {
-        Vector3d unitVec3dLocal = new Vector3d(0,0,0);
-        unitVec3dLocal.set(unitVec3d);
-        unitVec3dLocal.scale(scale);
-        Vector3d vec3dLocal = new Vector3d(0,0,0);
-        vec3dLocal.set(vec3d);
-        vec3dLocal.add(unitVec3dLocal);
-        return vec3dLocal;
+    private static Vector3d addVector3d(Vector3d vec, Vector3d unitVec, float scale) {
+        Vector3d unitVecLocal = new Vector3d(0,0,0);
+        unitVecLocal.set(unitVec);
+        unitVecLocal.scale(scale);
+        Vector3d vecLocal = new Vector3d(0,0,0);
+        vecLocal.set(vec);
+        vecLocal.add(unitVecLocal);
+        return vecLocal;
     }
 
     // returns the exact spot that the cursorWorldPos ray meets a solid block
@@ -341,7 +361,7 @@ public class CursorClientVanillaEvents {
 
     // don't draw block outline if we are box selecting and only if we have an entity selected
     private static boolean shouldDrawBlockOutline() {
-        return !leftClickDown && selectedEntity != null;
+        return !leftClickDown && selectedUnits != null;
     }
 
     private static BlockPos getRefinedBlockPos(BlockPos bp, Vector3d cursorWorldPosNear) {

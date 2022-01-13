@@ -1,19 +1,11 @@
 package com.solegendary.ageofcraft.units;
 
-import com.solegendary.ageofcraft.cursor.CursorClientVanillaEvents;
-import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import com.solegendary.ageofcraft.units.goals.MoveToCursorBlockGoal;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.animal.Chicken;
-import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Set;
