@@ -22,7 +22,7 @@ public class CursorCommonVanillaEvents {
         ServerLevel world = (ServerLevel) evt.world;
 
         // on startup, remove all existing cursorEntities and create a new one
-        if (!evt.world.isClientSide() && cursorEntity == null)
+        if (!world.isClientSide() && cursorEntity == null)
             cursorEntity = EntityType.ARMOR_STAND.create(world);
 
         if (cursorEntity != null) {

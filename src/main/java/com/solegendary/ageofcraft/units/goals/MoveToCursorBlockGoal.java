@@ -1,6 +1,7 @@
 package com.solegendary.ageofcraft.units.goals;
 
 import com.solegendary.ageofcraft.cursor.CursorClientVanillaEvents;
+import com.solegendary.ageofcraft.units.UnitCommonVanillaEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.PathfinderMob;
@@ -17,6 +18,7 @@ public class MoveToCursorBlockGoal extends Goal {
     private final double speedModifier;
     private final Level level;
     private final int maxDist = 20;
+    private BlockPos targetBp = null;
 
     public MoveToCursorBlockGoal(PathfinderMob mob, double speedModifier) {
         this.mob = mob;
@@ -27,13 +29,12 @@ public class MoveToCursorBlockGoal extends Goal {
 
     // only use if the target pos is close enough and the mob is selected
     public boolean canUse() {
-        ArrayList<PathfinderMob> selectedUnits = CursorClientVanillaEvents.getSelectedUnits();
+        ArrayList<PathfinderMob> selectedUnits = UnitCommonVanillaEvents.getSelectedUnits();
 
         for (PathfinderMob unit : selectedUnits) {
-            if (unit.getId() == mob.getId()) {
-                BlockPos bp = CursorClientVanillaEvents.getSelectedBlockPos();
+            if (unit.getId() == mob.getId() && targetBp != null) {
                 BlockPos mobbp = this.mob.blockPosition();
-                int dist = bp.distManhattan(new Vec3i(mobbp.getX(), mobbp.getY()-1, mobbp.getZ()));
+                int dist = targetBp.distManhattan(new Vec3i(mobbp.getX(), mobbp.getY()-1, mobbp.getZ()));
                 return dist <= maxDist;
             }
         }
@@ -45,10 +46,14 @@ public class MoveToCursorBlockGoal extends Goal {
     }
 
     public void start() {
-        BlockPos bp = CursorClientVanillaEvents.getSelectedBlockPos();
+        if (targetBp != null) {
+            // move to exact goal instead of 1 block away
+            Path path = mob.getNavigation().createPath(targetBp.getX(), targetBp.getY(), targetBp.getZ(), 0);
+            this.mob.getNavigation().moveTo(path, speedModifier);
+        }
+    }
 
-        // move to exact goal instead of 1 block away
-        Path path = mob.getNavigation().createPath(bp.getX(), bp.getY(), bp.getZ(),0);
-        this.mob.getNavigation().moveTo(path, speedModifier);
+    public void setNewTargetBp(BlockPos bp) {
+        this.targetBp = bp;
     }
 }

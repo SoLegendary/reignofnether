@@ -5,6 +5,10 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3d;
 import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import com.solegendary.ageofcraft.registrars.Keybinds;
+import com.solegendary.ageofcraft.units.UnitCommonVanillaEvents;
+import com.solegendary.ageofcraft.units.goals.MoveToCursorBlockGoal;
+import com.solegendary.ageofcraft.util.MyMath;
+import com.solegendary.ageofcraft.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -12,6 +16,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
 import net.minecraftforge.client.event.DrawSelectionEvent;
@@ -40,9 +45,8 @@ public class CursorClientVanillaEvents {
     private static boolean rightClickDown = false;
 
     // pos of block moused over or inside a box select
+    // currently blocks are not fully selectable
     private static BlockPos preselectedBlockPos = new BlockPos(0,0,0);
-    // pos of block selected by right click (to move units to)
-    private static BlockPos selectedBlockPos = new BlockPos(0,0,0);
     // pos of cursor exactly on: first non-air block, last frame, near to screen, far from screen
     private static Vector3d cursorWorldPos = new Vector3d(0,0,0);
     private static Vector3d cursorWorldPosLast = new Vector3d(0,0,0);
@@ -50,9 +54,7 @@ public class CursorClientVanillaEvents {
     private static Vec2 cursorLeftClickDownPos = new Vec2(0,0);
     private static Vec2 cursorLeftClickDragPos = new Vec2(0,0);
     private static Vec2 cursorPos = new Vec2(0,0);
-    // entity moused over, vs entity selected by clicking
-    private static ArrayList<PathfinderMob> preselectedUnits = new ArrayList<>();
-    private static ArrayList<PathfinderMob> selectedUnits = new ArrayList<>();
+
 
     private static AABB boxSelectAABB = new AABB(0,0,0,0,0,0);
 
@@ -61,17 +63,8 @@ public class CursorClientVanillaEvents {
     public static Vector3d getCursorWorldPos() {
         return cursorWorldPos;
     }
-    public static ArrayList<PathfinderMob> getPreselectedUnits() {
-        return preselectedUnits;
-    }
-    public static ArrayList<PathfinderMob> getSelectedUnits() {
-        return selectedUnits;
-    }
     public static BlockPos getPreselectedBlockPos() {
         return preselectedBlockPos;
-    }
-    public static BlockPos getSelectedBlockPos() {
-        return selectedBlockPos;
     }
 
     @SubscribeEvent
@@ -94,8 +87,8 @@ public class CursorClientVanillaEvents {
 
         // calc near and far cursorWorldPos to get a cursor line vector
         Vector3d lookVector = getPlayerLookVector();
-        Vector3d cursorWorldPosNear = addVector3d(cursorWorldPos, lookVector, -200);
-        Vector3d cursorWorldPosFar = addVector3d(cursorWorldPos, lookVector, 200);
+        Vector3d cursorWorldPosNear = MyMath.addVector3d(cursorWorldPos, lookVector, -200);
+        Vector3d cursorWorldPosFar = MyMath.addVector3d(cursorWorldPos, lookVector, 200);
 
         // only spend time doing refining calcs for if we actually moved the cursor (or if this is the first time)
         if (cursorWorldPos.x != cursorWorldPosLast.x || cursorWorldPos.y != cursorWorldPosLast.y || cursorWorldPos.z != cursorWorldPosLast.z) {
@@ -126,14 +119,14 @@ public class CursorClientVanillaEvents {
         );
         List<PathfinderMob> entities = MC.level.getEntitiesOfClass(PathfinderMob.class, aabb);
 
-        preselectedUnits = new ArrayList<>();
+        UnitCommonVanillaEvents.setPreselectedUnits(new ArrayList<>());
 
         for (PathfinderMob entity : entities) {
             // inflate by set amount to improve click accuracy
             AABB entityaabb = entity.getBoundingBox().inflate(0.1);
 
-            if (rayIntersectsAABBCustom(cursorWorldPosNear, getPlayerLookVector(), entityaabb)) {
-                preselectedUnits.add(entity);
+            if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, getPlayerLookVector(), entityaabb)) {
+                UnitCommonVanillaEvents.addPreselectedUnit(entity);
                 break; // only allow one moused unit at a time
             }
         }
@@ -155,10 +148,10 @@ public class CursorClientVanillaEvents {
             Vector3d worldPosBL = screenPosToWorldPos((int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y); // bottom-left
             Vector3d worldPosBR = screenPosToWorldPos((int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y); // bottom-right
 
-            Vector3d vp5 = addVector3d(worldPosTL, lookVector, -200);
-            Vector3d vp1 = addVector3d(worldPosBL, lookVector, -200);
-            Vector3d vp4 = addVector3d(worldPosBR, lookVector, -200);
-            Vector3d vp2 = addVector3d(worldPosBL, lookVector, 200);
+            Vector3d vp5 = MyMath.addVector3d(worldPosTL, lookVector, -200);
+            Vector3d vp1 = MyMath.addVector3d(worldPosBL, lookVector, -200);
+            Vector3d vp4 = MyMath.addVector3d(worldPosBR, lookVector, -200);
+            Vector3d vp2 = MyMath.addVector3d(worldPosBL, lookVector, 200);
 
             // convert all to Vec3s so we can do math without modifying in-place
             Vec3 p5 = new Vec3(vp5.x, vp5.y, vp5.z);
@@ -177,10 +170,10 @@ public class CursorClientVanillaEvents {
                 double vx = v.dot(x);
                 double wx = w.dot(x);
 
-                if (isBetween(u.dot(p1), ux, u.dot(p2)) &&
-                    isBetween(v.dot(p1), vx, v.dot(p4)) &&
-                    isBetween(w.dot(p1), wx, w.dot(p5))) {
-                    preselectedUnits.add(entity);
+                if (MyMath.isBetween(u.dot(p1), ux, u.dot(p2)) &&
+                    MyMath.isBetween(v.dot(p1), vx, v.dot(p4)) &&
+                    MyMath.isBetween(w.dot(p1), wx, w.dot(p5))) {
+                    UnitCommonVanillaEvents.addPreselectedUnit(entity);
                 }
             }
         }
@@ -211,21 +204,7 @@ public class CursorClientVanillaEvents {
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             rightClickDown = true;
-
-            // TODO: various fixes:
-            // 1. mobs always want to finish moving to the first block if moved again before they finish their journey
-            // 2. MoveToCursorBlockGoal should have targetBlockPos as a field (or newly selected mobs move to the same spot without being told)
-            // 3. improve performance of movement and selection in general
-            if (selectedUnits != null) {
-                selectedBlockPos = preselectedBlockPos;
-                System.out.println("Moving selected units to " + selectedBlockPos);
-            }
         }
-    }
-
-    // returns whether b is between a and c
-    private static boolean isBetween(double a, double b, double c) {
-        return (a <= b && b <= c) || (a >= b && b >= c);
     }
 
     @SubscribeEvent
@@ -238,21 +217,14 @@ public class CursorClientVanillaEvents {
     public static void onMouseRelease(GuiScreenEvent.MouseReleasedEvent.Post evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
-
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             leftClickDown = false;
 
             // enact selection
-            selectedUnits = (ArrayList<PathfinderMob>) preselectedUnits.clone();
-
-            if (selectedUnits.size() > 0) {
-                System.out.println(" ");
-                System.out.println("downPos: " + cursorLeftClickDownPos.x + " " + cursorLeftClickDownPos.y);
-                System.out.println("dragPos: " + cursorLeftClickDragPos.x + " " + cursorLeftClickDragPos.y);
-                System.out.println("cursorPos: " + cursorPos.x + " " + cursorPos.y);
-            }
-
+            UnitCommonVanillaEvents.setSelectedUnits(
+                    (ArrayList<PathfinderMob>) UnitCommonVanillaEvents.getPreselectedUnits().clone()
+            );
             cursorLeftClickDownPos = new Vec2(0,0);
             cursorLeftClickDragPos = new Vec2(0,0);
         }
@@ -271,37 +243,13 @@ public class CursorClientVanillaEvents {
     @SubscribeEvent
     public static void onRenderWorld(RenderWorldLastEvent evt) {
         if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled()) {
-            if (selectedUnits != null) {
-                for (PathfinderMob unit : selectedUnits)
-                    drawEntityOutline(evt.getMatrixStack(), unit, 1.0f);
+
+            if (!OrthoviewClientVanillaEvents.isCameraMovingByMouse() && !leftClickDown &&
+                 UnitCommonVanillaEvents.getSelectedUnits().size() > 0) {
+                MyRenderer.drawBlockOutline(evt.getMatrixStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }
-            if (preselectedUnits != null) {
-                for (PathfinderMob unit : preselectedUnits)
-                    drawEntityOutline(evt.getMatrixStack(), unit, 0.5f);
-            }
-            if (!OrthoviewClientVanillaEvents.isCameraMovingByMouse() && shouldDrawBlockOutline()) {
-                if (rightClickDown)
-                    drawBlockOutline(evt.getMatrixStack(), selectedBlockPos, 1.0f);
-                if (selectedUnits.size() > 0)
-                    drawBlockOutline(evt.getMatrixStack(), preselectedBlockPos, 0.5f);
-            }
-            drawOutline(evt.getMatrixStack(), boxSelectAABB, 1.0f);
+            MyRenderer.drawOutline(evt.getMatrixStack(), boxSelectAABB, 1.0f);
         }
-    }
-
-    @SubscribeEvent
-    public static void onEntityLeave(EntityLeaveWorldEvent evt) {
-        int entityId = evt.getEntity().getId();
-        preselectedUnits.removeIf(e -> e.getId() == entityId);
-        selectedUnits.removeIf(e -> e.getId() == entityId);
-    }
-
-    @SubscribeEvent
-    public static void onWorldTick(TickEvent.WorldTickEvent evt) {
-        //System.out.println(" ");
-        //System.out.println("downPos: " + cursorLeftClickDownPos.x + " " + cursorLeftClickDownPos.y);
-        //System.out.println("dragPos: " + cursorLeftClickDragPos.x + " " + cursorLeftClickDragPos.y);
-        //System.out.println("cursorPos: " + cursorPos.x + " " + cursorPos.y);
     }
 
     // gets the unit vector in the direction of player facing (same as camera)
@@ -338,17 +286,6 @@ public class CursorClientVanillaEvents {
         );
     }
 
-    // returns vec3d with a set amount of the given unit vector added to it
-    private static Vector3d addVector3d(Vector3d vec, Vector3d unitVec, float scale) {
-        Vector3d unitVecLocal = new Vector3d(0,0,0);
-        unitVecLocal.set(unitVec);
-        unitVecLocal.scale(scale);
-        Vector3d vecLocal = new Vector3d(0,0,0);
-        vecLocal.set(vec);
-        vecLocal.add(unitVecLocal);
-        return vecLocal;
-    }
-
     // returns the exact spot that the cursorWorldPos ray meets a solid block
     private static Vec3 getRefinedCursorWorldPos(Vector3d cursorWorldPosNear, Vector3d cursorWorldPosFar) {
         Vec3 vectorNear = new Vec3(cursorWorldPosNear.x, cursorWorldPosNear.y, cursorWorldPosNear.z);
@@ -357,11 +294,6 @@ public class CursorClientVanillaEvents {
         // clip() returns the point of clip, not the clipped block giving off-by-one errors so move slightly to compensate
         HitResult hitResult = MC.level.clip(new ClipContext(vectorNear, vectorFar, ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, null));
         return hitResult.getLocation().add(new Vec3(-0.001,-0.001,-0.001));
-    }
-
-    // don't draw block outline if we are box selecting and only if we have an entity selected
-    private static boolean shouldDrawBlockOutline() {
-        return !leftClickDown && selectedUnits != null;
     }
 
     private static BlockPos getRefinedBlockPos(BlockPos bp, Vector3d cursorWorldPosNear) {
@@ -406,64 +338,13 @@ public class CursorClientVanillaEvents {
             double dist = new Vec3(block.getX(), block.getY(), block.getZ())
                     .distanceTo(new Vec3(cursorWorldPosNear.x, cursorWorldPosNear.y, cursorWorldPosNear.z));
             if (MC.level.getBlockState(block).getMaterial().isSolidBlocking()
-                    && rayIntersectsAABBCustom(cursorWorldPosNear, lookVector, new AABB(block))
+                    && MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, lookVector, new AABB(block))
                     && dist < smallestDist ) {
                 smallestDist = dist;
                 bestBp = block;
             }
         }
         return bestBp;
-    }
-
-    private static boolean rayIntersectsAABBCustom(Vector3d origin, Vector3d rayVector, AABB aabb) {
-        // r.dir is unit direction vector of ray
-        Vector3d dirfrac = new Vector3d(
-                1.0f / rayVector.x,
-                1.0f / rayVector.y,
-                1.0f / rayVector.z
-        );
-        // lb is the corner of AABB with minimal coordinates - left bottom, rt is maximal corner
-        // r.org is origin of ray
-        float t1 = (float) ((aabb.minX - origin.x) * dirfrac.x);
-        float t2 = (float) ((aabb.maxX - origin.x) * dirfrac.x);
-        float t3 = (float) ((aabb.minY - origin.y) * dirfrac.y);
-        float t4 = (float) ((aabb.maxY - origin.y) * dirfrac.y);
-        float t5 = (float) ((aabb.minZ - origin.z) * dirfrac.z);
-        float t6 = (float) ((aabb.maxZ - origin.z) * dirfrac.z);
-
-        float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
-        float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
-
-        // if tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
-        // if (tmax < 0) return false;
-        // if tmin > tmax, ray doesn't intersect AABB
-        if (tmin > tmax) return false;
-
-        return true;
-    }
-
-    public static void drawBlockOutline(PoseStack matrixStack, BlockPos blockpos, float alpha) {
-        AABB aabb = new AABB(blockpos).move(0,0.01,0);
-        drawOutline(matrixStack, aabb, alpha);
-    }
-
-    public static void drawEntityOutline(PoseStack matrixStack, Entity entity, float alpha) {
-        drawOutline(matrixStack, entity.getBoundingBox(), alpha);
-    }
-
-    public static void drawOutline(PoseStack matrixStack, AABB aabb, float alpha) {
-        Entity camEntity = MC.getCameraEntity();
-        double d0 = camEntity.getX();
-        double d1 = camEntity.getY() + camEntity.getEyeHeight();
-        double d2 = camEntity.getZ();
-
-        RenderSystem.depthMask(false); // disable showing lines through blocks
-        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.lines());
-        matrixStack.pushPose();
-        matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
-        LevelRenderer.renderLineBox(matrixStack, vertexConsumer, aabb, 1.0f, 1.0f, 1.0f, alpha);
-        matrixStack.popPose();
-
     }
 }
 
