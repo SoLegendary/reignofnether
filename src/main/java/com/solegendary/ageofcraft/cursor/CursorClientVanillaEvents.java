@@ -1,38 +1,27 @@
 package com.solegendary.ageofcraft.cursor;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3d;
 import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import com.solegendary.ageofcraft.registrars.Keybinds;
+import com.solegendary.ageofcraft.units.Unit;
 import com.solegendary.ageofcraft.units.UnitCommonVanillaEvents;
-import com.solegendary.ageofcraft.units.goals.MoveToCursorBlockGoal;
 import com.solegendary.ageofcraft.util.MyMath;
 import com.solegendary.ageofcraft.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
 import net.minecraftforge.client.event.DrawSelectionEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
-import com.mojang.blaze3d.systems.RenderSystem;
-
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 import static net.minecraft.util.Mth.*;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,10 +42,6 @@ public class CursorClientVanillaEvents {
     // pos of cursor on screen for box selections
     private static Vec2 cursorLeftClickDownPos = new Vec2(0,0);
     private static Vec2 cursorLeftClickDragPos = new Vec2(0,0);
-    private static Vec2 cursorPos = new Vec2(0,0);
-
-
-    private static AABB boxSelectAABB = new AABB(0,0,0,0,0,0);
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -70,8 +55,6 @@ public class CursorClientVanillaEvents {
     @SubscribeEvent
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
-
-        cursorPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
 
         if (MC.player == null || MC.level == null) return;
 
@@ -221,10 +204,12 @@ public class CursorClientVanillaEvents {
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             leftClickDown = false;
 
-            // enact selection
-            UnitCommonVanillaEvents.setSelectedUnits(
-                    (ArrayList<PathfinderMob>) UnitCommonVanillaEvents.getPreselectedUnits().clone()
-            );
+            // enact selection, excluding non-unit mobs
+            UnitCommonVanillaEvents.setSelectedUnits(new ArrayList<>());
+            for (PathfinderMob mob : UnitCommonVanillaEvents.getPreselectedUnits()) {
+                if (mob instanceof Unit)
+                    UnitCommonVanillaEvents.addSelectedUnit(mob);
+            }
             cursorLeftClickDownPos = new Vec2(0,0);
             cursorLeftClickDragPos = new Vec2(0,0);
         }
@@ -245,10 +230,10 @@ public class CursorClientVanillaEvents {
         if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled()) {
 
             if (!OrthoviewClientVanillaEvents.isCameraMovingByMouse() && !leftClickDown &&
-                 UnitCommonVanillaEvents.getSelectedUnits().size() > 0) {
+                 UnitCommonVanillaEvents.getSelectedUnits().size() > 0 &&
+                 UnitCommonVanillaEvents.getPreselectedUnits().size() <= 0) {
                 MyRenderer.drawBlockOutline(evt.getMatrixStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }
-            MyRenderer.drawOutline(evt.getMatrixStack(), boxSelectAABB, 1.0f);
         }
     }
 
@@ -274,9 +259,9 @@ public class CursorClientVanillaEvents {
         float z = (mouseY - (float) winHeight / 2) / pixelsToBlocks;
 
         double camRotYRads = Math.toRadians(OrthoviewClientVanillaEvents.getCamRotY());
-        z = z / (float) (Math.sin(-camRotYRads));
+        z = z / (float) (Math.sin(camRotYRads));
 
-        Vec2 XZRotated = OrthoviewClientVanillaEvents.rotateCoords(x, z);
+        Vec2 XZRotated = MyMath.rotateCoords(x, z, OrthoviewClientVanillaEvents.getCamRotX());
 
         // for some reason position is off by some y coord so just move it down manually
         return new Vector3d(

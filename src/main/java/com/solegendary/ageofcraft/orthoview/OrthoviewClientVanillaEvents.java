@@ -1,6 +1,7 @@
 package com.solegendary.ageofcraft.orthoview;
 
 import com.solegendary.ageofcraft.gui.TopdownGuiCommonVanillaEvents;
+import com.solegendary.ageofcraft.util.MyMath;
 import net.minecraft.client.Minecraft;
 import com.solegendary.ageofcraft.registrars.Keybinds;
 import net.minecraft.world.entity.MoverType;
@@ -63,9 +64,9 @@ public class OrthoviewClientVanillaEvents {
     public static boolean isCameraMovingByMouse() { return cameraMovingByMouse; }
     public static float getZoom() { return zoom; }
     public static float getCamRotX() {
-        return camRotX;
+        return -camRotX - camRotAdjX;
     }
-    public static float getCamRotY() { return camRotY; }
+    public static float getCamRotY() { return -camRotY - camRotAdjY; }
 
     private static void reset() {
         zoom = 30;
@@ -94,16 +95,9 @@ public class OrthoviewClientVanillaEvents {
 
     public static void panCam(float x, float z) { // pan camera relative to rotation
         if (MC.player != null) {
-            Vec2 XZRotated = rotateCoords(x,z);
+            Vec2 XZRotated = MyMath.rotateCoords(x, z, -camRotX - camRotAdjX);
             MC.player.move(MoverType.SELF, new Vec3(XZRotated.x, 0, XZRotated.y));
         }
-    }
-
-    public static Vec2 rotateCoords(float x, float y) {
-        float camXRotRads = (float) Math.toRadians(-camRotX - camRotAdjX);
-        float moveXRotated = (x * cos(camXRotRads)) - (y * sin(camXRotRads));
-        float moveyRotated = (y * cos(camXRotRads)) + (x * sin(camXRotRads));
-        return new Vec2(moveXRotated, moveyRotated);
     }
 
     // are we on the top-down gui screen?

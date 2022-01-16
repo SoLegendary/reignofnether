@@ -8,6 +8,8 @@ public class UnitCommonModEvents {
 
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent evt) {
-        evt.put(EntityRegistrar.VILLAGER_UNIT.get(), VillagerUnit.createAttributes().build());
+        evt.put(EntityRegistrar.ZOMBIE_UNIT.get(), ZombieUnit.createAttributes().build());
+        evt.put(EntityRegistrar.SKELETON_UNIT.get(), ZombieUnit.createAttributes().build());
+        evt.put(EntityRegistrar.CREEPER_UNIT.get(), ZombieUnit.createAttributes().build());
     }
 }

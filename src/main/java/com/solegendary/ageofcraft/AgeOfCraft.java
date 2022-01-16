@@ -28,7 +28,7 @@ public class AgeOfCraft
         CommonEventRegistrar commonRegistrar = new CommonEventRegistrar();
         commonRegistrar.registerCommonEvents();
 
-        final ClientSideEventRegistrar clientRegistrar = new ClientSideEventRegistrar();
+        final ClientEventRegistrar clientRegistrar = new ClientEventRegistrar();
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> clientRegistrar::registerClientEvents);
 
         final ServerSideEventRegistrar serverRegistrar = new ServerSideEventRegistrar();

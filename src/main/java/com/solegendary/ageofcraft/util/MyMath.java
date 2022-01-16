@@ -2,9 +2,12 @@ package com.solegendary.ageofcraft.util;
 
 import com.mojang.math.Vector3d;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static net.minecraft.util.Mth.cos;
+import static net.minecraft.util.Mth.sin;
 
 public class MyMath {
 
@@ -49,5 +52,12 @@ public class MyMath {
         if (tmin > tmax) return false;
 
         return true;
+    }
+
+    public static Vec2 rotateCoords(float x, float y, double deg) {
+        float camXRotRads = (float) Math.toRadians(deg);
+        float moveXRotated = (x * cos(camXRotRads)) - (y * sin(camXRotRads));
+        float moveyRotated = (y * cos(camXRotRads)) + (x * sin(camXRotRads));
+        return new Vec2(moveXRotated, moveyRotated);
     }
 }
