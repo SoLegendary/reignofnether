@@ -9,5 +9,6 @@ public interface Unit {
 
     void setMoveToBlock(BlockPos bp);
 
+    // TODO: remove invincibility frames from being attacked on all mobs
     void setAttackTarget(@Nullable LivingEntity target);
 }

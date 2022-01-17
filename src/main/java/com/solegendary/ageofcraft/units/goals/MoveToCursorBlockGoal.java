@@ -8,6 +8,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.EnumSet;
 
@@ -15,14 +16,12 @@ public class MoveToCursorBlockGoal extends Goal {
 
     private final PathfinderMob mob;
     private final double speedModifier;
-    private final Level level;
     private final int maxDist = 20;
     private BlockPos targetBp = null;
 
     public MoveToCursorBlockGoal(PathfinderMob mob, double speedModifier) {
         this.mob = mob;
         this.speedModifier = speedModifier;
-        this.level = mob.level;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE));
     }
 
@@ -50,9 +49,11 @@ public class MoveToCursorBlockGoal extends Goal {
             Path path = mob.getNavigation().createPath(targetBp.getX(), targetBp.getY(), targetBp.getZ(), 0);
             this.mob.getNavigation().moveTo(path, speedModifier);
         }
+        else
+            this.mob.getNavigation().stop();
     }
 
-    public void setNewTargetBp(BlockPos bp) {
+    public void setNewTargetBp(@Nullable BlockPos bp) {
         this.targetBp = bp;
         this.start();
     }

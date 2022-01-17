@@ -13,34 +13,33 @@ import javax.annotation.Nullable;
 
 public class ZombieUnit extends Zombie implements Unit {
 
+    MoveToCursorBlockGoal moveGoal;
+    SelectedTargetGoal targetGoal;
+
     public ZombieUnit(EntityType<? extends Zombie> p_34271_, Level p_34272_) {
         super(p_34271_, p_34272_);
     }
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(1, new MoveToCursorBlockGoal(this, 1.0f));
-        this.goalSelector.addGoal(2, new ZombieAttackGoal(this, 1.0D, false));
-        this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
-        this.targetSelector.addGoal(2, new SelectedTargetGoal(this, true, true));
+        this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
+        this.targetGoal = new SelectedTargetGoal(this, true, true);
+
+        this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(2, moveGoal);
+        this.goalSelector.addGoal(3, new ZombieAttackGoal(this, 1.0D, false));
+        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        this.targetSelector.addGoal(3, targetGoal);
     }
 
-    @Override
-    public void setMoveToBlock(BlockPos bp) {
-        for (WrappedGoal goal : this.goalSelector.getAvailableGoals()) {
-            if (goal.getGoal() instanceof MoveToCursorBlockGoal) {
-                MoveToCursorBlockGoal moveGoal = (MoveToCursorBlockGoal) goal.getGoal();
-                moveGoal.setNewTargetBp(bp);
-            }
-        }
+    public void setMoveToBlock(@Nullable BlockPos bp) {
+        targetGoal.setTarget(null);
+        moveGoal.setNewTargetBp(bp);
     }
 
+    // target MUST be a serverside entity or else it cannot be attacked
     public void setAttackTarget(@Nullable LivingEntity target) {
-        for (WrappedGoal goal : this.goalSelector.getAvailableGoals()) {
-            if (goal.getGoal() instanceof SelectedTargetGoal) {
-                SelectedTargetGoal targetGoal = (SelectedTargetGoal) goal.getGoal();
-                targetGoal.setTarget(target);
-            }
-        }
+        moveGoal.setNewTargetBp(null);
+        targetGoal.setTarget(target);
     }
 }

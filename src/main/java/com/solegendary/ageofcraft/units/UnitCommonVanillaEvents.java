@@ -25,7 +25,7 @@ public class UnitCommonVanillaEvents {
     // units selected by click or box select
     private static ArrayList<PathfinderMob> selectedUnits = new ArrayList<>();
     // unit targeted by a right click for attack or follow
-    private static PathfinderMob targetedUnit = null; // QUEUE
+    private static int targetedUnitId = -1; // QUEUE
     private static ArrayList<Integer> unitIdsToMove = new ArrayList<>(); // QUEUE
 
     public static ArrayList<PathfinderMob> getPreselectedUnits() { return preselectedUnits; }
@@ -38,7 +38,7 @@ public class UnitCommonVanillaEvents {
         preselectedUnits = units;
     }
     public static void setSelectedUnits(ArrayList<PathfinderMob> units) { selectedUnits = units; }
-    public static PathfinderMob getTargetedUnit() { return targetedUnit; }
+    public static int getTargetedUnitId() { return targetedUnitId; }
 
     // TODO: consider changing PathfinderMob to Unit?
 
@@ -65,14 +65,14 @@ public class UnitCommonVanillaEvents {
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
             // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
-            unitIdsToMove = new ArrayList<>();
 
-            for (PathfinderMob unit : selectedUnits)
-                unitIdsToMove.add(unit.getId());
-
-            if (preselectedUnits.size() == 1) {
-                targetedUnit = preselectedUnits.get(0);
-                System.out.println("Set targetedUnit to:" + targetedUnit.getName());
+            // prioritise attacks and don't both attack and move
+            if (preselectedUnits.size() == 1)
+                targetedUnitId = preselectedUnits.get(0).getId();
+            else {
+                unitIdsToMove = new ArrayList<>();
+                for (PathfinderMob unit : selectedUnits)
+                    unitIdsToMove.add(unit.getId());
             }
         }
     }
@@ -94,15 +94,15 @@ public class UnitCommonVanillaEvents {
             }
             unitIdsToMove = new ArrayList<>();
 
-            if (targetedUnit != null) {
+            if (targetedUnitId >= 0) {
                 for (PathfinderMob mob : selectedUnits) {
-                    Unit unit = (Unit) world.getEntity(mob.getId());
-                    if (unit != null) {
-                        System.out.println("Set target for id: " + mob.getId() + " to: " + targetedUnit.getName());
-                        unit.setAttackTarget(targetedUnit);
+                    if (targetedUnitId != mob.getId()) { // prevent units targeting themselves
+                        Unit unit = (Unit) world.getEntity(mob.getId());
+                        if (unit != null)
+                            unit.setAttackTarget((LivingEntity) world.getEntity(targetedUnitId));
                     }
                 }
-                targetedUnit = null;
+                targetedUnitId = -1;
             }
         }
     }
@@ -116,8 +116,8 @@ public class UnitCommonVanillaEvents {
                 MyRenderer.drawEntityOutline(evt.getMatrixStack(), unit,0.5f);
 
             // TODO: this is only active for 1 frame... probably just check isRightClickDown and render on preselectedUnits
-            if (targetedUnit != null)
-                MyRenderer.drawEntityOutline(evt.getMatrixStack(), targetedUnit, 1.0f, 0, 0 ,0.5f);
+            //if (targetedUnitId >= 0)
+            //    MyRenderer.drawEntityOutline(evt.getMatrixStack(), evt.get(targetedUnitId), 1.0f, 0, 0 ,0.5f);
         }
     }
 }
