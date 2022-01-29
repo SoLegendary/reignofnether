@@ -1,6 +1,7 @@
 package com.solegendary.ageofcraft.units;
 
 import com.solegendary.ageofcraft.units.goals.MoveToCursorBlockGoal;
+import com.solegendary.ageofcraft.units.goals.RangedBowAttackModifiedGoal;
 import com.solegendary.ageofcraft.units.goals.SelectedTargetGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
@@ -15,20 +16,29 @@ public class SkeletonUnit extends Skeleton implements Unit {
 
     MoveToCursorBlockGoal moveGoal;
     SelectedTargetGoal targetGoal;
+    RangedBowAttackModifiedGoal attackGoal;
 
     public SkeletonUnit(EntityType<? extends Skeleton> p_33570_, Level p_33571_) {
         super(p_33570_, p_33571_);
+    }
+
+    public void tick() {
+        super.tick();
+        if (this.attackGoal != null)
+            attackGoal.tickCooldown();
+
+        this.invulnerableTime = 0; // no iframes
     }
 
     @Override
     protected void registerGoals() {
         this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
         this.targetGoal = new SelectedTargetGoal(this, true, false);
+        this.attackGoal = new RangedBowAttackModifiedGoal(this, 5, 45, 10.0F);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, moveGoal);
-        // TODO: extend rangedBowAttackGoal and make it not strafe (also it keeps attacking the spot after target death)
-        this.goalSelector.addGoal(3, new RangedBowAttackGoal<>(this, 1.0D, 20, 15.0F));
+        this.goalSelector.addGoal(3, attackGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(3, targetGoal);
     }

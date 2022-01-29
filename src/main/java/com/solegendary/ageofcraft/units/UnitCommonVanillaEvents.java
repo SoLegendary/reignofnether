@@ -16,6 +16,7 @@ import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
+import java.util.List;
 
 public class UnitCommonVanillaEvents {
     private static final Minecraft MC = Minecraft.getInstance();
@@ -48,7 +49,7 @@ public class UnitCommonVanillaEvents {
     public static void onEntityJoin(EntityJoinWorldEvent evt) {
         Entity entity = evt.getEntity();
 
-        // TODO: replace all vanilla mobs registered as units with our version
+        // TODO: replace all vanilla mobs registered as units with our version, eg. Skeleton -> SkeletonUnit
 
     }
     @SubscribeEvent
@@ -94,13 +95,24 @@ public class UnitCommonVanillaEvents {
             }
             unitIdsToMove = new ArrayList<>();
 
+            ArrayList<Integer> selectedUnitIds = new ArrayList<>();
+            for (PathfinderMob mob : selectedUnits)
+                selectedUnitIds.add(mob.getId());
+
             if (targetedUnitId >= 0) {
                 for (PathfinderMob mob : selectedUnits) {
-                    if (targetedUnitId != mob.getId()) { // prevent units targeting themselves
+
+                    if (selectedUnitIds.contains(targetedUnitId)) { // if targeting a friendly, move to them instead of attacking
+                        Unit unit = (Unit) world.getEntity(mob.getId());
+                        if (unit != null)
+                            unit.setMoveToBlock(CursorClientVanillaEvents.getPreselectedBlockPos());
+                    }
+                    else if (targetedUnitId != mob.getId()) { // prevent units targeting themselves or friendlies
                         Unit unit = (Unit) world.getEntity(mob.getId());
                         if (unit != null)
                             unit.setAttackTarget((LivingEntity) world.getEntity(targetedUnitId));
                     }
+
                 }
                 targetedUnitId = -1;
             }

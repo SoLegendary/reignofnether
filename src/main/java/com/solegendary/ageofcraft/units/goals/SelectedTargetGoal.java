@@ -1,5 +1,7 @@
 package com.solegendary.ageofcraft.units.goals;
 
+import com.solegendary.ageofcraft.cursor.CursorClientVanillaEvents;
+import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
