@@ -27,7 +27,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
         if (this.attackGoal != null)
             attackGoal.tickCooldown();
 
-        this.invulnerableTime = 0; // no iframes
+        this.invulnerableTime = 0; // no iframes after being damaged
     }
 
     @Override

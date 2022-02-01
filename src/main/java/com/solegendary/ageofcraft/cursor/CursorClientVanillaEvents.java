@@ -1,5 +1,6 @@
 package com.solegendary.ageofcraft.cursor;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Vector3d;
 import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import com.solegendary.ageofcraft.registrars.Keybinds;
@@ -9,7 +10,9 @@ import com.solegendary.ageofcraft.util.MyMath;
 import com.solegendary.ageofcraft.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
@@ -21,7 +24,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 import static net.minecraft.util.Mth.*;
 
-import java.nio.file.Path;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +32,8 @@ import java.util.List;
  * Handler that implements and manages screen-to-world translations of the cursor and block/entity selection
  */
 public class CursorClientVanillaEvents {
+
+    private static final Minecraft MC = Minecraft.getInstance();
 
     private static boolean leftClickDown = false;
     private static boolean rightClickDown = false;
@@ -43,8 +48,6 @@ public class CursorClientVanillaEvents {
     private static Vec2 cursorLeftClickDownPos = new Vec2(0,0);
     private static Vec2 cursorLeftClickDragPos = new Vec2(0,0);
 
-    private static final Minecraft MC = Minecraft.getInstance();
-
     public static Vector3d getCursorWorldPos() {
         return cursorWorldPos;
     }
@@ -52,11 +55,57 @@ public class CursorClientVanillaEvents {
         return preselectedBlockPos;
     }
 
+    private static final ResourceLocation TEXTURE_CURSOR = new ResourceLocation("ageofcraft", "cursors/customcursor.png");
+    private static final ResourceLocation TEXTURE_HAND = new ResourceLocation("ageofcraft", "cursors/customcursor_hand.png");
+    private static final ResourceLocation TEXTURE_HAND_GRAB = new ResourceLocation("ageofcraft", "cursors/customcursor_hand_grab.png");
+    private static final ResourceLocation TEXTURE_SWORD = new ResourceLocation("ageofcraft", "cursors/customcursor_sword.png");
+
+    private static boolean attackMove = false;
+
     @SubscribeEvent
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
         if (MC.player == null || MC.level == null) return;
+
+        // ************************************
+        // Manage cursor icons based on actions
+        // ************************************
+
+        if (Keybinds.keyA.isDown()) {
+            attackMove = true;
+        }
+        if (leftClickDown) {
+            attackMove = false;
+        }
+
+        // hide regular cursor
+        long window = MC.getWindow().getWindow();
+        GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_HIDDEN);
+
+
+        // blitting like this will cause it to be rendered 1 frame behind realtime (this hopefully shouldn't be noticeable...)
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+        if (Keybinds.shiftMod.isDown() && (leftClickDown || rightClickDown))
+            RenderSystem.setShaderTexture(0, TEXTURE_HAND_GRAB);
+        else if (Keybinds.shiftMod.isDown())
+            RenderSystem.setShaderTexture(0, TEXTURE_HAND);
+        else if (attackMove)
+            RenderSystem.setShaderTexture(0, TEXTURE_SWORD);
+        else
+            RenderSystem.setShaderTexture(0, TEXTURE_CURSOR);
+
+        GuiComponent.blit(evt.getMatrixStack(),
+                evt.getMouseX(), evt.getMouseY(), // where on screen to starting drawing to
+                16,  // blit offset
+                16, 16,
+                16, 16, // where on texture to start drawing from
+                16,16 // width/height of what to draw (if larger than texture, it will be repeated)
+        );
+
+
 
         // ***********************************************
         // Convert cursor on-screen 2d pos to world 3d pos
@@ -165,6 +214,7 @@ public class CursorClientVanillaEvents {
     // draw box selection rectangle
     @SubscribeEvent
     public static void renderOverlay(RenderGameOverlayEvent.Post evt) {
+
         if (leftClickDown && !Keybinds.shiftMod.isDown()) {
             GuiComponent.fill(evt.getMatrixStack(), // x1,y1, x2,y2,
                     Math.round(cursorLeftClickDownPos.x),
@@ -282,7 +332,7 @@ public class CursorClientVanillaEvents {
     }
 
     private static BlockPos getRefinedBlockPos(BlockPos bp, Vector3d cursorWorldPosNear) {
-        ArrayList<BlockPos> blocks = new ArrayList<BlockPos>();
+        ArrayList<BlockPos> blocks = new ArrayList<>();
 
         blocks.add(bp);
         blocks.add(bp.north());
@@ -318,8 +368,7 @@ public class CursorClientVanillaEvents {
         double smallestDist = 10000;
         Vector3d lookVector = getPlayerLookVector();
 
-        for (int i = 0; i < blocks.size(); i++) {
-            BlockPos block = blocks.get(i);
+        for (BlockPos block : blocks) {
             double dist = new Vec3(block.getX(), block.getY(), block.getZ())
                     .distanceTo(new Vec3(cursorWorldPosNear.x, cursorWorldPosNear.y, cursorWorldPosNear.z));
             if (MC.level.getBlockState(block).getMaterial().isSolidBlocking()

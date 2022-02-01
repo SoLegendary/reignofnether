@@ -247,16 +247,6 @@ public class OrthoviewClientVanillaEvents {
         if (Keybinds.zoomOut.isDown())
             zoomCam(ZOOM_STEP_KEY);
 
-        // rotate with keys
-        if (Keybinds.rotPlusX.isDown())
-            rotateCam(ROTATE_STEP,0);
-        else if (Keybinds.rotMinusX.isDown())
-            rotateCam(-ROTATE_STEP,0);
-        if (Keybinds.rotPlusY.isDown())
-            rotateCam(0,ROTATE_STEP);
-        else if (Keybinds.rotMinusY.isDown())
-            rotateCam(0,-ROTATE_STEP);
-
         // pan camera with keys
         if (Keybinds.panPlusX.isDown())
             panCam(PAN_KEY_STEP,0);
