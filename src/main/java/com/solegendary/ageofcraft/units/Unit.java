@@ -7,7 +7,12 @@ import javax.annotation.Nullable;
 
 public interface Unit {
 
-    void setMoveToBlock(BlockPos bp);
-
+    // chase and attack the target ignoring all else until it is dead or out of sight
     void setAttackTarget(@Nullable LivingEntity target);
+
+    // move to a block ignoring all else until reaching it
+    void setMoveTarget(@Nullable BlockPos bp);
+
+    // move to a block but chase/attack a target if there is one close by (for a limited distance)
+    void setAttackMoveTarget(BlockPos bp);
 }

@@ -5,7 +5,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 
 import javax.annotation.Nullable;
@@ -17,7 +16,7 @@ public class MoveToCursorBlockGoal extends Goal {
     private final PathfinderMob mob;
     private final double speedModifier;
     private final int maxDist = 20;
-    private BlockPos targetBp = null;
+    private BlockPos moveTarget = null;
 
     public MoveToCursorBlockGoal(PathfinderMob mob, double speedModifier) {
         this.mob = mob;
@@ -30,31 +29,32 @@ public class MoveToCursorBlockGoal extends Goal {
         ArrayList<PathfinderMob> selectedUnits = UnitCommonVanillaEvents.getSelectedUnits();
 
         for (PathfinderMob unit : selectedUnits) {
-            if (unit.getId() == mob.getId() && targetBp != null) {
+            if (unit.getId() == mob.getId() && moveTarget != null) {
                 BlockPos mobbp = this.mob.blockPosition();
-                int dist = targetBp.distManhattan(new Vec3i(mobbp.getX(), mobbp.getY()-1, mobbp.getZ()));
+                int dist = moveTarget.distManhattan(new Vec3i(mobbp.getX(), mobbp.getY()-1, mobbp.getZ()));
                 return dist <= maxDist;
             }
         }
         return false;
     }
 
+    // TODO: implement attackmove using this.mob.isAttackMoving()
     public boolean canContinueToUse() {
         return !this.mob.getNavigation().isDone();
     }
 
     public void start() {
-        if (targetBp != null) {
+        if (moveTarget != null) {
             // move to exact goal instead of 1 block away
-            Path path = mob.getNavigation().createPath(targetBp.getX(), targetBp.getY(), targetBp.getZ(), 0);
+            Path path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), 0);
             this.mob.getNavigation().moveTo(path, speedModifier);
         }
         else
             this.mob.getNavigation().stop();
     }
 
-    public void setNewTargetBp(@Nullable BlockPos bp) {
-        this.targetBp = bp;
+    public void setMoveTarget(@Nullable BlockPos bp) {
+        this.moveTarget = bp;
         this.start();
     }
 }

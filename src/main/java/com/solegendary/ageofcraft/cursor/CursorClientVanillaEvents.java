@@ -48,11 +48,19 @@ public class CursorClientVanillaEvents {
     private static Vec2 cursorLeftClickDownPos = new Vec2(0,0);
     private static Vec2 cursorLeftClickDragPos = new Vec2(0,0);
 
+    private static boolean attackFlag = false; // pressed a to attack move or force attack a friendly
+
     public static Vector3d getCursorWorldPos() {
         return cursorWorldPos;
     }
     public static BlockPos getPreselectedBlockPos() {
         return preselectedBlockPos;
+    }
+    public static boolean getAttackFlag() {
+        return attackFlag;
+    }
+    public static void removeAttackFlag() {
+        attackFlag = false;
     }
 
     private static final ResourceLocation TEXTURE_CURSOR = new ResourceLocation("ageofcraft", "cursors/customcursor.png");
@@ -60,7 +68,7 @@ public class CursorClientVanillaEvents {
     private static final ResourceLocation TEXTURE_HAND_GRAB = new ResourceLocation("ageofcraft", "cursors/customcursor_hand_grab.png");
     private static final ResourceLocation TEXTURE_SWORD = new ResourceLocation("ageofcraft", "cursors/customcursor_sword.png");
 
-    private static boolean attackMove = false;
+
 
     @SubscribeEvent
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
@@ -72,12 +80,8 @@ public class CursorClientVanillaEvents {
         // Manage cursor icons based on actions
         // ************************************
 
-        if (Keybinds.keyA.isDown()) {
-            attackMove = true;
-        }
-        if (leftClickDown) {
-            attackMove = false;
-        }
+        if (Keybinds.keyA.isDown())
+            attackFlag = true;
 
         // hide regular cursor
         long window = MC.getWindow().getWindow();
@@ -92,7 +96,7 @@ public class CursorClientVanillaEvents {
             RenderSystem.setShaderTexture(0, TEXTURE_HAND_GRAB);
         else if (Keybinds.shiftMod.isDown())
             RenderSystem.setShaderTexture(0, TEXTURE_HAND);
-        else if (attackMove)
+        else if (attackFlag)
             RenderSystem.setShaderTexture(0, TEXTURE_SWORD);
         else
             RenderSystem.setShaderTexture(0, TEXTURE_CURSOR);

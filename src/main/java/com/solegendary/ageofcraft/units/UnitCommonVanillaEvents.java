@@ -3,14 +3,12 @@ package com.solegendary.ageofcraft.units;
 import com.solegendary.ageofcraft.cursor.CursorClientVanillaEvents;
 import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import com.solegendary.ageofcraft.util.MyRenderer;
-import net.java.games.input.Mouse;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -31,6 +29,7 @@ public class UnitCommonVanillaEvents {
     // unit targeted by a right click for attack or follow
     private static int targetedUnitId = -1; // QUEUE
     private static ArrayList<Integer> unitIdsToMove = new ArrayList<>(); // QUEUE
+    private static ArrayList<Integer> unitIdsWithAttackFlag = new ArrayList<>(); // QUEUE
 
     public static ArrayList<PathfinderMob> getPreselectedUnits() { return preselectedUnits; }
     public static ArrayList<PathfinderMob> getSelectedUnits() {
@@ -65,10 +64,19 @@ public class UnitCommonVanillaEvents {
     public static void onMouseClick(GuiScreenEvent.MouseClickedEvent.Post evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-            // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
-            // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
+        // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
+        // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
 
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) { // left click
+            if (preselectedUnits.size() == 1)
+                targetedUnitId = preselectedUnits.get(0).getId();
+            else {
+                unitIdsWithAttackFlag = new ArrayList<>();
+                for (PathfinderMob unit : selectedUnits)
+                    unitIdsWithAttackFlag.add(unit.getId());
+            }
+        }
+        else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) { // right click
             // prioritise attacks and don't both attack and move
             if (preselectedUnits.size() == 1)
                 targetedUnitId = preselectedUnits.get(0).getId();
@@ -90,10 +98,20 @@ public class UnitCommonVanillaEvents {
         // entity first via the ID or else goals are not able to be manipulated (and also so we can cast to Unit)
         if (!world.isClientSide()) {
 
+            // right-click move
             for (int id : unitIdsToMove) {
                 Unit unit = (Unit) world.getEntity(id);
                 if (unit != null)
-                    unit.setMoveToBlock(CursorClientVanillaEvents.getPreselectedBlockPos());
+                    unit.setMoveTarget(CursorClientVanillaEvents.getPreselectedBlockPos());
+            }
+            unitIdsToMove = new ArrayList<>();
+
+            // left-click attackmove
+            for (int id : unitIdsWithAttackFlag) {
+                Unit unit = (Unit) world.getEntity(id);
+                if (unit != null)
+                    unit.setAttackMoveTarget(CursorClientVanillaEvents.getPreselectedBlockPos());
+                CursorClientVanillaEvents.removeAttackFlag();
             }
             unitIdsToMove = new ArrayList<>();
 
@@ -104,18 +122,26 @@ public class UnitCommonVanillaEvents {
             if (targetedUnitId >= 0) {
                 for (PathfinderMob mob : selectedUnits) {
 
-                    if (selectedUnitIds.contains(targetedUnitId)) { // if targeting a friendly, move to them instead of attacking
+                    if (targetedUnitId != mob.getId() && CursorClientVanillaEvents.getAttackFlag()) {
                         Unit unit = (Unit) world.getEntity(mob.getId());
                         if (unit != null)
-                            unit.setMoveToBlock(CursorClientVanillaEvents.getPreselectedBlockPos());
+                            unit.setAttackTarget((LivingEntity) world.getEntity(targetedUnitId));
                     }
-                    else if (targetedUnitId != mob.getId()) { // prevent units targeting themselves or friendlies
+                    // if targeting a friendly, move to them instead of attacking, except if attackFlag was set
+                    else if (selectedUnitIds.contains(targetedUnitId)) {
+                        Unit unit = (Unit) world.getEntity(mob.getId());
+                        if (unit != null)
+                            unit.setMoveTarget(CursorClientVanillaEvents.getPreselectedBlockPos());
+                    }
+                    // prevent units targeting themselves or friendlies
+                    else if (targetedUnitId != mob.getId()) {
                         Unit unit = (Unit) world.getEntity(mob.getId());
                         if (unit != null)
                             unit.setAttackTarget((LivingEntity) world.getEntity(targetedUnitId));
                     }
                 }
                 targetedUnitId = -1;
+                CursorClientVanillaEvents.removeAttackFlag();
             }
         }
     }

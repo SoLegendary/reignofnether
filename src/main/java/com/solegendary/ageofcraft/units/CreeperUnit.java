@@ -34,14 +34,14 @@ public class CreeperUnit extends Creeper implements Unit {
         this.targetSelector.addGoal(4, targetGoal);
     }
 
-    public void setMoveToBlock(@Nullable BlockPos bp) {
+    public void setMoveTarget(@Nullable BlockPos bp) {
         targetGoal.setTarget(null);
-        moveGoal.setNewTargetBp(bp);
+        moveGoal.setMoveTarget(bp);
     }
 
     // target MUST be a serverside entity or else it cannot be attacked
     public void setAttackTarget(@Nullable LivingEntity target) {
-        moveGoal.setNewTargetBp(null);
+        moveGoal.setMoveTarget(null);
         targetGoal.setTarget(target);
     }
 }

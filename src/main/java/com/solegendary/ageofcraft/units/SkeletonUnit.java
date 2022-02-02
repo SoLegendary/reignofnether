@@ -18,9 +18,19 @@ public class SkeletonUnit extends Skeleton implements Unit {
     SelectedTargetGoal targetGoal;
     RangedBowAttackModifiedGoal attackGoal;
 
+    // if true causes moveGoal and attackGoal to work together to allow attack moving
+    // moves to a block but will chase/attack nearby monsters in range up to a certain distance away
+    private Boolean attackMoveFlag = false;
+    private final float attackMoveRange = 5; // range to chase before returning to move path
+    private BlockPos attackMoveAnchor = null; // pos marked after chasing a target on attack move to return to
+
     public SkeletonUnit(EntityType<? extends Skeleton> p_33570_, Level p_33571_) {
         super(p_33570_, p_33571_);
     }
+
+    public Boolean isAttackMoving() { return attackMoveFlag; }
+    public float getAttackMoveRange() { return attackMoveRange; }
+    public BlockPos getAttackMoveAnchor() { return attackMoveAnchor; }
 
     public void tick() {
         super.tick();
@@ -43,14 +53,22 @@ public class SkeletonUnit extends Skeleton implements Unit {
         this.targetSelector.addGoal(3, targetGoal);
     }
 
-    public void setMoveToBlock(@Nullable BlockPos bp) {
+    public void setMoveTarget(@Nullable BlockPos bp) {
+        this.attackMoveFlag = false;
         targetGoal.setTarget(null);
-        moveGoal.setNewTargetBp(bp);
+        moveGoal.setMoveTarget(bp);
     }
 
     // target MUST be a serverside entity or else it cannot be attacked
     public void setAttackTarget(@Nullable LivingEntity target) {
-        moveGoal.setNewTargetBp(null);
+        this.attackMoveFlag = false;
+        moveGoal.setMoveTarget(null);
         targetGoal.setTarget(target);
+    }
+
+    public void setAttackMoveTarget(@Nullable BlockPos bp) {
+        this.attackMoveFlag = true;
+        targetGoal.setTarget(null);
+        moveGoal.setMoveTarget(bp);
     }
 }
