@@ -50,9 +50,9 @@ public class TopdownGuiCommonVanillaEvents {
     // open the menu that would normally be opened on pressing esc, while the topdown gui is open
     // we should also register an event to reopen the topdown gui (if it was open) when the esc menu is closed
     // TODO: make this actually work...
-    public static void openEscMenu() {
-        System.out.println("Opening esc menu!");
-        MC.pauseGame(true);
+    public static void openPauseMenu() {
+        //System.out.println("Opening esc menu!");
+        //MC.pauseGame(true);
     }
 
     @SubscribeEvent

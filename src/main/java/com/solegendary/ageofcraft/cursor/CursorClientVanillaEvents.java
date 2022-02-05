@@ -13,6 +13,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
@@ -80,7 +81,7 @@ public class CursorClientVanillaEvents {
         // Manage cursor icons based on actions
         // ************************************
 
-        if (Keybinds.keyA.isDown())
+        if (Keybinds.keyA.isDown() && UnitCommonVanillaEvents.getSelectedUnitIds().size() > 0)
             attackFlag = true;
 
         // hide regular cursor
@@ -155,14 +156,14 @@ public class CursorClientVanillaEvents {
         );
         List<PathfinderMob> entities = MC.level.getEntitiesOfClass(PathfinderMob.class, aabb);
 
-        UnitCommonVanillaEvents.setPreselectedUnits(new ArrayList<>());
+        UnitCommonVanillaEvents.setPreselectedUnitIds(new ArrayList<>());
 
         for (PathfinderMob entity : entities) {
             // inflate by set amount to improve click accuracy
             AABB entityaabb = entity.getBoundingBox().inflate(0.1);
 
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, getPlayerLookVector(), entityaabb)) {
-                UnitCommonVanillaEvents.addPreselectedUnit(entity);
+                UnitCommonVanillaEvents.addPreselectedUnitId(entity.getId());
                 break; // only allow one moused unit at a time
             }
         }
@@ -209,7 +210,7 @@ public class CursorClientVanillaEvents {
                 if (MyMath.isBetween(u.dot(p1), ux, u.dot(p2)) &&
                     MyMath.isBetween(v.dot(p1), vx, v.dot(p4)) &&
                     MyMath.isBetween(w.dot(p1), wx, w.dot(p5))) {
-                    UnitCommonVanillaEvents.addPreselectedUnit(entity);
+                    UnitCommonVanillaEvents.addPreselectedUnitId(entity.getId());
                 }
             }
         }
@@ -258,11 +259,17 @@ public class CursorClientVanillaEvents {
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             leftClickDown = false;
 
-            // enact selection, excluding non-unit mobs
-            UnitCommonVanillaEvents.setSelectedUnits(new ArrayList<>());
-            for (PathfinderMob mob : UnitCommonVanillaEvents.getPreselectedUnits()) {
-                if (mob instanceof Unit)
-                    UnitCommonVanillaEvents.addSelectedUnit(mob);
+            // enact box selection, excluding non-unit mobs
+            // for single-unit selection, see UnitCommonVanillaEvents
+            // except if attack-moving or nothing is preselected (to prevent deselection)
+            ArrayList<Integer> preselectedUnitIds = UnitCommonVanillaEvents.getPreselectedUnitIds();
+            if (preselectedUnitIds.size() > 1 && !attackFlag) {
+                UnitCommonVanillaEvents.setSelectedUnitIds(new ArrayList<>());
+                for (int mobId : preselectedUnitIds) {
+                    Entity mob = MC.level.getEntity(mobId);
+                    if (mob instanceof Unit)
+                        UnitCommonVanillaEvents.addSelectedUnitId(mob.getId());
+                }
             }
             cursorLeftClickDownPos = new Vec2(0,0);
             cursorLeftClickDragPos = new Vec2(0,0);
@@ -284,8 +291,8 @@ public class CursorClientVanillaEvents {
         if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled()) {
 
             if (!OrthoviewClientVanillaEvents.isCameraMovingByMouse() && !leftClickDown &&
-                 UnitCommonVanillaEvents.getSelectedUnits().size() > 0 &&
-                 UnitCommonVanillaEvents.getPreselectedUnits().size() <= 0) {
+                 UnitCommonVanillaEvents.getSelectedUnitIds().size() > 0 &&
+                 UnitCommonVanillaEvents.getPreselectedUnitIds().size() <= 0) {
                 MyRenderer.drawBlockOutline(evt.getMatrixStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }
         }

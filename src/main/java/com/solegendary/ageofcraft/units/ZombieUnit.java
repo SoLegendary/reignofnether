@@ -16,6 +16,10 @@ public class ZombieUnit extends Zombie implements Unit {
     MoveToCursorBlockGoal moveGoal;
     SelectedTargetGoal targetGoal;
 
+    private Boolean attackMoveFlag = false;
+    private final float attackMoveRange = 5;
+    private BlockPos attackMoveAnchor = null;
+
     public ZombieUnit(EntityType<? extends Zombie> p_34271_, Level p_34272_) {
         super(p_34271_, p_34272_);
     }
@@ -33,13 +37,21 @@ public class ZombieUnit extends Zombie implements Unit {
     }
 
     public void setMoveTarget(@Nullable BlockPos bp) {
+        this.attackMoveFlag = false;
         targetGoal.setTarget(null);
         moveGoal.setMoveTarget(bp);
     }
 
     // target MUST be a serverside entity or else it cannot be attacked
     public void setAttackTarget(@Nullable LivingEntity target) {
+        this.attackMoveFlag = false;
         moveGoal.setMoveTarget(null);
         targetGoal.setTarget(target);
+    }
+
+    public void setAttackMoveTarget(@Nullable BlockPos bp) {
+        this.attackMoveFlag = true;
+        targetGoal.setTarget(null);
+        moveGoal.setMoveTarget(bp);
     }
 }

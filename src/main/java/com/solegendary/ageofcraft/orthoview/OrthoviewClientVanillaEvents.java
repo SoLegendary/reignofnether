@@ -16,8 +16,6 @@ import com.mojang.math.Matrix4f;
 
 import java.nio.FloatBuffer;
 
-import static net.minecraft.util.Mth.cos;
-import static net.minecraft.util.Mth.sin;
 import static net.minecraft.util.Mth.sign;
 
 /**
@@ -129,8 +127,8 @@ public class OrthoviewClientVanillaEvents {
             if (evt.getKey() == Keybinds.reset.getKey().getValue())
                 reset();
 
-            if (evt.getKey() == Keybinds.escape.getKey().getValue())
-                TopdownGuiCommonVanillaEvents.openEscMenu();
+            if (evt.getKey() == Keybinds.keyP.getKey().getValue())
+                TopdownGuiCommonVanillaEvents.openPauseMenu();
         }
     }
 

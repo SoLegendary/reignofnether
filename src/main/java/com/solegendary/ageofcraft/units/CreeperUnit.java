@@ -18,6 +18,10 @@ public class CreeperUnit extends Creeper implements Unit {
     MoveToCursorBlockGoal moveGoal;
     SelectedTargetGoal targetGoal;
 
+    private Boolean attackMoveFlag = false;
+    private final float attackMoveRange = 5;
+    private BlockPos attackMoveAnchor = null;
+
     public CreeperUnit(EntityType<? extends Creeper> p_32278_, Level p_32279_) { super(p_32278_, p_32279_); }
 
     @Override
@@ -35,13 +39,21 @@ public class CreeperUnit extends Creeper implements Unit {
     }
 
     public void setMoveTarget(@Nullable BlockPos bp) {
+        this.attackMoveFlag = false;
         targetGoal.setTarget(null);
         moveGoal.setMoveTarget(bp);
     }
 
     // target MUST be a serverside entity or else it cannot be attacked
     public void setAttackTarget(@Nullable LivingEntity target) {
+        this.attackMoveFlag = false;
         moveGoal.setMoveTarget(null);
         targetGoal.setTarget(target);
+    }
+
+    public void setAttackMoveTarget(@Nullable BlockPos bp) {
+        this.attackMoveFlag = true;
+        targetGoal.setTarget(null);
+        moveGoal.setMoveTarget(bp);
     }
 }

@@ -26,10 +26,10 @@ public class MoveToCursorBlockGoal extends Goal {
 
     // only use if the target pos is close enough and the mob is selected
     public boolean canUse() {
-        ArrayList<PathfinderMob> selectedUnits = UnitCommonVanillaEvents.getSelectedUnits();
+        ArrayList<Integer> selectedUnitIds = UnitCommonVanillaEvents.getSelectedUnitIds();
 
-        for (PathfinderMob unit : selectedUnits) {
-            if (unit.getId() == mob.getId() && moveTarget != null) {
+        for (int unitId : selectedUnitIds) {
+            if (unitId == mob.getId() && moveTarget != null) {
                 BlockPos mobbp = this.mob.blockPosition();
                 int dist = moveTarget.distManhattan(new Vec3i(mobbp.getX(), mobbp.getY()-1, mobbp.getZ()));
                 return dist <= maxDist;
