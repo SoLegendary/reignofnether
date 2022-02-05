@@ -14,5 +14,8 @@ public interface Unit {
     void setMoveTarget(@Nullable BlockPos bp);
 
     // move to a block but chase/attack a target if there is one close by (for a limited distance)
-    void setAttackMoveTarget(BlockPos bp);
+    void setAttackMoveTarget(@Nullable BlockPos bp);
+
+    // continuously move to a target until told to do something else
+    void setFollowTarget(@Nullable LivingEntity target);
 }

@@ -142,11 +142,17 @@ public class UnitCommonVanillaEvents {
             }
             unitIdsToAttackMove = new ArrayList<>();
 
-            if (unitIdToAttack > 0) {
-
-
-                unitIdToAttack = 0;
+            for (int id : selectedUnitIds) {
+                Unit unit = (Unit) world.getEntity(id);
+                if (unit != null) {
+                    if (unitIdToAttack >= 0)
+                        unit.setAttackTarget((LivingEntity) world.getEntity(unitIdToAttack));
+                    if (unitIdToFollow >= 0)
+                        unit.setFollowTarget((LivingEntity) world.getEntity(unitIdToFollow));
+                }
             }
+            unitIdToAttack = -1;
+            unitIdToFollow = -1;
         }
     }
 

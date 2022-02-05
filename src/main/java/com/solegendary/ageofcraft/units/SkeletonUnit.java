@@ -23,6 +23,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
     private Boolean attackMoveFlag = false;
     private final float attackMoveRange = 5; // range to chase before returning to move path
     private BlockPos attackMoveAnchor = null; // pos marked after chasing a target on attack move to return to
+    private LivingEntity followTarget = null;
 
     public SkeletonUnit(EntityType<? extends Skeleton> p_33570_, Level p_33571_) {
         super(p_33570_, p_33571_);
@@ -31,6 +32,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
     public Boolean isAttackMoving() { return attackMoveFlag; }
     public float getAttackMoveRange() { return attackMoveRange; }
     public BlockPos getAttackMoveAnchor() { return attackMoveAnchor; }
+    public LivingEntity getFollowTarget() { return followTarget; }
 
     public void tick() {
         super.tick();
@@ -53,6 +55,8 @@ public class SkeletonUnit extends Skeleton implements Unit {
         this.targetSelector.addGoal(3, targetGoal);
     }
 
+
+
     public void setMoveTarget(@Nullable BlockPos bp) {
         this.attackMoveFlag = false;
         targetGoal.setTarget(null);
@@ -70,5 +74,9 @@ public class SkeletonUnit extends Skeleton implements Unit {
         this.attackMoveFlag = true;
         targetGoal.setTarget(null);
         moveGoal.setMoveTarget(bp);
+    }
+
+    public void setFollowTarget(@Nullable LivingEntity target) {
+        this.followTarget = target;
     }
 }

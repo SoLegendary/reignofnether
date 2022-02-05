@@ -21,6 +21,7 @@ public class CreeperUnit extends Creeper implements Unit {
     private Boolean attackMoveFlag = false;
     private final float attackMoveRange = 5;
     private BlockPos attackMoveAnchor = null;
+    private LivingEntity followTarget = null;
 
     public CreeperUnit(EntityType<? extends Creeper> p_32278_, Level p_32279_) { super(p_32278_, p_32279_); }
 
@@ -55,5 +56,9 @@ public class CreeperUnit extends Creeper implements Unit {
         this.attackMoveFlag = true;
         targetGoal.setTarget(null);
         moveGoal.setMoveTarget(bp);
+    }
+
+    public void setFollowTarget(@Nullable LivingEntity target) {
+        this.followTarget = target;
     }
 }

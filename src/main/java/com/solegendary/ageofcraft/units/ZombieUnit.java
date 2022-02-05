@@ -19,6 +19,7 @@ public class ZombieUnit extends Zombie implements Unit {
     private Boolean attackMoveFlag = false;
     private final float attackMoveRange = 5;
     private BlockPos attackMoveAnchor = null;
+    private LivingEntity followTarget = null;
 
     public ZombieUnit(EntityType<? extends Zombie> p_34271_, Level p_34272_) {
         super(p_34271_, p_34272_);
@@ -53,5 +54,9 @@ public class ZombieUnit extends Zombie implements Unit {
         this.attackMoveFlag = true;
         targetGoal.setTarget(null);
         moveGoal.setMoveTarget(bp);
+    }
+
+    public void setFollowTarget(@Nullable LivingEntity target) {
+        this.followTarget = target;
     }
 }
