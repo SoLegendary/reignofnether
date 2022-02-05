@@ -4,6 +4,7 @@ import com.solegendary.ageofcraft.cursor.CursorClientVanillaEvents;
 import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import com.solegendary.ageofcraft.registrars.Keybinds;
 import com.solegendary.ageofcraft.util.MyRenderer;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -35,6 +36,7 @@ public class UnitCommonVanillaEvents {
     private static int unitIdToFollow = -1; // QUEUED - selected units follow this unit
     private static ArrayList<Integer> unitIdsToMove = new ArrayList<>(); // QUEUED - these units move to cursorBlockPos
     private static ArrayList<Integer> unitIdsToAttackMove = new ArrayList<>(); // QUEUED - these units attack move to cursorBlockPos
+    private static ArrayList<ArrayList<Integer>> controlGroups = new ArrayList<>(10);
 
     public static ArrayList<Integer> getPreselectedUnitIds() { return preselectedUnitIds; }
     public static ArrayList<Integer> getSelectedUnitIds() {
@@ -46,6 +48,7 @@ public class UnitCommonVanillaEvents {
     public static void setSelectedUnitIds(ArrayList<Integer> unitIds) { selectedUnitIds = unitIds; }
     public static int getUnitIdToAttack() { return unitIdToAttack; }
     public static int getUnitIdToFollow() { return unitIdToFollow; }
+
 
     // TODO: consider changing PathfinderMob to Unit?
 
@@ -116,7 +119,24 @@ public class UnitCommonVanillaEvents {
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
+        System.out.println(Keybinds.nums[1]);
+
         ServerLevel world = (ServerLevel) evt.world;
+
+        // get and set control groups
+        if (controlGroups.size() <= 0) // initialise with empty arrays
+            for (KeyMapping keyMapping : Keybinds.nums)
+                controlGroups.add(new ArrayList<>());
+
+        for (KeyMapping keyMapping : Keybinds.nums) {
+            int index = Integer.parseInt(keyMapping.getKey().getDisplayName().getContents());
+
+            if (Keybinds.ctrlMod.isDown() && keyMapping.isDown() && selectedUnitIds.size() > 0)
+                controlGroups.set(index, selectedUnitIds);
+            else if (keyMapping.isDown() && controlGroups.get(index).size() > 0)
+                selectedUnitIds = controlGroups.get(index);
+        }
+
 
         // Consume queues produced in clientside events like onMouseClick; remember to always get the serverside
         // entity first via the ID or else goals are not able to be manipulated (and also so we can cast to Unit)

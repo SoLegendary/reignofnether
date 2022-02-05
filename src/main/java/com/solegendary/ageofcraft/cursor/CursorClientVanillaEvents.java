@@ -93,9 +93,9 @@ public class CursorClientVanillaEvents {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        if (Keybinds.ctrlMod.isDown() && (leftClickDown || rightClickDown))
+        if (Keybinds.altMod.isDown() && (leftClickDown || rightClickDown))
             RenderSystem.setShaderTexture(0, TEXTURE_HAND_GRAB);
-        else if (Keybinds.ctrlMod.isDown())
+        else if (Keybinds.altMod.isDown())
             RenderSystem.setShaderTexture(0, TEXTURE_HAND);
         else if (attackFlag)
             RenderSystem.setShaderTexture(0, TEXTURE_SWORD);
@@ -174,7 +174,7 @@ public class CursorClientVanillaEvents {
         // weird bug when downPos == dragPos makes random entities get selected by this algorithm
         float dist = cursorLeftClickDownPos.distanceToSqr(cursorLeftClickDragPos);
 
-        if (leftClickDown && dist > 0 && !Keybinds.ctrlMod.isDown()) {
+        if (leftClickDown && dist > 0 && !Keybinds.altMod.isDown()) {
 
             // can't use AABB here as it's always axis-aligned (ie. no camera-rotation)
             // instead, improvise our own quad
@@ -220,7 +220,7 @@ public class CursorClientVanillaEvents {
     @SubscribeEvent
     public static void renderOverlay(RenderGameOverlayEvent.Post evt) {
 
-        if (leftClickDown && !Keybinds.ctrlMod.isDown()) {
+        if (leftClickDown && !Keybinds.altMod.isDown()) {
             GuiComponent.fill(evt.getMatrixStack(), // x1,y1, x2,y2,
                     Math.round(cursorLeftClickDownPos.x),
                     Math.round(cursorLeftClickDownPos.y),
