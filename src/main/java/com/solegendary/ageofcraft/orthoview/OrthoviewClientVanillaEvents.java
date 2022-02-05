@@ -143,7 +143,7 @@ public class OrthoviewClientVanillaEvents {
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
         if (!enabled) return;
 
-        if (Keybinds.shiftMod.isDown()) return;
+        if (Keybinds.ctrlMod.isDown()) return;
 
         // no idea why but mouse x and y are half of what's expected
         int mouseX = evt.getMouseX();
@@ -202,13 +202,13 @@ public class OrthoviewClientVanillaEvents {
     public static void onMouseDrag(GuiScreenEvent.MouseDragEvent evt) {
         if (!enabled) return;
 
-        if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybinds.shiftMod.isDown()) {
+        if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybinds.ctrlMod.isDown()) {
             cameraMovingByMouse = true;
             float moveX = (float) evt.getDragX() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX) * ((float) screenWidth / winWidth);
             float moveZ = (float) evt.getDragY() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX) * ((float) screenHeight / winHeight);
             panCam(moveX, moveZ);
         }
-        else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybinds.shiftMod.isDown()) {
+        else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybinds.ctrlMod.isDown()) {
             cameraMovingByMouse = true;
             camRotAdjX = (float) (evt.getMouseX() - mouseRightDownX) * CAMROT_MOUSE_SENSITIVITY;
             camRotAdjY = (float) -(evt.getMouseY() - mouseRightDownY) * CAMROT_MOUSE_SENSITIVITY;

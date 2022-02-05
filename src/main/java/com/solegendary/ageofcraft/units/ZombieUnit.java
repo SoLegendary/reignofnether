@@ -25,6 +25,11 @@ public class ZombieUnit extends Zombie implements Unit {
         super(p_34271_, p_34272_);
     }
 
+    public Boolean isAttackMoving() { return attackMoveFlag; }
+    public float getAttackMoveRange() { return attackMoveRange; }
+    public BlockPos getAttackMoveAnchor() { return attackMoveAnchor; }
+    public LivingEntity getFollowTarget() { return followTarget; }
+
     @Override
     protected void registerGoals() {
         this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);

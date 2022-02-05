@@ -39,7 +39,15 @@ public class SkeletonUnit extends Skeleton implements Unit {
         if (this.attackGoal != null)
             attackGoal.tickCooldown();
 
-        this.invulnerableTime = 0; // no iframes after being damaged
+        // no iframes after being damaged so multiple units can attack at once
+        this.invulnerableTime = 0;
+
+        // continually follow target, and stop followTarget being reset
+        if (followTarget != null) {
+            LivingEntity target = followTarget;
+            setMoveTarget(followTarget.blockPosition());
+            followTarget = target;
+        }
     }
 
     @Override
@@ -55,28 +63,32 @@ public class SkeletonUnit extends Skeleton implements Unit {
         this.targetSelector.addGoal(3, targetGoal);
     }
 
-
-
-    public void setMoveTarget(@Nullable BlockPos bp) {
+    public void resetAllTargets() {
         this.attackMoveFlag = false;
         targetGoal.setTarget(null);
+        moveGoal.setMoveTarget(null);
+        this.followTarget = null;
+    }
+
+    public void setMoveTarget(@Nullable BlockPos bp) {
+        resetAllTargets();
         moveGoal.setMoveTarget(bp);
     }
 
     // target MUST be a serverside entity or else it cannot be attacked
     public void setAttackTarget(@Nullable LivingEntity target) {
-        this.attackMoveFlag = false;
-        moveGoal.setMoveTarget(null);
+        resetAllTargets();
         targetGoal.setTarget(target);
     }
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) {
+        resetAllTargets();
         this.attackMoveFlag = true;
-        targetGoal.setTarget(null);
         moveGoal.setMoveTarget(bp);
     }
 
     public void setFollowTarget(@Nullable LivingEntity target) {
+        resetAllTargets();
         this.followTarget = target;
     }
 }

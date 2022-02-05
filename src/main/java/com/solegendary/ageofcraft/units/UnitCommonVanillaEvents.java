@@ -74,7 +74,7 @@ public class UnitCommonVanillaEvents {
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (selectedUnitIds.size() > 0) {
                 // A + left click -> force attack single unit (even if friendly)
-                if (CursorClientVanillaEvents.getAttackFlag() && preselectedUnitIds.size() == 1)
+                if (CursorClientVanillaEvents.getAttackFlag() && preselectedUnitIds.size() == 1 && !targetingSelf())
                     unitIdToAttack = preselectedUnitIds.get(0);
                 // A + left click -> attack move ground
                 else if (CursorClientVanillaEvents.getAttackFlag()) {
@@ -82,20 +82,25 @@ public class UnitCommonVanillaEvents {
                     unitIdsToAttackMove.addAll(selectedUnitIds);
                 }
             }
-            // left click -> select a single unit
+            // left click -> (de)select a single unit
             if (preselectedUnitIds.size() == 1 && !CursorClientVanillaEvents.getAttackFlag()) {
-                selectedUnitIds = new ArrayList<>();
-                selectedUnitIds.add(preselectedUnitIds.get(0));
+                if (!Keybinds.shiftMod.isDown())
+                    selectedUnitIds = new ArrayList<>();
+                else
+                    selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0)));
+                if (!selectedUnitIds.contains(preselectedUnitIds.get(0)))
+                    selectedUnitIds.add(preselectedUnitIds.get(0));
+
             }
             CursorClientVanillaEvents.removeAttackFlag();
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (selectedUnitIds.size() > 0) {
                 // right click -> attack unfriendly unit
-                if (preselectedUnitIds.size() == 1 && !isUnitFriendly(preselectedUnitIds.get(0)))
+                if (preselectedUnitIds.size() == 1 && !targetingSelf() && !isUnitFriendly(preselectedUnitIds.get(0)))
                     unitIdToAttack = preselectedUnitIds.get(0);
                 // right click -> follow friendly unit
-                else if (preselectedUnitIds.size() == 1)
+                else if (preselectedUnitIds.size() == 1 && !targetingSelf())
                     unitIdToFollow = preselectedUnitIds.get(0);
                 // right click -> move to ground pos
                 else {
@@ -120,13 +125,6 @@ public class UnitCommonVanillaEvents {
             // deselect all units on escape
             if (Keybinds.escape.isDown())
                 selectedUnitIds = new ArrayList<>();
-
-            /*
-            unitIdToAttack = -1; // QUEUED - selected units attack this unit
-            unitIdToFollow = -1; // QUEUED - selected units follow this unit
-            unitIdsToMove = new ArrayList<>(); // QUEUED - these units move to cursorBlockPos
-            unitIdsToAttackMove = new ArrayList<>(); // QUEUED - these units attack move to cursorBlockPos
-            */
 
             for (int id : unitIdsToMove) {
                 Unit unit = (Unit) world.getEntity(id);
@@ -169,11 +167,7 @@ public class UnitCommonVanillaEvents {
             for (int idToDraw : unitIdsToDraw) {
                 Entity entity = MC.level.getEntity(idToDraw);
                 if (entity != null) {
-                    boolean targetingSelf = selectedUnitIds.size() == 1 &&
-                                            preselectedUnitIds.size() == 1 &&
-                                            selectedUnitIds.get(0).equals(preselectedUnitIds.get(0));
-
-                    if (preselectedUnitIds.contains(idToDraw) && CursorClientVanillaEvents.getAttackFlag() && !targetingSelf)
+                    if (preselectedUnitIds.contains(idToDraw) && CursorClientVanillaEvents.getAttackFlag() && !targetingSelf())
                         MyRenderer.drawEntityOutline(evt.getMatrixStack(), entity, 1.0f, 0.3f,0.3f, 1.0f);
                     else if (selectedUnitIds.contains(idToDraw))
                         MyRenderer.drawEntityOutline(evt.getMatrixStack(), entity, 1.0f);
@@ -195,5 +189,11 @@ public class UnitCommonVanillaEvents {
                 return true;
         }
         return false;
+    }
+
+    public static boolean targetingSelf() {
+        return selectedUnitIds.size() == 1 &&
+                preselectedUnitIds.size() == 1 &&
+                selectedUnitIds.get(0).equals(preselectedUnitIds.get(0));
     }
 }

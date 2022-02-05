@@ -93,9 +93,9 @@ public class CursorClientVanillaEvents {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        if (Keybinds.shiftMod.isDown() && (leftClickDown || rightClickDown))
+        if (Keybinds.ctrlMod.isDown() && (leftClickDown || rightClickDown))
             RenderSystem.setShaderTexture(0, TEXTURE_HAND_GRAB);
-        else if (Keybinds.shiftMod.isDown())
+        else if (Keybinds.ctrlMod.isDown())
             RenderSystem.setShaderTexture(0, TEXTURE_HAND);
         else if (attackFlag)
             RenderSystem.setShaderTexture(0, TEXTURE_SWORD);
@@ -174,7 +174,7 @@ public class CursorClientVanillaEvents {
         // weird bug when downPos == dragPos makes random entities get selected by this algorithm
         float dist = cursorLeftClickDownPos.distanceToSqr(cursorLeftClickDragPos);
 
-        if (leftClickDown && dist > 0 && !Keybinds.shiftMod.isDown()) {
+        if (leftClickDown && dist > 0 && !Keybinds.ctrlMod.isDown()) {
 
             // can't use AABB here as it's always axis-aligned (ie. no camera-rotation)
             // instead, improvise our own quad
@@ -220,7 +220,7 @@ public class CursorClientVanillaEvents {
     @SubscribeEvent
     public static void renderOverlay(RenderGameOverlayEvent.Post evt) {
 
-        if (leftClickDown && !Keybinds.shiftMod.isDown()) {
+        if (leftClickDown && !Keybinds.ctrlMod.isDown()) {
             GuiComponent.fill(evt.getMatrixStack(), // x1,y1, x2,y2,
                     Math.round(cursorLeftClickDownPos.x),
                     Math.round(cursorLeftClickDownPos.y),
@@ -260,11 +260,12 @@ public class CursorClientVanillaEvents {
             leftClickDown = false;
 
             // enact box selection, excluding non-unit mobs
-            // for single-unit selection, see UnitCommonVanillaEvents
+            // for single-click selection, see UnitCommonVanillaEvents
             // except if attack-moving or nothing is preselected (to prevent deselection)
             ArrayList<Integer> preselectedUnitIds = UnitCommonVanillaEvents.getPreselectedUnitIds();
-            if (preselectedUnitIds.size() > 1 && !attackFlag) {
-                UnitCommonVanillaEvents.setSelectedUnitIds(new ArrayList<>());
+            if (preselectedUnitIds.size() > 0 && !cursorLeftClickDownPos.equals(cursorLeftClickDragPos)) {
+                if (!Keybinds.shiftMod.isDown())
+                    UnitCommonVanillaEvents.setSelectedUnitIds(new ArrayList<>());
                 for (int mobId : preselectedUnitIds) {
                     Entity mob = MC.level.getEntity(mobId);
                     if (mob instanceof Unit)

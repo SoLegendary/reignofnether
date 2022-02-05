@@ -39,6 +39,11 @@ public class CreeperUnit extends Creeper implements Unit {
         this.targetSelector.addGoal(4, targetGoal);
     }
 
+    public Boolean isAttackMoving() { return attackMoveFlag; }
+    public float getAttackMoveRange() { return attackMoveRange; }
+    public BlockPos getAttackMoveAnchor() { return attackMoveAnchor; }
+    public LivingEntity getFollowTarget() { return followTarget; }
+
     public void setMoveTarget(@Nullable BlockPos bp) {
         this.attackMoveFlag = false;
         targetGoal.setTarget(null);

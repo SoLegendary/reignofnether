@@ -1,5 +1,6 @@
 package com.solegendary.ageofcraft.units.goals;
 
+import com.solegendary.ageofcraft.units.Unit;
 import com.solegendary.ageofcraft.units.UnitCommonVanillaEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
