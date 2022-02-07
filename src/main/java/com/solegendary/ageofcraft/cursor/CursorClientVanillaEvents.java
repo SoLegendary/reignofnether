@@ -6,6 +6,7 @@ import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import com.solegendary.ageofcraft.registrars.Keybinds;
 import com.solegendary.ageofcraft.units.Unit;
 import com.solegendary.ageofcraft.units.UnitCommonVanillaEvents;
+import com.solegendary.ageofcraft.util.MiscUtil;
 import com.solegendary.ageofcraft.util.MyMath;
 import com.solegendary.ageofcraft.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -146,15 +147,7 @@ public class CursorClientVanillaEvents {
         // ****************************************
         // Find entity moused over and/or selected
         // ****************************************
-        AABB aabb = new AABB(
-                cursorWorldPos.x - 200,
-                cursorWorldPos.y - 200,
-                cursorWorldPos.z - 200,
-                cursorWorldPos.x + 200,
-                cursorWorldPos.y + 200,
-                cursorWorldPos.z + 200
-        );
-        List<PathfinderMob> entities = MC.level.getEntitiesOfClass(PathfinderMob.class, aabb);
+        List<PathfinderMob> entities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, PathfinderMob.class);
 
         UnitCommonVanillaEvents.setPreselectedUnitIds(new ArrayList<>());
 

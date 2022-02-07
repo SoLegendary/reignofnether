@@ -8,9 +8,9 @@ import javax.annotation.Nullable;
 public interface Unit {
 
     public Boolean isAttackMoving();
-    public float getAttackMoveRange();
-    public BlockPos getAttackMoveAnchor();
-    public LivingEntity getFollowTarget();
+    public Boolean isFollowing();
+
+    void resetTargets();
 
     // chase and attack the target ignoring all else until it is dead or out of sight
     void setAttackTarget(@Nullable LivingEntity target);

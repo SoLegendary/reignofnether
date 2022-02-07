@@ -16,7 +16,7 @@ public class ZombieUnit extends Zombie implements Unit {
     MoveToCursorBlockGoal moveGoal;
     SelectedTargetGoal targetGoal;
 
-    private Boolean attackMoveFlag = false;
+    private BlockPos attackMoveTarget = null;
     private final float attackMoveRange = 5;
     private BlockPos attackMoveAnchor = null;
     private LivingEntity followTarget = null;
@@ -25,16 +25,15 @@ public class ZombieUnit extends Zombie implements Unit {
         super(p_34271_, p_34272_);
     }
 
-    public Boolean isAttackMoving() { return attackMoveFlag; }
-    public float getAttackMoveRange() { return attackMoveRange; }
-    public BlockPos getAttackMoveAnchor() { return attackMoveAnchor; }
-    public LivingEntity getFollowTarget() { return followTarget; }
+    public Boolean isAttackMoving() { return attackMoveTarget != null; }
+    public Boolean isFollowing() { return followTarget != null; }
 
     @Override
     protected void registerGoals() {
         this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
         this.targetGoal = new SelectedTargetGoal(this, true, true);
 
+        // TODO: extend zombie goal to always null target on end
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, moveGoal);
         this.goalSelector.addGoal(3, new ZombieAttackGoal(this, 1.0D, false));
@@ -42,26 +41,31 @@ public class ZombieUnit extends Zombie implements Unit {
         this.targetSelector.addGoal(3, targetGoal);
     }
 
-    public void setMoveTarget(@Nullable BlockPos bp) {
-        this.attackMoveFlag = false;
+    public void resetTargets() {
+        this.attackMoveTarget = null;
         targetGoal.setTarget(null);
+        moveGoal.setMoveTarget(null);
+        this.followTarget = null;
+    }
+
+    public void setMoveTarget(@Nullable BlockPos bp) {
+        resetTargets();
         moveGoal.setMoveTarget(bp);
     }
 
     // target MUST be a serverside entity or else it cannot be attacked
     public void setAttackTarget(@Nullable LivingEntity target) {
-        this.attackMoveFlag = false;
-        moveGoal.setMoveTarget(null);
+        resetTargets();
         targetGoal.setTarget(target);
     }
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) {
-        this.attackMoveFlag = true;
-        targetGoal.setTarget(null);
-        moveGoal.setMoveTarget(bp);
+        resetTargets();
+        this.attackMoveTarget = bp;
     }
 
     public void setFollowTarget(@Nullable LivingEntity target) {
+        resetTargets();
         this.followTarget = target;
     }
 }

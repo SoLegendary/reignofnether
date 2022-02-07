@@ -48,6 +48,8 @@ public class UnitCommonVanillaEvents {
     public static void setSelectedUnitIds(ArrayList<Integer> unitIds) { selectedUnitIds = unitIds; }
     public static int getUnitIdToAttack() { return unitIdToAttack; }
     public static int getUnitIdToFollow() { return unitIdToFollow; }
+    public static void setUnitIdToAttack(int id) { unitIdToAttack = id; }
+    public static void setUnitIdToFollow(int id) { unitIdToFollow = id; }
 
 
     // TODO: consider changing PathfinderMob to Unit?
@@ -119,11 +121,9 @@ public class UnitCommonVanillaEvents {
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
-        System.out.println(Keybinds.nums[1]);
-
         ServerLevel world = (ServerLevel) evt.world;
 
-        // get and set control groups
+        // manage control groups
         if (controlGroups.size() <= 0) // initialise with empty arrays
             for (KeyMapping keyMapping : Keybinds.nums)
                 controlGroups.add(new ArrayList<>());
@@ -137,11 +137,18 @@ public class UnitCommonVanillaEvents {
                 selectedUnitIds = controlGroups.get(index);
         }
 
-
         // Consume queues produced in clientside events like onMouseClick; remember to always get the serverside
         // entity first via the ID or else goals are not able to be manipulated (and also so we can cast to Unit)
         if (!world.isClientSide()) {
 
+            // stop command
+            if (Keybinds.keyS.isDown()) {
+                for (int id : unitIdsToMove) {
+                    Unit unit = (Unit) world.getEntity(id);
+                    if (unit != null)
+                        unit.resetTargets();
+                }
+            }
             // deselect all units on escape
             if (Keybinds.escape.isDown())
                 selectedUnitIds = new ArrayList<>();
@@ -202,13 +209,12 @@ public class UnitCommonVanillaEvents {
         }
     }
 
-    // TODO: change this later to check for the unit's player controller instead of just selections
+    // TODO: change this later to check for the unit's player controller instead of just type
     public static boolean isUnitFriendly(int unitId) {
-        for (int selectedUnitId : selectedUnitIds) {
-            if (selectedUnitId == unitId)
-                return true;
+        if (MC.level != null) {
+            return MC.level.getEntity(unitId) instanceof Unit;
         }
-        return false;
+        return true;
     }
 
     public static boolean targetingSelf() {

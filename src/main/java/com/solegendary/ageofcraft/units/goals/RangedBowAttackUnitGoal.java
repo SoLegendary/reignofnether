@@ -17,7 +17,7 @@ import java.util.EnumSet;
 // - does not require the user to wind up bow attacks, instead using RTS-like attack cooldowns
 // TODO: prevent friendly fire
 
-public class RangedBowAttackModifiedGoal<T extends net.minecraft.world.entity.Mob & RangedAttackMob> extends Goal {
+public class RangedBowAttackUnitGoal<T extends net.minecraft.world.entity.Mob & RangedAttackMob> extends Goal {
     private final T mob;
     private int attackWindupTime; // time to wind up a bow attack
     private int attackCooldownMax;
@@ -26,7 +26,7 @@ public class RangedBowAttackModifiedGoal<T extends net.minecraft.world.entity.Mo
     private int attackTime = -1;
     private int seeTime; // how long we have seen the target for
 
-    public RangedBowAttackModifiedGoal(T mob, int attackWindupTime, int attackCooldown, float attackRadius) {
+    public RangedBowAttackUnitGoal(T mob, int attackWindupTime, int attackCooldown, float attackRadius) {
         this.mob = mob;
         this.attackWindupTime = attackWindupTime;
         this.attackCooldownMax = attackCooldown;
@@ -46,10 +46,13 @@ public class RangedBowAttackModifiedGoal<T extends net.minecraft.world.entity.Mo
     }
 
     public boolean canContinueToUse() {
-        return (this.canUse() || !this.mob.getNavigation().isDone()) &&
-                this.isHoldingBow() &&
-                this.mob.getTarget() != null &&
-                this.mob.getTarget().isAlive();
+        boolean canContinue = ((this.canUse() || !this.mob.getNavigation().isDone()) &&
+                                this.isHoldingBow() &&
+                                this.mob.getTarget() != null &&
+                                this.mob.getTarget().isAlive());
+        if (!canContinue)
+            this.mob.setTarget(null);
+        return canContinue;
     }
 
     public void start() {
@@ -63,6 +66,7 @@ public class RangedBowAttackModifiedGoal<T extends net.minecraft.world.entity.Mo
         this.seeTime = 0;
         this.attackTime = -1;
         this.mob.stopUsingItem();
+        this.mob.setTarget(null);
     }
 
     public void tick() {
@@ -98,7 +102,7 @@ public class RangedBowAttackModifiedGoal<T extends net.minecraft.world.entity.Mo
                 }
                 else if (canSeeTarget) { // start drawing bowstring
                     int i = this.mob.getTicksUsingItem();
-                    if (i >= 5 && attackCooldown <= 0) {
+                    if (i >= attackWindupTime && attackCooldown <= 0) {
                         this.mob.stopUsingItem();
                         this.mob.performRangedAttack(target, BowItem.getPowerForTime(i));
                         this.attackTime = this.attackWindupTime;

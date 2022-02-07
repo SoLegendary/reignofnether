@@ -13,6 +13,7 @@ import net.minecraft.world.phys.AABB;
 public class MyRenderer {
 
     private static final Minecraft MC = Minecraft.getInstance();
+
     public static void drawBlockOutline(PoseStack matrixStack, BlockPos blockpos, float a) {
         AABB aabb = new AABB(blockpos).move(0,0.01,0);
         drawOutline(matrixStack, aabb, 1.0f,1.0f,1.0f, a);

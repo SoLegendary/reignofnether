@@ -39,9 +39,12 @@ public class MoveToCursorBlockGoal extends Goal {
         return false;
     }
 
-    // TODO: implement attackmove using this.mob.isAttackMoving()
     public boolean canContinueToUse() {
-        return !this.mob.getNavigation().isDone();
+        if (this.mob.getNavigation().isDone()) {
+            moveTarget = null;
+            return false;
+        }
+        return true;
     }
 
     public void start() {
@@ -57,5 +60,9 @@ public class MoveToCursorBlockGoal extends Goal {
     public void setMoveTarget(@Nullable BlockPos bp) {
         this.moveTarget = bp;
         this.start();
+    }
+
+    public BlockPos getMoveTarget() {
+        return this.moveTarget;
     }
 }

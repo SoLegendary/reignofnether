@@ -18,7 +18,7 @@ public class CreeperUnit extends Creeper implements Unit {
     MoveToCursorBlockGoal moveGoal;
     SelectedTargetGoal targetGoal;
 
-    private Boolean attackMoveFlag = false;
+    private BlockPos attackMoveTarget = null;
     private final float attackMoveRange = 5;
     private BlockPos attackMoveAnchor = null;
     private LivingEntity followTarget = null;
@@ -39,31 +39,34 @@ public class CreeperUnit extends Creeper implements Unit {
         this.targetSelector.addGoal(4, targetGoal);
     }
 
-    public Boolean isAttackMoving() { return attackMoveFlag; }
-    public float getAttackMoveRange() { return attackMoveRange; }
-    public BlockPos getAttackMoveAnchor() { return attackMoveAnchor; }
-    public LivingEntity getFollowTarget() { return followTarget; }
+    public Boolean isAttackMoving() { return attackMoveTarget != null; }
+    public Boolean isFollowing() { return followTarget != null; }
+
+    public void resetTargets() {
+        this.attackMoveTarget = null;
+        targetGoal.setTarget(null);
+        moveGoal.setMoveTarget(null);
+        this.followTarget = null;
+    }
 
     public void setMoveTarget(@Nullable BlockPos bp) {
-        this.attackMoveFlag = false;
-        targetGoal.setTarget(null);
+        resetTargets();
         moveGoal.setMoveTarget(bp);
     }
 
     // target MUST be a serverside entity or else it cannot be attacked
     public void setAttackTarget(@Nullable LivingEntity target) {
-        this.attackMoveFlag = false;
-        moveGoal.setMoveTarget(null);
+        resetTargets();
         targetGoal.setTarget(target);
     }
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) {
-        this.attackMoveFlag = true;
-        targetGoal.setTarget(null);
-        moveGoal.setMoveTarget(bp);
+        resetTargets();
+        this.attackMoveTarget = bp;
     }
 
     public void setFollowTarget(@Nullable LivingEntity target) {
+        resetTargets();
         this.followTarget = target;
     }
 }
