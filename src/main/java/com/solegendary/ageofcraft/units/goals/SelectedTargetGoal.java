@@ -44,4 +44,8 @@ public class SelectedTargetGoal<T extends LivingEntity> extends TargetGoal {
         this.target = target;
         this.start();
     }
+
+    public LivingEntity getTarget() {
+        return this.target;
+    }
 }

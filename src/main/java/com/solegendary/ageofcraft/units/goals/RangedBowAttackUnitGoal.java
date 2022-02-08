@@ -46,13 +46,10 @@ public class RangedBowAttackUnitGoal<T extends net.minecraft.world.entity.Mob & 
     }
 
     public boolean canContinueToUse() {
-        boolean canContinue = ((this.canUse() || !this.mob.getNavigation().isDone()) &&
-                                this.isHoldingBow() &&
-                                this.mob.getTarget() != null &&
-                                this.mob.getTarget().isAlive());
-        if (!canContinue)
-            this.mob.setTarget(null);
-        return canContinue;
+       return (this.canUse() || !this.mob.getNavigation().isDone()) &&
+            this.isHoldingBow() &&
+            this.mob.getTarget() != null &&
+            this.mob.getTarget().isAlive();
     }
 
     public void start() {
@@ -66,7 +63,6 @@ public class RangedBowAttackUnitGoal<T extends net.minecraft.world.entity.Mob & 
         this.seeTime = 0;
         this.attackTime = -1;
         this.mob.stopUsingItem();
-        this.mob.setTarget(null);
     }
 
     public void tick() {

@@ -15,6 +15,8 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.world.entity.ai.goal.RangedBowAttackGoal;
+
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +30,6 @@ public class SkeletonUnit extends Skeleton implements Unit {
     // if true causes moveGoal and attackGoal to work together to allow attack moving
     // moves to a block but will chase/attack nearby monsters in range up to a certain distance away
     private BlockPos attackMoveTarget = null;
-    private BlockPos attackMoveAnchor = null; // pos marked after chasing a target on attack move to return to
     private LivingEntity followTarget = null; // if nonnull, continuously moves to the target
     private boolean holdPosition = false;
 
@@ -40,10 +41,10 @@ public class SkeletonUnit extends Skeleton implements Unit {
     boolean retainHoldPosition = false;
 
     // combat stats
-    private final float attackRange = 10.0F;
-    private final int attackCooldown = 45;
-    private final float aggroRange = 10;
-    private final boolean willRetaliate = true; // will attack when hurt by an enemy, TODO: for workers, run if false
+    final float attackRange = 10.0F;
+    final int attackCooldown = 45;
+    final float aggroRange = 10;
+    final boolean willRetaliate = true; // will attack when hurt by an enemy, TODO: for workers, run if false
 
     public SkeletonUnit(EntityType<? extends Skeleton> p_33570_, Level p_33571_) {
         super(p_33570_, p_33571_);
@@ -57,8 +58,14 @@ public class SkeletonUnit extends Skeleton implements Unit {
 
         if (!this.level.isClientSide) {
 
-            // TODO: target is being reassigned every tick and seems to cause spazzing out bug after the target dies
+            // reduce conditions for
+            if (targetGoal.getTarget() == null || !targetGoal.getTarget().isAlive() ||
+                this.getTarget() == null || !this.getTarget().isAlive()) {
+                this.setTarget(null);
+                this.targetGoal.setTarget(null);
+            }
 
+            // need to do this outside the goal so it ticks down while not attacking
             if (this.attackGoal != null)
                 attackGoal.tickCooldown();
 
@@ -86,15 +93,15 @@ public class SkeletonUnit extends Skeleton implements Unit {
             // retaliate against a mob that damaged us
             if (getLastDamageSource() != null && willRetaliate) {
                 Entity lastDSEntity = getLastDamageSource().getEntity();
+
                 if (lastDSEntity instanceof PathfinderMob &&
-                        UnitCommonVanillaEvents.isUnitFriendly(lastDSEntity.getId()) &&
+                        !UnitCommonVanillaEvents.isUnitFriendly(lastDSEntity.getId()) &&
                         !hasLivingTarget())
                     this.setAttackTarget((PathfinderMob) lastDSEntity);
             }
-            // enact aggression when idle TODO: doesn't seem to work?
-            //if (isIdle()) {
-            //    System.out.println(this.attackClosestEnemy((ServerLevel) this.level));
-            //}
+            // enact aggression when idle
+            if (isIdle())
+                System.out.println(this.attackClosestEnemy((ServerLevel) this.level));
 
             // TODO: enact hold position
         }
@@ -113,14 +120,15 @@ public class SkeletonUnit extends Skeleton implements Unit {
         List<PathfinderMob> nearbyUnfriendlyMobs = new ArrayList<>();
 
         for (PathfinderMob mob : nearbyMobs) {
-            if (!UnitCommonVanillaEvents.isUnitFriendly(mob.getId()))
+            if (!UnitCommonVanillaEvents.isUnitFriendly(mob.getId()) && mob.getId() != this.getId())
                 nearbyUnfriendlyMobs.add(mob);
         }
-        // sort by distance, then attack the closest one
+        // find the closest mob
         double closestDist = attackRange + 1;
         PathfinderMob closestMob = null;
         for (PathfinderMob mob : nearbyUnfriendlyMobs) {
-            if (this.position().distanceTo(mob.position()) < closestDist) {
+            double dist = this.position().distanceTo(mob.position());
+            if (dist < closestDist && dist < aggroRange) {
                 closestDist = this.position().distanceTo(mob.position());
                 closestMob = mob;
             }

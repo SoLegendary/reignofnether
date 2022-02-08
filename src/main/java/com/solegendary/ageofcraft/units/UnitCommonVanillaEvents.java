@@ -93,7 +93,8 @@ public class UnitCommonVanillaEvents {
                     selectedUnitIds = new ArrayList<>();
                 else
                     selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0)));
-                if (!selectedUnitIds.contains(preselectedUnitIds.get(0)))
+                if (!selectedUnitIds.contains(preselectedUnitIds.get(0)) &&
+                     MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit)
                     selectedUnitIds.add(preselectedUnitIds.get(0));
 
             }
