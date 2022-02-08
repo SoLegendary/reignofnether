@@ -33,14 +33,14 @@ public class OrthoviewClientVanillaEvents {
     private static final float ZOOM_STEP_SCROLL = 1;
     private static final float ZOOM_MIN = 10;
     private static final float ZOOM_MAX = 90;
-    private static final float PAN_KEY_STEP = 0.5f;
-    private static final float PAN_MOUSE_STEP = 0.5f;
+    private static final float PAN_KEY_STEP = 0.3f;
+    private static final float PAN_MOUSE_STEP = 0.3f;
     private static final float PAN_MOUSE_EDGE_BUFFER = 20; // if mouse < this distance from screen edge: start panning
     private static final float ROTATE_STEP = 0.35f;
     private static final float CAMROTY_MAX = -20;
     private static final float CAMROTY_MIN = -90;
     private static final float CAMROT_MOUSE_SENSITIVITY = 0.12f;
-    private static final float CAMPAN_MOUSE_SENSITIVITY = 0.2f;
+    private static final float CAMPAN_MOUSE_SENSITIVITY = 0.12f;
 
     private static float zoom = 30; // * 2 = number of blocks in height
     private static float camRotX = 45;

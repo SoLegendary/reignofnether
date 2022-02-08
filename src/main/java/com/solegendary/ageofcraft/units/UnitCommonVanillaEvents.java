@@ -19,6 +19,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Array;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -88,14 +89,21 @@ public class UnitCommonVanillaEvents {
                 }
             }
             // left click -> (de)select a single unit
+            // if shift is held, deselect a unit or add it to the selected group
             if (preselectedUnitIds.size() == 1 && !CursorClientVanillaEvents.getAttackFlag()) {
-                if (!Keybinds.shiftMod.isDown())
+                if (Keybinds.shiftMod.isDown()) {
+                    if (!selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0))))
+                        if (MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit)
+                            selectedUnitIds.add(preselectedUnitIds.get(0));
+                }
+                else {
                     selectedUnitIds = new ArrayList<>();
-                else
-                    selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0)));
-                if (!selectedUnitIds.contains(preselectedUnitIds.get(0)) &&
-                     MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit)
-                    selectedUnitIds.add(preselectedUnitIds.get(0));
+                    if (MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit)
+                        selectedUnitIds.add(preselectedUnitIds.get(0));
+                }
+
+
+
 
             }
             CursorClientVanillaEvents.removeAttackFlag();
@@ -109,7 +117,7 @@ public class UnitCommonVanillaEvents {
                 else if (preselectedUnitIds.size() == 1 && !targetingSelf())
                     unitIdToFollow = preselectedUnitIds.get(0);
                 // right click -> move to ground pos
-                else {
+                else if (!Keybinds.altMod.isDown()) {
                     unitIdsToMove = new ArrayList<>();
                     unitIdsToMove.addAll(selectedUnitIds);
                 }

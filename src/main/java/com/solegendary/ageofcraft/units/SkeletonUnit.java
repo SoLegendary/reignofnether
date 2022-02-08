@@ -45,7 +45,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
     final int attackCooldown = 45;
     final float aggroRange = 10;
     final boolean willRetaliate = true; // will attack when hurt by an enemy, TODO: for workers, run if false
-    final boolean aggressiveWhenIdle = true;
+    final boolean aggressiveWhenIdle = false;
 
     public SkeletonUnit(EntityType<? extends Skeleton> p_33570_, Level p_33571_) {
         super(p_33570_, p_33571_);
