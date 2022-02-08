@@ -45,6 +45,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
     final int attackCooldown = 45;
     final float aggroRange = 10;
     final boolean willRetaliate = true; // will attack when hurt by an enemy, TODO: for workers, run if false
+    final boolean aggressiveWhenIdle = true;
 
     public SkeletonUnit(EntityType<? extends Skeleton> p_33570_, Level p_33571_) {
         super(p_33570_, p_33571_);
@@ -100,8 +101,8 @@ public class SkeletonUnit extends Skeleton implements Unit {
                     this.setAttackTarget((PathfinderMob) lastDSEntity);
             }
             // enact aggression when idle
-            if (isIdle())
-                System.out.println(this.attackClosestEnemy((ServerLevel) this.level));
+            if (isIdle() && aggressiveWhenIdle)
+                this.attackClosestEnemy((ServerLevel) this.level);
 
             // TODO: enact hold position
         }
