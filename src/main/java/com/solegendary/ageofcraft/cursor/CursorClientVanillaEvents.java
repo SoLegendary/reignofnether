@@ -71,7 +71,6 @@ public class CursorClientVanillaEvents {
     private static final ResourceLocation TEXTURE_SWORD = new ResourceLocation("ageofcraft", "cursors/customcursor_sword.png");
 
 
-
     @SubscribeEvent
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
@@ -85,10 +84,10 @@ public class CursorClientVanillaEvents {
         if (Keybinds.keyA.isDown() && UnitCommonVanillaEvents.getSelectedUnitIds().size() > 0)
             attackFlag = true;
 
-        // hide regular cursor
         long window = MC.getWindow().getWindow();
-        GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_HIDDEN);
 
+        // hides default cursor and locks it to the window to allow edge panning
+        GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
 
         // blitting like this will cause it to be rendered 1 frame behind realtime (this hopefully shouldn't be noticeable...)
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -103,8 +102,14 @@ public class CursorClientVanillaEvents {
         else
             RenderSystem.setShaderTexture(0, TEXTURE_CURSOR);
 
+        // draw at edge of screen even if mouse is off it
+        int cursorDrawX = Math.min(evt.getMouseX(), MC.getWindow().getGuiScaledWidth() - 5);
+        int cursorDrawY = Math.min(evt.getMouseY(), MC.getWindow().getGuiScaledHeight() - 5);
+        cursorDrawX = Math.max(0,cursorDrawX);
+        cursorDrawY = Math.max(0,cursorDrawY);
+
         GuiComponent.blit(evt.getMatrixStack(),
-                evt.getMouseX(), evt.getMouseY(), // where on screen to starting drawing to
+                cursorDrawX, cursorDrawY,
                 16,  // blit offset
                 16, 16,
                 16, 16, // where on texture to start drawing from

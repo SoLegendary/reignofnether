@@ -1,5 +1,6 @@
 package com.solegendary.ageofcraft.orthoview;
 
+import com.mojang.blaze3d.platform.Window;
 import com.solegendary.ageofcraft.gui.TopdownGuiCommonVanillaEvents;
 import com.solegendary.ageofcraft.util.MyMath;
 import net.minecraft.client.Minecraft;
@@ -10,10 +11,12 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import com.solegendary.ageofcraft.gui.TopdownGuiContainer;
 import com.mojang.math.Matrix4f;
 
+import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 
 import static net.minecraft.util.Mth.sign;
@@ -34,13 +37,11 @@ public class OrthoviewClientVanillaEvents {
     private static final float ZOOM_MIN = 10;
     private static final float ZOOM_MAX = 90;
     private static final float PAN_KEY_STEP = 0.3f;
-    private static final float PAN_MOUSE_STEP = 0.3f;
-    private static final float PAN_MOUSE_EDGE_BUFFER = 20; // if mouse < this distance from screen edge: start panning
-    private static final float ROTATE_STEP = 0.35f;
+    private static final float EDGE_CAMPAM_SENSITIVITY = 0.8f;
     private static final float CAMROTY_MAX = -20;
     private static final float CAMROTY_MIN = -90;
     private static final float CAMROT_MOUSE_SENSITIVITY = 0.12f;
-    private static final float CAMPAN_MOUSE_SENSITIVITY = 0.12f;
+    private static final float CAMPAN_MOUSE_SENSITIVITY = 0.15f;
 
     private static float zoom = 30; // * 2 = number of blocks in height
     private static float camRotX = 45;
@@ -51,10 +52,10 @@ public class OrthoviewClientVanillaEvents {
     private static float mouseRightDownY = 0;
     private static float mouseLeftDownX = 0;
     private static float mouseLeftDownY = 0;
+
+    // not sure why but screen=2*win; GLFW functions should use screen
     private static int winWidth = MC.getWindow().getGuiScaledWidth();
     private static int winHeight = MC.getWindow().getGuiScaledHeight();
-    private static int screenWidth = MC.getWindow().getScreenWidth();
-    private static int screenHeight = MC.getWindow().getScreenHeight();
 
     public static boolean isEnabled() {
         return enabled;
@@ -143,24 +144,42 @@ public class OrthoviewClientVanillaEvents {
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
         if (!enabled) return;
 
-        if (Keybinds.altMod.isDown()) return;
+        // GLFW coords seem to be 2x vanilla coords, but use only them for consistency
+        // since we need to use glfwSetCursorPos
+        long glfwWindow = MC.getWindow().getWindow();
+        int glfwWinWidth = MC.getWindow().getScreenWidth();
+        int glfwWinHeight = MC.getWindow().getScreenHeight();
 
-        // no idea why but mouse x and y are half of what's expected
-        int mouseX = evt.getMouseX();
-        int mouseY = evt.getMouseY();
+        DoubleBuffer glfwCursorX = BufferUtils.createDoubleBuffer(1);
+        DoubleBuffer glfwCursorY = BufferUtils.createDoubleBuffer(1);
+        GLFW.glfwGetCursorPos(glfwWindow, glfwCursorX, glfwCursorY);
+        double cursorX = glfwCursorX.get();
+        double cursorY = glfwCursorY.get();
 
         // panCam when cursor is at edge of screen
         // mouse (0,0) is top left of screen
-        /*
-        if (mouseX < PAN_MOUSE_EDGE_BUFFER)
-            panCam(PAN_KEY_STEP * 2, 0);
-        else if (mouseX > winWidth - PAN_MOUSE_EDGE_BUFFER)
-            panCam(-PAN_KEY_STEP * 2, 0);
-        if (mouseY < PAN_MOUSE_EDGE_BUFFER)
-            panCam(0, PAN_KEY_STEP * 2);
-        else if (mouseY > winHeight - PAN_MOUSE_EDGE_BUFFER)
-            panCam(0, -PAN_KEY_STEP * 2);
-         */
+
+        // for one frame you can take the mouse outside of the window, so use this amount to adjust pan speed
+        if (!Keybinds.altMod.isDown()) {
+            if (cursorX <= 0)
+                panCam(EDGE_CAMPAM_SENSITIVITY, 0);
+            else if (cursorX >= glfwWinWidth)
+                panCam(-EDGE_CAMPAM_SENSITIVITY, 0);
+            if (cursorY <= 0)
+                panCam(0, EDGE_CAMPAM_SENSITIVITY);
+            else if (cursorY >= glfwWinHeight)
+                panCam(0, -EDGE_CAMPAM_SENSITIVITY);
+        }
+
+        // lock mouse inside window
+        if (cursorX >= glfwWinWidth)
+            GLFW.glfwSetCursorPos(glfwWindow, glfwWinWidth, cursorY);
+        if (cursorY >= glfwWinHeight)
+            GLFW.glfwSetCursorPos(glfwWindow, cursorX, glfwWinHeight);
+        if (cursorX <= 0)
+            GLFW.glfwSetCursorPos(glfwWindow, 0, cursorY);
+        if (cursorY <= 0)
+            GLFW.glfwSetCursorPos(glfwWindow, cursorX, 0);
     }
 
     // prevents stuff like fire and water effects being shown on your HUD
@@ -204,8 +223,8 @@ public class OrthoviewClientVanillaEvents {
 
         if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybinds.altMod.isDown()) {
             cameraMovingByMouse = true;
-            float moveX = (float) evt.getDragX() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX) * ((float) screenWidth / winWidth);
-            float moveZ = (float) evt.getDragY() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX) * ((float) screenHeight / winHeight);
+            float moveX = (float) evt.getDragX() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX); //* winWidth/1920;
+            float moveZ = (float) evt.getDragY() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX); //* winHeight/1080;
             panCam(moveX, moveZ);
         }
         else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybinds.altMod.isDown()) {
@@ -234,8 +253,6 @@ public class OrthoviewClientVanillaEvents {
 
         winWidth = MC.getWindow().getGuiScaledWidth();
         winHeight = MC.getWindow().getGuiScaledHeight();
-        screenWidth = MC.getWindow().getScreenWidth();
-        screenHeight = MC.getWindow().getScreenHeight();
 
         Player player = MC.player;
 

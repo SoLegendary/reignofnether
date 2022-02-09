@@ -116,7 +116,7 @@ public class UnitCommonVanillaEvents {
                 // right click -> follow friendly unit
                 else if (preselectedUnitIds.size() == 1 && !targetingSelf())
                     unitIdToFollow = preselectedUnitIds.get(0);
-                // right click -> move to ground pos
+                // right click -> move to ground pos (and disable during camera manip)
                 else if (!Keybinds.altMod.isDown()) {
                     unitIdsToMove = new ArrayList<>();
                     unitIdsToMove.addAll(selectedUnitIds);
