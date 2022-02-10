@@ -24,6 +24,7 @@ public class Keybinds {
     public static final KeyMapping keyO = new KeyMapping("key.ageofcraft.orthoview.keyO", GLFW.GLFW_KEY_O, KEY_CATEGORY);
     public static final KeyMapping keyA = new KeyMapping("key.ageofcraft.orthoview.keyA", GLFW.GLFW_KEY_A, KEY_CATEGORY);
     public static final KeyMapping keyS = new KeyMapping("key.ageofcraft.orthoview.keyS", GLFW.GLFW_KEY_S, KEY_CATEGORY);
+    public static final KeyMapping keyF1 = new KeyMapping("key.ageofcraft.orthoview.keyF1", GLFW.GLFW_KEY_F1, KEY_CATEGORY);
 
     public static final KeyMapping[] nums = {
          new KeyMapping("key.ageofcraft.orthoview.key0", GLFW.GLFW_KEY_0, KEY_CATEGORY),
@@ -52,6 +53,7 @@ public class Keybinds {
         ClientRegistry.registerKeyBinding(keyO);
         ClientRegistry.registerKeyBinding(keyA);
         ClientRegistry.registerKeyBinding(keyS);
+        ClientRegistry.registerKeyBinding(keyF1);
 
         for (KeyMapping keyMapping : nums)
             ClientRegistry.registerKeyBinding(keyMapping);

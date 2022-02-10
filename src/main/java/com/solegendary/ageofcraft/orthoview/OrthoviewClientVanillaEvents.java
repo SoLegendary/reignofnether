@@ -99,14 +99,6 @@ public class OrthoviewClientVanillaEvents {
         }
     }
 
-    // are we on the top-down gui screen?
-    public static boolean isTopdownGui(GuiScreenEvent evt) {
-        if (evt.getGui() != null)
-            return evt.getGui().getTitle().getString().equals(TopdownGuiContainer.TITLE.getString());
-        else
-            return false;
-    }
-
     public static void toggleEnable() {
         enabled = !enabled;
 
@@ -128,7 +120,7 @@ public class OrthoviewClientVanillaEvents {
             if (evt.getKey() == Keybinds.reset.getKey().getValue())
                 reset();
 
-            if (evt.getKey() == Keybinds.keyP.getKey().getValue())
+            if (evt.getKey() == Keybinds.keyF1.getKey().getValue())
                 TopdownGuiCommonVanillaEvents.openPauseMenu();
         }
     }

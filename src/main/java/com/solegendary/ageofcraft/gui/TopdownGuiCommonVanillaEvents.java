@@ -6,10 +6,14 @@ import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.level.GameType;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fmllegacy.network.NetworkHooks;
+
+import net.minecraft.client.gui.screens.PauseScreen;
+
 /**
  * Handler for TopdownGui, the GUI screen that allows for cursor movement on screen
  * Doing stuff like initialising it and controlling where it comes up in the game client
@@ -51,8 +55,8 @@ public class TopdownGuiCommonVanillaEvents {
     // we should also register an event to reopen the topdown gui (if it was open) when the esc menu is closed
     // TODO: make this actually work...
     public static void openPauseMenu() {
-        //System.out.println("Opening esc menu!");
-        //MC.pauseGame(true);
+        System.out.println("Opening pause menu!");
+        MC.pauseGame(true);
     }
 
     @SubscribeEvent
@@ -63,5 +67,12 @@ public class TopdownGuiCommonVanillaEvents {
         if (guiTitle.equals("topdowngui_container")) {
             evt.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent
+    public void onOpenGui(GuiOpenEvent evt) {
+        System.out.println("TEST");
+        System.out.println(evt.getGui());
+        System.out.println(evt.getGui().getTitle());
     }
 }

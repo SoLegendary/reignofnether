@@ -18,7 +18,6 @@ public class TopdownGuiCommonModEvents {
     @SubscribeEvent
     public static void registerContainers(final RegistryEvent.Register<MenuType<?>> event)
     {
-        System.out.println("registerContainers");
         TopdownGuiObjects.CONTAINER_TYPE = IForgeContainerType.create(TopdownGuiContainer::createContainerClientSide);
         TopdownGuiObjects.CONTAINER_TYPE.setRegistryName("topdowngui_container");
         event.getRegistry().register(TopdownGuiObjects.CONTAINER_TYPE);

@@ -73,8 +73,13 @@ public class CursorClientVanillaEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
-        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
+        long window = MC.getWindow().getWindow();
 
+        if (!OrthoviewClientVanillaEvents.isEnabled()) {
+            if (GLFW.glfwRawMouseMotionSupported()) // raw mouse increases sensitivity massively for some reason
+                GLFW.glfwSetInputMode(window, GLFW.GLFW_RAW_MOUSE_MOTION, GLFW.GLFW_TRUE);
+            return;
+        }
         if (MC.player == null || MC.level == null) return;
 
         // ************************************
@@ -84,10 +89,10 @@ public class CursorClientVanillaEvents {
         if (Keybinds.keyA.isDown() && UnitCommonVanillaEvents.getSelectedUnitIds().size() > 0)
             attackFlag = true;
 
-        long window = MC.getWindow().getWindow();
-
         // hides default cursor and locks it to the window to allow edge panning
         GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+        // raw mouse increases sensitivity massively for some reason
+        GLFW.glfwSetInputMode(window, GLFW.GLFW_RAW_MOUSE_MOTION, GLFW.GLFW_FALSE);
 
         // blitting like this will cause it to be rendered 1 frame behind realtime (this hopefully shouldn't be noticeable...)
         RenderSystem.setShader(GameRenderer::getPositionTexShader);

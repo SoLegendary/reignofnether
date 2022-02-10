@@ -1,6 +1,7 @@
 package com.solegendary.ageofcraft.gui;
 
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
@@ -15,7 +16,6 @@ public class TopdownGuiClientEvents {
     // register the factory that is used on the client to generate a ContainerScreen corresponding to our Container
     @SubscribeEvent
     public static void onClientSetupEvent(FMLClientSetupEvent evt) {
-        System.out.println("onClientSetupEvent");
         MenuScreens.register(TopdownGuiObjects.CONTAINER_TYPE, TopdownGui::new);
     }
 }
