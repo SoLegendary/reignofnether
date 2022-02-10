@@ -19,9 +19,9 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
 import net.minecraftforge.client.event.DrawSelectionEvent;
-import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 import static net.minecraft.util.Mth.*;
@@ -72,7 +72,7 @@ public class CursorClientVanillaEvents {
 
 
     @SubscribeEvent
-    public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
+    public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
         long window = MC.getWindow().getWindow();
 
         if (!OrthoviewClientVanillaEvents.isEnabled()) {
@@ -113,15 +113,13 @@ public class CursorClientVanillaEvents {
         cursorDrawX = Math.max(0,cursorDrawX);
         cursorDrawY = Math.max(0,cursorDrawY);
 
-        GuiComponent.blit(evt.getMatrixStack(),
+        GuiComponent.blit(evt.getPoseStack(),
                 cursorDrawX, cursorDrawY,
                 16,  // blit offset
                 16, 16,
                 16, 16, // where on texture to start drawing from
                 16,16 // width/height of what to draw (if larger than texture, it will be repeated)
         );
-
-
 
         // ***********************************************
         // Convert cursor on-screen 2d pos to world 3d pos
@@ -234,7 +232,7 @@ public class CursorClientVanillaEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseClick(GuiScreenEvent.MouseClickedEvent.Post evt) {
+    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
         // select a moused over entity by left clicking it
@@ -249,13 +247,13 @@ public class CursorClientVanillaEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseDrag(GuiScreenEvent.MouseDragEvent.Pre evt) {
+    public static void onMouseDrag(ScreenEvent.MouseDragEvent.Pre evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
         cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
     }
     @SubscribeEvent
-    public static void onMouseRelease(GuiScreenEvent.MouseReleasedEvent.Post evt) {
+    public static void onMouseRelease(ScreenEvent.MouseReleasedEvent.Post evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
         // select a moused over entity by left clicking it
@@ -291,13 +289,13 @@ public class CursorClientVanillaEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderWorld(RenderWorldLastEvent evt) {
+    public static void onRenderWorld(RenderLevelLastEvent evt) {
         if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled()) {
 
             if (!OrthoviewClientVanillaEvents.isCameraMovingByMouse() && !leftClickDown &&
                  UnitCommonVanillaEvents.getSelectedUnitIds().size() > 0 &&
                  UnitCommonVanillaEvents.getPreselectedUnitIds().size() <= 0) {
-                MyRenderer.drawBlockOutline(evt.getMatrixStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
+                MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }
         }
     }

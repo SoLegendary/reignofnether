@@ -8,14 +8,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Frustum.class)
-public class FrustumCullingMixin {
-    // disables frustum culling
+public class FrustumMixin {
+    // I have no idea why this is needed but without it the game freezes and gets stuck inside
+    // this function forever a few seconds after activating orthoView
     @Inject(
-            method = "cubeInFrustum(FFFFFF)Z",
+            method = "cubeCompletelyInFrustum(FFFFFF)Z",
             at = @At("HEAD"),
             cancellable = true
     )
-    private void cubeInFrustum(
+    private void cubeCompletelyInFrustum(
             float f1, float f2, float f3, float f4, float f5, float f6,
             CallbackInfoReturnable<Boolean> cir
     ) {

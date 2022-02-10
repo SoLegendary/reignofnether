@@ -6,11 +6,11 @@ import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.level.GameType;
-import net.minecraftforge.client.event.GuiOpenEvent;
-import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.event.ScreenOpenEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fmllegacy.network.NetworkHooks;
+import net.minecraftforge.network.NetworkHooks;
 
 import net.minecraft.client.gui.screens.PauseScreen;
 
@@ -60,8 +60,8 @@ public class TopdownGuiCommonVanillaEvents {
     }
 
     @SubscribeEvent
-    public static void beforeGuiRender(GuiScreenEvent.DrawScreenEvent.Pre evt) {
-        String guiTitle = evt.getGui().getTitle().getString();
+    public static void beforeGuiRender(ScreenEvent.DrawScreenEvent.Pre evt) {
+        String guiTitle = evt.getScreen().getTitle().getString();
 
         // cancel drawing the GUI
         if (guiTitle.equals("topdowngui_container")) {
@@ -70,9 +70,9 @@ public class TopdownGuiCommonVanillaEvents {
     }
 
     @SubscribeEvent
-    public void onOpenGui(GuiOpenEvent evt) {
+    public void onOpenGui(ScreenOpenEvent evt) {
         System.out.println("TEST");
-        System.out.println(evt.getGui());
-        System.out.println(evt.getGui().getTitle());
+        //System.out.println(evt.getScreen());
+        //System.out.println(evt.getScreen().getTitle());
     }
 }

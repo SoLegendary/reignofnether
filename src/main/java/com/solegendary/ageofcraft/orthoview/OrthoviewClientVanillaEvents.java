@@ -126,14 +126,14 @@ public class OrthoviewClientVanillaEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseScroll(GuiScreenEvent.MouseScrollEvent evt) {
+    public static void onMouseScroll(ScreenEvent.MouseScrollEvent evt) {
         if (!enabled) return;
 
         zoomCam((float) sign(evt.getScrollDelta()) * -ZOOM_STEP_SCROLL);
     }
 
     @SubscribeEvent
-    public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent evt) {
+    public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
         if (!enabled) return;
 
         // GLFW coords seem to be 2x vanilla coords, but use only them for consistency
@@ -182,7 +182,7 @@ public class OrthoviewClientVanillaEvents {
     }
     
     @SubscribeEvent
-    public static void onMouseClick(GuiScreenEvent.MouseClickedEvent evt) {
+    public static void onMouseClick(ScreenEvent.MouseClickedEvent evt) {
         if (!enabled) return;
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -195,7 +195,7 @@ public class OrthoviewClientVanillaEvents {
         }
     }
     @SubscribeEvent
-    public static void onMouseRelease(GuiScreenEvent.MouseReleasedEvent evt) {
+    public static void onMouseRelease(ScreenEvent.MouseReleasedEvent evt) {
         if (!enabled) return;
 
         // stop treating the rotation as adjustments and add them to the base amount
@@ -210,7 +210,7 @@ public class OrthoviewClientVanillaEvents {
         }
     }
     @SubscribeEvent
-    public static void onMouseDrag(GuiScreenEvent.MouseDragEvent evt) {
+    public static void onMouseDrag(ScreenEvent.MouseDragEvent evt) {
         if (!enabled) return;
 
         if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybinds.altMod.isDown()) {
@@ -232,7 +232,7 @@ public class OrthoviewClientVanillaEvents {
     }
 
     @SubscribeEvent
-    public static void onFovModifier(EntityViewRenderEvent.FOVModifier evt) {
+    public static void onFovModifier(EntityViewRenderEvent.FieldOfView evt) {
         if (enabled)
             evt.setFOV(180);
     }

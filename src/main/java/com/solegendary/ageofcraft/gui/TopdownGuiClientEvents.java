@@ -1,7 +1,6 @@
 package com.solegendary.ageofcraft.gui;
 
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 

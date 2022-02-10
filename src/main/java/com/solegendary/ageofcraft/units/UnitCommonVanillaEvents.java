@@ -9,17 +9,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.lang.reflect.Array;
-import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -71,7 +68,7 @@ public class UnitCommonVanillaEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseClick(GuiScreenEvent.MouseClickedEvent.Post evt) {
+    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
         // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
@@ -192,7 +189,7 @@ public class UnitCommonVanillaEvents {
 
     @SubscribeEvent
 
-    public static void onRenderWorld(RenderWorldLastEvent evt) {
+    public static void onRenderWorld(RenderLevelLastEvent evt) {
         if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled()) {
 
             Set<Integer> unitIdsToDraw = new HashSet<>();
@@ -204,11 +201,11 @@ public class UnitCommonVanillaEvents {
                 Entity entity = MC.level.getEntity(idToDraw);
                 if (entity != null) {
                     if (preselectedUnitIds.contains(idToDraw) && CursorClientVanillaEvents.getAttackFlag() && !targetingSelf())
-                        MyRenderer.drawEntityOutline(evt.getMatrixStack(), entity, 1.0f, 0.3f,0.3f, 1.0f);
+                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f,0.3f, 1.0f);
                     else if (selectedUnitIds.contains(idToDraw))
-                        MyRenderer.drawEntityOutline(evt.getMatrixStack(), entity, 1.0f);
+                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f);
                     else if (preselectedUnitIds.contains(idToDraw))
-                        MyRenderer.drawEntityOutline(evt.getMatrixStack(), entity, 0.5f);
+                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.5f);
                 }
             }
 
