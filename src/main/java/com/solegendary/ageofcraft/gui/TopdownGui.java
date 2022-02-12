@@ -27,7 +27,7 @@ public class TopdownGui extends AbstractContainerScreen<TopdownGuiContainer> {
 
     @Override
     public boolean shouldCloseOnEsc() {
-        return false;
+        return true; // allow to close but in ScreenOpenEvent open the pause menu, and vice versa
     }
 
 

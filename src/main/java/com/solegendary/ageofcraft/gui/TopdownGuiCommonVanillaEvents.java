@@ -1,6 +1,8 @@
 package com.solegendary.ageofcraft.gui;
 
+import com.solegendary.ageofcraft.orthoview.OrthoviewClientVanillaEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.MenuProvider;
@@ -69,10 +71,53 @@ public class TopdownGuiCommonVanillaEvents {
         }
     }
 
+    private static Screen topdownGuiScreen = null;
+    private static String lastScreenClosed = null;
+
+    // allow us to go between topdownGui <-> pauseMenu seamlessly by pressing escape
     @SubscribeEvent
-    public void onOpenGui(ScreenOpenEvent evt) {
-        System.out.println("TEST");
-        //System.out.println(evt.getScreen());
-        //System.out.println(evt.getScreen().getTitle());
+    public static void onOpenGui(ScreenOpenEvent evt) {
+
+        if (evt.getScreen() != null) {
+            String screenName = evt.getScreen().getTitle().getString();
+
+            if (screenName.contains("topdowngui_container"))
+                topdownGuiScreen = evt.getScreen();
+        }
+        else { // this branch fires twice on screen close - once with screenClosed nonnull, then null
+            if (MC.screen != null) {
+
+                String screenClosed = MC.screen.getTitle().getString();
+
+                // when we set the menu screen on the same frame as pressing escape, the game tries to close it too
+                // and vice versa too for closing menu and reopening topdowngui, so cancel this
+                // TODO: don't do this if we didn't close game menu by escape
+                if ((lastScreenClosed != null &&
+                    lastScreenClosed.contains("topdowngui_container") &&
+                    screenClosed.contains("Game Menu")) ||
+                    (lastScreenClosed != null &&
+                    lastScreenClosed.contains("Game Menu") &&
+                    screenClosed.contains("topdowngui_container"))) {
+
+                    evt.setCanceled(true);
+                    lastScreenClosed = null; // stop us getting stuck on menu screen forever
+                }
+                // allow the screen to be closed and record it
+                else {
+                    lastScreenClosed = screenClosed;
+                }
+            }
+            // closed topdowngui with esc -> open menu screen
+            else if (lastScreenClosed != null && lastScreenClosed.contains("topdowngui_container") &&
+                    OrthoviewClientVanillaEvents.isEnabled()) {
+                evt.setScreen(new PauseScreen(true));
+            }
+            // closed menu screen while previously being on topdowngui -> open topdowngui
+            // TODO: don't do this if we just changed screens while in the menu
+            else if (lastScreenClosed != null && lastScreenClosed.contains("Game Menu") &&
+                    OrthoviewClientVanillaEvents.isEnabled()) {
+                evt.setScreen(topdownGuiScreen);
+            }
+        }
     }
 }

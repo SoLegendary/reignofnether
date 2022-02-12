@@ -155,8 +155,8 @@ public class UnitCommonVanillaEvents {
                         unit.resetTargets();
                 }
             }
-            // deselect all units on escape
-            if (Keybinds.escape.isDown())
+            // deselect all units
+            if (Keybinds.keyF1.isDown())
                 selectedUnitIds = new ArrayList<>();
 
             for (int id : unitIdsToMove) {
