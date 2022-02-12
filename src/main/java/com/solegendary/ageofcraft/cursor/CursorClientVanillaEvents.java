@@ -73,9 +73,11 @@ public class CursorClientVanillaEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
+
+        String screenName = evt.getScreen().getTitle().getString();
         long window = MC.getWindow().getWindow();
 
-        if (!OrthoviewClientVanillaEvents.isEnabled()) {
+        if (!OrthoviewClientVanillaEvents.isEnabled() || !screenName.equals("topdowngui_container")) {
             if (GLFW.glfwRawMouseMotionSupported()) // raw mouse increases sensitivity massively for some reason
                 GLFW.glfwSetInputMode(window, GLFW.GLFW_RAW_MOUSE_MOTION, GLFW.GLFW_TRUE);
             return;

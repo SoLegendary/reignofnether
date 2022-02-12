@@ -57,8 +57,6 @@ public class UnitCommonVanillaEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinWorldEvent evt) {
         Entity entity = evt.getEntity();
-
-        // TODO: replace all vanilla mobs registered as units with our version, eg. Skeleton -> SkeletonUnit
     }
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveWorldEvent evt) {
@@ -208,10 +206,6 @@ public class UnitCommonVanillaEvents {
                         MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.5f);
                 }
             }
-
-            // TODO: this is only active for 1 frame... probably just check isRightClickDown and render on preselectedUnits
-            //if (targetedUnitId >= 0)
-            //    MyRenderer.drawEntityOutline(evt.getMatrixStack(), evt.get(targetedUnitId), 1.0f, 0, 0 ,0.5f);
         }
     }
 

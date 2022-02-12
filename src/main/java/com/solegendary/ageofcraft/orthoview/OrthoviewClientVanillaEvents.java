@@ -134,7 +134,9 @@ public class OrthoviewClientVanillaEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
-        if (!enabled) return;
+        String screenName = evt.getScreen().getTitle().getString();
+
+        if (!enabled || !screenName.equals("topdowngui_container")) return;
 
         // GLFW coords seem to be 2x vanilla coords, but use only them for consistency
         // since we need to use glfwSetCursorPos
