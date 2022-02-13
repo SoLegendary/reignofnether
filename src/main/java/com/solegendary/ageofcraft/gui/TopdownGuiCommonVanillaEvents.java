@@ -11,6 +11,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.event.ScreenOpenEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
 
@@ -58,33 +59,31 @@ public class TopdownGuiCommonVanillaEvents {
         String guiTitle = evt.getScreen().getTitle().getString();
 
         // cancel drawing the GUI
-        if (guiTitle.equals("topdowngui_container")) {
+        if (guiTitle.equals("topdowngui_container"))
             evt.setCanceled(true);
-        }
     }
 
-    private static Screen topdownGuiScreen = null;
+    // ensure topdownGui is always open whenever Orthoview is enabled (if no other screens are open)
+    @SubscribeEvent
+    public static void onWorldTick(TickEvent.WorldTickEvent evt) {
+        if (MC.screen == null && OrthoviewClientVanillaEvents.isEnabled())
+            openTopdownGui();
+    }
+
     private static String lastScreenClosed = "Game Menu";
 
     // allow us to go between topdownGui <-> pauseMenu seamlessly by pressing escape
     @SubscribeEvent
     public static void onOpenGui(ScreenOpenEvent evt) {
 
-        if (evt.getScreen() != null) {
-            String screenName = evt.getScreen().getTitle().getString();
-
-            if (screenName.contains("topdowngui_container"))
-                topdownGuiScreen = evt.getScreen();
-        }
+        // if getScreen is null, we closed a screen instead of opening it
         // this branch fires twice on screen close - once with screenClosed nonnull, then null
-        else if (OrthoviewClientVanillaEvents.isEnabled()) {
+        if (evt.getScreen() == null && OrthoviewClientVanillaEvents.isEnabled()) {
             if (MC.screen != null) {
 
                 String screenClosed = MC.screen.getTitle().getString();
 
                 // when we set the menu screen on the same frame as pressing escape, the game tries to close it too
-                // TODO: don't do this if we didn't close game menu by escape
-                // TODO: if we closed menu by button click or just logged and previously logged out in topdown mode, reopen topdowngui
                 if (lastScreenClosed != null &&
                     lastScreenClosed.contains("Game Menu") &&
                     screenClosed.contains("topdowngui_container")) {
@@ -94,15 +93,8 @@ public class TopdownGuiCommonVanillaEvents {
                 lastScreenClosed = screenClosed;
             }
             // closed topdowngui with esc -> open menu screen
-            else if (lastScreenClosed != null && lastScreenClosed.contains("topdowngui_container")) {
+            else if (lastScreenClosed != null && lastScreenClosed.contains("topdowngui_container"))
                 evt.setScreen(new PauseScreen(true));
-                System.out.println("Set pausescreen");
-            }
-            // closed menu screen while previously being on topdowngui -> open topdowngui
-            else if (lastScreenClosed != null && lastScreenClosed.contains("Game Menu")) {
-                evt.setScreen(topdownGuiScreen);
-                System.out.println("Set topdownGuiScreen");
-            }
         }
     }
 }

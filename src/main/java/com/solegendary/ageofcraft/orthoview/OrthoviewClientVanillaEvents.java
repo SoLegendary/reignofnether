@@ -102,8 +102,8 @@ public class OrthoviewClientVanillaEvents {
     public static void toggleEnable() {
         enabled = !enabled;
 
-        if (enabled) {
-            TopdownGuiCommonVanillaEvents.openTopdownGui();
+        if (enabled) { // opening is done by TopdownGui world tick (which opens it whenever no other screen is open)
+            //TopdownGuiCommonVanillaEvents.openTopdownGui();
         }
         else {
             TopdownGuiCommonVanillaEvents.closeTopdownGui();
@@ -119,9 +119,6 @@ public class OrthoviewClientVanillaEvents {
 
             if (evt.getKey() == Keybinds.reset.getKey().getValue())
                 reset();
-
-            if (evt.getKey() == Keybinds.keyF1.getKey().getValue())
-                TopdownGuiCommonVanillaEvents.openPauseMenu();
         }
     }
 
