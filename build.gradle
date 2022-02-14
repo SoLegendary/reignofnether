@@ -16,8 +16,8 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 version = '1.0'
-group = 'com.solegendary.ageofcraft' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'ageofcraft'
+group = 'com.solegendary.reignofnether' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'reignofnether'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -44,7 +44,7 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('run')
-            arg "-mixin.config=ageofcraft.mixins.json"
+            arg "-mixin.config=reignofnether.mixins.json"
 
             // Recommended logging data for a userdev environment
             // The markers can be changed as needed.
@@ -59,7 +59,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                ageofcraft {
+                reignofnether {
                     source sourceSets.main
                 }
             }
@@ -81,7 +81,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                ageofcraft {
+                reignofnether {
                     source sourceSets.main
                 }
             }
@@ -103,10 +103,10 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'ageofcraft', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', 'reignofnether', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
-                ageofcraft {
+                reignofnether {
                     source sourceSets.main
                 }
             }
@@ -148,15 +148,15 @@ dependencies {
 }
 
 mixin {
-    add sourceSets.main, "ageofcraft.refmap.json"
+    add sourceSets.main, "reignofnether.refmap.json"
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
     manifest {
         attributes([
-            "MixinConfigs": "ageofcraft.mixins.json",
-            "Specification-Title": "ageofcraft",
+            "MixinConfigs": "reignofnether.mixins.json",
+            "Specification-Title": "reignofnether",
             "Specification-Vendor": "examplemodsareus",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,

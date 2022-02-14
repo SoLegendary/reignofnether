@@ -1,1 +1,1 @@
-MixinConfigs: ageofcraft.mixins.json
+MixinConfigs: reignofnether.mixins.json

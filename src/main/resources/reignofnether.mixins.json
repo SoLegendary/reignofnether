@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "com.solegendary.reignofnether.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "refmap": "reignofnether.refmap.json",
+  "mixins": [
+    "OrthoViewMixin",
+    "FrustumMixin"
+  ],
+  "minVersion": "0.8"
+}
