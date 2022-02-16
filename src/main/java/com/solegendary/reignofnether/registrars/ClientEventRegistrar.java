@@ -1,9 +1,14 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.cursor.CursorClientVanillaEvents;
-import com.solegendary.reignofnether.gui.TopdownGuiClientEvents;
+import com.solegendary.reignofnether.cursor.CursorCommonVanillaEvents;
+import com.solegendary.reignofnether.gui.TopdownGuiClientModEvents;
+import com.solegendary.reignofnether.gui.TopdownGuiClientVanillaEvents;
+import com.solegendary.reignofnether.gui.TopdownGuiCommonVanillaEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
 import com.solegendary.reignofnether.units.UnitClientModEvents;
+import com.solegendary.reignofnether.units.UnitClientVanillaEvents;
+import com.solegendary.reignofnether.units.UnitCommonVanillaEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -22,7 +27,16 @@ public class ClientEventRegistrar {
         Keybinds.init();
         vanillaEventBus.register(OrthoviewClientVanillaEvents.class);
         vanillaEventBus.register(CursorClientVanillaEvents.class);
-        modEventBus.register(TopdownGuiClientEvents.class);
         modEventBus.register(UnitClientModEvents.class);
+        modEventBus.register(TopdownGuiClientModEvents.class);
+
+        vanillaEventBus.register(TopdownGuiClientVanillaEvents.class);
+        vanillaEventBus.register(UnitClientVanillaEvents.class);
+
+        vanillaEventBus.register(TopdownGuiCommonVanillaEvents.class);
+        vanillaEventBus.register(CursorCommonVanillaEvents.class);
+        vanillaEventBus.register(UnitCommonVanillaEvents.class);
+
+
     }
 }

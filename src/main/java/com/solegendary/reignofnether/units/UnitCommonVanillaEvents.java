@@ -48,6 +48,8 @@ public class UnitCommonVanillaEvents {
     public static int getUnitIdToFollow() { return unitIdToFollow; }
     public static void setUnitIdToAttack(int id) { unitIdToAttack = id; }
     public static void setUnitIdToFollow(int id) { unitIdToFollow = id; }
+    public static void setUnitIdsToMove(ArrayList<Integer> unitIds) { unitIdsToMove = unitIds; }
+    public static void setUnitIdsToAttackMove(ArrayList<Integer> unitIds) { unitIdsToAttackMove = unitIds; }
 
 
     // TODO: consider changing PathfinderMob to Unit?
@@ -63,62 +65,6 @@ public class UnitCommonVanillaEvents {
         int entityId = evt.getEntity().getId();
         preselectedUnitIds.removeIf(e -> e == entityId);
         selectedUnitIds.removeIf(e -> e == entityId);
-    }
-
-    @SubscribeEvent
-    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
-        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
-
-        // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
-        // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
-
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-            if (selectedUnitIds.size() > 0) {
-                // A + left click -> force attack single unit (even if friendly)
-                if (CursorClientVanillaEvents.getAttackFlag() && preselectedUnitIds.size() == 1 && !targetingSelf())
-                    unitIdToAttack = preselectedUnitIds.get(0);
-                // A + left click -> attack move ground
-                else if (CursorClientVanillaEvents.getAttackFlag()) {
-                    unitIdsToAttackMove = new ArrayList<>();
-                    unitIdsToAttackMove.addAll(selectedUnitIds);
-                }
-            }
-            // left click -> (de)select a single unit
-            // if shift is held, deselect a unit or add it to the selected group
-            if (preselectedUnitIds.size() == 1 && !CursorClientVanillaEvents.getAttackFlag()) {
-                if (Keybinds.shiftMod.isDown()) {
-                    if (!selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0))))
-                        if (MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit)
-                            selectedUnitIds.add(preselectedUnitIds.get(0));
-                }
-                else {
-                    selectedUnitIds = new ArrayList<>();
-                    if (MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit)
-                        selectedUnitIds.add(preselectedUnitIds.get(0));
-                }
-
-
-
-
-            }
-            CursorClientVanillaEvents.removeAttackFlag();
-        }
-        else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-            if (selectedUnitIds.size() > 0) {
-                // right click -> attack unfriendly unit
-                if (preselectedUnitIds.size() == 1 && !targetingSelf() && !isUnitFriendly(preselectedUnitIds.get(0)))
-                    unitIdToAttack = preselectedUnitIds.get(0);
-                // right click -> follow friendly unit
-                else if (preselectedUnitIds.size() == 1 && !targetingSelf())
-                    unitIdToFollow = preselectedUnitIds.get(0);
-                // right click -> move to ground pos (and disable during camera manip)
-                else if (!Keybinds.altMod.isDown()) {
-                    unitIdsToMove = new ArrayList<>();
-                    unitIdsToMove.addAll(selectedUnitIds);
-                }
-            }
-            CursorClientVanillaEvents.removeAttackFlag();
-        }
     }
 
     @SubscribeEvent
@@ -182,30 +128,6 @@ public class UnitCommonVanillaEvents {
             }
             unitIdToAttack = -1;
             unitIdToFollow = -1;
-        }
-    }
-
-    @SubscribeEvent
-
-    public static void onRenderWorld(RenderLevelLastEvent evt) {
-        if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled()) {
-
-            Set<Integer> unitIdsToDraw = new HashSet<>();
-            unitIdsToDraw.addAll(selectedUnitIds);
-            unitIdsToDraw.addAll(preselectedUnitIds);
-
-            // draw outlines on all (pre)selected units but only draw once per unit based on conditions
-            for (int idToDraw : unitIdsToDraw) {
-                Entity entity = MC.level.getEntity(idToDraw);
-                if (entity != null) {
-                    if (preselectedUnitIds.contains(idToDraw) && CursorClientVanillaEvents.getAttackFlag() && !targetingSelf())
-                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f,0.3f, 1.0f);
-                    else if (selectedUnitIds.contains(idToDraw))
-                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f);
-                    else if (preselectedUnitIds.contains(idToDraw))
-                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.5f);
-                }
-            }
         }
     }
 

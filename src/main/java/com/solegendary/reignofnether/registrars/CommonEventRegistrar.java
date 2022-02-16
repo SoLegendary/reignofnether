@@ -1,9 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.cursor.CursorCommonVanillaEvents;
-import com.solegendary.reignofnether.gui.TopdownGuiCommonModEvents;
 import com.solegendary.reignofnether.gui.TopdownGuiCommonVanillaEvents;
-import com.solegendary.reignofnether.units.UnitCommonModEvents;
 import com.solegendary.reignofnether.units.UnitCommonVanillaEvents;
 
 import net.minecraftforge.common.MinecraftForge;
@@ -20,10 +18,8 @@ public class CommonEventRegistrar {
      * Register common events. This method can be run from the main parent class without using DistExecutor
      */
     public void registerCommonEvents() {
-        modEventBus.register(TopdownGuiCommonModEvents.class);
-        vanillaEventBus.register(TopdownGuiCommonVanillaEvents.class);
-        vanillaEventBus.register(CursorCommonVanillaEvents.class);
-        vanillaEventBus.register(UnitCommonVanillaEvents.class);
-        modEventBus.register(UnitCommonModEvents.class);
+        //vanillaEventBus.register(TopdownGuiCommonVanillaEvents.class);
+        //vanillaEventBus.register(CursorCommonVanillaEvents.class);
+        //vanillaEventBus.register(UnitCommonVanillaEvents.class);
     }
 }
