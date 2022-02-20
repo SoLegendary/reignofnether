@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.orthoview;
 
-import com.solegendary.reignofnether.gui.TopdownGuiCommonVanillaEvents;
+import com.solegendary.reignofnether.gui.TopdownGuiServerVanillaEvents;
+import com.solegendary.reignofnether.gui.TopdownGuiServerboundPackets;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
 import com.solegendary.reignofnether.registrars.Keybinds;
@@ -9,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
@@ -101,11 +103,18 @@ public class OrthoviewClientVanillaEvents {
         enabled = !enabled;
 
         if (enabled) { // opening is done by TopdownGui world tick (which opens it whenever no other screen is open)
-            //TopdownGuiCommonVanillaEvents.openTopdownGui();
+            TopdownGuiServerboundPackets.openTopdownGui();
         }
         else {
-            TopdownGuiCommonVanillaEvents.closeTopdownGui();
+            TopdownGuiServerboundPackets.closeTopdownGui();
         }
+    }
+
+    // ensure topdownGui is always open whenever Orthoview is enabled (if no other screens are open)
+    @SubscribeEvent
+    public static void onWorldTick(TickEvent.WorldTickEvent evt) {
+        //if (MC.screen == null && isEnabled())
+        //    TopdownGuiServerboundPackets.openTopdownGui();
     }
 
     @SubscribeEvent

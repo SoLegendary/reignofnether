@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.cursor.CursorClientVanillaEvents;
 import com.solegendary.reignofnether.cursor.CursorCommonVanillaEvents;
 import com.solegendary.reignofnether.gui.TopdownGuiClientModEvents;
 import com.solegendary.reignofnether.gui.TopdownGuiClientVanillaEvents;
-import com.solegendary.reignofnether.gui.TopdownGuiCommonVanillaEvents;
+import com.solegendary.reignofnether.gui.TopdownGuiServerVanillaEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
 import com.solegendary.reignofnether.units.UnitClientModEvents;
 import com.solegendary.reignofnether.units.UnitClientVanillaEvents;
@@ -33,7 +33,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(TopdownGuiClientVanillaEvents.class);
         vanillaEventBus.register(UnitClientVanillaEvents.class);
 
-        vanillaEventBus.register(TopdownGuiCommonVanillaEvents.class);
+        vanillaEventBus.register(TopdownGuiServerVanillaEvents.class);
         vanillaEventBus.register(CursorCommonVanillaEvents.class);
         vanillaEventBus.register(UnitCommonVanillaEvents.class);
 

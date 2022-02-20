@@ -87,6 +87,10 @@ public class UnitClientVanillaEvents {
         // update values in UnitCommonVanillaEvents
         UnitCommonVanillaEvents.setSelectedUnitIds(selectedUnitIds);
         UnitCommonVanillaEvents.setPreselectedUnitIds(preselectedUnitIds);
+
+        /* TODO: move all the id vars into this class, and enact consumptions on serverside via packet each tick
+            if that set of ids is populated/non-null
+        */
     }
 
     @SubscribeEvent

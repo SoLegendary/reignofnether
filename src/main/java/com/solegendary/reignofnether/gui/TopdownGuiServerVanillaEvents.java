@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.gui;
 
 import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
+import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,13 +21,13 @@ import net.minecraftforge.network.NetworkHooks;
  * @author SoLegendary
  */
 
-public class TopdownGuiCommonVanillaEvents {
+public class TopdownGuiServerVanillaEvents {
 
-    private static final Minecraft MC = Minecraft.getInstance();
     private static ServerPlayer serverPlayer = null;
 
     @SubscribeEvent
     public static void onPlayerJoin(OnDatapackSyncEvent evt) {
+        System.out.println("Player joined: " + evt.getPlayer().getId());
         serverPlayer = evt.getPlayer();
     }
 
@@ -44,16 +45,10 @@ public class TopdownGuiCommonVanillaEvents {
     }
 
     public static void closeTopdownGui() {
-        MC.popGuiLayer();
         GameType previousGameMode = serverPlayer.gameMode.getPreviousGameModeForPlayer();
         if (previousGameMode != null)
             serverPlayer.setGameMode(previousGameMode);
     }
 
-    // ensure topdownGui is always open whenever Orthoview is enabled (if no other screens are open)
-    @SubscribeEvent
-    public static void onWorldTick(TickEvent.WorldTickEvent evt) {
-        if (MC.screen == null && OrthoviewClientVanillaEvents.isEnabled())
-            openTopdownGui();
-    }
+
 }
