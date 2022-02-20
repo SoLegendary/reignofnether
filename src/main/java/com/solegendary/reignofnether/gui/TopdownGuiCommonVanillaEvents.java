@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.gui;
 
 import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.MenuProvider;

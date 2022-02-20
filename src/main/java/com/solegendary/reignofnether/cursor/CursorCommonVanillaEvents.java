@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.cursor;
 
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.server.level.ServerLevel;
@@ -25,13 +24,13 @@ public class CursorCommonVanillaEvents {
         if (!world.isClientSide() && cursorEntity == null)
             cursorEntity = EntityType.ARMOR_STAND.create(world);
 
-        if (cursorEntity != null) {
-            if (!cursorEntityAdded && OrthoviewClientVanillaEvents.isEnabled()) {
+        if (cursorEntity != null) { // and Orthoview is enabled, except this isnt allowed on server...
+            if (!cursorEntityAdded) {
                 world.addFreshEntity(cursorEntity);
                 cursorEntity.setNoGravity(true);
                 cursorEntityAdded = true;
             }
-            if (cursorEntityAdded && !OrthoviewClientVanillaEvents.isEnabled()) {
+            else {
                 world.removeEntity(cursorEntity, true);
                 cursorEntity = null;
                 cursorEntityAdded = false;

@@ -60,6 +60,7 @@ public class UnitCommonVanillaEvents {
     public static void onEntityJoin(EntityJoinWorldEvent evt) {
         Entity entity = evt.getEntity();
     }
+
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveWorldEvent evt) {
         int entityId = evt.getEntity().getId();

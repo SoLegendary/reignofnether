@@ -24,7 +24,7 @@ public class ServerSideEventRegistrar {
      * is executing code on the server side and not the client.
      */
     public void registerServerEvents() {
-        vanillaEventBus.register(TopdownGuiCommonVanillaEvents.class);
+        //vanillaEventBus.register(TopdownGuiCommonVanillaEvents.class);
         vanillaEventBus.register(CursorCommonVanillaEvents.class);
         vanillaEventBus.register(UnitCommonVanillaEvents.class);
     }
