@@ -49,6 +49,4 @@ public class TopdownGuiServerVanillaEvents {
         if (previousGameMode != null)
             serverPlayer.setGameMode(previousGameMode);
     }
-
-
 }

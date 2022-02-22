@@ -19,6 +19,7 @@ public class ReignOfNether
     public ReignOfNether() {
         ItemRegistrar.init();
         EntityRegistrar.init();
+        ContainerRegistrar.init();
 
         // Use MinecraftForge.EVENT_BUS.register() for non-mod events (eg. onKeyInput, onServerChat)
         // and FMLJavaModLoadingContext...register() for IModEventBus events (eg, FMLClientSetupEvent)

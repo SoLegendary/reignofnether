@@ -1,30 +1,48 @@
 package com.solegendary.reignofnether.gui;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import io.netty.util.internal.shaded.org.jctools.queues.MessagePassingQueue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 public class TopdownGuiServerboundPackets {
+    public boolean topdownGuiOpen = false;
 
-    private static final Minecraft MC = Minecraft.getInstance();
-
-    /* TODO: convenience functions that just send packets out to enact the server function instead of having to
-        write something like: PacketHandler.INSTANCE.sendToServer(new PacketSenderClass(data)); every time
-        we can also enact some clientside logic too before asking the server to do stuff
-     */
-
+    // client-side helper functions
     public static void openTopdownGui() {
-        PacketHandler.INSTANCE.sendToServer(new TopdownGuiToggler(true));
+        PacketHandler.INSTANCE.sendToServer(new TopdownGuiServerboundPackets(true));
     }
-
     public static void closeTopdownGui() {
-        MC.popGuiLayer();
-        PacketHandler.INSTANCE.sendToServer(new TopdownGuiToggler(false));
+        Minecraft.getInstance().popGuiLayer();
+        PacketHandler.INSTANCE.sendToServer(new TopdownGuiServerboundPackets(false));
     }
 
 
+    // packet-handler functions
+    public TopdownGuiServerboundPackets(Boolean pos) { this.topdownGuiOpen = pos; }
+
+    public TopdownGuiServerboundPackets(FriendlyByteBuf buffer) { this.topdownGuiOpen = buffer.readBoolean(); }
+
+    public void encode(FriendlyByteBuf buffer) { buffer.writeBoolean(this.topdownGuiOpen); }
+
+
+    // server-side packet-consuming functions
+    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
+        final var success = new AtomicBoolean(false);
+        ctx.get().enqueueWork(() -> {
+            System.out.println("Got packet from client!");
+
+            if (topdownGuiOpen)
+                TopdownGuiServerVanillaEvents.openTopdownGui();
+            else
+                TopdownGuiServerVanillaEvents.closeTopdownGui();
+
+            success.set(true);
+        });
+        ctx.get().setPacketHandled(true);
+        return success.get();
+    }
 }

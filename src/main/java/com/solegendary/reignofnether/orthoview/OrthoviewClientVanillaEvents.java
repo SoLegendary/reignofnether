@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.orthoview;
 
-import com.solegendary.reignofnether.gui.TopdownGuiServerVanillaEvents;
 import com.solegendary.reignofnether.gui.TopdownGuiServerboundPackets;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
@@ -111,10 +110,15 @@ public class OrthoviewClientVanillaEvents {
     }
 
     // ensure topdownGui is always open whenever Orthoview is enabled (if no other screens are open)
+    // it takes a while for the packet to be received and processed so don't spam the server with it
+    private static int sendPacketCooldown = 10;
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
-        //if (MC.screen == null && isEnabled())
-        //    TopdownGuiServerboundPackets.openTopdownGui();
+        if (sendPacketCooldown > 0) sendPacketCooldown -= 1;
+        if (MC.screen == null && isEnabled() && sendPacketCooldown <= 0) {
+            TopdownGuiServerboundPackets.openTopdownGui();
+            sendPacketCooldown = 10;
+        }
     }
 
     @SubscribeEvent

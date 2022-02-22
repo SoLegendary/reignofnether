@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.gui;
 
 
+import com.solegendary.reignofnether.registrars.ContainerRegistrar;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -28,11 +29,9 @@ public class TopdownGuiContainer extends AbstractContainerMenu {
         return (id, playerInventory, serverPlayer) -> new TopdownGuiContainer(id, playerInventory);
     }
 
-    protected TopdownGuiContainer(int id, Inventory playerInventory)
+    public TopdownGuiContainer(int id, Inventory playerInventory)
     {
-        super(TopdownGuiObjects.CONTAINER_TYPE, id);
-        if (TopdownGuiObjects.CONTAINER_TYPE == null)
-            throw new IllegalStateException("Must initialise TopdownGuiObjects.CONTAINER_TYPE before constructing a ContainerBasic!");
+        super(ContainerRegistrar.TOPDOWNGUI_CONTAINER.get(), id);
     }
 
     @Override
