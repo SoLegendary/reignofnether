@@ -5,7 +5,7 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Unit;
-import com.solegendary.reignofnether.units.UnitCommonVanillaEvents;
+import com.solegendary.reignofnether.units.UnitClientVanillaEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -88,7 +88,7 @@ public class CursorClientVanillaEvents {
         // Manage cursor icons based on actions
         // ************************************
 
-        if (Keybinds.keyA.isDown() && UnitCommonVanillaEvents.getSelectedUnitIds().size() > 0)
+        if (Keybinds.keyA.isDown() && UnitClientVanillaEvents.getSelectedUnitIds().size() > 0)
             attackFlag = true;
 
         // hides default cursor and locks it to the window to allow edge panning
@@ -152,21 +152,21 @@ public class CursorClientVanillaEvents {
         }
 
         // TODO: make this be CursorEntity and only show when moving a mob instead of following cursor
-        //CursorCommonVanillaEvents.moveCursorEntity(cursorWorldPos);
+        //CursorServerVanillaEvents.moveCursorEntity(cursorWorldPos);
 
         // ****************************************
         // Find entity moused over and/or selected
         // ****************************************
         List<PathfinderMob> entities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, PathfinderMob.class);
 
-        UnitCommonVanillaEvents.setPreselectedUnitIds(new ArrayList<>());
+        UnitClientVanillaEvents.setPreselectedUnitIds(new ArrayList<>());
 
         for (PathfinderMob entity : entities) {
             // inflate by set amount to improve click accuracy
             AABB entityaabb = entity.getBoundingBox().inflate(0.1);
 
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, getPlayerLookVector(), entityaabb)) {
-                UnitCommonVanillaEvents.addPreselectedUnitId(entity.getId());
+                UnitClientVanillaEvents.addPreselectedUnitId(entity.getId());
                 break; // only allow one moused unit at a time
             }
         }
@@ -213,7 +213,7 @@ public class CursorClientVanillaEvents {
                 if (MyMath.isBetween(u.dot(p1), ux, u.dot(p2)) &&
                     MyMath.isBetween(v.dot(p1), vx, v.dot(p4)) &&
                     MyMath.isBetween(w.dot(p1), wx, w.dot(p5))) {
-                    UnitCommonVanillaEvents.addPreselectedUnitId(entity.getId());
+                    UnitClientVanillaEvents.addPreselectedUnitId(entity.getId());
                 }
             }
         }
@@ -265,14 +265,14 @@ public class CursorClientVanillaEvents {
             // enact box selection, excluding non-unit mobs
             // for single-click selection, see UnitCommonVanillaEvents
             // except if attack-moving or nothing is preselected (to prevent deselection)
-            ArrayList<Integer> preselectedUnitIds = UnitCommonVanillaEvents.getPreselectedUnitIds();
+            ArrayList<Integer> preselectedUnitIds = UnitClientVanillaEvents.getPreselectedUnitIds();
             if (preselectedUnitIds.size() > 0 && !cursorLeftClickDownPos.equals(cursorLeftClickDragPos)) {
                 if (!Keybinds.shiftMod.isDown())
-                    UnitCommonVanillaEvents.setSelectedUnitIds(new ArrayList<>());
+                    UnitClientVanillaEvents.setSelectedUnitIds(new ArrayList<>());
                 for (int mobId : preselectedUnitIds) {
                     Entity mob = MC.level.getEntity(mobId);
                     if (mob instanceof Unit)
-                        UnitCommonVanillaEvents.addSelectedUnitId(mob.getId());
+                        UnitClientVanillaEvents.addSelectedUnitId(mob.getId());
                 }
             }
             cursorLeftClickDownPos = new Vec2(0,0);
@@ -295,8 +295,8 @@ public class CursorClientVanillaEvents {
         if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled()) {
 
             if (!OrthoviewClientVanillaEvents.isCameraMovingByMouse() && !leftClickDown &&
-                 UnitCommonVanillaEvents.getSelectedUnitIds().size() > 0 &&
-                 UnitCommonVanillaEvents.getPreselectedUnitIds().size() <= 0) {
+                    UnitClientVanillaEvents.getSelectedUnitIds().size() > 0 &&
+                    UnitClientVanillaEvents.getPreselectedUnitIds().size() <= 0) {
                 MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }
         }

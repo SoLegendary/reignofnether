@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.gui.TopdownGuiServerboundPackets;
+import com.solegendary.reignofnether.units.UnitServerboundPackets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
@@ -24,5 +25,9 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(TopdownGuiServerboundPackets.class, index++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(TopdownGuiServerboundPackets::encode).decoder(TopdownGuiServerboundPackets::new)
                 .consumer(TopdownGuiServerboundPackets::handle).add();
+
+        INSTANCE.messageBuilder(UnitServerboundPackets.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(UnitServerboundPackets::encode).decoder(UnitServerboundPackets::new)
+                .consumer(UnitServerboundPackets::handle).add();
     }
 }

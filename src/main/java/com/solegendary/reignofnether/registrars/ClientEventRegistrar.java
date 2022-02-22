@@ -1,14 +1,14 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.cursor.CursorClientVanillaEvents;
-import com.solegendary.reignofnether.cursor.CursorCommonVanillaEvents;
+import com.solegendary.reignofnether.cursor.CursorServerVanillaEvents;
 import com.solegendary.reignofnether.gui.TopdownGuiClientModEvents;
 import com.solegendary.reignofnether.gui.TopdownGuiClientVanillaEvents;
 import com.solegendary.reignofnether.gui.TopdownGuiServerVanillaEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
 import com.solegendary.reignofnether.units.UnitClientModEvents;
 import com.solegendary.reignofnether.units.UnitClientVanillaEvents;
-import com.solegendary.reignofnether.units.UnitCommonVanillaEvents;
+import com.solegendary.reignofnether.units.UnitServerVanillaEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -29,14 +29,12 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(CursorClientVanillaEvents.class);
         modEventBus.register(UnitClientModEvents.class);
         modEventBus.register(TopdownGuiClientModEvents.class);
-
         vanillaEventBus.register(TopdownGuiClientVanillaEvents.class);
         vanillaEventBus.register(UnitClientVanillaEvents.class);
 
+        // to allow singleplayer integrated server to work
         vanillaEventBus.register(TopdownGuiServerVanillaEvents.class);
-        vanillaEventBus.register(CursorCommonVanillaEvents.class);
-        vanillaEventBus.register(UnitCommonVanillaEvents.class);
-
-
+        vanillaEventBus.register(UnitServerVanillaEvents.class);
+        //vanillaEventBus.register(CursorServerVanillaEvents.class);
     }
 }

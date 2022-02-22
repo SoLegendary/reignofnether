@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.units.goals;
 
-import com.solegendary.reignofnether.units.UnitCommonVanillaEvents;
+import com.solegendary.reignofnether.units.UnitClientVanillaEvents;
+import com.solegendary.reignofnether.units.UnitServerVanillaEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.PathfinderMob;
@@ -26,7 +27,7 @@ public class MoveToCursorBlockGoal extends Goal {
 
     // only use if the target pos is close enough and the mob is selected
     public boolean canUse() {
-        ArrayList<Integer> selectedUnitIds = UnitCommonVanillaEvents.getSelectedUnitIds();
+        ArrayList<Integer> selectedUnitIds = UnitClientVanillaEvents.getSelectedUnitIds();
 
         for (int unitId : selectedUnitIds) {
             if (unitId == mob.getId() && moveTarget != null) {
