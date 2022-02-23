@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -31,6 +32,7 @@ public class UnitServerboundPackets {
     private int[] unitIdsToAttackMove;
     private int[] preselectedUnitIds;
     private int[] selectedUnitIds;
+    private BlockPos preselectedBlockPos;
 
     // packet-handler functions
     public UnitServerboundPackets(
@@ -40,7 +42,8 @@ public class UnitServerboundPackets {
             int[] unitIdsToMove,
             int[] unitIdsToAttackMove,
             int[] preselectedUnitIds,
-            int[] selectedUnitIds
+            int[] selectedUnitIds,
+            BlockPos preselectedBlockPos
     ) {
         this.stopCommand = stopCommand;
         this.unitIdToAttack = unitIdToAttack;
@@ -49,6 +52,7 @@ public class UnitServerboundPackets {
         this.unitIdsToAttackMove = unitIdsToAttackMove;
         this.preselectedUnitIds = preselectedUnitIds;
         this.selectedUnitIds = selectedUnitIds;
+        this.preselectedBlockPos = preselectedBlockPos;
     }
 
     public UnitServerboundPackets(FriendlyByteBuf buffer) {
@@ -59,6 +63,7 @@ public class UnitServerboundPackets {
         this.unitIdsToAttackMove = buffer.readVarIntArray();
         this.preselectedUnitIds = buffer.readVarIntArray();
         this.selectedUnitIds = buffer.readVarIntArray();
+        this.preselectedBlockPos = buffer.readBlockPos();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -69,6 +74,7 @@ public class UnitServerboundPackets {
         buffer.writeVarIntArray(this.unitIdsToAttackMove);
         buffer.writeVarIntArray(this.preselectedUnitIds);
         buffer.writeVarIntArray(this.selectedUnitIds);
+        buffer.writeBlockPos(this.preselectedBlockPos);
     }
 
     // server-side packet-consuming functions
@@ -84,7 +90,8 @@ public class UnitServerboundPackets {
                     this.unitIdsToMove,
                     this.unitIdsToAttackMove,
                     this.preselectedUnitIds,
-                    this.selectedUnitIds
+                    this.selectedUnitIds,
+                    this.preselectedBlockPos
             );
             success.set(true);
         });

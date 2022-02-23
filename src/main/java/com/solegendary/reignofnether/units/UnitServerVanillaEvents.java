@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.units;
 
 import com.solegendary.reignofnether.cursor.CursorClientVanillaEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,8 +21,9 @@ public class UnitServerVanillaEvents {
     static int[] unitIdsToAttackMove = new int[0];
     static int[] preselectedUnitIds = new int[0];
     static int[] selectedUnitIds = new int[0];
+    static BlockPos preselectedBlockPos = null;
 
-    // for some reason we have to use the level in the same tick as the unit actions or else
+    // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns null
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
         ServerLevel level = (ServerLevel) evt.world;
@@ -37,12 +39,12 @@ public class UnitServerVanillaEvents {
             for (int id : unitIdsToMove) {
                 Unit unit = (Unit) level.getEntity(id);
                 if (unit != null)
-                    unit.setMoveTarget(CursorClientVanillaEvents.getPreselectedBlockPos());
+                    unit.setMoveTarget(preselectedBlockPos);
             }
             for (int id : unitIdsToAttackMove) {
                 Unit unit = (Unit) level.getEntity(id);
                 if (unit != null)
-                    unit.setAttackMoveTarget(CursorClientVanillaEvents.getPreselectedBlockPos());
+                    unit.setAttackMoveTarget(preselectedBlockPos);
             }
             for (int id : selectedUnitIds) {
                 Unit unit = (Unit) level.getEntity(id);
@@ -68,7 +70,8 @@ public class UnitServerVanillaEvents {
             int[] unitIdsToMoveIn,
             int[] unitIdsToAttackMoveIn,
             int[] preselectedUnitIdsIn,
-            int[] selectedUnitIdsIn
+            int[] selectedUnitIdsIn,
+            BlockPos preselectedBlockPosIn
     ) {
         stopCommand = stopCommandIn;
         unitIdToAttack = unitIdToAttackIn;
@@ -77,5 +80,6 @@ public class UnitServerVanillaEvents {
         unitIdsToAttackMove = unitIdsToAttackMoveIn;
         preselectedUnitIds = preselectedUnitIdsIn;
         selectedUnitIds = selectedUnitIdsIn;
+        preselectedBlockPos = preselectedBlockPosIn;
     }
 }

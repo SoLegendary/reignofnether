@@ -124,7 +124,8 @@ public class UnitClientVanillaEvents {
                     unitIdsToMove.stream().mapToInt(i -> i).toArray(), // convert List<Integer> to int[]
                     unitIdsToAttackMove.stream().mapToInt(i -> i).toArray(),
                     preselectedUnitIds.stream().mapToInt(i -> i).toArray(),
-                    selectedUnitIds.stream().mapToInt(i -> i).toArray()
+                    selectedUnitIds.stream().mapToInt(i -> i).toArray(),
+                    CursorClientVanillaEvents.getPreselectedBlockPos()
             ));
             unitIdToAttack = -1;
             unitIdToFollow = -1;
@@ -143,7 +144,8 @@ public class UnitClientVanillaEvents {
                     new int[0],
                     new int[0],
                     preselectedUnitIds.stream().mapToInt(i -> i).toArray(),
-                    selectedUnitIds.stream().mapToInt(i -> i).toArray()
+                    selectedUnitIds.stream().mapToInt(i -> i).toArray(),
+                    null
             ));
         }
     }

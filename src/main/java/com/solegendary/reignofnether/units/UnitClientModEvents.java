@@ -14,11 +14,4 @@ public class UnitClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.SKELETON_UNIT.get(), SkeletonRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.CREEPER_UNIT.get(), CreeperRenderer::new);
     }
-
-    @SubscribeEvent
-    public static void registerAttributes(EntityAttributeCreationEvent evt) {
-        evt.put(EntityRegistrar.ZOMBIE_UNIT.get(), ZombieUnit.createAttributes().build());
-        evt.put(EntityRegistrar.SKELETON_UNIT.get(), ZombieUnit.createAttributes().build());
-        evt.put(EntityRegistrar.CREEPER_UNIT.get(), ZombieUnit.createAttributes().build());
-    }
 }

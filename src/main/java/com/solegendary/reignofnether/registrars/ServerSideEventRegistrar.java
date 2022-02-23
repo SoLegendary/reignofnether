@@ -2,6 +2,8 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.gui.TopdownGuiClientModEvents;
 import com.solegendary.reignofnether.gui.TopdownGuiServerVanillaEvents;
+import com.solegendary.reignofnether.units.UnitClientModEvents;
+import com.solegendary.reignofnether.units.UnitServerModEvents;
 import com.solegendary.reignofnether.units.UnitServerVanillaEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -27,5 +29,7 @@ public class ServerSideEventRegistrar {
         vanillaEventBus.register(TopdownGuiServerVanillaEvents.class);
         vanillaEventBus.register(UnitServerVanillaEvents.class);
         //vanillaEventBus.register(CursorServerVanillaEvents.class);
+
+        modEventBus.register(UnitServerModEvents.class);
     }
 }

@@ -23,6 +23,9 @@ public class ClientEventRegistrar {
      * Register client only events. This method must only be called when it is certain that the mod is
      * is executing code on the client side and not the dedicated server.
      */
+
+    // TODO: check if we can just move all mod events outside (into the .init() classes)
+
     public void registerClientEvents() {
         Keybinds.init();
         vanillaEventBus.register(OrthoviewClientVanillaEvents.class);
