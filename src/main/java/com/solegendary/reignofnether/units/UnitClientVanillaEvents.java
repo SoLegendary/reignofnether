@@ -34,7 +34,6 @@ public class UnitClientVanillaEvents {
     private static ArrayList<Integer> unitIdsToMove = new ArrayList<>(); // QUEUED - these units move to cursorBlockPos
     private static ArrayList<Integer> unitIdsToAttackMove = new ArrayList<>(); // QUEUED - these units attack move to cursorBlockPos
     private static ArrayList<ArrayList<Integer>> controlGroups = new ArrayList<>(10);
-    private static boolean stopCommand = false;
 
     public static ArrayList<Integer> getPreselectedUnitIds() { return preselectedUnitIds; }
     public static ArrayList<Integer> getSelectedUnitIds() { return selectedUnitIds; }
