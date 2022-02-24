@@ -136,6 +136,8 @@ public class UnitClientVanillaEvents {
 
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyboardKeyPressedEvent.Pre evt) {
+        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
+
         if (evt.getKeyCode() == Keybinds.keyS.getKey().getValue()) {
             PacketHandler.INSTANCE.sendToServer(new UnitServerboundPackets(
                     true,

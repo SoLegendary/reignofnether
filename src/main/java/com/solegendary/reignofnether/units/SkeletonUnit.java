@@ -94,7 +94,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
                 Entity lastDSEntity = getLastDamageSource().getEntity();
 
                 if (lastDSEntity instanceof PathfinderMob &&
-                        !UnitClientVanillaEvents.isUnitFriendly(lastDSEntity.getId()) &&
+                        !UnitServerVanillaEvents.isUnitFriendly(lastDSEntity.getId()) &&
                         !hasLivingTarget())
                     this.setAttackTarget((PathfinderMob) lastDSEntity);
             }
@@ -119,7 +119,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
         List<PathfinderMob> nearbyUnfriendlyMobs = new ArrayList<>();
 
         for (PathfinderMob mob : nearbyMobs) {
-            if (!UnitClientVanillaEvents.isUnitFriendly(mob.getId()) && mob.getId() != this.getId())
+            if (!UnitServerVanillaEvents.isUnitFriendly(mob.getId()) && mob.getId() != this.getId())
                 nearbyUnfriendlyMobs.add(mob);
         }
         // find the closest mob

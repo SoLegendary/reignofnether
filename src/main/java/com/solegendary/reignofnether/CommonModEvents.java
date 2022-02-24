@@ -14,5 +14,7 @@ public class CommonModEvents {
         System.out.println("Registering packet handler");
         event.enqueueWork(PacketHandler::init);
     }
+
+
 }
 

@@ -29,7 +29,7 @@ public class MoveToCursorBlockGoal extends Goal {
     public boolean canUse() {
 
         // TODO: remove this as server has to use this code too (probs have to send a packet to update selected units every click)
-        ArrayList<Integer> selectedUnitIds = UnitClientVanillaEvents.getSelectedUnitIds();
+        int[] selectedUnitIds = UnitServerVanillaEvents.getSelectedUnitIds();
 
         for (int unitId : selectedUnitIds) {
             if (unitId == mob.getId() && moveTarget != null) {

@@ -14,14 +14,20 @@ public class UnitServerVanillaEvents {
 
     // TODO: consider changing PathfinderMob to Unit?
 
-    static boolean stopCommand = false;
-    static int unitIdToAttack = -1;
-    static int unitIdToFollow = -1;
-    static int[] unitIdsToMove = new int[0];
-    static int[] unitIdsToAttackMove = new int[0];
-    static int[] preselectedUnitIds = new int[0];
-    static int[] selectedUnitIds = new int[0];
-    static BlockPos preselectedBlockPos = null;
+    private static boolean stopCommand = false;
+    private static int unitIdToAttack = -1;
+    private static int unitIdToFollow = -1;
+    private static int[] unitIdsToMove = new int[0];
+    private static int[] unitIdsToAttackMove = new int[0];
+    private static int[] preselectedUnitIds = new int[0];
+    private static int[] selectedUnitIds = new int[0];
+    private static BlockPos preselectedBlockPos = null;
+
+    public static int[] getPreselectedUnitIds() { return preselectedUnitIds; }
+    public static int[] getSelectedUnitIds() { return selectedUnitIds; }
+    public static BlockPos getPreselectedBlockPos() { return preselectedBlockPos; }
+
+
 
     // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns null
     @SubscribeEvent
@@ -81,5 +87,10 @@ public class UnitServerVanillaEvents {
         preselectedUnitIds = preselectedUnitIdsIn;
         selectedUnitIds = selectedUnitIdsIn;
         preselectedBlockPos = preselectedBlockPosIn;
+    }
+
+    // TODO: change this later to check for the unit's player controller instead of just type
+    public static boolean isUnitFriendly(int unitId) {
+        return true;
     }
 }
