@@ -102,7 +102,7 @@ public class OrthoviewClientVanillaEvents {
         enabled = !enabled;
 
         if (enabled) { // opening is done by TopdownGui world tick (which opens it whenever no other screen is open)
-            TopdownGuiServerboundPackets.openTopdownGui();
+            //TopdownGuiServerboundPackets.openTopdownGui();
         }
         else {
             TopdownGuiServerboundPackets.closeTopdownGui();

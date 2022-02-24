@@ -1,11 +1,9 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.gui.TopdownGuiServerVanillaEvents;
-import com.solegendary.reignofnether.units.UnitServerModEvents;
 import com.solegendary.reignofnether.units.UnitServerVanillaEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /*
     This class is required to make sure that we don't accidentally try to load any client-side-only classes

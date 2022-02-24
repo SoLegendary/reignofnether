@@ -1,16 +1,13 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.cursor.CursorClientVanillaEvents;
-import com.solegendary.reignofnether.gui.TopdownGuiClientModEvents;
 import com.solegendary.reignofnether.gui.TopdownGuiClientVanillaEvents;
 import com.solegendary.reignofnether.gui.TopdownGuiServerVanillaEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
 import com.solegendary.reignofnether.units.UnitClientVanillaEvents;
-import com.solegendary.reignofnether.units.UnitServerModEvents;
 import com.solegendary.reignofnether.units.UnitServerVanillaEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class ClientEventRegistrar {
     private final IEventBus vanillaEventBus = MinecraftForge.EVENT_BUS;
