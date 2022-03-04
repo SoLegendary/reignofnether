@@ -12,13 +12,6 @@ import java.util.List;
 
 public class MiscUtil {
 
-    private static final Minecraft MC = Minecraft.getInstance();
-
-    // use this for client side entities only
-    public static <T extends Entity> List<T> getEntitiesWithinRange(Vector3d pos, float range, Class<T> entityType) {
-        return getEntitiesWithinRange(pos, range, entityType, MC.level);
-    }
-
     public static <T extends Entity> List<T> getEntitiesWithinRange(Vector3d pos, float range, Class<T> entityType, Level level) {
         AABB aabb = new AABB(
                 pos.x - range,

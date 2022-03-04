@@ -113,9 +113,9 @@ public class OrthoviewClientVanillaEvents {
     // it takes a while for the packet to be received and processed so don't spam the server with it
     private static int sendPacketCooldown = 10;
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.WorldTickEvent evt) {
+    public static void onWorldTick(TickEvent.ClientTickEvent evt) {
         if (sendPacketCooldown > 0) sendPacketCooldown -= 1;
-        if (MC.screen == null && isEnabled() && sendPacketCooldown <= 0) {
+        if (Minecraft.getInstance().screen == null && isEnabled() && sendPacketCooldown <= 0) {
             TopdownGuiServerboundPackets.openTopdownGui();
             sendPacketCooldown = 10;
         }

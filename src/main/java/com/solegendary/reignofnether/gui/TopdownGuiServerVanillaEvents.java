@@ -34,6 +34,7 @@ public class TopdownGuiServerVanillaEvents {
     public static void openTopdownGui() {
         // containers have to be opened server side so that the server can track its data
         if (serverPlayer != null) {
+            System.out.println("openTopdownGui!");
             MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
             MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
             NetworkHooks.openGui(serverPlayer, namedProvider);

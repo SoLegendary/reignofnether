@@ -35,7 +35,7 @@ public class TopdownGuiServerboundPackets {
         ctx.get().enqueueWork(() -> {
             System.out.println("Got TopdownGui packet from client!");
 
-            if (topdownGuiOpen)
+            if (this.topdownGuiOpen)
                 TopdownGuiServerVanillaEvents.openTopdownGui();
             else
                 TopdownGuiServerVanillaEvents.closeTopdownGui();

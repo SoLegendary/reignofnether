@@ -157,7 +157,7 @@ public class CursorClientVanillaEvents {
         // ****************************************
         // Find entity moused over and/or selected
         // ****************************************
-        List<PathfinderMob> entities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, PathfinderMob.class);
+        List<PathfinderMob> entities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, PathfinderMob.class, MC.level);
 
         UnitClientVanillaEvents.setPreselectedUnitIds(new ArrayList<>());
 

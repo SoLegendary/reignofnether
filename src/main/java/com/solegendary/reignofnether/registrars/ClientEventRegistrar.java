@@ -19,8 +19,6 @@ public class ClientEventRegistrar {
      * is executing code on the client side and not the dedicated server.
      */
 
-    // TODO: check if we can just move all mod events outside (into the .init() classes)
-
     public void registerClientEvents() {
         Keybinds.init();
         vanillaEventBus.register(OrthoviewClientVanillaEvents.class);

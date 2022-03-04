@@ -12,8 +12,6 @@ import java.util.ArrayList;
 
 public class UnitServerVanillaEvents {
 
-    // TODO: consider changing PathfinderMob to Unit?
-
     private static boolean stopCommand = false;
     private static int unitIdToAttack = -1;
     private static int unitIdToFollow = -1;

@@ -153,7 +153,7 @@ public class UnitClientVanillaEvents {
     }
 
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.WorldTickEvent evt) {
+    public static void onWorldTick(TickEvent.ClientTickEvent evt) {
 
         // deselect all units
         if (Keybinds.keyF1.isDown())
