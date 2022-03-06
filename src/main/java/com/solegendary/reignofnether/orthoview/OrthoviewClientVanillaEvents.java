@@ -105,7 +105,7 @@ public class OrthoviewClientVanillaEvents {
             //TopdownGuiServerboundPackets.openTopdownGui();
         }
         else {
-            TopdownGuiServerboundPackets.closeTopdownGui();
+            TopdownGuiServerboundPackets.closeTopdownGui(MC.player.getId());
         }
     }
 
@@ -116,7 +116,7 @@ public class OrthoviewClientVanillaEvents {
     public static void onWorldTick(TickEvent.ClientTickEvent evt) {
         if (sendPacketCooldown > 0) sendPacketCooldown -= 1;
         if (Minecraft.getInstance().screen == null && isEnabled() && sendPacketCooldown <= 0) {
-            TopdownGuiServerboundPackets.openTopdownGui();
+            TopdownGuiServerboundPackets.openTopdownGui(MC.player.getId());
             sendPacketCooldown = 10;
         }
     }

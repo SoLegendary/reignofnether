@@ -1,18 +1,15 @@
 package com.solegendary.reignofnether.gui;
 
-import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
-import com.solegendary.reignofnether.registrars.PacketHandler;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.level.GameType;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
+
+import java.util.ArrayList;
 
 /**
  * Handler for TopdownGui, the GUI screen that allows for cursor movement on screen
@@ -23,15 +20,27 @@ import net.minecraftforge.network.NetworkHooks;
 
 public class TopdownGuiServerVanillaEvents {
 
-    private static ServerPlayer serverPlayer = null;
+    private static final ArrayList<ServerPlayer> serverPlayers = new ArrayList<>();
 
     @SubscribeEvent
-    public static void onPlayerJoin(OnDatapackSyncEvent evt) {
-        System.out.println("Player joined: " + evt.getPlayer().getId());
-        serverPlayer = evt.getPlayer();
+    public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
+        System.out.println("Player logged in: " + evt.getPlayer().getName().getString() + ", id: " + evt.getPlayer().getId());
+        serverPlayers.add((ServerPlayer) evt.getPlayer());
     }
 
-    public static void openTopdownGui() {
+    @SubscribeEvent
+    public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent evt) {
+        int id = evt.getPlayer().getId();
+        System.out.println("Player logged out (serverside): " + evt.getPlayer().getName().getString() + ", id: " + id);
+        serverPlayers.removeIf(player -> player.getId() == id);
+    }
+
+    public static void openTopdownGui(int playerId) {
+        ServerPlayer serverPlayer = serverPlayers.stream()
+                .filter(player -> playerId == player.getId())
+                .findAny()
+                .orElse(null);
+
         // containers have to be opened server side so that the server can track its data
         if (serverPlayer != null) {
             System.out.println("openTopdownGui!");
@@ -45,7 +54,12 @@ public class TopdownGuiServerVanillaEvents {
         }
     }
 
-    public static void closeTopdownGui() {
+    public static void closeTopdownGui(int playerId) {
+        ServerPlayer serverPlayer = serverPlayers.stream()
+                .filter(player -> playerId == player.getId())
+                .findAny()
+                .orElse(null);
+
         GameType previousGameMode = serverPlayer.gameMode.getPreviousGameModeForPlayer();
         if (previousGameMode != null)
             serverPlayer.setGameMode(previousGameMode);
