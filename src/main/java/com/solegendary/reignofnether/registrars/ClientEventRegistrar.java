@@ -30,7 +30,5 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(TopdownGuiServerVanillaEvents.class);
         vanillaEventBus.register(UnitServerVanillaEvents.class);
         //vanillaEventBus.register(CursorServerVanillaEvents.class);
-
-
     }
 }

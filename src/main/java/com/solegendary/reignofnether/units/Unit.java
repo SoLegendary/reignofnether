@@ -7,6 +7,9 @@ import javax.annotation.Nullable;
 
 public interface Unit {
 
+    public int getControllingPlayerId();
+    public void setControllingPlayerId(int id);
+
     public Boolean isAttackMoving();
     public Boolean isFollowing();
 

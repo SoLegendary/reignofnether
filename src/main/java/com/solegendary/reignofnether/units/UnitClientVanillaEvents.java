@@ -8,10 +8,13 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.BaseSpawner;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -63,6 +66,7 @@ public class UnitClientVanillaEvents {
         // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
         // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
 
+        // TODO: restrict controls to only Relationship.OWNED
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (selectedUnitIds.size() > 0) {
                 // A + left click -> force attack single unit (even if friendly)
@@ -97,7 +101,7 @@ public class UnitClientVanillaEvents {
                 // right click -> attack unfriendly unit
                 if (preselectedUnitIds.size() == 1 &&
                         !targetingSelf() &&
-                        !isUnitFriendly(preselectedUnitIds.get(0)))
+                        getPlayerToMobRelationship(preselectedUnitIds.get(0)) == Relationship.HOSTILE)
                     setUnitIdToAttack(preselectedUnitIds.get(0));
                 // right click -> follow friendly unit
                 else if (preselectedUnitIds.size() == 1 && !targetingSelf())
@@ -112,6 +116,7 @@ public class UnitClientVanillaEvents {
             CursorClientVanillaEvents.removeAttackFlag();
         }
 
+        // send all of the commands over to server to enact
         if (unitIdToAttack >= 0 ||
             unitIdToFollow >= 0 ||
             unitIdsToMove.size() > 0 ||
@@ -198,22 +203,43 @@ public class UnitClientVanillaEvents {
                         MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f);
                     else if (preselectedUnitIds.contains(idToDraw))
                         MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.5f);
+
+                    // always-shown highlights to indicate unit relationships
+                    Relationship unitRs = getPlayerToMobRelationship(entity.getId());
+                    if (unitRs == Relationship.OWNED)
+                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.3f, 1.0f, 0.3f, 0.5f);
+                    else if (unitRs == Relationship.FRIENDLY)
+                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.5f);
+                    else if (unitRs == Relationship.HOSTILE)
+                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.5f);
                 }
             }
         }
-    }
-
-    // TODO: change this later to check for the unit's player controller instead of just type
-    public static boolean isUnitFriendly(int unitId) {
-        if (MC.level != null) {
-            return MC.level.getEntity(unitId) instanceof Unit;
-        }
-        return true;
     }
 
     public static boolean targetingSelf() {
         return selectedUnitIds.size() == 1 &&
                 preselectedUnitIds.size() == 1 &&
                 selectedUnitIds.get(0).equals(preselectedUnitIds.get(0));
+    }
+
+    // TODO: unit ControllingPlayerId seems to only be set serverside right now
+    public static Relationship getPlayerToMobRelationship(int mobId) {
+        if (MC.level != null) {
+            Entity entity = MC.level.getEntity(mobId);
+
+            if (!(entity instanceof Unit))
+                return Relationship.NEUTRAL;
+
+            int controllerId = ((Unit) entity).getControllingPlayerId();
+
+            System.out.println("controllerId: " + controllerId);
+
+            if (controllerId == MC.player.getId())
+                return Relationship.OWNED;
+            else
+                return Relationship.HOSTILE;
+        }
+        return null;
     }
 }

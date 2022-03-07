@@ -31,7 +31,7 @@ public class TopdownGuiServerVanillaEvents {
     @SubscribeEvent
     public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent evt) {
         int id = evt.getPlayer().getId();
-        System.out.println("Player logged out (serverside): " + evt.getPlayer().getName().getString() + ", id: " + id);
+        System.out.println("Player logged out: " + evt.getPlayer().getName().getString() + ", id: " + id);
         serverPlayers.removeIf(player -> player.getId() == id);
     }
 
@@ -43,7 +43,6 @@ public class TopdownGuiServerVanillaEvents {
 
         // containers have to be opened server side so that the server can track its data
         if (serverPlayer != null) {
-            System.out.println("openTopdownGui!");
             MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
             MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
             NetworkHooks.openGui(serverPlayer, namedProvider);

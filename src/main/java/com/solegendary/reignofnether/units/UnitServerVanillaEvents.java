@@ -1,14 +1,20 @@
 package com.solegendary.reignofnether.units;
 
-import com.solegendary.reignofnether.cursor.CursorClientVanillaEvents;
-import com.solegendary.reignofnether.registrars.Keybinds;
+import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BaseSpawner;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import java.util.ArrayList;
+
+import java.util.List;
 
 public class UnitServerVanillaEvents {
 
@@ -87,8 +93,44 @@ public class UnitServerVanillaEvents {
         preselectedBlockPos = preselectedBlockPosIn;
     }
 
-    // TODO: change this later to check for the unit's player controller instead of just type
-    public static boolean isUnitFriendly(int unitId) {
-        return true;
+    @SubscribeEvent
+    // assign unit controllingPlayerId when spawned based on whoever is closest
+    // this is very hacky, can assign to the wrong player if they spawn on top of someone else
+    // but probably just leave it until we're spawning with production buildings
+    public static void onMobSpawn(LivingSpawnEvent.SpecialSpawn evt) {
+
+        Entity entity = evt.getEntity();
+        if (evt.getEntity() instanceof Unit) {
+
+            Vec3 pos = entity.position();
+            List<Player> nearbyPlayers = MiscUtil.getEntitiesWithinRange(
+                    new Vector3d(pos.x, pos.y, pos.z),
+                    100, Player.class, evt.getEntity().level);
+
+            int closestPlayerDist = 100;
+            Player closestPlayer = null;
+            for (Player player : nearbyPlayers) {
+                if (player.distanceTo(entity) < closestPlayerDist)
+                    closestPlayer = player;
+            }
+            if (closestPlayer != null) {
+                ((Unit) entity).setControllingPlayerId(closestPlayer.getId());
+                System.out.println("Assigned controllingPlayerId: " + closestPlayer.getId());
+            }
+        }
+    }
+
+    // similar to UnitClientVanillaEvents getUnitRelationship  given two
+    public static Relationship getUnitToMobRelationship(Unit unit, Entity mob) {
+        if (!(mob instanceof Unit))
+            return Relationship.NEUTRAL;
+
+        int controllerId1 = unit.getControllingPlayerId();
+        int controllerId2 = ((Unit) mob).getControllingPlayerId();
+
+        if (controllerId1 == controllerId2)
+            return Relationship.OWNED;
+        else
+            return Relationship.HOSTILE;
     }
 }

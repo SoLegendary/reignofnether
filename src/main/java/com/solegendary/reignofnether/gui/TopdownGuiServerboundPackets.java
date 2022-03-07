@@ -44,8 +44,6 @@ public class TopdownGuiServerboundPackets {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
-            System.out.println("Got TopdownGui packet from client!");
-
             if (this.topdownGuiOpen)
                 TopdownGuiServerVanillaEvents.openTopdownGui(this.playerId);
             else

@@ -81,8 +81,6 @@ public class UnitServerboundPackets {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
-            System.out.println("Got Unit packet from client!");
-
             UnitServerVanillaEvents.consumeUnitActionQueues(
                     this.stopCommand,
                     this.unitIdToAttack,

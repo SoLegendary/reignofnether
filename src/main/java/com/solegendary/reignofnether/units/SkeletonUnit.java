@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -44,6 +45,13 @@ public class SkeletonUnit extends Skeleton implements Unit {
     final float aggroRange = 10;
     final boolean willRetaliate = true; // will attack when hurt by an enemy, TODO: for workers, run if false
     final boolean aggressiveWhenIdle = false;
+
+    // which player owns this unit?
+    private int controllingPlayerId = -1;
+
+    public int getControllingPlayerId() { return this.controllingPlayerId; }
+    public void setControllingPlayerId(int id) { this.controllingPlayerId = id; }
+
 
     public SkeletonUnit(EntityType<? extends Skeleton> p_33570_, Level p_33571_) {
         super(p_33570_, p_33571_);
@@ -92,9 +100,10 @@ public class SkeletonUnit extends Skeleton implements Unit {
             // retaliate against a mob that damaged us
             if (getLastDamageSource() != null && willRetaliate) {
                 Entity lastDSEntity = getLastDamageSource().getEntity();
+                Relationship rs = UnitServerVanillaEvents.getUnitToMobRelationship(this, lastDSEntity);
 
                 if (lastDSEntity instanceof PathfinderMob &&
-                        !UnitServerVanillaEvents.isUnitFriendly(lastDSEntity.getId()) &&
+                        (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE) &&
                         !hasLivingTarget())
                     this.setAttackTarget((PathfinderMob) lastDSEntity);
             }
@@ -116,16 +125,17 @@ public class SkeletonUnit extends Skeleton implements Unit {
                 PathfinderMob.class,
                 level);
 
-        List<PathfinderMob> nearbyUnfriendlyMobs = new ArrayList<>();
+        List<PathfinderMob> nearbyHostileMobs = new ArrayList<>();
 
         for (PathfinderMob mob : nearbyMobs) {
-            if (!UnitServerVanillaEvents.isUnitFriendly(mob.getId()) && mob.getId() != this.getId())
-                nearbyUnfriendlyMobs.add(mob);
+            Relationship rs = UnitServerVanillaEvents.getUnitToMobRelationship(this, mob);
+            if (rs == Relationship.HOSTILE && mob.getId() != this.getId())
+                nearbyHostileMobs.add(mob);
         }
         // find the closest mob
         double closestDist = attackRange + 1;
         PathfinderMob closestMob = null;
-        for (PathfinderMob mob : nearbyUnfriendlyMobs) {
+        for (PathfinderMob mob : nearbyHostileMobs) {
             double dist = this.position().distanceTo(mob.position());
             if (dist < closestDist && dist < aggroRange) {
                 closestDist = this.position().distanceTo(mob.position());

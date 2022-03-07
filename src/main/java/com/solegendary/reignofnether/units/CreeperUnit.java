@@ -23,6 +23,12 @@ public class CreeperUnit extends Creeper implements Unit {
     private BlockPos attackMoveAnchor = null;
     private LivingEntity followTarget = null;
 
+    // which player owns this unit?
+    private int controllingPlayerId = -1;
+
+    public int getControllingPlayerId() { return this.controllingPlayerId; }
+    public void setControllingPlayerId(int id) { this.controllingPlayerId = id; }
+
     public CreeperUnit(EntityType<? extends Creeper> p_32278_, Level p_32279_) { super(p_32278_, p_32279_); }
 
     @Override
