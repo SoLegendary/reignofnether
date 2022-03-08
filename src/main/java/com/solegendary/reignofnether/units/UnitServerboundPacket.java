@@ -1,29 +1,13 @@
 package com.solegendary.reignofnether.units;
 
-import com.solegendary.reignofnether.cursor.CursorClientVanillaEvents;
-import com.solegendary.reignofnether.gui.TopdownGuiServerVanillaEvents;
-import com.solegendary.reignofnether.gui.TopdownGuiServerboundPackets;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
-import com.solegendary.reignofnether.registrars.Keybinds;
-import com.solegendary.reignofnether.registrars.PacketHandler;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class UnitServerboundPackets {
+public class UnitServerboundPacket {
 
     private boolean stopCommand;
     private int unitIdToAttack;
@@ -35,7 +19,7 @@ public class UnitServerboundPackets {
     private BlockPos preselectedBlockPos;
 
     // packet-handler functions
-    public UnitServerboundPackets(
+    public UnitServerboundPacket(
             boolean stopCommand,
             int unitIdToAttack,
             int unitIdToFollow,
@@ -55,7 +39,7 @@ public class UnitServerboundPackets {
         this.preselectedBlockPos = preselectedBlockPos;
     }
 
-    public UnitServerboundPackets(FriendlyByteBuf buffer) {
+    public UnitServerboundPacket(FriendlyByteBuf buffer) {
         this.stopCommand = buffer.readBoolean();
         this.unitIdToAttack = buffer.readInt();
         this.unitIdToFollow = buffer.readInt();

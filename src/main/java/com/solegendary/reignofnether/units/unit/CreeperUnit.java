@@ -1,5 +1,6 @@
-package com.solegendary.reignofnether.units;
+package com.solegendary.reignofnether.units.unit;
 
+import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.goals.MoveToCursorBlockGoal;
 import com.solegendary.reignofnether.units.goals.SelectedTargetGoal;
 import net.minecraft.core.BlockPos;

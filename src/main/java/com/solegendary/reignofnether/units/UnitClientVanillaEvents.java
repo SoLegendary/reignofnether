@@ -8,19 +8,15 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BaseSpawner;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class UnitClientVanillaEvents {
@@ -122,7 +118,7 @@ public class UnitClientVanillaEvents {
             unitIdsToMove.size() > 0 ||
             unitIdsToAttackMove.size() > 0) {
 
-            PacketHandler.INSTANCE.sendToServer(new UnitServerboundPackets(
+            PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
                     false,
                     unitIdToAttack,
                     unitIdToFollow,
@@ -144,7 +140,7 @@ public class UnitClientVanillaEvents {
         if (!OrthoviewClientVanillaEvents.isEnabled()) return;
 
         if (evt.getKeyCode() == Keybinds.keyS.getKey().getValue()) {
-            PacketHandler.INSTANCE.sendToServer(new UnitServerboundPackets(
+            PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
                     true,
                     -1,
                     -1,
@@ -233,7 +229,7 @@ public class UnitClientVanillaEvents {
 
             int controllerId = ((Unit) entity).getControllingPlayerId();
 
-            System.out.println("controllerId: " + controllerId);
+            System.out.println("entityId: " + entity.getId() + " controllerId: " + controllerId);
 
             if (controllerId == MC.player.getId())
                 return Relationship.OWNED;

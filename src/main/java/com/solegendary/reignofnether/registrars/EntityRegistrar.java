@@ -1,9 +1,9 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.units.CreeperUnit;
-import com.solegendary.reignofnether.units.SkeletonUnit;
-import com.solegendary.reignofnether.units.ZombieUnit;
+import com.solegendary.reignofnether.units.unit.CreeperUnit;
+import com.solegendary.reignofnether.units.unit.SkeletonUnit;
+import com.solegendary.reignofnether.units.unit.ZombieUnit;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;

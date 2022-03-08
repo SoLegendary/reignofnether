@@ -1,8 +1,9 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.gui.TopdownGuiServerboundPackets;
-import com.solegendary.reignofnether.units.UnitServerboundPackets;
+import com.solegendary.reignofnether.gui.TopdownGuiServerboundPacket;
+import com.solegendary.reignofnether.units.UnitClientboundPacket;
+import com.solegendary.reignofnether.units.UnitServerboundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
@@ -22,12 +23,16 @@ public final class PacketHandler {
     public static void init() {
         int index = 0;
 
-        INSTANCE.messageBuilder(TopdownGuiServerboundPackets.class, index++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(TopdownGuiServerboundPackets::encode).decoder(TopdownGuiServerboundPackets::new)
-                .consumer(TopdownGuiServerboundPackets::handle).add();
+        INSTANCE.messageBuilder(TopdownGuiServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(TopdownGuiServerboundPacket::encode).decoder(TopdownGuiServerboundPacket::new)
+                .consumer(TopdownGuiServerboundPacket::handle).add();
 
-        INSTANCE.messageBuilder(UnitServerboundPackets.class, index++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(UnitServerboundPackets::encode).decoder(UnitServerboundPackets::new)
-                .consumer(UnitServerboundPackets::handle).add();
+        INSTANCE.messageBuilder(UnitServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(UnitServerboundPacket::encode).decoder(UnitServerboundPacket::new)
+                .consumer(UnitServerboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(UnitClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(UnitClientboundPacket::encode).decoder(UnitClientboundPacket::new)
+                .consumer(UnitClientboundPacket::handle).add();
     }
 }

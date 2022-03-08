@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.orthoview;
 
-import com.solegendary.reignofnether.gui.TopdownGuiServerboundPackets;
+import com.solegendary.reignofnether.gui.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
 import com.solegendary.reignofnether.registrars.Keybinds;
@@ -105,7 +105,7 @@ public class OrthoviewClientVanillaEvents {
             //TopdownGuiServerboundPackets.openTopdownGui();
         }
         else {
-            TopdownGuiServerboundPackets.closeTopdownGui(MC.player.getId());
+            TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
         }
     }
 
@@ -116,7 +116,7 @@ public class OrthoviewClientVanillaEvents {
     public static void onWorldTick(TickEvent.ClientTickEvent evt) {
         if (sendPacketCooldown > 0) sendPacketCooldown -= 1;
         if (Minecraft.getInstance().screen == null && isEnabled() && sendPacketCooldown <= 0) {
-            TopdownGuiServerboundPackets.openTopdownGui(MC.player.getId());
+            TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
             sendPacketCooldown = 10;
         }
     }

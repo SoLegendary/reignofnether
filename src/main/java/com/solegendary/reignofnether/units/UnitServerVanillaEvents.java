@@ -1,18 +1,18 @@
 package com.solegendary.reignofnether.units;
 
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -116,6 +116,15 @@ public class UnitServerVanillaEvents {
             if (closestPlayer != null) {
                 ((Unit) entity).setControllingPlayerId(closestPlayer.getId());
                 System.out.println("Assigned controllingPlayerId: " + closestPlayer.getId());
+
+                // set on clientside too - send to all players that have loaded the chunk this entity is in
+                PacketHandler.INSTANCE.send(
+                    //PacketDistributor.TRACKING_ENTITY.with(() -> entity),
+                    PacketDistributor.TRACKING_CHUNK.with(() -> entity.level.getChunkAt(entity.blockPosition())),
+                    new UnitClientboundPacket(
+                        entity.getId(),
+                        closestPlayer.getId()
+                ));
             }
         }
     }
