@@ -1,12 +1,11 @@
 package com.solegendary.reignofnether.units;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.Entity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -40,13 +39,12 @@ public class UnitClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> {
-                    System.out.println("Received packet from server:");
-                    System.out.println(this.unitId);
-                    System.out.println(this.controllingPlayerId);
-
-                    Entity entity = Minecraft.getInstance().level.getEntity(this.unitId);
-                    if (entity != null)
-                        ((Unit) entity).setControllingPlayerId(this.controllingPlayerId);
+                    // this packet is triggered on server mob spawn, but clients may not have the entity available yet
+                    // therefore, queue up the ids to assign
+                    ArrayList<Integer> unitPair = new ArrayList<>();
+                    unitPair.add(this.unitId);
+                    unitPair.add(this.controllingPlayerId);
+                    UnitClientVanillaEvents.unitsToAssignCtrl.add(unitPair);
                     success.set(true);
                 }
             );

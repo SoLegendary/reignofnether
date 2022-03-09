@@ -153,8 +153,31 @@ public class UnitClientVanillaEvents {
         }
     }
 
+    // queue for units to be assigned controllers
+    public static ArrayList<ArrayList<Integer>> unitsToAssignCtrl = new ArrayList<>();
+
     @SubscribeEvent
     public static void onWorldTick(TickEvent.ClientTickEvent evt) {
+
+        ArrayList<ArrayList<Integer>> unitsToAssignCtrlNew = new ArrayList<>();
+
+        for (ArrayList<Integer> unitPair : unitsToAssignCtrl) {
+            boolean assigned = false;
+            int unitId = unitPair.get(0);
+            int playerId = unitPair.get(1);
+
+            if (unitId > 0 && playerId > 0) {
+                Entity entity = MC.level.getEntity(unitId);
+                if (entity != null) {
+                    ((Unit) entity).setControllingPlayerId(playerId);
+                    assigned = true;
+                }
+            }
+            if (!assigned)
+                unitsToAssignCtrlNew.add(unitPair);
+        }
+        unitsToAssignCtrl = unitsToAssignCtrlNew;
+
 
         // deselect all units
         if (Keybinds.keyF1.isDown())
@@ -203,11 +226,11 @@ public class UnitClientVanillaEvents {
                     // always-shown highlights to indicate unit relationships
                     Relationship unitRs = getPlayerToMobRelationship(entity.getId());
                     if (unitRs == Relationship.OWNED)
-                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.3f, 1.0f, 0.3f, 0.5f);
+                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.3f, 1.0f, 0.3f, 0.2f);
                     else if (unitRs == Relationship.FRIENDLY)
-                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.5f);
+                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.2f);
                     else if (unitRs == Relationship.HOSTILE)
-                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.5f);
+                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.2f);
                 }
             }
         }
@@ -228,8 +251,6 @@ public class UnitClientVanillaEvents {
                 return Relationship.NEUTRAL;
 
             int controllerId = ((Unit) entity).getControllingPlayerId();
-
-            System.out.println("entityId: " + entity.getId() + " controllerId: " + controllerId);
 
             if (controllerId == MC.player.getId())
                 return Relationship.OWNED;
