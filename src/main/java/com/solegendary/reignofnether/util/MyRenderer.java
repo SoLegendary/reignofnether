@@ -27,6 +27,13 @@ public class MyRenderer {
         drawOutline(matrixStack, entity.getBoundingBox(), r, g, b, a);
     }
 
+    // like drawEntityOutline but only the bottom square
+    public static void drawEntityOutlineBottom(PoseStack matrixStack, Entity entity, float r, float g, float b, float a) {
+        AABB aabb = entity.getBoundingBox();
+        aabb = aabb.setMaxY(aabb.minY);
+        drawOutline(matrixStack, aabb, r, g, b, a);
+    }
+
     public static void drawOutline(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
         Entity camEntity = MC.getCameraEntity();
         double d0 = camEntity.getX();

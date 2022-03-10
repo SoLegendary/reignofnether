@@ -114,8 +114,8 @@ public class UnitServerVanillaEvents {
                     closestPlayer = player;
             }
             if (closestPlayer != null) {
-                ((Unit) entity).setControllingPlayerId(closestPlayer.getId());
-                System.out.println("Assigned controllingPlayerId: " + closestPlayer.getId());
+                ((Unit) entity).setOwnerName(closestPlayer.getName().getString());
+                System.out.println("Assigned ownerName: " + closestPlayer.getName().getString());
 
                 // set on clientside too - send to all players that have loaded the chunk this entity is in
                 PacketHandler.INSTANCE.send(
@@ -123,7 +123,7 @@ public class UnitServerVanillaEvents {
                     PacketDistributor.TRACKING_CHUNK.with(() -> entity.level.getChunkAt(entity.blockPosition())),
                     new UnitClientboundPacket(
                         entity.getId(),
-                        closestPlayer.getId()
+                        closestPlayer.getUUID()
                 ));
             }
         }
@@ -134,10 +134,10 @@ public class UnitServerVanillaEvents {
         if (!(mob instanceof Unit))
             return Relationship.NEUTRAL;
 
-        int controllerId1 = unit.getControllingPlayerId();
-        int controllerId2 = ((Unit) mob).getControllingPlayerId();
+        String ownerName1 = unit.getOwnerName();
+        String ownerName2 = ((Unit) mob).getOwnerName();
 
-        if (controllerId1 == controllerId2)
+        if (ownerName1.equals(ownerName2))
             return Relationship.OWNED;
         else
             return Relationship.HOSTILE;

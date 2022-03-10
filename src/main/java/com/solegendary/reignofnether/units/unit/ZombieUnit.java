@@ -23,10 +23,10 @@ public class ZombieUnit extends Zombie implements Unit {
     private LivingEntity followTarget = null;
 
     // which player owns this unit?
-    private int controllingPlayerId = -1;
+    private String ownerName = "";
 
-    public int getControllingPlayerId() { return this.controllingPlayerId; }
-    public void setControllingPlayerId(int id) { this.controllingPlayerId = id; }
+    public String getOwnerName() { return this.ownerName; }
+    public void setOwnerName(String name) { this.ownerName = name; }
 
     public ZombieUnit(EntityType<? extends Zombie> p_34271_, Level p_34272_) {
         super(p_34271_, p_34272_);

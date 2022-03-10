@@ -8,9 +8,11 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -18,6 +20,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 public class UnitClientVanillaEvents {
 
@@ -33,11 +36,15 @@ public class UnitClientVanillaEvents {
     private static ArrayList<Integer> unitIdsToMove = new ArrayList<>(); // QUEUED - these units move to cursorBlockPos
     private static ArrayList<Integer> unitIdsToAttackMove = new ArrayList<>(); // QUEUED - these units attack move to cursorBlockPos
     private static ArrayList<ArrayList<Integer>> controlGroups = new ArrayList<>(10);
+    private static ArrayList<Integer> allUnitIds = new ArrayList<>();
 
     public static ArrayList<Integer> getPreselectedUnitIds() { return preselectedUnitIds; }
     public static ArrayList<Integer> getSelectedUnitIds() { return selectedUnitIds; }
     public static void addPreselectedUnitId(Integer unitId) { preselectedUnitIds.add(unitId); }
-    public static void addSelectedUnitId(Integer unitId) { selectedUnitIds.add(unitId); }
+    public static void addSelectedUnitId(Integer unitId) { // only ever add owned units
+        if (getPlayerToMobRelationship(unitId) == Relationship.OWNED)
+            selectedUnitIds.add(unitId);
+    }
     public static void setPreselectedUnitIds(ArrayList<Integer> unitIds) { preselectedUnitIds = unitIds; }
     public static void setSelectedUnitIds(ArrayList<Integer> unitIds) { selectedUnitIds = unitIds; }
     public static int getUnitIdToAttack() { return unitIdToAttack; }
@@ -47,12 +54,23 @@ public class UnitClientVanillaEvents {
     public static void setUnitIdsToMove(ArrayList<Integer> unitIds) { unitIdsToMove = unitIds; }
     public static void setUnitIdsToAttackMove(ArrayList<Integer> unitIds) { unitIdsToAttackMove = unitIds; }
 
-    // TODO: not sure this works clientside
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveWorldEvent evt) {
         int entityId = evt.getEntity().getId();
+
         preselectedUnitIds.removeIf(e -> e == entityId);
         selectedUnitIds.removeIf(e -> e == entityId);
+        allUnitIds.removeIf(e -> e == entityId);
+
+        for (ArrayList<Integer> controlGroup : controlGroups)
+            controlGroup.removeIf(e -> e == entityId);
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoin(EntityJoinWorldEvent evt) {
+        Entity entity = evt.getEntity();
+        if (entity instanceof Unit)
+            allUnitIds.add(entity.getId());
     }
 
     @SubscribeEvent
@@ -62,12 +80,10 @@ public class UnitClientVanillaEvents {
         // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
         // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
 
-        // TODO: restrict controls to only Relationship.OWNED
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (selectedUnitIds.size() > 0) {
                 // A + left click -> force attack single unit (even if friendly)
-                if (CursorClientVanillaEvents.getAttackFlag() && preselectedUnitIds.size() == 1 &&
-                        !targetingSelf())
+                if (CursorClientVanillaEvents.getAttackFlag() && preselectedUnitIds.size() == 1 && !targetingSelf())
                     setUnitIdToAttack(preselectedUnitIds.get(0));
                 // A + left click -> attack move ground
                 else if (CursorClientVanillaEvents.getAttackFlag()) {
@@ -76,9 +92,17 @@ public class UnitClientVanillaEvents {
                     setUnitIdsToAttackMove(unitIdsToAttackMove);
                 }
             }
+
+            for (int unitId : preselectedUnitIds) {
+                Unit unit = (Unit) MC.level.getEntity(unitId);
+                System.out.println(unit.getOwnerName());
+            }
+
             // left click -> (de)select a single unit
             // if shift is held, deselect a unit or add it to the selected group
-            if (preselectedUnitIds.size() == 1 && !CursorClientVanillaEvents.getAttackFlag()) {
+            if (preselectedUnitIds.size() == 1 && !CursorClientVanillaEvents.getAttackFlag() &&
+                getPlayerToMobRelationship(preselectedUnitIds.get(0)) == Relationship.OWNED) {
+
                 if (Keybinds.shiftMod.isDown()) {
                     if (!selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0))))
                         if (MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit)
@@ -154,29 +178,34 @@ public class UnitClientVanillaEvents {
     }
 
     // queue for units to be assigned controllers
-    public static ArrayList<ArrayList<Integer>> unitsToAssignCtrl = new ArrayList<>();
+    public static ArrayList<Integer> unitsToAssignCtrl = new ArrayList<>();
+    public static ArrayList<UUID> playerUUIDs = new ArrayList<>();
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.ClientTickEvent evt) {
 
-        ArrayList<ArrayList<Integer>> unitsToAssignCtrlNew = new ArrayList<>();
+        ArrayList<Integer> unitsToAssignCtrlNew = new ArrayList<>();
+        ArrayList<UUID> playerUUIDsNew = new ArrayList<>();
 
-        for (ArrayList<Integer> unitPair : unitsToAssignCtrl) {
+        for (int i = 0; i < unitsToAssignCtrl.size(); i++) {
             boolean assigned = false;
-            int unitId = unitPair.get(0);
-            int playerId = unitPair.get(1);
+            int unitId = unitsToAssignCtrl.get(i);
+            UUID playerUUID = playerUUIDs.get(i);
 
-            if (unitId > 0 && playerId > 0) {
-                Entity entity = MC.level.getEntity(unitId);
-                if (entity != null) {
-                    ((Unit) entity).setControllingPlayerId(playerId);
-                    assigned = true;
-                }
+            Entity entity = MC.level.getEntity(unitId);
+            if (entity != null) {
+                Player player = MC.level.getPlayerByUUID(playerUUID);
+                System.out.println(player.getName().getString());
+                ((Unit) entity).setOwnerName(player.getName().getString());
+                assigned = true;
             }
-            if (!assigned)
-                unitsToAssignCtrlNew.add(unitPair);
+            if (!assigned) {
+                unitsToAssignCtrlNew.add(unitId);
+                playerUUIDsNew.add(playerUUID);
+            }
         }
         unitsToAssignCtrl = unitsToAssignCtrlNew;
+        playerUUIDs = playerUUIDsNew;
 
 
         // deselect all units
@@ -222,15 +251,20 @@ public class UnitClientVanillaEvents {
                         MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f);
                     else if (preselectedUnitIds.contains(idToDraw))
                         MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.5f);
+                }
+            }
 
-                    // always-shown highlights to indicate unit relationships
-                    Relationship unitRs = getPlayerToMobRelationship(entity.getId());
+            // always-shown highlights to indicate unit relationships
+            for (int unitId : allUnitIds) {
+                Entity entity = MC.level.getEntity(unitId);
+                if (entity != null) {
+                    Relationship unitRs = getPlayerToMobRelationship(unitId);
                     if (unitRs == Relationship.OWNED)
-                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.3f, 1.0f, 0.3f, 0.2f);
+                        MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 1.0f, 0.3f, 0.2f);
                     else if (unitRs == Relationship.FRIENDLY)
-                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.2f);
+                        MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 0.3f, 1.0f, 0.2f);
                     else if (unitRs == Relationship.HOSTILE)
-                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.2f);
+                        MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.2f);
                 }
             }
         }
@@ -242,17 +276,17 @@ public class UnitClientVanillaEvents {
                 selectedUnitIds.get(0).equals(preselectedUnitIds.get(0));
     }
 
-    // TODO: unit ControllingPlayerId seems to only be set serverside right now
     public static Relationship getPlayerToMobRelationship(int mobId) {
         if (MC.level != null) {
+
             Entity entity = MC.level.getEntity(mobId);
 
             if (!(entity instanceof Unit))
                 return Relationship.NEUTRAL;
 
-            int controllerId = ((Unit) entity).getControllingPlayerId();
+            String ownerName = ((Unit) entity).getOwnerName();
 
-            if (controllerId == MC.player.getId())
+            if (ownerName.equals(MC.player.getName().getString()))
                 return Relationship.OWNED;
             else
                 return Relationship.HOSTILE;

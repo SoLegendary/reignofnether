@@ -25,10 +25,10 @@ public class CreeperUnit extends Creeper implements Unit {
     private LivingEntity followTarget = null;
 
     // which player owns this unit?
-    private int controllingPlayerId = -1;
+    private String ownerName = "";
 
-    public int getControllingPlayerId() { return this.controllingPlayerId; }
-    public void setControllingPlayerId(int id) { this.controllingPlayerId = id; }
+    public String getOwnerName() { return this.ownerName; }
+    public void setOwnerName(String name) { this.ownerName = name; }
 
     public CreeperUnit(EntityType<? extends Creeper> p_32278_, Level p_32279_) { super(p_32278_, p_32279_); }
 

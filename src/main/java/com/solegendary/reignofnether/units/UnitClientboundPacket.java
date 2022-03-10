@@ -6,31 +6,32 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public class UnitClientboundPacket {
 
     private int unitId;
-    private int controllingPlayerId;
+    private UUID ownerUUID;
 
     // packet-handler functions
     public UnitClientboundPacket(
             int unitId,
-            int controllingPlayerId
+            UUID ownerUUID
     ) {
         this.unitId = unitId;
-        this.controllingPlayerId = controllingPlayerId;
+        this.ownerUUID = ownerUUID;
     }
 
     public UnitClientboundPacket(FriendlyByteBuf buffer) {
         this.unitId = buffer.readInt();
-        this.controllingPlayerId = buffer.readInt();
+        this.ownerUUID = buffer.readUUID();
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeInt(this.unitId);
-        buffer.writeInt(this.controllingPlayerId);
+        buffer.writeUUID(this.ownerUUID);
     }
 
     // client-side packet-consuming functions
@@ -41,10 +42,8 @@ public class UnitClientboundPacket {
                 () -> () -> {
                     // this packet is triggered on server mob spawn, but clients may not have the entity available yet
                     // therefore, queue up the ids to assign
-                    ArrayList<Integer> unitPair = new ArrayList<>();
-                    unitPair.add(this.unitId);
-                    unitPair.add(this.controllingPlayerId);
-                    UnitClientVanillaEvents.unitsToAssignCtrl.add(unitPair);
+                    UnitClientVanillaEvents.unitsToAssignCtrl.add(unitId);
+                    UnitClientVanillaEvents.playerUUIDs.add(ownerUUID);
                     success.set(true);
                 }
             );

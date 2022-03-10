@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 
 public interface Unit {
 
-    public int getControllingPlayerId();
-    public void setControllingPlayerId(int id);
+    public String getOwnerName();
+    public void setOwnerName(String name);
 
     public Boolean isAttackMoving();
     public Boolean isFollowing();

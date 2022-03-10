@@ -16,7 +16,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.monster.Skeleton;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -50,10 +49,10 @@ public class SkeletonUnit extends Skeleton implements Unit {
     final boolean aggressiveWhenIdle = false;
 
     // which player owns this unit?
-    private int controllingPlayerId = -1;
+    private String ownerName = "";
 
-    public int getControllingPlayerId() { return this.controllingPlayerId; }
-    public void setControllingPlayerId(int id) { this.controllingPlayerId = id; }
+    public String getOwnerName() { return this.ownerName; }
+    public void setOwnerName(String name) { this.ownerName = name; }
 
 
     public SkeletonUnit(EntityType<? extends Skeleton> p_33570_, Level p_33571_) {
@@ -100,8 +99,8 @@ public class SkeletonUnit extends Skeleton implements Unit {
                     resetTargets();
             }
 
-            // retaliate against a mob that damaged us
-            if (getLastDamageSource() != null && willRetaliate) {
+            // retaliate against a mob that damaged us UNLESS already on a move command (unless just following someone)
+            if (getLastDamageSource() != null && willRetaliate && this.moveGoal.getMoveTarget() == null && followTarget == null) {
                 Entity lastDSEntity = getLastDamageSource().getEntity();
                 Relationship rs = UnitServerVanillaEvents.getUnitToMobRelationship(this, lastDSEntity);
 
