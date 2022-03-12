@@ -9,6 +9,10 @@ import com.solegendary.reignofnether.units.goals.RangedBowAttackUnitGoal;
 import com.solegendary.reignofnether.units.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -48,19 +52,24 @@ public class SkeletonUnit extends Skeleton implements Unit {
     final boolean willRetaliate = true; // will attack when hurt by an enemy, TODO: for workers, run if false
     final boolean aggressiveWhenIdle = false;
 
-    // which player owns this unit?
-    private String ownerName = "";
-
-    public String getOwnerName() { return this.ownerName; }
-    public void setOwnerName(String name) { this.ownerName = name; }
-
-
     public SkeletonUnit(EntityType<? extends Skeleton> p_33570_, Level p_33571_) {
         super(p_33570_, p_33571_);
     }
 
     public Boolean isAttackMoving() { return attackMoveTarget != null; }
     public Boolean isFollowing() { return followTarget != null; }
+
+    // which player owns this unit? this format ensures its synched to client without having to use packets
+    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
+    public static final EntityDataAccessor<String> ownerDataAccessor =
+            SynchedEntityData.defineId(SkeletonUnit.class, EntityDataSerializers.STRING);
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(ownerDataAccessor, "");
+    }
 
     public void tick() {
         super.tick();

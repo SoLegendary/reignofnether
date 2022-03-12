@@ -69,8 +69,10 @@ public class UnitClientVanillaEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinWorldEvent evt) {
         Entity entity = evt.getEntity();
-        if (entity instanceof Unit)
+        if (entity instanceof Unit) {
             allUnitIds.add(entity.getId());
+            System.out.println("Entity joined with owner: " + ((Unit) entity).getOwnerName());
+        }
     }
 
     @SubscribeEvent
@@ -91,11 +93,6 @@ public class UnitClientVanillaEvents {
                     unitIdsToAttackMove.addAll(selectedUnitIds);
                     setUnitIdsToAttackMove(unitIdsToAttackMove);
                 }
-            }
-
-            for (int unitId : preselectedUnitIds) {
-                Unit unit = (Unit) MC.level.getEntity(unitId);
-                System.out.println(unit.getOwnerName());
             }
 
             // left click -> (de)select a single unit
@@ -177,36 +174,8 @@ public class UnitClientVanillaEvents {
         }
     }
 
-    // queue for units to be assigned controllers
-    public static ArrayList<Integer> unitsToAssignCtrl = new ArrayList<>();
-    public static ArrayList<UUID> playerUUIDs = new ArrayList<>();
-
     @SubscribeEvent
     public static void onWorldTick(TickEvent.ClientTickEvent evt) {
-
-        ArrayList<Integer> unitsToAssignCtrlNew = new ArrayList<>();
-        ArrayList<UUID> playerUUIDsNew = new ArrayList<>();
-
-        for (int i = 0; i < unitsToAssignCtrl.size(); i++) {
-            boolean assigned = false;
-            int unitId = unitsToAssignCtrl.get(i);
-            UUID playerUUID = playerUUIDs.get(i);
-
-            Entity entity = MC.level.getEntity(unitId);
-            if (entity != null) {
-                Player player = MC.level.getPlayerByUUID(playerUUID);
-                System.out.println(player.getName().getString());
-                ((Unit) entity).setOwnerName(player.getName().getString());
-                assigned = true;
-            }
-            if (!assigned) {
-                unitsToAssignCtrlNew.add(unitId);
-                playerUUIDsNew.add(playerUUID);
-            }
-        }
-        unitsToAssignCtrl = unitsToAssignCtrlNew;
-        playerUUIDs = playerUUIDsNew;
-
 
         // deselect all units
         if (Keybinds.keyF1.isDown())

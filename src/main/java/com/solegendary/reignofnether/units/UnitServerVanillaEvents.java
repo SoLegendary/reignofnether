@@ -5,15 +5,20 @@ import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UnitServerVanillaEvents {
@@ -107,24 +112,18 @@ public class UnitServerVanillaEvents {
                     new Vector3d(pos.x, pos.y, pos.z),
                     100, Player.class, evt.getEntity().level);
 
-            int closestPlayerDist = 100;
+            float closestPlayerDist = 100;
             Player closestPlayer = null;
             for (Player player : nearbyPlayers) {
-                if (player.distanceTo(entity) < closestPlayerDist)
+                System.out.println("Found nearby player: " + player.getName().getString() + " " + player.distanceTo(entity));
+                if (player.distanceTo(entity) < closestPlayerDist) {
+                    closestPlayerDist = player.distanceTo(entity);
                     closestPlayer = player;
+                }
             }
             if (closestPlayer != null) {
                 ((Unit) entity).setOwnerName(closestPlayer.getName().getString());
                 System.out.println("Assigned ownerName: " + closestPlayer.getName().getString());
-
-                // set on clientside too - send to all players that have loaded the chunk this entity is in
-                PacketHandler.INSTANCE.send(
-                    //PacketDistributor.TRACKING_ENTITY.with(() -> entity),
-                    PacketDistributor.TRACKING_CHUNK.with(() -> entity.level.getChunkAt(entity.blockPosition())),
-                    new UnitClientboundPacket(
-                        entity.getId(),
-                        closestPlayer.getUUID()
-                ));
             }
         }
     }
@@ -141,5 +140,17 @@ public class UnitServerVanillaEvents {
             return Relationship.OWNED;
         else
             return Relationship.HOSTILE;
+    }
+
+    @SubscribeEvent
+    // TODO: ownerName is lost on serverside too when server is restarted (inc. singleplayer), maybe have to save to world save file?
+    // have to setOwnerName here because its lost on logout; note that players join BEFORE other entities
+    public static void onEntityJoin(EntityJoinWorldEvent evt) {
+        Entity entity = evt.getEntity();
+        if (entity instanceof Unit) {
+            String ownerName = ((Unit) entity).getOwnerName();
+            System.out.println(ownerName);
+            ((Unit) entity).setOwnerName(ownerName);
+        }
     }
 }
