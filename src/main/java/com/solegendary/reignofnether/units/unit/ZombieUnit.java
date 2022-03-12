@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 
-public class ZombieUnit extends Zombie implements Unit {
+public class ZombieUnit extends Zombie {
 
     MoveToCursorBlockGoal moveGoal;
     SelectedTargetGoal targetGoal;
@@ -32,9 +32,6 @@ public class ZombieUnit extends Zombie implements Unit {
         super(p_34271_, p_34272_);
     }
 
-    public Boolean isAttackMoving() { return attackMoveTarget != null; }
-    public Boolean isFollowing() { return followTarget != null; }
-
     @Override
     protected void registerGoals() {
         this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
@@ -46,33 +43,5 @@ public class ZombieUnit extends Zombie implements Unit {
         this.goalSelector.addGoal(3, new ZombieAttackGoal(this, 1.0D, false));
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(3, targetGoal);
-    }
-
-    public void resetTargets() {
-        this.attackMoveTarget = null;
-        targetGoal.setTarget(null);
-        moveGoal.setMoveTarget(null);
-        this.followTarget = null;
-    }
-
-    public void setMoveTarget(@Nullable BlockPos bp) {
-        resetTargets();
-        moveGoal.setMoveTarget(bp);
-    }
-
-    // target MUST be a serverside entity or else it cannot be attacked
-    public void setAttackTarget(@Nullable LivingEntity target) {
-        resetTargets();
-        targetGoal.setTarget(target);
-    }
-
-    public void setAttackMoveTarget(@Nullable BlockPos bp) {
-        resetTargets();
-        this.attackMoveTarget = bp;
-    }
-
-    public void setFollowTarget(@Nullable LivingEntity target) {
-        resetTargets();
-        this.followTarget = target;
     }
 }

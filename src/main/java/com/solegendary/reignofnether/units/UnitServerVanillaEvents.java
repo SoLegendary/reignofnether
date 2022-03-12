@@ -149,7 +149,6 @@ public class UnitServerVanillaEvents {
         Entity entity = evt.getEntity();
         if (entity instanceof Unit) {
             String ownerName = ((Unit) entity).getOwnerName();
-            System.out.println(ownerName);
             ((Unit) entity).setOwnerName(ownerName);
         }
     }
