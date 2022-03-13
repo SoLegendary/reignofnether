@@ -51,19 +51,6 @@ public class SkeletonUnit extends Skeleton implements Unit {
     boolean retainFollowTarget = false;
     boolean retainHoldPosition = false;
 
-    // combat stats
-    public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return attackCooldown;}
-    public float getAggroRange() {return aggroRange;}
-    public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
-    public float getAttackRange() {return attackRange;}
-
-    final public float attackRange = 10.0F;
-    final public int attackCooldown = 45;
-    final public float aggroRange = 10;
-    final public boolean willRetaliate = true; // will attack when hurt by an enemy, TODO: for workers, run if false
-    final public boolean aggressiveWhenIdle = false;
-
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
     public boolean getHoldPosition() { return holdPosition; }
@@ -118,9 +105,27 @@ public class SkeletonUnit extends Skeleton implements Unit {
         this.followTarget = target;
     }
 
+    // combat stats
+    public boolean getWillRetaliate() {return willRetaliate;}
+    public int getAttackCooldown() {return attackCooldown;}
+    public float getAggroRange() {return aggroRange;}
+    public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
+    public float getAttackRange() {return attackRange;}
+
+    final public float attackRange = 10.0F; // only used by ranged units
+    final public int attackCooldown = 45;
+    final public float aggroRange = 10;
+    final public boolean willRetaliate = true; // will attack when hurt by an enemy, TODO: for workers, run if false
+    final public boolean aggressiveWhenIdle = false;
+
     public void tick() {
         super.tick();
         Unit.tick(this);
+
+        // need to do this outside the goal so it ticks down while not attacking
+        // only needed right now for RangedBowAttackUnitGoal
+        if (getAttackGoal() != null)
+            getAttackGoal().tickCooldown();
     }
 
     @Override

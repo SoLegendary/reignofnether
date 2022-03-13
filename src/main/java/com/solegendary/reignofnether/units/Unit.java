@@ -22,12 +22,11 @@ import java.util.List;
 
 public interface Unit {
 
+    // note that attackGoal is specific to unit types
     public MoveToCursorBlockGoal getMoveGoal();
     public void setMoveGoal(MoveToCursorBlockGoal moveGoal);
     public SelectedTargetGoal getTargetGoal();
     public void setTargetGoal(SelectedTargetGoal targetGoal);
-    public RangedBowAttackUnitGoal getAttackGoal();
-    public void setAttackGoal(RangedBowAttackUnitGoal attackGoal);
 
     public boolean getRetainAttackMoveTarget();
     public void setRetainAttackMoveTarget(boolean retainAttackMoveTarget);
@@ -65,10 +64,6 @@ public interface Unit {
                 unitMob.setTarget(null);
                 unit.getTargetGoal().setTarget(null);
             }
-
-            // need to do this outside the goal so it ticks down while not attacking
-            if (unit.getAttackGoal() != null)
-                unit.getAttackGoal().tickCooldown();
 
             // no iframes after being damaged so multiple units can attack at once
             unitMob.invulnerableTime = 0;
