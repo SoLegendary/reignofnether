@@ -2,10 +2,10 @@ package com.solegendary.reignofnether.cursor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Unit;
-import com.solegendary.reignofnether.units.UnitCommonVanillaEvents;
+import com.solegendary.reignofnether.units.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Handler that implements and manages screen-to-world translations of the cursor and block/entity selection
  */
-public class CursorClientVanillaEvents {
+public class CursorClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -77,7 +77,7 @@ public class CursorClientVanillaEvents {
         String screenName = evt.getScreen().getTitle().getString();
         long window = MC.getWindow().getWindow();
 
-        if (!OrthoviewClientVanillaEvents.isEnabled() || !screenName.equals("topdowngui_container")) {
+        if (!OrthoviewClientEvents.isEnabled() || !screenName.equals("topdowngui_container")) {
             if (GLFW.glfwRawMouseMotionSupported()) // raw mouse increases sensitivity massively for some reason
                 GLFW.glfwSetInputMode(window, GLFW.GLFW_RAW_MOUSE_MOTION, GLFW.GLFW_TRUE);
             return;
@@ -88,7 +88,7 @@ public class CursorClientVanillaEvents {
         // Manage cursor icons based on actions
         // ************************************
 
-        if (Keybinds.keyA.isDown() && UnitCommonVanillaEvents.getSelectedUnitIds().size() > 0)
+        if (Keybinds.keyA.isDown() && UnitClientEvents.getSelectedUnitIds().size() > 0)
             attackFlag = true;
 
         // hides default cursor and locks it to the window to allow edge panning
@@ -152,21 +152,21 @@ public class CursorClientVanillaEvents {
         }
 
         // TODO: make this be CursorEntity and only show when moving a mob instead of following cursor
-        //CursorCommonVanillaEvents.moveCursorEntity(cursorWorldPos);
+        //CursorServerEvents.moveCursorEntity(cursorWorldPos);
 
         // ****************************************
         // Find entity moused over and/or selected
         // ****************************************
-        List<PathfinderMob> entities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, PathfinderMob.class);
+        List<PathfinderMob> entities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, PathfinderMob.class, MC.level);
 
-        UnitCommonVanillaEvents.setPreselectedUnitIds(new ArrayList<>());
+        UnitClientEvents.setPreselectedUnitIds(new ArrayList<>());
 
         for (PathfinderMob entity : entities) {
             // inflate by set amount to improve click accuracy
             AABB entityaabb = entity.getBoundingBox().inflate(0.1);
 
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, getPlayerLookVector(), entityaabb)) {
-                UnitCommonVanillaEvents.addPreselectedUnitId(entity.getId());
+                UnitClientEvents.addPreselectedUnitId(entity.getId());
                 break; // only allow one moused unit at a time
             }
         }
@@ -213,7 +213,7 @@ public class CursorClientVanillaEvents {
                 if (MyMath.isBetween(u.dot(p1), ux, u.dot(p2)) &&
                     MyMath.isBetween(v.dot(p1), vx, v.dot(p4)) &&
                     MyMath.isBetween(w.dot(p1), wx, w.dot(p5))) {
-                    UnitCommonVanillaEvents.addPreselectedUnitId(entity.getId());
+                    UnitClientEvents.addPreselectedUnitId(entity.getId());
                 }
             }
         }
@@ -235,7 +235,7 @@ public class CursorClientVanillaEvents {
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
-        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
+        if (!OrthoviewClientEvents.isEnabled()) return;
 
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -250,13 +250,13 @@ public class CursorClientVanillaEvents {
 
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragEvent.Pre evt) {
-        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
+        if (!OrthoviewClientEvents.isEnabled()) return;
 
         cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
     }
     @SubscribeEvent
     public static void onMouseRelease(ScreenEvent.MouseReleasedEvent.Post evt) {
-        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
+        if (!OrthoviewClientEvents.isEnabled()) return;
 
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -265,14 +265,14 @@ public class CursorClientVanillaEvents {
             // enact box selection, excluding non-unit mobs
             // for single-click selection, see UnitCommonVanillaEvents
             // except if attack-moving or nothing is preselected (to prevent deselection)
-            ArrayList<Integer> preselectedUnitIds = UnitCommonVanillaEvents.getPreselectedUnitIds();
+            ArrayList<Integer> preselectedUnitIds = UnitClientEvents.getPreselectedUnitIds();
             if (preselectedUnitIds.size() > 0 && !cursorLeftClickDownPos.equals(cursorLeftClickDragPos)) {
                 if (!Keybinds.shiftMod.isDown())
-                    UnitCommonVanillaEvents.setSelectedUnitIds(new ArrayList<>());
-                for (int mobId : preselectedUnitIds) {
-                    Entity mob = MC.level.getEntity(mobId);
-                    if (mob instanceof Unit)
-                        UnitCommonVanillaEvents.addSelectedUnitId(mob.getId());
+                    UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
+                for (int unitId : preselectedUnitIds) {
+                    Entity entity = MC.level.getEntity(unitId);
+                    if (entity instanceof Unit)
+                        UnitClientEvents.addSelectedUnitId(entity.getId());
                 }
             }
             cursorLeftClickDownPos = new Vec2(0,0);
@@ -286,17 +286,17 @@ public class CursorClientVanillaEvents {
     // prevent moused over blocks being outlined in the usual way (ie. by raytracing from player to block)
     @SubscribeEvent
     public static void onHighlightBlockEvent(DrawSelectionEvent.HighlightBlock evt) {
-        if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled())
+        if (MC.level != null && OrthoviewClientEvents.isEnabled())
             evt.setCanceled(true);
     }
 
     @SubscribeEvent
     public static void onRenderWorld(RenderLevelLastEvent evt) {
-        if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled()) {
+        if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
 
-            if (!OrthoviewClientVanillaEvents.isCameraMovingByMouse() && !leftClickDown &&
-                 UnitCommonVanillaEvents.getSelectedUnitIds().size() > 0 &&
-                 UnitCommonVanillaEvents.getPreselectedUnitIds().size() <= 0) {
+            if (!OrthoviewClientEvents.isCameraMovingByMouse() && !leftClickDown &&
+                    UnitClientEvents.getSelectedUnitIds().size() > 0 &&
+                    UnitClientEvents.getPreselectedUnitIds().size() <= 0) {
                 MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }
         }
@@ -316,17 +316,17 @@ public class CursorClientVanillaEvents {
         int winHeight = MC.getWindow().getGuiScaledHeight();
 
         // at winHeight=240, zoom=10, screen is 20 blocks high, so PTB=240/20=24
-        float pixelsToBlocks = winHeight / OrthoviewClientVanillaEvents.getZoom();
+        float pixelsToBlocks = winHeight / OrthoviewClientEvents.getZoom();
 
         // make mouse coordinate origin centre of screen
         float x = (mouseX - (float) winWidth / 2) / pixelsToBlocks;
         float y = 0;
         float z = (mouseY - (float) winHeight / 2) / pixelsToBlocks;
 
-        double camRotYRads = Math.toRadians(OrthoviewClientVanillaEvents.getCamRotY());
+        double camRotYRads = Math.toRadians(OrthoviewClientEvents.getCamRotY());
         z = z / (float) (Math.sin(camRotYRads));
 
-        Vec2 XZRotated = MyMath.rotateCoords(x, z, OrthoviewClientVanillaEvents.getCamRotX());
+        Vec2 XZRotated = MyMath.rotateCoords(x, z, OrthoviewClientEvents.getCamRotX());
 
         // for some reason position is off by some y coord so just move it down manually
         return new Vector3d(

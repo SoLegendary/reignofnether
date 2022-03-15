@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.mixin;
 
-import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.renderer.culling.Frustum;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,7 +20,7 @@ public class FrustumMixin {
             float f1, float f2, float f3, float f4, float f5, float f6,
             CallbackInfoReturnable<Boolean> cir
     ) {
-        if (OrthoviewClientVanillaEvents.isEnabled()) {
+        if (OrthoviewClientEvents.isEnabled()) {
             cir.setReturnValue(true);
         }
     }

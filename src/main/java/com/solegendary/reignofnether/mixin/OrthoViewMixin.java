@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.mixin;
 
-import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.renderer.GameRenderer;
 import com.mojang.math.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,8 +20,8 @@ public class OrthoViewMixin {
             double d,
             CallbackInfoReturnable<Matrix4f> cir
     ) {
-        if (OrthoviewClientVanillaEvents.isEnabled()) {
-            cir.setReturnValue(OrthoviewClientVanillaEvents.getOrthographicProjection());
+        if (OrthoviewClientEvents.isEnabled()) {
+            cir.setReturnValue(OrthoviewClientEvents.getOrthographicProjection());
         }
     }
 }

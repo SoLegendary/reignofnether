@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.orthoview;
 
-import com.solegendary.reignofnether.gui.TopdownGuiCommonVanillaEvents;
+import com.solegendary.reignofnether.gui.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
 import com.solegendary.reignofnether.registrars.Keybinds;
@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
@@ -24,7 +25,7 @@ import static net.minecraft.util.Mth.sign;
  *
  * @author SoLegendary, adapted from Mineshot by Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class OrthoviewClientVanillaEvents {
+public class OrthoviewClientEvents {
 
     public static boolean enabled = false;
     private static boolean cameraMovingByMouse = false; // is the camera being moved using the mouse?
@@ -101,10 +102,22 @@ public class OrthoviewClientVanillaEvents {
         enabled = !enabled;
 
         if (enabled) { // opening is done by TopdownGui world tick (which opens it whenever no other screen is open)
-            //TopdownGuiCommonVanillaEvents.openTopdownGui();
+            //TopdownGuiServerboundPackets.openTopdownGui();
         }
         else {
-            TopdownGuiCommonVanillaEvents.closeTopdownGui();
+            TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
+        }
+    }
+
+    // ensure topdownGui is always open whenever Orthoview is enabled (if no other screens are open)
+    // it takes a while for the packet to be received and processed so don't spam the server with it
+    private static int sendPacketCooldown = 10;
+    @SubscribeEvent
+    public static void onWorldTick(TickEvent.ClientTickEvent evt) {
+        if (sendPacketCooldown > 0) sendPacketCooldown -= 1;
+        if (Minecraft.getInstance().screen == null && isEnabled() && sendPacketCooldown <= 0) {
+            TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
+            sendPacketCooldown = 10;
         }
     }
 

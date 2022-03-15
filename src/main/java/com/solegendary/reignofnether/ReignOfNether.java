@@ -19,14 +19,12 @@ public class ReignOfNether
     public ReignOfNether() {
         ItemRegistrar.init();
         EntityRegistrar.init();
+        ContainerRegistrar.init();
 
         // Use MinecraftForge.EVENT_BUS.register() for non-mod events (eg. onKeyInput, onServerChat)
         // and FMLJavaModLoadingContext...register() for IModEventBus events (eg, FMLClientSetupEvent)
         //
-        // If these anything mixed up, you can usually get crashes saying "Has @SubscribeEvent annotation, but..."
-
-        CommonEventRegistrar commonRegistrar = new CommonEventRegistrar();
-        commonRegistrar.registerCommonEvents();
+        // If these get mixed up, you can usually get crashes saying "Has @SubscribeEvent annotation, but..."
 
         final ClientEventRegistrar clientRegistrar = new ClientEventRegistrar();
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> clientRegistrar::registerClientEvents);
