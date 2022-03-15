@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
-import com.solegendary.reignofnether.gui.TopdownGuiServerVanillaEvents;
-import com.solegendary.reignofnether.units.UnitServerVanillaEvents;
+import com.solegendary.reignofnether.gui.TopdownGuiServerEvents;
+import com.solegendary.reignofnether.units.UnitServerEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 
@@ -21,8 +21,8 @@ public class ServerSideEventRegistrar {
      * is executing code on the server side and not the client.
      */
     public void registerServerEvents() {
-        vanillaEventBus.register(TopdownGuiServerVanillaEvents.class);
-        vanillaEventBus.register(UnitServerVanillaEvents.class);
-        //vanillaEventBus.register(CursorServerVanillaEvents.class);
+        vanillaEventBus.register(TopdownGuiServerEvents.class);
+        vanillaEventBus.register(UnitServerEvents.class);
+        //vanillaEventBus.register(CursorServerEvents.class);
     }
 }

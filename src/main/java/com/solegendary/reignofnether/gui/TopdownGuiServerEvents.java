@@ -18,7 +18,7 @@ import java.util.ArrayList;
  * @author SoLegendary
  */
 
-public class TopdownGuiServerVanillaEvents {
+public class TopdownGuiServerEvents {
 
     private static final ArrayList<ServerPlayer> serverPlayers = new ArrayList<>();
 

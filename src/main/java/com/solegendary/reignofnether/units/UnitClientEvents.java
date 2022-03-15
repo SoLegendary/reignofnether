@@ -1,14 +1,13 @@
 package com.solegendary.reignofnether.units;
 
-import com.solegendary.reignofnether.cursor.CursorClientVanillaEvents;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -20,9 +19,8 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
-public class UnitClientVanillaEvents {
+public class UnitClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -42,7 +40,7 @@ public class UnitClientVanillaEvents {
     public static ArrayList<Integer> getSelectedUnitIds() { return selectedUnitIds; }
     public static void addPreselectedUnitId(Integer unitId) { preselectedUnitIds.add(unitId); }
     public static void addSelectedUnitId(Integer unitId) { // only ever add owned units
-        if (getPlayerToMobRelationship(unitId) == Relationship.OWNED)
+        if (getPlayerToEntityRelationship(unitId) == Relationship.OWNED)
             selectedUnitIds.add(unitId);
     }
     public static void setPreselectedUnitIds(ArrayList<Integer> unitIds) { preselectedUnitIds = unitIds; }
@@ -77,7 +75,7 @@ public class UnitClientVanillaEvents {
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
-        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
+        if (!OrthoviewClientEvents.isEnabled()) return;
 
         // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
         // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
@@ -85,10 +83,10 @@ public class UnitClientVanillaEvents {
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (selectedUnitIds.size() > 0) {
                 // A + left click -> force attack single unit (even if friendly)
-                if (CursorClientVanillaEvents.getAttackFlag() && preselectedUnitIds.size() == 1 && !targetingSelf())
+                if (CursorClientEvents.getAttackFlag() && preselectedUnitIds.size() == 1 && !targetingSelf())
                     setUnitIdToAttack(preselectedUnitIds.get(0));
                 // A + left click -> attack move ground
-                else if (CursorClientVanillaEvents.getAttackFlag()) {
+                else if (CursorClientEvents.getAttackFlag()) {
                     ArrayList<Integer> unitIdsToAttackMove = new ArrayList<>();
                     unitIdsToAttackMove.addAll(selectedUnitIds);
                     setUnitIdsToAttackMove(unitIdsToAttackMove);
@@ -97,8 +95,8 @@ public class UnitClientVanillaEvents {
 
             // left click -> (de)select a single unit
             // if shift is held, deselect a unit or add it to the selected group
-            if (preselectedUnitIds.size() == 1 && !CursorClientVanillaEvents.getAttackFlag() &&
-                getPlayerToMobRelationship(preselectedUnitIds.get(0)) == Relationship.OWNED) {
+            if (preselectedUnitIds.size() == 1 && !CursorClientEvents.getAttackFlag() &&
+                getPlayerToEntityRelationship(preselectedUnitIds.get(0)) == Relationship.OWNED) {
 
                 if (Keybinds.shiftMod.isDown()) {
                     if (!selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0))))
@@ -111,14 +109,14 @@ public class UnitClientVanillaEvents {
                         selectedUnitIds.add(preselectedUnitIds.get(0));
                 }
             }
-            CursorClientVanillaEvents.removeAttackFlag();
+            CursorClientEvents.removeAttackFlag();
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (selectedUnitIds.size() > 0) {
                 // right click -> attack unfriendly unit
                 if (preselectedUnitIds.size() == 1 &&
                         !targetingSelf() &&
-                        getPlayerToMobRelationship(preselectedUnitIds.get(0)) == Relationship.HOSTILE)
+                        getPlayerToEntityRelationship(preselectedUnitIds.get(0)) == Relationship.HOSTILE)
                     setUnitIdToAttack(preselectedUnitIds.get(0));
                 // right click -> follow friendly unit
                 else if (preselectedUnitIds.size() == 1 && !targetingSelf())
@@ -130,7 +128,7 @@ public class UnitClientVanillaEvents {
                     setUnitIdsToMove(unitIdsToMove);
                 }
             }
-            CursorClientVanillaEvents.removeAttackFlag();
+            CursorClientEvents.removeAttackFlag();
         }
 
         // send all of the commands over to server to enact
@@ -147,7 +145,7 @@ public class UnitClientVanillaEvents {
                     unitIdsToAttackMove.stream().mapToInt(i -> i).toArray(),
                     preselectedUnitIds.stream().mapToInt(i -> i).toArray(),
                     selectedUnitIds.stream().mapToInt(i -> i).toArray(),
-                    CursorClientVanillaEvents.getPreselectedBlockPos()
+                    CursorClientEvents.getPreselectedBlockPos()
             ));
             unitIdToAttack = -1;
             unitIdToFollow = -1;
@@ -158,7 +156,7 @@ public class UnitClientVanillaEvents {
 
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyboardKeyPressedEvent.Pre evt) {
-        if (!OrthoviewClientVanillaEvents.isEnabled()) return;
+        if (!OrthoviewClientEvents.isEnabled()) return;
 
         if (evt.getKeyCode() == Keybinds.keyS.getKey().getValue()) {
             PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
@@ -199,7 +197,7 @@ public class UnitClientVanillaEvents {
 
     @SubscribeEvent
     public static void onRenderWorld(RenderLevelLastEvent evt) {
-        if (MC.level != null && OrthoviewClientVanillaEvents.isEnabled()) {
+        if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
 
             ArrayList<Integer> selectedUnitIds = getSelectedUnitIds();
             ArrayList<Integer> preselectedUnitIds = getPreselectedUnitIds();
@@ -213,7 +211,7 @@ public class UnitClientVanillaEvents {
                 Entity entity = MC.level.getEntity(idToDraw);
                 if (entity != null) {
                     if (preselectedUnitIds.contains(idToDraw) &&
-                            CursorClientVanillaEvents.getAttackFlag() &&
+                            CursorClientEvents.getAttackFlag() &&
                             !targetingSelf())
                         MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f,0.3f, 1.0f);
                     else if (selectedUnitIds.contains(idToDraw))
@@ -227,7 +225,7 @@ public class UnitClientVanillaEvents {
             for (int unitId : allUnitIds) {
                 Entity entity = MC.level.getEntity(unitId);
                 if (entity != null) {
-                    Relationship unitRs = getPlayerToMobRelationship(unitId);
+                    Relationship unitRs = getPlayerToEntityRelationship(unitId);
                     if (unitRs == Relationship.OWNED)
                         MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 1.0f, 0.3f, 0.2f);
                     else if (unitRs == Relationship.FRIENDLY)
@@ -245,10 +243,9 @@ public class UnitClientVanillaEvents {
                 selectedUnitIds.get(0).equals(preselectedUnitIds.get(0));
     }
 
-    public static Relationship getPlayerToMobRelationship(int mobId) {
+    public static Relationship getPlayerToEntityRelationship(int entityId) {
         if (MC.level != null) {
-
-            Entity entity = MC.level.getEntity(mobId);
+            Entity entity = MC.level.getEntity(entityId);
 
             if (!(entity instanceof Unit))
                 return Relationship.NEUTRAL;
@@ -260,6 +257,6 @@ public class UnitClientVanillaEvents {
             else
                 return Relationship.HOSTILE;
         }
-        return null;
+        return Relationship.NEUTRAL;
     }
 }

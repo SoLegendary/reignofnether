@@ -21,7 +21,7 @@ import net.minecraftforge.network.PacketDistributor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UnitServerVanillaEvents {
+public class UnitServerEvents {
 
     private static boolean stopCommand = false;
     private static int unitIdToAttack = -1;
@@ -128,13 +128,13 @@ public class UnitServerVanillaEvents {
         }
     }
 
-    // similar to UnitClientVanillaEvents getUnitRelationship  given two
-    public static Relationship getUnitToMobRelationship(Unit unit, Entity mob) {
-        if (!(mob instanceof Unit))
+    // similar to UnitClientEvents getUnitRelationship  given two
+    public static Relationship getUnitToEntityRelationship(Unit unit, Entity entity) {
+        if (!(entity instanceof Unit))
             return Relationship.NEUTRAL;
 
         String ownerName1 = unit.getOwnerName();
-        String ownerName2 = ((Unit) mob).getOwnerName();
+        String ownerName2 = ((Unit) entity).getOwnerName();
 
         if (ownerName1.equals(ownerName2))
             return Relationship.OWNED;

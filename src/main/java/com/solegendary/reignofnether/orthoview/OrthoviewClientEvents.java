@@ -25,7 +25,7 @@ import static net.minecraft.util.Mth.sign;
  *
  * @author SoLegendary, adapted from Mineshot by Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class OrthoviewClientVanillaEvents {
+public class OrthoviewClientEvents {
 
     public static boolean enabled = false;
     private static boolean cameraMovingByMouse = false; // is the camera being moved using the mouse?

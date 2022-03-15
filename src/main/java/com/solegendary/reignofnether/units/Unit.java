@@ -2,9 +2,7 @@ package com.solegendary.reignofnether.units;
 
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.units.goals.MoveToCursorBlockGoal;
-import com.solegendary.reignofnether.units.goals.RangedBowAttackUnitGoal;
 import com.solegendary.reignofnether.units.goals.SelectedTargetGoal;
-import com.solegendary.reignofnether.units.unit.SkeletonUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -91,7 +89,7 @@ public interface Unit {
                 unit.getMoveGoal().getMoveTarget() == null && unit.getFollowTarget() == null) {
 
                 Entity lastDSEntity = unitMob.getLastDamageSource().getEntity();
-                Relationship rs = UnitServerVanillaEvents.getUnitToMobRelationship(unit, lastDSEntity);
+                Relationship rs = UnitServerEvents.getUnitToEntityRelationship(unit, lastDSEntity);
 
                 if (lastDSEntity instanceof PathfinderMob &&
                         (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE) &&
@@ -120,7 +118,7 @@ public interface Unit {
         List<PathfinderMob> nearbyHostileMobs = new ArrayList<>();
 
         for (PathfinderMob mob : nearbyMobs) {
-            Relationship rs = UnitServerVanillaEvents.getUnitToMobRelationship(this, mob);
+            Relationship rs = UnitServerEvents.getUnitToEntityRelationship(this, mob);
             if (rs == Relationship.HOSTILE && mob.getId() != unitMob.getId())
                 nearbyHostileMobs.add(mob);
         }
@@ -163,7 +161,4 @@ public interface Unit {
     public void setAttackMoveTarget(@Nullable BlockPos bp);
     // continuously move to a target until told to do something else
     public void setFollowTarget(@Nullable LivingEntity target);
-
-    // TODO: check what default methods can do here?
-
 }

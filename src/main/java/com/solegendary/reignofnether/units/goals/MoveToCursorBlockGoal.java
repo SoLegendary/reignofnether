@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.units.goals;
 
-import com.solegendary.reignofnether.units.UnitClientVanillaEvents;
-import com.solegendary.reignofnether.units.UnitServerVanillaEvents;
+import com.solegendary.reignofnether.units.UnitServerEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.PathfinderMob;
@@ -9,7 +8,6 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.pathfinder.Path;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.EnumSet;
 
 public class MoveToCursorBlockGoal extends Goal {
@@ -27,9 +25,7 @@ public class MoveToCursorBlockGoal extends Goal {
 
     // only use if the target pos is close enough and the mob is selected
     public boolean canUse() {
-
-        // TODO: remove this as server has to use this code too (probs have to send a packet to update selected units every click)
-        int[] selectedUnitIds = UnitServerVanillaEvents.getSelectedUnitIds();
+        int[] selectedUnitIds = UnitServerEvents.getSelectedUnitIds();
 
         for (int unitId : selectedUnitIds) {
             if (unitId == mob.getId() && moveTarget != null) {

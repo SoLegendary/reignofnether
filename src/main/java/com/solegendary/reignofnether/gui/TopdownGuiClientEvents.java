@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.gui;
 
-import com.solegendary.reignofnether.orthoview.OrthoviewClientVanillaEvents;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -14,7 +14,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * @author SoLegendary
  */
 
-public class TopdownGuiClientVanillaEvents {
+public class TopdownGuiClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static String lastScreenClosed = "Game Menu";
@@ -25,7 +25,7 @@ public class TopdownGuiClientVanillaEvents {
 
         // if getScreen is null, we closed a screen instead of opening it
         // this branch fires twice on screen close - once with screenClosed nonnull, then null
-        if (evt.getScreen() == null && OrthoviewClientVanillaEvents.isEnabled()) {
+        if (evt.getScreen() == null && OrthoviewClientEvents.isEnabled()) {
             if (MC.screen != null) {
 
                 String screenClosed = MC.screen.getTitle().getString();

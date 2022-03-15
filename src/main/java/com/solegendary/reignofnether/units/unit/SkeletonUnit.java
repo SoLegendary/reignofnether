@@ -115,7 +115,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
     final public float attackRange = 10.0F; // only used by ranged units
     final public int attackCooldown = 45;
     final public float aggroRange = 10;
-    final public boolean willRetaliate = true; // will attack when hurt by an enemy, TODO: for workers, run if false
+    final public boolean willRetaliate = true; // will attack when hurt by an enemy
     final public boolean aggressiveWhenIdle = false;
 
     public void tick() {

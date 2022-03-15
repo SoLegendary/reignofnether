@@ -44,9 +44,9 @@ public class TopdownGuiServerboundPacket {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
             if (this.topdownGuiOpen)
-                TopdownGuiServerVanillaEvents.openTopdownGui(this.playerId);
+                TopdownGuiServerEvents.openTopdownGui(this.playerId);
             else
-                TopdownGuiServerVanillaEvents.closeTopdownGui(this.playerId);
+                TopdownGuiServerEvents.closeTopdownGui(this.playerId);
 
             success.set(true);
         });

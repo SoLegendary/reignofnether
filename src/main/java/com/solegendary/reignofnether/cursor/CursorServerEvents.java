@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.cursor;
 
 import com.mojang.math.Vector3d;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.server.level.ServerLevel;
@@ -10,7 +11,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 /**
  * Handler that implements and manages the cursor entity that converts screen space to game space
  */
-public class CursorServerVanillaEvents {
+public class CursorServerEvents {
 
     private static ArmorStand cursorEntity;
     private static boolean cursorEntityAdded = false;
@@ -31,7 +32,8 @@ public class CursorServerVanillaEvents {
                 cursorEntityAdded = true;
             }
             else {
-                world.removeEntity(cursorEntity, true);
+                //world.removeEntity(cursorEntity, true);
+                cursorEntity.setRemoved(Entity.RemovalReason.DISCARDED);
                 cursorEntity = null;
                 cursorEntityAdded = false;
             }
