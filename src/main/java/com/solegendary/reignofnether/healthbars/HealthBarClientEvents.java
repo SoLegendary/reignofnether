@@ -36,9 +36,8 @@ import java.util.stream.StreamSupport;
 public class HealthBarClientEvents {
 
     private static final ResourceLocation GUI_BARS_TEXTURES = new ResourceLocation(
-                ReignOfNether.MOD_ID + ":textures/gui/healthbars.png");
+                ReignOfNether.MOD_ID + ":textures/hud/healthbars.png");
     private static final int DARK_GRAY = 0x808080;
-    private static final float FULL_SIZE = 40;
 
     private static final List<LivingEntity> renderedEntities = new ArrayList<>();
 
@@ -124,7 +123,12 @@ public class HealthBarClientEvents {
             matrix.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
             matrix.scale(-scaleToGui, -scaleToGui, scaleToGui);
 
-            render(matrix, entity, 0, 0, FULL_SIZE, true);
+            // calculate bar width based in entity max health (1hp : 2px)
+            int barWidth = (int) entity.getMaxHealth() * 2;
+            barWidth = Math.min(barWidth, 120);
+            barWidth = Math.max(barWidth, 20);
+
+            render(matrix, entity, 0, 0, barWidth, true);
 
             matrix.popPose();
         }
@@ -188,7 +192,7 @@ public class HealthBarClientEvents {
         int vh = 5;
 
         double size = percent * width;
-        double h = inWorld ? 4 : 6;
+        double h = inWorld ? 10 : 6; // bar size height
 
         float r = (color >> 16 & 255) / 255.0F;
         float g = (color >> 8 & 255) / 255.0F;

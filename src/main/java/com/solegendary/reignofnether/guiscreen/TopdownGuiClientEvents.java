@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.gui;
+package com.solegendary.reignofnether.guiscreen;
 
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;

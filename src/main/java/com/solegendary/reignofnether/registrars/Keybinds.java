@@ -9,7 +9,7 @@ public class Keybinds {
     private static final String KEY_CATEGORY = "key.categories.reignofnether";
 
     public static final KeyMapping escape = new KeyMapping("key.reignofnether.orthoview.escape", GLFW.GLFW_KEY_ESCAPE, KEY_CATEGORY);
-    public static final KeyMapping toggle = new KeyMapping("key.reignofnether.orthoview.toggle", GLFW.GLFW_KEY_KP_5, KEY_CATEGORY);
+    public static final KeyMapping toggle = new KeyMapping("key.reignofnether.orthoview.toggle", GLFW.GLFW_KEY_F12, KEY_CATEGORY);
     public static final KeyMapping zoomIn = new KeyMapping("key.reignofnether.orthoview.zoomIn", GLFW.GLFW_KEY_KP_ADD, KEY_CATEGORY);
     public static final KeyMapping zoomOut = new KeyMapping("key.reignofnether.orthoview.zoomOut", GLFW.GLFW_KEY_KP_SUBTRACT, KEY_CATEGORY);
     public static final KeyMapping panPlusX = new KeyMapping("key.reignofnether.orthoview.panPlusZ", GLFW.GLFW_KEY_LEFT, KEY_CATEGORY);

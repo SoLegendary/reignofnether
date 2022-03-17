@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether;
 
-import com.solegendary.reignofnether.gui.TopdownGui;
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.registrars.ContainerRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;

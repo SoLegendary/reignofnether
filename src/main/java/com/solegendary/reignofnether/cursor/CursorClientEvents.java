@@ -119,8 +119,8 @@ public class CursorClientEvents {
                 cursorDrawX, cursorDrawY,
                 16,  // blit offset
                 16, 16,
-                16, 16, // where on texture to start drawing from
-                16,16 // width/height of what to draw (if larger than texture, it will be repeated)
+                16, 16,
+                16,16
         );
 
         // ***********************************************

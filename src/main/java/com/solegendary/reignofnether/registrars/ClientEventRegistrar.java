@@ -1,9 +1,10 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.gui.TopdownGuiClientEvents;
-import com.solegendary.reignofnether.gui.TopdownGuiServerEvents;
+import com.solegendary.reignofnether.guiscreen.TopdownGuiClientEvents;
+import com.solegendary.reignofnether.guiscreen.TopdownGuiServerEvents;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.units.UnitClientEvents;
 import com.solegendary.reignofnether.units.UnitServerEvents;
@@ -27,6 +28,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(TopdownGuiClientEvents.class);
         vanillaEventBus.register(UnitClientEvents.class);
         vanillaEventBus.register(HealthBarClientEvents.class);
+        vanillaEventBus.register(HudClientEvents.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(TopdownGuiServerEvents.class);

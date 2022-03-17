@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.gui;
+package com.solegendary.reignofnether.guiscreen;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.MenuConstructor;
