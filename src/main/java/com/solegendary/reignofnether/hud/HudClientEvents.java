@@ -2,16 +2,20 @@ package com.solegendary.reignofnether.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.units.UnitClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class HudClientEvents {
 
@@ -29,28 +33,28 @@ public class HudClientEvents {
         String screenName = evt.getScreen().getTitle().getString();
         if (!OrthoviewClientEvents.isEnabled() || !screenName.equals("topdowngui_container"))
             return;
+        if (MC.level == null)
+            return;
 
-        ArrayList<String> unitNames = new ArrayList<>();
-        if (MC.level != null)
-        {
-            for (int id: UnitClientEvents.getSelectedUnitIds()) {
-                Entity entity = MC.level.getEntity(id);
-                if (entity != null)
-                    unitNames.add(entity.getName().getString()
-                            .replace(" ","")
-                            .replace("entity.reignofnether.","")
-                            .replace("_unit","")
-                    );
-            }
+        ArrayList<LivingEntity> units = new ArrayList<>();
+
+        for (int id: UnitClientEvents.getSelectedUnitIds()) {
+            Entity entity = MC.level.getEntity(id);
+            if (entity instanceof LivingEntity)
+                units.add((LivingEntity) entity);
         }
 
         int screenWidth = MC.getWindow().getGuiScaledWidth();
         int screenHeight = MC.getWindow().getGuiScaledHeight();
 
-        int blitX = (screenWidth / 2) - (unitNames.size() * iconFrameSize / 2);
+        int blitX = (screenWidth / 2) - (units.size() * iconFrameSize / 2);
         int blitY = screenHeight - iconFrameSize;
 
-        for (String unitName : unitNames) {
+        // TODO: sort units
+        //Collections.sort(units);
+
+        for (LivingEntity unit : units) {
+
             // icon frame and transparent background
             RenderSystem.setShaderTexture(0,
                     new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png")
@@ -63,6 +67,11 @@ public class HudClientEvents {
             );
 
             // mob head icon
+            String unitName = unit.getName().getString()
+                    .replace(" ","")
+                    .replace("entity.reignofnether.","")
+                    .replace("_unit","");
+
             RenderSystem.setShaderTexture(0,
                     new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName +  ".png")
             );
@@ -72,9 +81,18 @@ public class HudClientEvents {
                     mobHeadSize, mobHeadSize, // dimensions of blit area
                     mobHeadSize, mobHeadSize // size of texture (if < dimensions, texture is repeated)
             );
-            blitX += iconFrameSize;
 
-            // TODO: show health bars above unit icon frames
+            HealthBarClientEvents.render(evt.getPoseStack(), unit,
+                    blitX + ((float) iconFrameSize / 2), blitY - 4,
+                    iconFrameSize - 1,
+                    false);
+
+
+
+
+
+
+            blitX += iconFrameSize;
         }
     }
 }

@@ -37,7 +37,7 @@ public class HealthBarClientEvents {
 
     private static final ResourceLocation GUI_BARS_TEXTURES = new ResourceLocation(
                 ReignOfNether.MOD_ID + ":textures/hud/healthbars.png");
-    private static final int DARK_GRAY = 0x808080;
+    private static final int DARK_GRAY = 0x606060;
 
     private static final List<LivingEntity> renderedEntities = new ArrayList<>();
 
@@ -138,7 +138,7 @@ public class HealthBarClientEvents {
         renderedEntities.clear();
     }
 
-    private static void render(PoseStack matrix, LivingEntity entity, double x, double y,
+    public static void render(PoseStack matrix, LivingEntity entity, double x, double y,
                               float width, boolean inWorld) {
 
         int ownedColor = 0x00ff00;
@@ -192,7 +192,7 @@ public class HealthBarClientEvents {
         int vh = 5;
 
         double size = percent * width;
-        double h = inWorld ? 10 : 6; // bar size height
+        double h = inWorld ? 10 : 4; // bar size height
 
         float r = (color >> 16 & 255) / 255.0F;
         float g = (color >> 8 & 255) / 255.0F;
@@ -220,5 +220,8 @@ public class HealthBarClientEvents {
         buffer.vertex(matrix4f, (float) (-half + size + x), (float) y, zOffset * zOffsetAmount)
                 .uv(((u + uw) * c), v * c).endVertex();
         tessellator.end();
+
+        // reset color
+        RenderSystem.setShaderColor(1,1,1,1);
     }
 }
