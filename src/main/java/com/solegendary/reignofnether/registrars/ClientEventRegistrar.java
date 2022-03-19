@@ -24,11 +24,11 @@ public class ClientEventRegistrar {
     public void registerClientEvents() {
         Keybinds.init();
         vanillaEventBus.register(OrthoviewClientEvents.class);
-        vanillaEventBus.register(CursorClientEvents.class);
         vanillaEventBus.register(TopdownGuiClientEvents.class);
         vanillaEventBus.register(UnitClientEvents.class);
         vanillaEventBus.register(HealthBarClientEvents.class);
-        vanillaEventBus.register(HudClientEvents.class);
+        vanillaEventBus.register(HudClientEvents.class); // ensure this is first so cursor is rendered above hud
+        vanillaEventBus.register(CursorClientEvents.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(TopdownGuiServerEvents.class);

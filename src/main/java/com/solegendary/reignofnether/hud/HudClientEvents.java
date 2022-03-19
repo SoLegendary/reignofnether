@@ -28,6 +28,8 @@ public class HudClientEvents {
     private static final int iconFrameSize = 22;
     private static final int iconFrameSelectedSize = 24;
 
+    private static ArrayList<Button> buttons = new ArrayList<>();
+
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
         String screenName = evt.getScreen().getTitle().getString();
@@ -37,6 +39,7 @@ public class HudClientEvents {
             return;
 
         ArrayList<LivingEntity> units = new ArrayList<>();
+        buttons = new ArrayList<>();
 
         for (int id: UnitClientEvents.getSelectedUnitIds()) {
             Entity entity = MC.level.getEntity(id);
@@ -55,44 +58,44 @@ public class HudClientEvents {
 
         for (LivingEntity unit : units) {
 
-            // icon frame and transparent background
-            RenderSystem.setShaderTexture(0,
-                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png")
-            );
-            GuiComponent.blit(evt.getPoseStack(),
-                    blitX, blitY, 0,
-                    0,0, // where on texture to start drawing from
-                    iconFrameSize, iconFrameSize, // dimensions of blit texture
-                    iconFrameSize, iconFrameSize // size of texture itself (if < dimensions, texture is repeated)
-            );
-
             // mob head icon
             String unitName = unit.getName().getString()
                     .replace(" ","")
                     .replace("entity.reignofnether.","")
                     .replace("_unit","");
 
-            RenderSystem.setShaderTexture(0,
-                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName +  ".png")
-            );
-            GuiComponent.blit(evt.getPoseStack(),
-                    blitX + 4, blitY + 4, 0,
-                    0,0, // where on texture to start drawing from
-                    mobHeadSize, mobHeadSize, // dimensions of blit area
-                    mobHeadSize, mobHeadSize // size of texture (if < dimensions, texture is repeated)
-            );
-
-            HealthBarClientEvents.render(evt.getPoseStack(), unit,
-                    blitX + ((float) iconFrameSize / 2), blitY - 4,
-                    iconFrameSize - 1,
-                    false);
-
-
-
-
-
+            buttons.add(new Button(
+                    blitX, blitY,
+                    mobHeadSize,
+                    iconFrameSize,
+                    iconFrameSelectedSize,
+                    "textures/mobheads/" + unitName +  ".png",
+                    "textures/hud/icon_frame.png",
+                    "textures/hud/icon_frame_selected.png",
+                    unit
+            ));
 
             blitX += iconFrameSize;
+        }
+
+        for (Button button : buttons) {
+            button.render(evt.getPoseStack());
+            button.renderHealthBar(evt.getPoseStack());
+        }
+
+
+    }
+
+    @SubscribeEvent
+    public static void mouseEvent(ScreenEvent.MouseClickedEvent evt) {
+        for (Button button : buttons) {
+            if (evt.getMouseX() >= button.x &&
+                evt.getMouseY() >= button.y &&
+                evt.getMouseX() < button.x + button.iconFrameSize &&
+                evt.getMouseY() < button.y + button.iconFrameSize
+            ) {
+                System.out.println("Clicked on button: " + button.entity.getId());
+            }
         }
     }
 }

@@ -63,7 +63,7 @@ public class UnitServerEvents {
             }
             for (int id : selectedUnitIds) {
                 Unit unit = (Unit) level.getEntity(id);
-                if (unit != null) {
+                if (unit != null && id != unitIdToAttack && id != unitIdToFollow) {
                     if (unitIdToAttack >= 0)
                         unit.setAttackTarget((LivingEntity) level.getEntity(unitIdToAttack));
                     if (unitIdToFollow >= 0)
