@@ -61,9 +61,7 @@ public class CursorClientEvents {
     public static boolean getAttackFlag() {
         return attackFlag;
     }
-    public static void removeAttackFlag() {
-        attackFlag = false;
-    }
+    public static void setAttackFlag(Boolean flag) { attackFlag = flag; }
 
     private static final ResourceLocation TEXTURE_CURSOR = new ResourceLocation("reignofnether", "cursors/customcursor.png");
     private static final ResourceLocation TEXTURE_HAND = new ResourceLocation("reignofnether", "cursors/customcursor_hand.png");
@@ -87,9 +85,6 @@ public class CursorClientEvents {
         // ************************************
         // Manage cursor icons based on actions
         // ************************************
-
-        if (Keybinds.keyA.isDown() && UnitClientEvents.getSelectedUnitIds().size() > 0)
-            attackFlag = true;
 
         // hides default cursor and locks it to the window to allow edge panning
         GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);

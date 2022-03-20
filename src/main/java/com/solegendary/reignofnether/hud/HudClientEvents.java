@@ -1,34 +1,29 @@
 package com.solegendary.reignofnether.hud;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.hud.actions.ActionButtons;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.units.UnitClientEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 public class HudClientEvents {
 
-    private static final ResourceLocation TEXTURE_ICONFRAME = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
-    private static final ResourceLocation TEXTURE_ICONFRAME_SELECTED = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_selected.png");
-
     private static final Minecraft MC = Minecraft.getInstance();
 
-    private static final int mobHeadSize = 14;
-    private static final int iconFrameSize = 22;
-    private static final int iconFrameSelectedSize = 24;
-
-    private static ArrayList<Button> buttons = new ArrayList<>();
+    private static ArrayList<Button> unitButtons = new ArrayList<>();
+    private static final ArrayList<Button> actionButtons = new ArrayList<>(Arrays.asList(
+            ActionButtons.attack,
+            ActionButtons.stop,
+            ActionButtons.hold,
+            ActionButtons.move
+    ));
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
@@ -38,8 +33,11 @@ public class HudClientEvents {
         if (MC.level == null)
             return;
 
+        int mouseX = evt.getMouseX();
+        int mouseY = evt.getMouseY();
+
         ArrayList<LivingEntity> units = new ArrayList<>();
-        buttons = new ArrayList<>();
+        unitButtons = new ArrayList<>();
 
         for (int id: UnitClientEvents.getSelectedUnitIds()) {
             Entity entity = MC.level.getEntity(id);
@@ -49,6 +47,10 @@ public class HudClientEvents {
 
         int screenWidth = MC.getWindow().getGuiScaledWidth();
         int screenHeight = MC.getWindow().getGuiScaledHeight();
+
+        int iconSize = 14;
+        int iconFrameSize = 22;
+        int iconFrameSelectedSize = 24;
 
         int blitX = (screenWidth / 2) - (units.size() * iconFrameSize / 2);
         int blitY = screenHeight - iconFrameSize;
@@ -64,37 +66,62 @@ public class HudClientEvents {
                     .replace("entity.reignofnether.","")
                     .replace("_unit","");
 
-            buttons.add(new Button(
+            unitButtons.add(new Button(
                     blitX, blitY,
-                    mobHeadSize,
+                    iconSize,
                     iconFrameSize,
                     iconFrameSelectedSize,
                     "textures/mobheads/" + unitName +  ".png",
                     "textures/hud/icon_frame.png",
                     "textures/hud/icon_frame_selected.png",
-                    unit
+                    unit,
+                    () -> { return false; },
+                    () -> {
+                        UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
+                        UnitClientEvents.addSelectedUnitId(unit.getId());
+                    }
             ));
-
             blitX += iconFrameSize;
         }
 
-        for (Button button : buttons) {
-            button.render(evt.getPoseStack());
+        for (Button button : unitButtons) {
+            button.render(evt.getPoseStack(), mouseX, mouseY);
             button.renderHealthBar(evt.getPoseStack());
         }
 
+        // -------------------------------------------------------
+        // Unit action icons (attack, stop, move, abilities etc.)
+        // -------------------------------------------------------
+        blitX = 0;
+        blitY = screenHeight - iconFrameSize;
+
+        if (UnitClientEvents.getSelectedUnitIds().size() > 0) {
+
+            for (Button actionButton : actionButtons) {
+                actionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                blitX += actionButton.iconFrameSize;
+                actionButton.checkPressed();
+            }
+        }
 
     }
 
     @SubscribeEvent
     public static void mouseEvent(ScreenEvent.MouseClickedEvent evt) {
+        int mouseX = (int) evt.getMouseX();
+        int mouseY = (int) evt.getMouseY();
+
+        ArrayList<Button> buttons = new ArrayList<>();
+        buttons.addAll(actionButtons);
+        buttons.addAll(unitButtons);
+
         for (Button button : buttons) {
-            if (evt.getMouseX() >= button.x &&
-                evt.getMouseY() >= button.y &&
-                evt.getMouseX() < button.x + button.iconFrameSize &&
-                evt.getMouseY() < button.y + button.iconFrameSize
+            if (mouseX >= button.x &&
+                mouseY >= button.y &&
+                mouseX < button.x + button.iconFrameSize &&
+                mouseY < button.y + button.iconFrameSize
             ) {
-                System.out.println("Clicked on button: " + button.entity.getId());
+                button.checkClicked(mouseX, mouseY);
             }
         }
     }

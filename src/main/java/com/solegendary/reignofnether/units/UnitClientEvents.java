@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -109,7 +110,7 @@ public class UnitClientEvents {
                         selectedUnitIds.add(preselectedUnitIds.get(0));
                 }
             }
-            CursorClientEvents.removeAttackFlag();
+            CursorClientEvents.setAttackFlag(false);
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (selectedUnitIds.size() > 0) {
@@ -128,7 +129,7 @@ public class UnitClientEvents {
                     setUnitIdsToMove(unitIdsToMove);
                 }
             }
-            CursorClientEvents.removeAttackFlag();
+            CursorClientEvents.setAttackFlag(false);
         }
 
         // send all of the commands over to server to enact
@@ -151,24 +152,6 @@ public class UnitClientEvents {
             unitIdToFollow = -1;
             unitIdsToMove = new ArrayList<>();
             unitIdsToAttackMove = new ArrayList<>();
-        }
-    }
-
-    @SubscribeEvent
-    public static void onKeyPress(ScreenEvent.KeyboardKeyPressedEvent.Pre evt) {
-        if (!OrthoviewClientEvents.isEnabled()) return;
-
-        if (evt.getKeyCode() == Keybinds.keyS.getKey().getValue()) {
-            PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
-                    true,
-                    -1,
-                    -1,
-                    new int[0],
-                    new int[0],
-                    preselectedUnitIds.stream().mapToInt(i -> i).toArray(),
-                    selectedUnitIds.stream().mapToInt(i -> i).toArray(),
-                    null
-            ));
         }
     }
 
@@ -235,6 +218,19 @@ public class UnitClientEvents {
                 }
             }
         }
+    }
+
+    public static void sendStopCommand() {
+        PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
+                true,
+                -1,
+                -1,
+                new int[0],
+                new int[0],
+                preselectedUnitIds.stream().mapToInt(i -> i).toArray(),
+                selectedUnitIds.stream().mapToInt(i -> i).toArray(),
+                new BlockPos(0,0,0) // not used anyway
+        ));
     }
 
     public static boolean targetingSelf() {

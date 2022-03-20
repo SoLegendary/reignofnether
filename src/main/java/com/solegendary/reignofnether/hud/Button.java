@@ -4,9 +4,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+
+import java.util.function.Supplier;
 
 /**
  * Class for creating buttons that consist of an icon inside of a frame which is selectable
@@ -26,13 +30,26 @@ public class Button {
     ResourceLocation iconFrameResource;
     ResourceLocation iconFrameSelectedResource;
 
-    LivingEntity entity;
+    public KeyMapping hotkey = null; // for action/ability buttons
+    public LivingEntity entity = null; // for selected unit buttons
 
-    public boolean selected = false;
+    /** https://stackoverflow.com/questions/29945627/java-8-lambda-void-argument
+     * Supplier       ()    -> x
+     * Consumer       x     -> ()
+     * Runnable       ()    -> ()
+     * Predicate      x     -> boolean
+     */
+    public Supplier<Boolean> isSelected; // controls selected frame rendering
+    public Runnable onUse; //
+
+    public boolean enabled = false; // allowed to click and use hotkey?
     public boolean hovered = false;
 
+    Minecraft MC = Minecraft.getInstance();
+
     public Button(int x, int y, int iconSize, int iconFrameSize, int iconFrameSelectedSize,
-            String iconResourcePath, String iconFrameResourcePath, String iconFrameSelectedResourcePath, LivingEntity entity) {
+                  String iconResourcePath, String iconFrameResourcePath, String iconFrameSelectedResourcePath, KeyMapping hotkey,
+                  Supplier<Boolean> isSelected, Runnable onClick) {
         this.x = x;
         this.y = y;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
@@ -41,11 +58,42 @@ public class Button {
         this.iconSize = iconSize;
         this.iconFrameSize = iconFrameSize;
         this.iconFrameSelectedSize = iconFrameSelectedSize;
-        this.entity = entity; // optional, for selected unit icons
+        this.hotkey = hotkey;
+        this.isSelected = isSelected;
+        this.onUse = onClick;
     }
 
-    public void render(PoseStack poseStack) {
-        // icon frame and transparent background
+    public Button(int x, int y, int iconSize, int iconFrameSize, int iconFrameSelectedSize,
+                  String iconResourcePath, String iconFrameResourcePath, String iconFrameSelectedResourcePath, LivingEntity entity,
+                  Supplier<Boolean> isSelected, Runnable onClick) {
+        this.x = x;
+        this.y = y;
+        this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
+        this.iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, iconFrameResourcePath);
+        this.iconFrameSelectedResource = new ResourceLocation(ReignOfNether.MOD_ID, iconFrameSelectedResourcePath);
+        this.iconSize = iconSize;
+        this.iconFrameSize = iconFrameSize;
+        this.iconFrameSelectedSize = iconFrameSelectedSize;
+        this.entity = entity;
+        this.isSelected = isSelected;
+        this.onUse = onClick;
+    }
+
+    public void render(PoseStack poseStack, int x, int y, int mouseX, int mouseY) {
+        this.x = x;
+        this.y = y;
+        render(poseStack, mouseX, mouseY);
+    }
+
+    public void render(PoseStack poseStack, int mouseX, int mouseY) {
+        //transparent background
+        GuiComponent.fill(poseStack, // x1,y1, x2,y2,
+                x, y,
+                x + iconFrameSize,
+                y + iconFrameSize,
+                0x64000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
+
+        // icon frame
         RenderSystem.setShaderTexture(0, iconFrameResource);
         GuiComponent.blit(poseStack,
                 x, y, 0,
@@ -54,7 +102,7 @@ public class Button {
                 iconFrameSize, iconFrameSize // size of texture itself (if < dimensions, texture is repeated)
         );
 
-        // item icon
+        // item/unit icon
         RenderSystem.setShaderTexture(0, iconResource);
         GuiComponent.blit(poseStack,
                 x + 4, y + 4, 0,
@@ -62,6 +110,29 @@ public class Button {
                 iconSize, iconSize, // dimensions of blit area
                 iconSize, iconSize // size of texture (if < dimensions, texture is repeated)
         );
+
+        // selected frame
+        if (isSelected.get()) {
+            RenderSystem.setShaderTexture(0, iconFrameSelectedResource);
+            GuiComponent.blit(poseStack,
+                    x - 1, y - 1, 0,
+                    0,0, // where on texture to start drawing from
+                    iconFrameSelectedSize, iconFrameSelectedSize, // dimensions of blit area
+                    iconFrameSelectedSize, iconFrameSelectedSize // size of texture (if < dimensions, texture is repeated)
+            );
+        }
+
+        // hotkey letter
+        if (this.hotkey != null) {
+            GuiComponent.drawCenteredString(poseStack, MC.font,
+                    hotkey.getKey().getDisplayName().getString().toUpperCase(),
+                    x + iconSize + 4,
+                    y + iconSize - 1,
+                    0xFFFFFF);
+        }
+
+
+        checkHover(poseStack, mouseX, mouseY);
     }
 
     public void renderHealthBar(PoseStack poseStack) {
@@ -71,13 +142,38 @@ public class Button {
                 false);
     }
 
-    // callback: on click
+    private void checkHover(PoseStack poseStack, int mouseX, int mouseY) {
+        // light up on hover
+        if (mouseX >= x &&
+                mouseY >= y &&
+                mouseX < x + iconFrameSize &&
+                mouseY < y + iconFrameSize
+        ) {
+            GuiComponent.fill(poseStack, // x1,y1, x2,y2,
+                    x, y,
+                    x + iconFrameSize,
+                    y + iconFrameSize,
+                    0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
+        }
+    }
 
-    // callback: on hover
+    public void checkClicked(int mouseX, int mouseY) {
+        if (mouseX >= x &&
+            mouseY >= y &&
+            mouseX < x + iconFrameSize &&
+            mouseY < y + iconFrameSize
+        ) {
+            if (this.entity != null)
+                System.out.println("Clicked on button - entity id: " + entity.getId());
+            else if (this.hotkey != null)
+                System.out.println("Clicked on button - hotkey: " + hotkey.getKey().getDisplayName());
 
-    // render tooltip (on hover)
+            this.onUse.run();
+        }
+    }
 
-    // render texture (unselected)
-    // render texture (selected)
-
+    public void checkPressed() {
+        if (hotkey.isDown())
+            this.onUse.run();
+    }
 }
