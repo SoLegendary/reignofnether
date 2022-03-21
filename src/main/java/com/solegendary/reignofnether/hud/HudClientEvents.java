@@ -1,17 +1,16 @@
 package com.solegendary.reignofnether.hud;
 
-import com.solegendary.reignofnether.hud.actions.ActionButtons;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.units.UnitClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 
 public class HudClientEvents {
 
@@ -24,6 +23,16 @@ public class HudClientEvents {
             ActionButtons.hold,
             ActionButtons.move
     ));
+    // unit type that is selected in the list of unit icons
+    private static String hudSelectedUnitType = null;
+
+    // eg. entity.reignofnether.zombie_unit -> zombie
+    private static String getSimpleUnitName(LivingEntity unit) {
+        return unit.getName().getString()
+            .replace(" ","")
+            .replace("entity.reignofnether.","")
+            .replace("_unit","");
+    }
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
@@ -45,6 +54,15 @@ public class HudClientEvents {
                 units.add((LivingEntity) entity);
         }
 
+        // sort and hudSelect the first unit type in the list
+        units.sort(Comparator.comparing(a -> a.getName().getString()));
+
+        if (units.size() <= 0)
+            hudSelectedUnitType = null;
+        else if (hudSelectedUnitType == null)
+            hudSelectedUnitType = getSimpleUnitName(units.get(0));
+
+        // render all of the unit hud icons
         int screenWidth = MC.getWindow().getGuiScaledWidth();
         int screenHeight = MC.getWindow().getGuiScaledHeight();
 
@@ -55,16 +73,10 @@ public class HudClientEvents {
         int blitX = (screenWidth / 2) - (units.size() * iconFrameSize / 2);
         int blitY = screenHeight - iconFrameSize;
 
-        // TODO: sort units
-        //Collections.sort(units);
-
         for (LivingEntity unit : units) {
 
             // mob head icon
-            String unitName = unit.getName().getString()
-                    .replace(" ","")
-                    .replace("entity.reignofnether.","")
-                    .replace("_unit","");
+            String unitName = getSimpleUnitName(unit);
 
             unitButtons.add(new Button(
                     blitX, blitY,
@@ -75,10 +87,16 @@ public class HudClientEvents {
                     "textures/hud/icon_frame.png",
                     "textures/hud/icon_frame_selected.png",
                     unit,
-                    () -> { return false; },
+                    () -> { return hudSelectedUnitType.equals(unitName); },
                     () -> {
-                        UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
-                        UnitClientEvents.addSelectedUnitId(unit.getId());
+                        // click to select this unit type as a group
+                        if (hudSelectedUnitType.equals(unitName)) {
+                            UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
+                            UnitClientEvents.addSelectedUnitId(unit.getId());
+                        }
+                        else { // select this one specific unit
+                            hudSelectedUnitType = unitName;
+                        }
                     }
             ));
             blitX += iconFrameSize;
@@ -96,18 +114,16 @@ public class HudClientEvents {
         blitY = screenHeight - iconFrameSize;
 
         if (UnitClientEvents.getSelectedUnitIds().size() > 0) {
-
             for (Button actionButton : actionButtons) {
                 actionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                 blitX += actionButton.iconFrameSize;
                 actionButton.checkPressed();
             }
         }
-
     }
 
     @SubscribeEvent
-    public static void mouseEvent(ScreenEvent.MouseClickedEvent evt) {
+    public static void onMouseRelease(ScreenEvent.MouseReleasedEvent.Post evt) {
         int mouseX = (int) evt.getMouseX();
         int mouseY = (int) evt.getMouseY();
 
@@ -115,14 +131,7 @@ public class HudClientEvents {
         buttons.addAll(actionButtons);
         buttons.addAll(unitButtons);
 
-        for (Button button : buttons) {
-            if (mouseX >= button.x &&
-                mouseY >= button.y &&
-                mouseX < button.x + button.iconFrameSize &&
-                mouseY < button.y + button.iconFrameSize
-            ) {
-                button.checkClicked(mouseX, mouseY);
-            }
-        }
+        for (Button button : buttons)
+            button.checkClicked(mouseX, mouseY);
     }
 }

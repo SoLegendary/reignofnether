@@ -4,6 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.registrars.Keybinds;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -42,8 +44,8 @@ public class Button {
     public Supplier<Boolean> isSelected; // controls selected frame rendering
     public Runnable onUse; //
 
+    // TODO: enforce not enabled (and if !enabled and rendered, render dark overlay)
     public boolean enabled = false; // allowed to click and use hotkey?
-    public boolean hovered = false;
 
     Minecraft MC = Minecraft.getInstance();
 
@@ -112,7 +114,8 @@ public class Button {
         );
 
         // selected frame
-        if (isSelected.get()) {
+
+        if (isSelected.get() || hotkey.isDown() || (isMouseOver(mouseX, mouseY) && MiscUtil.isLeftClickDown(MC))) {
             RenderSystem.setShaderTexture(0, iconFrameSelectedResource);
             GuiComponent.blit(poseStack,
                     x - 1, y - 1, 0,
@@ -142,13 +145,17 @@ public class Button {
                 false);
     }
 
-    private void checkHover(PoseStack poseStack, int mouseX, int mouseY) {
-        // light up on hover
-        if (mouseX >= x &&
+    private boolean isMouseOver(int mouseX, int mouseY) {
+        return (mouseX >= x &&
                 mouseY >= y &&
                 mouseX < x + iconFrameSize &&
                 mouseY < y + iconFrameSize
-        ) {
+        );
+    }
+
+    private void checkHover(PoseStack poseStack, int mouseX, int mouseY) {
+        // light up on hover
+        if (isMouseOver(mouseX, mouseY)) {
             GuiComponent.fill(poseStack, // x1,y1, x2,y2,
                     x, y,
                     x + iconFrameSize,
@@ -158,11 +165,7 @@ public class Button {
     }
 
     public void checkClicked(int mouseX, int mouseY) {
-        if (mouseX >= x &&
-            mouseY >= y &&
-            mouseX < x + iconFrameSize &&
-            mouseY < y + iconFrameSize
-        ) {
+        if (isMouseOver(mouseX, mouseY)) {
             if (this.entity != null)
                 System.out.println("Clicked on button - entity id: " + entity.getId());
             else if (this.hotkey != null)
@@ -173,7 +176,7 @@ public class Button {
     }
 
     public void checkPressed() {
-        if (hotkey.isDown())
+        if (hotkey != null && hotkey.isDown())
             this.onUse.run();
     }
 }

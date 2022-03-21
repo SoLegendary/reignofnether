@@ -68,7 +68,6 @@ public class CursorClientEvents {
     private static final ResourceLocation TEXTURE_HAND_GRAB = new ResourceLocation("reignofnether", "cursors/customcursor_hand_grab.png");
     private static final ResourceLocation TEXTURE_SWORD = new ResourceLocation("reignofnether", "cursors/customcursor_sword.png");
 
-
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
 
@@ -249,6 +248,7 @@ public class CursorClientEvents {
 
         cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
     }
+
     @SubscribeEvent
     public static void onMouseRelease(ScreenEvent.MouseReleasedEvent.Post evt) {
         if (!OrthoviewClientEvents.isEnabled()) return;

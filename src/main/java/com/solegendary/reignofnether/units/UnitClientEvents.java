@@ -1,9 +1,11 @@
 package com.solegendary.reignofnether.units;
 
+import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -15,10 +17,12 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.checkerframework.checker.units.qual.A;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class UnitClientEvents {
@@ -53,6 +57,9 @@ public class UnitClientEvents {
     public static void setUnitIdsToMove(ArrayList<Integer> unitIds) { unitIdsToMove = unitIds; }
     public static void setUnitIdsToAttackMove(ArrayList<Integer> unitIds) { unitIdsToAttackMove = unitIds; }
 
+    private static long lastLeftClickTime = 0; // to track double clicks
+    private static final long doubleClickTimeMs = 500;
+
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveWorldEvent evt) {
         int entityId = evt.getEntity().getId();
@@ -63,15 +70,16 @@ public class UnitClientEvents {
 
         for (ArrayList<Integer> controlGroup : controlGroups)
             controlGroup.removeIf(e -> e == entityId);
+
+
+
     }
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinWorldEvent evt) {
         Entity entity = evt.getEntity();
-        if (entity instanceof Unit) {
+        if (entity instanceof Unit && !evt.getWorld().isClientSide)
             allUnitIds.add(entity.getId());
-            System.out.println("Entity joined with owner: " + ((Unit) entity).getOwnerName());
-        }
     }
 
     @SubscribeEvent
@@ -82,6 +90,7 @@ public class UnitClientEvents {
         // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+
             if (selectedUnitIds.size() > 0) {
                 // A + left click -> force attack single unit (even if friendly)
                 if (CursorClientEvents.getAttackFlag() && preselectedUnitIds.size() == 1 && !targetingSelf())
@@ -94,22 +103,40 @@ public class UnitClientEvents {
                 }
             }
 
+            // select all nearby units of the same type when double clicked
+            if (selectedUnitIds.size() == 1 && MC.level != null &&
+               (System.currentTimeMillis() - lastLeftClickTime) < doubleClickTimeMs) {
+
+                lastLeftClickTime = 0;
+                Entity selectedUnit = MC.level.getEntity(selectedUnitIds.get(0));
+                List<? extends Entity> nearbyEntities = MiscUtil.getEntitiesWithinRange(
+                        new Vector3d(selectedUnit.position().x, selectedUnit.position().y, selectedUnit.position().z),
+                        OrthoviewClientEvents.getZoom(),
+                        MC.level.getEntity(selectedUnitIds.get(0)).getClass(),
+                        MC.level
+                );
+                selectedUnitIds = new ArrayList<>();
+                for (Entity entity : nearbyEntities)
+                    addSelectedUnitId(entity.getId());
+
+            }
             // left click -> (de)select a single unit
             // if shift is held, deselect a unit or add it to the selected group
-            if (preselectedUnitIds.size() == 1 && !CursorClientEvents.getAttackFlag() &&
+            else if (preselectedUnitIds.size() == 1 && !CursorClientEvents.getAttackFlag() &&
                 getPlayerToEntityRelationship(preselectedUnitIds.get(0)) == Relationship.OWNED) {
 
                 if (Keybinds.shiftMod.isDown()) {
                     if (!selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0))))
                         if (MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit)
-                            selectedUnitIds.add(preselectedUnitIds.get(0));
+                            addSelectedUnitId(preselectedUnitIds.get(0));
                 }
                 else {
                     selectedUnitIds = new ArrayList<>();
                     if (MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit)
-                        selectedUnitIds.add(preselectedUnitIds.get(0));
+                        addSelectedUnitId(preselectedUnitIds.get(0));
                 }
             }
+            lastLeftClickTime = System.currentTimeMillis();
             CursorClientEvents.setAttackFlag(false);
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {

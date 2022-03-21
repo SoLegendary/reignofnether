@@ -52,10 +52,6 @@ public class OrthoviewClientEvents {
     private static float mouseLeftDownX = 0;
     private static float mouseLeftDownY = 0;
 
-    // not sure why but screen=2*win; GLFW functions should use screen
-    private static int winWidth = MC.getWindow().getGuiScaledWidth();
-    private static int winHeight = MC.getWindow().getGuiScaledHeight();
-
     public static boolean isEnabled() {
         return enabled;
     }
@@ -192,7 +188,7 @@ public class OrthoviewClientEvents {
     }
     
     @SubscribeEvent
-    public static void onMouseClick(ScreenEvent.MouseClickedEvent evt) {
+    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
         if (!enabled) return;
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -253,8 +249,9 @@ public class OrthoviewClientEvents {
         if (!enabled)
             return;
 
-        winWidth = MC.getWindow().getGuiScaledWidth();
-        winHeight = MC.getWindow().getGuiScaledHeight();
+        // not sure why but screen=2*win; GLFW functions should use screen
+        int winWidth = MC.getWindow().getGuiScaledWidth();
+        int winHeight = MC.getWindow().getGuiScaledHeight();
 
         Player player = MC.player;
 
