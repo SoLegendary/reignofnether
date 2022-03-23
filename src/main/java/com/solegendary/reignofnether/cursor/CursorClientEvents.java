@@ -2,6 +2,9 @@ package com.solegendary.reignofnether.cursor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.hud.ActionButtons;
+import com.solegendary.reignofnether.hud.ActionName;
+import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Unit;
@@ -49,8 +52,8 @@ public class CursorClientEvents {
     // pos of cursor on screen for box selections
     private static Vec2 cursorLeftClickDownPos = new Vec2(0,0);
     private static Vec2 cursorLeftClickDragPos = new Vec2(0,0);
-
-    private static boolean attackFlag = false; // pressed a to attack move or force attack a friendly
+    // attack that is performed on the next left click
+    private static ActionName leftClickAction = null;
 
     public static Vector3d getCursorWorldPos() {
         return cursorWorldPos;
@@ -58,15 +61,19 @@ public class CursorClientEvents {
     public static BlockPos getPreselectedBlockPos() {
         return preselectedBlockPos;
     }
-    public static boolean getAttackFlag() {
-        return attackFlag;
+    public static ActionName getLeftClickAction() {
+        return leftClickAction;
     }
-    public static void setAttackFlag(Boolean flag) { attackFlag = flag; }
+    public static void setLeftClickAction(ActionName actionName) {
+        if (UnitClientEvents.getSelectedUnitIds().size() > 0)
+            leftClickAction = actionName;
+    }
 
-    private static final ResourceLocation TEXTURE_CURSOR = new ResourceLocation("reignofnether", "cursors/customcursor.png");
-    private static final ResourceLocation TEXTURE_HAND = new ResourceLocation("reignofnether", "cursors/customcursor_hand.png");
-    private static final ResourceLocation TEXTURE_HAND_GRAB = new ResourceLocation("reignofnether", "cursors/customcursor_hand_grab.png");
-    private static final ResourceLocation TEXTURE_SWORD = new ResourceLocation("reignofnether", "cursors/customcursor_sword.png");
+    private static final ResourceLocation TEXTURE_CURSOR = new ResourceLocation("reignofnether", "textures/cursors/customcursor.png");
+    private static final ResourceLocation TEXTURE_HAND = new ResourceLocation("reignofnether", "textures/cursors/customcursor_hand.png");
+    private static final ResourceLocation TEXTURE_HAND_GRAB = new ResourceLocation("reignofnether", "textures/cursors/customcursor_hand_grab.png");
+    private static final ResourceLocation TEXTURE_SWORD = new ResourceLocation("reignofnether", "textures/cursors/customcursor_sword.png");
+    private static final ResourceLocation TEXTURE_CROSS = new ResourceLocation("reignofnether", "textures/cursors/customcursor_cross.png");
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
@@ -94,24 +101,29 @@ public class CursorClientEvents {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        if (Keybinds.altMod.isDown() && (leftClickDown || rightClickDown))
-            RenderSystem.setShaderTexture(0, TEXTURE_HAND_GRAB);
-        else if (Keybinds.altMod.isDown())
-            RenderSystem.setShaderTexture(0, TEXTURE_HAND);
-        else if (attackFlag)
-            RenderSystem.setShaderTexture(0, TEXTURE_SWORD);
-        else
-            RenderSystem.setShaderTexture(0, TEXTURE_CURSOR);
-
         // draw at edge of screen even if mouse is off it
         int cursorDrawX = Math.min(evt.getMouseX(), MC.getWindow().getGuiScaledWidth() - 5);
         int cursorDrawY = Math.min(evt.getMouseY(), MC.getWindow().getGuiScaledHeight() - 5);
         cursorDrawX = Math.max(0,cursorDrawX);
         cursorDrawY = Math.max(0,cursorDrawY);
 
+        if (Keybinds.altMod.isDown() && (leftClickDown || rightClickDown))
+            RenderSystem.setShaderTexture(0, TEXTURE_HAND_GRAB);
+        else if (Keybinds.altMod.isDown())
+            RenderSystem.setShaderTexture(0, TEXTURE_HAND);
+        else if (leftClickAction != null && leftClickAction.equals(ActionName.ATTACK))
+            RenderSystem.setShaderTexture(0, TEXTURE_SWORD);
+        else if (leftClickAction != null) {
+            RenderSystem.setShaderTexture(0, TEXTURE_CROSS);
+            cursorDrawX -= 16;
+            cursorDrawY -= 16;
+        }
+        else
+            RenderSystem.setShaderTexture(0, TEXTURE_CURSOR);
+
         GuiComponent.blit(evt.getPoseStack(),
                 cursorDrawX, cursorDrawY,
-                16,  // blit offset
+                16,
                 16, 16,
                 16, 16,
                 16,16

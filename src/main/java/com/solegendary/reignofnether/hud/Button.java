@@ -20,13 +20,13 @@ import java.util.function.Supplier;
  */
 
 public class Button {
-
-    int iconSize;
-    int iconFrameSize;
-    int iconFrameSelectedSize;
+    public String name;
 
     int x; // top left
     int y;
+    int iconSize;
+    int iconFrameSize;
+    int iconFrameSelectedSize;
 
     ResourceLocation iconResource;
     ResourceLocation iconFrameResource;
@@ -49,9 +49,10 @@ public class Button {
 
     Minecraft MC = Minecraft.getInstance();
 
-    public Button(int x, int y, int iconSize, int iconFrameSize, int iconFrameSelectedSize,
+    public Button(String name, int x, int y, int iconSize, int iconFrameSize, int iconFrameSelectedSize,
                   String iconResourcePath, String iconFrameResourcePath, String iconFrameSelectedResourcePath, KeyMapping hotkey,
                   Supplier<Boolean> isSelected, Runnable onClick) {
+        this.name = name;
         this.x = x;
         this.y = y;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
@@ -65,9 +66,10 @@ public class Button {
         this.onUse = onClick;
     }
 
-    public Button(int x, int y, int iconSize, int iconFrameSize, int iconFrameSelectedSize,
+    public Button(String name, int x, int y, int iconSize, int iconFrameSize, int iconFrameSelectedSize,
                   String iconResourcePath, String iconFrameResourcePath, String iconFrameSelectedResourcePath, LivingEntity entity,
                   Supplier<Boolean> isSelected, Runnable onClick) {
+        this.name = name;
         this.x = x;
         this.y = y;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
@@ -114,8 +116,7 @@ public class Button {
         );
 
         // selected frame
-
-        if (isSelected.get() || hotkey.isDown() || (isMouseOver(mouseX, mouseY) && MiscUtil.isLeftClickDown(MC))) {
+        if (isSelected.get() || (hotkey != null && hotkey.isDown()) || (isMouseOver(mouseX, mouseY) && MiscUtil.isLeftClickDown(MC))) {
             RenderSystem.setShaderTexture(0, iconFrameSelectedResource);
             GuiComponent.blit(poseStack,
                     x - 1, y - 1, 0,

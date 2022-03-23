@@ -2,6 +2,8 @@ package com.solegendary.reignofnether.units;
 
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.hud.ActionButtons;
+import com.solegendary.reignofnether.hud.ActionName;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.registrars.PacketHandler;
@@ -60,6 +62,22 @@ public class UnitClientEvents {
     private static long lastLeftClickTime = 0; // to track double clicks
     private static final long doubleClickTimeMs = 500;
 
+    private static boolean isLeftClickAttack() {
+        return CursorClientEvents.getLeftClickAction() == ActionName.ATTACK;
+    }
+
+    private static void resolveMoveAction() {
+        // follow friendly unit
+        if (preselectedUnitIds.size() == 1 && !targetingSelf())
+            setUnitIdToFollow(preselectedUnitIds.get(0));
+            // move to ground pos (and disable during camera manip)
+        else if (!Keybinds.altMod.isDown()) {
+            ArrayList<Integer> unitIdsToMove = new ArrayList<>();
+            unitIdsToMove.addAll(selectedUnitIds);
+            setUnitIdsToMove(unitIdsToMove);
+        }
+    }
+
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveWorldEvent evt) {
         int entityId = evt.getEntity().getId();
@@ -70,9 +88,6 @@ public class UnitClientEvents {
 
         for (ArrayList<Integer> controlGroup : controlGroups)
             controlGroup.removeIf(e -> e == entityId);
-
-
-
     }
 
     @SubscribeEvent
@@ -91,12 +106,12 @@ public class UnitClientEvents {
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
 
-            if (selectedUnitIds.size() > 0) {
+            if (selectedUnitIds.size() > 0 && isLeftClickAttack()) {
                 // A + left click -> force attack single unit (even if friendly)
-                if (CursorClientEvents.getAttackFlag() && preselectedUnitIds.size() == 1 && !targetingSelf())
+                if (preselectedUnitIds.size() == 1 && !targetingSelf())
                     setUnitIdToAttack(preselectedUnitIds.get(0));
                 // A + left click -> attack move ground
-                else if (CursorClientEvents.getAttackFlag()) {
+                else {
                     ArrayList<Integer> unitIdsToAttackMove = new ArrayList<>();
                     unitIdsToAttackMove.addAll(selectedUnitIds);
                     setUnitIdsToAttackMove(unitIdsToAttackMove);
@@ -120,9 +135,16 @@ public class UnitClientEvents {
                     addSelectedUnitId(entity.getId());
 
             }
+            // move on left click
+            else if (CursorClientEvents.getLeftClickAction() == ActionName.MOVE)
+                resolveMoveAction();
+
+            // TODO: resolve unit special abilities
+            //else if ()
+
             // left click -> (de)select a single unit
             // if shift is held, deselect a unit or add it to the selected group
-            else if (preselectedUnitIds.size() == 1 && !CursorClientEvents.getAttackFlag() &&
+            else if (preselectedUnitIds.size() == 1 && !isLeftClickAttack() &&
                 getPlayerToEntityRelationship(preselectedUnitIds.get(0)) == Relationship.OWNED) {
 
                 if (Keybinds.shiftMod.isDown()) {
@@ -137,7 +159,7 @@ public class UnitClientEvents {
                 }
             }
             lastLeftClickTime = System.currentTimeMillis();
-            CursorClientEvents.setAttackFlag(false);
+            CursorClientEvents.setLeftClickAction(ActionName.ATTACK);
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (selectedUnitIds.size() > 0) {
@@ -147,16 +169,9 @@ public class UnitClientEvents {
                         getPlayerToEntityRelationship(preselectedUnitIds.get(0)) == Relationship.HOSTILE)
                     setUnitIdToAttack(preselectedUnitIds.get(0));
                 // right click -> follow friendly unit
-                else if (preselectedUnitIds.size() == 1 && !targetingSelf())
-                    setUnitIdToFollow(preselectedUnitIds.get(0));
-                // right click -> move to ground pos (and disable during camera manip)
-                else if (!Keybinds.altMod.isDown()) {
-                    ArrayList<Integer> unitIdsToMove = new ArrayList<>();
-                    unitIdsToMove.addAll(selectedUnitIds);
-                    setUnitIdsToMove(unitIdsToMove);
-                }
+                else
+                    resolveMoveAction();
             }
-            CursorClientEvents.setAttackFlag(false);
         }
 
         // send all of the commands over to server to enact
@@ -180,6 +195,9 @@ public class UnitClientEvents {
             unitIdsToMove = new ArrayList<>();
             unitIdsToAttackMove = new ArrayList<>();
         }
+
+        // clear all cursor actions
+        CursorClientEvents.setLeftClickAction(null);
     }
 
     @SubscribeEvent
@@ -221,7 +239,7 @@ public class UnitClientEvents {
                 Entity entity = MC.level.getEntity(idToDraw);
                 if (entity != null) {
                     if (preselectedUnitIds.contains(idToDraw) &&
-                            CursorClientEvents.getAttackFlag() &&
+                            isLeftClickAttack() &&
                             !targetingSelf())
                         MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f,0.3f, 1.0f);
                     else if (selectedUnitIds.contains(idToDraw))

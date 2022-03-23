@@ -26,6 +26,9 @@ public class HudClientEvents {
     // unit type that is selected in the list of unit icons
     private static String hudSelectedUnitType = null;
 
+    // if we are rendering > this amount, then just render an empty icon with +N for the remaining units
+    private static final int maxUnitButtons = 8;
+
     // eg. entity.reignofnether.zombie_unit -> zombie
     private static String getSimpleUnitName(LivingEntity unit) {
         return unit.getName().getString()
@@ -75,31 +78,35 @@ public class HudClientEvents {
 
         for (LivingEntity unit : units) {
 
-            // mob head icon
-            String unitName = getSimpleUnitName(unit);
+            if (unitButtons.size() < maxUnitButtons) {
+                // mob head icon
+                String unitName = getSimpleUnitName(unit);
 
-            unitButtons.add(new Button(
-                    blitX, blitY,
-                    iconSize,
-                    iconFrameSize,
-                    iconFrameSelectedSize,
-                    "textures/mobheads/" + unitName +  ".png",
-                    "textures/hud/icon_frame.png",
-                    "textures/hud/icon_frame_selected.png",
-                    unit,
-                    () -> { return hudSelectedUnitType.equals(unitName); },
-                    () -> {
-                        // click to select this unit type as a group
-                        if (hudSelectedUnitType.equals(unitName)) {
-                            UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
-                            UnitClientEvents.addSelectedUnitId(unit.getId());
+                unitButtons.add(new Button(
+                        unitName,
+                        blitX, blitY,
+                        iconSize,
+                        iconFrameSize,
+                        iconFrameSelectedSize,
+                        "textures/mobheads/" + unitName + ".png",
+                        "textures/hud/icon_frame.png",
+                        "textures/hud/icon_frame_selected.png",
+                        unit,
+                        () -> {
+                            return hudSelectedUnitType.equals(unitName);
+                        },
+                        () -> {
+                            // click to select this unit type as a group
+                            if (hudSelectedUnitType.equals(unitName)) {
+                                UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
+                                UnitClientEvents.addSelectedUnitId(unit.getId());
+                            } else { // select this one specific unit
+                                hudSelectedUnitType = unitName;
+                            }
                         }
-                        else { // select this one specific unit
-                            hudSelectedUnitType = unitName;
-                        }
-                    }
-            ));
-            blitX += iconFrameSize;
+                ));
+                blitX += iconFrameSize;
+            }
         }
 
         for (Button button : unitButtons) {
