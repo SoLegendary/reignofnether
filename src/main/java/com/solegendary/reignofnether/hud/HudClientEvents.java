@@ -86,11 +86,7 @@ public class HudClientEvents {
                         unitName,
                         blitX, blitY,
                         iconSize,
-                        iconFrameSize,
-                        iconFrameSelectedSize,
                         "textures/mobheads/" + unitName + ".png",
-                        "textures/hud/icon_frame.png",
-                        "textures/hud/icon_frame_selected.png",
                         unit,
                         () -> {
                             return hudSelectedUnitType.equals(unitName);

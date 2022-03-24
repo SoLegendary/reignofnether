@@ -25,12 +25,10 @@ public class Button {
     int x; // top left
     int y;
     int iconSize;
-    int iconFrameSize;
-    int iconFrameSelectedSize;
+    int iconFrameSize = 22;
+    int iconFrameSelectedSize = 24;
 
     ResourceLocation iconResource;
-    ResourceLocation iconFrameResource;
-    ResourceLocation iconFrameSelectedResource;
 
     public KeyMapping hotkey = null; // for action/ability buttons
     public LivingEntity entity = null; // for selected unit buttons
@@ -49,35 +47,27 @@ public class Button {
 
     Minecraft MC = Minecraft.getInstance();
 
-    public Button(String name, int x, int y, int iconSize, int iconFrameSize, int iconFrameSelectedSize,
-                  String iconResourcePath, String iconFrameResourcePath, String iconFrameSelectedResourcePath, KeyMapping hotkey,
+    public Button(String name, int x, int y, int iconSize,
+                  String iconResourcePath, KeyMapping hotkey,
                   Supplier<Boolean> isSelected, Runnable onClick) {
         this.name = name;
         this.x = x;
         this.y = y;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
-        this.iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, iconFrameResourcePath);
-        this.iconFrameSelectedResource = new ResourceLocation(ReignOfNether.MOD_ID, iconFrameSelectedResourcePath);
         this.iconSize = iconSize;
-        this.iconFrameSize = iconFrameSize;
-        this.iconFrameSelectedSize = iconFrameSelectedSize;
         this.hotkey = hotkey;
         this.isSelected = isSelected;
         this.onUse = onClick;
     }
 
-    public Button(String name, int x, int y, int iconSize, int iconFrameSize, int iconFrameSelectedSize,
-                  String iconResourcePath, String iconFrameResourcePath, String iconFrameSelectedResourcePath, LivingEntity entity,
+    public Button(String name, int x, int y, int iconSize,
+                  String iconResourcePath, LivingEntity entity,
                   Supplier<Boolean> isSelected, Runnable onClick) {
         this.name = name;
         this.x = x;
         this.y = y;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
-        this.iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, iconFrameResourcePath);
-        this.iconFrameSelectedResource = new ResourceLocation(ReignOfNether.MOD_ID, iconFrameSelectedResourcePath);
         this.iconSize = iconSize;
-        this.iconFrameSize = iconFrameSize;
-        this.iconFrameSelectedSize = iconFrameSelectedSize;
         this.entity = entity;
         this.isSelected = isSelected;
         this.onUse = onClick;
@@ -98,6 +88,7 @@ public class Button {
                 0x64000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
 
         // icon frame
+        ResourceLocation iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
         RenderSystem.setShaderTexture(0, iconFrameResource);
         GuiComponent.blit(poseStack,
                 x, y, 0,
@@ -117,6 +108,7 @@ public class Button {
 
         // selected frame
         if (isSelected.get() || (hotkey != null && hotkey.isDown()) || (isMouseOver(mouseX, mouseY) && MiscUtil.isLeftClickDown(MC))) {
+            ResourceLocation iconFrameSelectedResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_selected.png");
             RenderSystem.setShaderTexture(0, iconFrameSelectedResource);
             GuiComponent.blit(poseStack,
                     x - 1, y - 1, 0,

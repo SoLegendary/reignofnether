@@ -1,10 +1,10 @@
-package com.solegendary.reignofnether.units.unit;
+package com.solegendary.reignofnether.units.monsters;
 
+import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.units.Unit;
+import com.solegendary.reignofnether.units.goals.MoveToCursorBlockGoal;
 import com.solegendary.reignofnether.units.goals.RangedBowAttackUnitGoal;
 import com.solegendary.reignofnether.units.goals.SelectedTargetGoal;
-import com.solegendary.reignofnether.units.goals.MoveToCursorBlockGoal;
-import com.solegendary.reignofnether.units.goals.ZombieAttackUnitGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -12,27 +12,29 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.*;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ZombieUnit extends Zombie implements Unit {
+public class SkeletonUnit extends Skeleton implements Unit {
 
-    public ZombieUnit(EntityType<? extends Zombie> p_34271_, Level p_34272_) {
-        super(p_34271_, p_34272_);
+    public SkeletonUnit(EntityType<? extends Skeleton> p_33570_, Level p_33571_) {
+        super(p_33570_, p_33571_);
     }
+
+    // region
+    public List<AbilityButton> getAbilities() {return abilities;};
 
     public MoveToCursorBlockGoal getMoveGoal() {return moveGoal;}
     public void setMoveGoal(MoveToCursorBlockGoal moveGoal) {this.moveGoal = moveGoal;}
-    public SelectedTargetGoal getTargetGoal() {return targetGoal;}
-    public void setTargetGoal(SelectedTargetGoal targetGoal) {this.targetGoal = targetGoal;}
-    public ZombieAttackUnitGoal getAttackGoal() {return attackGoal;}
-    public void setAttackGoal(ZombieAttackUnitGoal attackGoal) {this.attackGoal = attackGoal;}
+    public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
+    public void setTargetGoal(SelectedTargetGoal<? extends LivingEntity> targetGoal) {this.targetGoal = targetGoal;}
 
     public MoveToCursorBlockGoal moveGoal;
-    public SelectedTargetGoal targetGoal;
-    public ZombieAttackUnitGoal attackGoal;
+    public SelectedTargetGoal<? extends LivingEntity> targetGoal;
 
     // flags to not reset particular targets so we can persist them for specific actions
     public boolean getRetainAttackMoveTarget() {return retainAttackMoveTarget;}
@@ -63,11 +65,12 @@ public class ZombieUnit extends Zombie implements Unit {
     private LivingEntity followTarget = null; // if nonnull, continuously moves to the target
     private boolean holdPosition = false;
 
+
     // which player owns this unit? this format ensures its synched to client without having to use packets
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
-            SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.STRING);
+            SynchedEntityData.defineId(SkeletonUnit.class, EntityDataSerializers.STRING);
 
     @Override
     protected void defineSynchedData() {
@@ -112,22 +115,33 @@ public class ZombieUnit extends Zombie implements Unit {
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
 
-    final public float attackRange = 0; // only used by ranged units
-    final public int attackCooldown = 20;
+    // endregion
+
+    final public float attackRange = 10.0F; // only used by ranged units
+    final public int attackCooldown = 45;
     final public float aggroRange = 10;
     final public boolean willRetaliate = true; // will attack when hurt by an enemy
     final public boolean aggressiveWhenIdle = false;
 
+    public RangedBowAttackUnitGoal<? extends LivingEntity> attackGoal;
+
+    List<AbilityButton> abilities = new ArrayList<>();
+
     public void tick() {
         super.tick();
         Unit.tick(this);
+
+        // need to do this outside the goal so it ticks down while not attacking
+        // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
+        if (attackGoal != null)
+            attackGoal.tickCooldown();
     }
 
     @Override
     protected void registerGoals() {
         this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
-        this.targetGoal = new SelectedTargetGoal(this, true, true);
-        this.attackGoal = new ZombieAttackUnitGoal(this, attackCooldown, 1.0D, false);
+        this.targetGoal = new SelectedTargetGoal(this, true, false);
+        this.attackGoal = new RangedBowAttackUnitGoal(this, 5, attackCooldown, attackRange);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, moveGoal);

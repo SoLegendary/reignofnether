@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.units;
 
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.units.goals.MoveToCursorBlockGoal;
 import com.solegendary.reignofnether.units.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -20,11 +21,13 @@ import java.util.List;
 
 public interface Unit {
 
+    public List<AbilityButton> getAbilities();
+
     // note that attackGoal is specific to unit types
     public MoveToCursorBlockGoal getMoveGoal();
     public void setMoveGoal(MoveToCursorBlockGoal moveGoal);
-    public SelectedTargetGoal getTargetGoal();
-    public void setTargetGoal(SelectedTargetGoal targetGoal);
+    public SelectedTargetGoal<?> getTargetGoal();
+    public void setTargetGoal(SelectedTargetGoal<?> targetGoal);
 
     public boolean getRetainAttackMoveTarget();
     public void setRetainAttackMoveTarget(boolean retainAttackMoveTarget);
