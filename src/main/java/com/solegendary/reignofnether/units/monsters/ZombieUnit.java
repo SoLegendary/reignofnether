@@ -129,7 +129,7 @@ public class ZombieUnit extends Zombie implements Unit {
 
     public ZombieAttackUnitGoal attackGoal;
 
-    public List<AbilityButton> abilities = new ArrayList<>();
+    private static final List<AbilityButton> abilities = new ArrayList<>();
 
     public void tick() {
         super.tick();

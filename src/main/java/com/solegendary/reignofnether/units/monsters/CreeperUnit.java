@@ -134,7 +134,7 @@ public class CreeperUnit extends Creeper implements Unit {
         Unit.tick(this);
     }
 
-    public List<AbilityButton> abilities = Arrays.asList(
+    private static final List<AbilityButton> abilities = Arrays.asList(
             new AbilityButton(
                     "Explode", 0,0,
                     14,

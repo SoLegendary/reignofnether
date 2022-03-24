@@ -71,7 +71,6 @@ public class HudClientEvents {
 
         int iconSize = 14;
         int iconFrameSize = 22;
-        int iconFrameSelectedSize = 24;
 
         int blitX = (screenWidth / 2) - (units.size() * iconFrameSize / 2);
         int blitY = screenHeight - iconFrameSize;
@@ -88,9 +87,7 @@ public class HudClientEvents {
                         iconSize,
                         "textures/mobheads/" + unitName + ".png",
                         unit,
-                        () -> {
-                            return hudSelectedUnitType.equals(unitName);
-                        },
+                        () -> hudSelectedUnitType.equals(unitName),
                         () -> {
                             // click to select this unit type as a group
                             if (hudSelectedUnitType.equals(unitName)) {
@@ -113,13 +110,10 @@ public class HudClientEvents {
         // -------------------------------------------------------
         // Unit action icons (attack, stop, move, abilities etc.)
         // -------------------------------------------------------
-        blitX = 0;
-        blitY = screenHeight - iconFrameSize;
 
         if (UnitClientEvents.getSelectedUnitIds().size() > 0) {
             for (Button actionButton : actionButtons) {
-                actionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
-                blitX += actionButton.iconFrameSize;
+                actionButton.render(evt.getPoseStack(), mouseX, mouseY);
                 actionButton.checkPressed();
             }
         }

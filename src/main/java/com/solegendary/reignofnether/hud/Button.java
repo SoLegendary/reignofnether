@@ -73,12 +73,6 @@ public class Button {
         this.onUse = onClick;
     }
 
-    public void render(PoseStack poseStack, int x, int y, int mouseX, int mouseY) {
-        this.x = x;
-        this.y = y;
-        render(poseStack, mouseX, mouseY);
-    }
-
     public void render(PoseStack poseStack, int mouseX, int mouseY) {
         //transparent background
         GuiComponent.fill(poseStack, // x1,y1, x2,y2,

@@ -125,7 +125,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
 
     public RangedBowAttackUnitGoal<? extends LivingEntity> attackGoal;
 
-    List<AbilityButton> abilities = new ArrayList<>();
+    private static final List<AbilityButton> abilities = new ArrayList<>();
 
     public void tick() {
         super.tick();

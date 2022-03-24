@@ -9,11 +9,12 @@ import net.minecraft.client.Minecraft;
 public class ActionButtons {
 
     private static final int itemIconSize = 14;
-
-    private static final Minecraft MC = Minecraft.getInstance();
+    private static final int iconFrameSize = 22;
+    private static final int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
 
     public static final Button attack = new Button(
-            "Attack", 0,0,
+            "Attack",
+            0,screenHeight - iconFrameSize,
             itemIconSize,
             "textures/icons/items/sword.png",
             Keybinds.keyA,
@@ -21,7 +22,8 @@ public class ActionButtons {
             () -> CursorClientEvents.setLeftClickAction(ActionName.ATTACK)
     );
     public static final Button stop = new Button(
-            "Stop", 0,0,
+            "Stop",
+            iconFrameSize,screenHeight - iconFrameSize,
             itemIconSize,
             "textures/icons/items/barrier.png",
             Keybinds.keyS,
@@ -29,7 +31,8 @@ public class ActionButtons {
             UnitClientEvents::sendStopCommand
     );
     public static final Button hold = new Button(
-            "Hold Position", 0,0,
+            "Hold Position",
+            iconFrameSize*2,screenHeight - iconFrameSize,
             itemIconSize,
             "textures/icons/items/chestplate.png",
             Keybinds.keyH,
@@ -37,7 +40,8 @@ public class ActionButtons {
             () -> { } // TODO: implement
     );
     public static final Button move = new Button(
-            "Move", 0,0,
+            "Move",
+            iconFrameSize*3,screenHeight - iconFrameSize,
             itemIconSize,
             "textures/icons/items/boots.png",
             Keybinds.keyM,
