@@ -9,12 +9,10 @@ import net.minecraft.client.Minecraft;
 public class ActionButtons {
 
     private static final int itemIconSize = 14;
-    private static final int iconFrameSize = 22;
-    private static final int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
+    private static final int iconFrameSize = Button.iconFrameSize;
 
     public static final Button attack = new Button(
             "Attack",
-            0,screenHeight - iconFrameSize,
             itemIconSize,
             "textures/icons/items/sword.png",
             Keybinds.keyA,
@@ -23,7 +21,6 @@ public class ActionButtons {
     );
     public static final Button stop = new Button(
             "Stop",
-            iconFrameSize,screenHeight - iconFrameSize,
             itemIconSize,
             "textures/icons/items/barrier.png",
             Keybinds.keyS,
@@ -32,7 +29,6 @@ public class ActionButtons {
     );
     public static final Button hold = new Button(
             "Hold Position",
-            iconFrameSize*2,screenHeight - iconFrameSize,
             itemIconSize,
             "textures/icons/items/chestplate.png",
             Keybinds.keyH,
@@ -41,7 +37,6 @@ public class ActionButtons {
     );
     public static final Button move = new Button(
             "Move",
-            iconFrameSize*3,screenHeight - iconFrameSize,
             itemIconSize,
             "textures/icons/items/boots.png",
             Keybinds.keyM,

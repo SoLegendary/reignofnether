@@ -4,5 +4,6 @@ public enum ActionName {
     ATTACK,
     STOP,
     HOLD,
-    MOVE
+    MOVE,
+    EXPLODE,
 }

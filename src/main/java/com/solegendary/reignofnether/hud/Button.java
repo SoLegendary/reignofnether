@@ -20,13 +20,13 @@ import java.util.function.Supplier;
  */
 
 public class Button {
-    public String name;
 
-    int x; // top left
-    int y;
+    public String name;
+    public int x; // top left
+    public int y;
     int iconSize;
-    int iconFrameSize = 22;
-    int iconFrameSelectedSize = 24;
+    public static int iconFrameSize = 22;
+    public static int iconFrameSelectedSize = 24;
 
     ResourceLocation iconResource;
 
@@ -47,12 +47,10 @@ public class Button {
 
     Minecraft MC = Minecraft.getInstance();
 
-    public Button(String name, int x, int y, int iconSize,
+    public Button(String name, int iconSize,
                   String iconResourcePath, KeyMapping hotkey,
                   Supplier<Boolean> isSelected, Runnable onClick) {
         this.name = name;
-        this.x = x;
-        this.y = y;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
         this.iconSize = iconSize;
         this.hotkey = hotkey;
@@ -60,12 +58,10 @@ public class Button {
         this.onUse = onClick;
     }
 
-    public Button(String name, int x, int y, int iconSize,
+    public Button(String name, int iconSize,
                   String iconResourcePath, LivingEntity entity,
                   Supplier<Boolean> isSelected, Runnable onClick) {
         this.name = name;
-        this.x = x;
-        this.y = y;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
         this.iconSize = iconSize;
         this.entity = entity;
@@ -73,7 +69,9 @@ public class Button {
         this.onUse = onClick;
     }
 
-    public void render(PoseStack poseStack, int mouseX, int mouseY) {
+    public void render(PoseStack poseStack, int x, int y, int mouseX, int mouseY) {
+        this.x = x;
+        this.y = y;
         //transparent background
         GuiComponent.fill(poseStack, // x1,y1, x2,y2,
                 x, y,

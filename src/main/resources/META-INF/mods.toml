@@ -56,10 +56,3 @@ Minecraft, except it's an RTS
     versionRange="[1.18,1.18.2)"
     ordering="NONE"
     side="BOTH"
-
-[[dependencies.reignofnether]]
-    modId = "ftblibrary"
-    mandatory = true
-    versionRange = "[1801.3.5-build.104,)"
-    ordering = "AFTER"
-    side = "BOTH"

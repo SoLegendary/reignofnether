@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
@@ -65,15 +66,12 @@ public class HudClientEvents {
         else if (hudSelectedUnitType == null)
             hudSelectedUnitType = getSimpleUnitName(units.get(0));
 
-        // render all of the unit hud icons
+        // create all of the unit buttons for this frame
         int screenWidth = MC.getWindow().getGuiScaledWidth();
         int screenHeight = MC.getWindow().getGuiScaledHeight();
 
         int iconSize = 14;
-        int iconFrameSize = 22;
-
-        int blitX = (screenWidth / 2) - (units.size() * iconFrameSize / 2);
-        int blitY = screenHeight - iconFrameSize;
+        int iconFrameSize = Button.iconFrameSize;
 
         for (LivingEntity unit : units) {
 
@@ -83,7 +81,6 @@ public class HudClientEvents {
 
                 unitButtons.add(new Button(
                         unitName,
-                        blitX, blitY,
                         iconSize,
                         "textures/mobheads/" + unitName + ".png",
                         unit,
@@ -98,13 +95,20 @@ public class HudClientEvents {
                             }
                         }
                 ));
-                blitX += iconFrameSize;
             }
         }
 
+        // ---------------------------
+        // Unit icons using mob heads
+        // ---------------------------
+        int numUnitButtons = Math.min(units.size(), maxUnitButtons);
+        int blitX = (screenWidth / 2) - (numUnitButtons * iconFrameSize / 2);
+        int blitY = screenHeight - iconFrameSize;
+
         for (Button button : unitButtons) {
-            button.render(evt.getPoseStack(), mouseX, mouseY);
+            button.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
             button.renderHealthBar(evt.getPoseStack());
+            blitX += iconFrameSize;
         }
 
         // -------------------------------------------------------
@@ -112,9 +116,24 @@ public class HudClientEvents {
         // -------------------------------------------------------
 
         if (UnitClientEvents.getSelectedUnitIds().size() > 0) {
+            blitX = 0;
+            blitY = screenHeight - iconFrameSize;
             for (Button actionButton : actionButtons) {
-                actionButton.render(evt.getPoseStack(), mouseX, mouseY);
+                actionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                 actionButton.checkPressed();
+                blitX += iconFrameSize;
+            }
+            blitX = 0;
+            blitY = screenHeight - (iconFrameSize * 2);
+            for (LivingEntity unit : units) {
+                if (getSimpleUnitName(unit).equals(hudSelectedUnitType)) {
+                    for (AbilityButton ability : ((Unit) unit).getAbilities()) {
+                        ability.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                        ability.checkPressed();
+                        blitX += iconFrameSize;
+                    }
+                    break;
+                }
             }
         }
     }

@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.goals.MoveToCursorBlockGoal;
 import com.solegendary.reignofnether.units.goals.RangedBowAttackUnitGoal;
 import com.solegendary.reignofnether.units.goals.SelectedTargetGoal;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -136,12 +137,12 @@ public class CreeperUnit extends Creeper implements Unit {
 
     private static final List<AbilityButton> abilities = Arrays.asList(
             new AbilityButton(
-                    "Explode", 0,0,
+                    "Explode",
                     14,
                     "textures/icons/blocks/tnt.png",
                     Keybinds.keyQ,
-                    () -> CursorClientEvents.getLeftClickAction() == ActionName.ATTACK,
-                    () -> CursorClientEvents.setLeftClickAction(ActionName.ATTACK),
+                    () -> CursorClientEvents.getLeftClickAction() == ActionName.EXPLODE,
+                    () -> CursorClientEvents.setLeftClickAction(ActionName.EXPLODE),
                     0, 0, 3
             )
     );
@@ -158,5 +159,9 @@ public class CreeperUnit extends Creeper implements Unit {
         this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
         // TODO: this doesn't cause the creeper to move to the target before attacking
         this.targetSelector.addGoal(4, targetGoal);
+    }
+
+    // TODO: specifically ground target explode ability; for targeting a mob just set target for regular attack goal
+    public void explode(BlockPos targetPos) {
     }
 }

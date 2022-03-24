@@ -115,8 +115,8 @@ public class CursorClientEvents {
             RenderSystem.setShaderTexture(0, TEXTURE_SWORD);
         else if (leftClickAction != null) {
             RenderSystem.setShaderTexture(0, TEXTURE_CROSS);
-            cursorDrawX -= 16;
-            cursorDrawY -= 16;
+            cursorDrawX -= 8;
+            cursorDrawY -= 8;
         }
         else
             RenderSystem.setShaderTexture(0, TEXTURE_CURSOR);
