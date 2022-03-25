@@ -119,9 +119,11 @@ public class CreeperUnit extends Creeper implements Unit {
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
+    public float getSpeedModifier() {return speedModifier;}
 
     // endregion
 
+    final public float speedModifier = 1.0f;
     final public float attackRange = 0; // only used by ranged units
     final public int attackCooldown = 0; // not used by creepers
     final public float aggroRange = 10;
@@ -149,7 +151,7 @@ public class CreeperUnit extends Creeper implements Unit {
 
     @Override
     protected void registerGoals() {
-        this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
+        this.moveGoal = new MoveToCursorBlockGoal(this, speedModifier);
         this.targetGoal = new SelectedTargetGoal(this, true, true);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));

@@ -10,6 +10,7 @@ public class AbilityButton extends Button {
     float cooldown = 0;
     float range = 0; // if <= 0, is melee
     float radius = 0; // if <= 0, is single target
+    boolean active = false; // light up when being used, channeled, toggled on, etc.
 
     public AbilityButton(String abilityName, int iconSize, String iconResourcePath,
                          KeyMapping hotkey, Supplier<Boolean> isSelected, Runnable onClick,

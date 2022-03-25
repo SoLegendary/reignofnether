@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.units.goals;
 
+import com.solegendary.reignofnether.units.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
@@ -85,7 +86,8 @@ public class RangedBowAttackUnitGoal<T extends net.minecraft.world.entity.Mob & 
             }
 
             // move towards the target until in range and target is visible
-            if (distToTargetSqr > (double) this.attackRadiusSqr || !canSeeTarget) {
+            // TODO: hold position not enforced
+            if (distToTargetSqr > (double) this.attackRadiusSqr || !canSeeTarget && !((Unit) this.mob).getHoldPosition()) {
                 this.mob.getNavigation().moveTo(target, 1.0f);
             } else {
                 this.mob.getNavigation().stop();

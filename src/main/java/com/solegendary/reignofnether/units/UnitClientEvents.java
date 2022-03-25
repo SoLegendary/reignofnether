@@ -181,7 +181,7 @@ public class UnitClientEvents {
             unitIdsToAttackMove.size() > 0) {
 
             PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
-                    false,
+                    ActionName.NONE,
                     unitIdToAttack,
                     unitIdToFollow,
                     unitIdsToMove.stream().mapToInt(i -> i).toArray(), // convert List<Integer> to int[]
@@ -265,16 +265,16 @@ public class UnitClientEvents {
         }
     }
 
-    public static void sendStopCommand() {
+    public static void sendCommand(ActionName actionName) {
         PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
-                true,
-                -1,
-                -1,
-                new int[0],
-                new int[0],
+                actionName,
+                -1, // unitIdToAttack
+                -1, // unitIdToFollow
+                new int[0], // unitIdsToMove
+                new int[0], // unitIdsToAttackMove
                 preselectedUnitIds.stream().mapToInt(i -> i).toArray(),
                 selectedUnitIds.stream().mapToInt(i -> i).toArray(),
-                new BlockPos(0,0,0) // not used anyway
+                CursorClientEvents.getPreselectedBlockPos() // used for actions that ground target
         ));
     }
 

@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.units;
 
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.hud.ActionName;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -23,7 +24,7 @@ import java.util.List;
 
 public class UnitServerEvents {
 
-    private static boolean stopCommand = false;
+    private static ActionName specialAction = null;
     private static int unitIdToAttack = -1;
     private static int unitIdToFollow = -1;
     private static int[] unitIdsToMove = new int[0];
@@ -44,11 +45,20 @@ public class UnitServerEvents {
         ServerLevel level = (ServerLevel) evt.world;
 
         if (!level.isClientSide()) {
-            if (stopCommand) {
+            if (specialAction == ActionName.STOP) {
                 for (int id : selectedUnitIds) {
                     Unit unit = (Unit) level.getEntity(id);
                     if (unit != null)
                         unit.resetTargets();
+                }
+            }
+            if (specialAction == ActionName.HOLD) {
+                for (int id : selectedUnitIds) {
+                    Unit unit = (Unit) level.getEntity(id);
+                    if (unit != null) {
+                        unit.resetTargets();
+                        unit.setHoldPosition(true);
+                    }
                 }
             }
             for (int id : unitIdsToMove) {
@@ -70,7 +80,7 @@ public class UnitServerEvents {
                         unit.setFollowTarget((LivingEntity) level.getEntity(unitIdToFollow));
                 }
             }
-            stopCommand = false;
+            specialAction = null;
             unitIdToAttack = -1;
             unitIdToFollow = -1;
             unitIdsToMove = new int[0];
@@ -79,7 +89,7 @@ public class UnitServerEvents {
     }
 
     public static void consumeUnitActionQueues(
-            boolean stopCommandIn,
+            ActionName specialActionIn,
             int unitIdToAttackIn,
             int unitIdToFollowIn,
             int[] unitIdsToMoveIn,
@@ -88,7 +98,7 @@ public class UnitServerEvents {
             int[] selectedUnitIdsIn,
             BlockPos preselectedBlockPosIn
     ) {
-        stopCommand = stopCommandIn;
+        specialAction = specialActionIn;
         unitIdToAttack = unitIdToAttackIn;
         unitIdToFollow = unitIdToFollowIn;
         unitIdsToMove = unitIdsToMoveIn;

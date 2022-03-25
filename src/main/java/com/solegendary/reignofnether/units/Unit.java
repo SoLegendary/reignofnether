@@ -45,6 +45,7 @@ public interface Unit {
     public float getAggroRange();
     public boolean getAggressiveWhenIdle();
     public float getAttackRange();
+    public float getSpeedModifier();
 
     public BlockPos getAttackMoveTarget();
     public LivingEntity getFollowTarget();
@@ -102,8 +103,6 @@ public interface Unit {
             // enact aggression when idle
             if (unit.isIdle() && unit.getAggressiveWhenIdle())
                 unit.attackClosestEnemy((ServerLevel) unitMob.level);
-
-            // TODO: enact hold position
         }
     }
 

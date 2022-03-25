@@ -24,16 +24,16 @@ public class ActionButtons {
             itemIconSize,
             "textures/icons/items/barrier.png",
             Keybinds.keyS,
-            () -> false,
-            UnitClientEvents::sendStopCommand
+            () -> false, // except if currently clicked on
+            () -> UnitClientEvents.sendCommand(ActionName.STOP)
     );
     public static final Button hold = new Button(
             "Hold Position",
             itemIconSize,
             "textures/icons/items/chestplate.png",
             Keybinds.keyH,
-            () -> false,
-            () -> { } // TODO: implement
+            () -> false, // TODO: if all selected units are holding position (but would need to get this from server?)
+            () -> UnitClientEvents.sendCommand(ActionName.HOLD)
     );
     public static final Button move = new Button(
             "Move",

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.units.goals;
 
+import com.solegendary.reignofnether.units.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
@@ -131,9 +132,10 @@ public class MeleeAttackUnitGoal extends Goal {
                     this.ticksUntilNextPathRecalculation += 5;
                 }
 
-                if (!this.mob.getNavigation().moveTo(livingentity, this.speedModifier)) {
-                    this.ticksUntilNextPathRecalculation += 15;
-                }
+                // don't move if holding position
+                if (!((Unit) this.mob).getHoldPosition())
+                    if (!this.mob.getNavigation().moveTo(livingentity, this.speedModifier))
+                        this.ticksUntilNextPathRecalculation += 15;
 
                 this.ticksUntilNextPathRecalculation = this.adjustedTickDelay(this.ticksUntilNextPathRecalculation);
             }

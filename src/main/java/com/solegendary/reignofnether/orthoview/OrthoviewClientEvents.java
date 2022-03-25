@@ -4,8 +4,11 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
 import com.solegendary.reignofnether.registrars.Keybinds;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
@@ -118,6 +121,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
+    // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.KeyInputEvent evt) {
 
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
@@ -235,6 +239,13 @@ public class OrthoviewClientEvents {
             if (camRotY + camRotAdjY < CAMROTY_MIN)
                 camRotAdjY = CAMROTY_MIN - camRotY;
         }
+    }
+
+    // don't let orthoview players see other orthoview players
+    @SubscribeEvent
+    public static void onPlayerRender(RenderPlayerEvent.Pre evt) {
+        if (enabled && evt.getPlayer().isSpectator())
+            evt.setCanceled(true);
     }
 
     @SubscribeEvent

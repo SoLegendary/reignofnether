@@ -114,9 +114,11 @@ public class SkeletonUnit extends Skeleton implements Unit {
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
+    public float getSpeedModifier() {return speedModifier;}
 
     // endregion
 
+    final public float speedModifier = 1.0f;
     final public float attackRange = 10.0F; // only used by ranged units
     final public int attackCooldown = 45;
     final public float aggroRange = 10;
@@ -139,7 +141,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
 
     @Override
     protected void registerGoals() {
-        this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
+        this.moveGoal = new MoveToCursorBlockGoal(this, speedModifier);
         this.targetGoal = new SelectedTargetGoal(this, true, false);
         this.attackGoal = new RangedBowAttackUnitGoal(this, 5, attackCooldown, attackRange);
 
