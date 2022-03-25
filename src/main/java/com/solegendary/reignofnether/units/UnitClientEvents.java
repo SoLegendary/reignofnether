@@ -93,7 +93,7 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinWorldEvent evt) {
         Entity entity = evt.getEntity();
-        if (entity instanceof Unit && !evt.getWorld().isClientSide)
+        if (entity instanceof Unit && evt.getWorld().isClientSide)
             allUnitIds.add(entity.getId());
     }
 
@@ -254,6 +254,7 @@ public class UnitClientEvents {
                 Entity entity = MC.level.getEntity(unitId);
                 if (entity != null) {
                     Relationship unitRs = getPlayerToEntityRelationship(unitId);
+
                     if (unitRs == Relationship.OWNED)
                         MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 1.0f, 0.3f, 0.2f);
                     else if (unitRs == Relationship.FRIENDLY)

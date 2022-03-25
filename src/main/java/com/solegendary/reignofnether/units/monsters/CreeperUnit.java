@@ -6,9 +6,7 @@ import com.solegendary.reignofnether.hud.ActionName;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.goals.MoveToCursorBlockGoal;
-import com.solegendary.reignofnether.units.goals.RangedBowAttackUnitGoal;
 import com.solegendary.reignofnether.units.goals.SelectedTargetGoal;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -23,7 +21,6 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -83,33 +80,24 @@ public class CreeperUnit extends Creeper implements Unit {
         this.entityData.define(ownerDataAccessor, "");
     }
 
-    public void resetTargets() {
-        if (!this.getRetainAttackMoveTarget())
-            attackMoveTarget = null;
-        if (!this.getRetainAttackTarget())
-            targetGoal.setTarget(null);
-        if (!this.getRetainMoveTarget())
-            moveGoal.setMoveTarget(null);
-        if (!this.getRetainFollowTarget())
-            followTarget = null;
-        if (!this.getRetainHoldPosition())
-            holdPosition = false;
+    public void resetBehaviours() {
+        attackMoveTarget = null;
+        targetGoal.setTarget(null);
+        moveGoal.setMoveTarget(null);
+        followTarget = null;
+        holdPosition = false;
     }
 
     public void setMoveTarget(@Nullable BlockPos bp) {
-        resetTargets();
         moveGoal.setMoveTarget(bp);
     }
     public void setAttackTarget(@Nullable LivingEntity target) {
-        resetTargets();
         targetGoal.setTarget(target);
     }
     public void setAttackMoveTarget(@Nullable BlockPos bp) {
-        resetTargets();
         this.attackMoveTarget = bp;
     }
     public void setFollowTarget(@Nullable LivingEntity target) {
-        resetTargets();
         this.followTarget = target;
     }
 

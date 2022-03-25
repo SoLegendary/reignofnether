@@ -2,24 +2,18 @@ package com.solegendary.reignofnether.units;
 
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.hud.ActionName;
-import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.network.PacketDistributor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class UnitServerEvents {
@@ -40,6 +34,7 @@ public class UnitServerEvents {
 
 
     // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns null
+    // remember to always reset targets so that users' actions always overwrite any existing action
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
         ServerLevel level = (ServerLevel) evt.world;
@@ -49,35 +44,43 @@ public class UnitServerEvents {
                 for (int id : selectedUnitIds) {
                     Unit unit = (Unit) level.getEntity(id);
                     if (unit != null)
-                        unit.resetTargets();
+                        unit.resetBehaviours();
                 }
             }
             if (specialAction == ActionName.HOLD) {
                 for (int id : selectedUnitIds) {
                     Unit unit = (Unit) level.getEntity(id);
                     if (unit != null) {
-                        unit.resetTargets();
+                        unit.resetBehaviours();
                         unit.setHoldPosition(true);
                     }
                 }
             }
             for (int id : unitIdsToMove) {
                 Unit unit = (Unit) level.getEntity(id);
-                if (unit != null)
+                if (unit != null) {
+                    unit.resetBehaviours();
                     unit.setMoveTarget(preselectedBlockPos);
+                }
             }
             for (int id : unitIdsToAttackMove) {
                 Unit unit = (Unit) level.getEntity(id);
-                if (unit != null)
+                if (unit != null) {
+                    unit.resetBehaviours();
                     unit.setAttackMoveTarget(preselectedBlockPos);
+                }
             }
             for (int id : selectedUnitIds) {
                 Unit unit = (Unit) level.getEntity(id);
                 if (unit != null && id != unitIdToAttack && id != unitIdToFollow) {
-                    if (unitIdToAttack >= 0)
+                    if (unitIdToAttack >= 0) {
+                        unit.resetBehaviours();
                         unit.setAttackTarget((LivingEntity) level.getEntity(unitIdToAttack));
-                    if (unitIdToFollow >= 0)
+                    }
+                    if (unitIdToFollow >= 0) {
+                        unit.resetBehaviours();
                         unit.setFollowTarget((LivingEntity) level.getEntity(unitIdToFollow));
+                    }
                 }
             }
             specialAction = null;

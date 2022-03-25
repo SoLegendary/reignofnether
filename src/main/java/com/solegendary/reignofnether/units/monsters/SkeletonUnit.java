@@ -78,33 +78,24 @@ public class SkeletonUnit extends Skeleton implements Unit {
         this.entityData.define(ownerDataAccessor, "");
     }
 
-    public void resetTargets() {
-        if (!this.getRetainAttackMoveTarget())
-            attackMoveTarget = null;
-        if (!this.getRetainAttackTarget())
-            targetGoal.setTarget(null);
-        if (!this.getRetainMoveTarget())
-            moveGoal.setMoveTarget(null);
-        if (!this.getRetainFollowTarget())
-            followTarget = null;
-        if (!this.getRetainHoldPosition())
-            holdPosition = false;
+    public void resetBehaviours() {
+        attackMoveTarget = null;
+        targetGoal.setTarget(null);
+        moveGoal.setMoveTarget(null);
+        followTarget = null;
+        holdPosition = false;
     }
 
     public void setMoveTarget(@Nullable BlockPos bp) {
-        resetTargets();
         moveGoal.setMoveTarget(bp);
     }
     public void setAttackTarget(@Nullable LivingEntity target) {
-        resetTargets();
         targetGoal.setTarget(target);
     }
     public void setAttackMoveTarget(@Nullable BlockPos bp) {
-        resetTargets();
         this.attackMoveTarget = bp;
     }
     public void setFollowTarget(@Nullable LivingEntity target) {
-        resetTargets();
         this.followTarget = target;
     }
 

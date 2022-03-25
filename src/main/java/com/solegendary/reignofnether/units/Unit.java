@@ -29,17 +29,6 @@ public interface Unit {
     public SelectedTargetGoal<?> getTargetGoal();
     public void setTargetGoal(SelectedTargetGoal<?> targetGoal);
 
-    public boolean getRetainAttackMoveTarget();
-    public void setRetainAttackMoveTarget(boolean retainAttackMoveTarget);
-    public boolean getRetainAttackTarget();
-    public void setRetainAttackTarget(boolean retainAttackTarget);
-    public boolean getRetainMoveTarget();
-    public void setRetainMoveTarget(boolean retainMoveTarget);
-    public boolean getRetainFollowTarget();
-    public void setRetainFollowTarget(boolean retainFollowTarget);
-    public boolean getRetainHoldPosition();
-    public void setRetainHoldPosition(boolean retainHoldPosition);
-
     public boolean getWillRetaliate();
     public int getAttackCooldown();
     public float getAggroRange();
@@ -71,24 +60,19 @@ public interface Unit {
             unitMob.invulnerableTime = 0;
 
             // enact target-following, and stop followTarget being reset
-            if (unit.getFollowTarget() != null) {
-                unit.setRetainFollowTarget(true);
+            if (unit.getFollowTarget() != null)
                 unit.setMoveTarget(unit.getFollowTarget().blockPosition());
-                unit.setRetainFollowTarget(false);
-            }
 
             // enact attack moving - move to target but chase enemies, resuming move once dead or out of range/sight
             if (unit.getAttackMoveTarget() != null && !unit.hasLivingTarget()) {
-                unit.setRetainAttackMoveTarget(true);
                 boolean attacked = unit.attackClosestEnemy((ServerLevel) unitMob.level);
                 if (!attacked && unit.getMoveGoal().getMoveTarget() == null)
                     unit.setMoveTarget(unit.getAttackMoveTarget());
-                unit.setRetainAttackMoveTarget(false);
                 if (!attacked && !unit.getMoveGoal().canContinueToUse()) // finished attack-moving
-                    unit.resetTargets();
+                    unit.resetBehaviours();
             }
 
-            // retaliate against a mob that damaged us UNLESS already on a move command (unless just following someone)
+            // retaliate against a mob that damaged us UNLESS already on a move or follow command
             if (unitMob.getLastDamageSource() != null && unit.getWillRetaliate() &&
                 unit.getMoveGoal().getMoveTarget() == null && unit.getFollowTarget() == null) {
 
@@ -153,7 +137,7 @@ public interface Unit {
         return unitMob.getTarget() != null && unitMob.getTarget().isAlive();
     }
 
-    public void resetTargets();
+    public void resetBehaviours();
 
     // move to a block ignoring all else until reaching it
     public void setMoveTarget(@Nullable BlockPos bp);

@@ -24,7 +24,6 @@ public class CommonModEvents {
 
     @SubscribeEvent
     public static void commonSetup(FMLCommonSetupEvent event) {
-        System.out.println("Registering packet handler");
         event.enqueueWork(PacketHandler::init);
     }
 
