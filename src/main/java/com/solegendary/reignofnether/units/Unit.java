@@ -66,9 +66,11 @@ public interface Unit {
             // enact attack moving - move to target but chase enemies, resuming move once dead or out of range/sight
             if (unit.getAttackMoveTarget() != null && !unit.hasLivingTarget()) {
                 boolean attacked = unit.attackClosestEnemy((ServerLevel) unitMob.level);
+
                 if (!attacked && unit.getMoveGoal().getMoveTarget() == null)
                     unit.setMoveTarget(unit.getAttackMoveTarget());
-                if (!attacked && !unit.getMoveGoal().canContinueToUse()) // finished attack-moving
+
+                else if (!attacked && !unit.getMoveGoal().canContinueToUse()) // finished attack-moving
                     unit.resetBehaviours();
             }
 
