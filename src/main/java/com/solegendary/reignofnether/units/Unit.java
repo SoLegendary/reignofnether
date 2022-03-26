@@ -18,6 +18,8 @@ import java.util.List;
 
 // Defines method bodies for Units
 // workaround for trying to have units inherit from both their base vanilla Mob class and a Unit class
+// Note that we can't write any default methods if they need to use Unit fields without a getter/setter
+// (including getters/setters themselves)
 
 public interface Unit {
 
@@ -139,14 +141,28 @@ public interface Unit {
         return unitMob.getTarget() != null && unitMob.getTarget().isAlive();
     }
 
-    public void resetBehaviours();
+    public default void resetBehaviours() {
+        this.setAttackMoveTarget(null);
+        this.getTargetGoal().setTarget(null);
+        this.getMoveGoal().setMoveTarget(null);
+        this.setFollowTarget(null);
+        this.setHoldPosition(false);
+    }
 
     // move to a block ignoring all else until reaching it
-    public void setMoveTarget(@Nullable BlockPos bp);
+    public default void setMoveTarget(@Nullable BlockPos bp) {
+        this.getMoveGoal().setMoveTarget(bp);
+    }
     // chase and attack the target ignoring all else until it is dead or out of sight
-    public void setAttackTarget(@Nullable LivingEntity target);
+    public default void setAttackTarget(@Nullable LivingEntity target) {
+        this.getTargetGoal().setTarget(target);
+    }
     // move to a block but chase/attack a target if there is one close by (for a limited distance)
-    public void setAttackMoveTarget(@Nullable BlockPos bp);
+    public default void setAttackMoveTarget(@Nullable BlockPos bp) {
+        this.setAttackMoveTarget(bp);
+    }
     // continuously move to a target until told to do something else
-    public void setFollowTarget(@Nullable LivingEntity target);
+    public default void setFollowTarget(@Nullable LivingEntity target) {
+        this.setFollowTarget(target);
+    }
 }

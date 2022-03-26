@@ -20,7 +20,6 @@ import net.minecraft.world.entity.ai.goal.SwellGoal;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.level.Level;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,24 +37,6 @@ public class CreeperUnit extends Creeper implements Unit {
 
     public MoveToCursorBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
-
-    // flags to not reset particular targets so we can persist them for specific actions
-    public boolean getRetainAttackMoveTarget() {return retainAttackMoveTarget;}
-    public void setRetainAttackMoveTarget(boolean retainAttackMoveTarget) {this.retainAttackMoveTarget = retainAttackMoveTarget;}
-    public boolean getRetainAttackTarget() {return retainAttackTarget;}
-    public void setRetainAttackTarget(boolean retainAttackTarget) {this.retainAttackTarget = retainAttackTarget;}
-    public boolean getRetainMoveTarget() {return retainMoveTarget;}
-    public void setRetainMoveTarget(boolean retainMoveTarget) {this.retainMoveTarget = retainMoveTarget;}
-    public boolean getRetainFollowTarget() {return retainFollowTarget;}
-    public void setRetainFollowTarget(boolean retainFollowTarget) {this.retainFollowTarget = retainFollowTarget;}
-    public boolean getRetainHoldPosition() {return retainHoldPosition;}
-    public void setRetainHoldPosition(boolean retainHoldPosition) {this.retainHoldPosition = retainHoldPosition;}
-
-    boolean retainAttackMoveTarget = false;
-    boolean retainAttackTarget = false;
-    boolean retainMoveTarget = false;
-    boolean retainFollowTarget = false;
-    boolean retainHoldPosition = false;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -80,27 +61,6 @@ public class CreeperUnit extends Creeper implements Unit {
         this.entityData.define(ownerDataAccessor, "");
     }
 
-    public void resetBehaviours() {
-        attackMoveTarget = null;
-        targetGoal.setTarget(null);
-        moveGoal.setMoveTarget(null);
-        followTarget = null;
-        holdPosition = false;
-    }
-
-    public void setMoveTarget(@Nullable BlockPos bp) {
-        moveGoal.setMoveTarget(bp);
-    }
-    public void setAttackTarget(@Nullable LivingEntity target) {
-        targetGoal.setTarget(target);
-    }
-    public void setAttackMoveTarget(@Nullable BlockPos bp) {
-        this.attackMoveTarget = bp;
-    }
-    public void setFollowTarget(@Nullable LivingEntity target) {
-        this.followTarget = target;
-    }
-
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
     public int getAttackCooldown() {return attackCooldown;}
@@ -120,11 +80,6 @@ public class CreeperUnit extends Creeper implements Unit {
 
     public MeleeAttackGoal attackGoal;
 
-    public void tick() {
-        super.tick();
-        Unit.tick(this);
-    }
-
     private static final List<AbilityButton> abilities = Arrays.asList(
             new AbilityButton(
                     "Explode",
@@ -136,6 +91,11 @@ public class CreeperUnit extends Creeper implements Unit {
                     0, 0, 3
             )
     );
+
+    public void tick() {
+        super.tick();
+        Unit.tick(this);
+    }
 
     @Override
     protected void registerGoals() {
