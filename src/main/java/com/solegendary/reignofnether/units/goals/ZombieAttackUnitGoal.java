@@ -1,17 +1,6 @@
 package com.solegendary.reignofnether.units.goals;
 
-import com.solegendary.reignofnether.units.unit.ZombieUnit;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.monster.Zombie;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.pathfinder.Path;
-
-import java.util.EnumSet;
+import com.solegendary.reignofnether.units.monsters.ZombieUnit;
 
 public class ZombieAttackUnitGoal extends MeleeAttackUnitGoal {
     private final ZombieUnit zombieUnit;

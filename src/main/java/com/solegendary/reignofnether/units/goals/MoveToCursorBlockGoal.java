@@ -55,6 +55,7 @@ public class MoveToCursorBlockGoal extends Goal {
             this.mob.getNavigation().stop();
     }
 
+    // TODO: can sometimes fail to go back uphill when knocked downhill by attacks
     public void setMoveTarget(@Nullable BlockPos bp) {
         this.moveTarget = bp;
         this.start();

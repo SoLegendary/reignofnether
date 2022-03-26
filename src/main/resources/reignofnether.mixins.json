@@ -4,8 +4,9 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "reignofnether.refmap.json",
   "mixins": [
+    "FrustumMixin",
     "OrthoViewMixin",
-    "FrustumMixin"
+    "SpectatorGuiMixin"
   ],
   "minVersion": "0.8"
 }

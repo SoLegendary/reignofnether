@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.registrars;
 
-import com.solegendary.reignofnether.gui.TopdownGuiServerEvents;
+import com.solegendary.reignofnether.guiscreen.TopdownGuiServerEvents;
 import com.solegendary.reignofnether.units.UnitServerEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.units;
 
+import com.solegendary.reignofnether.hud.ActionName;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
@@ -9,7 +10,7 @@ import java.util.function.Supplier;
 
 public class UnitServerboundPacket {
 
-    private boolean stopCommand;
+    private ActionName specialAction;
     private int unitIdToAttack;
     private int unitIdToFollow;
     private int[] unitIdsToMove;
@@ -20,7 +21,7 @@ public class UnitServerboundPacket {
 
     // packet-handler functions
     public UnitServerboundPacket(
-            boolean stopCommand,
+            ActionName specialAction,
             int unitIdToAttack,
             int unitIdToFollow,
             int[] unitIdsToMove,
@@ -29,7 +30,7 @@ public class UnitServerboundPacket {
             int[] selectedUnitIds,
             BlockPos preselectedBlockPos
     ) {
-        this.stopCommand = stopCommand;
+        this.specialAction = specialAction;
         this.unitIdToAttack = unitIdToAttack;
         this.unitIdToFollow = unitIdToFollow;
         this.unitIdsToMove = unitIdsToMove;
@@ -40,7 +41,7 @@ public class UnitServerboundPacket {
     }
 
     public UnitServerboundPacket(FriendlyByteBuf buffer) {
-        this.stopCommand = buffer.readBoolean();
+        this.specialAction = buffer.readEnum(ActionName.class);
         this.unitIdToAttack = buffer.readInt();
         this.unitIdToFollow = buffer.readInt();
         this.unitIdsToMove = buffer.readVarIntArray();
@@ -51,7 +52,7 @@ public class UnitServerboundPacket {
     }
 
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeBoolean(this.stopCommand);
+        buffer.writeEnum(this.specialAction);
         buffer.writeInt(this.unitIdToAttack);
         buffer.writeInt(this.unitIdToFollow);
         buffer.writeVarIntArray(this.unitIdsToMove);
@@ -66,7 +67,7 @@ public class UnitServerboundPacket {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
             UnitServerEvents.consumeUnitActionQueues(
-                    this.stopCommand,
+                    this.specialAction,
                     this.unitIdToAttack,
                     this.unitIdToFollow,
                     this.unitIdsToMove,

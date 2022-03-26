@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.units;
 
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.units.goals.MoveToCursorBlockGoal;
 import com.solegendary.reignofnether.units.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -20,28 +21,20 @@ import java.util.List;
 
 public interface Unit {
 
+    public List<AbilityButton> getAbilities();
+
     // note that attackGoal is specific to unit types
     public MoveToCursorBlockGoal getMoveGoal();
     public void setMoveGoal(MoveToCursorBlockGoal moveGoal);
-    public SelectedTargetGoal getTargetGoal();
-    public void setTargetGoal(SelectedTargetGoal targetGoal);
-
-    public boolean getRetainAttackMoveTarget();
-    public void setRetainAttackMoveTarget(boolean retainAttackMoveTarget);
-    public boolean getRetainAttackTarget();
-    public void setRetainAttackTarget(boolean retainAttackTarget);
-    public boolean getRetainMoveTarget();
-    public void setRetainMoveTarget(boolean retainMoveTarget);
-    public boolean getRetainFollowTarget();
-    public void setRetainFollowTarget(boolean retainFollowTarget);
-    public boolean getRetainHoldPosition();
-    public void setRetainHoldPosition(boolean retainHoldPosition);
+    public SelectedTargetGoal<?> getTargetGoal();
+    public void setTargetGoal(SelectedTargetGoal<?> targetGoal);
 
     public boolean getWillRetaliate();
     public int getAttackCooldown();
     public float getAggroRange();
     public boolean getAggressiveWhenIdle();
     public float getAttackRange();
+    public float getSpeedModifier();
 
     public BlockPos getAttackMoveTarget();
     public LivingEntity getFollowTarget();
@@ -67,24 +60,21 @@ public interface Unit {
             unitMob.invulnerableTime = 0;
 
             // enact target-following, and stop followTarget being reset
-            if (unit.getFollowTarget() != null) {
-                unit.setRetainFollowTarget(true);
+            if (unit.getFollowTarget() != null)
                 unit.setMoveTarget(unit.getFollowTarget().blockPosition());
-                unit.setRetainFollowTarget(false);
-            }
 
             // enact attack moving - move to target but chase enemies, resuming move once dead or out of range/sight
             if (unit.getAttackMoveTarget() != null && !unit.hasLivingTarget()) {
-                unit.setRetainAttackMoveTarget(true);
                 boolean attacked = unit.attackClosestEnemy((ServerLevel) unitMob.level);
+
                 if (!attacked && unit.getMoveGoal().getMoveTarget() == null)
                     unit.setMoveTarget(unit.getAttackMoveTarget());
-                unit.setRetainAttackMoveTarget(false);
-                if (!attacked && !unit.getMoveGoal().canContinueToUse()) // finished attack-moving
-                    unit.resetTargets();
+
+                else if (!attacked && !unit.getMoveGoal().canContinueToUse()) // finished attack-moving
+                    unit.resetBehaviours();
             }
 
-            // retaliate against a mob that damaged us UNLESS already on a move command (unless just following someone)
+            // retaliate against a mob that damaged us UNLESS already on a move or follow command
             if (unitMob.getLastDamageSource() != null && unit.getWillRetaliate() &&
                 unit.getMoveGoal().getMoveTarget() == null && unit.getFollowTarget() == null) {
 
@@ -99,8 +89,6 @@ public interface Unit {
             // enact aggression when idle
             if (unit.isIdle() && unit.getAggressiveWhenIdle())
                 unit.attackClosestEnemy((ServerLevel) unitMob.level);
-
-            // TODO: enact hold position
         }
     }
 
@@ -151,7 +139,7 @@ public interface Unit {
         return unitMob.getTarget() != null && unitMob.getTarget().isAlive();
     }
 
-    public void resetTargets();
+    public void resetBehaviours();
 
     // move to a block ignoring all else until reaching it
     public void setMoveTarget(@Nullable BlockPos bp);

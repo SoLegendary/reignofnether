@@ -1,11 +1,14 @@
 package com.solegendary.reignofnether.orthoview;
 
-import com.solegendary.reignofnether.gui.TopdownGuiServerboundPacket;
+import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
 import com.solegendary.reignofnether.registrars.Keybinds;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
@@ -51,10 +54,6 @@ public class OrthoviewClientEvents {
     private static float mouseRightDownY = 0;
     private static float mouseLeftDownX = 0;
     private static float mouseLeftDownY = 0;
-
-    // not sure why but screen=2*win; GLFW functions should use screen
-    private static int winWidth = MC.getWindow().getGuiScaledWidth();
-    private static int winHeight = MC.getWindow().getGuiScaledHeight();
 
     public static boolean isEnabled() {
         return enabled;
@@ -122,6 +121,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
+    // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.KeyInputEvent evt) {
 
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
@@ -192,7 +192,7 @@ public class OrthoviewClientEvents {
     }
     
     @SubscribeEvent
-    public static void onMouseClick(ScreenEvent.MouseClickedEvent evt) {
+    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
         if (!enabled) return;
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -241,6 +241,13 @@ public class OrthoviewClientEvents {
         }
     }
 
+    // don't let orthoview players see other orthoview players
+    @SubscribeEvent
+    public static void onPlayerRender(RenderPlayerEvent.Pre evt) {
+        if (enabled && evt.getPlayer().isSpectator())
+            evt.setCanceled(true);
+    }
+
     @SubscribeEvent
     public static void onFovModifier(EntityViewRenderEvent.FieldOfView evt) {
         if (enabled)
@@ -253,8 +260,9 @@ public class OrthoviewClientEvents {
         if (!enabled)
             return;
 
-        winWidth = MC.getWindow().getGuiScaledWidth();
-        winHeight = MC.getWindow().getGuiScaledHeight();
+        // not sure why but screen=2*win; GLFW functions should use screen
+        int winWidth = MC.getWindow().getGuiScaledWidth();
+        int winHeight = MC.getWindow().getGuiScaledHeight();
 
         Player player = MC.player;
 

@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.gui;
+package com.solegendary.reignofnether.guiscreen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;

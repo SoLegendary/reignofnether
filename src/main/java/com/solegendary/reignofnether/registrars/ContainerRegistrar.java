@@ -1,10 +1,8 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.gui.TopdownGuiContainer;
-import com.solegendary.reignofnether.items.ItemBase;
+import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.Item;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;

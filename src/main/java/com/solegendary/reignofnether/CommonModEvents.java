@@ -1,12 +1,12 @@
 package com.solegendary.reignofnether;
 
-import com.solegendary.reignofnether.gui.TopdownGui;
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.registrars.ContainerRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.units.unit.CreeperUnit;
-import com.solegendary.reignofnether.units.unit.SkeletonUnit;
-import com.solegendary.reignofnether.units.unit.ZombieUnit;
+import com.solegendary.reignofnether.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.units.monsters.ZombieUnit;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.entity.CreeperRenderer;
 import net.minecraft.client.renderer.entity.SkeletonRenderer;
@@ -24,7 +24,6 @@ public class CommonModEvents {
 
     @SubscribeEvent
     public static void commonSetup(FMLCommonSetupEvent event) {
-        System.out.println("Registering packet handler");
         event.enqueueWork(PacketHandler::init);
     }
 
