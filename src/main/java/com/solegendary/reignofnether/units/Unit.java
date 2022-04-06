@@ -157,12 +157,11 @@ public interface Unit {
     public default void setAttackTarget(@Nullable LivingEntity target) {
         this.getTargetGoal().setTarget(target);
     }
+
+    // these two setters set a Unit field and so can't be defaulted
+
     // move to a block but chase/attack a target if there is one close by (for a limited distance)
-    public default void setAttackMoveTarget(@Nullable BlockPos bp) {
-        this.setAttackMoveTarget(bp);
-    }
+    public void setAttackMoveTarget(@Nullable BlockPos bp);
     // continuously move to a target until told to do something else
-    public default void setFollowTarget(@Nullable LivingEntity target) {
-        this.setFollowTarget(target);
-    }
+    public void setFollowTarget(@Nullable LivingEntity target);
 }

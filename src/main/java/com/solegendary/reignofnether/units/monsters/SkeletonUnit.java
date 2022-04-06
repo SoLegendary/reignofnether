@@ -15,6 +15,7 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +66,9 @@ public class SkeletonUnit extends Skeleton implements Unit {
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
     public float getSpeedModifier() {return speedModifier;}
+
+    public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
+    public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
     // endregion
 

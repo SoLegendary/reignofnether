@@ -1,6 +1,11 @@
 package com.solegendary.reignofnether.units;
 
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3d;
+import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.ActionButtons;
 import com.solegendary.reignofnether.hud.ActionName;
@@ -11,9 +16,22 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.CreeperModel;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.model.SkeletonModel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.SkeletonRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -21,6 +39,8 @@ import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.checkerframework.checker.units.qual.A;
 import org.lwjgl.glfw.GLFW;
+
+import dev.ftb.mods.ftblibrary.math.MathUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -100,6 +120,8 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
         if (!OrthoviewClientEvents.isEnabled()) return;
+
+        System.out.println(MathUtils.dist(1,2,3,4));
 
         // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
         // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
@@ -300,5 +322,77 @@ public class UnitClientEvents {
                 return Relationship.HOSTILE;
         }
         return Relationship.NEUTRAL;
+    }
+
+    /*
+    @SubscribeEvent
+    public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
+        LivingEntity entity = evt.getEntity();
+        Model model = evt.getRenderer().getModel();
+
+        if (entity instanceof Unit) {
+            if (entity instanceof Creeper) {
+                ((CreeperModel) model).root().visible = false;
+            }
+            else {
+                ((HumanoidModel) model).body.visible = false;
+            }
+        }
+    }*/
+
+    public static void drawEntity(PoseStack matrixStack2, int x, int y, int size, float mouseX,
+                                  float mouseY, LivingEntity entity, float scale) {
+
+        float f = (float) Math.atan((double) (mouseX / 40.0F));
+        float g = (float) Math.atan((double) (mouseY / 40.0F));
+        PoseStack matrixStack = RenderSystem.getModelViewStack();
+        matrixStack.pushPose();
+        matrixStack.translate((double) x * scale, (double) y * scale, 1050.0D * scale);
+        matrixStack.scale(1.0F, 1.0F, -1.0F);
+        RenderSystem.applyModelViewMatrix();
+        matrixStack2.pushPose();
+        matrixStack2.translate(0.0D, 0.0D, 1000.0D);
+        matrixStack2.scale((float) size, (float) size, (float) size);
+        Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
+        Quaternion quaternion2 = Vector3f.XP.rotationDegrees(g * 20.0F);
+        quaternion.mul(quaternion2);
+        matrixStack2.mulPose(quaternion);
+        float h = entity.yBodyRot; // bodyYaw;
+        float i = entity.getYRot(); // getYaw();
+        float j = entity.getXRot(); // getPitch();
+        float k = entity.yHeadRotO; // prevHeadYaw;
+        float l = entity.yHeadRot; // headYaw;
+        entity.yBodyRot = 180.0F + f * 20.0F;
+        entity.setYRot(180.0F + f * 40.0F);
+        entity.setXRot(-g * 20.0F);
+        entity.yHeadRot = entity.getYRot();
+        entity.yHeadRotO = entity.getYRot();
+
+        Lighting.setupForEntityInInventory();
+        EntityRenderDispatcher entityrenderdispatcher =
+                Minecraft.getInstance().getEntityRenderDispatcher();
+        quaternion2.conj();
+        entityrenderdispatcher.overrideCameraOrientation(quaternion2);
+        entityrenderdispatcher.setRenderShadow(false);
+
+        MultiBufferSource.BufferSource bufferSource =
+                Minecraft.getInstance().renderBuffers().bufferSource();
+
+        RenderSystem.runAsFancy(() -> {
+            entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixStack2, bufferSource,
+                    15728880);
+        });
+
+        bufferSource.endBatch();
+        entityrenderdispatcher.setRenderShadow(true);
+        entity.yBodyRot = h;
+        entity.setYRot(i);
+        entity.setXRot(j);
+        entity.yHeadRotO = k;
+        entity.yHeadRot = l;
+        matrixStack.popPose();
+        matrixStack2.popPose();
+        RenderSystem.applyModelViewMatrix();
+        Lighting.setupFor3DItems();
     }
 }
