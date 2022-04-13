@@ -135,6 +135,7 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     implementation fg.deobf("curse.maven:ftbl-404465:3725485")
+    implementation fg.deobf("curse.maven:arch-419699:3728618")
 }
 
 mixin {

@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.items.ItemBase;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.EggItem;
 import net.minecraft.world.item.Item;
