@@ -137,7 +137,7 @@ public class CursorClientEvents {
                 cursorWorldPos.y,
                 cursorWorldPos.z
         );
-        cursorWorldPos = screenPosToWorldPos(evt.getMouseX(), evt.getMouseY());
+        cursorWorldPos = MiscUtil.screenPosToWorldPos(MC, evt.getMouseX(), evt.getMouseY());
 
         // calc near and far cursorWorldPos to get a cursor line vector
         Vector3d lookVector = getPlayerLookVector();
@@ -190,9 +190,9 @@ public class CursorClientEvents {
             // https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
 
             // calculate 4 vertices
-            Vector3d worldPosTL = screenPosToWorldPos((int) cursorLeftClickDownPos.x, (int) cursorLeftClickDownPos.y); // top-left
-            Vector3d worldPosBL = screenPosToWorldPos((int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y); // bottom-left
-            Vector3d worldPosBR = screenPosToWorldPos((int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y); // bottom-right
+            Vector3d worldPosTL = MiscUtil.screenPosToWorldPos(MC, (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDownPos.y); // top-left
+            Vector3d worldPosBL = MiscUtil.screenPosToWorldPos(MC, (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y); // bottom-left
+            Vector3d worldPosBR = MiscUtil.screenPosToWorldPos(MC, (int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y); // bottom-right
 
             Vector3d vp5 = MyMath.addVector3d(worldPosTL, lookVector, -200);
             Vector3d vp1 = MyMath.addVector3d(worldPosBL, lookVector, -200);
@@ -315,32 +315,6 @@ public class CursorClientEvents {
         float a = (float) Math.toRadians(MC.player.getYRot());
         float b = (float) Math.toRadians(MC.player.getXRot());
         return new Vector3d(-cos(b) * sin(a), -sin(b), cos(b) * cos(a));
-    }
-
-    // converts
-    public static Vector3d screenPosToWorldPos(int mouseX, int mouseY) {
-        int winWidth = MC.getWindow().getGuiScaledWidth();
-        int winHeight = MC.getWindow().getGuiScaledHeight();
-
-        // at winHeight=240, zoom=10, screen is 20 blocks high, so PTB=240/20=24
-        float pixelsToBlocks = winHeight / OrthoviewClientEvents.getZoom();
-
-        // make mouse coordinate origin centre of screen
-        float x = (mouseX - (float) winWidth / 2) / pixelsToBlocks;
-        float y = 0;
-        float z = (mouseY - (float) winHeight / 2) / pixelsToBlocks;
-
-        double camRotYRads = Math.toRadians(OrthoviewClientEvents.getCamRotY());
-        z = z / (float) (Math.sin(camRotYRads));
-
-        Vec2 XZRotated = MyMath.rotateCoords(x, z, OrthoviewClientEvents.getCamRotX());
-
-        // for some reason position is off by some y coord so just move it down manually
-        return new Vector3d(
-                MC.player.xo - XZRotated.x,
-                MC.player.yo + y + 1.5,
-                MC.player.zo - XZRotated.y
-        );
     }
 
     // returns the exact spot that the cursorWorldPos ray meets a solid block

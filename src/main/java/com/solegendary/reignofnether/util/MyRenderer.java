@@ -1,9 +1,9 @@
 package com.solegendary.reignofnether.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
@@ -46,6 +46,5 @@ public class MyRenderer {
         matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
         LevelRenderer.renderLineBox(matrixStack, vertexConsumer, aabb, r, g, b, a);
         matrixStack.popPose();
-
     }
 }
