@@ -55,9 +55,9 @@ public class MyMath {
     }
 
     public static Vec2 rotateCoords(float x, float y, double deg) {
-        float camXRotRads = (float) Math.toRadians(deg);
-        float moveXRotated = (x * cos(camXRotRads)) - (y * sin(camXRotRads));
-        float moveyRotated = (y * cos(camXRotRads)) + (x * sin(camXRotRads));
+        float xRotRads = (float) Math.toRadians(deg);
+        float moveXRotated = (x * cos(xRotRads)) - (y * sin(xRotRads));
+        float moveyRotated = (y * cos(xRotRads)) + (x * sin(xRotRads));
         return new Vec2(moveXRotated, moveyRotated);
     }
 }

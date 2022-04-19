@@ -78,8 +78,6 @@ public class OrthoviewClientEvents {
         if (camRotX <= -360)
             camRotX += 360;
 
-        System.out.println(camRotX);
-
         camRotY += y;
         if (camRotY > CAMROTY_MAX)
             camRotY = CAMROTY_MAX;

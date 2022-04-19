@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.util;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
@@ -16,25 +15,25 @@ public class MyRenderer {
 
     public static void drawBlockOutline(PoseStack matrixStack, BlockPos blockpos, float a) {
         AABB aabb = new AABB(blockpos).move(0,0.01,0);
-        drawOutline(matrixStack, aabb, 1.0f,1.0f,1.0f, a);
+        drawLineBox(matrixStack, aabb, 1.0f,1.0f,1.0f, a);
     }
 
     public static void drawEntityOutline(PoseStack matrixStack, Entity entity, float a) {
-        drawOutline(matrixStack, entity.getBoundingBox(), 1.0f,1.0f,1.0f, a);
+        drawLineBox(matrixStack, entity.getBoundingBox(), 1.0f,1.0f,1.0f, a);
     }
 
     public static void drawEntityOutline(PoseStack matrixStack, Entity entity, float r, float g, float b, float a) {
-        drawOutline(matrixStack, entity.getBoundingBox(), r, g, b, a);
+        drawLineBox(matrixStack, entity.getBoundingBox(), r, g, b, a);
     }
 
     // like drawEntityOutline but only the bottom square
     public static void drawEntityOutlineBottom(PoseStack matrixStack, Entity entity, float r, float g, float b, float a) {
         AABB aabb = entity.getBoundingBox();
         aabb = aabb.setMaxY(aabb.minY);
-        drawOutline(matrixStack, aabb, r, g, b, a);
+        drawLineBox(matrixStack, aabb, r, g, b, a);
     }
 
-    public static void drawOutline(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
+    public static void drawLineBox(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
         Entity camEntity = MC.getCameraEntity();
         double d0 = camEntity.getX();
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
@@ -47,4 +46,6 @@ public class MyRenderer {
         LevelRenderer.renderLineBox(matrixStack, vertexConsumer, aabb, r, g, b, a);
         matrixStack.popPose();
     }
+
+
 }

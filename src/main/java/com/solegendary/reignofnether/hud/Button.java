@@ -118,8 +118,6 @@ public class Button {
                     y + iconSize - 1,
                     0xFFFFFF);
         }
-
-
         checkHover(poseStack, mouseX, mouseY);
     }
 

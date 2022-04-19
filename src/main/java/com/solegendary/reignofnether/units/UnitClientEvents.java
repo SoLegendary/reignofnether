@@ -121,8 +121,6 @@ public class UnitClientEvents {
     public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
         if (!OrthoviewClientEvents.isEnabled()) return;
 
-        System.out.println(MathUtils.dist(1,2,3,4));
-
         // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
         // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
 
