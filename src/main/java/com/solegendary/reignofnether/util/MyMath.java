@@ -4,8 +4,7 @@ import com.mojang.math.Vector3d;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
 
@@ -59,5 +58,37 @@ public class MyMath {
         float moveXRotated = (x * cos(xRotRads)) - (y * sin(xRotRads));
         float moveyRotated = (y * cos(xRotRads)) + (x * sin(xRotRads));
         return new Vec2(moveXRotated, moveyRotated);
+    }
+
+    public static double distance(double x1, double y1, double x2, double y2) {
+        return Math.sqrt(pow(x2-x1,2) + pow(y2-y1,2));
+    }
+
+    // https://stackoverflow.com/questions/11907947/how-to-check-if-a-point-lies-on-a-line-between-2-other-points
+    // the greater quad_threshold, the thicker the lines will be; ptc is the tested point
+    public static boolean isPointOnLine(Vec2 pt1, Vec2 pt2, Vec2 ptc, float threshold) {
+
+        // gradient
+        double dx1 = ptc.x - pt1.x;
+        double dy1 = ptc.y - pt1.y;
+
+        double dx2 = pt2.x - pt1.x;
+        double dy2 = pt2.y - pt1.y;
+
+        double cross = dx1 * dy2 - dy1 * dx2;
+
+        // checks if on line
+        if (Math.abs(cross) > threshold)
+            return false;
+
+        // checks if between the two points
+        if (abs(dx2) >= abs(dy2))
+            return dx2 > 0 ?
+                pt1.x <= ptc.x && ptc.x <= pt2.x :
+                pt2.x <= ptc.x && ptc.x <= pt1.x;
+        else
+            return dy2 > 0 ?
+                pt1.y <= ptc.y && ptc.y <= pt2.y :
+                pt2.y <= ptc.y && ptc.y <= pt1.y;
     }
 }

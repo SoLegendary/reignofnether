@@ -102,6 +102,13 @@ public class MinimapClientEvents {
 
         long timeBefore = System.currentTimeMillis();
 
+        Vector3d[] corners = new Vector3d[] {
+            MiscUtil.screenPosToWorldPos(MC, 0,0),
+            MiscUtil.screenPosToWorldPos(MC, 0, MC.getWindow().getGuiScaledHeight()),
+            MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), MC.getWindow().getGuiScaledHeight()),
+            MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), 0)
+        };
+
         mapColours = new ArrayList<>();
         for (int z = zc_world - WORLD_RADIUS; z < zc_world + WORLD_RADIUS; z++)
         {
@@ -153,6 +160,28 @@ public class MinimapClientEvents {
 
                     col = shadeRGB(col, 1.2F - (0.025F * depth));
                 }
+
+                for (int i = 0; i < corners.length; i++) {
+                    int j = i + 1;
+                    if (j >= corners.length) j = 0;
+
+                    if (MyMath.isPointOnLine(
+                            new Vec2((float) corners[i].x, (float) corners[i].z),
+                            new Vec2((float) corners[j].x, (float) corners[j].z),
+                            new Vec2(x,z),
+                            75.0F // larger = thicker line
+                    ))
+                        col = 0xFFFFFF;
+                }
+
+                /* // bolds corners
+                if (((x > vec3tl.x - width && x < vec3tl.x + width) && (z > vec3tl.z - width && z < vec3tl.z + width)) ||
+                    ((x > vec3bl.x - width && x < vec3bl.x + width) && (z > vec3bl.z - width && z < vec3bl.z + width)) ||
+                    ((x > vec3br.x - width && x < vec3br.x + width) && (z > vec3br.z - width && z < vec3br.z + width)) ||
+                    ((x > vec3tr.x - width && x < vec3tr.x + width) && (z > vec3tr.z - width && z < vec3tr.z + width))
+                )
+                    col = 0xFFFFFF;
+                 */
 
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
                 mapColours.add(reverseRGB(col) | (0xFF << 24));
@@ -210,7 +239,6 @@ public class MinimapClientEvents {
         float yc_bg = yc;
         float yb_bg = yb + BG_OFFSET;
 
-        /*
         // render map background first
         ResourceLocation iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/map_background.png");
         RenderSystem.setShaderTexture(0, iconFrameResource);
@@ -222,77 +250,19 @@ public class MinimapClientEvents {
         bufferbuilder.vertex(matrix4f, xr_bg, yc_bg, 0.0F).uv(1.0F, 1.0F).endVertex();
         bufferbuilder.vertex(matrix4f, xc_bg, yt_bg, 0.0F).uv(1.0F, 0.0F).endVertex();
         bufferbuilder.vertex(matrix4f, xl_bg, yc_bg, 0.0F).uv(0.0F, 0.0F).endVertex();
+
         bufferbuilder.end();
         BufferUploader.end(bufferbuilder);
-         */
 
         // render map itself
-        /*
         MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         VertexConsumer consumer = buffer.getBuffer(MAP_RENDER_TYPE);
-        consumer.vertex(matrix4f, xc, yb, 0.0F).color(255, 255, 255, 155).uv(0.0F, 1.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xr, yc, 0.0F).color(255, 255, 255, 155).uv(1.0F, 1.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xc, yt, 0.0F).color(255, 255, 255, 155).uv(1.0F, 0.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xl, yc, 0.0F).color(255, 255, 255, 155).uv(0.0F, 0.0F).uv2(255).endVertex();
+        consumer.vertex(matrix4f, xc, yb, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(255).endVertex();
+        consumer.vertex(matrix4f, xr, yc, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(255).endVertex();
+        consumer.vertex(matrix4f, xc, yt, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(255).endVertex();
+        consumer.vertex(matrix4f, xl, yc, 0.0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(255).endVertex();
 
         buffer.endBatch();
-
-         */
-    }
-
-    private static Vec2 worldPosToMapScreenPos(int worldx, int worldz) {
-        return new Vec2(0,0);
-    }
-
-    // calculates corners of the quad that denotes which part of the map is being viewed right now
-    // if saveOffset, then will record the calculated coords to offset the quad for rendering
-    // (so that it always appears centered on the map on a reset)
-    private static void calcViewQuad(Boolean saveOffset) {
-        // ratio of screen pixels to world blocks on the map
-        float pixelsToBlocks = (float) RENDER_RADIUS / (float) WORLD_RADIUS;
-
-        // get world pos of top left and bottom right screen corners
-        Vector3d vec3tl = MiscUtil.screenPosToWorldPos(MC, 0,0);
-        Vector3d vec3br = MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(),MC.getWindow().getGuiScaledHeight());
-        double xtl_world = vec3tl.x;
-        double ztl_world = vec3tl.z;
-        double xbr_world = vec3br.x;
-        double zbr_world = vec3br.z;
-
-        // calculate the screen location if the map was NOT angled 45 degrees, then rotate them
-        double xtl = (xtl_world - xc_world) * pixelsToBlocks;
-        double ytl = (ztl_world - zc_world) * pixelsToBlocks;
-        double xbr = (xbr_world - xc_world) * pixelsToBlocks;
-        double ybr = (zbr_world - zc_world) * pixelsToBlocks;
-
-        Vec2 tl_rot = MyMath.rotateCoords((float) xtl, (float) ytl, -45);
-        Vec2 br_rot = MyMath.rotateCoords((float) xbr, (float) ybr, -45);
-
-        xtl_quad = (int) tl_rot.x;
-        ytl_quad = (int) tl_rot.y;
-        xbr_quad = (int) br_rot.x;
-        ybr_quad = (int) br_rot.y;
-
-        if (saveOffset) {
-            x_quad_offset = (int) tl_rot.x;
-            y_quad_offset = (int) tl_rot.y;
-        }
-    }
-
-    // the quad that denotes which part of the map is being viewed right now
-    private static void renderViewQuad(PoseStack stack) {
-
-        GuiComponent.drawString(stack, MC.font, "xtl " + (x_quad_offset), 0,0, 0xFFFFFF);
-        GuiComponent.drawString(stack, MC.font, "ztl " + (y_quad_offset), 0,10, 0xFFFFFF);
-        GuiComponent.drawString(stack, MC.font, "xbr " + (x_quad_offset), 0,20, 0xFFFFFF);
-        GuiComponent.drawString(stack, MC.font, "zbr " + (y_quad_offset), 0,30, 0xFFFFFF);
-
-        GuiComponent.fill(stack,
-                xtl_quad - x_quad_offset + (int) xc,
-                ytl_quad - y_quad_offset + (int) yc,
-                xbr_quad - x_quad_offset + (int) xc,
-                ybr_quad - y_quad_offset + (int) yc,
-                0x0841e868); // ARGB(hex); note that alpha ranges between ~0-16, not 0-255
     }
 
     @SubscribeEvent
@@ -312,7 +282,5 @@ public class MinimapClientEvents {
             updateMapTexture();
         }
         renderMap(evt.getMatrixStack());
-        calcViewQuad(false);
-        renderViewQuad(evt.getMatrixStack());
     }
 }

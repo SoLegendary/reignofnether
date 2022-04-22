@@ -1,8 +1,11 @@
 package com.solegendary.reignofnether.util;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -69,5 +72,14 @@ public class MiscUtil {
         }
         else
             return new ArrayList<>();
+    }
+
+    // accepts a list of strings to draw at the top left to track debug data
+    public static void drawDebugStrings(PoseStack stack, Font font, String[] strings) {
+        int y = 0;
+        for (String str : strings) {
+            GuiComponent.drawString(stack, font, str, 0,y, 0xFFFFFF);
+            y += 10;
+        }
     }
 }
