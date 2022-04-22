@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -49,17 +51,6 @@ public class MinimapClientEvents {
     private static int xc_world = 0; // world pos x centre, maps to xc
     private static int zc_world = 0; // world pos zcentre, maps to yc
 
-    // viewquad coordinates and offsets to show where the screen is on the minimap
-    private static int xtl_quad = 0;
-    private static int ytl_quad = 0;
-    private static int xbr_quad = 0;
-    private static int ybr_quad = 0;
-    private static int x_quad_offset = 0;
-    private static int y_quad_offset = 0;
-
-    // map vertex coordinates (left, centre, right, top, centre, bottom)
-    private static float xl, xc, xr, yt, yc, yb;
-
     private static final Set<Block> BLOCK_IGNORE_LIST = Set.of(
             Blocks.FERN,
             Blocks.GRASS,
@@ -76,7 +67,6 @@ public class MinimapClientEvents {
     public static void setMapCentre(double x, double z) {
         xc_world = (int) x;
         zc_world = (int) z;
-        calcViewQuad(true);
     }
 
     public static void updateMapTexture()
@@ -102,12 +92,19 @@ public class MinimapClientEvents {
 
         long timeBefore = System.currentTimeMillis();
 
+        // get position of
         Vector3d[] corners = new Vector3d[] {
             MiscUtil.screenPosToWorldPos(MC, 0,0),
             MiscUtil.screenPosToWorldPos(MC, 0, MC.getWindow().getGuiScaledHeight()),
             MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), MC.getWindow().getGuiScaledHeight()),
             MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), 0)
         };
+        // adjust corners according to camera angle
+        Vector3d lookVector = CursorClientEvents.getPlayerLookVector();
+        corners[0] = MyMath.addVector3d(corners[0], lookVector, 90-OrthoviewClientEvents.getCamRotY());
+        corners[1] = MyMath.addVector3d(corners[1], lookVector, 75-OrthoviewClientEvents.getCamRotY());
+        corners[2] = MyMath.addVector3d(corners[2], lookVector, 75-OrthoviewClientEvents.getCamRotY());
+        corners[3] = MyMath.addVector3d(corners[3], lookVector, 90-OrthoviewClientEvents.getCamRotY());
 
         mapColours = new ArrayList<>();
         for (int z = zc_world - WORLD_RADIUS; z < zc_world + WORLD_RADIUS; z++)
@@ -224,12 +221,13 @@ public class MinimapClientEvents {
         Matrix4f matrix4f = stack.last().pose();
 
         // place vertices in a diamond shape - left, centre, right, top, centre, bottom
-        xl = MC.getWindow().getGuiScaledWidth() - (RENDER_RADIUS * 2) - CORNER_OFFSET;
-        xc = MC.getWindow().getGuiScaledWidth() - RENDER_RADIUS - CORNER_OFFSET;
-        xr = MC.getWindow().getGuiScaledWidth() - CORNER_OFFSET;
-        yt = MC.getWindow().getGuiScaledHeight() - (RENDER_RADIUS * 2) - CORNER_OFFSET;
-        yc = MC.getWindow().getGuiScaledHeight() - RENDER_RADIUS - CORNER_OFFSET;
-        yb = MC.getWindow().getGuiScaledHeight() - CORNER_OFFSET;
+        // map vertex coordinates (left, centre, right, top, centre, bottom)
+        float xl = MC.getWindow().getGuiScaledWidth() - (RENDER_RADIUS * 2) - CORNER_OFFSET;
+        float xc = MC.getWindow().getGuiScaledWidth() - RENDER_RADIUS - CORNER_OFFSET;
+        float xr = MC.getWindow().getGuiScaledWidth() - CORNER_OFFSET;
+        float yt = MC.getWindow().getGuiScaledHeight() - (RENDER_RADIUS * 2) - CORNER_OFFSET;
+        float yc = MC.getWindow().getGuiScaledHeight() - RENDER_RADIUS - CORNER_OFFSET;
+        float yb = MC.getWindow().getGuiScaledHeight() - CORNER_OFFSET;
 
         // background vertex coords need to be slightly larger
         float xl_bg = xl - BG_OFFSET;
@@ -274,6 +272,10 @@ public class MinimapClientEvents {
     public static void onRenderOverlay(RenderGameOverlayEvent.Post evt) {
         if (!OrthoviewClientEvents.isEnabled())
             return;
+
+        MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
+                "camRotY: " + OrthoviewClientEvents.getCamRotY()
+        });
 
         REFRESH_TICKS_CURRENT -= 1;
         if (REFRESH_TICKS_CURRENT <= 0) {
