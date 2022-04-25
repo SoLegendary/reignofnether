@@ -104,7 +104,7 @@ public class OrthoviewClientEvents {
 
         if (enabled) { // opening is done by TopdownGui world tick (which opens it whenever no other screen is open)
             //TopdownGuiServerboundPackets.openTopdownGui();
-            MinimapClientEvents.setMapCentre(MC.player.getX(), MC.player.getY());
+            MinimapClientEvents.setMapCentre(MC.player.getX(), MC.player.getZ());
         }
         else {
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());

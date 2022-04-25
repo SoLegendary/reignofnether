@@ -5,6 +5,7 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.hud.ActionButtons;
 import com.solegendary.reignofnether.hud.ActionName;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Unit;
@@ -50,8 +51,8 @@ public class CursorClientEvents {
     private static Vector3d cursorWorldPos = new Vector3d(0,0,0);
     private static Vector3d cursorWorldPosLast = new Vector3d(0,0,0);
     // pos of cursor on screen for box selections
-    private static Vec2 cursorLeftClickDownPos = new Vec2(0,0);
-    private static Vec2 cursorLeftClickDragPos = new Vec2(0,0);
+    private static Vec2 cursorLeftClickDownPos = new Vec2(-1,-1);
+    private static Vec2 cursorLeftClickDragPos = new Vec2(-1,-1);
     // attack that is performed on the next left click
     private static ActionName leftClickAction = null;
 
@@ -225,6 +226,13 @@ public class CursorClientEvents {
         }
     }
 
+    public static boolean isBoxSelecting() {
+        return cursorLeftClickDownPos.x >= 0 &&
+                cursorLeftClickDownPos.y >= 0 &&
+                cursorLeftClickDragPos.x >= 0 &&
+                cursorLeftClickDragPos.y >= 0;
+    }
+
     // draw box selection rectangle
     @SubscribeEvent
     public static void renderOverlay(RenderGameOverlayEvent.Post evt) {
@@ -241,7 +249,10 @@ public class CursorClientEvents {
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled()) return;
+        // don't box selecrt
+        if (!OrthoviewClientEvents.isEnabled() ||
+            MinimapClientEvents.isPointInsideMinimap(evt.getMouseX(), evt.getMouseY()))
+            return;
 
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -256,7 +267,9 @@ public class CursorClientEvents {
 
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragEvent.Pre evt) {
-        if (!OrthoviewClientEvents.isEnabled()) return;
+        if (!OrthoviewClientEvents.isEnabled() ||
+            (cursorLeftClickDownPos.x < 0 && cursorLeftClickDownPos.y < 0))
+            return;
 
         cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
     }
@@ -282,8 +295,8 @@ public class CursorClientEvents {
                         UnitClientEvents.addSelectedUnitId(entity.getId());
                 }
             }
-            cursorLeftClickDownPos = new Vec2(0,0);
-            cursorLeftClickDragPos = new Vec2(0,0);
+            cursorLeftClickDownPos = new Vec2(-1,-1);
+            cursorLeftClickDragPos = new Vec2(-1,-1);
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             rightClickDown = false;

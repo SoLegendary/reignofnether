@@ -28,6 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,8 @@ public class MinimapClientEvents {
     private static List<Integer> mapColours = new ArrayList<>();
     private static int xc_world = 0; // world pos x centre, maps to xc
     private static int zc_world = 0; // world pos zcentre, maps to yc
+
+    private static float xl, xc, xr, yt, yc, yb;
 
     private static final Set<Block> BLOCK_IGNORE_LIST = Set.of(
             Blocks.FERN,
@@ -158,6 +161,8 @@ public class MinimapClientEvents {
                     col = shadeRGB(col, 1.2F - (0.025F * depth));
                 }
 
+                // draw view quad
+                // TODO: this only works at specific player heights (Y ~= 85)
                 for (int i = 0; i < corners.length; i++) {
                     int j = i + 1;
                     if (j >= corners.length) j = 0;
@@ -170,16 +175,6 @@ public class MinimapClientEvents {
                     ))
                         col = 0xFFFFFF;
                 }
-
-                /* // bolds corners
-                if (((x > vec3tl.x - width && x < vec3tl.x + width) && (z > vec3tl.z - width && z < vec3tl.z + width)) ||
-                    ((x > vec3bl.x - width && x < vec3bl.x + width) && (z > vec3bl.z - width && z < vec3bl.z + width)) ||
-                    ((x > vec3br.x - width && x < vec3br.x + width) && (z > vec3br.z - width && z < vec3br.z + width)) ||
-                    ((x > vec3tr.x - width && x < vec3tr.x + width) && (z > vec3tr.z - width && z < vec3tr.z + width))
-                )
-                    col = 0xFFFFFF;
-                 */
-
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
                 mapColours.add(reverseRGB(col) | (0xFF << 24));
             }
@@ -222,12 +217,12 @@ public class MinimapClientEvents {
 
         // place vertices in a diamond shape - left, centre, right, top, centre, bottom
         // map vertex coordinates (left, centre, right, top, centre, bottom)
-        float xl = MC.getWindow().getGuiScaledWidth() - (RENDER_RADIUS * 2) - CORNER_OFFSET;
-        float xc = MC.getWindow().getGuiScaledWidth() - RENDER_RADIUS - CORNER_OFFSET;
-        float xr = MC.getWindow().getGuiScaledWidth() - CORNER_OFFSET;
-        float yt = MC.getWindow().getGuiScaledHeight() - (RENDER_RADIUS * 2) - CORNER_OFFSET;
-        float yc = MC.getWindow().getGuiScaledHeight() - RENDER_RADIUS - CORNER_OFFSET;
-        float yb = MC.getWindow().getGuiScaledHeight() - CORNER_OFFSET;
+        xl = MC.getWindow().getGuiScaledWidth() - (RENDER_RADIUS * 2) - CORNER_OFFSET;
+        xc = MC.getWindow().getGuiScaledWidth() - RENDER_RADIUS - CORNER_OFFSET;
+        xr = MC.getWindow().getGuiScaledWidth() - CORNER_OFFSET;
+        yt = MC.getWindow().getGuiScaledHeight() - (RENDER_RADIUS * 2) - CORNER_OFFSET;
+        yc = MC.getWindow().getGuiScaledHeight() - RENDER_RADIUS - CORNER_OFFSET;
+        yb = MC.getWindow().getGuiScaledHeight() - CORNER_OFFSET;
 
         // background vertex coords need to be slightly larger
         float xl_bg = xl - BG_OFFSET;
@@ -263,9 +258,40 @@ public class MinimapClientEvents {
         buffer.endBatch();
     }
 
+    public static boolean isPointInsideMinimap(double x, double y) {
+        return x > xl && x < xr && y > yt && y < yb;
+    }
+
+    private static void clickMapToMoveCamera(float x, float y) {
+        if (!isPointInsideMinimap(x,y) || CursorClientEvents.isBoxSelecting())
+            return;
+
+        float pixelsToBlocks = (float) WORLD_RADIUS / (float) RENDER_RADIUS;
+
+        // offset y up so that user clicks the centre of the view quad instead of bottom border
+        y += OrthoviewClientEvents.getZoom() * 0.5F / pixelsToBlocks;
+
+        Vec2 clicked = MyMath.rotateCoords(x - xc, y - yc,45);
+
+        double xMoveTo = xc_world + clicked.x * pixelsToBlocks * Math.sqrt(2);
+        double zMoveTo = zc_world + clicked.y * pixelsToBlocks * Math.sqrt(2);
+
+        if (MC.player != null)
+            MinimapServerboundPacket.teleportPlayer(MC.player.getId(), xMoveTo, MC.player.getY(), zMoveTo);
+    }
+
+    // when clicking on map move player there
+    // TODO: stop doing box select while doing this
     @SubscribeEvent
-    public static void onMouseClick(ScreenEvent.MouseDragEvent.Pre evt) {
-        // TODO: when clicking on map move player there
+    public static void onMouseDrag(ScreenEvent.MouseDragEvent.Pre evt) {
+        if (OrthoviewClientEvents.isEnabled() && evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1)
+            clickMapToMoveCamera((float) evt.getMouseX(), (float) evt.getMouseY());
+    }
+
+    @SubscribeEvent
+    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Pre evt) {
+        if (OrthoviewClientEvents.isEnabled() && evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1)
+            clickMapToMoveCamera((float) evt.getMouseX(), (float) evt.getMouseY());
     }
 
     @SubscribeEvent
@@ -273,9 +299,13 @@ public class MinimapClientEvents {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
+        /*
         MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
-                "camRotY: " + OrthoviewClientEvents.getCamRotY()
-        });
+                "xl: " + xl,
+                "xr: " + xr,
+                "yt: " + yt,
+                "yb: " + yb,
+        });*/
 
         REFRESH_TICKS_CURRENT -= 1;
         if (REFRESH_TICKS_CURRENT <= 0) {

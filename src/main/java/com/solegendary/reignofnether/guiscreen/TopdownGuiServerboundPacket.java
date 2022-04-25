@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.guiscreen;
 
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -44,9 +45,9 @@ public class TopdownGuiServerboundPacket {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
             if (this.topdownGuiOpen)
-                TopdownGuiServerEvents.openTopdownGui(this.playerId);
+                PlayerServerEvents.openTopdownGui(this.playerId);
             else
-                TopdownGuiServerEvents.closeTopdownGui(this.playerId);
+                PlayerServerEvents.closeTopdownGui(this.playerId);
 
             success.set(true);
         });
