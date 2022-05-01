@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.orthoview;
 
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
+import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
 import com.solegendary.reignofnether.registrars.Keybinds;
@@ -46,14 +48,17 @@ public class OrthoviewClientEvents {
     private static final float CAMPAN_MOUSE_SENSITIVITY = 0.15f;
 
     private static float zoom = 30; // * 2 = number of blocks in height
-    private static float camRotX = 45;
-    private static float camRotY = -45;
+    private static float camRotX = 135; // left/right - should start northeast (towards -Z,+X)
+    private static float camRotY = -45; // up/down
     private static float camRotAdjX = 0;
     private static float camRotAdjY = 0;
     private static float mouseRightDownX = 0;
     private static float mouseRightDownY = 0;
     private static float mouseLeftDownX = 0;
     private static float mouseLeftDownY = 0;
+
+    private static double prevPlayerY = 64;
+    private static final double setPlayerY = 85;
 
     public static boolean isEnabled() {
         return enabled;
@@ -67,7 +72,7 @@ public class OrthoviewClientEvents {
 
     private static void reset() {
         zoom = 30;
-        camRotX = 45;
+        camRotX = 135;
         camRotY = -45;
     }
     public static void rotateCam(float x, float y) {
@@ -76,6 +81,7 @@ public class OrthoviewClientEvents {
             camRotX -= 360;
         if (camRotX <= -360)
             camRotX += 360;
+
         camRotY += y;
         if (camRotY > CAMROTY_MAX)
             camRotY = CAMROTY_MAX;
@@ -102,9 +108,13 @@ public class OrthoviewClientEvents {
 
         if (enabled) { // opening is done by TopdownGui world tick (which opens it whenever no other screen is open)
             //TopdownGuiServerboundPackets.openTopdownGui();
+            MinimapClientEvents.setMapCentre(MC.player.getX(), MC.player.getZ());
+            prevPlayerY = MC.player.getY();
+            PlayerServerboundPacket.teleportPlayer(MC.player.getId(), MC.player.getX(), setPlayerY, MC.player.getX());
         }
         else {
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
+            PlayerServerboundPacket.teleportPlayer(MC.player.getId(), MC.player.getX(), prevPlayerY, MC.player.getX());
         }
     }
 
@@ -256,13 +266,9 @@ public class OrthoviewClientEvents {
 
     // on each game render frame
     @SubscribeEvent
-    public static void onFogDensity(EntityViewRenderEvent.FogDensity evt) {
+    public static void onFogDensity(EntityViewRenderEvent.RenderFogEvent evt) {
         if (!enabled)
             return;
-
-        // not sure why but screen=2*win; GLFW functions should use screen
-        int winWidth = MC.getWindow().getGuiScaledWidth();
-        int winHeight = MC.getWindow().getGuiScaledHeight();
 
         Player player = MC.player;
 
@@ -284,8 +290,8 @@ public class OrthoviewClientEvents {
 
         // note that we treat x and y rot as horizontal and vertical, but MC treats it the other way around...
         if (player != null) {
-            player.setXRot((float) -camRotY - camRotAdjY);
-            player.setYRot((float) -camRotX - camRotAdjX);
+            player.setXRot(-camRotY - camRotAdjY);
+            player.setYRot(-camRotX - camRotAdjX);
         }
     }
 

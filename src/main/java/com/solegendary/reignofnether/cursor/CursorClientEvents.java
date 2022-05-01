@@ -5,6 +5,7 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.hud.ActionButtons;
 import com.solegendary.reignofnether.hud.ActionName;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Unit;
@@ -50,8 +51,8 @@ public class CursorClientEvents {
     private static Vector3d cursorWorldPos = new Vector3d(0,0,0);
     private static Vector3d cursorWorldPosLast = new Vector3d(0,0,0);
     // pos of cursor on screen for box selections
-    private static Vec2 cursorLeftClickDownPos = new Vec2(0,0);
-    private static Vec2 cursorLeftClickDragPos = new Vec2(0,0);
+    private static Vec2 cursorLeftClickDownPos = new Vec2(-1,-1);
+    private static Vec2 cursorLeftClickDragPos = new Vec2(-1,-1);
     // attack that is performed on the next left click
     private static ActionName leftClickAction = null;
 
@@ -137,7 +138,7 @@ public class CursorClientEvents {
                 cursorWorldPos.y,
                 cursorWorldPos.z
         );
-        cursorWorldPos = screenPosToWorldPos(evt.getMouseX(), evt.getMouseY());
+        cursorWorldPos = MiscUtil.screenPosToWorldPos(MC, evt.getMouseX(), evt.getMouseY());
 
         // calc near and far cursorWorldPos to get a cursor line vector
         Vector3d lookVector = getPlayerLookVector();
@@ -190,9 +191,9 @@ public class CursorClientEvents {
             // https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
 
             // calculate 4 vertices
-            Vector3d worldPosTL = screenPosToWorldPos((int) cursorLeftClickDownPos.x, (int) cursorLeftClickDownPos.y); // top-left
-            Vector3d worldPosBL = screenPosToWorldPos((int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y); // bottom-left
-            Vector3d worldPosBR = screenPosToWorldPos((int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y); // bottom-right
+            Vector3d worldPosTL = MiscUtil.screenPosToWorldPos(MC, (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDownPos.y); // top-left
+            Vector3d worldPosBL = MiscUtil.screenPosToWorldPos(MC, (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y); // bottom-left
+            Vector3d worldPosBR = MiscUtil.screenPosToWorldPos(MC, (int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y); // bottom-right
 
             Vector3d vp5 = MyMath.addVector3d(worldPosTL, lookVector, -200);
             Vector3d vp1 = MyMath.addVector3d(worldPosBL, lookVector, -200);
@@ -225,6 +226,13 @@ public class CursorClientEvents {
         }
     }
 
+    public static boolean isBoxSelecting() {
+        return cursorLeftClickDownPos.x >= 0 &&
+                cursorLeftClickDownPos.y >= 0 &&
+                cursorLeftClickDragPos.x >= 0 &&
+                cursorLeftClickDragPos.y >= 0;
+    }
+
     // draw box selection rectangle
     @SubscribeEvent
     public static void renderOverlay(RenderGameOverlayEvent.Post evt) {
@@ -241,7 +249,10 @@ public class CursorClientEvents {
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled()) return;
+        // don't box select
+        if (!OrthoviewClientEvents.isEnabled() ||
+            MinimapClientEvents.isPointInsideMinimap(evt.getMouseX(), evt.getMouseY()))
+            return;
 
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -256,7 +267,9 @@ public class CursorClientEvents {
 
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragEvent.Pre evt) {
-        if (!OrthoviewClientEvents.isEnabled()) return;
+        if (!OrthoviewClientEvents.isEnabled() ||
+            (cursorLeftClickDownPos.x < 0 && cursorLeftClickDownPos.y < 0))
+            return;
 
         cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
     }
@@ -282,8 +295,8 @@ public class CursorClientEvents {
                         UnitClientEvents.addSelectedUnitId(entity.getId());
                 }
             }
-            cursorLeftClickDownPos = new Vec2(0,0);
-            cursorLeftClickDragPos = new Vec2(0,0);
+            cursorLeftClickDownPos = new Vec2(-1,-1);
+            cursorLeftClickDragPos = new Vec2(-1,-1);
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             rightClickDown = false;
@@ -317,34 +330,8 @@ public class CursorClientEvents {
         return new Vector3d(-cos(b) * sin(a), -sin(b), cos(b) * cos(a));
     }
 
-    // converts
-    public static Vector3d screenPosToWorldPos(int mouseX, int mouseY) {
-        int winWidth = MC.getWindow().getGuiScaledWidth();
-        int winHeight = MC.getWindow().getGuiScaledHeight();
-
-        // at winHeight=240, zoom=10, screen is 20 blocks high, so PTB=240/20=24
-        float pixelsToBlocks = winHeight / OrthoviewClientEvents.getZoom();
-
-        // make mouse coordinate origin centre of screen
-        float x = (mouseX - (float) winWidth / 2) / pixelsToBlocks;
-        float y = 0;
-        float z = (mouseY - (float) winHeight / 2) / pixelsToBlocks;
-
-        double camRotYRads = Math.toRadians(OrthoviewClientEvents.getCamRotY());
-        z = z / (float) (Math.sin(camRotYRads));
-
-        Vec2 XZRotated = MyMath.rotateCoords(x, z, OrthoviewClientEvents.getCamRotX());
-
-        // for some reason position is off by some y coord so just move it down manually
-        return new Vector3d(
-                MC.player.xo - XZRotated.x,
-                MC.player.yo + y + 1.5,
-                MC.player.zo - XZRotated.y
-        );
-    }
-
     // returns the exact spot that the cursorWorldPos ray meets a solid block
-    private static Vec3 getRefinedCursorWorldPos(Vector3d cursorWorldPosNear, Vector3d cursorWorldPosFar) {
+    public static Vec3 getRefinedCursorWorldPos(Vector3d cursorWorldPosNear, Vector3d cursorWorldPosFar) {
         Vec3 vectorNear = new Vec3(cursorWorldPosNear.x, cursorWorldPosNear.y, cursorWorldPosNear.z);
         Vec3 vectorFar = new Vec3(cursorWorldPosFar.x, cursorWorldPosFar.y, cursorWorldPosFar.z);
 

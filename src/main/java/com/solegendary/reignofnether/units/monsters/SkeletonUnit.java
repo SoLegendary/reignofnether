@@ -36,24 +36,6 @@ public class SkeletonUnit extends Skeleton implements Unit {
     public MoveToCursorBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
 
-    // flags to not reset particular targets so we can persist them for specific actions
-    public boolean getRetainAttackMoveTarget() {return retainAttackMoveTarget;}
-    public void setRetainAttackMoveTarget(boolean retainAttackMoveTarget) {this.retainAttackMoveTarget = retainAttackMoveTarget;}
-    public boolean getRetainAttackTarget() {return retainAttackTarget;}
-    public void setRetainAttackTarget(boolean retainAttackTarget) {this.retainAttackTarget = retainAttackTarget;}
-    public boolean getRetainMoveTarget() {return retainMoveTarget;}
-    public void setRetainMoveTarget(boolean retainMoveTarget) {this.retainMoveTarget = retainMoveTarget;}
-    public boolean getRetainFollowTarget() {return retainFollowTarget;}
-    public void setRetainFollowTarget(boolean retainFollowTarget) {this.retainFollowTarget = retainFollowTarget;}
-    public boolean getRetainHoldPosition() {return retainHoldPosition;}
-    public void setRetainHoldPosition(boolean retainHoldPosition) {this.retainHoldPosition = retainHoldPosition;}
-
-    boolean retainAttackMoveTarget = false;
-    boolean retainAttackTarget = false;
-    boolean retainMoveTarget = false;
-    boolean retainFollowTarget = false;
-    boolean retainHoldPosition = false;
-
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
     public boolean getHoldPosition() { return holdPosition; }
@@ -64,7 +46,6 @@ public class SkeletonUnit extends Skeleton implements Unit {
     private BlockPos attackMoveTarget = null;
     private LivingEntity followTarget = null; // if nonnull, continuously moves to the target
     private boolean holdPosition = false;
-
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
@@ -78,27 +59,6 @@ public class SkeletonUnit extends Skeleton implements Unit {
         this.entityData.define(ownerDataAccessor, "");
     }
 
-    public void resetBehaviours() {
-        attackMoveTarget = null;
-        targetGoal.setTarget(null);
-        moveGoal.setMoveTarget(null);
-        followTarget = null;
-        holdPosition = false;
-    }
-
-    public void setMoveTarget(@Nullable BlockPos bp) {
-        moveGoal.setMoveTarget(bp);
-    }
-    public void setAttackTarget(@Nullable LivingEntity target) {
-        targetGoal.setTarget(target);
-    }
-    public void setAttackMoveTarget(@Nullable BlockPos bp) {
-        this.attackMoveTarget = bp;
-    }
-    public void setFollowTarget(@Nullable LivingEntity target) {
-        this.followTarget = target;
-    }
-
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
     public int getAttackCooldown() {return attackCooldown;}
@@ -106,6 +66,9 @@ public class SkeletonUnit extends Skeleton implements Unit {
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
     public float getSpeedModifier() {return speedModifier;}
+
+    public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
+    public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
     // endregion
 
