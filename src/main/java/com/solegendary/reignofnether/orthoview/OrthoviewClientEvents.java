@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.orthoview;
 
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
+import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
 import com.solegendary.reignofnether.registrars.Keybinds;
@@ -56,6 +57,9 @@ public class OrthoviewClientEvents {
     private static float mouseLeftDownX = 0;
     private static float mouseLeftDownY = 0;
 
+    private static double prevPlayerY = 64;
+    private static final double setPlayerY = 85;
+
     public static boolean isEnabled() {
         return enabled;
     }
@@ -105,9 +109,12 @@ public class OrthoviewClientEvents {
         if (enabled) { // opening is done by TopdownGui world tick (which opens it whenever no other screen is open)
             //TopdownGuiServerboundPackets.openTopdownGui();
             MinimapClientEvents.setMapCentre(MC.player.getX(), MC.player.getZ());
+            prevPlayerY = MC.player.getY();
+            PlayerServerboundPacket.teleportPlayer(MC.player.getId(), MC.player.getX(), setPlayerY, MC.player.getX());
         }
         else {
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
+            PlayerServerboundPacket.teleportPlayer(MC.player.getId(), MC.player.getX(), prevPlayerY, MC.player.getX());
         }
     }
 
@@ -259,7 +266,7 @@ public class OrthoviewClientEvents {
 
     // on each game render frame
     @SubscribeEvent
-    public static void onFogDensity(EntityViewRenderEvent.FogDensity evt) {
+    public static void onFogDensity(EntityViewRenderEvent.RenderFogEvent evt) {
         if (!enabled)
             return;
 

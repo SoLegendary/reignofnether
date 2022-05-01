@@ -40,7 +40,7 @@ public class Button {
      * Predicate      x     -> boolean
      */
     public Supplier<Boolean> isSelected; // controls selected frame rendering
-    public Runnable onUse; //
+    public Runnable onUse;
 
     // TODO: enforce not enabled (and if !enabled and rendered, render dark overlay)
     public boolean enabled = false; // allowed to click and use hotkey?

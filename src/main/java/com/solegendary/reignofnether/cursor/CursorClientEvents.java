@@ -249,7 +249,7 @@ public class CursorClientEvents {
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
-        // don't box selecrt
+        // don't box select
         if (!OrthoviewClientEvents.isEnabled() ||
             MinimapClientEvents.isPointInsideMinimap(evt.getMouseX(), evt.getMouseY()))
             return;

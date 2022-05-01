@@ -1,7 +1,5 @@
-package com.solegendary.reignofnether.minimap;
+package com.solegendary.reignofnether.player;
 
-import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
-import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
@@ -9,25 +7,25 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class MinimapServerboundPacket {
+public class PlayerServerboundPacket {
     public double x = 0;
     public double y = 0;
     public double z = 0;
     public int playerId = -1; // to track
 
     public static void teleportPlayer(int playerId, Double x, Double y, Double z) {
-        PacketHandler.INSTANCE.sendToServer(new MinimapServerboundPacket(playerId, x, y, z));
+        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(playerId, x, y, z));
     }
 
     // packet-handler functions
-    public MinimapServerboundPacket(int playerId, Double x, Double y, Double z) {
+    public PlayerServerboundPacket(int playerId, Double x, Double y, Double z) {
         this.playerId = playerId;
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public MinimapServerboundPacket(FriendlyByteBuf buffer) {
+    public PlayerServerboundPacket(FriendlyByteBuf buffer) {
         this.playerId = buffer.readInt();
         this.x = buffer.readDouble();
         this.y = buffer.readDouble();

@@ -8,11 +8,10 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.Keybinds;
+import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -24,7 +23,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -44,7 +42,7 @@ public class MinimapClientEvents {
     private static final float CORNER_OFFSET = 10;
     private static final float BG_OFFSET = 6;
 
-    private static final DynamicTexture MAP_TEXTURE = new DynamicTexture(WORLD_RADIUS *2, WORLD_RADIUS *2, true);
+    private static final DynamicTexture MAP_TEXTURE = new DynamicTexture(WORLD_RADIUS * 2, WORLD_RADIUS * 2, true);
     private static final RenderType MAP_RENDER_TYPE = RenderType.textSeeThrough(Minecraft.getInstance()
             .textureManager.register(ReignOfNether.MOD_ID + "_" + "minimap", MAP_TEXTURE));
 
@@ -95,7 +93,7 @@ public class MinimapClientEvents {
 
         long timeBefore = System.currentTimeMillis();
 
-        // get position of
+        // get world position of corners of the screen
         Vector3d[] corners = new Vector3d[] {
             MiscUtil.screenPosToWorldPos(MC, 0,0),
             MiscUtil.screenPosToWorldPos(MC, 0, MC.getWindow().getGuiScaledHeight()),
@@ -162,7 +160,6 @@ public class MinimapClientEvents {
                 }
 
                 // draw view quad
-                // TODO: this only works at specific player heights (Y ~= 85)
                 for (int i = 0; i < corners.length; i++) {
                     int j = i + 1;
                     if (j >= corners.length) j = 0;
@@ -171,7 +168,7 @@ public class MinimapClientEvents {
                             new Vec2((float) corners[i].x, (float) corners[i].z),
                             new Vec2((float) corners[j].x, (float) corners[j].z),
                             new Vec2(x,z),
-                            75.0F // larger = thicker line
+                            OrthoviewClientEvents.getZoom() * 2 // larger = thicker line
                     ))
                         col = 0xFFFFFF;
                 }
@@ -258,8 +255,12 @@ public class MinimapClientEvents {
         buffer.endBatch();
     }
 
+    // https://stackoverflow.com/questions/27022064/detect-click-in-a-diamond
     public static boolean isPointInsideMinimap(double x, double y) {
-        return x > xl && x < xr && y > yt && y < yb;
+        double dx = Math.abs(x - xc);
+        double dy = Math.abs(y - yc);
+        double d = dx / (RENDER_RADIUS * 2) + dy / (RENDER_RADIUS * 2);
+        return d <= 0.5;
     }
 
     private static void clickMapToMoveCamera(float x, float y) {
@@ -277,11 +278,10 @@ public class MinimapClientEvents {
         double zMoveTo = zc_world + clicked.y * pixelsToBlocks * Math.sqrt(2);
 
         if (MC.player != null)
-            MinimapServerboundPacket.teleportPlayer(MC.player.getId(), xMoveTo, MC.player.getY(), zMoveTo);
+            PlayerServerboundPacket.teleportPlayer(MC.player.getId(), xMoveTo, MC.player.getY(), zMoveTo);
     }
 
     // when clicking on map move player there
-    // TODO: stop doing box select while doing this
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragEvent.Pre evt) {
         if (OrthoviewClientEvents.isEnabled() && evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1)
@@ -299,14 +299,6 @@ public class MinimapClientEvents {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
-        /*
-        MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
-                "xl: " + xl,
-                "xr: " + xr,
-                "yt: " + yt,
-                "yb: " + yb,
-        });*/
-
         REFRESH_TICKS_CURRENT -= 1;
         if (REFRESH_TICKS_CURRENT <= 0) {
             REFRESH_TICKS_CURRENT = REFRESH_TICKS_MAX;
@@ -314,5 +306,8 @@ public class MinimapClientEvents {
             updateMapTexture();
         }
         renderMap(evt.getMatrixStack());
+
+        //MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
+        //});
     }
 }
