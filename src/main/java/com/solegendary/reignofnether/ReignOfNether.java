@@ -29,7 +29,7 @@ public class ReignOfNether
         final ClientEventRegistrar clientRegistrar = new ClientEventRegistrar();
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> clientRegistrar::registerClientEvents);
 
-        final ServerSideEventRegistrar serverRegistrar = new ServerSideEventRegistrar();
+        final ServerEventRegistrar serverRegistrar = new ServerEventRegistrar();
         DistExecutor.safeRunWhenOn(Dist.DEDICATED_SERVER, () -> serverRegistrar::registerServerEvents);
     }
 }

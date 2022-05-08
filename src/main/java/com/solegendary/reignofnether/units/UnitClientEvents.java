@@ -9,6 +9,7 @@ import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.ActionButtons;
 import com.solegendary.reignofnether.hud.ActionName;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.registrars.PacketHandler;
@@ -29,10 +30,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Skeleton;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
@@ -42,10 +40,7 @@ import org.lwjgl.glfw.GLFW;
 
 import dev.ftb.mods.ftblibrary.math.MathUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class UnitClientEvents {
 
@@ -245,43 +240,43 @@ public class UnitClientEvents {
 
     @SubscribeEvent
     public static void onRenderWorld(RenderLevelLastEvent evt) {
-        if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
+        if (MC.level == null || !OrthoviewClientEvents.isEnabled())
+            return;
 
-            ArrayList<Integer> selectedUnitIds = getSelectedUnitIds();
-            ArrayList<Integer> preselectedUnitIds = getPreselectedUnitIds();
+        ArrayList<Integer> selectedUnitIds = getSelectedUnitIds();
+        ArrayList<Integer> preselectedUnitIds = getPreselectedUnitIds();
 
-            Set<Integer> unitIdsToDraw = new HashSet<>();
-            unitIdsToDraw.addAll(selectedUnitIds);
-            unitIdsToDraw.addAll(preselectedUnitIds);
+        Set<Integer> unitIdsToDraw = new HashSet<>();
+        unitIdsToDraw.addAll(selectedUnitIds);
+        unitIdsToDraw.addAll(preselectedUnitIds);
 
-            // draw outlines on all (pre)selected units but only draw once per unit based on conditions
-            for (int idToDraw : unitIdsToDraw) {
-                Entity entity = MC.level.getEntity(idToDraw);
-                if (entity != null) {
-                    if (preselectedUnitIds.contains(idToDraw) &&
-                            isLeftClickAttack() &&
-                            !targetingSelf())
-                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f,0.3f, 1.0f);
-                    else if (selectedUnitIds.contains(idToDraw))
-                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f);
-                    else if (preselectedUnitIds.contains(idToDraw))
-                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.5f);
-                }
+        // draw outlines on all (pre)selected units but only draw once per unit based on conditions
+        for (int idToDraw : unitIdsToDraw) {
+            Entity entity = MC.level.getEntity(idToDraw);
+            if (entity != null) {
+                if (preselectedUnitIds.contains(idToDraw) &&
+                        isLeftClickAttack() &&
+                        !targetingSelf())
+                    MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f,0.3f, 1.0f);
+                else if (selectedUnitIds.contains(idToDraw))
+                    MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f);
+                else if (preselectedUnitIds.contains(idToDraw))
+                    MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.5f);
             }
+        }
 
-            // always-shown highlights to indicate unit relationships
-            for (int unitId : allUnitIds) {
-                Entity entity = MC.level.getEntity(unitId);
-                if (entity != null) {
-                    Relationship unitRs = getPlayerToEntityRelationship(unitId);
+        // always-shown highlights to indicate unit relationships
+        for (int unitId : allUnitIds) {
+            Entity entity = MC.level.getEntity(unitId);
+            if (entity != null) {
+                Relationship unitRs = getPlayerToEntityRelationship(unitId);
 
-                    if (unitRs == Relationship.OWNED)
-                        MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 1.0f, 0.3f, 0.2f);
-                    else if (unitRs == Relationship.FRIENDLY)
-                        MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 0.3f, 1.0f, 0.2f);
-                    else if (unitRs == Relationship.HOSTILE)
-                        MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.2f);
-                }
+                if (unitRs == Relationship.OWNED)
+                    MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 1.0f, 0.3f, 0.2f);
+                else if (unitRs == Relationship.FRIENDLY)
+                    MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 0.3f, 1.0f, 0.2f);
+                else if (unitRs == Relationship.HOSTILE)
+                    MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.2f);
             }
         }
     }
@@ -337,60 +332,4 @@ public class UnitClientEvents {
             }
         }
     }*/
-
-    public static void drawEntity(PoseStack matrixStack2, int x, int y, int size, float mouseX,
-                                  float mouseY, LivingEntity entity, float scale) {
-
-        float f = (float) Math.atan((double) (mouseX / 40.0F));
-        float g = (float) Math.atan((double) (mouseY / 40.0F));
-        PoseStack matrixStack = RenderSystem.getModelViewStack();
-        matrixStack.pushPose();
-        matrixStack.translate((double) x * scale, (double) y * scale, 1050.0D * scale);
-        matrixStack.scale(1.0F, 1.0F, -1.0F);
-        RenderSystem.applyModelViewMatrix();
-        matrixStack2.pushPose();
-        matrixStack2.translate(0.0D, 0.0D, 1000.0D);
-        matrixStack2.scale((float) size, (float) size, (float) size);
-        Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
-        Quaternion quaternion2 = Vector3f.XP.rotationDegrees(g * 20.0F);
-        quaternion.mul(quaternion2);
-        matrixStack2.mulPose(quaternion);
-        float h = entity.yBodyRot; // bodyYaw;
-        float i = entity.getYRot(); // getYaw();
-        float j = entity.getXRot(); // getPitch();
-        float k = entity.yHeadRotO; // prevHeadYaw;
-        float l = entity.yHeadRot; // headYaw;
-        entity.yBodyRot = 180.0F + f * 20.0F;
-        entity.setYRot(180.0F + f * 40.0F);
-        entity.setXRot(-g * 20.0F);
-        entity.yHeadRot = entity.getYRot();
-        entity.yHeadRotO = entity.getYRot();
-
-        Lighting.setupForEntityInInventory();
-        EntityRenderDispatcher entityrenderdispatcher =
-                Minecraft.getInstance().getEntityRenderDispatcher();
-        quaternion2.conj();
-        entityrenderdispatcher.overrideCameraOrientation(quaternion2);
-        entityrenderdispatcher.setRenderShadow(false);
-
-        MultiBufferSource.BufferSource bufferSource =
-                Minecraft.getInstance().renderBuffers().bufferSource();
-
-        RenderSystem.runAsFancy(() -> {
-            entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixStack2, bufferSource,
-                    15728880);
-        });
-
-        bufferSource.endBatch();
-        entityrenderdispatcher.setRenderShadow(true);
-        entity.yBodyRot = h;
-        entity.setYRot(i);
-        entity.setXRot(j);
-        entity.yHeadRotO = k;
-        entity.yHeadRot = l;
-        matrixStack.popPose();
-        matrixStack2.popPose();
-        RenderSystem.applyModelViewMatrix();
-        Lighting.setupFor3DItems();
-    }
 }

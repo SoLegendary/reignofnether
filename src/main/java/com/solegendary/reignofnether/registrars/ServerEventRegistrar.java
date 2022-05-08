@@ -11,10 +11,10 @@ import net.minecraftforge.eventbus.api.IEventBus;
     It is a rather convoluted way of doing it, but I haven't found a simpler way to do it which is robust
  */
 
-public class ServerSideEventRegistrar {
+public class ServerEventRegistrar {
     private final IEventBus vanillaEventBus = MinecraftForge.EVENT_BUS;
 
-    public ServerSideEventRegistrar() { }
+    public ServerEventRegistrar() { }
 
     /**
      * Register server only events. This method must only be called when it is certain that the mod is

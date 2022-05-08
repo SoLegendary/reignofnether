@@ -10,20 +10,22 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Locale;
+import java.util.*;
 
 public class HudClientEvents {
 
@@ -37,7 +39,7 @@ public class HudClientEvents {
             ActionButtons.move
     ));
     // unit type that is selected in the list of unit icons
-    private static Entity hudSelectedUnitClass = null;
+    public static Entity hudSelectedUnitClass = null;
 
     // if we are rendering > this amount, then just render an empty icon with +N for the remaining units
     private static final int maxUnitButtons = 8;
@@ -50,59 +52,7 @@ public class HudClientEvents {
             .replace("_unit","");
     }
 
-    public static void drawEntityOnScreen(PoseStack matrixStack2, int x, int y, int size, float mouseX,
-                                  float mouseY, LivingEntity entity, float scale) {
-        float f = (float) Math.atan((double) (mouseX / 40.0F));
-        float g = (float) Math.atan((double) (mouseY / 40.0F));
-        PoseStack matrixStack = RenderSystem.getModelViewStack();
-        matrixStack.pushPose();
-        matrixStack.translate((double) x * scale, (double) y * scale, 1050.0D * scale);
-        matrixStack.scale(1.0F, 1.0F, -1.0F);
-        RenderSystem.applyModelViewMatrix();
-        matrixStack2.pushPose();
-        matrixStack2.translate(0.0D, 0.0D, 1000.0D);
-        matrixStack2.scale((float) size, (float) size, (float) size);
-        Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
-        Quaternion quaternion2 = Vector3f.XP.rotationDegrees(g * 20.0F);
-        quaternion.mul(quaternion2);
-        matrixStack2.mulPose(quaternion);
-        float h = entity.yBodyRot; // bodyYaw;
-        float i = entity.getYRot(); // getYaw();
-        float j = entity.getXRot(); // getPitch();
-        float k = entity.yHeadRotO; // prevHeadYaw;
-        float l = entity.yHeadRot; // headYaw;
-        entity.yBodyRot = 180.0F + f * 20.0F;
-        entity.setYRot(180.0F + f * 40.0F);
-        entity.setXRot(-g * 20.0F);
-        entity.yHeadRot = entity.getYRot();
-        entity.yHeadRotO = entity.getYRot();
 
-        Lighting.setupForEntityInInventory();
-        EntityRenderDispatcher entityrenderdispatcher =
-                Minecraft.getInstance().getEntityRenderDispatcher();
-        quaternion2.conj();
-        entityrenderdispatcher.overrideCameraOrientation(quaternion2);
-        entityrenderdispatcher.setRenderShadow(false);
-        MultiBufferSource.BufferSource immediate =
-                Minecraft.getInstance().renderBuffers().bufferSource();
-
-        RenderSystem.runAsFancy(() -> {
-            entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixStack2, immediate,
-                    15728880);
-        });
-
-        immediate.endBatch();
-        entityrenderdispatcher.setRenderShadow(true);
-        entity.yBodyRot = h;
-        entity.setYRot(i);
-        entity.setXRot(j);
-        entity.yHeadRotO = k;
-        entity.yHeadRot = l;
-        matrixStack.popPose();
-        matrixStack2.popPose();
-        RenderSystem.applyModelViewMatrix();
-        Lighting.setupFor3DItems();
-    }
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
@@ -177,36 +127,6 @@ public class HudClientEvents {
             blitX += iconFrameSize;
         }
 
-        // ------------------------------------------------
-        // Unit head portrait (based on selected unit type)
-        // ------------------------------------------------
-
-
-        if (hudSelectedUnitClass != null) {
-            MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                    "hudSelectedUnitType: " + getSimpleUnitName(hudSelectedUnitClass)
-            });
-
-            if (getSimpleUnitName(hudSelectedUnitClass).toLowerCase(Locale.ROOT).contains("skeleton")) {
-
-                /*
-                // icon frame
-                ResourceLocation iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame.png");
-                RenderSystem.setShaderTexture(0, iconFrameResource);
-                GuiComponent.blit(evt.getPoseStack(),
-                        0,0, 0,
-                        0,0, // where on texture to start drawing from
-                        42, 42, // dimensions of blit texture
-                        42, 42 // size of texture itself (if < dimensions, texture is repeated)
-                );
-
-                drawEntityOnScreen(evt.getPoseStack(), 0,0, 1, evt.getMouseX(),  evt.getMouseY(), (LivingEntity) hudSelectedUnitClass, 1.0f);
-                 */
-            }
-        }
-
-
-
         // -------------------------------------------------------
         // Unit action icons (attack, stop, move, abilities etc.)
         // -------------------------------------------------------
@@ -230,6 +150,36 @@ public class HudClientEvents {
                     }
                     break;
                 }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderOverlay(RenderGameOverlayEvent.PreLayer evt) {
+        /*
+        MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
+                "showOnlyReducedInfo: " + MC.showOnlyReducedInfo()
+        });
+         */
+
+        // ------------------------------------------------
+        // Unit head portrait (based on selected unit type)
+        // ------------------------------------------------
+        if (hudSelectedUnitClass != null) {
+
+            if (getSimpleUnitName(hudSelectedUnitClass).toLowerCase(Locale.ROOT).contains("skeleton")) {
+
+                // icon frame
+                /*
+                ResourceLocation iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame.png");
+                RenderSystem.setShaderTexture(0, iconFrameResource);
+                GuiComponent.blit(evt.getPoseStack(),
+                        0,0, 0,
+                        0,0, // where on texture to start drawing from
+                        42, 42, // dimensions of blit texture
+                        42, 42 // size of texture itself (if < dimensions, texture is repeated)
+                );*/
+                //drawEntityOnScreen(evt.getMatrixStack(), 20, 35, 13, -80, -20, (LivingEntity) hudSelectedUnitClass, 1.0f);
             }
         }
     }
