@@ -15,6 +15,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
@@ -117,6 +118,23 @@ public class OrthoviewClientEvents {
             PlayerServerboundPacket.teleportPlayer(MC.player.getId(), MC.player.getX(), prevPlayerY, MC.player.getZ());
         }
     }
+
+    @SubscribeEvent
+    public static void onLivingUpdateEvent(LivingEvent.LivingUpdateEvent evt) {
+        if (isEnabled() && evt.getEntity().getId() == MC.player.getId())
+            evt.getEntity().noPhysics = true; // noclip like in spectator mode
+    }
+    @SubscribeEvent
+    public static void onRenderArm(RenderArmEvent evt) {
+        if (isEnabled())
+            evt.setCanceled(true);
+    }
+    @SubscribeEvent
+    public static void onRenderHand(RenderHandEvent evt) {
+        if (isEnabled())
+            evt.setCanceled(true);
+    }
+
 
     // ensure topdownGui is always open whenever Orthoview is enabled (if no other screens are open)
     // it takes a while for the packet to be received and processed so don't spam the server with it
@@ -254,7 +272,7 @@ public class OrthoviewClientEvents {
     // don't let orthoview players see other orthoview players
     @SubscribeEvent
     public static void onPlayerRender(RenderPlayerEvent.Pre evt) {
-        if (enabled && evt.getPlayer().isSpectator())
+        if (enabled && (evt.getPlayer().isSpectator() || evt.getPlayer().isCreative()))
             evt.setCanceled(true);
     }
 

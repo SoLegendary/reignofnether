@@ -65,7 +65,7 @@ public class HealthBarClientEvents {
                    entity instanceof Creeper && ((Creeper) entity).isPowered() ||
                    StreamSupport.stream(entity.getAllSlots().spliterator(), false).anyMatch(is -> !is.isEmpty())) &&
                entity != client.player &&
-               !entity.isSpectator() &&
+                !entity.isSpectator() &&
                OrthoviewClientEvents.isEnabled();
     }
 

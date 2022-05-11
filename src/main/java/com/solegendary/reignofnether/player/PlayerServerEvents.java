@@ -48,7 +48,7 @@ public class PlayerServerEvents {
             MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
             MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
             NetworkHooks.openGui(serverPlayer, namedProvider);
-            serverPlayer.setGameMode(GameType.SPECTATOR);
+            serverPlayer.setGameMode(GameType.CREATIVE);
         }
         else {
             System.out.println("serverPlayer is null, cannot open topdown gui");
@@ -57,10 +57,7 @@ public class PlayerServerEvents {
 
     public static void closeTopdownGui(int playerId) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
-
-        GameType previousGameMode = serverPlayer.gameMode.getPreviousGameModeForPlayer();
-        if (previousGameMode != null)
-            serverPlayer.setGameMode(previousGameMode);
+        serverPlayer.setGameMode(GameType.CREATIVE);
     }
 
     public static void movePlayer(int playerId, double x, double y, double z) {
