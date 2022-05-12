@@ -1,27 +1,19 @@
 package com.solegendary.reignofnether.hud;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
-import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -39,7 +31,8 @@ public class HudClientEvents {
             ActionButtons.move
     ));
     // unit type that is selected in the list of unit icons
-    public static Entity hudSelectedUnitClass = null;
+    public static Entity hudSelectedUnit = null;
+    public static Model hudSelectedModel = null;
 
     // if we are rendering > this amount, then just render an empty icon with +N for the remaining units
     private static final int maxUnitButtons = 8;
@@ -51,8 +44,6 @@ public class HudClientEvents {
             .replace("entity.reignofnether.","")
             .replace("_unit","");
     }
-
-
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
@@ -78,9 +69,9 @@ public class HudClientEvents {
         units.sort(Comparator.comparing(HudClientEvents::getSimpleUnitName));
 
         if (units.size() <= 0)
-            hudSelectedUnitClass = null;
-        else if (hudSelectedUnitClass == null)
-            hudSelectedUnitClass = units.get(0);
+            hudSelectedUnit = null;
+        else if (hudSelectedUnit == null)
+            hudSelectedUnit = units.get(0);
 
         // create all of the unit buttons for this frame
         int screenWidth = MC.getWindow().getGuiScaledWidth();
@@ -100,14 +91,14 @@ public class HudClientEvents {
                         iconSize,
                         "textures/mobheads/" + unitName + ".png",
                         unit,
-                        () -> getSimpleUnitName(hudSelectedUnitClass).equals(unitName),
+                        () -> getSimpleUnitName(hudSelectedUnit).equals(unitName),
                         () -> {
                             // click to select this unit type as a group
-                            if (getSimpleUnitName(hudSelectedUnitClass).equals(unitName)) {
+                            if (getSimpleUnitName(hudSelectedUnit).equals(unitName)) {
                                 UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
                                 UnitClientEvents.addSelectedUnitId(unit.getId());
                             } else { // select this one specific unit
-                                hudSelectedUnitClass = unit;
+                                hudSelectedUnit = unit;
                             }
                         }
                 ));
@@ -142,7 +133,7 @@ public class HudClientEvents {
             blitX = 0;
             blitY = screenHeight - (iconFrameSize * 2);
             for (LivingEntity unit : units) {
-                if (getSimpleUnitName(unit).equals(getSimpleUnitName(hudSelectedUnitClass))) {
+                if (getSimpleUnitName(unit).equals(getSimpleUnitName(hudSelectedUnit))) {
                     for (AbilityButton ability : ((Unit) unit).getAbilities()) {
                         ability.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                         ability.checkPressed();
@@ -155,32 +146,37 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderOverlay(RenderGameOverlayEvent.PreLayer evt) {
+    public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
+        LivingEntity entity = evt.getEntity();
+        if (hudSelectedUnit == null)
+            hudSelectedModel = null;
+        else if (entity == hudSelectedUnit)
+            hudSelectedModel = evt.getRenderer().getModel();
+    }
+
+    @SubscribeEvent
+    public static void onRenderOverlay(RenderGameOverlayEvent.Post evt) {
         /*
         MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
                 "showOnlyReducedInfo: " + MC.showOnlyReducedInfo()
         });
          */
-
         // ------------------------------------------------
         // Unit head portrait (based on selected unit type)
         // ------------------------------------------------
-        if (hudSelectedUnitClass != null) {
-
-            if (getSimpleUnitName(hudSelectedUnitClass).toLowerCase(Locale.ROOT).contains("skeleton")) {
-
-                // icon frame
-                /*
-                ResourceLocation iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame.png");
-                RenderSystem.setShaderTexture(0, iconFrameResource);
-                GuiComponent.blit(evt.getPoseStack(),
-                        0,0, 0,
-                        0,0, // where on texture to start drawing from
-                        42, 42, // dimensions of blit texture
-                        42, 42 // size of texture itself (if < dimensions, texture is repeated)
-                );*/
-                //drawEntityOnScreen(evt.getMatrixStack(), 20, 35, 13, -80, -20, (LivingEntity) hudSelectedUnitClass, 1.0f);
-            }
+        if (hudSelectedUnit != null && hudSelectedModel != null) {
+            // icon frame
+            ResourceLocation iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame.png");
+            RenderSystem.setShaderTexture(0, iconFrameResource);
+            GuiComponent.blit(evt.getMatrixStack(),
+                    0,0, 0,
+                    0,0, // where on texture to start drawing from
+                    42, 42, // dimensions of blit texture
+                    42, 42 // size of texture itself (if < dimensions, texture is repeated)
+            );
+            MyRenderer.setNonHeadModelVisibility(hudSelectedModel, false);
+            MyRenderer.drawEntityOnScreen(evt.getMatrixStack(), 20, 35, 13, -80, -20, (LivingEntity) hudSelectedUnit, 1.0f);
+            MyRenderer.setNonHeadModelVisibility(hudSelectedModel, true);
         }
     }
 

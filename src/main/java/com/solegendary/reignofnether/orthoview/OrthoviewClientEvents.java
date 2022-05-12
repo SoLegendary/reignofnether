@@ -121,8 +121,11 @@ public class OrthoviewClientEvents {
 
     @SubscribeEvent
     public static void onLivingUpdateEvent(LivingEvent.LivingUpdateEvent evt) {
-        if (isEnabled() && evt.getEntity().getId() == MC.player.getId())
+        if (isEnabled() && MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
             evt.getEntity().noPhysics = true; // noclip like in spectator mode
+            evt.getEntity().setOnGround(false);
+        }
+
     }
     @SubscribeEvent
     public static void onRenderArm(RenderArmEvent evt) {
