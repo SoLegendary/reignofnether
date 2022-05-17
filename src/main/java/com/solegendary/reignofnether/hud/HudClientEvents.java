@@ -3,25 +3,33 @@ package com.solegendary.reignofnether.hud;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.model.*;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
 public class HudClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
+    private static int mouseX = 0;
+    private static int mouseY = 0;
 
     private static ArrayList<Button> unitButtons = new ArrayList<>();
     private static final ArrayList<Button> actionButtons = new ArrayList<>(Arrays.asList(
@@ -32,7 +40,9 @@ public class HudClientEvents {
     ));
     // unit type that is selected in the list of unit icons
     public static Entity hudSelectedUnit = null;
-    public static Model hudSelectedModel = null;
+    // private class used to render only the head of a unit on screen for the portrait
+    public static PortraitRenderer portraitRenderer = new PortraitRenderer(null);
+
 
     // if we are rendering > this amount, then just render an empty icon with +N for the remaining units
     private static final int maxUnitButtons = 8;
@@ -53,8 +63,8 @@ public class HudClientEvents {
         if (MC.level == null)
             return;
 
-        int mouseX = evt.getMouseX();
-        int mouseY = evt.getMouseY();
+        mouseX = evt.getMouseX();
+        mouseY = evt.getMouseY();
 
         ArrayList<LivingEntity> units = new ArrayList<>();
         unitButtons = new ArrayList<>();
@@ -146,41 +156,6 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
-        LivingEntity entity = evt.getEntity();
-        if (hudSelectedUnit == null)
-            hudSelectedModel = null;
-        else if (entity == hudSelectedUnit)
-            hudSelectedModel = evt.getRenderer().getModel();
-    }
-
-    @SubscribeEvent
-    public static void onRenderOverlay(RenderGameOverlayEvent.Post evt) {
-        /*
-        MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
-                "showOnlyReducedInfo: " + MC.showOnlyReducedInfo()
-        });
-         */
-        // ------------------------------------------------
-        // Unit head portrait (based on selected unit type)
-        // ------------------------------------------------
-        if (hudSelectedUnit != null && hudSelectedModel != null) {
-            // icon frame
-            ResourceLocation iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame.png");
-            RenderSystem.setShaderTexture(0, iconFrameResource);
-            GuiComponent.blit(evt.getMatrixStack(),
-                    0,0, 0,
-                    0,0, // where on texture to start drawing from
-                    42, 42, // dimensions of blit texture
-                    42, 42 // size of texture itself (if < dimensions, texture is repeated)
-            );
-            MyRenderer.setNonHeadModelVisibility(hudSelectedModel, false);
-            MyRenderer.drawEntityOnScreen(evt.getMatrixStack(), 20, 35, 13, -80, -20, (LivingEntity) hudSelectedUnit, 1.0f);
-            MyRenderer.setNonHeadModelVisibility(hudSelectedModel, true);
-        }
-    }
-
-    @SubscribeEvent
     public static void onMouseRelease(ScreenEvent.MouseReleasedEvent.Post evt) {
         int mouseX = (int) evt.getMouseX();
         int mouseY = (int) evt.getMouseY();
@@ -191,5 +166,35 @@ public class HudClientEvents {
 
         for (Button button : buttons)
             button.checkClicked(mouseX, mouseY);
+    }
+
+    @SubscribeEvent
+    public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
+        LivingEntity entity = evt.getEntity();
+        if (hudSelectedUnit == null) {
+            portraitRenderer.model = null;
+            portraitRenderer.renderer = null;
+        }
+        else if (entity == hudSelectedUnit) {
+            portraitRenderer.model = evt.getRenderer().getModel();
+            portraitRenderer.renderer = evt.getRenderer();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderOverlay(RenderGameOverlayEvent.Post evt) {
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
+
+        // ------------------------------------------------
+        // Unit head portrait (based on selected unit type)
+        // ------------------------------------------------
+        if (hudSelectedUnit != null && portraitRenderer.model != null && portraitRenderer.renderer != null) {
+                portraitRenderer.renderHeadOnScreen(
+                        evt.getMatrixStack(),
+                        evt.getWindow().getGuiScaledWidth() / 3,
+                        evt.getWindow().getGuiScaledHeight() - portraitRenderer.frameSize,
+                        (LivingEntity) hudSelectedUnit);
+        }
     }
 }
