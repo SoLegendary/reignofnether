@@ -5,10 +5,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
-import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.model.CreeperModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
@@ -17,7 +16,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.List;
@@ -26,32 +24,77 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
     public R renderer;
     public Model model;
 
-    public int headSize = 30;
-    public int frameSize = 42;
-    public int headOffsetX = 22;
+    public int headSize = 46;
+    public int frameSize = 60;
+    public int headOffsetX = 30;
+    public int headOffsetY = 104; // creepers should be 12 lower
 
-    // change these randomly every few seconds to make the
-    private int headLookX = 0;
-    private int headLookY = 0;
-    private int headLookTargetX = 0;
-    private int headLookTargetY = 0;
+    // change these randomly every few seconds to make the head look around
+    private int lookX = 0;
+    private int lookY = 0;
+    private int lastLookTargetX = 0;
+    private int lastLookTargetY = 0;
+    private int lookTargetX = 0;
+    private int lookTargetY = 0;
+    private int ticksLeft = 0;
+    private final int ticksLeftMin = 60;
+    private final int ticksLeftMax = 120;
+    private final int lookRangeX = 100;
+    private final int lookRangeY = 40;
+
+
 
     public PortraitRenderer(R renderer) {
         this.renderer = renderer;
     }
 
-    public void renderHeadOnScreen(PoseStack matrixStack2, int x, int y, LivingEntity entity) {
-        // draw icon frame
-        ResourceLocation iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame.png");
-        RenderSystem.setShaderTexture(0, iconFrameResource);
-        GuiComponent.blit(matrixStack2,
-                x,y, 0,
-                0,0, // where on texture to start drawing from
-                frameSize, frameSize, // dimensions of blit texture
-                frameSize, frameSize // size of texture itself (if < dimensions, texture is repeated)
-        );
 
-        int drawX = x + headOffsetX;
+    public void randomiseAnimation(Boolean randomisePos) {
+        if (randomisePos) {
+            lookX = MyMath.randRangeInt(-lookRangeX, lookRangeX);
+            lookY = MyMath.randRangeInt(-lookRangeY, lookRangeY);
+        }
+        ticksLeft = MyMath.randRangeInt(ticksLeftMin, ticksLeftMax);
+
+        lastLookTargetX = lookTargetX;
+        lastLookTargetY = lookTargetY;
+
+        while (Math.abs(lookTargetX - lookX) < lookRangeX / 2)
+            lookTargetX = MyMath.randRangeInt(-lookRangeX, lookRangeX);
+        while (Math.abs(lookTargetY - lookY) < lookRangeY / 2)
+            lookTargetY = MyMath.randRangeInt(-lookRangeY, lookRangeY);
+    }
+
+    public void tickAnimation() {
+        ticksLeft -= 1;
+        if (ticksLeft <= 0)
+            this.randomiseAnimation(false);
+
+        int lookSpeedX = Math.abs(lastLookTargetX - lookX) / 20;
+        int lookSpeedY = Math.abs(lastLookTargetY - lookY) / 20;
+
+        if (lookX < lookTargetX)
+            lookX += lookSpeedX;
+        if (lookX > lookTargetX)
+            lookX -= lookSpeedX;
+        if (lookY < lookTargetY)
+            lookY += lookSpeedY;
+        if (lookY > lookTargetY)
+            lookY -= lookSpeedY;
+
+        if (Math.abs(lookTargetX - lookX) < lookSpeedX)
+            lookX = lookTargetX;
+        if (Math.abs(lookTargetY - lookY) < lookSpeedY)
+            lookY = lookTargetY;
+    }
+
+    public void renderHeadOnScreen(PoseStack matrixStack2, int x, int y, LivingEntity entity) {
+        MyRenderer.renderFrameWithBg(matrixStack2, x, y,
+                frameSize,
+                frameSize,
+                0x80000000);
+
+        int drawX = x + getHeadOffsetX(this.model);
         int drawY = y + getHeadOffsetY(this.model);
 
         // hide all model parts except the head
@@ -63,11 +106,16 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
         setNonHeadModelVisibility(this.model, true);
     }
 
-    private static int getHeadOffsetY(Model model) {
+    private int getHeadOffsetX(Model model) {
+        if (model != null)
+            return headOffsetX;
+        return 0;
+    }
+    private int getHeadOffsetY(Model model) {
         if (model instanceof HumanoidModel)
-            return 70;
+            return headOffsetY;
         if (model instanceof CreeperModel)
-            return 60;
+            return headOffsetY - 12;
         return 0;
     }
 
@@ -91,8 +139,8 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
 
     private void drawEntityOnScreen(PoseStack matrixStack2, LivingEntity entity, int x, int y, int size) {
 
-        float f = (float) Math.atan((double) (-headLookX / 40F));
-        float g = (float) Math.atan((double) (-headLookY / 40F));
+        float f = (float) Math.atan((double) (-lookX / 40F));
+        float g = (float) Math.atan((double) (-lookY / 40F));
         PoseStack matrixStack = RenderSystem.getModelViewStack();
         matrixStack.pushPose();
         matrixStack.translate((double) x, (double) y, 1050.0D);

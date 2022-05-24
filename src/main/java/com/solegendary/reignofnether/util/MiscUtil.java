@@ -75,6 +75,8 @@ public class MiscUtil {
     }
 
     // accepts a list of strings to draw at the top left to track debug data
+    //MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
+    //});
     public static void drawDebugStrings(PoseStack stack, Font font, String[] strings) {
         int y = 0;
         for (String str : strings) {

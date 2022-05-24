@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
@@ -11,8 +12,6 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.model.*;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,6 +19,7 @@ import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -32,7 +32,7 @@ public class HudClientEvents {
     private static int mouseY = 0;
 
     private static ArrayList<Button> unitButtons = new ArrayList<>();
-    private static final ArrayList<Button> actionButtons = new ArrayList<>(Arrays.asList(
+    private static final ArrayList<Button> genericActionButtons = new ArrayList<>(Arrays.asList(
             ActionButtons.attack,
             ActionButtons.stop,
             ActionButtons.hold,
@@ -43,9 +43,11 @@ public class HudClientEvents {
     // private class used to render only the head of a unit on screen for the portrait
     public static PortraitRenderer portraitRenderer = new PortraitRenderer(null);
 
+    // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
+    private static int hudStartingXPos = 0;
 
     // if we are rendering > this amount, then just render an empty icon with +N for the remaining units
-    private static final int maxUnitButtons = 8;
+    private static final int unitButtonsPerRow = 8;
 
     // eg. entity.reignofnether.zombie_unit -> zombie
     private static String getSimpleUnitName(Entity unit) {
@@ -62,6 +64,8 @@ public class HudClientEvents {
             return;
         if (MC.level == null)
             return;
+
+        hudStartingXPos = MC.getWindow().getGuiScaledWidth() / 5;
 
         mouseX = evt.getMouseX();
         mouseY = evt.getMouseY();
@@ -80,19 +84,16 @@ public class HudClientEvents {
 
         if (units.size() <= 0)
             hudSelectedUnit = null;
-        else if (hudSelectedUnit == null)
+        else if (hudSelectedUnit == null || units.size() == 1)
             hudSelectedUnit = units.get(0);
-
         // create all of the unit buttons for this frame
-        int screenWidth = MC.getWindow().getGuiScaledWidth();
         int screenHeight = MC.getWindow().getGuiScaledHeight();
 
         int iconSize = 14;
         int iconFrameSize = Button.iconFrameSize;
 
         for (LivingEntity unit : units) {
-
-            if (unitButtons.size() < maxUnitButtons) {
+            if (unitButtons.size() < (unitButtonsPerRow * 2)) {
                 // mob head icon
                 String unitName = getSimpleUnitName(unit);
 
@@ -115,17 +116,54 @@ public class HudClientEvents {
             }
         }
 
-        // ---------------------------
-        // Unit icons using mob heads
-        // ---------------------------
-        int numUnitButtons = Math.min(units.size(), maxUnitButtons);
-        int blitX = (screenWidth / 2) - (numUnitButtons * iconFrameSize / 2);
-        int blitY = screenHeight - iconFrameSize;
+        // ------------------------------------------------
+        // Unit head portrait (based on selected unit type)
+        // ------------------------------------------------
+        int blitX = hudStartingXPos;
+        int blitY = MC.getWindow().getGuiScaledHeight() - portraitRenderer.frameSize;
+
+        if (hudSelectedUnit != null && portraitRenderer.model != null && portraitRenderer.renderer != null) {
+            portraitRenderer.renderHeadOnScreen(
+                    evt.getPoseStack(), blitX, blitY,
+                    (LivingEntity) hudSelectedUnit);
+
+            // draw unit stats
+            blitX += portraitRenderer.frameSize - 2;
+            MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX, blitY,
+                    portraitRenderer.frameSize,
+                    portraitRenderer.frameSize,
+                    0x80000000);
+        }
+
+        // ----------------------------------------------
+        // Unit icons using mob heads on 2 rows if needed
+        // ----------------------------------------------
+        int buttonsRendered = 0;
+        blitX += portraitRenderer.frameSize + 20;
+        int blitXStart = blitX;
+        blitY = screenHeight - iconFrameSize;
+        if (unitButtons.size() > unitButtonsPerRow)
+            blitY -= iconFrameSize + 5;
 
         for (Button unitButton : unitButtons) {
-            unitButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
-            unitButton.renderHealthBar(evt.getPoseStack());
-            blitX += iconFrameSize;
+            // replace last icon with a +X number of units icon
+            if (buttonsRendered == (unitButtonsPerRow * 2) - 1 &&
+                    units.size() > (unitButtonsPerRow * 2)) {
+                int numExtraUnits = units.size() - (unitButtonsPerRow * 2) + 1;
+                MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, 0x64000000);
+                GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraUnits,
+                        blitX + 8, blitY + 8, 0xFFFFFF);
+            }
+            else {
+                unitButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                unitButton.renderHealthBar(evt.getPoseStack());
+                blitX += iconFrameSize;
+                buttonsRendered += 1;
+                if (buttonsRendered == unitButtonsPerRow) {
+                    blitX = blitXStart;
+                    blitY += iconFrameSize + 6;
+                }
+            }
         }
 
         // -------------------------------------------------------
@@ -135,7 +173,7 @@ public class HudClientEvents {
         if (UnitClientEvents.getSelectedUnitIds().size() > 0) {
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
-            for (Button actionButton : actionButtons) {
+            for (Button actionButton : genericActionButtons) {
                 actionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                 actionButton.checkPressed();
                 blitX += iconFrameSize;
@@ -161,7 +199,7 @@ public class HudClientEvents {
         int mouseY = (int) evt.getMouseY();
 
         ArrayList<Button> buttons = new ArrayList<>();
-        buttons.addAll(actionButtons);
+        buttons.addAll(genericActionButtons);
         buttons.addAll(unitButtons);
 
         for (Button button : buttons)
@@ -182,19 +220,37 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderOverlay(RenderGameOverlayEvent.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled())
-            return;
+    public static void onTick(TickEvent.ClientTickEvent evt) {
+        //if (OrthoviewClientEvents.isEnabled())
+        //    portraitRenderer.tickAnimation();
+    }
 
-        // ------------------------------------------------
-        // Unit head portrait (based on selected unit type)
-        // ------------------------------------------------
-        if (hudSelectedUnit != null && portraitRenderer.model != null && portraitRenderer.renderer != null) {
-                portraitRenderer.renderHeadOnScreen(
-                        evt.getMatrixStack(),
-                        evt.getWindow().getGuiScaledWidth() / 3,
-                        evt.getWindow().getGuiScaledHeight() - portraitRenderer.frameSize,
-                        (LivingEntity) hudSelectedUnit);
+    // uncomment to adjust render position/size
+    @SubscribeEvent
+    public static void onInput(InputEvent.KeyInputEvent evt) {
+        if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
+            if (evt.getKey() == Keybinds.panMinusX.getKey().getValue())
+                portraitRenderer.headOffsetX += 1;
+            if (evt.getKey() == Keybinds.panPlusX.getKey().getValue())
+                portraitRenderer.headOffsetX -= 1;
+            if (evt.getKey() == Keybinds.panMinusZ.getKey().getValue())
+                portraitRenderer.headOffsetY += 1;
+            if (evt.getKey() == Keybinds.panPlusZ.getKey().getValue())
+                portraitRenderer.headOffsetY -= 1;
+
+            if (evt.getKey() == Keybinds.nums[9].getKey().getValue())
+                portraitRenderer.headSize -= 1;
+            if (evt.getKey() == Keybinds.nums[0].getKey().getValue())
+                portraitRenderer.headSize += 1;
         }
+    }
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
+        if (hudSelectedUnit != null)
+            MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
+                    "headOffsetX: " + portraitRenderer.headOffsetX,
+                    "headOffsetY: " + portraitRenderer.headOffsetY,
+                    "headSize: " + portraitRenderer.headSize
+            });
     }
 }

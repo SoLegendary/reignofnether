@@ -91,4 +91,9 @@ public class MyMath {
                 pt1.y <= ptc.y && ptc.y <= pt2.y :
                 pt2.y <= ptc.y && ptc.y <= pt1.y;
     }
+
+    public static int randRangeInt(int min, int max) {
+        int posRandInt = (int) ((max - min) * Math.random());
+        return posRandInt + min;
+    }
 }

@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -72,22 +73,8 @@ public class Button {
     public void render(PoseStack poseStack, int x, int y, int mouseX, int mouseY) {
         this.x = x;
         this.y = y;
-        //transparent background
-        GuiComponent.fill(poseStack, // x1,y1, x2,y2,
-                x, y,
-                x + iconFrameSize,
-                y + iconFrameSize,
-                0x64000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
 
-        // icon frame
-        ResourceLocation iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
-        RenderSystem.setShaderTexture(0, iconFrameResource);
-        GuiComponent.blit(poseStack,
-                x, y, 0,
-                0,0, // where on texture to start drawing from
-                iconFrameSize, iconFrameSize, // dimensions of blit texture
-                iconFrameSize, iconFrameSize // size of texture itself (if < dimensions, texture is repeated)
-        );
+        MyRenderer.renderIconFrameWithBg(poseStack, x, y, iconFrameSize, 0x64000000);
 
         // item/unit icon
         RenderSystem.setShaderTexture(0, iconResource);
@@ -123,7 +110,7 @@ public class Button {
 
     public void renderHealthBar(PoseStack poseStack) {
         HealthBarClientEvents.render(poseStack, entity,
-                x + ((float) iconFrameSize / 2), y - 4,
+                x + ((float) iconFrameSize / 2), y - 5,
                 iconFrameSize - 1,
                 false);
     }
