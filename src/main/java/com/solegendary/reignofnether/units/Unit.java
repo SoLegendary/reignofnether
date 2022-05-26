@@ -37,6 +37,7 @@ public interface Unit {
     public boolean getAggressiveWhenIdle();
     public float getAttackRange();
     public float getSpeedModifier();
+    public float getDamage();
 
     public BlockPos getAttackMoveTarget();
     public LivingEntity getFollowTarget();

@@ -95,4 +95,14 @@ public class MyRenderer {
                 size, size // size of texture itself (if < dimensions, texture is repeated)
         );
     }
+
+    public static void renderIcon(PoseStack poseStack, ResourceLocation resourceLocation, int x, int y, int size) {
+        RenderSystem.setShaderTexture(0, resourceLocation);
+        GuiComponent.blit(poseStack,
+                x, y, 0,
+                0,0, // where on texture to start drawing from
+                size, size, // dimensions of blit texture
+                size, size // size of texture itself (if < dimensions, texture is repeated)
+        );
+    }
 }

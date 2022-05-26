@@ -69,15 +69,17 @@ public class CreeperUnit extends Creeper implements Unit {
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
     public float getSpeedModifier() {return speedModifier;}
+    public float getDamage() {return damage;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
     // endregion
 
+    final public float damage = 20.0f;
     final public float speedModifier = 1.0f;
     final public float attackRange = 0; // only used by ranged units
-    final public int attackCooldown = 0; // not used by creepers
+    final public int attackCooldown = 100; // not used by creepers anyway
     final public float aggroRange = 10;
     final public boolean willRetaliate = true; // will attack when hurt by an enemy
     final public boolean aggressiveWhenIdle = false;

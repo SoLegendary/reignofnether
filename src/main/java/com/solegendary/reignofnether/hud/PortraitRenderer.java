@@ -26,8 +26,8 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
 
     public int headSize = 46;
     public int frameSize = 60;
-    public int headOffsetX = 30;
-    public int headOffsetY = 104; // creepers should be 12 lower
+    public int headOffsetX = 31;
+    public int headOffsetY = 110; // creepers should be 17 lower
 
     // change these randomly every few seconds to make the head look around
     private int lookX = 0;
@@ -92,7 +92,7 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
         MyRenderer.renderFrameWithBg(matrixStack2, x, y,
                 frameSize,
                 frameSize,
-                0x80000000);
+                0xA0000000);
 
         int drawX = x + getHeadOffsetX(this.model);
         int drawY = y + getHeadOffsetY(this.model);
@@ -115,7 +115,7 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
         if (model instanceof HumanoidModel)
             return headOffsetY;
         if (model instanceof CreeperModel)
-            return headOffsetY - 12;
+            return headOffsetY - 17;
         return 0;
     }
 

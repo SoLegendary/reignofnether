@@ -77,23 +77,21 @@ public class Button {
         MyRenderer.renderIconFrameWithBg(poseStack, x, y, iconFrameSize, 0x64000000);
 
         // item/unit icon
-        RenderSystem.setShaderTexture(0, iconResource);
-        GuiComponent.blit(poseStack,
-                x + 4, y + 4, 0,
-                0,0, // where on texture to start drawing from
-                iconSize, iconSize, // dimensions of blit area
-                iconSize, iconSize // size of texture (if < dimensions, texture is repeated)
+        MyRenderer.renderIcon(
+                poseStack,
+                iconResource,
+                x+4, y+4,
+                iconSize
         );
 
         // selected frame
         if (isSelected.get() || (hotkey != null && hotkey.isDown()) || (isMouseOver(mouseX, mouseY) && MiscUtil.isLeftClickDown(MC))) {
             ResourceLocation iconFrameSelectedResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_selected.png");
-            RenderSystem.setShaderTexture(0, iconFrameSelectedResource);
-            GuiComponent.blit(poseStack,
-                    x - 1, y - 1, 0,
-                    0,0, // where on texture to start drawing from
-                    iconFrameSelectedSize, iconFrameSelectedSize, // dimensions of blit area
-                    iconFrameSelectedSize, iconFrameSelectedSize // size of texture (if < dimensions, texture is repeated)
+            MyRenderer.renderIcon(
+                    poseStack,
+                    iconFrameSelectedResource,
+                    x-1,y-1,
+                    iconFrameSelectedSize
             );
         }
 

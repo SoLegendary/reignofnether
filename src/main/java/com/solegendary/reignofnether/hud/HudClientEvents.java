@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Unit;
@@ -26,6 +24,14 @@ import org.lwjgl.glfw.GLFW;
 import java.util.*;
 
 public class HudClientEvents {
+
+    private static final ResourceLocation[] TEXTURE_STAT_ICONS = {
+            new ResourceLocation("reignofnether", "textures/icons/items/sword.png"), // DAMAGE
+            new ResourceLocation("reignofnether", "textures/icons/items/sparkler.png"), // ATTACK SPEED
+            new ResourceLocation("reignofnether", "textures/icons/items/bow.png"), // RANGE
+            new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"), // ARMOUR
+            new ResourceLocation("reignofnether", "textures/icons/items/boots.png"), // MOVE SPEED
+    };
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static int mouseX = 0;
@@ -116,9 +122,9 @@ public class HudClientEvents {
             }
         }
 
-        // ------------------------------------------------
-        // Unit head portrait (based on selected unit type)
-        // ------------------------------------------------
+        // --------------------------------------------------------
+        // Unit head portrait (based on selected unit type) + stats
+        // --------------------------------------------------------
         int blitX = hudStartingXPos;
         int blitY = MC.getWindow().getGuiScaledHeight() - portraitRenderer.frameSize;
 
@@ -130,9 +136,31 @@ public class HudClientEvents {
             // draw unit stats
             blitX += portraitRenderer.frameSize - 2;
             MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX, blitY,
+                    (int) (portraitRenderer.frameSize * 0.75f),
                     portraitRenderer.frameSize,
-                    portraitRenderer.frameSize,
-                    0x80000000);
+                    0xA0000000);
+
+            int blitXIcon = blitX + 6;
+            int blitYIcon = blitY + 7;
+            for (int i = 0; i < TEXTURE_STAT_ICONS.length; i++) {
+                MyRenderer.renderIcon(
+                    evt.getPoseStack(),
+                    TEXTURE_STAT_ICONS[i],
+                    blitXIcon, blitYIcon, 8
+                );
+                String statString = "";
+                Unit unit = (Unit) hudSelectedUnit;
+
+                switch (i) {
+                    case 0 -> statString = String.valueOf(unit.getDamage()); // DAMAGE
+                    case 1 -> statString = String.valueOf((int) (100 / unit.getAttackCooldown())); // ATTACK SPEED
+                    case 2 -> statString = String.valueOf((int) (unit.getAttackRange())); // RANGE
+                    case 3 -> statString = String.valueOf(((LivingEntity) hudSelectedUnit).getArmorValue()); // ARMOUR
+                    case 4 -> statString = String.valueOf((int) (unit.getSpeedModifier() * 100)); // MOVE SPEED
+                }
+                GuiComponent.drawString(evt.getPoseStack(), MC.font, statString, blitXIcon + 13, blitYIcon, 0xFFFFFF);
+                blitYIcon += 10;
+            }
         }
 
         // ----------------------------------------------
@@ -221,11 +249,12 @@ public class HudClientEvents {
 
     @SubscribeEvent
     public static void onTick(TickEvent.ClientTickEvent evt) {
-        //if (OrthoviewClientEvents.isEnabled())
-        //    portraitRenderer.tickAnimation();
+        if (OrthoviewClientEvents.isEnabled())
+            portraitRenderer.tickAnimation();
     }
 
-    // uncomment to adjust render position/size
+    // uncomment to adjust render position/size of portraits
+    /*
     @SubscribeEvent
     public static void onInput(InputEvent.KeyInputEvent evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
@@ -253,4 +282,5 @@ public class HudClientEvents {
                     "headSize: " + portraitRenderer.headSize
             });
     }
+     */
 }
