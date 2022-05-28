@@ -110,7 +110,7 @@ public class Button {
         HealthBarClientEvents.render(poseStack, entity,
                 x + ((float) iconFrameSize / 2), y - 5,
                 iconFrameSize - 1,
-                false);
+                HealthBarClientEvents.HeightMode.ON_SCREEN_ICON);
     }
 
     private boolean isMouseOver(int mouseX, int mouseY) {

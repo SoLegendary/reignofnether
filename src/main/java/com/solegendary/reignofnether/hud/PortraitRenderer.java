@@ -5,9 +5,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.model.CreeperModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
@@ -16,6 +20,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.List;
@@ -25,9 +30,10 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
     public Model model;
 
     public int headSize = 46;
-    public int frameSize = 60;
+    public int frameWidth = 60;
+    public int frameHeight = 60;
     public int headOffsetX = 31;
-    public int headOffsetY = 110; // creepers should be 17 lower
+    public int headOffsetY = 105; // creepers should be 17 lower
 
     // change these randomly every few seconds to make the head look around
     private int lookX = 0;
@@ -88,22 +94,40 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
             lookY = lookTargetY;
     }
 
-    public void renderHeadOnScreen(PoseStack matrixStack2, int x, int y, LivingEntity entity) {
-        MyRenderer.renderFrameWithBg(matrixStack2, x, y,
-                frameSize,
-                frameSize,
+    // includes:
+    // - background frame
+    // - moving head
+    // - healthbar
+    // - unit name
+    public void renderWithFrame(PoseStack poseStack, int x, int y, LivingEntity entity) {
+        MyRenderer.renderFrameWithBg(poseStack, x, y,
+                frameWidth,
+                frameHeight,
                 0xA0000000);
 
         int drawX = x + getHeadOffsetX(this.model);
         int drawY = y + getHeadOffsetY(this.model);
 
+        // TODO: hiding layers causes crash when unit dies while selected (also nonHeadModelVisibiliy sometimes isn't reset?)
         // hide all model parts except the head
         setNonHeadModelVisibility(this.model, false);
         List<RenderLayer<T, M>> layers = renderer.layers;
         renderer.layers = List.of();
-        drawEntityOnScreen(matrixStack2, entity, drawX, drawY, headSize);
+        drawEntityOnScreen(poseStack, entity, drawX, drawY, headSize);
         renderer.layers = layers;
         setNonHeadModelVisibility(this.model, true);
+
+        // draw health bar and write min/max hp
+        HealthBarClientEvents.render(poseStack, entity,
+                x+(frameWidth/2f), y+frameHeight-15,
+                frameWidth-9, HealthBarClientEvents.HeightMode.ON_SCREEN_PORTRAIT);
+
+        GuiComponent.drawCenteredString(
+                poseStack, Minecraft.getInstance().font,
+                (int) entity.getHealth() + "/" + (int) entity.getMaxHealth(),
+                x+(frameWidth/2), y+frameHeight-13,
+                0xFFFFFFFF
+        );
     }
 
     private int getHeadOffsetX(Model model) {
@@ -137,22 +161,22 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
         }
     }
 
-    private void drawEntityOnScreen(PoseStack matrixStack2, LivingEntity entity, int x, int y, int size) {
+    private void drawEntityOnScreen(PoseStack poseStack, LivingEntity entity, int x, int y, int size) {
 
         float f = (float) Math.atan((double) (-lookX / 40F));
         float g = (float) Math.atan((double) (-lookY / 40F));
-        PoseStack matrixStack = RenderSystem.getModelViewStack();
-        matrixStack.pushPose();
-        matrixStack.translate((double) x, (double) y, 1050.0D);
-        matrixStack.scale(1.0F, 1.0F, -1.0F);
+        PoseStack poseStackModel = RenderSystem.getModelViewStack();
+        poseStackModel.pushPose();
+        poseStackModel.translate((double) x, (double) y, 1050.0D);
+        poseStackModel.scale(1.0F, 1.0F, -1.0F);
         RenderSystem.applyModelViewMatrix();
-        matrixStack2.pushPose();
-        matrixStack2.translate(0.0D, 0.0D, 1000.0D);
-        matrixStack2.scale((float) size, (float) size, (float) size);
+        poseStack.pushPose();
+        poseStack.translate(0.0D, 0.0D, 1000.0D);
+        poseStack.scale((float) size, (float) size, (float) size);
         Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
         Quaternion quaternion2 = Vector3f.XP.rotationDegrees(g * 20.0F);
         quaternion.mul(quaternion2);
-        matrixStack2.mulPose(quaternion);
+        poseStack.mulPose(quaternion);
         float h = entity.yBodyRot; // bodyYaw;
         float i = entity.getYRot(); // getYaw();
         float j = entity.getXRot(); // getPitch();
@@ -174,7 +198,7 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
         // for some reason this snippet causes drawLineBox to draw lines in completely wrong locations while in spectator mode
         RenderSystem.runAsFancy(() -> {
             MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-            entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixStack2, immediate,
+            entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, poseStack, immediate,
                     15728880);
             immediate.endBatch();
         });
@@ -184,8 +208,8 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
         entity.setXRot(j);
         entity.yHeadRotO = k;
         entity.yHeadRot = l;
-        matrixStack.popPose();
-        matrixStack2.popPose();
+        poseStackModel.popPose();
+        poseStack.popPose();
         RenderSystem.applyModelViewMatrix();
         Lighting.setupFor3DItems();
     }

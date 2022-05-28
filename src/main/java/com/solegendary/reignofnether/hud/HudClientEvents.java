@@ -1,11 +1,8 @@
 package com.solegendary.reignofnether.hud;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
-import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -13,13 +10,10 @@ import net.minecraft.client.model.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
@@ -56,7 +50,7 @@ public class HudClientEvents {
     private static final int unitButtonsPerRow = 8;
 
     // eg. entity.reignofnether.zombie_unit -> zombie
-    private static String getSimpleUnitName(Entity unit) {
+    public static String getSimpleUnitName(Entity unit) {
         return unit.getName().getString()
             .replace(" ","")
             .replace("entity.reignofnether.","")
@@ -71,7 +65,7 @@ public class HudClientEvents {
         if (MC.level == null)
             return;
 
-        hudStartingXPos = MC.getWindow().getGuiScaledWidth() / 5;
+        hudStartingXPos = (MC.getWindow().getGuiScaledWidth() / 5) + 4;
 
         mouseX = evt.getMouseX();
         mouseY = evt.getMouseY();
@@ -126,18 +120,29 @@ public class HudClientEvents {
         // Unit head portrait (based on selected unit type) + stats
         // --------------------------------------------------------
         int blitX = hudStartingXPos;
-        int blitY = MC.getWindow().getGuiScaledHeight() - portraitRenderer.frameSize;
+        int blitY = MC.getWindow().getGuiScaledHeight() - portraitRenderer.frameHeight;
 
         if (hudSelectedUnit != null && portraitRenderer.model != null && portraitRenderer.renderer != null) {
-            portraitRenderer.renderHeadOnScreen(
+
+            // write capitalised unit name
+            String unitName = HudClientEvents.getSimpleUnitName(hudSelectedUnit);
+            String unitNameCap = unitName.substring(0, 1).toUpperCase() + unitName.substring(1);
+            GuiComponent.drawCenteredString(
+                    evt.getPoseStack(), Minecraft.getInstance().font,
+                    unitNameCap,
+                    blitX+(portraitRenderer.frameWidth/2),blitY-9,
+                    0xFFFFFFFF
+            );
+
+            portraitRenderer.renderWithFrame(
                     evt.getPoseStack(), blitX, blitY,
                     (LivingEntity) hudSelectedUnit);
 
             // draw unit stats
-            blitX += portraitRenderer.frameSize - 2;
+            blitX += portraitRenderer.frameWidth - 2;
             MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX, blitY,
-                    (int) (portraitRenderer.frameSize * 0.75f),
-                    portraitRenderer.frameSize,
+                    43,
+                    portraitRenderer.frameHeight,
                     0xA0000000);
 
             int blitXIcon = blitX + 6;
@@ -152,7 +157,7 @@ public class HudClientEvents {
                 Unit unit = (Unit) hudSelectedUnit;
 
                 switch (i) {
-                    case 0 -> statString = String.valueOf(unit.getDamage()); // DAMAGE
+                    case 0 -> statString = String.valueOf((int) unit.getDamage()); // DAMAGE
                     case 1 -> statString = String.valueOf((int) (100 / unit.getAttackCooldown())); // ATTACK SPEED
                     case 2 -> statString = String.valueOf((int) (unit.getAttackRange())); // RANGE
                     case 3 -> statString = String.valueOf(((LivingEntity) hudSelectedUnit).getArmorValue()); // ARMOUR
@@ -167,7 +172,7 @@ public class HudClientEvents {
         // Unit icons using mob heads on 2 rows if needed
         // ----------------------------------------------
         int buttonsRendered = 0;
-        blitX += portraitRenderer.frameSize + 20;
+        blitX += portraitRenderer.frameWidth + 20;
         int blitXStart = blitX;
         blitY = screenHeight - iconFrameSize;
         if (unitButtons.size() > unitButtonsPerRow)
