@@ -7,13 +7,13 @@ import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.units.UnitClientEvents;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -38,14 +38,12 @@ public class HealthBarClientEvents {
     private static final ResourceLocation GUI_BARS_TEXTURES = new ResourceLocation(
                 ReignOfNether.MOD_ID + ":textures/hud/healthbars.png");
 
-    private static final int DARK_GRAY = 0x606060;
     private static final List<LivingEntity> renderedEntities = new ArrayList<>();
     private static final Minecraft MC = Minecraft.getInstance();
-    private static HeightMode Height;
 
-    public enum HeightMode {
-        ON_SCREEN_ICON,
-        ON_SCREEN_PORTRAIT,
+    public enum RenderMode {
+        GUI_ICON,
+        GUI_PORTRAIT,
         IN_WORLD_ORTHOVIEW,
         IN_WORLD_FIRST_PERSON
     }
@@ -135,7 +133,7 @@ public class HealthBarClientEvents {
             barWidth = Math.max(barWidth, 20);
 
             render(matrix, entity, 0, 0, barWidth,
-                    OrthoviewClientEvents.isEnabled() ? HeightMode.IN_WORLD_ORTHOVIEW : HeightMode.IN_WORLD_FIRST_PERSON);
+                    OrthoviewClientEvents.isEnabled() ? RenderMode.IN_WORLD_ORTHOVIEW : RenderMode.IN_WORLD_FIRST_PERSON);
 
             matrix.popPose();
         }
@@ -146,52 +144,31 @@ public class HealthBarClientEvents {
     }
 
     public static void render(PoseStack matrix, LivingEntity entity, double x, double y,
-                              float width, HeightMode heightMode) {
+                              float width, RenderMode renderMode) {
 
-        int ownedColor = 0x00ff00;
-        int ownedColorSecondary = 0x008000;
-        int friendlyColor = 0x0000ff;
-        int friendlyColorSecondary = 0x000080;
-        int neutralColor = 0xffff00;
-        int neutralColorSecondary = 0x808000;
-        int hostileColor = 0xff0000;
-        int hostileColorSecondary = 0x800000;
-        int color = 0x0;
-        int color2 = 0x0;
-
-        // base colour on Relationship enum
-        switch (UnitClientEvents.getPlayerToEntityRelationship(entity.getId())) {
-            case OWNED -> {
-                color = ownedColor;
-                color2 = ownedColorSecondary;
-            }
-            case FRIENDLY -> {
-                color = friendlyColor;
-                color2 = friendlyColorSecondary;
-            }
-            case NEUTRAL -> {
-                color = neutralColor;
-                color2 = neutralColorSecondary;
-            }
-            case HOSTILE -> {
-                color = hostileColor;
-                color2 = hostileColorSecondary;
-            }
-        }
         BarState state = BarStates.getState(entity);
 
         float percent = Math.min(1, Math.min(state.health, entity.getMaxHealth()) / entity.getMaxHealth());
         float percent2 = Math.min(state.previousHealthDisplay, entity.getMaxHealth()) / entity.getMaxHealth();
+
         int zOffset = 0;
 
+        // base colour on percentage health remaining (green @ 100%, yellow @ 50%, red @ 0%)
+        float r = Math.max(0, Math.min(1, 2-percent*2));
+        float g = Math.max(0, Math.min(1, percent*2));
+        float b = 0;
+        float r2 = r * 0.5f;
+        float g2 = g * 0.5f;
+        float b2 = b * 0.5f;
+
         Matrix4f m4f = matrix.last().pose();
-        drawBar(m4f, x, y, width, 1, DARK_GRAY, zOffset++, heightMode);
-        drawBar(m4f, x, y, width, percent2, color2, zOffset++, heightMode);
-        drawBar(m4f, x, y, width, percent, color, zOffset, heightMode);
+        drawBar(m4f, x, y, width, 1, 0.35f,0.35f,0.35f, zOffset++, renderMode);
+        drawBar(m4f, x, y, width, percent2, r2,g2,b2, zOffset++, renderMode);
+        drawBar(m4f, x, y, width, percent, r,g,b, zOffset, renderMode);
     }
 
     private static void drawBar(Matrix4f matrix4f, double x, double y, float width, float percent,
-                                int color, int zOffset, HeightMode heightMode) {
+                                float r, float g, float b, int zOffset, RenderMode renderMode) {
         float c = 0.00390625F;
         int u = 0;
         int v = 6 * 5 * 2 + 5;
@@ -201,18 +178,14 @@ public class HealthBarClientEvents {
         double size = percent * width;
         double h = 10;
 
-        if (heightMode == HeightMode.ON_SCREEN_ICON)
+        if (renderMode == RenderMode.GUI_ICON)
             h = 4;
-        else if (heightMode == HeightMode.ON_SCREEN_PORTRAIT)
+        else if (renderMode == RenderMode.GUI_PORTRAIT)
             h = 12;
-        else if (heightMode == HeightMode.IN_WORLD_FIRST_PERSON)
+        else if (renderMode == RenderMode.IN_WORLD_FIRST_PERSON)
             h = 6;
-        else if (heightMode == HeightMode.IN_WORLD_ORTHOVIEW)
+        else if (renderMode == RenderMode.IN_WORLD_ORTHOVIEW)
             h = 10;
-
-        float r = (color >> 16 & 255) / 255.0F;
-        float g = (color >> 8 & 255) / 255.0F;
-        float b = (color & 255) / 255.0F;
 
         RenderSystem.setShaderColor(r, g, b, 1);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -221,7 +194,7 @@ public class HealthBarClientEvents {
 
         float half = width / 2;
 
-        float zOffsetAmount = heightMode == HeightMode.IN_WORLD_FIRST_PERSON || heightMode == HeightMode.IN_WORLD_ORTHOVIEW ? -0.1F : 0.1F;
+        float zOffsetAmount = renderMode == RenderMode.IN_WORLD_FIRST_PERSON || renderMode == RenderMode.IN_WORLD_ORTHOVIEW ? -0.1F : 0.1F;
 
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();

@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
+import com.solegendary.reignofnether.units.Relationship;
 import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -291,7 +292,7 @@ public class CursorClientEvents {
                     UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
                 for (int unitId : preselectedUnitIds) {
                     Entity entity = MC.level.getEntity(unitId);
-                    if (entity instanceof Unit)
+                    if (UnitClientEvents.getPlayerToEntityRelationship(unitId) == Relationship.OWNED)
                         UnitClientEvents.addSelectedUnitId(entity.getId());
                 }
             }

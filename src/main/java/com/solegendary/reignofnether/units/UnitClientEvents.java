@@ -1,15 +1,8 @@
 package com.solegendary.reignofnether.units;
 
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3d;
-import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.ActionButtons;
 import com.solegendary.reignofnether.hud.ActionName;
-import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.registrars.PacketHandler;
@@ -17,28 +10,14 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.CreeperModel;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.Model;
-import net.minecraft.client.model.SkeletonModel;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.SkeletonRenderer;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.AbstractSkeleton;
-import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.checkerframework.checker.units.qual.A;
 import org.lwjgl.glfw.GLFW;
-
-import dev.ftb.mods.ftblibrary.math.MathUtils;
 
 import java.util.*;
 
@@ -59,12 +38,23 @@ public class UnitClientEvents {
     private static ArrayList<Integer> allUnitIds = new ArrayList<>();
 
     public static ArrayList<Integer> getPreselectedUnitIds() { return preselectedUnitIds; }
-    public static ArrayList<Integer> getSelectedUnitIds() { return selectedUnitIds; }
-    public static void addPreselectedUnitId(Integer unitId) { preselectedUnitIds.add(unitId); }
-    public static void addSelectedUnitId(Integer unitId) { // only ever add owned units
-        if (getPlayerToEntityRelationship(unitId) == Relationship.OWNED)
-            selectedUnitIds.add(unitId);
+    public static ArrayList<LivingEntity> getPreselectedUnits() {
+        ArrayList<LivingEntity> units = new ArrayList<>();
+        for (int id: UnitClientEvents.getPreselectedUnitIds())
+            if (MC.level != null)
+                units.add((LivingEntity) MC.level.getEntity(id));
+        return units;
     }
+    public static ArrayList<Integer> getSelectedUnitIds() { return selectedUnitIds; }
+    public static ArrayList<LivingEntity> getSelectedUnits() {
+        ArrayList<LivingEntity> units = new ArrayList<>();
+        for (int id: UnitClientEvents.getSelectedUnitIds())
+            if (MC.level != null)
+                units.add((LivingEntity) MC.level.getEntity(id));
+        return units;
+    }
+    public static void addPreselectedUnitId(Integer unitId) { preselectedUnitIds.add(unitId); }
+    public static void addSelectedUnitId(Integer unitId) { selectedUnitIds.add(unitId); }
     public static void setPreselectedUnitIds(ArrayList<Integer> unitIds) { preselectedUnitIds = unitIds; }
     public static void setSelectedUnitIds(ArrayList<Integer> unitIds) { selectedUnitIds = unitIds; }
     public static int getUnitIdToAttack() { return unitIdToAttack; }
@@ -85,7 +75,7 @@ public class UnitClientEvents {
         // follow friendly unit
         if (preselectedUnitIds.size() == 1 && !targetingSelf())
             setUnitIdToFollow(preselectedUnitIds.get(0));
-            // move to ground pos (and disable during camera manip)
+        // move to ground pos (disabled during camera manip)
         else if (!Keybinds.altMod.isDown()) {
             ArrayList<Integer> unitIdsToMove = new ArrayList<>();
             unitIdsToMove.addAll(selectedUnitIds);
@@ -147,7 +137,8 @@ public class UnitClientEvents {
                 );
                 selectedUnitIds = new ArrayList<>();
                 for (Entity entity : nearbyEntities)
-                    addSelectedUnitId(entity.getId());
+                    if (getPlayerToEntityRelationship(entity.getId()) == Relationship.OWNED)
+                        addSelectedUnitId(entity.getId());
 
             }
             // move on left click
@@ -159,18 +150,17 @@ public class UnitClientEvents {
 
             // left click -> (de)select a single unit
             // if shift is held, deselect a unit or add it to the selected group
-            else if (preselectedUnitIds.size() == 1 && !isLeftClickAttack() &&
-                getPlayerToEntityRelationship(preselectedUnitIds.get(0)) == Relationship.OWNED) {
+            else if (preselectedUnitIds.size() == 1 && !isLeftClickAttack()) {
 
-                if (Keybinds.shiftMod.isDown()) {
-                    if (!selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0))))
-                        if (MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit)
-                            addSelectedUnitId(preselectedUnitIds.get(0));
-                }
-                else {
-                    selectedUnitIds = new ArrayList<>();
-                    if (MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit)
+                if (Keybinds.shiftMod.isDown() &&
+                    !selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0))) &&
+                    MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit &&
+                    getPlayerToEntityRelationship(preselectedUnitIds.get(0)) == Relationship.OWNED) {
                         addSelectedUnitId(preselectedUnitIds.get(0));
+                }
+                else { // this should be the only code path that allows you to select a non-owned unit
+                    selectedUnitIds = new ArrayList<>();
+                    addSelectedUnitId(preselectedUnitIds.get(0));
                 }
             }
             lastLeftClickTime = System.currentTimeMillis();
@@ -230,7 +220,10 @@ public class UnitClientEvents {
         for (KeyMapping keyMapping : Keybinds.nums) {
             int index = Integer.parseInt(keyMapping.getKey().getDisplayName().getContents());
 
-            if (Keybinds.ctrlMod.isDown() && keyMapping.isDown() && selectedUnitIds.size() > 0)
+            if (Keybinds.ctrlMod.isDown() &&
+                keyMapping.isDown() &&
+                selectedUnitIds.size() > 0 &&
+                getPlayerToEntityRelationship(selectedUnitIds.get(0)) == Relationship.OWNED)
                 controlGroups.set(index, selectedUnitIds);
             else if (keyMapping.isDown() && controlGroups.get(index).size() > 0)
                 selectedUnitIds = controlGroups.get(index);
@@ -240,6 +233,22 @@ public class UnitClientEvents {
 
     @SubscribeEvent
     public static void onRenderWorld(RenderLevelLastEvent evt) {
+
+        // always-shown highlights to indicate unit relationships
+        for (int unitId : allUnitIds) {
+            Entity entity = MC.level.getEntity(unitId);
+            if (entity != null) {
+                Relationship unitRs = getPlayerToEntityRelationship(unitId);
+
+                if (unitRs == Relationship.OWNED)
+                    MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 1.0f, 0.3f, 0.2f);
+                else if (unitRs == Relationship.FRIENDLY)
+                    MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 0.3f, 1.0f, 0.2f);
+                else if (unitRs == Relationship.HOSTILE)
+                    MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.2f);
+            }
+        }
+
         if (MC.level == null || !OrthoviewClientEvents.isEnabled())
             return;
 
@@ -262,21 +271,6 @@ public class UnitClientEvents {
                     MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f);
                 else if (preselectedUnitIds.contains(idToDraw))
                     MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.5f);
-            }
-        }
-
-        // always-shown highlights to indicate unit relationships
-        for (int unitId : allUnitIds) {
-            Entity entity = MC.level.getEntity(unitId);
-            if (entity != null) {
-                Relationship unitRs = getPlayerToEntityRelationship(unitId);
-
-                if (unitRs == Relationship.OWNED)
-                    MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 1.0f, 0.3f, 0.2f);
-                else if (unitRs == Relationship.FRIENDLY)
-                    MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 0.3f, 1.0f, 0.2f);
-                else if (unitRs == Relationship.HOSTILE)
-                    MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.2f);
             }
         }
     }

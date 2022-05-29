@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.healthbars;
 
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -36,7 +37,6 @@ public class BarState {
     } else if (lastDmgDelay == 0.0F) {
       reset();
     }
-
     updateAnimations();
   }
 
@@ -69,7 +69,7 @@ public class BarState {
       if (diff > 0) {
         animationSpeed = diff / 10f;
       }
-    } else if (previousHealthDelay < 1 && previousHealthDisplay > health) {
+    } else if (previousHealthDelay < 1 && previousHealthDisplay > health && animationSpeed > 0) {
       previousHealthDisplay -= animationSpeed;
     } else {
       previousHealthDisplay = health;

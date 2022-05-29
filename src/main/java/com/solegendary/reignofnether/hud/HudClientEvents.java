@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.units.Relationship;
 import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -39,7 +40,7 @@ public class HudClientEvents {
             ActionButtons.move
     ));
     // unit type that is selected in the list of unit icons
-    public static Entity hudSelectedUnit = null;
+    public static LivingEntity hudSelectedUnit = null;
     // private class used to render only the head of a unit on screen for the portrait
     public static PortraitRenderer portraitRenderer = new PortraitRenderer(null);
 
@@ -70,30 +71,18 @@ public class HudClientEvents {
         mouseX = evt.getMouseX();
         mouseY = evt.getMouseY();
 
-        ArrayList<LivingEntity> units = new ArrayList<>();
-        unitButtons = new ArrayList<>();
+        ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
 
-        for (int id: UnitClientEvents.getSelectedUnitIds()) {
-            Entity entity = MC.level.getEntity(id);
-            if (entity instanceof LivingEntity)
-                units.add((LivingEntity) entity);
-        }
-
-        // sort and hudSelect the first unit type in the list
-        units.sort(Comparator.comparing(HudClientEvents::getSimpleUnitName));
-
-        if (units.size() <= 0)
-            hudSelectedUnit = null;
-        else if (hudSelectedUnit == null || units.size() == 1)
-            hudSelectedUnit = units.get(0);
         // create all of the unit buttons for this frame
         int screenHeight = MC.getWindow().getGuiScaledHeight();
 
         int iconSize = 14;
         int iconFrameSize = Button.iconFrameSize;
 
+        unitButtons = new ArrayList<>();
         for (LivingEntity unit : units) {
-            if (unitButtons.size() < (unitButtonsPerRow * 2)) {
+            if (UnitClientEvents.getPlayerToEntityRelationship(unit.getId()) == Relationship.OWNED &&
+                unitButtons.size() < (unitButtonsPerRow * 2)) {
                 // mob head icon
                 String unitName = getSimpleUnitName(unit);
 
@@ -122,7 +111,9 @@ public class HudClientEvents {
         int blitX = hudStartingXPos;
         int blitY = MC.getWindow().getGuiScaledHeight() - portraitRenderer.frameHeight;
 
-        if (hudSelectedUnit != null && portraitRenderer.model != null && portraitRenderer.renderer != null) {
+        if (hudSelectedUnit != null &&
+            portraitRenderer.model != null &&
+            portraitRenderer.renderer != null) {
 
             // write capitalised unit name
             String unitName = HudClientEvents.getSimpleUnitName(hudSelectedUnit);
@@ -136,7 +127,7 @@ public class HudClientEvents {
 
             portraitRenderer.renderWithFrame(
                     evt.getPoseStack(), blitX, blitY,
-                    (LivingEntity) hudSelectedUnit);
+                    hudSelectedUnit);
 
             // draw unit stats
             blitX += portraitRenderer.frameWidth - 2;
@@ -160,7 +151,7 @@ public class HudClientEvents {
                     case 0 -> statString = String.valueOf((int) unit.getDamage()); // DAMAGE
                     case 1 -> statString = String.valueOf((int) (100 / unit.getAttackCooldown())); // ATTACK SPEED
                     case 2 -> statString = String.valueOf((int) (unit.getAttackRange())); // RANGE
-                    case 3 -> statString = String.valueOf(((LivingEntity) hudSelectedUnit).getArmorValue()); // ARMOUR
+                    case 3 -> statString = String.valueOf(hudSelectedUnit.getArmorValue()); // ARMOUR
                     case 4 -> statString = String.valueOf((int) (unit.getSpeedModifier() * 100)); // MOVE SPEED
                 }
                 GuiComponent.drawString(evt.getPoseStack(), MC.font, statString, blitXIcon + 13, blitYIcon, 0xFFFFFF);
@@ -203,7 +194,10 @@ public class HudClientEvents {
         // Unit action icons (attack, stop, move, abilities etc.)
         // -------------------------------------------------------
 
-        if (UnitClientEvents.getSelectedUnitIds().size() > 0) {
+        ArrayList<Integer> selUnitIds = UnitClientEvents.getSelectedUnitIds();
+        if (selUnitIds.size() > 0 &&
+            UnitClientEvents.getPlayerToEntityRelationship(selUnitIds.get(0)) == Relationship.OWNED) {
+
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
             for (Button actionButton : genericActionButtons) {
@@ -240,13 +234,24 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
+    // hudSelectedUnit and portraitRenderer should be assigned in the same event to avoid desyncs
     public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
-        LivingEntity entity = evt.getEntity();
+
+        ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
+
+        // sort and hudSelect the first unit type in the list
+        units.sort(Comparator.comparing(HudClientEvents::getSimpleUnitName));
+
+        if (units.size() <= 0)
+            hudSelectedUnit = null;
+        else if (hudSelectedUnit == null || units.size() == 1)
+            hudSelectedUnit = units.get(0);
+
         if (hudSelectedUnit == null) {
             portraitRenderer.model = null;
             portraitRenderer.renderer = null;
         }
-        else if (entity == hudSelectedUnit) {
+        else if (evt.getEntity() == hudSelectedUnit) {
             portraitRenderer.model = evt.getRenderer().getModel();
             portraitRenderer.renderer = evt.getRenderer();
         }

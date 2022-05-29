@@ -138,9 +138,9 @@ public class MinimapClientEvents {
                 // shade blocks to give elevation effects, excluding liquids and nonblocking blocks (eg. grass, flowers)
                 if (!mat.isLiquid()) {
                     if (yNorth > y)
-                        col = shadeRGB(col, 0.82F);
+                        col = MiscUtil.shadeHexRGB(col, 0.82F);
                     else if (yNorth < y) {
-                        col = shadeRGB(col, 1.16F);
+                        col = MiscUtil.shadeHexRGB(col, 1.16F);
                     }
                 }
                 else { // shade liquid based on depth
@@ -156,7 +156,7 @@ public class MinimapClientEvents {
                     // only reduce shade every nth step to have the map look sharper
                     depth = (int) (5*(Math.ceil(Math.abs(depth/5))));
 
-                    col = shadeRGB(col, 1.2F - (0.025F * depth));
+                    col = MiscUtil.shadeHexRGB(col, 1.2F - (0.025F * depth));
                 }
 
                 // draw view quad
@@ -173,39 +173,11 @@ public class MinimapClientEvents {
                         col = 0xFFFFFF;
                 }
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
-                mapColours.add(reverseRGB(col) | (0xFF << 24));
+                mapColours.add(MiscUtil.reverseHexRGB(col) | (0xFF << 24));
             }
         }
         //System.out.println("updated in: " + (System.currentTimeMillis() - timeBefore) + "ms");
         //System.out.println("blocks: " + mapColours.size());
-    }
-
-    // lightens or darkens a hex RGB value
-    private static int shadeRGB(int col, float mult) {
-        int red = (col >> 16) & 0xFF;
-        int green = (col >> 8) & 0xFF;
-        int blue = (col) & 0xFF;
-
-        if (mult > 1) { // prevent colours going > 255 (0xFF)
-            red = Math.min(Math.round(red * mult), 0xFF);
-            green = Math.min(Math.round(green * mult), 0xFF);
-            blue = Math.min(Math.round(blue * mult), 0xFF);
-        }
-        else { // prevent colours going < 0
-            red = Math.max(Math.round(red * mult), 0);
-            green = Math.max(Math.round(green * mult), 0);
-            blue = Math.max(Math.round(blue * mult), 0);
-        }
-        return (red << 16) | (green << 8) | (blue);
-    }
-
-    // convert col from RGB -> BGR (for some reason setPixelRGBA reads them backwards)
-    private static int reverseRGB(int col) {
-        int red = (col >> 16) & 0xFF;
-        int green = (col >> 8) & 0xFF;
-        int blue = (col) & 0xFF;
-
-        return (blue << 16) | (green << 8) | (red);
     }
 
     private static void renderMap(PoseStack stack)

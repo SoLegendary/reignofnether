@@ -6,11 +6,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
-import com.solegendary.reignofnether.units.Unit;
+import com.solegendary.reignofnether.units.UnitClientEvents;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.model.CreeperModel;
 import net.minecraft.client.model.EntityModel;
@@ -20,7 +19,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.List;
@@ -47,7 +45,6 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
     private final int ticksLeftMax = 120;
     private final int lookRangeX = 100;
     private final int lookRangeY = 40;
-
 
 
     public PortraitRenderer(R renderer) {
@@ -100,31 +97,50 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
     // - healthbar
     // - unit name
     public void renderWithFrame(PoseStack poseStack, int x, int y, LivingEntity entity) {
+
+        int bgCol = 0x0;
+        switch (UnitClientEvents.getPlayerToEntityRelationship(entity.getId())) {
+            case OWNED    -> bgCol = 0x90000000;
+            case FRIENDLY -> bgCol = 0x90009000;
+            case NEUTRAL  -> bgCol = 0x90909000;
+            case HOSTILE  -> bgCol = 0x90900000;
+        }
+
         MyRenderer.renderFrameWithBg(poseStack, x, y,
                 frameWidth,
                 frameHeight,
-                0xA0000000);
+                bgCol);
 
         int drawX = x + getHeadOffsetX(this.model);
         int drawY = y + getHeadOffsetY(this.model);
 
-        // TODO: hiding layers causes crash when unit dies while selected (also nonHeadModelVisibiliy sometimes isn't reset?)
         // hide all model parts except the head
         setNonHeadModelVisibility(this.model, false);
-        List<RenderLayer<T, M>> layers = renderer.layers;
-        renderer.layers = List.of();
+        List<RenderLayer<T, M>> layers = null;
+        if (renderer != null) {
+            layers = renderer.layers;
+            renderer.layers = List.of();
+        }
         drawEntityOnScreen(poseStack, entity, drawX, drawY, headSize);
-        renderer.layers = layers;
+        if (renderer != null && layers != null)
+            renderer.layers = layers;
         setNonHeadModelVisibility(this.model, true);
 
         // draw health bar and write min/max hp
         HealthBarClientEvents.render(poseStack, entity,
                 x+(frameWidth/2f), y+frameHeight-15,
-                frameWidth-9, HealthBarClientEvents.HeightMode.ON_SCREEN_PORTRAIT);
+                frameWidth-9, HealthBarClientEvents.RenderMode.GUI_PORTRAIT);
+
+        String healthText = "";
+        float health = entity.getHealth();
+        if (health >= 1)
+            healthText = String.valueOf((int) health);
+        else
+            healthText = String.valueOf(health).substring(0,3);
 
         GuiComponent.drawCenteredString(
                 poseStack, Minecraft.getInstance().font,
-                (int) entity.getHealth() + "/" + (int) entity.getMaxHealth(),
+                healthText + "/" + (int) entity.getMaxHealth(),
                 x+(frameWidth/2), y+frameHeight-13,
                 0xFFFFFFFF
         );

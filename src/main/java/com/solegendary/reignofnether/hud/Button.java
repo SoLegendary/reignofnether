@@ -1,10 +1,8 @@
 package com.solegendary.reignofnether.hud;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
-import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
@@ -110,7 +108,7 @@ public class Button {
         HealthBarClientEvents.render(poseStack, entity,
                 x + ((float) iconFrameSize / 2), y - 5,
                 iconFrameSize - 1,
-                HealthBarClientEvents.HeightMode.ON_SCREEN_ICON);
+                HealthBarClientEvents.RenderMode.GUI_ICON);
     }
 
     private boolean isMouseOver(int mouseX, int mouseY) {

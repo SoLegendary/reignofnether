@@ -6,5 +6,7 @@ public enum ActionName {
     STOP,
     HOLD,
     MOVE,
+
+    // special abilities
     EXPLODE,
 }

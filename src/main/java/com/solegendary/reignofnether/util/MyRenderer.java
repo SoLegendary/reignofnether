@@ -59,13 +59,13 @@ public class MyRenderer {
         matrixStack.popPose();
     }
 
-    public static void renderFrameWithBg(PoseStack poseStack, int x, int y, int width, int height, int bg) {
+    public static void renderFrameWithBg(PoseStack poseStack, int x, int y, int width, int height, int bgCol) {
         // draw icon frame with dark transparent bg
         GuiComponent.fill(poseStack, // x1,y1, x2,y2,
                 x + 2, y + 2,
                 x + width - 2,
                 y + height - 2,
-                bg); //ARGB(hex); note that alpha ranges between ~0-16 in RenderOverlayEvent, not 0-255
+                bgCol); //ARGB(hex); note that alpha ranges between ~0-16 in RenderOverlayEvent, not 0-255
 
         ResourceLocation iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame_no_bg.png");
         RenderSystem.setShaderTexture(0, iconFrameResource);

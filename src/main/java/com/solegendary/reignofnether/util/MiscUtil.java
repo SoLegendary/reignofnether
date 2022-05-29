@@ -84,4 +84,32 @@ public class MiscUtil {
             y += 10;
         }
     }
+
+    // lightens or darkens a hex RGB value
+    public static int shadeHexRGB(int col, float mult) {
+        int red = (col >> 16) & 0xFF;
+        int green = (col >> 8) & 0xFF;
+        int blue = (col) & 0xFF;
+
+        if (mult > 1) { // prevent colours going > 255 (0xFF)
+            red = Math.min(Math.round(red * mult), 0xFF);
+            green = Math.min(Math.round(green * mult), 0xFF);
+            blue = Math.min(Math.round(blue * mult), 0xFF);
+        }
+        else { // prevent colours going < 0
+            red = Math.max(Math.round(red * mult), 0);
+            green = Math.max(Math.round(green * mult), 0);
+            blue = Math.max(Math.round(blue * mult), 0);
+        }
+        return (red << 16) | (green << 8) | (blue);
+    }
+
+    // convert col from RGB -> BGR (for some reason setPixelRGBA reads them backwards)
+    public static int reverseHexRGB(int col) {
+        int red = (col >> 16) & 0xFF;
+        int green = (col >> 8) & 0xFF;
+        int blue = (col) & 0xFF;
+
+        return (blue << 16) | (green << 8) | (red);
+    }
 }
