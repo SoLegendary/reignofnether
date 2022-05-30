@@ -234,6 +234,13 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onRenderWorld(RenderLevelLastEvent evt) {
 
+        if (MC.level == null || !OrthoviewClientEvents.isEnabled())
+            return;
+
+        /**
+         *  TODO: make these visible to 1st-person players but currently had a visual glitch
+         *  doesnt align to camera very well, sometimes sinks below ground and too thin
+         */
         // always-shown highlights to indicate unit relationships
         for (int unitId : allUnitIds) {
             Entity entity = MC.level.getEntity(unitId);
@@ -248,9 +255,6 @@ public class UnitClientEvents {
                     MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.2f);
             }
         }
-
-        if (MC.level == null || !OrthoviewClientEvents.isEnabled())
-            return;
 
         ArrayList<Integer> selectedUnitIds = getSelectedUnitIds();
         ArrayList<Integer> preselectedUnitIds = getPreselectedUnitIds();

@@ -11,10 +11,8 @@ import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.model.CreeperModel;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.Model;
+import net.minecraft.client.model.*;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -121,6 +119,7 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
             layers = renderer.layers;
             renderer.layers = List.of();
         }
+
         drawEntityOnScreen(poseStack, entity, drawX, drawY, headSize);
         if (renderer != null && layers != null)
             renderer.layers = layers;
@@ -151,12 +150,12 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
             return headOffsetX;
         return 0;
     }
+    // TODO: could use entity.getEyeHeight()?
     private int getHeadOffsetY(Model model) {
-        if (model instanceof HumanoidModel)
-            return headOffsetY;
         if (model instanceof CreeperModel)
             return headOffsetY - 17;
-        return 0;
+        else
+            return headOffsetY;
     }
 
     private void setNonHeadModelVisibility(Model model, boolean visibility) {
@@ -168,12 +167,31 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
             ((HumanoidModel) model).rightLeg.visible = visibility;
             ((HumanoidModel) model).leftLeg.visible = visibility;
         }
-        if (model instanceof CreeperModel) {
+        else if (model instanceof CreeperModel) {
             ((CreeperModel) model).rightHindLeg.visible = visibility;
             ((CreeperModel) model).leftHindLeg.visible = visibility;
             ((CreeperModel) model).rightFrontLeg.visible = visibility;
             ((CreeperModel) model).leftFrontLeg.visible = visibility;
             ((CreeperModel) model).root.getChild("body").visible = visibility;
+        }
+        else if (model instanceof HeadedModel && model instanceof HierarchicalModel) {
+
+            ModelPart head = ((HeadedModel) model).getHead();
+            ModelPart root = ((HierarchicalModel) model).root();
+
+            root.getAllParts().forEach((ModelPart modelPart) -> {
+                if (!modelPart.equals(head) && !modelPart.equals(root))
+                    modelPart.visible = visibility;
+            });
+
+            if (model instanceof IllagerModel) {
+                head.getChild("nose").visible = true;
+
+                ModelPart body = root.getChild("body");
+                body.getAllParts().forEach((ModelPart modelPart) -> {
+                    modelPart.visible = visibility;
+                });
+            }
         }
     }
 
