@@ -89,11 +89,12 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
             lookY = lookTargetY;
     }
 
-    // includes:
+    // Render the portrait including:
     // - background frame
     // - moving head
     // - healthbar
     // - unit name
+    // Must be called from DrawScreenEvent
     public void renderWithFrame(PoseStack poseStack, int x, int y, LivingEntity entity) {
 
         int bgCol = 0x0;
@@ -126,6 +127,7 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
         setNonHeadModelVisibility(this.model, true);
 
         // draw health bar and write min/max hp
+        /*
         HealthBarClientEvents.render(poseStack, entity,
                 x+(frameWidth/2f), y+frameHeight-15,
                 frameWidth-9, HealthBarClientEvents.RenderMode.GUI_PORTRAIT);
@@ -143,6 +145,7 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
                 x+(frameWidth/2), y+frameHeight-13,
                 0xFFFFFFFF
         );
+         */
     }
 
     private int getHeadOffsetX(Model model) {
@@ -159,6 +162,7 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
     }
 
     private void setNonHeadModelVisibility(Model model, boolean visibility) {
+
         if (model instanceof HumanoidModel) {
             ((HumanoidModel) model).hat.visible = visibility;
             ((HumanoidModel) model).body.visible = visibility;
@@ -167,31 +171,14 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
             ((HumanoidModel) model).rightLeg.visible = visibility;
             ((HumanoidModel) model).leftLeg.visible = visibility;
         }
-        else if (model instanceof CreeperModel) {
-            ((CreeperModel) model).rightHindLeg.visible = visibility;
-            ((CreeperModel) model).leftHindLeg.visible = visibility;
-            ((CreeperModel) model).rightFrontLeg.visible = visibility;
-            ((CreeperModel) model).leftFrontLeg.visible = visibility;
-            ((CreeperModel) model).root.getChild("body").visible = visibility;
-        }
-        else if (model instanceof HeadedModel && model instanceof HierarchicalModel) {
+        else if (model instanceof HierarchicalModel) {
 
-            ModelPart head = ((HeadedModel) model).getHead();
             ModelPart root = ((HierarchicalModel) model).root();
 
-            root.getAllParts().forEach((ModelPart modelPart) -> {
-                if (!modelPart.equals(head) && !modelPart.equals(root))
+            root.children.forEach((String name, ModelPart modelPart) -> {
+                if (!name.contentEquals("head"))
                     modelPart.visible = visibility;
             });
-
-            if (model instanceof IllagerModel) {
-                head.getChild("nose").visible = true;
-
-                ModelPart body = root.getChild("body");
-                body.getAllParts().forEach((ModelPart modelPart) -> {
-                    modelPart.visible = visibility;
-                });
-            }
         }
     }
 

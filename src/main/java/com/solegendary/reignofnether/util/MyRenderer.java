@@ -3,6 +3,8 @@ package com.solegendary.reignofnether.util;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.ReignOfNether;
@@ -27,7 +29,7 @@ public class MyRenderer {
 
     public static void drawBlockOutline(PoseStack matrixStack, BlockPos blockpos, float a) {
         AABB aabb = new AABB(blockpos).move(0,0.01,0);
-        drawLineBox(matrixStack, aabb, 1.0f,1.0f,1.0f, a);
+        drawSolidBox(matrixStack, aabb, 1.0f,1.0f,1.0f, a);
     }
 
     public static void drawEntityOutline(PoseStack matrixStack, Entity entity, float a) {
@@ -53,9 +55,75 @@ public class MyRenderer {
 
         RenderSystem.depthMask(false); // disable showing lines through blocks
         VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.lines());
+
         matrixStack.pushPose();
         matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
         LevelRenderer.renderLineBox(matrixStack, vertexConsumer, aabb, r, g, b, a);
+        matrixStack.popPose();
+    }
+
+    public static void drawSolidBox(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
+        Entity camEntity = MC.getCameraEntity();
+        double d0 = camEntity.getX();
+        double d1 = camEntity.getY() + camEntity.getEyeHeight();
+        double d2 = camEntity.getZ();
+
+        RenderSystem.depthMask(false); // disable showing lines through blocks
+
+        matrixStack.pushPose();
+        matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
+        Matrix4f matrix4f = matrixStack.last().pose();
+        Matrix3f matrix3f = matrixStack.last().normal();
+
+        float minX = (float) aabb.minX;
+        float minY = (float) aabb.minY;
+        float minZ = (float) aabb.minZ;
+        float maxX = (float) aabb.maxX;
+        float maxY = (float) aabb.maxY;
+        float maxZ = (float) aabb.maxZ;
+
+        // Note that error: 'not filled all elements of vertex' means the vertex needs more elements,
+        // eg. POSITION_COLOR_NORMAL needs vertex(pos).color(rgba).normal(dir)
+        // normal is the vector perpendicular to the plane, if not used all quads will always be flat facing
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferbuilder = tesselator.getBuilder();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+
+        // +y top face
+        bufferbuilder.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+        /*
+        // +x side face
+        bufferbuilder.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+        // +z side face
+        bufferbuilder.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+        // -x side face
+        bufferbuilder.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        // -z side face
+        bufferbuilder.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        */
+        // -y bottom face
+        bufferbuilder.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+
+
+        tesselator.end();
         matrixStack.popPose();
     }
 

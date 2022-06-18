@@ -1,9 +1,11 @@
 package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Relationship;
 import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -11,10 +13,13 @@ import net.minecraft.client.model.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
@@ -269,7 +274,7 @@ public class HudClientEvents {
     }
 
     // uncomment to adjust render position/size of portraits
-    /*
+
     @SubscribeEvent
     public static void onInput(InputEvent.KeyInputEvent evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
@@ -290,12 +295,12 @@ public class HudClientEvents {
     }
     @SubscribeEvent
     public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
-        if (hudSelectedUnit != null)
+        if (hudSelectedEntity != null)
             MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
                     "headOffsetX: " + portraitRenderer.headOffsetX,
                     "headOffsetY: " + portraitRenderer.headOffsetY,
-                    "headSize: " + portraitRenderer.headSize
+                    "headSize: " + portraitRenderer.headSize,
+                    "eyeHeight: " + hudSelectedEntity.getEyeHeight(),
             });
     }
-     */
 }

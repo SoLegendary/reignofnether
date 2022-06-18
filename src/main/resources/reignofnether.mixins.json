@@ -7,7 +7,7 @@
     "FrustumMixin",
     "OrthoViewMixin",
     "TopdownGuiMixin",
-    "PlayerMixin"
+    "AbstractIllagerMixin"
   ],
   "minVersion": "0.8"
 }
