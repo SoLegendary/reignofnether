@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
@@ -83,46 +84,68 @@ public class MyRenderer {
         float maxZ = (float) aabb.maxZ;
 
         // Note that error: 'not filled all elements of vertex' means the vertex needs more elements,
-        // eg. POSITION_COLOR_NORMAL needs vertex(pos).color(rgba).normal(dir)
+        // eg. ENTITY_TRANSLUCENT needs vertex(x,y,z).color(rgba).uv(0,0).overlayCoords(0,0).uv2(light).normal(x,y,z)
         // normal is the vector perpendicular to the plane, if not used all quads will always be flat facing
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+        //Tesselator tesselator = Tesselator.getInstance();
+        //BufferBuilder bufferbuilder = tesselator.getBuilder();
+        //bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+
+        // uv() are the texture coordinates, if you dont use a texture, they can be (0, 0).
+        // uv2() are the block and skylight (packed with LightTexture.pack() to one integer).
+        // overlayCoords() refers to overlay effects:
+        //      (0,10) is no overlay
+        //      (0,0) is 'entity hurt', ie. the red overlaid when entities take damage
+
+        ResourceLocation rl = new ResourceLocation("forge:textures/black.png");
+        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
+
+        int colour = 0x7F7F7F7F;
+        a = FastColor.ARGB32.alpha(colour);
+        r = FastColor.ARGB32.red(colour);
+        g = FastColor.ARGB32.green(colour);
+        b = FastColor.ARGB32.blue(colour);
+
+        System.out.println("Colours:");
+        System.out.println(a);
+        System.out.println(r);
+        System.out.println(g);
+        System.out.println(b);
 
         // all vertices are in order: BR, TR, TL, BL
 
-        // +y top face
-        bufferbuilder.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        // +x side face
-        bufferbuilder.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
-        // +z side face
-        bufferbuilder.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
-        // -x side face
-        bufferbuilder.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
-        // -z side face
-        bufferbuilder.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
-        // -y bottom face
-        bufferbuilder.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+        int light = 255;
 
-        tesselator.end();
+        // +y top face
+        vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        // +x side face
+        vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        // +z side face
+        vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        // -x side face
+        vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+        // -z side face
+        vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+        // -y bottom face
+        vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+
         matrixStack.popPose();
     }
 
