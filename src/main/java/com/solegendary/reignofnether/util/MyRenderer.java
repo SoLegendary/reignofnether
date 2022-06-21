@@ -30,7 +30,7 @@ public class MyRenderer {
 
     public static void drawBlockOutline(PoseStack matrixStack, BlockPos blockpos, float a) {
         AABB aabb = new AABB(blockpos).move(0,0.01,0);
-        drawSolidBox(matrixStack, aabb, 1.0f,1.0f,1.0f, a);
+        drawLineBox(matrixStack, aabb, 1.0f,1.0f,1.0f, a);
     }
 
     public static void drawEntityOutline(PoseStack matrixStack, Entity entity, float a) {
@@ -63,7 +63,20 @@ public class MyRenderer {
         matrixStack.popPose();
     }
 
-    public static void drawSolidBox(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
+    public static void drawWhiteBox(PoseStack matrixStack, BlockPos bp, float a) {
+        drawSolidBox(matrixStack, new AABB(bp), 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/white.png"));
+    }
+    public static void drawWhiteBox(PoseStack matrixStack, AABB aabb, float a) {
+        drawSolidBox(matrixStack, aabb, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/white.png"));
+    }
+    public static void drawBlackBox(PoseStack matrixStack, BlockPos bp, float a) {
+        drawSolidBox(matrixStack, new AABB(bp), 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/black.png"));
+    }
+    public static void drawBlackBox(PoseStack matrixStack, AABB aabb, float a) {
+        drawSolidBox(matrixStack, aabb, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/black.png"));
+    }
+
+    public static void drawSolidBox(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a, ResourceLocation rl) {
         Entity camEntity = MC.getCameraEntity();
         double d0 = camEntity.getX();
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
@@ -86,9 +99,6 @@ public class MyRenderer {
         // Note that error: 'not filled all elements of vertex' means the vertex needs more elements,
         // eg. ENTITY_TRANSLUCENT needs vertex(x,y,z).color(rgba).uv(0,0).overlayCoords(0,0).uv2(light).normal(x,y,z)
         // normal is the vector perpendicular to the plane, if not used all quads will always be flat facing
-        //Tesselator tesselator = Tesselator.getInstance();
-        //BufferBuilder bufferbuilder = tesselator.getBuilder();
-        //bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
         // uv() are the texture coordinates, if you dont use a texture, they can be (0, 0).
         // uv2() are the block and skylight (packed with LightTexture.pack() to one integer).
@@ -96,20 +106,7 @@ public class MyRenderer {
         //      (0,10) is no overlay
         //      (0,0) is 'entity hurt', ie. the red overlaid when entities take damage
 
-        ResourceLocation rl = new ResourceLocation("forge:textures/black.png");
         VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
-
-        int colour = 0x7F7F7F7F;
-        a = FastColor.ARGB32.alpha(colour);
-        r = FastColor.ARGB32.red(colour);
-        g = FastColor.ARGB32.green(colour);
-        b = FastColor.ARGB32.blue(colour);
-
-        System.out.println("Colours:");
-        System.out.println(a);
-        System.out.println(r);
-        System.out.println(g);
-        System.out.println(b);
 
         // all vertices are in order: BR, TR, TL, BL
 

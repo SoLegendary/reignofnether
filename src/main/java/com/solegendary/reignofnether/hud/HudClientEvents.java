@@ -274,7 +274,7 @@ public class HudClientEvents {
     }
 
     // uncomment to adjust render position/size of portraits
-
+    /*
     @SubscribeEvent
     public static void onInput(InputEvent.KeyInputEvent evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
@@ -295,6 +295,7 @@ public class HudClientEvents {
     }
     @SubscribeEvent
     public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
+
         if (hudSelectedEntity != null)
             MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
                     "headOffsetX: " + portraitRenderer.headOffsetX,
@@ -303,4 +304,5 @@ public class HudClientEvents {
                     "eyeHeight: " + hudSelectedEntity.getEyeHeight(),
             });
     }
+     */
 }

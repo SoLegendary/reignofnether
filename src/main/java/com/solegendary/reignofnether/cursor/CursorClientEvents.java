@@ -23,10 +23,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
-import net.minecraftforge.client.event.DrawSelectionEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
-import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 import static net.minecraft.util.Mth.*;
@@ -318,6 +315,7 @@ public class CursorClientEvents {
             if (!OrthoviewClientEvents.isCameraMovingByMouse() && !leftClickDown &&
                     UnitClientEvents.getSelectedUnitIds().size() > 0 &&
                     UnitClientEvents.getPreselectedUnitIds().size() <= 0) {
+                MyRenderer.drawWhiteBox(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 0.3f : 0.15f);
                 MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }
         }
@@ -389,6 +387,24 @@ public class CursorClientEvents {
             }
         }
         return bestBp;
+    }
+
+    static float alpha = 1.0f;
+
+    @SubscribeEvent
+    public static void onInput(InputEvent.KeyInputEvent evt) {
+        if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
+            if (evt.getKey() == Keybinds.panMinusX.getKey().getValue())
+                alpha -= 0.1f;
+            if (evt.getKey() == Keybinds.panPlusX.getKey().getValue())
+                alpha += 0.1f;
+        }
+    }
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
+        MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
+                "alpha: " + alpha,
+        });
     }
 }
 
