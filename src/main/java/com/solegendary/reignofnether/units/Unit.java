@@ -38,6 +38,7 @@ public interface Unit {
     public float getAttackRange();
     public float getSpeedModifier();
     public float getDamage();
+    public float getSightRange();
 
     public BlockPos getAttackMoveTarget();
     public LivingEntity getFollowTarget();

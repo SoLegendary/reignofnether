@@ -127,7 +127,6 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
         setNonHeadModelVisibility(this.model, true);
 
         // draw health bar and write min/max hp
-        /*
         HealthBarClientEvents.render(poseStack, entity,
                 x+(frameWidth/2f), y+frameHeight-15,
                 frameWidth-9, HealthBarClientEvents.RenderMode.GUI_PORTRAIT);
@@ -145,7 +144,6 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
                 x+(frameWidth/2), y+frameHeight-13,
                 0xFFFFFFFF
         );
-         */
     }
 
     private int getHeadOffsetX(Model model) {

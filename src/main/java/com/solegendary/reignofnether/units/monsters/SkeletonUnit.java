@@ -67,6 +67,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
     public float getAttackRange() {return attackRange;}
     public float getSpeedModifier() {return speedModifier;}
     public float getDamage() {return damage;}
+    public float getSightRange() {return sightRange;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -78,6 +79,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
     final public float attackRange = 10.0F; // only used by ranged units
     final public int attackCooldown = 45;
     final public float aggroRange = 10;
+    final public float sightRange = 10f;
     final public boolean willRetaliate = true; // will attack when hurt by an enemy
     final public boolean aggressiveWhenIdle = false;
 

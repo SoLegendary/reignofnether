@@ -15,6 +15,17 @@ public class MyMath {
         return (a <= b && b <= c) || (a >= b && b >= c);
     }
 
+    // returns whether the given 2d point (m) is inside a rectangle with corners a,b,c,d
+    // https://math.stackexchange.com/questions/190111/how-to-check-if-a-point-is-inside-a-rectangle
+    public static boolean isPointInsideRect(Vec2 m, Vec2 a, Vec2 b, Vec2 c, Vec2 d) {
+        float area_rect = 0.5f * abs((a.y-c.y)*(d.x-b.x) + (b.y-d.y)*(a.x-c.x));
+        float abm = 0.5f * (a.x*(b.y-m.y) + b.x*(m.y-a.y) + m.x*(a.y-b.y));
+        float bcm = 0.5f * (b.x*(c.y-m.y) + c.x*(m.y-b.y) + m.x*(b.y-c.y));
+        float cdm = 0.5f * (c.x*(d.y-m.y) + d.x*(m.y-c.y) + m.x*(c.y-d.y));
+        float dam = 0.5f * (d.x*(a.y-m.y) + a.x*(m.y-d.y) + m.x*(d.y-a.y));
+        return (abm + bcm + cdm + dam) < area_rect;
+    }
+
     // returns vec3d with a set amount of the given unit vector added to it
     public static Vector3d addVector3d(Vector3d vec, Vector3d unitVec, float scale) {
         Vector3d unitVecLocal = new Vector3d(0,0,0);
