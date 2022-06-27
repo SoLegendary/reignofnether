@@ -188,38 +188,14 @@ public class CursorClientEvents {
             // instead, improvise our own quad
             // https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
 
-            // calculate 4 vertices
-            Vector3d worldPosTL = MiscUtil.screenPosToWorldPos(MC, (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDownPos.y); // top-left
-            Vector3d worldPosBL = MiscUtil.screenPosToWorldPos(MC, (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y); // bottom-left
-            Vector3d worldPosBR = MiscUtil.screenPosToWorldPos(MC, (int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y); // bottom-right
-
-            Vector3d vp5 = MyMath.addVector3d(worldPosTL, lookVector, -200);
-            Vector3d vp1 = MyMath.addVector3d(worldPosBL, lookVector, -200);
-            Vector3d vp4 = MyMath.addVector3d(worldPosBR, lookVector, -200);
-            Vector3d vp2 = MyMath.addVector3d(worldPosBL, lookVector, 200);
-
-            // convert all to Vec3s so we can do math without modifying in-place
-            Vec3 p5 = new Vec3(vp5.x, vp5.y, vp5.z);
-            Vec3 p1 = new Vec3(vp1.x, vp1.y, vp1.z);
-            Vec3 p4 = new Vec3(vp4.x, vp4.y, vp4.z);
-            Vec3 p2 = new Vec3(vp2.x, vp2.y, vp2.z);
-
-            Vec3 u = p1.subtract(p4).cross(p1.subtract(p5));
-            Vec3 v = p1.subtract(p2).cross(p1.subtract(p5));
-            Vec3 w = p1.subtract(p2).cross(p1.subtract(p4));
-
+            ArrayList<Vec3> uvwp = MyMath.prepIsPointInsideRect3d(MC,
+                    (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDownPos.y,
+                    (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y,
+                    (int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y
+            );
             for (PathfinderMob entity : entities) {
-                Vec3 x = entity.getBoundingBox().getCenter();
-
-                double ux = u.dot(x);
-                double vx = v.dot(x);
-                double wx = w.dot(x);
-
-                if (MyMath.isBetween(u.dot(p1), ux, u.dot(p2)) &&
-                    MyMath.isBetween(v.dot(p1), vx, v.dot(p4)) &&
-                    MyMath.isBetween(w.dot(p1), wx, w.dot(p5))) {
+                if (MyMath.isPointInsideRect3d(uvwp, entity.getBoundingBox().getCenter()))
                     UnitClientEvents.addPreselectedUnitId(entity.getId());
-                }
             }
         }
     }

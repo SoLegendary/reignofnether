@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
@@ -64,19 +65,21 @@ public class MyRenderer {
     }
 
     public static void drawWhiteBox(PoseStack matrixStack, BlockPos bp, float a) {
-        drawSolidBox(matrixStack, new AABB(bp), 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/white.png"));
-    }
-    public static void drawWhiteBox(PoseStack matrixStack, AABB aabb, float a) {
-        drawSolidBox(matrixStack, aabb, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/white.png"));
+        drawSolidBox(matrixStack, new AABB(bp), null, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/white.png"));
     }
     public static void drawBlackBox(PoseStack matrixStack, BlockPos bp, float a) {
-        drawSolidBox(matrixStack, new AABB(bp), 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/black.png"));
-    }
-    public static void drawBlackBox(PoseStack matrixStack, AABB aabb, float a) {
-        drawSolidBox(matrixStack, aabb, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/black.png"));
+        AABB aabb = new AABB(bp);
+        aabb = aabb.setMaxY(aabb.maxY + 0.01f);
+        drawSolidBox(matrixStack, aabb, null, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/black.png"));
     }
 
-    public static void drawSolidBox(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a, ResourceLocation rl) {
+    public static void drawDarkBlockFace(PoseStack matrixStack, Direction dir, BlockPos bp, float a) {
+        AABB aabb = new AABB(bp);
+        aabb = aabb.setMaxY(aabb.maxY + 0.01f);
+        drawSolidBox(matrixStack, aabb, dir, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/black.png"));
+    }
+
+    public static void drawSolidBox(PoseStack matrixStack, AABB aabb, Direction dir, float r, float g, float b, float a, ResourceLocation rl) {
         Entity camEntity = MC.getCameraEntity();
         double d0 = camEntity.getX();
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
@@ -113,36 +116,47 @@ public class MyRenderer {
         int light = 255;
 
         // +y top face
-        vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        if (dir == null || dir == Direction.UP) {
+            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        }
         // +x side face
-        vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        if (dir == null || dir == Direction.EAST) {
+            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        }
         // +z side face
-        vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        if (dir == null || dir == Direction.SOUTH) {
+            vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        }
         // -x side face
-        vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+        if (dir == null || dir == Direction.WEST) {
+            vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+        }
         // -z side face
-        vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+        if (dir == null || dir == Direction.NORTH) {
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).uv(0, 0).overlayCoords(0, 10).uv2(light).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).uv(0, 0).overlayCoords(0, 10).uv2(light).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).uv(0, 0).overlayCoords(0, 10).uv2(light).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).uv(0, 0).overlayCoords(0, 10).uv2(light).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+        }
         // -y bottom face
-        vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(light).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
-
+        if (dir == null || dir == Direction.DOWN) {
+            vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).uv(0, 0).overlayCoords(0, 10).uv2(light).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).uv(0, 0).overlayCoords(0, 10).uv2(light).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).uv(0, 0).overlayCoords(0, 10).uv2(light).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).uv(0, 0).overlayCoords(0, 10).uv2(light).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+        }
         matrixStack.popPose();
     }
 
@@ -192,4 +206,6 @@ public class MyRenderer {
                 size, size // size of texture itself (if < dimensions, texture is repeated)
         );
     }
+
+
 }

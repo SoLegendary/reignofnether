@@ -1,9 +1,14 @@
 package com.solegendary.reignofnether.util;
 
 import com.mojang.math.Vector3d;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
+
+import static com.solegendary.reignofnether.cursor.CursorClientEvents.getPlayerLookVector;
 import static java.lang.Math.*;
 import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
@@ -17,13 +22,69 @@ public class MyMath {
 
     // returns whether the given 2d point (m) is inside a rectangle with corners a,b,c,d
     // https://math.stackexchange.com/questions/190111/how-to-check-if-a-point-is-inside-a-rectangle
-    public static boolean isPointInsideRect(Vec2 m, Vec2 a, Vec2 b, Vec2 c, Vec2 d) {
+    public static boolean isPointInsideRect2d(Vec2 m, Vec2 a, Vec2 b, Vec2 c, Vec2 d) {
         float area_rect = 0.5f * abs((a.y-c.y)*(d.x-b.x) + (b.y-d.y)*(a.x-c.x));
         float abm = 0.5f * (a.x*(b.y-m.y) + b.x*(m.y-a.y) + m.x*(a.y-b.y));
         float bcm = 0.5f * (b.x*(c.y-m.y) + c.x*(m.y-b.y) + m.x*(b.y-c.y));
         float cdm = 0.5f * (c.x*(d.y-m.y) + d.x*(m.y-c.y) + m.x*(c.y-d.y));
         float dam = 0.5f * (d.x*(a.y-m.y) + a.x*(m.y-d.y) + m.x*(d.y-a.y));
         return (abm + bcm + cdm + dam) < area_rect;
+    }
+
+    // returns the uvw used by isPointInsideRect3d
+    // the 3 corners are SCREEN positions which are converted to world positions
+    // usually used to check if a point is in the view camera (or part of it)
+    public static ArrayList<Vec3> prepIsPointInsideRect3d(Minecraft MC, int tlx, int tly, int blx, int bly, int brx, int bry) {
+
+        Vector3d lookVector = getPlayerLookVector();
+
+        Vector3d tl = MiscUtil.screenPosToWorldPos(MC, tlx, tly);
+        Vector3d bl = MiscUtil.screenPosToWorldPos(MC, blx, bly);
+        Vector3d br = MiscUtil.screenPosToWorldPos(MC, brx, bry);
+
+        Vector3d vp5 = MyMath.addVector3d(tl, lookVector, -200);
+        Vector3d vp1 = MyMath.addVector3d(bl, lookVector, -200);
+        Vector3d vp4 = MyMath.addVector3d(br, lookVector, -200);
+        Vector3d vp2 = MyMath.addVector3d(bl, lookVector, 200);
+
+        // convert all to Vec3s so we can do math without modifying in-place
+        Vec3 p5 = new Vec3(vp5.x, vp5.y, vp5.z);
+        Vec3 p1 = new Vec3(vp1.x, vp1.y, vp1.z);
+        Vec3 p4 = new Vec3(vp4.x, vp4.y, vp4.z);
+        Vec3 p2 = new Vec3(vp2.x, vp2.y, vp2.z);
+
+        Vec3 u = p1.subtract(p4).cross(p1.subtract(p5));
+        Vec3 v = p1.subtract(p2).cross(p1.subtract(p5));
+        Vec3 w = p1.subtract(p2).cross(p1.subtract(p4));
+
+        // contains u,v,w,p1,p2,p4,p5
+        ArrayList<Vec3> uvwp = new ArrayList<>();
+        uvwp.add(u);
+        uvwp.add(v);
+        uvwp.add(w);
+        uvwp.add(p1);
+        uvwp.add(p2);
+        uvwp.add(p4);
+        uvwp.add(p5);
+        return uvwp;
+    }
+
+    public static boolean isPointInsideRect3d(ArrayList<Vec3> uvwp, Vec3 x) {
+        Vec3 u = uvwp.get(0);
+        Vec3 v = uvwp.get(1);
+        Vec3 w = uvwp.get(2);
+        Vec3 p1 = uvwp.get(3);
+        Vec3 p2 = uvwp.get(4);
+        Vec3 p4 = uvwp.get(5);
+        Vec3 p5 = uvwp.get(6);
+
+        double ux = u.dot(x);
+        double vx = v.dot(x);
+        double wx = w.dot(x);
+
+        return MyMath.isBetween(u.dot(p1), ux, u.dot(p2)) &&
+               MyMath.isBetween(v.dot(p1), vx, v.dot(p4)) &&
+               MyMath.isBetween(w.dot(p1), wx, w.dot(p5));
     }
 
     // returns vec3d with a set amount of the given unit vector added to it

@@ -38,7 +38,7 @@ public class MinimapClientEvents {
     public static final int WORLD_RADIUS = 100; // how many world blocks should be mapped
     public static final int RENDER_RADIUS = 50; // actual size on GUI
     private static final int REFRESH_TICKS_MAX = 100;
-    private static int REFRESH_TICKS_CURRENT = 100;
+    private static int refreshTicksCurrent = 0;
     private static final float CORNER_OFFSET = 10;
     private static final float BG_OFFSET = 6;
 
@@ -271,9 +271,9 @@ public class MinimapClientEvents {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
-        REFRESH_TICKS_CURRENT -= 1;
-        if (REFRESH_TICKS_CURRENT <= 0) {
-            REFRESH_TICKS_CURRENT = REFRESH_TICKS_MAX;
+        refreshTicksCurrent -= 1;
+        if (refreshTicksCurrent <= 0) {
+            refreshTicksCurrent = REFRESH_TICKS_MAX;
             updateMapColours();
             updateMapTexture();
         }
