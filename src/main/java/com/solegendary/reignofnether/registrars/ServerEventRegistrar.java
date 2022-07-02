@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.registrars;
 
+import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.units.UnitServerEvents;
 import net.minecraftforge.common.MinecraftForge;
@@ -23,6 +24,7 @@ public class ServerEventRegistrar {
     public void registerServerEvents() {
         vanillaEventBus.register(PlayerServerEvents.class);
         vanillaEventBus.register(UnitServerEvents.class);
+        vanillaEventBus.register(BuildingServerEvents.class);
         //vanillaEventBus.register(CursorServerEvents.class);
     }
 }

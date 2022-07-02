@@ -101,6 +101,7 @@ public class MyRenderer {
 
         // Note that error: 'not filled all elements of vertex' means the vertex needs more elements,
         // eg. ENTITY_TRANSLUCENT needs vertex(x,y,z).color(rgba).uv(0,0).overlayCoords(0,0).uv2(light).normal(x,y,z)
+        // you can trace this all the way back to the DefaultVertexFormat class where these vertex elements are defined
         // normal is the vector perpendicular to the plane, if not used all quads will always be flat facing
 
         // uv() are the texture coordinates, if you dont use a texture, they can be (0, 0).

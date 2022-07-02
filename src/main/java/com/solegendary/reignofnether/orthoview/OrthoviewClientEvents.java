@@ -156,7 +156,7 @@ public class OrthoviewClientEvents {
     public static void onInput(InputEvent.KeyInputEvent evt) {
 
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-            if (evt.getKey() == Keybinds.toggle.getKey().getValue())
+            if (evt.getKey() == Keybinds.fnums[12].getKey().getValue())
                 toggleEnable();
 
             if (evt.getKey() == Keybinds.reset.getKey().getValue())

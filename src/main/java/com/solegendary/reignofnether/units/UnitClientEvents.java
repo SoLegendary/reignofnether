@@ -209,7 +209,7 @@ public class UnitClientEvents {
     public static void onWorldTick(TickEvent.ClientTickEvent evt) {
 
         // deselect all units
-        if (Keybinds.keyF1.isDown())
+        if (Keybinds.fnums[1].isDown())
             selectedUnitIds = new ArrayList<>();
 
         // manage control groups
