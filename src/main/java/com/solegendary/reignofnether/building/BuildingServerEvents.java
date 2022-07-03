@@ -4,9 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -29,6 +27,9 @@ public class BuildingServerEvents {
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
         if (evt.world.isClientSide())
             return;
+
+        if (!BuildingTemplates.initedStructures)
+            BuildingTemplates.initStructures((ServerLevel) evt.world);
 
         for (Pair<BlockPos, CompoundTag> placeBlock : placeQueue) {
             evt.world.setBlock(placeBlock.getFirst(), Blocks.OAK_LOG.defaultBlockState(), 1);
