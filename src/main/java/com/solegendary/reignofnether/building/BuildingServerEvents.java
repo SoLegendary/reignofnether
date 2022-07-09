@@ -1,14 +1,18 @@
 package com.solegendary.reignofnether.building;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class BuildingServerEvents {
 
@@ -27,9 +31,6 @@ public class BuildingServerEvents {
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
         if (evt.world.isClientSide())
             return;
-
-        if (!BuildingTemplates.initedStructures)
-            BuildingTemplates.initStructures((ServerLevel) evt.world);
 
         for (Pair<BlockPos, CompoundTag> placeBlock : placeQueue) {
             evt.world.setBlock(placeBlock.getFirst(), Blocks.OAK_LOG.defaultBlockState(), 1);
