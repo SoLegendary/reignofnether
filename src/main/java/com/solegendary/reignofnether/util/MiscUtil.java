@@ -18,6 +18,10 @@ import java.util.List;
 
 public class MiscUtil {
 
+    public static boolean listContainsObjectValue(List<Object> objs, String obj){
+        return objs.stream().anyMatch(o -> o.equals(obj));
+    }
+
     public static boolean isLeftClickDown(Minecraft MC) {
         return GLFW.glfwGetMouseButton(MC.getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_1) == GLFW.GLFW_PRESS;
     }

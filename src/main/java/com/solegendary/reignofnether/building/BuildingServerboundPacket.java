@@ -1,12 +1,9 @@
 package com.solegendary.reignofnether.building;
 
-import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,46 +13,26 @@ public class BuildingServerboundPacket {
 
     private static Minecraft MC = Minecraft.getInstance();
 
-    public BlockPos bp;
-    public CompoundTag nbt;
+    public BlockPos pos;
+    public int damageAmount;
     public BuildingAction action;
 
-    public static void placeBlock(BlockPos bp, CompoundTag nbt) {
-        if (MC.level != null) {
-            PacketHandler.INSTANCE.sendToServer(
-                    new BuildingServerboundPacket(bp, nbt, BuildingAction.PLACE)
-            );
-            // place and destroy dummy block clientside with drops disabled to get particle effects
-            MC.level.setBlock(bp, Blocks.OAK_LOG.defaultBlockState(), 1);
-            MC.level.destroyBlock(bp, false);
-            MC.level.setBlock(bp, Blocks.OAK_LOG.defaultBlockState(), 1);
-        }
-    }
-    public static void destroyBlock(BlockPos bp) {
-        if (MC.level != null) {
-            PacketHandler.INSTANCE.sendToServer(
-                    new BuildingServerboundPacket(bp, null, BuildingAction.DESTROY)
-            );
-            MC.level.destroyBlock(bp, false);
-        }
-    }
-
     // packet-handler functions
-    public BuildingServerboundPacket(BlockPos bp, CompoundTag nbt, BuildingAction action) {
-        this.bp = bp;
-        this.nbt = nbt;
+    public BuildingServerboundPacket(BlockPos bp, int damageAmount, BuildingAction action) {
+        this.pos = bp;
+        this.damageAmount = damageAmount;
         this.action = action;
     }
 
     public BuildingServerboundPacket(FriendlyByteBuf buffer) {
-        this.bp = buffer.readBlockPos();
-        this.nbt = buffer.readNbt();
+        this.pos = buffer.readBlockPos();
+        this.damageAmount = buffer.readInt();
         this.action = buffer.readEnum(BuildingAction.class);
     }
 
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeBlockPos(this.bp);
-        buffer.writeNbt(this.nbt);
+        buffer.writeBlockPos(this.pos);
+        buffer.writeInt(this.damageAmount);
         buffer.writeEnum(this.action);
     }
 
@@ -65,9 +42,13 @@ public class BuildingServerboundPacket {
         ctx.get().enqueueWork(() -> {
 
             if (this.action == BuildingAction.PLACE)
-                BuildingServerEvents.placeBlock(this.bp, this.nbt);
+                System.out.println("PLACE");
             else if (this.action == BuildingAction.DESTROY)
-                BuildingServerEvents.destroyBlock(this.bp);
+                System.out.println("DESTROY");
+            else if (this.action == BuildingAction.DAMAGE)
+                System.out.println("DAMAGE");
+            else if (this.action == BuildingAction.REPAIR)
+                System.out.println("REPAIR");
 
             success.set(true);
         });

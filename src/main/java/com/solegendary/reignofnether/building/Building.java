@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
@@ -12,11 +13,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Optional;
 
 public class Building {
@@ -32,59 +35,12 @@ public class Building {
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
     public float explodeChance;
-    public ArrayList<BuildingBlock> blocks = new ArrayList<>();
-    public ArrayList<BlockState> palette = new ArrayList<>();
-
-    private class BuildingBlock {
-        public BlockPos blockPos;
-        public Integer paletteIndex;
-        public Boolean isPlaced = false;
-
-        public BuildingBlock(BlockPos blockPos, Integer paletteIndex) {
-            this.blockPos = blockPos;
-            this.paletteIndex = paletteIndex;
-        }
-
-        public BlockState getBlockState() {
-            return palette.get(paletteIndex);
-        }
-
-        public void place() {
-
-        }
-
-        public void destroy() {
-
-        }
-    }
+    protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
+    protected ArrayList<BlockState> palette = new ArrayList<>();
+    public BlockPos originPos = null; // origin of structure, but mouse location will be close to centre
 
     public Building(String structureName) {
         this.structureName = structureName;
-    }
-
-    public void loadBlocks(Minecraft MC) {
-        System.out.println("loading NBT for: " + structureName);
-        try {
-            ResourceLocation fullRl = new ResourceLocation("reignofnether", "structures/" + structureName + ".nbt");
-            Resource rs = MC.resourceManager.getResource(fullRl);
-            CompoundTag nbt = NbtIo.readCompressed(rs.getInputStream());
-
-            // load in palette (list of unique blockstates)
-            ListTag paletteNbt = nbt.getList("palette", 10);
-            for(int i = 0; i < paletteNbt.size(); ++i)
-                palette.add(NbtUtils.readBlockState(paletteNbt.getCompound(i)));
-
-            // load in blocks (list of blockPos and their palette index)
-            ListTag blocksNbt = nbt.getList("blocks", 10);
-            for(int i = 0; i < blocksNbt.size(); ++i)
-                blocks.add(new BuildingBlock(
-                        NbtUtils.readBlockPos(blocksNbt.getCompound(i)),
-                        blocksNbt.getCompound(i).getInt("state")
-                ));
-        }
-        catch (Exception e) {
-            System.out.println(e);
-        }
     }
 
     private StructureTemplate getTemplate(ServerLevel serverLevel)  {
@@ -103,14 +59,40 @@ public class Building {
         return template;
     }
 
-    public float getBlocksPercent() {
-        return 1f;
+    public static Vec3i getBuildingSize(ArrayList<BuildingBlock> blocks) {
+        return new Vec3i(
+                blocks.stream().max(Comparator.comparingInt(block -> block.blockPos.getX())).get().blockPos.getX() + 1,
+                blocks.stream().max(Comparator.comparingInt(block -> block.blockPos.getY())).get().blockPos.getY() + 1,
+                blocks.stream().max(Comparator.comparingInt(block -> block.blockPos.getZ())).get().blockPos.getZ() + 1
+        );
+    }
+    // static returns of the base data
+    public static ArrayList<BuildingBlock> getBlockData() {
+        return new ArrayList<>();
+    }
+    public static ArrayList<BlockState> getPaletteData() {
+        return new ArrayList<>();
+    }
+    // non-static returns of the instanced live data
+    public ArrayList<BuildingBlock> getBlocks() {
+        return this.blocks;
+    }
+    public ArrayList<BlockState> getPalette() {
+        return this.palette;
     }
 
+    public int getTotalBlocks() {
+        return blocks.size();
+    }
+    public int getCurrentBlocks() {
+        return blocks.stream().filter(b -> b.isPlaced).toList().size();
+    }
+    public float getBlocksPercent() {
+        return (float) getCurrentBlocks() / (float) getTotalBlocks();
+    }
     public float getHealthPercent() {
         return ((float) health / (float) maxHealth);
     }
-
     public boolean isFunctional() {
         return this.isBuilt && this.getHealthPercent() >= 0.5f;
     }

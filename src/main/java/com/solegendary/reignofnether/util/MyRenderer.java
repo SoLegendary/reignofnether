@@ -65,15 +65,21 @@ public class MyRenderer {
     }
 
     public static void drawWhiteBox(PoseStack matrixStack, BlockPos bp, float a) {
-        drawSolidBox(matrixStack, new AABB(bp), null, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/white.png"));
+        AABB aabb = new AABB(bp);
+        aabb = aabb.setMaxY(aabb.maxY + 0.01f);
+        drawSolidBox(matrixStack, aabb, null, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/white.png"));
     }
     public static void drawBlackBox(PoseStack matrixStack, BlockPos bp, float a) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
         drawSolidBox(matrixStack, aabb, null, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/black.png"));
     }
-
-    public static void drawDarkBlockFace(PoseStack matrixStack, Direction dir, BlockPos bp, float a) {
+    public static void drawWhiteBlockFace(PoseStack matrixStack, Direction dir, BlockPos bp, float a) {
+        AABB aabb = new AABB(bp);
+        aabb = aabb.setMaxY(aabb.maxY + 0.01f);
+        drawSolidBox(matrixStack, aabb, dir, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/white.png"));
+    }
+    public static void drawBlackBlockFace(PoseStack matrixStack, Direction dir, BlockPos bp, float a) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
         drawSolidBox(matrixStack, aabb, dir, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/black.png"));

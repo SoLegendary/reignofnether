@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.fogofwar;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.units.Unit;
@@ -11,8 +10,6 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,7 +17,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -137,7 +133,7 @@ public class FogOfWarClientEvents {
 
     public static void renderFogOfWar(PoseStack poseStack) {
         for (Pair<BlockPos, Direction> bpd : foggedBlocks)
-            MyRenderer.drawDarkBlockFace(poseStack, bpd.getSecond(), bpd.getFirst(), 0.5f);
+            MyRenderer.drawBlackBlockFace(poseStack, bpd.getSecond(), bpd.getFirst(), 0.5f);
     }
 
     // checks whether a block is a complete cube or not
