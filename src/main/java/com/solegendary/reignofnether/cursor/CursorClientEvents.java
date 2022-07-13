@@ -378,9 +378,10 @@ public class CursorClientEvents {
     }
     @SubscribeEvent
     public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
+        /*
         MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
                 "alpha: " + alpha,
-        });
+        });*/
     }
 }
 

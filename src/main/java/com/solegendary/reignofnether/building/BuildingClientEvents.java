@@ -7,20 +7,22 @@ import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.model.ModelDataManager;
+import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
@@ -37,19 +39,57 @@ public class BuildingClientEvents {
     private static ArrayList<BlockState> paletteToPlace = new ArrayList<>();
     private static ArrayList<Pair<BlockPos, Direction>> facesToHighlight = new ArrayList<>();
 
-    // highlights an area to construct a building by drawing transparent green/red faces around it
+    private static int overlayU = 0;
+    private static int overlayV = 0;
+
+    // draws the building with a green/red overlay (based on placement validity) at the target position
     // based on whether the location is valid or not
     // location should be 1 space above the selected spot
-    public static void highlightArea(PoseStack matrix, BlockPos originPos) {
-        for (Pair<BlockPos, Direction> face : facesToHighlight) {
-            BlockPos pos = new BlockPos(
-                    originPos.getX() + face.getFirst().getX(),
-                    originPos.getY() + face.getFirst().getY(),
-                    originPos.getZ() + face.getFirst().getZ()
-            );
-            MyRenderer.drawWhiteBlockFace(matrix, face.getSecond(), pos, 0.5f);
-        }
+    public static void drawBuildingToPlace(PoseStack matrix, BlockPos originPos) {
+        boolean valid = isBuildingPlacementValid(originPos);
 
+        for (BuildingBlock block : blocksToPlace) {
+            BlockRenderDispatcher renderer = MC.getBlockRenderer();
+            BlockState bs = block.getBlockState(paletteToPlace);
+            BlockPos bp = new BlockPos(
+                    originPos.getX() + block.blockPos.getX(),
+                    originPos.getY() + block.blockPos.getY(),
+                    originPos.getZ() + block.blockPos.getZ()
+            );
+            IModelData modelData = renderer.getBlockModel(bs).getModelData(MC.level, bp, bs, ModelDataManager.getModelData(MC.level, bp));
+
+            matrix.pushPose();
+            Entity cam = MC.cameraEntity;
+            matrix.translate(
+                    bp.getX() - cam.getX(),
+                    bp.getY() - cam.getY(),
+                    bp.getZ() - cam.getZ());
+
+            renderer.renderSingleBlock(
+                    bs, matrix,
+                    MC.renderBuffers().crumblingBufferSource(), // don't render over other stuff
+                    15728880,
+                    OverlayTexture.pack(overlayU, overlayV),//OverlayTexture.WHITE_OVERLAY_V,
+                    modelData);
+
+            matrix.popPose();
+        }
+    }
+
+    // must not clip any existing blocks
+    public static boolean isBuildingPlacementValid(BlockPos originPos) {
+        for (BuildingBlock block : blocksToPlace) {
+            BlockState bs = block.getBlockState(paletteToPlace);
+            BlockPos bp = new BlockPos(
+                    originPos.getX() + block.blockPos.getX(),
+                    originPos.getY() + block.blockPos.getY() + 1,
+                    originPos.getZ() + block.blockPos.getZ()
+            );
+            BlockState bsWorld = MC.level.getBlockState(bp);
+            if (!bsWorld.isAir() && !bs.isAir())
+                return false;
+        }
+        return true;
     }
 
     public static void placeBuilding() {
@@ -62,7 +102,7 @@ public class BuildingClientEvents {
             return;
 
         if (buildingToPlace != null && initedStructures) {
-            highlightArea(evt.getPoseStack(), CursorClientEvents.getPreselectedBlockPos());
+            drawBuildingToPlace(evt.getPoseStack(), CursorClientEvents.getPreselectedBlockPos());
         }
     }
 
@@ -88,6 +128,18 @@ public class BuildingClientEvents {
             else if (evt.getKey() == Keybinds.fnums[8].getKey().getValue()) {
                 buildingToPlace = null;
             }
+            else if (evt.getKey() == Keybinds.nums[9].getKey().getValue()) {
+                overlayU += 1;
+                if (overlayU > 16)
+                    overlayU = 0;
+                System.out.println(overlayU);
+            }
+            else if (evt.getKey() == Keybinds.nums[0].getKey().getValue()) {
+                overlayV += 1;
+                if (overlayV > 16)
+                    overlayV = 0;
+                System.out.println(overlayV);
+            }
 
             if (lastBuildingToPlace != buildingToPlace) {
                 // load the new buildingToPlace's data
@@ -111,23 +163,26 @@ public class BuildingClientEvents {
                     // maybe we can do this by getting a list of BPs for each of the 5 directions
                     // where each list contains only the first block found as each side is scanned inwards
 
-                    BlockPos bp = block.blockPos;
-                    BuildingBlock west = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.west());
-                    BuildingBlock north = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.north());
-                    BuildingBlock east = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.east());
-                    BuildingBlock above = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.above());
-                    BuildingBlock south = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.south());
+                    if (!block.getBlockState(paletteToPlace).isAir()) {
 
-                    if (west == null || west.getBlockState(paletteToPlace).isAir())
-                        facesToHighlight.add(new Pair(bp, Direction.WEST));
-                    if (north == null || north.getBlockState(paletteToPlace).isAir())
-                        facesToHighlight.add(new Pair(bp, Direction.NORTH));
-                    if (east == null || east.getBlockState(paletteToPlace).isAir())
-                        facesToHighlight.add(new Pair(bp, Direction.EAST));
-                    if (above == null || above.getBlockState(paletteToPlace).isAir())
-                        facesToHighlight.add(new Pair(bp, Direction.UP));
-                    if (south == null || south.getBlockState(paletteToPlace).isAir())
-                        facesToHighlight.add(new Pair(bp, Direction.SOUTH));
+                        BlockPos bp = block.blockPos;
+                        BuildingBlock west = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.west());
+                        BuildingBlock north = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.north());
+                        BuildingBlock east = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.east());
+                        BuildingBlock above = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.above());
+                        BuildingBlock south = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.south());
+
+                        if (west == null || west.getBlockState(paletteToPlace).isAir())
+                            facesToHighlight.add(new Pair(bp, Direction.WEST));
+                        if (north == null || north.getBlockState(paletteToPlace).isAir())
+                            facesToHighlight.add(new Pair(bp, Direction.NORTH));
+                        if (east == null || east.getBlockState(paletteToPlace).isAir())
+                            facesToHighlight.add(new Pair(bp, Direction.EAST));
+                        if (above == null || above.getBlockState(paletteToPlace).isAir())
+                            facesToHighlight.add(new Pair(bp, Direction.UP));
+                        if (south == null || south.getBlockState(paletteToPlace).isAir())
+                            facesToHighlight.add(new Pair(bp, Direction.SOUTH));
+                    }
                 }
 
             }
