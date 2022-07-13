@@ -69,7 +69,7 @@ public class BuildingClientEvents {
                     bs, matrix,
                     MC.renderBuffers().crumblingBufferSource(), // don't render over other stuff
                     15728880,
-                    OverlayTexture.pack(overlayU, overlayV),//OverlayTexture.WHITE_OVERLAY_V,
+                    valid ? OverlayTexture.pack(8, 10) : OverlayTexture.pack(0,3),
                     modelData);
 
             matrix.popPose();
