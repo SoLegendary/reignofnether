@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.building;
 
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
@@ -42,11 +44,35 @@ public class BuildingClientEvents {
     private static int overlayU = 0;
     private static int overlayV = 0;
 
+    private static boolean replacedTexture = false;
+
+    // TODO: add an option for green overlay
+    public static void replaceOverlayTexture() {
+        NativeImage nativeimage = MC.gameRenderer.overlayTexture.texture.getPixels();
+
+        for(int i = 0; i < 16; ++i) {
+            for(int j = 0; j < 16; ++j) {
+                if (i < 8) {
+                    nativeimage.setPixelRGBA(j, i,0);
+                } else {
+                    int k = (int)((1.0F - (float)j / 15.0F * 0.75F) * 255.0F);
+                    nativeimage.setPixelRGBA(j, i,0);
+                }
+            }
+        }
+        RenderSystem.activeTexture(33985);
+        MC.gameRenderer.overlayTexture.texture.bind();
+        nativeimage.upload(0, 0, 0, 0, 0, nativeimage.getWidth(), nativeimage.getHeight(), false, true, false, false);
+        RenderSystem.activeTexture(33984);
+    }
+
     // draws the building with a green/red overlay (based on placement validity) at the target position
     // based on whether the location is valid or not
     // location should be 1 space above the selected spot
     public static void drawBuildingToPlace(PoseStack matrix, BlockPos originPos) {
-        boolean valid = isBuildingPlacementValid(originPos);
+        boolean inAir = isBuildingPlacementInAir(originPos);
+        boolean clipping = isBuildingPlacementClipping(originPos);
+        boolean invalid = inAir || clipping;
 
         for (BuildingBlock block : blocksToPlace) {
             BlockRenderDispatcher renderer = MC.getBlockRenderer();
@@ -65,19 +91,19 @@ public class BuildingClientEvents {
                     bp.getY() - cam.getY(),
                     bp.getZ() - cam.getZ());
 
+            // show red overlay if invalid, else show TODO: green
             renderer.renderSingleBlock(
                     bs, matrix,
                     MC.renderBuffers().crumblingBufferSource(), // don't render over other stuff
                     15728880,
-                    valid ? OverlayTexture.pack(8, 10) : OverlayTexture.pack(0,3),
+                    invalid ? OverlayTexture.pack(8, 10) : OverlayTexture.pack(0,3),
                     modelData);
 
             matrix.popPose();
         }
     }
 
-    // must not clip any existing blocks
-    public static boolean isBuildingPlacementValid(BlockPos originPos) {
+    public static boolean isBuildingPlacementClipping(BlockPos originPos) {
         for (BuildingBlock block : blocksToPlace) {
             BlockState bs = block.getBlockState(paletteToPlace);
             BlockPos bp = new BlockPos(
@@ -92,12 +118,19 @@ public class BuildingClientEvents {
         return true;
     }
 
+    // TODO: blocks below placement must be > 50% solid
+    public static boolean isBuildingPlacementInAir(BlockPos originPos) {
+        return false;
+    }
+
     public static void placeBuilding() {
 
     }
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelLastEvent evt) {
+
+
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
@@ -108,6 +141,10 @@ public class BuildingClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (!replacedTexture) {
+            replaceOverlayTexture();
+            replacedTexture = true;
+        }
         if (!initedStructures) {
             BuildingBlockData.initBlockData(MC);
             initedStructures = true;
