@@ -15,17 +15,13 @@ import java.util.List;
 
 public class BuildingBlockData {
 
-    public static ArrayList<BlockState> VILLAGER_HOUSE_PALETTE = null;
     public static ArrayList<BuildingBlock> VILLAGER_HOUSE_BLOCKS = null;
-    public static ArrayList<BlockState> VILLAGER_TOWER_PALETTE = null;
     public static ArrayList<BuildingBlock> VILLAGER_TOWER_BLOCKS = null;
 
     public static void initBlockData(Minecraft MC) {
         CompoundTag villagerHouseNbt = getBuildingNbt(MC, "villager_house");
-        VILLAGER_HOUSE_PALETTE = getBuildingPalette(villagerHouseNbt);
         VILLAGER_HOUSE_BLOCKS = getBuildingBlocks(villagerHouseNbt);
         CompoundTag villagerTowerNbt = getBuildingNbt(MC, "villager_tower");
-        VILLAGER_TOWER_PALETTE = getBuildingPalette(villagerTowerNbt);
         VILLAGER_TOWER_BLOCKS = getBuildingBlocks(villagerTowerNbt);
     }
 
@@ -56,6 +52,8 @@ public class BuildingBlockData {
         // load in blocks (list of blockPos and their palette index)
         ListTag blocksNbt = nbt.getList("blocks", 10);
 
+        ArrayList<BlockState> palette = getBuildingPalette(nbt);
+
         for(int i = 0; i < blocksNbt.size(); i++) {
             CompoundTag blockNbt = blocksNbt.getCompound(i);
             ListTag blockPosNbt = blockNbt.getList("pos", 3);
@@ -66,14 +64,14 @@ public class BuildingBlockData {
                             blockPosNbt.getInt(1),
                             blockPosNbt.getInt(2)
                     ),
-                    blockNbt.getInt("state")
+                    palette.get(blockNbt.getInt("state"))
             ));
         }
         return blocks;
     }
 
     public static BuildingBlock getBuildingBlockByPos(ArrayList<BuildingBlock> blocks, BlockPos bp) {
-        List<BuildingBlock> results = blocks.stream().filter(b -> b.blockPos.equals(bp)).toList();
+        List<BuildingBlock> results = blocks.stream().filter(b -> b.getBlockPos().equals(bp)).toList();
         if (results.size() > 0)
             return results.get(0);
         else

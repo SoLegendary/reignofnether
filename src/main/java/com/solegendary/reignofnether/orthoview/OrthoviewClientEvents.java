@@ -168,7 +168,8 @@ public class OrthoviewClientEvents {
     public static void onMouseScroll(ScreenEvent.MouseScrollEvent evt) {
         if (!enabled) return;
 
-        zoomCam((float) sign(evt.getScrollDelta()) * -ZOOM_STEP_SCROLL);
+        if (Keybinds.ctrlMod.isDown())
+            zoomCam((float) sign(evt.getScrollDelta()) * -ZOOM_STEP_SCROLL);
     }
 
     @SubscribeEvent

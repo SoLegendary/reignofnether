@@ -36,34 +36,17 @@ public class Building {
     // should be higher for large fragile buildings so players don't take ages to destroy it
     public float explodeChance;
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
-    protected ArrayList<BlockState> palette = new ArrayList<>();
     public BlockPos originPos = null; // origin of structure, but mouse location will be close to centre
 
     public Building(String structureName) {
         this.structureName = structureName;
     }
 
-    private StructureTemplate getTemplate(ServerLevel serverLevel)  {
-        Optional<StructureTemplate> optional;
-        StructureTemplate template;
-        ResourceLocation rl = ResourceLocation.tryParse(structureName);
-        try {
-            optional = serverLevel.getStructureManager().get(rl);
-            template = optional.orElse(null);
-        } catch (ResourceLocationException resourcelocationexception) {
-            template = null;
-        }
-        if (template == null)
-            throw new Error("Failed to initialise structure: " + structureName);
-
-        return template;
-    }
-
     public static Vec3i getBuildingSize(ArrayList<BuildingBlock> blocks) {
         return new Vec3i(
-                blocks.stream().max(Comparator.comparingInt(block -> block.blockPos.getX())).get().blockPos.getX() + 1,
-                blocks.stream().max(Comparator.comparingInt(block -> block.blockPos.getY())).get().blockPos.getY() + 1,
-                blocks.stream().max(Comparator.comparingInt(block -> block.blockPos.getZ())).get().blockPos.getZ() + 1
+                blocks.stream().max(Comparator.comparingInt(block -> block.getBlockPos().getX())).get().getBlockPos().getX() + 1,
+                blocks.stream().max(Comparator.comparingInt(block -> block.getBlockPos().getY())).get().getBlockPos().getY() + 1,
+                blocks.stream().max(Comparator.comparingInt(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ() + 1
         );
     }
     // static returns of the base data
@@ -76,9 +59,6 @@ public class Building {
     // non-static returns of the instanced live data
     public ArrayList<BuildingBlock> getBlocks() {
         return this.blocks;
-    }
-    public ArrayList<BlockState> getPalette() {
-        return this.palette;
     }
 
     public int getTotalBlocks() {

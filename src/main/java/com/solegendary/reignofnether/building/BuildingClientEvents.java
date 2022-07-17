@@ -19,19 +19,30 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
+
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static net.minecraft.util.Mth.sign;
 
 public class BuildingClientEvents {
 
@@ -39,16 +50,13 @@ public class BuildingClientEvents {
 
     public static Class<? extends Building> buildingToPlace = null;
     private static Class<? extends Building> lastBuildingToPlace = null;
-    private static Vec3i sizeToPlace = new Vec3i(0,0,0);
     private static ArrayList<BuildingBlock> blocksToPlace = new ArrayList<>();
     private static ArrayList<BlockState> paletteToPlace = new ArrayList<>();
-    private static ArrayList<Pair<BlockPos, Direction>> facesToHighlight = new ArrayList<>();
     private static boolean replacedTexture = false;
     public static boolean initedStructures = false;
-
     private static float solidBasePercent = 0;
+    private static Rotation buildingRotation = Rotation.NONE;
 
-    // TODO: add an option for green overlay
     // adds a green overlay option to OverlayTexture at (0,0)
     public static void replaceOverlayTexture() {
         NativeImage nativeimage = MC.gameRenderer.overlayTexture.texture.getPixels();
@@ -60,6 +68,7 @@ public class BuildingClientEvents {
         RenderSystem.activeTexture(33984);
     }
 
+    // TODO: draw at center of cursorPos, not corner
     // draws the building with a green/red overlay (based on placement validity) at the target position
     // based on whether the location is valid or not
     // location should be 1 space above the selected spot
@@ -77,11 +86,11 @@ public class BuildingClientEvents {
 
         for (BuildingBlock block : blocksToPlace) {
             BlockRenderDispatcher renderer = MC.getBlockRenderer();
-            BlockState bs = block.getBlockState(paletteToPlace);
+            BlockState bs = block.getBlockState();
             BlockPos bp = new BlockPos(
-                    originPos.getX() + block.blockPos.getX(),
-                    originPos.getY() + block.blockPos.getY(),
-                    originPos.getZ() + block.blockPos.getZ()
+                    originPos.getX() + block.getBlockPos().getX(),
+                    originPos.getY() + block.getBlockPos().getY(),
+                    originPos.getZ() + block.getBlockPos().getZ()
             );
             IModelData modelData = renderer.getBlockModel(bs).getModelData(MC.level, bp, bs, ModelDataManager.getModelData(MC.level, bp));
 
@@ -92,7 +101,7 @@ public class BuildingClientEvents {
                     bp.getY() - cam.getY() - 0.6,
                     bp.getZ() - cam.getZ());
 
-            // show red overlay if invalid, else show TODO: green
+            // show red overlay if invalid, else show green
             renderer.renderSingleBlock(
                     bs, matrix,
                     MC.renderBuffers().crumblingBufferSource(), // don't render over other stuff
@@ -125,11 +134,11 @@ public class BuildingClientEvents {
 
     public static boolean isBuildingPlacementClipping(BlockPos originPos) {
         for (BuildingBlock block : blocksToPlace) {
-            Material bm = block.getBlockState(paletteToPlace).getMaterial();
+            Material bm = block.getBlockState().getMaterial();
             BlockPos bp = new BlockPos(
-                    originPos.getX() + block.blockPos.getX(),
-                    originPos.getY() + block.blockPos.getY() + 1,
-                    originPos.getZ() + block.blockPos.getZ()
+                    originPos.getX() + block.getBlockPos().getX(),
+                    originPos.getY() + block.getBlockPos().getY() + 1,
+                    originPos.getZ() + block.getBlockPos().getZ()
             );
             Material bmWorld = MC.level.getBlockState(bp).getMaterial();
             if ((bmWorld.isSolid() || bmWorld.isLiquid()) && (bm.isSolid() || bm.isLiquid()))
@@ -144,11 +153,11 @@ public class BuildingClientEvents {
         int solidBlocksBelow = 0;
         int blocksBelow = 0;
         for (BuildingBlock block : blocksToPlace) {
-            if (block.blockPos.getY() == 0) {
+            if (block.getBlockPos().getY() == 0) {
                 BlockPos bp = new BlockPos(
-                        originPos.getX() + block.blockPos.getX(),
-                        originPos.getY() + block.blockPos.getY() + 1,
-                        originPos.getZ() + block.blockPos.getZ()
+                        originPos.getX() + block.getBlockPos().getX(),
+                        originPos.getY() + block.getBlockPos().getY() + 1,
+                        originPos.getZ() + block.getBlockPos().getZ()
                 );
                 Material bm = MC.level.getBlockState(bp).getMaterial();
                 Material bmBelow = MC.level.getBlockState(bp.below()).getMaterial();
@@ -170,14 +179,11 @@ public class BuildingClientEvents {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelLastEvent evt) {
-
-
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
-        if (buildingToPlace != null && initedStructures) {
+        if (buildingToPlace != null && initedStructures)
             drawBuildingToPlace(evt.getPoseStack(), CursorClientEvents.getPreselectedBlockPos());
-        }
     }
 
     @SubscribeEvent
@@ -197,15 +203,12 @@ public class BuildingClientEvents {
 
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
 
-            if (evt.getKey() == Keybinds.fnums[6].getKey().getValue()) {
+            if (evt.getKey() == Keybinds.fnums[6].getKey().getValue())
                 buildingToPlace = VillagerHouse.class;
-            }
-            else if (evt.getKey() == Keybinds.fnums[7].getKey().getValue()) {
+            else if (evt.getKey() == Keybinds.fnums[7].getKey().getValue())
                 buildingToPlace = VillagerTower.class;
-            }
-            else if (evt.getKey() == Keybinds.fnums[8].getKey().getValue()) {
+            else if (evt.getKey() == Keybinds.fnums[8].getKey().getValue())
                 buildingToPlace = null;
-            }
 
             if (buildingToPlace != lastBuildingToPlace && buildingToPlace != null) {
                 // load the new buildingToPlace's data
@@ -217,40 +220,6 @@ public class BuildingClientEvents {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                sizeToPlace = Building.getBuildingSize(blocksToPlace);
-                System.out.println(sizeToPlace.getX() + "|" + sizeToPlace.getY() + "|" + sizeToPlace.getZ());
-
-
-                // load faces to highlight
-                facesToHighlight = new ArrayList<>();
-                for (BuildingBlock block : blocksToPlace) {
-
-                    // TODO: only highlight faces on the outside of the building
-                    // maybe we can do this by getting a list of BPs for each of the 5 directions
-                    // where each list contains only the first block found as each side is scanned inwards
-
-                    if (!block.getBlockState(paletteToPlace).isAir()) {
-
-                        BlockPos bp = block.blockPos;
-                        BuildingBlock west = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.west());
-                        BuildingBlock north = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.north());
-                        BuildingBlock east = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.east());
-                        BuildingBlock above = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.above());
-                        BuildingBlock south = BuildingBlockData.getBuildingBlockByPos(blocksToPlace, bp.south());
-
-                        if (west == null || west.getBlockState(paletteToPlace).isAir())
-                            facesToHighlight.add(new Pair(bp, Direction.WEST));
-                        if (north == null || north.getBlockState(paletteToPlace).isAir())
-                            facesToHighlight.add(new Pair(bp, Direction.NORTH));
-                        if (east == null || east.getBlockState(paletteToPlace).isAir())
-                            facesToHighlight.add(new Pair(bp, Direction.EAST));
-                        if (above == null || above.getBlockState(paletteToPlace).isAir())
-                            facesToHighlight.add(new Pair(bp, Direction.UP));
-                        if (south == null || south.getBlockState(paletteToPlace).isAir())
-                            facesToHighlight.add(new Pair(bp, Direction.SOUTH));
-                    }
-                }
-
             }
             lastBuildingToPlace = buildingToPlace;
         }
@@ -259,10 +228,27 @@ public class BuildingClientEvents {
         }
     }
 
+    // on scroll rotate the building placement by 90deg by resorting the blocks list
+    // for some reason this event is run twice every scroll
+    private static boolean secondScrollEvt = true;
+    @SubscribeEvent
+    public static void onMouseScroll(ScreenEvent.MouseScrollEvent evt) {
+        secondScrollEvt = !secondScrollEvt;
+        if (!secondScrollEvt) return;
+
+        if (buildingToPlace != null) {
+            Rotation rotation = evt.getScrollDelta() > 0 ? Rotation.CLOCKWISE_90 : Rotation.COUNTERCLOCKWISE_90;
+            buildingRotation = buildingRotation.getRotated(rotation);
+            for (BuildingBlock block : blocksToPlace)
+                block.rotate(MC.level, rotation);
+        }
+    }
+
     @SubscribeEvent
     public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
+        /*
         MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
-                "solidBasePercent: " + solidBasePercent
-        });
+                "buildingRotation: " + buildingRotation
+        });*/
     }
 }

@@ -2,22 +2,31 @@ package com.solegendary.reignofnether.building;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 
 public class BuildingBlock {
-    public BlockPos blockPos;
-    public Integer paletteIndex;
+    private BlockPos blockPos;
+    private BlockState blockState;
     public Boolean isPlaced = false;
 
-    public BuildingBlock(BlockPos blockPos, Integer paletteIndex) {
+    public BuildingBlock(BlockPos blockPos, BlockState blockState) {
         this.blockPos = blockPos;
-        this.paletteIndex = paletteIndex;
+        this.blockState = blockState;
     }
 
-    public BlockState getBlockState(ArrayList<BlockState> palette) {
-        return palette.get(paletteIndex);
+    public BlockPos getBlockPos() { return blockPos; }
+    public BlockState getBlockState() { return blockState; }
+
+    public void setBlockPos(BlockPos bp) { this.blockPos = bp; }
+    public void setBlockState(BlockState bs) { this.blockState = bs; }
+
+    public void rotate(LevelAccessor level, Rotation rotation) {
+        this.blockPos = this.blockPos.rotate(rotation);
+        this.blockState = this.blockState.rotate(level, blockPos, rotation);
     }
 
     public void place(ServerLevel level) {

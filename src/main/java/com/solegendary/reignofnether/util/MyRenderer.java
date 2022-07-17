@@ -64,6 +64,7 @@ public class MyRenderer {
         matrixStack.popPose();
     }
 
+    // remember white.png can still be used with RGBA values
     public static void drawWhiteBox(PoseStack matrixStack, BlockPos bp, float a) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
