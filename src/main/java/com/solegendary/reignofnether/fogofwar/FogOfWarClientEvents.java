@@ -31,22 +31,6 @@ import static com.solegendary.reignofnether.cursor.CursorClientEvents.getRefined
 
 public class FogOfWarClientEvents {
 
-    private static final Set<Block> BLOCK_IGNORE_LIST = Set.of(
-        Blocks.AIR,
-        Blocks.CAVE_AIR,
-        Blocks.VINE,
-        Blocks.FERN,
-        Blocks.GRASS,
-        Blocks.TALL_GRASS,
-        Blocks.WHEAT,
-        Blocks.MELON_STEM,
-        Blocks.POTATOES,
-        Blocks.CARROTS,
-        Blocks.BEETROOTS,
-        Blocks.BROWN_MUSHROOM,
-        Blocks.RED_MUSHROOM
-    );
-
     static final Minecraft MC = Minecraft.getInstance();
     static ArrayList<Pair<BlockPos, Direction>> foggedBlocks = new ArrayList<>(); // x/z coords that are in fog of war (to darken on the minimap)
 
@@ -110,19 +94,19 @@ public class FogOfWarClientEvents {
                         BlockPos bp = new BlockPos(x, y, z);
                         BlockState bs = MC.level.getBlockState(bp);
 
-                        if (!BLOCK_IGNORE_LIST.contains(bs.getBlock()) &&
+                        if (bs.getMaterial().isSolid() &&
                             selEntity instanceof Unit &&
                             selEntity.getEyePosition().distanceTo(new Vec3(x, y, z)) > (((Unit) selEntity).getSightRange())) {
 
-                            if (hasTransparentView(bp.above()))
+                            if (!isSolidBlock(bp.above()))
                                 foggedBlocks.add(new Pair(bp, Direction.UP));
-                            if (hasTransparentView(bp.north()))
+                            if (!isSolidBlock(bp.north()))
                                 foggedBlocks.add(new Pair(bp, Direction.NORTH));
-                            if (hasTransparentView(bp.south()))
+                            if (!isSolidBlock(bp.south()))
                                 foggedBlocks.add(new Pair(bp, Direction.SOUTH));
-                            if (hasTransparentView(bp.east()))
+                            if (!isSolidBlock(bp.east()))
                                 foggedBlocks.add(new Pair(bp, Direction.EAST));
-                            if (hasTransparentView(bp.west()))
+                            if (!isSolidBlock(bp.west()))
                                 foggedBlocks.add(new Pair(bp, Direction.WEST));
                         }
                     }
@@ -137,8 +121,8 @@ public class FogOfWarClientEvents {
     }
 
     // checks whether a block is a complete cube or not
-    private static boolean hasTransparentView(BlockPos bp) {
+    private static boolean isSolidBlock(BlockPos bp) {
         BlockState bs = MC.level.getBlockState(bp);
-        return BLOCK_IGNORE_LIST.contains(bs.getBlock());
+        return bs.getMaterial().isSolid();
     }
 }

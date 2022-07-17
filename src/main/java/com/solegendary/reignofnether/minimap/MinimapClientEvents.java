@@ -20,6 +20,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec2;
@@ -51,19 +52,6 @@ public class MinimapClientEvents {
     private static int zc_world = 0; // world pos zcentre, maps to yc
 
     private static float xl, xc, xr, yt, yc, yb;
-
-    private static final Set<Block> BLOCK_IGNORE_LIST = Set.of(
-            Blocks.FERN,
-            Blocks.GRASS,
-            Blocks.TALL_GRASS,
-            Blocks.WHEAT,
-            Blocks.MELON_STEM,
-            Blocks.POTATOES,
-            Blocks.CARROTS,
-            Blocks.BEETROOTS,
-            Blocks.BROWN_MUSHROOM,
-            Blocks.RED_MUSHROOM
-    );
 
     public static void setMapCentre(double x, double z) {
         xc_world = (int) x;
@@ -113,34 +101,34 @@ public class MinimapClientEvents {
             for (int x = xc_world - WORLD_RADIUS; x < xc_world + WORLD_RADIUS; x++) {
 
                 int y = MC.level.getChunkAt(new BlockPos(x,0,z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
-                Block block;
+                BlockState bs;
                 do {
-                    block = MC.level.getBlockState(new BlockPos(x,y,z)).getBlock();
-                    if (BLOCK_IGNORE_LIST.contains(block))
+                    bs = MC.level.getBlockState(new BlockPos(x,y,z));
+                    if (!bs.getMaterial().isSolid())
                         y -= 1;
                     else
                         break;
                 } while (true);
 
                 int yNorth = MC.level.getChunkAt(new BlockPos(x,0,z-1)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z-1);
-                Block blockNorth;
+                BlockState bsNorth;
                 do {
-                    blockNorth = MC.level.getBlockState(new BlockPos(x,yNorth,z-1)).getBlock();
-                    if (BLOCK_IGNORE_LIST.contains(blockNorth))
+                    bsNorth = MC.level.getBlockState(new BlockPos(x,yNorth,z-1));
+                    if (!bs.getMaterial().isSolid())
                         yNorth -= 1;
                     else
                         break;
                 } while (true);
 
                 Material mat = MC.level.getBlockState(new BlockPos(x,yNorth,z-1)).getMaterial();
-                int col = mat.getColor().col;
+                int rgb = mat.getColor().col;
 
                 // shade blocks to give elevation effects, excluding liquids and nonblocking blocks (eg. grass, flowers)
                 if (!mat.isLiquid()) {
                     if (yNorth > y)
-                        col = MiscUtil.shadeHexRGB(col, 0.82F);
+                        rgb = MiscUtil.shadeHexRGB(rgb, 0.82F);
                     else if (yNorth < y) {
-                        col = MiscUtil.shadeHexRGB(col, 1.16F);
+                        rgb = MiscUtil.shadeHexRGB(rgb, 1.16F);
                     }
                 }
                 else { // shade liquid based on depth
@@ -156,7 +144,7 @@ public class MinimapClientEvents {
                     // only reduce shade every nth step to have the map look sharper
                     depth = (int) (5*(Math.ceil(Math.abs(depth/5))));
 
-                    col = MiscUtil.shadeHexRGB(col, 1.2F - (0.025F * depth));
+                    rgb = MiscUtil.shadeHexRGB(rgb, 1.2F - (0.025F * depth));
                 }
 
                 // draw view quad
@@ -170,10 +158,10 @@ public class MinimapClientEvents {
                             new Vec2(x,z),
                             OrthoviewClientEvents.getZoom() * 2 // larger = thicker line
                     ))
-                        col = 0xFFFFFF;
+                        rgb = 0xFFFFFF;
                 }
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
-                mapColours.add(MiscUtil.reverseHexRGB(col) | (0xFF << 24));
+                mapColours.add(MiscUtil.reverseHexRGB(rgb) | (0xFF << 24));
             }
         }
         //System.out.println("updated in: " + (System.currentTimeMillis() - timeBefore) + "ms");

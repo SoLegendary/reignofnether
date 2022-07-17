@@ -9,22 +9,27 @@ import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
+import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
@@ -32,34 +37,23 @@ public class BuildingClientEvents {
 
     static final Minecraft MC = Minecraft.getInstance();
 
-    public static Boolean initedStructures = false;
-
-    public static Class<? extends Building> lastBuildingToPlace = null;
     public static Class<? extends Building> buildingToPlace = null;
+    private static Class<? extends Building> lastBuildingToPlace = null;
     private static Vec3i sizeToPlace = new Vec3i(0,0,0);
     private static ArrayList<BuildingBlock> blocksToPlace = new ArrayList<>();
     private static ArrayList<BlockState> paletteToPlace = new ArrayList<>();
     private static ArrayList<Pair<BlockPos, Direction>> facesToHighlight = new ArrayList<>();
-
-    private static int overlayU = 0;
-    private static int overlayV = 0;
-
     private static boolean replacedTexture = false;
+    public static boolean initedStructures = false;
+
+    private static float solidBasePercent = 0;
 
     // TODO: add an option for green overlay
+    // adds a green overlay option to OverlayTexture at (0,0)
     public static void replaceOverlayTexture() {
         NativeImage nativeimage = MC.gameRenderer.overlayTexture.texture.getPixels();
-
-        for(int i = 0; i < 16; ++i) {
-            for(int j = 0; j < 16; ++j) {
-                if (i < 8) {
-                    nativeimage.setPixelRGBA(j, i,0);
-                } else {
-                    int k = (int)((1.0F - (float)j / 15.0F * 0.75F) * 255.0F);
-                    nativeimage.setPixelRGBA(j, i,0);
-                }
-            }
-        }
+        int bgr = MiscUtil.reverseHexRGB(0x00FF00); // for some reason setPixelRGBA reads it as ABGR with A inversed
+        nativeimage.setPixelRGBA(0,0, bgr | (0xB2 << 24));
         RenderSystem.activeTexture(33985);
         MC.gameRenderer.overlayTexture.texture.bind();
         nativeimage.upload(0, 0, 0, 0, 0, nativeimage.getWidth(), nativeimage.getHeight(), false, true, false, false);
@@ -74,6 +68,13 @@ public class BuildingClientEvents {
         boolean clipping = isBuildingPlacementClipping(originPos);
         boolean invalid = inAir || clipping;
 
+        int minX = 999999;
+        int minY = 999999;
+        int minZ = 999999;
+        int maxX = -999999;
+        int maxY = -999999;
+        int maxZ = -999999;
+
         for (BuildingBlock block : blocksToPlace) {
             BlockRenderDispatcher renderer = MC.getBlockRenderer();
             BlockState bs = block.getBlockState(paletteToPlace);
@@ -86,9 +87,9 @@ public class BuildingClientEvents {
 
             matrix.pushPose();
             Entity cam = MC.cameraEntity;
-            matrix.translate(
+            matrix.translate( // bp is center of block whereas render is corner, so offset by 0.5
                     bp.getX() - cam.getX(),
-                    bp.getY() - cam.getY(),
+                    bp.getY() - cam.getY() - 0.6,
                     bp.getZ() - cam.getZ());
 
             // show red overlay if invalid, else show TODO: green
@@ -96,31 +97,71 @@ public class BuildingClientEvents {
                     bs, matrix,
                     MC.renderBuffers().crumblingBufferSource(), // don't render over other stuff
                     15728880,
-                    invalid ? OverlayTexture.pack(8, 10) : OverlayTexture.pack(0,3),
+                    // red if invalid, else green
+                    invalid ? OverlayTexture.pack(0,3) : OverlayTexture.pack(0,0),
                     modelData);
 
             matrix.popPose();
+
+            if (bp.getX() < minX) minX = bp.getX();
+            if (bp.getY() < minY) minY = bp.getY();
+            if (bp.getZ() < minZ) minZ = bp.getZ();
+            if (bp.getX() > maxX) maxX = bp.getX();
+            if (bp.getY() > maxY) maxY = bp.getY();
+            if (bp.getZ() > maxZ) maxZ = bp.getZ();
         }
+        // draw placement outline below
+        maxX += 1;
+        minY += 1.05f;
+        maxZ += 1;
+
+        float r = invalid ? 1.0f : 0;
+        float g = invalid ? 0 : 1.0f;
+        ResourceLocation rl = new ResourceLocation("forge:textures/white.png");
+        AABB aabb = new AABB(minX, minY, minZ, maxX, minY, maxZ);
+        MyRenderer.drawLineBox(matrix, aabb, r, g, 0,0.5f);
+        MyRenderer.drawSolidBox(matrix, aabb, Direction.UP, r, g, 0, 0.5f, rl);
     }
 
     public static boolean isBuildingPlacementClipping(BlockPos originPos) {
         for (BuildingBlock block : blocksToPlace) {
-            BlockState bs = block.getBlockState(paletteToPlace);
+            Material bm = block.getBlockState(paletteToPlace).getMaterial();
             BlockPos bp = new BlockPos(
                     originPos.getX() + block.blockPos.getX(),
                     originPos.getY() + block.blockPos.getY() + 1,
                     originPos.getZ() + block.blockPos.getZ()
             );
-            BlockState bsWorld = MC.level.getBlockState(bp);
-            if (!bsWorld.isAir() && !bs.isAir())
-                return false;
+            Material bmWorld = MC.level.getBlockState(bp).getMaterial();
+            if ((bmWorld.isSolid() || bmWorld.isLiquid()) && (bm.isSolid() || bm.isLiquid()))
+                return true;
         }
-        return true;
+        return false;
     }
 
-    // TODO: blocks below placement must be > 50% solid
+    // considered to be in the air if < 75% of blocks below placement are solid,
+    // excluding those under blocks which aren't solid anyway
     public static boolean isBuildingPlacementInAir(BlockPos originPos) {
-        return false;
+        int solidBlocksBelow = 0;
+        int blocksBelow = 0;
+        for (BuildingBlock block : blocksToPlace) {
+            if (block.blockPos.getY() == 0) {
+                BlockPos bp = new BlockPos(
+                        originPos.getX() + block.blockPos.getX(),
+                        originPos.getY() + block.blockPos.getY() + 1,
+                        originPos.getZ() + block.blockPos.getZ()
+                );
+                Material bm = MC.level.getBlockState(bp).getMaterial();
+                Material bmBelow = MC.level.getBlockState(bp.below()).getMaterial();
+                if (bm.isSolid()) {
+                    blocksBelow += 1;
+                    if (bmBelow.isSolid())
+                        solidBlocksBelow += 1;
+                }
+
+            }
+        }
+        solidBasePercent = (float) solidBlocksBelow / (float) blocksBelow;
+        return ((float) solidBlocksBelow / (float) blocksBelow) < 0.75f;
     }
 
     public static void placeBuilding() {
@@ -165,20 +206,8 @@ public class BuildingClientEvents {
             else if (evt.getKey() == Keybinds.fnums[8].getKey().getValue()) {
                 buildingToPlace = null;
             }
-            else if (evt.getKey() == Keybinds.nums[9].getKey().getValue()) {
-                overlayU += 1;
-                if (overlayU > 16)
-                    overlayU = 0;
-                System.out.println(overlayU);
-            }
-            else if (evt.getKey() == Keybinds.nums[0].getKey().getValue()) {
-                overlayV += 1;
-                if (overlayV > 16)
-                    overlayV = 0;
-                System.out.println(overlayV);
-            }
 
-            if (lastBuildingToPlace != buildingToPlace) {
+            if (buildingToPlace != lastBuildingToPlace && buildingToPlace != null) {
                 // load the new buildingToPlace's data
                 try {
                     Method getBlockData = buildingToPlace.getMethod("getBlockData");
@@ -228,5 +257,12 @@ public class BuildingClientEvents {
         if (evt.getAction() == GLFW.GLFW_MOUSE_BUTTON_1 && buildingToPlace != null) {
 
         }
+    }
+
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
+        MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
+                "solidBasePercent: " + solidBasePercent
+        });
     }
 }
