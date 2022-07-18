@@ -15,38 +15,20 @@ import java.util.List;
 
 public class BuildingBlockData {
 
-    public static ArrayList<BuildingBlock> VILLAGER_HOUSE_BLOCKS = null;
-    public static ArrayList<BuildingBlock> VILLAGER_TOWER_BLOCKS = null;
+    private final static Minecraft MC = Minecraft.getInstance();
+    public final static ArrayList<BuildingBlock> VILLAGER_HOUSE_BLOCKS = getBuildingBlocks("villager_house");
+    public final static ArrayList<BuildingBlock> VILLAGER_TOWER_BLOCKS = getBuildingBlocks("villager_tower");
 
+    /*
     public static void initBlockData(Minecraft MC) {
-        CompoundTag villagerHouseNbt = getBuildingNbt(MC, "villager_house");
+        CompoundTag villagerHouseNbt = getBuildingNbt(Minecraft.getInstance(), "villager_house");
         VILLAGER_HOUSE_BLOCKS = getBuildingBlocks(villagerHouseNbt);
         CompoundTag villagerTowerNbt = getBuildingNbt(MC, "villager_tower");
         VILLAGER_TOWER_BLOCKS = getBuildingBlocks(villagerTowerNbt);
-    }
+    }*/
 
-    public static CompoundTag getBuildingNbt(Minecraft MC, String structureName) {
-        try {
-            ResourceLocation rl = new ResourceLocation("reignofnether", "structures/" + structureName + ".nbt");
-            Resource rs = MC.resourceManager.getResource(rl);
-            return NbtIo.readCompressed(rs.getInputStream());
-        }
-        catch (Exception e) {
-            System.out.println(e);
-            return null;
-        }
-    }
-
-    public static ArrayList<BlockState> getBuildingPalette(CompoundTag nbt) {
-        ArrayList<BlockState> palette = new ArrayList<>();
-        // load in palette (list of unique blockstates)
-        ListTag paletteNbt = nbt.getList("palette", 10);
-        for(int i = 0; i < paletteNbt.size(); i++)
-            palette.add(NbtUtils.readBlockState(paletteNbt.getCompound(i)));
-        return palette;
-    }
-
-    public static ArrayList<BuildingBlock> getBuildingBlocks(CompoundTag nbt) {
+    public static ArrayList<BuildingBlock> getBuildingBlocks(String structureName) {
+        CompoundTag nbt = getBuildingNbt(structureName);
         ArrayList<BuildingBlock> blocks = new ArrayList<>();
 
         // load in blocks (list of blockPos and their palette index)
@@ -69,6 +51,29 @@ public class BuildingBlockData {
         }
         return blocks;
     }
+
+    public static CompoundTag getBuildingNbt(String structureName) {
+        try {
+            ResourceLocation rl = new ResourceLocation("reignofnether", "structures/" + structureName + ".nbt");
+            Resource rs = MC.resourceManager.getResource(rl);
+            return NbtIo.readCompressed(rs.getInputStream());
+        }
+        catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
+    }
+
+    public static ArrayList<BlockState> getBuildingPalette(CompoundTag nbt) {
+        ArrayList<BlockState> palette = new ArrayList<>();
+        // load in palette (list of unique blockstates)
+        ListTag paletteNbt = nbt.getList("palette", 10);
+        for(int i = 0; i < paletteNbt.size(); i++)
+            palette.add(NbtUtils.readBlockState(paletteNbt.getCompound(i)));
+        return palette;
+    }
+
+
 
     public static BuildingBlock getBuildingBlockByPos(ArrayList<BuildingBlock> blocks, BlockPos bp) {
         List<BuildingBlock> results = blocks.stream().filter(b -> b.getBlockPos().equals(bp)).toList();

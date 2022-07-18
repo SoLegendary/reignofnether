@@ -8,6 +8,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class VillagerHouse extends Building {
 
@@ -19,6 +20,6 @@ public class VillagerHouse extends Building {
     }
 
     public static ArrayList<BuildingBlock> getBlockData() {
-        return BuildingBlockData.VILLAGER_HOUSE_BLOCKS;
+        return (ArrayList) BuildingBlockData.VILLAGER_HOUSE_BLOCKS.clone();
     }
 }

@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.building;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
@@ -19,10 +18,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.event.InputEvent;
@@ -34,15 +31,8 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
-
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static net.minecraft.util.Mth.sign;
 
 public class BuildingClientEvents {
 
@@ -51,11 +41,9 @@ public class BuildingClientEvents {
     public static Class<? extends Building> buildingToPlace = null;
     private static Class<? extends Building> lastBuildingToPlace = null;
     private static ArrayList<BuildingBlock> blocksToPlace = new ArrayList<>();
-    private static ArrayList<BlockState> paletteToPlace = new ArrayList<>();
     private static boolean replacedTexture = false;
-    public static boolean initedStructures = false;
-    private static float solidBasePercent = 0;
     private static Rotation buildingRotation = Rotation.NONE;
+    private static Vec3i buildingDimensions = new Vec3i(0,0,0);
 
     // adds a green overlay option to OverlayTexture at (0,0)
     public static void replaceOverlayTexture() {
@@ -68,8 +56,6 @@ public class BuildingClientEvents {
         RenderSystem.activeTexture(33984);
     }
 
-    // TODO: draw at center of cursorPos, not corner
-    //
     // draws the building with a green/red overlay (based on placement validity) at the target position
     // based on whether the location is valid or not
     // location should be 1 space above the selected spot
@@ -131,6 +117,8 @@ public class BuildingClientEvents {
         AABB aabb = new AABB(minX, minY, minZ, maxX, minY, maxZ);
         MyRenderer.drawLineBox(matrix, aabb, r, g, 0,0.5f);
         MyRenderer.drawSolidBox(matrix, aabb, Direction.UP, r, g, 0, 0.5f, rl);
+        AABB aabb2 = new AABB(minX, 0, minZ, maxX, minY, maxZ);
+        MyRenderer.drawLineBox(matrix, aabb2, r, g, 0,0.25f);
     }
 
     public static boolean isBuildingPlacementClipping(BlockPos originPos) {
@@ -148,7 +136,7 @@ public class BuildingClientEvents {
         return false;
     }
 
-    // considered to be in the air if < 75% of blocks below placement are solid,
+    // 90% all solid blocks at the base of the building must be on top of solid blocks to be placeable
     // excluding those under blocks which aren't solid anyway
     public static boolean isBuildingPlacementInAir(BlockPos originPos) {
         int solidBlocksBelow = 0;
@@ -160,18 +148,18 @@ public class BuildingClientEvents {
                         originPos.getY() + block.getBlockPos().getY() + 1,
                         originPos.getZ() + block.getBlockPos().getZ()
                 );
-                Material bm = MC.level.getBlockState(bp).getMaterial();
-                Material bmBelow = MC.level.getBlockState(bp.below()).getMaterial();
-                if (bm.isSolid()) {
+                BlockState bs = block.getBlockState(); // building block
+                BlockState bsBelow = MC.level.getBlockState(bp.below()); // world block
+
+                if (bs.getMaterial().isSolid()) {
                     blocksBelow += 1;
-                    if (bmBelow.isSolid())
+                    if (bsBelow.getMaterial().isSolid())
                         solidBlocksBelow += 1;
                 }
-
             }
         }
-        solidBasePercent = (float) solidBlocksBelow / (float) blocksBelow;
-        return ((float) solidBlocksBelow / (float) blocksBelow) < 0.75f;
+        if (blocksBelow <= 0) return false; // avoid division by 0
+        return ((float) solidBlocksBelow / (float) blocksBelow) < 0.9f;
     }
 
     public static void placeBuilding() {
@@ -183,8 +171,22 @@ public class BuildingClientEvents {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
-        if (buildingToPlace != null && initedStructures)
-            drawBuildingToPlace(evt.getPoseStack(), CursorClientEvents.getPreselectedBlockPos());
+        if (buildingToPlace != null) {
+            int xAdj = 0;
+            int zAdj = 0;
+            int xRadius = buildingDimensions.getX() / 2;
+            int zRadius = buildingDimensions.getZ() / 2;
+
+            switch(buildingRotation) {
+                case NONE:                xAdj = -xRadius; zAdj = -zRadius; break;
+                case CLOCKWISE_90:        xAdj =  xRadius; zAdj = -zRadius; break;
+                case CLOCKWISE_180:       xAdj =  xRadius; zAdj =  zRadius; break;
+                case COUNTERCLOCKWISE_90: xAdj = -xRadius; zAdj =  zRadius; break;
+            }
+            BlockPos centredBp = CursorClientEvents.getPreselectedBlockPos().offset(xAdj, 0, zAdj);
+            drawBuildingToPlace(evt.getPoseStack(), centredBp);
+        }
+
     }
 
     @SubscribeEvent
@@ -193,14 +195,12 @@ public class BuildingClientEvents {
             replaceOverlayTexture();
             replacedTexture = true;
         }
-        if (!initedStructures) {
-            BuildingBlockData.initBlockData(MC);
-            initedStructures = true;
-        }
     }
 
     @SubscribeEvent
     public static void onInput(InputEvent.KeyInputEvent evt) {
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
 
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
 
@@ -216,8 +216,9 @@ public class BuildingClientEvents {
                 try {
                     Method getBlockData = buildingToPlace.getMethod("getBlockData");
                     blocksToPlace = (ArrayList<BuildingBlock>) getBlockData.invoke(null);
-                    Method getPaletteData = buildingToPlace.getMethod("getPaletteData");
-                    paletteToPlace = (ArrayList<BlockState>) getPaletteData.invoke(null);
+                    buildingDimensions = Building.getBuildingSize(blocksToPlace);
+                    System.out.println(buildingDimensions);
+                    buildingRotation = Rotation.NONE;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -240,8 +241,8 @@ public class BuildingClientEvents {
         if (buildingToPlace != null) {
             Rotation rotation = evt.getScrollDelta() > 0 ? Rotation.CLOCKWISE_90 : Rotation.COUNTERCLOCKWISE_90;
             buildingRotation = buildingRotation.getRotated(rotation);
-            for (BuildingBlock block : blocksToPlace)
-                block.rotate(MC.level, rotation);
+            for (int i = 0; i < blocksToPlace.size(); i++)
+                blocksToPlace.set(i, blocksToPlace.get(i).rotate(MC.level, rotation));
         }
     }
 
@@ -249,7 +250,8 @@ public class BuildingClientEvents {
     public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
         /*
         MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
-                "buildingRotation: " + buildingRotation
+                "solidBlocksBelow: " + solidBlocksBelow1,
+                "blocksBelow: " + blocksBelow1
         });*/
     }
 }

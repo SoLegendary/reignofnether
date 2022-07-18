@@ -19,6 +19,6 @@ public class VillagerTower extends Building {
     }
 
     public static ArrayList<BuildingBlock> getBlockData() {
-        return BuildingBlockData.VILLAGER_TOWER_BLOCKS;
+        return (ArrayList) BuildingBlockData.VILLAGER_TOWER_BLOCKS.clone();
     }
 }

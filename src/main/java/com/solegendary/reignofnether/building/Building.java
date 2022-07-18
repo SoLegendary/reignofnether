@@ -43,11 +43,22 @@ public class Building {
     }
 
     public static Vec3i getBuildingSize(ArrayList<BuildingBlock> blocks) {
-        return new Vec3i(
-                blocks.stream().max(Comparator.comparingInt(block -> block.getBlockPos().getX())).get().getBlockPos().getX() + 1,
-                blocks.stream().max(Comparator.comparingInt(block -> block.getBlockPos().getY())).get().getBlockPos().getY() + 1,
-                blocks.stream().max(Comparator.comparingInt(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ() + 1
+        Vec3i min = new Vec3i(
+                blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
+                blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
+                blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
         );
+        Vec3i max = new Vec3i(
+                blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
+                blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
+                blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
+        );
+        Vec3i size = new Vec3i(
+                max.getX() - min.getX(),
+                max.getY() - min.getY(),
+                max.getZ() - min.getZ()
+        );
+        return size;
     }
     // static returns of the base data
     public static ArrayList<BuildingBlock> getBlockData() {
