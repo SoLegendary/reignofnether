@@ -19,14 +19,6 @@ public class BuildingBlockData {
     public final static ArrayList<BuildingBlock> VILLAGER_HOUSE_BLOCKS = getBuildingBlocks("villager_house");
     public final static ArrayList<BuildingBlock> VILLAGER_TOWER_BLOCKS = getBuildingBlocks("villager_tower");
 
-    /*
-    public static void initBlockData(Minecraft MC) {
-        CompoundTag villagerHouseNbt = getBuildingNbt(Minecraft.getInstance(), "villager_house");
-        VILLAGER_HOUSE_BLOCKS = getBuildingBlocks(villagerHouseNbt);
-        CompoundTag villagerTowerNbt = getBuildingNbt(MC, "villager_tower");
-        VILLAGER_TOWER_BLOCKS = getBuildingBlocks(villagerTowerNbt);
-    }*/
-
     public static ArrayList<BuildingBlock> getBuildingBlocks(String structureName) {
         CompoundTag nbt = getBuildingNbt(structureName);
         ArrayList<BuildingBlock> blocks = new ArrayList<>();
@@ -72,8 +64,6 @@ public class BuildingBlockData {
             palette.add(NbtUtils.readBlockState(paletteNbt.getCompound(i)));
         return palette;
     }
-
-
 
     public static BuildingBlock getBuildingBlockByPos(ArrayList<BuildingBlock> blocks, BlockPos bp) {
         List<BuildingBlock> results = blocks.stream().filter(b -> b.getBlockPos().equals(bp)).toList();

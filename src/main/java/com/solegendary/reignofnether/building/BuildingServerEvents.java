@@ -1,49 +1,64 @@
 package com.solegendary.reignofnether.building;
 
-import com.mojang.datafixers.util.Pair;
-import net.minecraft.ResourceLocationException;
+import com.solegendary.reignofnether.building.buildings.VillagerHouse;
+import com.solegendary.reignofnether.building.buildings.VillagerTower;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 public class BuildingServerEvents {
 
+    private static ServerLevel serverLevel = null;
+    private static ClientLevel clientLevel = null;
+
     // buildings that currently exist serverside
     private static ArrayList<Building> buildings = new ArrayList<>();
-
-    private static ArrayList<Pair<BlockPos, BlockState>> blockPlaceQueue = new ArrayList<>();
+    private static ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
     private static ArrayList<BlockPos> blockDestroyQueue = new ArrayList<>();
 
-    public static void placeBlock(BlockPos bp, BlockState bs) {
-        blockPlaceQueue.add(new Pair<>(bp, bs));
+    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation) {
+        Building building = null;
+
+        switch(buildingName) {
+            case VillagerHouse.buildingName -> building = new VillagerHouse(serverLevel, pos, rotation);
+            case VillagerTower.buildingName -> building = new VillagerTower(serverLevel, pos, rotation);
+        }
+        if (building != null) {
+            buildings.add(building);
+            blockPlaceQueue.addAll(building.blocks);
+        }
     }
 
-    public static void destroyBlock(BlockPos bp) {
-        blockDestroyQueue.add(bp);
+    // destroys any building that overlaps the given BlockPos
+    public static void destroyBuilding(BlockPos pos) {
+
     }
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
-        if (evt.world.isClientSide())
-            return;
+        if (!evt.world.isClientSide())
+            serverLevel = (ServerLevel) evt.world;
+        if (clientLevel == null)
+            clientLevel = Minecraft.getInstance().level;
 
-        for (Pair<BlockPos, BlockState> placeBlock : blockPlaceQueue) {
-            evt.world.setBlock(placeBlock.getFirst(), placeBlock.getSecond(), 1);
-        }
-        blockPlaceQueue = new ArrayList<>();
+        if (serverLevel != null && clientLevel != null) {
+            for (BuildingBlock placeBlock : blockPlaceQueue) {
+                clientLevel.setBlock(placeBlock.getBlockPos(), placeBlock.getBlockState(), 1);
+                serverLevel.setBlock(placeBlock.getBlockPos(), placeBlock.getBlockState(), 1);
+            }
+            blockPlaceQueue = new ArrayList<>();
 
-        for (BlockPos destroyBlock : blockDestroyQueue) {
-            evt.world.destroyBlock(destroyBlock, false);
+            for (BlockPos destroyBlock : blockDestroyQueue) {
+                clientLevel.destroyBlock(destroyBlock, false);
+                serverLevel.destroyBlock(destroyBlock, false);
+            }
+            blockDestroyQueue = new ArrayList<>();
         }
-        blockDestroyQueue = new ArrayList<>();
     }
 }

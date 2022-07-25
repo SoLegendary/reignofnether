@@ -31,6 +31,8 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
+
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
@@ -162,6 +164,7 @@ public class BuildingClientEvents {
         return ((float) solidBlocksBelow / (float) blocksBelow) < 0.9f;
     }
 
+    // sends off the packet to server to create the Building object and start construction
     public static void placeBuilding() {
 
     }
@@ -186,7 +189,6 @@ public class BuildingClientEvents {
             BlockPos centredBp = CursorClientEvents.getPreselectedBlockPos().offset(xAdj, 0, zAdj);
             drawBuildingToPlace(evt.getPoseStack(), centredBp);
         }
-
     }
 
     @SubscribeEvent
@@ -214,8 +216,8 @@ public class BuildingClientEvents {
             if (buildingToPlace != lastBuildingToPlace && buildingToPlace != null) {
                 // load the new buildingToPlace's data
                 try {
-                    Method getBlockData = buildingToPlace.getMethod("getBlockData");
-                    blocksToPlace = (ArrayList<BuildingBlock>) getBlockData.invoke(null);
+                    Method getStaticBlockData = buildingToPlace.getMethod("getStaticBlockData");
+                    blocksToPlace = (ArrayList<BuildingBlock>) getStaticBlockData.invoke(null);
                     buildingDimensions = Building.getBuildingSize(blocksToPlace);
                     System.out.println(buildingDimensions);
                     buildingRotation = Rotation.NONE;
@@ -243,6 +245,18 @@ public class BuildingClientEvents {
             buildingRotation = buildingRotation.getRotated(rotation);
             for (int i = 0; i < blocksToPlace.size(); i++)
                 blocksToPlace.set(i, blocksToPlace.get(i).rotate(MC.level, rotation));
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Pre evt) throws NoSuchFieldException, IllegalAccessException {
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
+
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && buildingToPlace != null) {
+            String buildingName = (String) buildingToPlace.getField("buildingName").get(null);
+            BuildingServerboundPacket.placeBuilding(buildingName, CursorClientEvents.getPreselectedBlockPos(), buildingRotation);
+            buildingToPlace = null;
         }
     }
 

@@ -11,6 +11,8 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.Vec3;
@@ -22,10 +24,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Optional;
 
-public class Building {
+public abstract class Building {
 
-    // players shouldn't have to destroy every single block so building collapses at a certain % blocks remaining
     public String structureName;
+    // building collapses at a certain % blocks remaining so players don't have to destroy every single block
     public final float minBlocksPercent = 0.25f;
     public int health;
     public int maxHealth;
@@ -36,7 +38,6 @@ public class Building {
     // should be higher for large fragile buildings so players don't take ages to destroy it
     public float explodeChance;
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
-    public BlockPos originPos = null; // origin of structure, but mouse location will be close to centre
 
     public Building(String structureName) {
         this.structureName = structureName;
@@ -60,10 +61,26 @@ public class Building {
         );
         return size;
     }
-    // static returns of the base data
-    public static ArrayList<BuildingBlock> getBlockData() {
-        return new ArrayList<>();
+    // non-static data with absolute BlockPos values
+    public ArrayList<BuildingBlock> getBlockData(ArrayList<BuildingBlock> staticBlocks, LevelAccessor level, BlockPos originPos, Rotation rotation) {
+        ArrayList<BuildingBlock> blocks = new ArrayList<>();
+
+        for (BuildingBlock block : staticBlocks) {
+            BlockPos bp = block.getBlockPos();
+
+            blocks.add(new BuildingBlock(
+                    new BlockPos(
+                            bp.getX() + originPos.getX(),
+                            bp.getY() + originPos.getY() + 1,
+                            bp.getZ() + originPos.getZ()
+                    ),
+                    block.getBlockState().rotate(level, originPos, rotation)
+            ));
+        }
+        return blocks;
     }
+    // static data with relative BlockPos values
+    public static ArrayList<BuildingBlock> getStaticBlockData() { return new ArrayList<>(); }
     public static ArrayList<BlockState> getPaletteData() {
         return new ArrayList<>();
     }
