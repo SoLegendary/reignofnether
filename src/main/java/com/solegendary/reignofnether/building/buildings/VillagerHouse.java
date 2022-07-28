@@ -15,10 +15,10 @@ public class VillagerHouse extends Building {
 
     public VillagerHouse(LevelAccessor level, BlockPos originPos, Rotation rotation) {
         super(buildingName);
-        this.blocks = getBlockData(getStaticBlockData(), level, originPos, rotation);
+        this.blocks = getAbsoluteBlockData(getRelativeBlockData(), level, originPos, rotation);
     }
 
-    public static ArrayList<BuildingBlock> getStaticBlockData() {
+    public static ArrayList<BuildingBlock> getRelativeBlockData() {
         return (ArrayList) BuildingBlockData.VILLAGER_HOUSE_BLOCKS.clone();
     }
 }

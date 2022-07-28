@@ -13,8 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
@@ -24,7 +22,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Set;
 
 import static com.solegendary.reignofnether.cursor.CursorClientEvents.getPlayerLookVector;
 import static com.solegendary.reignofnether.cursor.CursorClientEvents.getRefinedCursorWorldPos;
@@ -98,15 +95,15 @@ public class FogOfWarClientEvents {
                             selEntity instanceof Unit &&
                             selEntity.getEyePosition().distanceTo(new Vec3(x, y, z)) > (((Unit) selEntity).getSightRange())) {
 
-                            if (!isSolidBlock(bp.above()))
+                            if (!isSolidBlocking(bp.above()))
                                 foggedBlocks.add(new Pair(bp, Direction.UP));
-                            if (!isSolidBlock(bp.north()))
+                            if (!isSolidBlocking(bp.north()))
                                 foggedBlocks.add(new Pair(bp, Direction.NORTH));
-                            if (!isSolidBlock(bp.south()))
+                            if (!isSolidBlocking(bp.south()))
                                 foggedBlocks.add(new Pair(bp, Direction.SOUTH));
-                            if (!isSolidBlock(bp.east()))
+                            if (!isSolidBlocking(bp.east()))
                                 foggedBlocks.add(new Pair(bp, Direction.EAST));
-                            if (!isSolidBlock(bp.west()))
+                            if (!isSolidBlocking(bp.west()))
                                 foggedBlocks.add(new Pair(bp, Direction.WEST));
                         }
                     }
@@ -121,8 +118,8 @@ public class FogOfWarClientEvents {
     }
 
     // checks whether a block is a complete cube or not
-    private static boolean isSolidBlock(BlockPos bp) {
+    private static boolean isSolidBlocking(BlockPos bp) {
         BlockState bs = MC.level.getBlockState(bp);
-        return bs.getMaterial().isSolid();
+        return bs.getMaterial().isSolidBlocking();
     }
 }

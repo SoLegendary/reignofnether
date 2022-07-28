@@ -61,29 +61,28 @@ public abstract class Building {
         );
         return size;
     }
-    // non-static data with absolute BlockPos values
-    public ArrayList<BuildingBlock> getBlockData(ArrayList<BuildingBlock> staticBlocks, LevelAccessor level, BlockPos originPos, Rotation rotation) {
+
+    // get BlockPos values with absolute world positions
+    public static ArrayList<BuildingBlock> getAbsoluteBlockData(ArrayList<BuildingBlock> staticBlocks, LevelAccessor level, BlockPos originPos, Rotation rotation) {
         ArrayList<BuildingBlock> blocks = new ArrayList<>();
 
         for (BuildingBlock block : staticBlocks) {
+            block = block.rotate(level, rotation);
             BlockPos bp = block.getBlockPos();
 
-            blocks.add(new BuildingBlock(
-                    new BlockPos(
-                            bp.getX() + originPos.getX(),
-                            bp.getY() + originPos.getY() + 1,
-                            bp.getZ() + originPos.getZ()
-                    ),
-                    block.getBlockState().rotate(level, originPos, rotation)
+            block.setBlockPos(new BlockPos(
+                bp.getX() + originPos.getX(),
+                bp.getY() + originPos.getY() + 1,
+                bp.getZ() + originPos.getZ()
             ));
+            blocks.add(block);
         }
         return blocks;
     }
-    // static data with relative BlockPos values
-    public static ArrayList<BuildingBlock> getStaticBlockData() { return new ArrayList<>(); }
-    public static ArrayList<BlockState> getPaletteData() {
-        return new ArrayList<>();
-    }
+
+
+    // get BlockPos values with relative positions
+    public static ArrayList<BuildingBlock> getRelativeBlockData() { return new ArrayList<>(); }
     // non-static returns of the instanced live data
     public ArrayList<BuildingBlock> getBlocks() {
         return this.blocks;

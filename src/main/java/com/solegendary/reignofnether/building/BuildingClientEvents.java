@@ -32,7 +32,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
@@ -62,9 +61,7 @@ public class BuildingClientEvents {
     // based on whether the location is valid or not
     // location should be 1 space above the selected spot
     public static void drawBuildingToPlace(PoseStack matrix, BlockPos originPos) {
-        boolean inAir = isBuildingPlacementInAir(originPos);
-        boolean clipping = isBuildingPlacementClipping(originPos);
-        boolean invalid = inAir || clipping;
+        boolean invalid = isBuildingPlacementValid(originPos);
 
         int minX = 999999;
         int minY = 999999;
@@ -123,6 +120,12 @@ public class BuildingClientEvents {
         MyRenderer.drawLineBox(matrix, aabb2, r, g, 0,0.25f);
     }
 
+    public static boolean isBuildingPlacementValid(BlockPos originPos) {
+        boolean inAir = isBuildingPlacementInAir(originPos);
+        boolean clipping = isBuildingPlacementClipping(originPos);
+        return inAir || clipping;
+    }
+
     public static boolean isBuildingPlacementClipping(BlockPos originPos) {
         for (BuildingBlock block : blocksToPlace) {
             Material bm = block.getBlockState().getMaterial();
@@ -164,9 +167,20 @@ public class BuildingClientEvents {
         return ((float) solidBlocksBelow / (float) blocksBelow) < 0.9f;
     }
 
-    // sends off the packet to server to create the Building object and start construction
-    public static void placeBuilding() {
+    // gets the cursor position rotated according to the preselected building
+    private static BlockPos getOriginPos() {
+        int xAdj = 0;
+        int zAdj = 0;
+        int xRadius = buildingDimensions.getX() / 2;
+        int zRadius = buildingDimensions.getZ() / 2;
 
+        switch(buildingRotation) {
+            case NONE:                xAdj = -xRadius; zAdj = -zRadius; break;
+            case CLOCKWISE_90:        xAdj =  xRadius; zAdj = -zRadius; break;
+            case CLOCKWISE_180:       xAdj =  xRadius; zAdj =  zRadius; break;
+            case COUNTERCLOCKWISE_90: xAdj = -xRadius; zAdj =  zRadius; break;
+        }
+        return CursorClientEvents.getPreselectedBlockPos().offset(xAdj, 0, zAdj);
     }
 
     @SubscribeEvent
@@ -175,19 +189,7 @@ public class BuildingClientEvents {
             return;
 
         if (buildingToPlace != null) {
-            int xAdj = 0;
-            int zAdj = 0;
-            int xRadius = buildingDimensions.getX() / 2;
-            int zRadius = buildingDimensions.getZ() / 2;
-
-            switch(buildingRotation) {
-                case NONE:                xAdj = -xRadius; zAdj = -zRadius; break;
-                case CLOCKWISE_90:        xAdj =  xRadius; zAdj = -zRadius; break;
-                case CLOCKWISE_180:       xAdj =  xRadius; zAdj =  zRadius; break;
-                case COUNTERCLOCKWISE_90: xAdj = -xRadius; zAdj =  zRadius; break;
-            }
-            BlockPos centredBp = CursorClientEvents.getPreselectedBlockPos().offset(xAdj, 0, zAdj);
-            drawBuildingToPlace(evt.getPoseStack(), centredBp);
+            drawBuildingToPlace(evt.getPoseStack(), getOriginPos());
         }
     }
 
@@ -216,10 +218,9 @@ public class BuildingClientEvents {
             if (buildingToPlace != lastBuildingToPlace && buildingToPlace != null) {
                 // load the new buildingToPlace's data
                 try {
-                    Method getStaticBlockData = buildingToPlace.getMethod("getStaticBlockData");
-                    blocksToPlace = (ArrayList<BuildingBlock>) getStaticBlockData.invoke(null);
+                    Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData");
+                    blocksToPlace = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null);
                     buildingDimensions = Building.getBuildingSize(blocksToPlace);
-                    System.out.println(buildingDimensions);
                     buildingRotation = Rotation.NONE;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -253,9 +254,10 @@ public class BuildingClientEvents {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && buildingToPlace != null) {
+        BlockPos originPos = getOriginPos();
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && buildingToPlace != null && isBuildingPlacementValid(originPos)) {
             String buildingName = (String) buildingToPlace.getField("buildingName").get(null);
-            BuildingServerboundPacket.placeBuilding(buildingName, CursorClientEvents.getPreselectedBlockPos(), buildingRotation);
+            BuildingServerboundPacket.placeBuilding(buildingName, originPos, buildingRotation);
             buildingToPlace = null;
         }
     }

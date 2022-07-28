@@ -24,10 +24,7 @@ public class BuildingBlock {
     public void setBlockPos(BlockPos bp) { this.blockPos = bp; }
     public void setBlockState(BlockState bs) { this.blockState = bs; }
 
-    public void rotateInPlace(LevelAccessor level, Rotation rotation) {
-        this.blockPos = this.blockPos.rotate(rotation);
-        this.blockState = this.blockState.rotate(level, blockPos, rotation);
-    }
+    // rotation should only ever be done on a relative BlockPos or it will rotate about world (0,0)
     public BuildingBlock rotate(LevelAccessor level, Rotation rotation) {
         return new BuildingBlock(
             this.blockPos.rotate(rotation),
