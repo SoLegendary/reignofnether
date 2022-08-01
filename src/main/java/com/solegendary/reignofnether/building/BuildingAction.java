@@ -4,6 +4,5 @@ package com.solegendary.reignofnether.building;
 public enum BuildingAction {
     PLACE,
     CANCEL, // WIP building cancelled by owner
-    DESTROY, // Building explodes and is deleted from serverside memory
     REPAIR // damage is done by directly removing blocks
 }

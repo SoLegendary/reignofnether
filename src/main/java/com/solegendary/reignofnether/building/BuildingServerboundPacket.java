@@ -16,30 +16,29 @@ public class BuildingServerboundPacket {
     private static Minecraft MC = Minecraft.getInstance();
 
     // pos is used to identify the building object serverside
-    public BlockPos pos; // PLACE, CANCEL, DESTROY, REPAIR
+    public BlockPos pos; // required for action: PLACE, CANCEL, REPAIR
     public String buildingName; // PLACE
     public Rotation rotation; // PLACE
+    public String ownerName; // PLACE
     public int repairAmount; // REPAIR
     public BuildingAction action;
 
-    public static void placeBuilding(String buildingName, BlockPos originPos, Rotation rotation) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.PLACE, buildingName, originPos, rotation, 0));
+    public static void placeBuilding(String buildingName, BlockPos originPos, Rotation rotation, String ownerName) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.PLACE, buildingName, originPos, rotation, ownerName, 0));
     }
     public static void repairBuilding(BlockPos pos, int repairAmount) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.REPAIR, null, pos, null, repairAmount));
-    }
-    public static void destroyBuilding(BlockPos pos) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.DESTROY, null, pos, null, 0));
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.REPAIR, null, pos, null, null, repairAmount));
     }
     public static void cancelBuilding(BlockPos pos) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.CANCEL, null, pos, null, 0));
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.CANCEL, null, pos, null, null, 0));
     }
 
-    public BuildingServerboundPacket(BuildingAction action, String buildingName, BlockPos pos, Rotation rotation, int repairAmount) {
+    public BuildingServerboundPacket(BuildingAction action, String buildingName, BlockPos pos, Rotation rotation, String ownerName, int repairAmount) {
         this.action = action;
         this.buildingName = buildingName;
         this.pos = pos;
         this.rotation = rotation;
+        this.ownerName = ownerName;
         this.repairAmount = repairAmount;
     }
 
@@ -48,6 +47,7 @@ public class BuildingServerboundPacket {
         this.buildingName = buffer.readUtf();
         this.pos = buffer.readBlockPos();
         this.rotation = buffer.readEnum(Rotation.class);
+        this.ownerName = buffer.readUtf();
         this.repairAmount = buffer.readInt();
     }
 
@@ -56,6 +56,7 @@ public class BuildingServerboundPacket {
         buffer.writeUtf(this.buildingName);
         buffer.writeBlockPos(this.pos);
         buffer.writeEnum(this.rotation);
+        buffer.writeUtf(this.ownerName);
         buffer.writeInt(this.repairAmount);
     }
 
@@ -65,11 +66,9 @@ public class BuildingServerboundPacket {
         ctx.get().enqueueWork(() -> {
 
             if (this.action == BuildingAction.PLACE)
-                BuildingServerEvents.placeBuilding(this.buildingName, this.pos, this.rotation);
+                BuildingServerEvents.placeBuilding(this.buildingName, this.pos, this.rotation, this.ownerName);
             else if (this.action == BuildingAction.CANCEL)
                 System.out.println("CANCEL");
-            else if (this.action == BuildingAction.DESTROY)
-                BuildingServerEvents.destroyBuilding(this.pos);
             else if (this.action == BuildingAction.REPAIR)
                 System.out.println("REPAIR");
 

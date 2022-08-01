@@ -32,11 +32,13 @@ public class BuildingBlock {
         );
     }
 
-    public void place(ServerLevel level) {
-
+    public void place() {
+        isPlaced = true;
+        BuildingServerEvents.placeBlock(this);
     }
 
-    public void destroy(ServerLevel level) {
-
+    public void destroy() {
+        isPlaced = false;
+        BuildingServerEvents.destroyBlock(this.blockPos);
     }
 }

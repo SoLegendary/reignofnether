@@ -21,17 +21,20 @@ public class BuildingServerEvents {
     private static ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
     private static ArrayList<BlockPos> blockDestroyQueue = new ArrayList<>();
 
-    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation) {
-        Building building = Building.getNewBuilding(buildingName, serverLevel, pos, rotation);
+    public static void placeBlock(BuildingBlock block) {
+        blockPlaceQueue.add(block);
+    }
+    public static void destroyBlock(BlockPos pos) {
+        blockDestroyQueue.add(pos);
+    }
+
+    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName) {
+        Building building = Building.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName);
         if (building != null) {
             buildings.add(building);
             blockPlaceQueue.addAll(building.blocks);
         }
-    }
-
-    // destroys any building that overlaps the given BlockPos
-    public static void destroyBuilding(BlockPos pos) {
-
+        BuildingClientboundPacket.placeBuilding(buildingName, pos, rotation, ownerName);
     }
 
     @SubscribeEvent
@@ -49,15 +52,15 @@ public class BuildingServerEvents {
             clientLevel = Minecraft.getInstance().level;
 
         if (serverLevel != null && clientLevel != null) {
-            for (BuildingBlock placeBlock : blockPlaceQueue) {
-                clientLevel.setBlock(placeBlock.getBlockPos(), placeBlock.getBlockState(), 1);
-                serverLevel.setBlock(placeBlock.getBlockPos(), placeBlock.getBlockState(), 1);
+            for (BuildingBlock blockToPlace : blockPlaceQueue) {
+                clientLevel.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);
+                serverLevel.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);
             }
             blockPlaceQueue = new ArrayList<>();
 
-            for (BlockPos destroyBlock : blockDestroyQueue) {
-                clientLevel.destroyBlock(destroyBlock, false);
-                serverLevel.destroyBlock(destroyBlock, false);
+            for (BlockPos blockToDestroy : blockDestroyQueue) {
+                clientLevel.destroyBlock(blockToDestroy, false);
+                serverLevel.destroyBlock(blockToDestroy, false);
             }
             blockDestroyQueue = new ArrayList<>();
         }

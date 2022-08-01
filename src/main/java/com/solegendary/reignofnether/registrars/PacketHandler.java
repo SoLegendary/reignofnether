@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
@@ -39,5 +40,9 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(BuildingServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(BuildingServerboundPacket::encode).decoder(BuildingServerboundPacket::new)
                 .consumer(BuildingServerboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(BuildingClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(BuildingClientboundPacket::encode).decoder(BuildingClientboundPacket::new)
+                .consumer(BuildingClientboundPacket::handle).add();
     }
 }

@@ -28,18 +28,20 @@ public abstract class Building {
     // should be higher for large fragile buildings so players don't take ages to destroy it
     public float explodeChance;
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
+    public String ownerName;
 
-    public Building(String structureName, boolean isClientSide) {
+    public Building(String structureName, boolean isClientSide, String ownerName) {
         this.structureName = structureName;
         this.isClientSide = isClientSide;
+        this.ownerName = ownerName;
     }
 
     // given a string name return a new instance of that building
-    public static Building getNewBuilding(String buildingName, LevelAccessor level, BlockPos pos, Rotation rotation) {
+    public static Building getNewBuilding(String buildingName, LevelAccessor level, BlockPos pos, Rotation rotation, String ownerName) {
         Building building = null;
         switch(buildingName) {
-            case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation);
-            case VillagerTower.buildingName -> building = new VillagerTower(level, pos, rotation);
+            case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation, ownerName);
+            case VillagerTower.buildingName -> building = new VillagerTower(level, pos, rotation, ownerName);
         }
         return building;
     }

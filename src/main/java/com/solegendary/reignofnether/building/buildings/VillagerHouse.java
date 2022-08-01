@@ -13,8 +13,8 @@ public class VillagerHouse extends Building {
 
     public static final String buildingName = "Villager House";
 
-    public VillagerHouse(LevelAccessor level, BlockPos originPos, Rotation rotation) {
-        super(buildingName, level.isClientSide());
+    public VillagerHouse(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
+        super(buildingName, level.isClientSide(), ownerName);
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(), level, originPos, rotation);
     }
 

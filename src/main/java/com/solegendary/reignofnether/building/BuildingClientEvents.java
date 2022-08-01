@@ -199,7 +199,7 @@ public class BuildingClientEvents {
             if (building.isPosInsideBuilding(CursorClientEvents.getPreselectedBlockPos())) {
                 AABB aabb = new AABB(
                         new BlockPos(Building.getMinCorner(building.blocks)),
-                        new BlockPos(Building.getMaxCorner(building.blocks))
+                        new BlockPos(Building.getMaxCorner(building.blocks)).offset(1,1,1)
                 );
                 MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
             }
@@ -271,24 +271,26 @@ public class BuildingClientEvents {
             return;
 
         BlockPos pos = getOriginPos();
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && buildingToPlace != null && isBuildingPlacementValid(pos)) {
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && buildingToPlace != null && isBuildingPlacementValid(pos) && MC.player != null) {
             String buildingName = (String) buildingToPlace.getField("buildingName").get(null);
-            BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation);
-
-            Building building = Building.getNewBuilding(buildingName, MC.level, pos, buildingRotation);
-            if (building != null)
-                buildings.add(building);
+            BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString());
 
             buildingToPlace = null;
         }
     }
 
+    // place a building clientside that has already been registered on serverside
+    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName) {
+        Building building = Building.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName);
+        if (building != null)
+            buildings.add(building);
+    }
+
     @SubscribeEvent
     public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
-        /*
+
         MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
-                "solidBlocksBelow: " + solidBlocksBelow1,
-                "blocksBelow: " + blocksBelow1
-        });*/
+                "buildings registered: " + buildings.size()
+        });
     }
 }
