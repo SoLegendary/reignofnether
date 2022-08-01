@@ -137,29 +137,30 @@ public class HudClientEvents {
         int blitXStart = blitX;
         blitY = screenHeight - iconFrameSize * 2 - 10;
 
-        if (unitButtons.size() > 0)
-            MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 12,
+        if (unitButtons.size() >= 2) {
+            MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
                     iconFrameSize * unitButtonsPerRow + 10,
-                    iconFrameSize * 2 + 21,
+                    iconFrameSize * 2 + 20,
                     0xA0000000);
 
-        for (Button unitButton : unitButtons) {
-            // replace last icon with a +X number of units icon
-            if (buttonsRendered == (unitButtonsPerRow * 2) - 1 &&
-                    units.size() > (unitButtonsPerRow * 2)) {
-                int numExtraUnits = units.size() - (unitButtonsPerRow * 2) + 1;
-                MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, 0x64000000);
-                GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraUnits,
-                        blitX + iconFrameSize/2, blitY + 8, 0xFFFFFF);
-            }
-            else {
-                unitButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
-                unitButton.renderHealthBar(evt.getPoseStack());
-                blitX += iconFrameSize;
-                buttonsRendered += 1;
-                if (buttonsRendered == unitButtonsPerRow) {
-                    blitX = blitXStart;
-                    blitY += iconFrameSize + 6;
+            for (Button unitButton : unitButtons) {
+                // replace last icon with a +X number of units icon
+                if (buttonsRendered == (unitButtonsPerRow * 2) - 1 &&
+                        units.size() > (unitButtonsPerRow * 2)) {
+                    int numExtraUnits = units.size() - (unitButtonsPerRow * 2) + 1;
+                    MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, 0x64000000);
+                    GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraUnits,
+                            blitX + iconFrameSize/2, blitY + 8, 0xFFFFFF);
+                }
+                else {
+                    unitButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                    unitButton.renderHealthBar(evt.getPoseStack());
+                    blitX += iconFrameSize;
+                    buttonsRendered += 1;
+                    if (buttonsRendered == unitButtonsPerRow) {
+                        blitX = blitXStart;
+                        blitY += iconFrameSize + 6;
+                    }
                 }
             }
         }
