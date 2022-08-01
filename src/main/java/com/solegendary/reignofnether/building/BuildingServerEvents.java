@@ -1,13 +1,12 @@
 package com.solegendary.reignofnether.building;
 
-import com.solegendary.reignofnether.building.buildings.VillagerHouse;
-import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -23,12 +22,7 @@ public class BuildingServerEvents {
     private static ArrayList<BlockPos> blockDestroyQueue = new ArrayList<>();
 
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation) {
-        Building building = null;
-
-        switch(buildingName) {
-            case VillagerHouse.buildingName -> building = new VillagerHouse(serverLevel, pos, rotation);
-            case VillagerTower.buildingName -> building = new VillagerTower(serverLevel, pos, rotation);
-        }
+        Building building = Building.getNewBuilding(buildingName, serverLevel, pos, rotation);
         if (building != null) {
             buildings.add(building);
             blockPlaceQueue.addAll(building.blocks);
@@ -38,6 +32,13 @@ public class BuildingServerEvents {
     // destroys any building that overlaps the given BlockPos
     public static void destroyBuilding(BlockPos pos) {
 
+    }
+
+    @SubscribeEvent
+    public static void onBlockBreak(BlockEvent.BreakEvent evt) {
+        Boolean isClientside = evt.getWorld().isClientSide();
+
+        System.out.println(isClientside);
     }
 
     @SubscribeEvent

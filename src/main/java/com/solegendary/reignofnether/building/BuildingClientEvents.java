@@ -39,12 +39,16 @@ public class BuildingClientEvents {
 
     static final Minecraft MC = Minecraft.getInstance();
 
+    // clientside buildings used for tracking position (for cursor selection)
+    public static ArrayList<Building> buildings = new ArrayList<>();
     public static Class<? extends Building> buildingToPlace = null;
     private static Class<? extends Building> lastBuildingToPlace = null;
     private static ArrayList<BuildingBlock> blocksToPlace = new ArrayList<>();
     private static boolean replacedTexture = false;
     private static Rotation buildingRotation = Rotation.NONE;
     private static Vec3i buildingDimensions = new Vec3i(0,0,0);
+
+
 
     // adds a green overlay option to OverlayTexture at (0,0)
     public static void replaceOverlayTexture() {
@@ -61,7 +65,7 @@ public class BuildingClientEvents {
     // based on whether the location is valid or not
     // location should be 1 space above the selected spot
     public static void drawBuildingToPlace(PoseStack matrix, BlockPos originPos) {
-        boolean invalid = isBuildingPlacementValid(originPos);
+        boolean valid = isBuildingPlacementValid(originPos);
 
         int minX = 999999;
         int minY = 999999;
@@ -93,7 +97,7 @@ public class BuildingClientEvents {
                     MC.renderBuffers().crumblingBufferSource(), // don't render over other stuff
                     15728880,
                     // red if invalid, else green
-                    invalid ? OverlayTexture.pack(0,3) : OverlayTexture.pack(0,0),
+                    valid ? OverlayTexture.pack(0,0) : OverlayTexture.pack(0,3),
                     modelData);
 
             matrix.popPose();
@@ -110,8 +114,8 @@ public class BuildingClientEvents {
         minY += 1.05f;
         maxZ += 1;
 
-        float r = invalid ? 1.0f : 0;
-        float g = invalid ? 0 : 1.0f;
+        float r = valid ? 0 : 1.0f;
+        float g = valid ? 1.0f : 0;
         ResourceLocation rl = new ResourceLocation("forge:textures/white.png");
         AABB aabb = new AABB(minX, minY, minZ, maxX, minY, maxZ);
         MyRenderer.drawLineBox(matrix, aabb, r, g, 0,0.5f);
@@ -123,7 +127,7 @@ public class BuildingClientEvents {
     public static boolean isBuildingPlacementValid(BlockPos originPos) {
         boolean inAir = isBuildingPlacementInAir(originPos);
         boolean clipping = isBuildingPlacementClipping(originPos);
-        return inAir || clipping;
+        return !inAir && !clipping;
     }
 
     public static boolean isBuildingPlacementClipping(BlockPos originPos) {
@@ -191,6 +195,15 @@ public class BuildingClientEvents {
         if (buildingToPlace != null) {
             drawBuildingToPlace(evt.getPoseStack(), getOriginPos());
         }
+        for (Building building : buildings) {
+            if (building.isPosInsideBuilding(CursorClientEvents.getPreselectedBlockPos())) {
+                AABB aabb = new AABB(
+                        new BlockPos(Building.getMinCorner(building.blocks)),
+                        new BlockPos(Building.getMaxCorner(building.blocks))
+                );
+                MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -199,6 +212,9 @@ public class BuildingClientEvents {
             replaceOverlayTexture();
             replacedTexture = true;
         }
+
+        // check that all clientside buildings still exist (if any have 0 blocks remaining in world, then delete it)
+
     }
 
     @SubscribeEvent
@@ -254,10 +270,15 @@ public class BuildingClientEvents {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
-        BlockPos originPos = getOriginPos();
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && buildingToPlace != null && isBuildingPlacementValid(originPos)) {
+        BlockPos pos = getOriginPos();
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && buildingToPlace != null && isBuildingPlacementValid(pos)) {
             String buildingName = (String) buildingToPlace.getField("buildingName").get(null);
-            BuildingServerboundPacket.placeBuilding(buildingName, originPos, buildingRotation);
+            BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation);
+
+            Building building = Building.getNewBuilding(buildingName, MC.level, pos, buildingRotation);
+            if (building != null)
+                buildings.add(building);
+
             buildingToPlace = null;
         }
     }

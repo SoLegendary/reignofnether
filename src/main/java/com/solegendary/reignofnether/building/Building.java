@@ -1,32 +1,22 @@
 package com.solegendary.reignofnether.building;
 
-import net.minecraft.ResourceLocationException;
-import net.minecraft.client.Minecraft;
+import com.solegendary.reignofnether.building.buildings.VillagerHouse;
+import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Optional;
 
 public abstract class Building {
 
     public String structureName;
+    public boolean isClientSide;
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
     public final float minBlocksPercent = 0.25f;
     public int health;
@@ -39,27 +29,53 @@ public abstract class Building {
     public float explodeChance;
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
 
-    public Building(String structureName) {
+    public Building(String structureName, boolean isClientSide) {
         this.structureName = structureName;
+        this.isClientSide = isClientSide;
+    }
+
+    // given a string name return a new instance of that building
+    public static Building getNewBuilding(String buildingName, LevelAccessor level, BlockPos pos, Rotation rotation) {
+        Building building = null;
+        switch(buildingName) {
+            case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation);
+            case VillagerTower.buildingName -> building = new VillagerTower(level, pos, rotation);
+        }
+        return building;
+    }
+
+    public static Vec3i getMinCorner(ArrayList<BuildingBlock> blocks) {
+        return new Vec3i(
+            blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
+            blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
+            blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
+        );
+    }
+    public static Vec3i getMaxCorner(ArrayList<BuildingBlock> blocks) {
+        return new Vec3i(
+            blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
+            blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
+            blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
+        );
+    }
+
+    public boolean isPosInsideBuilding(BlockPos bp) {
+        Vec3i min = getMinCorner(this.blocks);
+        Vec3i max = getMaxCorner(this.blocks);
+
+        return bp.getX() <= max.getX() && bp.getX() >= min.getX() &&
+               bp.getY() <= max.getY() && bp.getY() >= min.getY() &&
+               bp.getZ() <= max.getZ() && bp.getZ() >= min.getZ();
     }
 
     public static Vec3i getBuildingSize(ArrayList<BuildingBlock> blocks) {
-        Vec3i min = new Vec3i(
-                blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
-                blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
-                blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
-        );
-        Vec3i max = new Vec3i(
-                blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
-                blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
-                blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
-        );
-        Vec3i size = new Vec3i(
+        Vec3i min = getMinCorner(blocks);
+        Vec3i max = getMaxCorner(blocks);
+        return new Vec3i(
                 max.getX() - min.getX(),
                 max.getY() - min.getY(),
                 max.getZ() - min.getZ()
         );
-        return size;
     }
 
     // get BlockPos values with absolute world positions
@@ -112,7 +128,7 @@ public abstract class Building {
     }
 
     @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent evt) {
+    public void onTick(TickEvent.ServerTickEvent evt) {
         // match healthPercent to (blocksBuiltPercent + minBlocksPercent)
 
         // if health <= 0: destroy the building in big explosion
