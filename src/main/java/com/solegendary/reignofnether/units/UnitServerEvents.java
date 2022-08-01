@@ -144,7 +144,7 @@ public class UnitServerEvents {
         }
     }
 
-    // similar to UnitClientEvents getUnitRelationship  given two
+    // similar to UnitClientEvents getUnitRelationship: given a Unit and Entity, what is the relationship between them
     public static Relationship getUnitToEntityRelationship(Unit unit, Entity entity) {
         if (!(entity instanceof Unit))
             return Relationship.NEUTRAL;

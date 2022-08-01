@@ -247,12 +247,11 @@ public class UnitClientEvents {
             if (entity != null) {
                 Relationship unitRs = getPlayerToEntityRelationship(unitId);
 
-                if (unitRs == Relationship.OWNED)
-                    MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 1.0f, 0.3f, 0.2f);
-                else if (unitRs == Relationship.FRIENDLY)
-                    MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 0.3f, 0.3f, 1.0f, 0.2f);
-                else if (unitRs == Relationship.HOSTILE)
-                    MyRenderer.drawEntityOutlineBottom(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 0.2f);
+                switch (unitRs) {
+                    case OWNED -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 1.0f, 0.3f, 0.2f);
+                    case FRIENDLY -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 0.3f, 1.0f, 0.2f);
+                    case HOSTILE -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 0.3f, 0.3f, 0.2f);
+                }
             }
         }
 

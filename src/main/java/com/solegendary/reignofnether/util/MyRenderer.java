@@ -43,8 +43,7 @@ public class MyRenderer {
     }
 
     // like drawEntityOutline but only the bottom square
-    public static void drawEntityOutlineBottom(PoseStack matrixStack, Entity entity, float r, float g, float b, float a) {
-        AABB aabb = entity.getBoundingBox();
+    public static void drawOutlineBottom(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
         aabb = aabb.setMaxY(aabb.minY);
         drawLineBox(matrixStack, aabb, r, g, b, a);
     }

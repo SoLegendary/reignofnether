@@ -15,7 +15,7 @@ import java.util.Comparator;
 
 public abstract class Building {
 
-    public String structureName;
+    public String name;
     public boolean isClientSide;
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
     public final float minBlocksPercent = 0.25f;
@@ -30,8 +30,8 @@ public abstract class Building {
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
     public String ownerName;
 
-    public Building(String structureName, boolean isClientSide, String ownerName) {
-        this.structureName = structureName;
+    public Building(String name, boolean isClientSide, String ownerName) {
+        this.name = name;
         this.isClientSide = isClientSide;
         this.ownerName = ownerName;
     }

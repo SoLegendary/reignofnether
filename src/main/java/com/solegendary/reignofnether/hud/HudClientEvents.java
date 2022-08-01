@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hud;
 
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Relationship;

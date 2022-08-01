@@ -8,6 +8,8 @@ import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.Keybinds;
+import com.solegendary.reignofnether.units.Relationship;
+import com.solegendary.reignofnether.units.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -41,6 +43,7 @@ public class BuildingClientEvents {
 
     // clientside buildings used for tracking position (for cursor selection)
     public static ArrayList<Building> buildings = new ArrayList<>();
+    public static Building selectedBuilding = null;
     public static Class<? extends Building> buildingToPlace = null;
     private static Class<? extends Building> lastBuildingToPlace = null;
     private static ArrayList<BuildingBlock> blocksToPlace = new ArrayList<>();
@@ -54,11 +57,21 @@ public class BuildingClientEvents {
     public static void replaceOverlayTexture() {
         NativeImage nativeimage = MC.gameRenderer.overlayTexture.texture.getPixels();
         int bgr = MiscUtil.reverseHexRGB(0x00FF00); // for some reason setPixelRGBA reads it as ABGR with A inversed
-        nativeimage.setPixelRGBA(0,0, bgr | (0xB2 << 24));
-        RenderSystem.activeTexture(33985);
-        MC.gameRenderer.overlayTexture.texture.bind();
-        nativeimage.upload(0, 0, 0, 0, 0, nativeimage.getWidth(), nativeimage.getHeight(), false, true, false, false);
-        RenderSystem.activeTexture(33984);
+        if (nativeimage != null) {
+            nativeimage.setPixelRGBA(0,0, bgr | (0xB2 << 24));
+            RenderSystem.activeTexture(33985);
+            MC.gameRenderer.overlayTexture.texture.bind();
+            nativeimage.upload(0, 0, 0, 0, 0, nativeimage.getWidth(), nativeimage.getHeight(), false, true, false, false);
+            RenderSystem.activeTexture(33984);
+        }
+    }
+
+    public static Building getPreselectedBuilding() {
+        for (Building building: buildings) {
+            if (building.isPosInsideBuilding(CursorClientEvents.getPreselectedBlockPos()))
+                return building;
+        }
+        return null;
     }
 
     // draws the building with a green/red overlay (based on placement validity) at the target position
@@ -151,7 +164,7 @@ public class BuildingClientEvents {
         int solidBlocksBelow = 0;
         int blocksBelow = 0;
         for (BuildingBlock block : blocksToPlace) {
-            if (block.getBlockPos().getY() == 0) {
+            if (block.getBlockPos().getY() == 0 && MC.level != null) {
                 BlockPos bp = new BlockPos(
                         originPos.getX() + block.getBlockPos().getX(),
                         originPos.getY() + block.getBlockPos().getY() + 1,
@@ -179,10 +192,10 @@ public class BuildingClientEvents {
         int zRadius = buildingDimensions.getZ() / 2;
 
         switch(buildingRotation) {
-            case NONE:                xAdj = -xRadius; zAdj = -zRadius; break;
-            case CLOCKWISE_90:        xAdj =  xRadius; zAdj = -zRadius; break;
-            case CLOCKWISE_180:       xAdj =  xRadius; zAdj =  zRadius; break;
-            case COUNTERCLOCKWISE_90: xAdj = -xRadius; zAdj =  zRadius; break;
+            case NONE                -> { xAdj = -xRadius; zAdj = -zRadius; }
+            case CLOCKWISE_90        -> { xAdj =  xRadius; zAdj = -zRadius; }
+            case CLOCKWISE_180       -> { xAdj =  xRadius; zAdj =  zRadius; }
+            case COUNTERCLOCKWISE_90 -> { xAdj = -xRadius; zAdj =  zRadius; }
         }
         return CursorClientEvents.getPreselectedBlockPos().offset(xAdj, 0, zAdj);
     }
@@ -192,16 +205,28 @@ public class BuildingClientEvents {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
-        if (buildingToPlace != null) {
+        if (buildingToPlace != null)
             drawBuildingToPlace(evt.getPoseStack(), getOriginPos());
-        }
+
+        Building preselectedBuilding = getPreselectedBuilding();
+
         for (Building building : buildings) {
-            if (building.isPosInsideBuilding(CursorClientEvents.getPreselectedBlockPos())) {
-                AABB aabb = new AABB(
-                        new BlockPos(Building.getMinCorner(building.blocks)),
-                        new BlockPos(Building.getMaxCorner(building.blocks)).offset(1,1,1)
-                );
+            AABB aabb = new AABB(
+                    new BlockPos(Building.getMinCorner(building.blocks)),
+                    new BlockPos(Building.getMaxCorner(building.blocks)).offset(1,1,1)
+            );
+
+            if (building.equals(selectedBuilding))
                 MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
+            else if (building.equals(preselectedBuilding))
+                MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 0.5f);
+
+            Relationship buildingRs = getPlayerToBuildingRelationship(building);
+
+            switch (buildingRs) {
+                case OWNED -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), aabb, 0.3f, 1.0f, 0.3f, 0.2f);
+                case FRIENDLY -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), aabb, 0.3f, 0.3f, 1.0f, 0.2f);
+                case HOSTILE -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), aabb, 1.0f, 0.3f, 0.3f, 0.2f);
             }
         }
     }
@@ -241,11 +266,8 @@ public class BuildingClientEvents {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                lastBuildingToPlace = buildingToPlace; // avoid loading the same data twice unnecessarily
             }
-            lastBuildingToPlace = buildingToPlace;
-        }
-        if (evt.getAction() == GLFW.GLFW_MOUSE_BUTTON_1 && buildingToPlace != null) {
-
         }
     }
 
@@ -271,11 +293,21 @@ public class BuildingClientEvents {
             return;
 
         BlockPos pos = getOriginPos();
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && buildingToPlace != null && isBuildingPlacementValid(pos) && MC.player != null) {
-            String buildingName = (String) buildingToPlace.getField("buildingName").get(null);
-            BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString());
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
 
-            buildingToPlace = null;
+            // place a new building
+            if (buildingToPlace != null && isBuildingPlacementValid(pos) && MC.player != null) {
+                String buildingName = (String) buildingToPlace.getField("buildingName").get(null);
+                BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString());
+                buildingToPlace = null;
+            }
+            else if (buildingToPlace == null) {
+                Building building = getPreselectedBuilding();
+                if (building != null) {
+                    selectedBuilding = building;
+                    UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
+                }
+            }
         }
     }
 
@@ -286,11 +318,27 @@ public class BuildingClientEvents {
             buildings.add(building);
     }
 
+    public static Relationship getPlayerToBuildingRelationship(Building building) {
+        if (MC.player != null && building.ownerName.equals(MC.player.getName().getString()))
+            return Relationship.OWNED;
+        else
+            return Relationship.HOSTILE;
+    }
+
     @SubscribeEvent
     public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
+        Building preselectedBuilding = getPreselectedBuilding();
+        String preselectedText = "";
+        if (preselectedBuilding != null)
+            preselectedText = preselectedBuilding.name;
+
+        String selectedText = "";
+        if (selectedBuilding != null)
+            selectedText = selectedBuilding.name;
 
         MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
-                "buildings registered: " + buildings.size()
+                "preselectedBuilding: " + preselectedText,
+                "selectedBuilding: " + selectedText
         });
     }
 }
