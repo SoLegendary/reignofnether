@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.hud;
 
-import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Relationship;
 import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
@@ -11,28 +9,17 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.model.*;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
 public class HudClientEvents {
-
-    private static final ResourceLocation[] TEXTURE_STAT_ICONS = {
-            new ResourceLocation("reignofnether", "textures/icons/items/sword.png"), // DAMAGE
-            new ResourceLocation("reignofnether", "textures/icons/items/sparkler.png"), // ATTACK SPEED
-            new ResourceLocation("reignofnether", "textures/icons/items/bow.png"), // RANGE
-            new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"), // ARMOUR
-            new ResourceLocation("reignofnether", "textures/icons/items/boots.png"), // MOVE SPEED
-    };
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static int mouseX = 0;
@@ -48,13 +35,10 @@ public class HudClientEvents {
     // unit type that is selected in the list of unit icons
     public static LivingEntity hudSelectedEntity = null;
     // private class used to render only the head of a unit on screen for the portrait
-    public static PortraitRenderer portraitRenderer = new PortraitRenderer(null);
+    public static PortraitRendererUnit portraitRendererUnit = new PortraitRendererUnit(null);
 
     // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
     private static int hudStartingXPos = 0;
-
-    // if we are rendering > this amount, then just render an empty icon with +N for the remaining units
-    private static final int unitButtonsPerRow = 8;
 
     // eg. entity.reignofnether.zombie_unit -> zombie
     public static String getSimpleEntityName(Entity entity) {
@@ -83,10 +67,16 @@ public class HudClientEvents {
         ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
 
         // create all of the unit buttons for this frame
+        int screenWidth = MC.getWindow().getGuiScaledWidth();
         int screenHeight = MC.getWindow().getGuiScaledHeight();
 
         int iconSize = 14;
         int iconFrameSize = Button.iconFrameSize;
+
+        // screenWidth ranges roughly between 440-540
+        int unitButtonsPerRow = (int) Math.ceil((float) (screenWidth - 340) / iconFrameSize);
+        unitButtonsPerRow = Math.min(unitButtonsPerRow, 10);
+        unitButtonsPerRow = Math.max(unitButtonsPerRow, 4);
 
         unitButtons = new ArrayList<>();
         for (LivingEntity unit : units) {
@@ -118,11 +108,11 @@ public class HudClientEvents {
         // Unit head portrait (based on selected unit type) + stats
         // --------------------------------------------------------
         int blitX = hudStartingXPos;
-        int blitY = MC.getWindow().getGuiScaledHeight() - portraitRenderer.frameHeight;
+        int blitY = MC.getWindow().getGuiScaledHeight() - portraitRendererUnit.frameHeight;
 
         if (hudSelectedEntity != null &&
-            portraitRenderer.model != null &&
-            portraitRenderer.renderer != null) {
+            portraitRendererUnit.model != null &&
+            portraitRendererUnit.renderer != null) {
 
             // write capitalised unit name
             String name = HudClientEvents.getSimpleEntityName(hudSelectedEntity);
@@ -134,51 +124,24 @@ public class HudClientEvents {
                     0xFFFFFFFF
             );
 
-            portraitRenderer.renderWithFrame(
+            portraitRendererUnit.render(
                     evt.getPoseStack(), blitX, blitY,
                     hudSelectedEntity);
-
-            // draw unit stats
-            if (hudSelectedEntity instanceof Unit) {
-                blitX += portraitRenderer.frameWidth - 2;
-                MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX, blitY,
-                        43,
-                        portraitRenderer.frameHeight,
-                        0xA0000000);
-
-                int blitXIcon = blitX + 6;
-                int blitYIcon = blitY + 7;
-                for (int i = 0; i < TEXTURE_STAT_ICONS.length; i++) {
-                    MyRenderer.renderIcon(
-                            evt.getPoseStack(),
-                            TEXTURE_STAT_ICONS[i],
-                            blitXIcon, blitYIcon, 8
-                    );
-                    String statString = "";
-
-                    Unit unit = (Unit) hudSelectedEntity;
-                    switch (i) {
-                        case 0 -> statString = String.valueOf((int) unit.getDamage()); // DAMAGE
-                        case 1 -> statString = String.valueOf((int) (100 / unit.getAttackCooldown())); // ATTACK SPEED
-                        case 2 -> statString = String.valueOf((int) (unit.getAttackRange())); // RANGE
-                        case 3 -> statString = String.valueOf(hudSelectedEntity.getArmorValue()); // ARMOUR
-                        case 4 -> statString = String.valueOf((int) (unit.getSpeedModifier() * 100)); // MOVE SPEED
-                    }
-                    GuiComponent.drawString(evt.getPoseStack(), MC.font, statString, blitXIcon + 13, blitYIcon, 0xFFFFFF);
-                    blitYIcon += 10;
-                }
-            }
         }
 
         // ----------------------------------------------
         // Unit icons using mob heads on 2 rows if needed
         // ----------------------------------------------
         int buttonsRendered = 0;
-        blitX += portraitRenderer.frameWidth + 20;
+        blitX += portraitRendererUnit.frameWidth * 2;
         int blitXStart = blitX;
-        blitY = screenHeight - iconFrameSize;
-        if (unitButtons.size() > unitButtonsPerRow)
-            blitY -= iconFrameSize + 5;
+        blitY = screenHeight - iconFrameSize * 2 - 10;
+
+        if (unitButtons.size() > 0)
+            MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 12,
+                    iconFrameSize * unitButtonsPerRow + 10,
+                    iconFrameSize * 2 + 21,
+                    0xA0000000);
 
         for (Button unitButton : unitButtons) {
             // replace last icon with a +X number of units icon
@@ -187,7 +150,7 @@ public class HudClientEvents {
                 int numExtraUnits = units.size() - (unitButtonsPerRow * 2) + 1;
                 MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, 0x64000000);
                 GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraUnits,
-                        blitX + 8, blitY + 8, 0xFFFFFF);
+                        blitX + iconFrameSize/2, blitY + 8, 0xFFFFFF);
             }
             else {
                 unitButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
@@ -245,7 +208,7 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
-    // hudSelectedUnit and portraitRenderer should be assigned in the same event to avoid desyncs
+    // hudSelectedUnit and portraitRendererUnit should be assigned in the same event to avoid desyncs
     public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
 
         ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
@@ -259,19 +222,19 @@ public class HudClientEvents {
             hudSelectedEntity = units.get(0);
 
         if (hudSelectedEntity == null) {
-            portraitRenderer.model = null;
-            portraitRenderer.renderer = null;
+            portraitRendererUnit.model = null;
+            portraitRendererUnit.renderer = null;
         }
         else if (evt.getEntity() == hudSelectedEntity) {
-            portraitRenderer.model = evt.getRenderer().getModel();
-            portraitRenderer.renderer = evt.getRenderer();
+            portraitRendererUnit.model = evt.getRenderer().getModel();
+            portraitRendererUnit.renderer = evt.getRenderer();
         }
     }
 
     @SubscribeEvent
     public static void onTick(TickEvent.ClientTickEvent evt) {
         if (OrthoviewClientEvents.isEnabled())
-            portraitRenderer.tickAnimation();
+            portraitRendererUnit.tickAnimation();
     }
 
     // uncomment to adjust render position/size of portraits
@@ -280,18 +243,18 @@ public class HudClientEvents {
     public static void onInput(InputEvent.KeyInputEvent evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
             if (evt.getKey() == Keybinds.panMinusX.getKey().getValue())
-                portraitRenderer.headOffsetX += 1;
+                portraitRendererUnit.headOffsetX += 1;
             if (evt.getKey() == Keybinds.panPlusX.getKey().getValue())
-                portraitRenderer.headOffsetX -= 1;
+                portraitRendererUnit.headOffsetX -= 1;
             if (evt.getKey() == Keybinds.panMinusZ.getKey().getValue())
-                portraitRenderer.headOffsetY += 1;
+                portraitRendererUnit.headOffsetY += 1;
             if (evt.getKey() == Keybinds.panPlusZ.getKey().getValue())
-                portraitRenderer.headOffsetY -= 1;
+                portraitRendererUnit.headOffsetY -= 1;
 
             if (evt.getKey() == Keybinds.nums[9].getKey().getValue())
-                portraitRenderer.headSize -= 1;
+                portraitRendererUnit.headSize -= 1;
             if (evt.getKey() == Keybinds.nums[0].getKey().getValue())
-                portraitRenderer.headSize += 1;
+                portraitRendererUnit.headSize += 1;
         }
     }
     @SubscribeEvent
@@ -299,11 +262,23 @@ public class HudClientEvents {
 
         if (hudSelectedEntity != null)
             MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
-                    "headOffsetX: " + portraitRenderer.headOffsetX,
-                    "headOffsetY: " + portraitRenderer.headOffsetY,
-                    "headSize: " + portraitRenderer.headSize,
+                    "headOffsetX: " + portraitRendererUnit.headOffsetX,
+                    "headOffsetY: " + portraitRendererUnit.headOffsetY,
+                    "headSize: " + portraitRendererUnit.headSize,
                     "eyeHeight: " + hudSelectedEntity.getEyeHeight(),
             });
     }
      */
+
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
+        int screenWidth = MC.getWindow().getGuiScaledWidth();
+        int iconFrameSize = Button.iconFrameSize;
+
+        if (hudSelectedEntity != null)
+            MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
+                    "window width: " + MC.getWindow().getGuiScaledWidth(),
+                    "unitsPerRow: " + (int) Math.ceil((float) (screenWidth - 340) / iconFrameSize)
+            });
+    }
 }

@@ -327,18 +327,10 @@ public class BuildingClientEvents {
 
     @SubscribeEvent
     public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
-        Building preselectedBuilding = getPreselectedBuilding();
-        String preselectedText = "";
-        if (preselectedBuilding != null)
-            preselectedText = preselectedBuilding.name;
-
-        String selectedText = "";
-        if (selectedBuilding != null)
-            selectedText = selectedBuilding.name;
-
+        /*
         MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
                 "preselectedBuilding: " + preselectedText,
                 "selectedBuilding: " + selectedText
-        });
+        });*/
     }
 }

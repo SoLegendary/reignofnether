@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -17,11 +18,14 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.List;
 
-class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R extends LivingEntityRenderer<T, M>> {
+// Renders a Unit's portrait including its animated head, name, healthbar, list of stats and UI frames for these
+
+class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R extends LivingEntityRenderer<T, M>> {
     public R renderer;
     public Model model;
 
@@ -44,8 +48,16 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
     private final int lookRangeX = 100;
     private final int lookRangeY = 40;
 
+    private static final ResourceLocation[] TEXTURE_STAT_ICONS = {
+            new ResourceLocation("reignofnether", "textures/icons/items/sword.png"), // DAMAGE
+            new ResourceLocation("reignofnether", "textures/icons/items/sparkler.png"), // ATTACK SPEED
+            new ResourceLocation("reignofnether", "textures/icons/items/bow.png"), // RANGE
+            new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"), // ARMOUR
+            new ResourceLocation("reignofnether", "textures/icons/items/boots.png"), // MOVE SPEED
+    };
 
-    public PortraitRenderer(R renderer) {
+
+    public PortraitRendererUnit(R renderer) {
         this.renderer = renderer;
     }
 
@@ -95,7 +107,7 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
     // - healthbar
     // - unit name
     // Must be called from DrawScreenEvent
-    public void renderWithFrame(PoseStack poseStack, int x, int y, LivingEntity entity) {
+    public void render(PoseStack poseStack, int x, int y, LivingEntity entity) {
 
         int bgCol = 0x0;
         switch (UnitClientEvents.getPlayerToEntityRelationship(entity.getId())) {
@@ -144,6 +156,36 @@ class PortraitRenderer<T extends LivingEntity, M extends EntityModel<T>, R exten
                 x+(frameWidth/2), y+frameHeight-13,
                 0xFFFFFFFF
         );
+
+        if (entity instanceof Unit) {
+            x += frameWidth - 1;
+            MyRenderer.renderFrameWithBg(poseStack, x, y,
+                    43,
+                    frameHeight,
+                    0xA0000000);
+
+            int blitXIcon = x + 6;
+            int blitYIcon = y + 7;
+            for (int i = 0; i < TEXTURE_STAT_ICONS.length; i++) {
+                MyRenderer.renderIcon(
+                        poseStack,
+                        TEXTURE_STAT_ICONS[i],
+                        blitXIcon, blitYIcon, 8
+                );
+                String statString = "";
+
+                Unit unit = (Unit) entity;
+                switch (i) {
+                    case 0 -> statString = String.valueOf((int) unit.getDamage()); // DAMAGE
+                    case 1 -> statString = String.valueOf((int) (100 / unit.getAttackCooldown())); // ATTACK SPEED
+                    case 2 -> statString = String.valueOf((int) (unit.getAttackRange())); // RANGE
+                    case 3 -> statString = String.valueOf(entity.getArmorValue()); // ARMOUR
+                    case 4 -> statString = String.valueOf((int) (unit.getSpeedModifier() * 100)); // MOVE SPEED
+                }
+                GuiComponent.drawString(poseStack, Minecraft.getInstance().font, statString, blitXIcon + 13, blitYIcon, 0xFFFFFF);
+                blitYIcon += 10;
+            }
+        }
     }
 
     private int getHeadOffsetX(Model model) {
