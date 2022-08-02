@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -29,6 +30,7 @@ public abstract class Building {
     public float explodeChance;
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
     public String ownerName;
+    public Block portraitBlock; // block rendered in the portrait GUI to represent this building
 
     public Building(String name, boolean isClientSide, String ownerName) {
         this.name = name;
@@ -106,14 +108,14 @@ public abstract class Building {
         return this.blocks;
     }
 
-    public int getTotalBlocks() {
+    public int getBlocksTotal() {
         return blocks.size();
     }
-    public int getCurrentBlocks() {
+    public int getBlocksLeft() {
         return blocks.stream().filter(b -> b.isPlaced).toList().size();
     }
     public float getBlocksPercent() {
-        return (float) getCurrentBlocks() / (float) getTotalBlocks();
+        return (float) getBlocksLeft() / (float) getBlocksTotal();
     }
     public float getHealthPercent() {
         return ((float) health / (float) maxHealth);

@@ -66,6 +66,8 @@ public class CursorClientEvents {
     public static void setLeftClickAction(ActionName actionName) {
         if (UnitClientEvents.getSelectedUnitIds().size() > 0)
             leftClickAction = actionName;
+        else if (actionName == null)
+            leftClickAction = null;
     }
 
     private static final ResourceLocation TEXTURE_CURSOR = new ResourceLocation("reignofnether", "textures/cursors/customcursor.png");
@@ -172,7 +174,7 @@ public class CursorClientEvents {
 
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, getPlayerLookVector(), entityaabb)) {
                 UnitClientEvents.addPreselectedUnitId(entity.getId());
-                break; // only allow one moused unit at a time
+                break; // only allow one moused-over unit at a time
             }
         }
 

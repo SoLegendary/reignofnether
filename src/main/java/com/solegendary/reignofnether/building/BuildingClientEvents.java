@@ -303,7 +303,7 @@ public class BuildingClientEvents {
             }
             else if (buildingToPlace == null) {
                 Building building = getPreselectedBuilding();
-                if (building != null) {
+                if (building != null && CursorClientEvents.getLeftClickAction() == null) {
                     selectedBuilding = building;
                     UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
                 }

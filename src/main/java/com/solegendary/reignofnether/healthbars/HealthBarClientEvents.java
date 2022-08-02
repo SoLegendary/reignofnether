@@ -5,9 +5,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.units.UnitClientEvents;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
@@ -132,7 +131,7 @@ public class HealthBarClientEvents {
             barWidth = Math.min(barWidth, 120);
             barWidth = Math.max(barWidth, 20);
 
-            render(matrix, entity, 0, 0, barWidth,
+            renderForEntity(matrix, entity, 0, 0, barWidth,
                     OrthoviewClientEvents.isEnabled() ? RenderMode.IN_WORLD_ORTHOVIEW : RenderMode.IN_WORLD_FIRST_PERSON);
 
             matrix.popPose();
@@ -143,14 +142,24 @@ public class HealthBarClientEvents {
         renderedEntities.clear();
     }
 
-    public static void render(PoseStack matrix, LivingEntity entity, double x, double y,
-                              float width, RenderMode renderMode) {
-
+    public static void renderForEntity(PoseStack matrix, LivingEntity entity, double x, double y,
+                                       float width, RenderMode renderMode) {
         BarState state = BarStates.getState(entity);
 
         float percent = Math.min(1, Math.min(state.health, entity.getMaxHealth()) / entity.getMaxHealth());
         float percent2 = Math.min(state.previousHealthDisplay, entity.getMaxHealth()) / entity.getMaxHealth();
 
+        render(matrix, percent, percent2, x, y, width, renderMode);
+    }
+
+    public static void renderForBuilding(PoseStack matrix, Building building, double x, double y,
+                                         float width, RenderMode renderMode) {
+        float percent = (float) building.getBlocksLeft() / (float) building.getBlocksTotal();
+        render(matrix, percent, percent, x, y, width, renderMode);
+    }
+
+    private static void render(PoseStack matrix, float percent, float percent2, double x, double y,
+                               float width, RenderMode renderMode) {
         int zOffset = 0;
 
         // base colour on percentage health remaining (green @ 100%, yellow @ 50%, red @ 0%)

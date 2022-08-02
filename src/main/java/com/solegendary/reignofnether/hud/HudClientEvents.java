@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.hud;
 
+import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Relationship;
 import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
@@ -11,11 +13,13 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.model.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
@@ -34,8 +38,9 @@ public class HudClientEvents {
     ));
     // unit type that is selected in the list of unit icons
     public static LivingEntity hudSelectedEntity = null;
-    // private class used to render only the head of a unit on screen for the portrait
+    // classes used to render unit or building portrait (mode, frame, healthbar, stats)
     public static PortraitRendererUnit portraitRendererUnit = new PortraitRendererUnit(null);
+    public static PortraitRendererBuilding portraitRendererBuilding = new PortraitRendererBuilding();
 
     // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
     private static int hudStartingXPos = 0;
@@ -104,36 +109,47 @@ public class HudClientEvents {
             }
         }
 
-        // --------------------------------------------------------
-        // Unit head portrait (based on selected unit type) + stats
-        // --------------------------------------------------------
         int blitX = hudStartingXPos;
-        int blitY = MC.getWindow().getGuiScaledHeight() - portraitRendererUnit.frameHeight;
+        int blitY = MC.getWindow().getGuiScaledHeight();
 
+        // --------------------------
+        // Unit head portrait + stats
+        // --------------------------
         if (hudSelectedEntity != null &&
             portraitRendererUnit.model != null &&
             portraitRendererUnit.renderer != null) {
 
+            blitY -= portraitRendererUnit.frameHeight;
+
             // write capitalised unit name
-            String name = HudClientEvents.getSimpleEntityName(hudSelectedEntity);
+            String name = getSimpleEntityName(hudSelectedEntity);
             String nameCap = name.substring(0, 1).toUpperCase() + name.substring(1);
-            GuiComponent.drawString(
-                    evt.getPoseStack(), Minecraft.getInstance().font,
-                    nameCap,
-                    blitX+4,blitY-9,
-                    0xFFFFFFFF
-            );
 
             portraitRendererUnit.render(
-                    evt.getPoseStack(), blitX, blitY,
-                    hudSelectedEntity);
+                    evt.getPoseStack(), nameCap,
+                    blitX, blitY, hudSelectedEntity);
+
+            blitX += portraitRendererUnit.frameWidth * 2;
         }
+
+        // -----------------
+        // Building portrait
+        // -----------------
+        else if (BuildingClientEvents.selectedBuilding != null) {
+            blitY -= portraitRendererBuilding.frameHeight;
+
+            portraitRendererBuilding.render(
+                    evt.getPoseStack(),
+                    blitX, blitY, BuildingClientEvents.selectedBuilding);
+
+            blitX += portraitRendererBuilding.frameWidth * 2;
+        }
+
 
         // ----------------------------------------------
         // Unit icons using mob heads on 2 rows if needed
         // ----------------------------------------------
         int buttonsRendered = 0;
-        blitX += portraitRendererUnit.frameWidth * 2;
         int blitXStart = blitX;
         blitY = screenHeight - iconFrameSize * 2 - 10;
 
@@ -273,13 +289,11 @@ public class HudClientEvents {
 
     @SubscribeEvent
     public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
-        int screenWidth = MC.getWindow().getGuiScaledWidth();
-        int iconFrameSize = Button.iconFrameSize;
 
         if (hudSelectedEntity != null)
             MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
-                    "window width: " + MC.getWindow().getGuiScaledWidth(),
-                    "unitsPerRow: " + (int) Math.ceil((float) (screenWidth - 340) / iconFrameSize)
+                    "entity eye height: " + hudSelectedEntity.getEyeHeight(),
+                    "entity eye pos: " + hudSelectedEntity.getEyePosition(),
             });
     }
 }

@@ -29,11 +29,13 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
     public R renderer;
     public Model model;
 
-    public int headSize = 46;
-    public int frameWidth = 60;
-    public int frameHeight = 60;
-    public int headOffsetX = 31;
-    public int headOffsetY = 105; // creepers should be 17 lower
+    public final int frameWidth = 60;
+    public final int frameHeight = 60;
+
+    private final int headSize = 46;
+    private final int headOffsetX = 31;
+    private final int headOffsetY = 105;
+    private final float standardEyeHeight = 1.74f; // height for most humanoid mobs
 
     // change these randomly every few seconds to make the head look around
     private int lookX = 0;
@@ -107,7 +109,15 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
     // - healthbar
     // - unit name
     // Must be called from DrawScreenEvent
-    public void render(PoseStack poseStack, int x, int y, LivingEntity entity) {
+    public void render(PoseStack poseStack, String name, int x, int y, LivingEntity entity) {
+
+        // draw name
+        GuiComponent.drawString(
+                poseStack, Minecraft.getInstance().font,
+                name,
+                x+4,y-9,
+                0xFFFFFFFF
+        );
 
         int bgCol = 0x0;
         switch (UnitClientEvents.getPlayerToEntityRelationship(entity.getId())) {
@@ -122,8 +132,8 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
                 frameHeight,
                 bgCol);
 
-        int drawX = x + getHeadOffsetX(this.model);
-        int drawY = y + getHeadOffsetY(this.model);
+        int drawX = x + headOffsetX;
+        int drawY = y + (int) (entity.getEyeHeight() / standardEyeHeight * headOffsetY);
 
         // hide all model parts except the head
         setNonHeadModelVisibility(this.model, false);
@@ -139,7 +149,7 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
         setNonHeadModelVisibility(this.model, true);
 
         // draw health bar and write min/max hp
-        HealthBarClientEvents.render(poseStack, entity,
+        HealthBarClientEvents.renderForEntity(poseStack, entity,
                 x+(frameWidth/2f), y+frameHeight-15,
                 frameWidth-9, HealthBarClientEvents.RenderMode.GUI_PORTRAIT);
 
@@ -186,19 +196,6 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
                 blitYIcon += 10;
             }
         }
-    }
-
-    private int getHeadOffsetX(Model model) {
-        if (model != null)
-            return headOffsetX;
-        return 0;
-    }
-    // TODO: could use entity.getEyeHeight()?
-    private int getHeadOffsetY(Model model) {
-        if (model instanceof CreeperModel)
-            return headOffsetY - 17;
-        else
-            return headOffsetY;
     }
 
     private void setNonHeadModelVisibility(Model model, boolean visibility) {

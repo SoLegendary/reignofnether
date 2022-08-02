@@ -105,7 +105,7 @@ public class Button {
     }
 
     public void renderHealthBar(PoseStack poseStack) {
-        HealthBarClientEvents.render(poseStack, entity,
+        HealthBarClientEvents.renderForEntity(poseStack, entity,
                 x + ((float) iconFrameSize / 2), y - 5,
                 iconFrameSize - 1,
                 HealthBarClientEvents.RenderMode.GUI_ICON);

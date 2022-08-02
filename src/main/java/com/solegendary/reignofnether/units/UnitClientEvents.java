@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.units;
 
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.ActionName;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -208,9 +209,11 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onWorldTick(TickEvent.ClientTickEvent evt) {
 
-        // deselect all units
-        if (Keybinds.fnums[1].isDown())
+        // deselect everything
+        if (Keybinds.fnums[1].isDown()) {
             selectedUnitIds = new ArrayList<>();
+            BuildingClientEvents.selectedBuilding = null;
+        }
 
         // manage control groups
         if (controlGroups.size() <= 0) // initialise with empty arrays
