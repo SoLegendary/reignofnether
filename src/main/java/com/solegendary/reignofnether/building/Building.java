@@ -4,12 +4,13 @@ import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,14 +18,12 @@ import java.util.Comparator;
 public abstract class Building {
 
     public String name;
-    public boolean isClientSide;
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
-    public final float minBlocksPercent = 0.25f;
-    public int health;
-    public int maxHealth;
-    public boolean isBuilt; // set true when health reaches 100% the first time
-    public boolean isBuilding; // a builder is assigned and actively building or repairing
-    public float buildRate; // rate at which health increases each tick when building or repairing
+    public final float minBlocksPercent = 0.2f;
+    public boolean isBuilt; // set true when blocksPercent reaches 100% the first time
+    public boolean isBuilding = true; // TODO: only true if // a builder is assigned and actively building or repairing
+    public int ticksPerBuild = 20; // ticks taken to place a single block while isBuilding
+    public int ticksToNextBuild = ticksPerBuild;
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
     public float explodeChance;
@@ -32,10 +31,7 @@ public abstract class Building {
     public String ownerName;
     public Block portraitBlock; // block rendered in the portrait GUI to represent this building
 
-    public Building(String name, boolean isClientSide, String ownerName) {
-        this.name = name;
-        this.isClientSide = isClientSide;
-        this.ownerName = ownerName;
+    public Building() {
     }
 
     // given a string name return a new instance of that building
@@ -103,47 +99,114 @@ public abstract class Building {
 
     // get BlockPos values with relative positions
     public static ArrayList<BuildingBlock> getRelativeBlockData() { return new ArrayList<>(); }
-    // non-static returns of the instanced live data
-    public ArrayList<BuildingBlock> getBlocks() {
-        return this.blocks;
-    }
 
     public int getBlocksTotal() {
-        return blocks.size();
+        return blocks.stream().filter(b -> !b.getBlockState().isAir()).toList().size();
     }
-    public int getBlocksLeft() {
-        return blocks.stream().filter(b -> b.isPlaced).toList().size();
+    public int getBlocksPlaced() {
+        return blocks.stream().filter(b -> b.isPlaced && !b.getBlockState().isAir()).toList().size();
     }
     public float getBlocksPercent() {
-        return (float) getBlocksLeft() / (float) getBlocksTotal();
-    }
-    public float getHealthPercent() {
-        return ((float) health / (float) maxHealth);
+        return (float) getBlocksPlaced() / (float) getBlocksTotal();
     }
     public boolean isFunctional() {
-        return this.isBuilt && this.getHealthPercent() >= 0.5f;
+        return this.isBuilt && this.getBlocksPercent() >= 0.5f;
     }
 
-    @SubscribeEvent
+    // place blocks according to the following rules:
+    // - block must be connected to something else (not air)
+    // - block must be the lowest Y value possible
+    // - all else equal, randomise the choice so it doesn't look too structured
+    private void buildBlock(Level level) {
+        ArrayList<BuildingBlock> unplacedBlocks = new ArrayList<>(blocks.stream().filter(b -> !b.isPlaced).toList());
+        int minY = getMinCorner(unplacedBlocks).getY();
+        ArrayList<BuildingBlock> validBlocks = new ArrayList<>();
+
+        // iterate through unplaced blocks and start at the bottom Y values
+        for (BuildingBlock block : unplacedBlocks) {
+            BlockPos bp = block.getBlockPos();
+            if ((bp.getY() <= minY) &&
+                (!level.getBlockState(bp.below()).isAir() ||
+                 !level.getBlockState(bp.east()).isAir() ||
+                 !level.getBlockState(bp.west()).isAir() ||
+                 !level.getBlockState(bp.south()).isAir() ||
+                 !level.getBlockState(bp.north()).isAir() ||
+                 !level.getBlockState(bp.above()).isAir()))
+                validBlocks.add(block);
+        }
+        if (validBlocks.size() > 0) {
+            validBlocks.get(0).place();
+            /*
+            Random rand = new Random();
+            validBlocks.get(rand.nextInt(validBlocks.size())).place();
+            */
+        }
+    }
+
+    // destroy all remaining blocks in a final big explosion
+    private void destroy() {
+
+    }
+
+    // should only be run serverside
     public void onBlockBreak(BlockEvent.BreakEvent evt) {
         // when a player breaks a block that's part of the building:
         // - roll explodeChance to cause explosion effects and destroy more blocks
-        // - cause fire if < 50% health
+        // - cause fire if < 50% blocksPercent
     }
 
-    @SubscribeEvent
-    public void onTick(TickEvent.ServerTickEvent evt) {
-        // match healthPercent to (blocksBuiltPercent + minBlocksPercent)
+    public void onWorldTick(Level level) {
+        boolean isClientSide = level.isClientSide();
 
-        // if health <= 0: destroy the building in big explosion
+        // update all the BuildingBlock.isPlaced booleans to match what the world actually has
+        // TODO: WorldTickEvent is run multiple times for every dimension - we need to lock it only the overworld
 
-        // if builder is assigned, increase health by buildRate
-        // if fires exist, put them out one by one (or remove them all if healthPercent > 50%)
+        for (BuildingBlock block : blocks) {
+            BlockPos bp = block.getBlockPos();
+            BlockState bs = block.getBlockState();
+            BlockState bsWorld = level.getBlockState(bp);
+            block.isPlaced = bsWorld.equals(bs);
 
-        // calculate number of blocks to place based on new healthPercent and blocksBuiltPercent
-        // eg. if there are 100/200 blocks built, and health raised from 50% -> 60%, place 20 blocks to match
+            int placed = 0;
+            if (!isClientSide) {
+                String bsName = bs.getBlock().getName().getString();
+                String bsWorldName = bsWorld.getBlock().getName().getString();
+                boolean bsEquals = bsWorld.equals(bs);
+                if (!bs.isAir()) {
+                    System.out.println(bp);
+                    //System.out.println(bsName);
+                    System.out.println(bsWorldName);
+                    //System.out.println(bsEquals);
+                    System.out.println(" ");
+                    if (bsEquals)
+                        placed += 1;
+                }
+                //System.out.println(placed);
+            }
+        }
 
-        // place blocks as required from bottom to top (obeying gravity if possible)
+        if (!isClientSide) {
+            float blocksPercent = getBlocksPercent();
+            float blocksPlaced = getBlocksPlaced();
+            float blocksTotal = getBlocksTotal();
 
+            if (blocksPlaced <= 0)
+                destroy();
+
+            // TODO: if builder is assigned, set isBuilding true
+
+            // place a block if the tick has run down
+            if (isBuilding && blocksPlaced < blocksTotal) {
+                ticksToNextBuild -= 1;
+                if (ticksToNextBuild <= 0) {
+                    ticksToNextBuild = ticksPerBuild;
+                    buildBlock(level);
+                }
+            }
+            if (blocksPlaced >= blocksTotal)
+                isBuilding = false;
+
+            // TODO: if fires exist, put them out one by one (or gradually remove them if blocksPercent > 50%)
+        }
     }
 }

@@ -51,8 +51,6 @@ public class BuildingClientEvents {
     private static Rotation buildingRotation = Rotation.NONE;
     private static Vec3i buildingDimensions = new Vec3i(0,0,0);
 
-
-
     // adds a green overlay option to OverlayTexture at (0,0)
     public static void replaceOverlayTexture() {
         NativeImage nativeimage = MC.gameRenderer.overlayTexture.texture.getPixels();
@@ -232,17 +230,6 @@ public class BuildingClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (!replacedTexture) {
-            replaceOverlayTexture();
-            replacedTexture = true;
-        }
-
-        // check that all clientside buildings still exist (if any have 0 blocks remaining in world, then delete it)
-
-    }
-
-    @SubscribeEvent
     public static void onInput(InputEvent.KeyInputEvent evt) {
         if (!OrthoviewClientEvents.isEnabled())
             return;
@@ -326,11 +313,22 @@ public class BuildingClientEvents {
     }
 
     @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (!replacedTexture) {
+            replaceOverlayTexture();
+            replacedTexture = true;
+        }
+        if (MC.level != null) {
+            for (Building building : buildings)
+                building.onWorldTick(MC.level);
+            buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 );
+        }
+    }
+
+    @SubscribeEvent
     public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
-        /*
         MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
-                "preselectedBuilding: " + preselectedText,
-                "selectedBuilding: " + selectedText
-        });*/
+                "buildings: " + buildings.size(),
+        });
     }
 }

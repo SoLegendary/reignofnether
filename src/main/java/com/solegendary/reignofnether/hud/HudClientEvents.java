@@ -287,6 +287,7 @@ public class HudClientEvents {
     }
      */
 
+    /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
 
@@ -295,5 +296,5 @@ public class HudClientEvents {
                     "entity eye height: " + hudSelectedEntity.getEyeHeight(),
                     "entity eye pos: " + hudSelectedEntity.getEyePosition(),
             });
-    }
+    }*/
 }

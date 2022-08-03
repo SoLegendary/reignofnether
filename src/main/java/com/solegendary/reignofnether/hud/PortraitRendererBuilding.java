@@ -11,7 +11,6 @@ import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.model.*;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -65,7 +64,7 @@ class PortraitRendererBuilding {
 
         GuiComponent.drawCenteredString(
                 poseStack, Minecraft.getInstance().font,
-                building.getBlocksLeft() + "/" + building.getBlocksTotal(),
+                building.getBlocksPlaced() + "/" + building.getBlocksTotal(),
                 x+(frameWidth/2), y+frameHeight-13,
                 0xFFFFFFFF
         );

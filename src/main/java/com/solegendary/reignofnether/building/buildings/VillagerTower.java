@@ -12,10 +12,12 @@ import java.util.ArrayList;
 
 public class VillagerTower extends Building {
 
-    public static final String buildingName = "Villager Tower";
+    public final static String buildingName = "Villager Tower";
 
     public VillagerTower(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(buildingName, level.isClientSide(), ownerName);
+        super();
+        this.name = buildingName;
+        this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(), level, originPos, rotation);
         this.portraitBlock = Blocks.OAK_PLANKS;
     }

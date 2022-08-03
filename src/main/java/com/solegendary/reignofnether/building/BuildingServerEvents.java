@@ -32,27 +32,43 @@ public class BuildingServerEvents {
         Building building = Building.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName);
         if (building != null) {
             buildings.add(building);
-            blockPlaceQueue.addAll(building.blocks);
+            // place all blocks on the lowest y level
+            int minY = Building.getMinCorner(building.blocks).getY();
+            for (BuildingBlock block : building.blocks)
+                if (block.getBlockPos().getY() == minY)
+                    block.place();
         }
         BuildingClientboundPacket.placeBuilding(buildingName, pos, rotation, ownerName);
     }
 
     @SubscribeEvent
     public static void onBlockBreak(BlockEvent.BreakEvent evt) {
-        Boolean isClientside = evt.getWorld().isClientSide();
-
-        System.out.println(isClientside);
+        if (!evt.getWorld().isClientSide()) {
+            for (Building building : buildings)
+                building.onBlockBreak(evt);
+        }
     }
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
-        if (!evt.world.isClientSide())
-            serverLevel = (ServerLevel) evt.world;
         if (clientLevel == null)
             clientLevel = Minecraft.getInstance().level;
+        // WorldTickEvent actually ticks for every dimension
+        if (serverLevel == null && clientLevel != null)
+            if (evt.world.dimension().equals(clientLevel.dimension()))
+                serverLevel = (ServerLevel) evt.world;
+
+        if (serverLevel != null && !evt.world.isClientSide()) {
+            for (Building building : buildings)
+                building.onWorldTick(serverLevel);
+            buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 );
+        }
 
         if (serverLevel != null && clientLevel != null) {
             for (BuildingBlock blockToPlace : blockPlaceQueue) {
+                // place and destroy it once first so we get the break effect
+                clientLevel.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);
+                clientLevel.destroyBlock(blockToPlace.getBlockPos(), false);
                 clientLevel.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);
                 serverLevel.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);
             }
