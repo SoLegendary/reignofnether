@@ -53,18 +53,16 @@ public class BuildingServerEvents {
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
         if (clientLevel == null)
             clientLevel = Minecraft.getInstance().level;
-        // WorldTickEvent actually ticks for every dimension
         if (serverLevel == null && clientLevel != null)
             if (evt.world.dimension().equals(clientLevel.dimension()))
                 serverLevel = (ServerLevel) evt.world;
 
-        if (serverLevel != null && !evt.world.isClientSide()) {
+        // WorldTickEvent actually ticks for every dimension so have it only tick for the overworld
+        if (serverLevel != null && evt.world.dimension().equals(serverLevel.dimension()) && !evt.world.isClientSide()) {
             for (Building building : buildings)
                 building.onWorldTick(serverLevel);
-            buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 );
-        }
+            buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 && building.tickAge > 10);
 
-        if (serverLevel != null && clientLevel != null) {
             for (BuildingBlock blockToPlace : blockPlaceQueue) {
                 // place and destroy it once first so we get the break effect
                 clientLevel.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);

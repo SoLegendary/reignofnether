@@ -321,14 +321,15 @@ public class BuildingClientEvents {
         if (MC.level != null) {
             for (Building building : buildings)
                 building.onWorldTick(MC.level);
-            buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 );
+            buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 && building.tickAge > 10 );
         }
     }
 
+    /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
         MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
                 "buildings: " + buildings.size(),
         });
-    }
+    }*/
 }

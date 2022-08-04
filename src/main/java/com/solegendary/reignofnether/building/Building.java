@@ -22,7 +22,7 @@ public abstract class Building {
     public final float minBlocksPercent = 0.2f;
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time
     public boolean isBuilding = true; // TODO: only true if // a builder is assigned and actively building or repairing
-    public int ticksPerBuild = 20; // ticks taken to place a single block while isBuilding
+    public int ticksPerBuild = 6; // ticks taken to place a single block while isBuilding
     public int ticksToNextBuild = ticksPerBuild;
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
@@ -30,6 +30,7 @@ public abstract class Building {
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
     public String ownerName;
     public Block portraitBlock; // block rendered in the portrait GUI to represent this building
+    public int tickAge = 0; // how many ticks ago this building was placed
 
     public Building() {
     }
@@ -156,33 +157,16 @@ public abstract class Building {
     }
 
     public void onWorldTick(Level level) {
+        this.tickAge += 1;
+
         boolean isClientSide = level.isClientSide();
 
         // update all the BuildingBlock.isPlaced booleans to match what the world actually has
-        // TODO: WorldTickEvent is run multiple times for every dimension - we need to lock it only the overworld
-
         for (BuildingBlock block : blocks) {
             BlockPos bp = block.getBlockPos();
             BlockState bs = block.getBlockState();
             BlockState bsWorld = level.getBlockState(bp);
             block.isPlaced = bsWorld.equals(bs);
-
-            int placed = 0;
-            if (!isClientSide) {
-                String bsName = bs.getBlock().getName().getString();
-                String bsWorldName = bsWorld.getBlock().getName().getString();
-                boolean bsEquals = bsWorld.equals(bs);
-                if (!bs.isAir()) {
-                    System.out.println(bp);
-                    //System.out.println(bsName);
-                    System.out.println(bsWorldName);
-                    //System.out.println(bsEquals);
-                    System.out.println(" ");
-                    if (bsEquals)
-                        placed += 1;
-                }
-                //System.out.println(placed);
-            }
         }
 
         if (!isClientSide) {
