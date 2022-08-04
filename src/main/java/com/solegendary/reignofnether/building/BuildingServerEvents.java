@@ -1,10 +1,11 @@
 package com.solegendary.reignofnether.building;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -14,7 +15,6 @@ import java.util.ArrayList;
 public class BuildingServerEvents {
 
     private static ServerLevel serverLevel = null;
-    private static ClientLevel clientLevel = null;
 
     // buildings that currently exist serverside
     private static ArrayList<Building> buildings = new ArrayList<>();
@@ -38,7 +38,7 @@ public class BuildingServerEvents {
                 if (block.getBlockPos().getY() == minY)
                     block.place();
         }
-        BuildingClientboundPacket.placeBuilding(buildingName, pos, rotation, ownerName);
+        BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName);
     }
 
     @SubscribeEvent
@@ -51,29 +51,24 @@ public class BuildingServerEvents {
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
-        if (clientLevel == null)
-            clientLevel = Minecraft.getInstance().level;
-        if (serverLevel == null && clientLevel != null)
-            if (evt.world.dimension().equals(clientLevel.dimension()))
-                serverLevel = (ServerLevel) evt.world;
+        if (serverLevel == null && evt.world.dimension() == Level.OVERWORLD)
+            serverLevel = (ServerLevel) evt.world;
 
-        // WorldTickEvent actually ticks for every dimension so have it only tick for the overworld
-        if (serverLevel != null && evt.world.dimension().equals(serverLevel.dimension()) && !evt.world.isClientSide()) {
+        if (serverLevel != null && !evt.world.isClientSide()) {
             for (Building building : buildings)
                 building.onWorldTick(serverLevel);
             buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 && building.tickAge > 10);
 
             for (BuildingBlock blockToPlace : blockPlaceQueue) {
-                // place and destroy it once first so we get the break effect
-                clientLevel.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);
-                clientLevel.destroyBlock(blockToPlace.getBlockPos(), false);
-                clientLevel.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);
-                serverLevel.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);
+                BlockPos bp = blockToPlace.getBlockPos();
+                BlockState bs = blockToPlace.getBlockState();
+                BuildingClientboundPacket.placeBlock(bp, Block.getId(bs));
+                serverLevel.setBlock(bp, bs, 1);
             }
             blockPlaceQueue = new ArrayList<>();
 
             for (BlockPos blockToDestroy : blockDestroyQueue) {
-                clientLevel.destroyBlock(blockToDestroy, false);
+                BuildingClientboundPacket.destroyBlock(blockToDestroy);
                 serverLevel.destroyBlock(blockToDestroy, false);
             }
             blockDestroyQueue = new ArrayList<>();

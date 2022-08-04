@@ -97,7 +97,6 @@ public abstract class Building {
         return blocks;
     }
 
-
     // get BlockPos values with relative positions
     public static ArrayList<BuildingBlock> getRelativeBlockData() { return new ArrayList<>(); }
 

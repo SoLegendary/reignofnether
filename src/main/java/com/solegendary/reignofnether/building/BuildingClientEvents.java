@@ -19,13 +19,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.model.ModelDataManager;
@@ -42,14 +43,24 @@ public class BuildingClientEvents {
     static final Minecraft MC = Minecraft.getInstance();
 
     // clientside buildings used for tracking position (for cursor selection)
-    public static ArrayList<Building> buildings = new ArrayList<>();
+    private static ArrayList<Building> buildings = new ArrayList<>();
+    private static ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
+    private static ArrayList<BlockPos> blockDestroyQueue = new ArrayList<>();
+
     public static Building selectedBuilding = null;
     public static Class<? extends Building> buildingToPlace = null;
     private static Class<? extends Building> lastBuildingToPlace = null;
-    private static ArrayList<BuildingBlock> blocksToPlace = new ArrayList<>();
+    private static ArrayList<BuildingBlock> blocksToDraw = new ArrayList<>();
     private static boolean replacedTexture = false;
     private static Rotation buildingRotation = Rotation.NONE;
     private static Vec3i buildingDimensions = new Vec3i(0,0,0);
+
+    public static void placeBlock(BuildingBlock block) {
+        blockPlaceQueue.add(block);
+    }
+    public static void destroyBlock(BlockPos pos) {
+        blockDestroyQueue.add(pos);
+    }
 
     // adds a green overlay option to OverlayTexture at (0,0)
     public static void replaceOverlayTexture() {
@@ -85,7 +96,7 @@ public class BuildingClientEvents {
         int maxY = -999999;
         int maxZ = -999999;
 
-        for (BuildingBlock block : blocksToPlace) {
+        for (BuildingBlock block : blocksToDraw) {
             BlockRenderDispatcher renderer = MC.getBlockRenderer();
             BlockState bs = block.getBlockState();
             BlockPos bp = new BlockPos(
@@ -142,7 +153,7 @@ public class BuildingClientEvents {
     }
 
     public static boolean isBuildingPlacementClipping(BlockPos originPos) {
-        for (BuildingBlock block : blocksToPlace) {
+        for (BuildingBlock block : blocksToDraw) {
             Material bm = block.getBlockState().getMaterial();
             BlockPos bp = new BlockPos(
                     originPos.getX() + block.getBlockPos().getX(),
@@ -161,7 +172,7 @@ public class BuildingClientEvents {
     public static boolean isBuildingPlacementInAir(BlockPos originPos) {
         int solidBlocksBelow = 0;
         int blocksBelow = 0;
-        for (BuildingBlock block : blocksToPlace) {
+        for (BuildingBlock block : blocksToDraw) {
             if (block.getBlockPos().getY() == 0 && MC.level != null) {
                 BlockPos bp = new BlockPos(
                         originPos.getX() + block.getBlockPos().getX(),
@@ -247,8 +258,8 @@ public class BuildingClientEvents {
                 // load the new buildingToPlace's data
                 try {
                     Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData");
-                    blocksToPlace = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null);
-                    buildingDimensions = Building.getBuildingSize(blocksToPlace);
+                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null);
+                    buildingDimensions = Building.getBuildingSize(blocksToDraw);
                     buildingRotation = Rotation.NONE;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -269,8 +280,8 @@ public class BuildingClientEvents {
         if (buildingToPlace != null) {
             Rotation rotation = evt.getScrollDelta() > 0 ? Rotation.CLOCKWISE_90 : Rotation.COUNTERCLOCKWISE_90;
             buildingRotation = buildingRotation.getRotated(rotation);
-            for (int i = 0; i < blocksToPlace.size(); i++)
-                blocksToPlace.set(i, blocksToPlace.get(i).rotate(MC.level, rotation));
+            for (int i = 0; i < blocksToDraw.size(); i++)
+                blocksToDraw.set(i, blocksToDraw.get(i).rotate(MC.level, rotation));
         }
     }
 
@@ -305,6 +316,10 @@ public class BuildingClientEvents {
             buildings.add(building);
     }
 
+    public static void destroyBuilding(BlockPos pos) {
+        buildings.removeIf(building -> building.isPosInsideBuilding(pos));
+    }
+
     public static Relationship getPlayerToBuildingRelationship(Building building) {
         if (MC.player != null && building.ownerName.equals(MC.player.getName().getString()))
             return Relationship.OWNED;
@@ -318,18 +333,27 @@ public class BuildingClientEvents {
             replaceOverlayTexture();
             replacedTexture = true;
         }
-        if (MC.level != null) {
+    }
+
+    @SubscribeEvent
+    public static void onWorldTick(TickEvent.WorldTickEvent evt) {
+        if (MC.level != null && evt.world.dimension() == Level.OVERWORLD) {
             for (Building building : buildings)
                 building.onWorldTick(MC.level);
             buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 && building.tickAge > 10 );
+
+            for (BuildingBlock blockToPlace : blockPlaceQueue) {
+                // place and destroy it once first so we get the break effect
+                MC.level.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);
+                MC.level.destroyBlock(blockToPlace.getBlockPos(), false);
+                MC.level.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);
+            }
+            blockPlaceQueue = new ArrayList<>();
+
+            for (BlockPos blockToDestroy : blockDestroyQueue)
+                MC.level.destroyBlock(blockToDestroy, false);
+
+            blockDestroyQueue = new ArrayList<>();
         }
     }
-
-    /*
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
-                "buildings: " + buildings.size(),
-        });
-    }*/
 }

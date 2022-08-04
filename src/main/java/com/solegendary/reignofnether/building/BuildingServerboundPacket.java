@@ -7,14 +7,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public class BuildingServerboundPacket {
-
-    private static Minecraft MC = Minecraft.getInstance();
-
     // pos is used to identify the building object serverside
     public BlockPos pos; // required for action: PLACE, CANCEL, REPAIR
     public String buildingName; // PLACE
@@ -30,7 +26,7 @@ public class BuildingServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.REPAIR, null, pos, null, null, repairAmount));
     }
     public static void cancelBuilding(BlockPos pos) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.CANCEL, null, pos, null, null, 0));
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.DESTROY, null, pos, null, null, 0));
     }
 
     public BuildingServerboundPacket(BuildingAction action, String buildingName, BlockPos pos, Rotation rotation, String ownerName, int repairAmount) {
@@ -67,7 +63,7 @@ public class BuildingServerboundPacket {
 
             if (this.action == BuildingAction.PLACE)
                 BuildingServerEvents.placeBuilding(this.buildingName, this.pos, this.rotation, this.ownerName);
-            else if (this.action == BuildingAction.CANCEL)
+            else if (this.action == BuildingAction.DESTROY)
                 System.out.println("CANCEL");
             else if (this.action == BuildingAction.REPAIR)
                 System.out.println("REPAIR");

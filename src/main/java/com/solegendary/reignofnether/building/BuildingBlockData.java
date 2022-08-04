@@ -21,6 +21,7 @@ public class BuildingBlockData {
     public final static ArrayList<BuildingBlock> VILLAGER_HOUSE_BLOCKS = getBuildingBlocks("villager_house");
     public final static ArrayList<BuildingBlock> VILLAGER_TOWER_BLOCKS = getBuildingBlocks("villager_tower");
 
+    // TODO: MC.resourceManager can't be used serverside....
     public static ArrayList<BuildingBlock> getBuildingBlocks(String structureName) {
         CompoundTag nbt = getBuildingNbt(structureName);
         ArrayList<BuildingBlock> blocks = new ArrayList<>();
@@ -35,12 +36,12 @@ public class BuildingBlockData {
             ListTag blockPosNbt = blockNbt.getList("pos", 3);
 
             blocks.add(new BuildingBlock(
-                    new BlockPos(
-                            blockPosNbt.getInt(0),
-                            blockPosNbt.getInt(1),
-                            blockPosNbt.getInt(2)
-                    ),
-                    palette.get(blockNbt.getInt("state"))
+                new BlockPos(
+                    blockPosNbt.getInt(0),
+                    blockPosNbt.getInt(1),
+                    blockPosNbt.getInt(2)
+                ),
+                palette.get(blockNbt.getInt("state"))
             ));
         }
         return blocks;
