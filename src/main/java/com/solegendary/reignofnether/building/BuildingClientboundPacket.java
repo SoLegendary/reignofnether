@@ -31,15 +31,15 @@ public class BuildingClientboundPacket {
     }
     public static void destroyBuilding(BlockPos pos) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new BuildingClientboundPacket(pos, 0, null, null, null, BuildingAction.DESTROY));
+            new BuildingClientboundPacket(pos, 0, "", Rotation.NONE, "", BuildingAction.DESTROY));
     }
     public static void placeBlock(BlockPos pos, int blockId) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new BuildingClientboundPacket(pos, blockId, null, null, null, BuildingAction.PLACE_BLOCK));
+            new BuildingClientboundPacket(pos, blockId, "", Rotation.NONE, "", BuildingAction.PLACE_BLOCK));
     }
     public static void destroyBlock(BlockPos pos) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new BuildingClientboundPacket(pos, 0, null, null, null, BuildingAction.DESTROY_BLOCK));
+            new BuildingClientboundPacket(pos, 0, "", Rotation.NONE, "", BuildingAction.DESTROY_BLOCK));
     }
 
     public BuildingClientboundPacket(BlockPos pos, int blockId, String buildingName, Rotation rotation, String ownerName, BuildingAction action) {

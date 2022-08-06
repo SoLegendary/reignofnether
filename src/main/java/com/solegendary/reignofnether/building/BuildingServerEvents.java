@@ -51,10 +51,9 @@ public class BuildingServerEvents {
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
-        if (serverLevel == null && evt.world.dimension() == Level.OVERWORLD)
+        if (!evt.world.isClientSide() && evt.world.dimension() == Level.OVERWORLD) {
             serverLevel = (ServerLevel) evt.world;
 
-        if (serverLevel != null && !evt.world.isClientSide()) {
             for (Building building : buildings)
                 building.onWorldTick(serverLevel);
             buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 && building.tickAge > 10);

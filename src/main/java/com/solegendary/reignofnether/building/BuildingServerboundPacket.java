@@ -23,10 +23,10 @@ public class BuildingServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.PLACE, buildingName, originPos, rotation, ownerName, 0));
     }
     public static void repairBuilding(BlockPos pos, int repairAmount) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.REPAIR, null, pos, null, null, repairAmount));
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.REPAIR, "", pos, Rotation.NONE, "", repairAmount));
     }
     public static void cancelBuilding(BlockPos pos) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.DESTROY, null, pos, null, null, 0));
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.DESTROY, "", pos, Rotation.NONE, "", 0));
     }
 
     public BuildingServerboundPacket(BuildingAction action, String buildingName, BlockPos pos, Rotation rotation, String ownerName, int repairAmount) {

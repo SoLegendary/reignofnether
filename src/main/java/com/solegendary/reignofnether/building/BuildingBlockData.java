@@ -8,22 +8,25 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.List;
 
-// a class for static functions related to reading building NBT data (as created by StructureBlocks)
+// a class for static functions related to reading building NBT data (as created by Structure Blocks)
 
 public class BuildingBlockData {
 
-    private final static Minecraft MC = Minecraft.getInstance();
-    public final static ArrayList<BuildingBlock> VILLAGER_HOUSE_BLOCKS = getBuildingBlocks("villager_house");
-    public final static ArrayList<BuildingBlock> VILLAGER_TOWER_BLOCKS = getBuildingBlocks("villager_tower");
+    public static ArrayList<BuildingBlock> getBuildingBlocks(String structureName, LevelAccessor level) {
+        ResourceManager resourceManager;
+        if (level.isClientSide())
+            resourceManager = Minecraft.getInstance().getResourceManager();
+        else
+            resourceManager = level.getServer().getResourceManager();
 
-    // TODO: MC.resourceManager can't be used serverside....
-    public static ArrayList<BuildingBlock> getBuildingBlocks(String structureName) {
-        CompoundTag nbt = getBuildingNbt(structureName);
+        CompoundTag nbt = getBuildingNbt(structureName, resourceManager);
         ArrayList<BuildingBlock> blocks = new ArrayList<>();
 
         // load in blocks (list of blockPos and their palette index)
@@ -47,10 +50,10 @@ public class BuildingBlockData {
         return blocks;
     }
 
-    public static CompoundTag getBuildingNbt(String structureName) {
+    public static CompoundTag getBuildingNbt(String structureName, ResourceManager resManager) {
         try {
             ResourceLocation rl = new ResourceLocation("reignofnether", "structures/" + structureName + ".nbt");
-            Resource rs = MC.resourceManager.getResource(rl);
+            Resource rs = resManager.getResource(rl);
             return NbtIo.readCompressed(rs.getInputStream());
         }
         catch (Exception e) {

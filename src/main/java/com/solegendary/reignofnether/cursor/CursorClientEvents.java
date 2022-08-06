@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
@@ -164,11 +165,15 @@ public class CursorClientEvents {
         // ****************************************
         // Find entity moused over and/or selected
         // ****************************************
-        List<PathfinderMob> entities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, PathfinderMob.class, MC.level);
+        List<LivingEntity> entities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, LivingEntity.class, MC.level);
 
         UnitClientEvents.setPreselectedUnitIds(new ArrayList<>());
 
-        for (PathfinderMob entity : entities) {
+        for (LivingEntity entity : entities) {
+            // don't let the player select themselves
+            if (entity.getId() == MC.player.getId())
+                continue;
+
             // inflate by set amount to improve click accuracy
             AABB entityaabb = entity.getBoundingBox().inflate(0.1);
 
@@ -195,7 +200,7 @@ public class CursorClientEvents {
                     (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y,
                     (int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y
             );
-            for (PathfinderMob entity : entities) {
+            for (LivingEntity entity : entities) {
                 if (MyMath.isPointInsideRect3d(uvwp, entity.getBoundingBox().getCenter()))
                     UnitClientEvents.addPreselectedUnitId(entity.getId());
             }

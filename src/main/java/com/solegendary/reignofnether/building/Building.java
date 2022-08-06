@@ -98,7 +98,7 @@ public abstract class Building {
     }
 
     // get BlockPos values with relative positions
-    public static ArrayList<BuildingBlock> getRelativeBlockData() { return new ArrayList<>(); }
+    public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) { return new ArrayList<>(); }
 
     public int getBlocksTotal() {
         return blocks.stream().filter(b -> !b.getBlockState().isAir()).toList().size();

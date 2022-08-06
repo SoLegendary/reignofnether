@@ -13,6 +13,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -57,7 +58,11 @@ public class UnitClientEvents {
     public static void addPreselectedUnitId(Integer unitId) { preselectedUnitIds.add(unitId); }
     public static void addSelectedUnitId(Integer unitId) { selectedUnitIds.add(unitId); }
     public static void setPreselectedUnitIds(ArrayList<Integer> unitIds) { preselectedUnitIds = unitIds; }
-    public static void setSelectedUnitIds(ArrayList<Integer> unitIds) { selectedUnitIds = unitIds; }
+    public static void setSelectedUnitIds(ArrayList<Integer> unitIds) {
+        selectedUnitIds = unitIds;
+        if (selectedUnitIds.size() > 0)
+            BuildingClientEvents.setSelectedBuilding(null);
+    }
     public static int getUnitIdToAttack() { return unitIdToAttack; }
     public static int getUnitIdToFollow() { return unitIdToFollow; }
     public static void setUnitIdToAttack(int id) { unitIdToAttack = id; }
@@ -212,7 +217,7 @@ public class UnitClientEvents {
         // deselect everything
         if (Keybinds.fnums[1].isDown()) {
             selectedUnitIds = new ArrayList<>();
-            BuildingClientEvents.selectedBuilding = null;
+            BuildingClientEvents.setSelectedBuilding(null);
         }
 
         // manage control groups
@@ -304,7 +309,9 @@ public class UnitClientEvents {
         if (MC.level != null) {
             Entity entity = MC.level.getEntity(entityId);
 
-            if (!(entity instanceof Unit))
+            if (entity instanceof Player)
+                return Relationship.HOSTILE;
+            else if (!(entity instanceof Unit))
                 return Relationship.NEUTRAL;
 
             String ownerName = ((Unit) entity).getOwnerName();

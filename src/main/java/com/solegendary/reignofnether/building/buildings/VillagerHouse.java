@@ -13,16 +13,17 @@ import java.util.ArrayList;
 public class VillagerHouse extends Building {
 
     public final static String buildingName = "Villager House";
+    public final static String structureName = "villager_house";
 
     public VillagerHouse(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
         super();
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.blocks = getAbsoluteBlockData(getRelativeBlockData(), level, originPos, rotation);
+        this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.OAK_LOG;
     }
 
-    public static ArrayList<BuildingBlock> getRelativeBlockData() {
-        return (ArrayList) BuildingBlockData.VILLAGER_HOUSE_BLOCKS.clone();
+    public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
+        return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 }

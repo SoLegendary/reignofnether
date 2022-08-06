@@ -13,11 +13,9 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.model.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -135,16 +133,15 @@ public class HudClientEvents {
         // -----------------
         // Building portrait
         // -----------------
-        else if (BuildingClientEvents.selectedBuilding != null) {
+        else if (BuildingClientEvents.getSelectedBuilding() != null) {
             blitY -= portraitRendererBuilding.frameHeight;
 
             portraitRendererBuilding.render(
                     evt.getPoseStack(),
-                    blitX, blitY, BuildingClientEvents.selectedBuilding);
+                    blitX, blitY, BuildingClientEvents.getSelectedBuilding());
 
             blitX += portraitRendererBuilding.frameWidth * 2;
         }
-
 
         // ----------------------------------------------
         // Unit icons using mob heads on 2 rows if needed
@@ -252,6 +249,12 @@ public class HudClientEvents {
     public static void onTick(TickEvent.ClientTickEvent evt) {
         if (OrthoviewClientEvents.isEnabled())
             portraitRendererUnit.tickAnimation();
+    }
+
+    @SubscribeEvent
+    public static void onRenderNamePlate(RenderNameplateEvent evt) {
+        if (OrthoviewClientEvents.isEnabled())
+            evt.setResult(Event.Result.DENY);
     }
 
     // uncomment to adjust render position/size of portraits

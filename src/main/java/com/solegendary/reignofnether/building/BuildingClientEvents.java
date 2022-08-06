@@ -19,9 +19,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
@@ -47,13 +47,16 @@ public class BuildingClientEvents {
     private static ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
     private static ArrayList<BlockPos> blockDestroyQueue = new ArrayList<>();
 
-    public static Building selectedBuilding = null;
-    public static Class<? extends Building> buildingToPlace = null;
+    private static Building selectedBuilding = null;
+    private static Class<? extends Building> buildingToPlace = null;
     private static Class<? extends Building> lastBuildingToPlace = null;
     private static ArrayList<BuildingBlock> blocksToDraw = new ArrayList<>();
     private static boolean replacedTexture = false;
     private static Rotation buildingRotation = Rotation.NONE;
     private static Vec3i buildingDimensions = new Vec3i(0,0,0);
+
+    public static Building getSelectedBuilding() { return selectedBuilding; }
+    public static void setSelectedBuilding(Building building) { selectedBuilding = building; }
 
     public static void placeBlock(BuildingBlock block) {
         blockPlaceQueue.add(block);
@@ -257,8 +260,9 @@ public class BuildingClientEvents {
             if (buildingToPlace != lastBuildingToPlace && buildingToPlace != null) {
                 // load the new buildingToPlace's data
                 try {
-                    Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData");
-                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null);
+                    Class<?>[] paramTypes = { LevelAccessor.class };
+                    Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData", paramTypes);
+                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level);
                     buildingDimensions = Building.getBuildingSize(blocksToDraw);
                     buildingRotation = Rotation.NONE;
                 } catch (Exception e) {
