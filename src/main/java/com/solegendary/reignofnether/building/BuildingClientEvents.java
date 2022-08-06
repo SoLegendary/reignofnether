@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
@@ -342,22 +343,28 @@ public class BuildingClientEvents {
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent evt) {
         if (MC.level != null && evt.world.dimension() == Level.OVERWORLD) {
+
             for (Building building : buildings)
                 building.onWorldTick(MC.level);
             buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 && building.tickAge > 10 );
 
-            for (BuildingBlock blockToPlace : blockPlaceQueue) {
+            if (blockPlaceQueue.size() > 0) {
+                BuildingBlock nextBlock = blockPlaceQueue.get(0);
+                BlockPos bp = nextBlock.getBlockPos();
+                BlockState bs = nextBlock.getBlockState();
                 // place and destroy it once first so we get the break effect
-                MC.level.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);
-                MC.level.destroyBlock(blockToPlace.getBlockPos(), false);
-                MC.level.setBlock(blockToPlace.getBlockPos(), blockToPlace.getBlockState(), 1);
+                // TODO: this is probably causing some intermittent crashes
+                MC.level.setBlock(bp, bs, 1);
+                MC.level.destroyBlock(bp, false);
+                MC.level.setBlock(bp, bs, 1);
+                blockPlaceQueue.removeIf(b -> b.equals(nextBlock));
             }
-            blockPlaceQueue = new ArrayList<>();
 
-            for (BlockPos blockToDestroy : blockDestroyQueue)
-                MC.level.destroyBlock(blockToDestroy, false);
-
-            blockDestroyQueue = new ArrayList<>();
+            if (blockDestroyQueue.size() > 0) {
+                BlockPos nextBlockPos = blockDestroyQueue.get(0);
+                MC.level.destroyBlock(nextBlockPos, false);
+                blockDestroyQueue.removeIf(b -> b.equals(nextBlockPos));
+            }
         }
     }
 }

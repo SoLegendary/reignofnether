@@ -58,19 +58,21 @@ public class BuildingServerEvents {
                 building.onWorldTick(serverLevel);
             buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 && building.tickAge > 10);
 
-            for (BuildingBlock blockToPlace : blockPlaceQueue) {
-                BlockPos bp = blockToPlace.getBlockPos();
-                BlockState bs = blockToPlace.getBlockState();
+            if (blockPlaceQueue.size() > 0) {
+                BuildingBlock nextBlock = blockPlaceQueue.get(0);
+                BlockPos bp = nextBlock.getBlockPos();
+                BlockState bs = nextBlock.getBlockState();
                 BuildingClientboundPacket.placeBlock(bp, Block.getId(bs));
                 serverLevel.setBlock(bp, bs, 1);
+                blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
             }
-            blockPlaceQueue = new ArrayList<>();
 
-            for (BlockPos blockToDestroy : blockDestroyQueue) {
-                BuildingClientboundPacket.destroyBlock(blockToDestroy);
-                serverLevel.destroyBlock(blockToDestroy, false);
+            if (blockDestroyQueue.size() > 0) {
+                BlockPos nextBlockPos = blockDestroyQueue.get(0);
+                BuildingClientboundPacket.destroyBlock(nextBlockPos);
+                serverLevel.destroyBlock(nextBlockPos, false);
+                blockDestroyQueue.removeIf(b -> b.equals(nextBlockPos));
             }
-            blockDestroyQueue = new ArrayList<>();
         }
     }
 }
