@@ -55,11 +55,11 @@ public class UnitClientEvents {
                 units.add((LivingEntity) MC.level.getEntity(id));
         return units;
     }
-    public static void addPreselectedUnitId(Integer unitId) {
-        preselectedUnitIds.add(unitId);
+    public static void addPreselectedUnitId(Integer unitId) { preselectedUnitIds.add(unitId); }
+    public static void addSelectedUnitId(Integer unitId) {
+        selectedUnitIds.add(unitId);
         BuildingClientEvents.setSelectedBuilding(null);
     }
-    public static void addSelectedUnitId(Integer unitId) { selectedUnitIds.add(unitId); }
     public static void setPreselectedUnitIds(ArrayList<Integer> unitIds) { preselectedUnitIds = unitIds; }
     public static void setSelectedUnitIds(ArrayList<Integer> unitIds) {
         selectedUnitIds = unitIds;
