@@ -348,6 +348,8 @@ public class BuildingClientEvents {
                 building.onWorldTick(MC.level);
             buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 && building.tickAge > 10 );
 
+            // TODO: maybe updating to 1.19 can resolve it?
+            // intermittent crashes and/or freezes inside the LongOpenHashSet java class
             if (blockPlaceQueue.size() > 0) {
                 BuildingBlock nextBlock = blockPlaceQueue.get(0);
                 BlockPos bp = nextBlock.getBlockPos();
