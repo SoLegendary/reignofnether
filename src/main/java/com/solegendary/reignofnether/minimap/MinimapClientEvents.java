@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -24,7 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec2;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -201,8 +202,7 @@ public class MinimapClientEvents {
         bufferbuilder.vertex(matrix4f, xc_bg, yt_bg, 0.0F).uv(1.0F, 0.0F).endVertex();
         bufferbuilder.vertex(matrix4f, xl_bg, yc_bg, 0.0F).uv(0.0F, 0.0F).endVertex();
 
-        bufferbuilder.end();
-        BufferUploader.end(bufferbuilder);
+        BufferUploader.drawWithShader(bufferbuilder.end());
 
         // render map itself
         MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
@@ -243,19 +243,19 @@ public class MinimapClientEvents {
 
     // when clicking on map move player there
     @SubscribeEvent
-    public static void onMouseDrag(ScreenEvent.MouseDragEvent.Pre evt) {
+    public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
         if (OrthoviewClientEvents.isEnabled() && evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1)
             clickMapToMoveCamera((float) evt.getMouseX(), (float) evt.getMouseY());
     }
 
     @SubscribeEvent
-    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Pre evt) {
+    public static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre evt) {
         if (OrthoviewClientEvents.isEnabled() && evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1)
             clickMapToMoveCamera((float) evt.getMouseX(), (float) evt.getMouseY());
     }
 
     @SubscribeEvent
-    public static void onRenderOverlay(RenderGameOverlayEvent.Post evt) {
+    public static void onRenderOverlay(RenderGuiOverlayEvent.Post evt) {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
@@ -265,7 +265,7 @@ public class MinimapClientEvents {
             updateMapColours();
             updateMapTexture();
         }
-        renderMap(evt.getMatrixStack());
+        renderMap(evt.getPoseStack());
 
         //MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
         //});

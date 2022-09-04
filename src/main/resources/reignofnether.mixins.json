@@ -4,8 +4,6 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "reignofnether.refmap.json",
   "mixins": [
-    "FrustumMixin",
-    "OrthoViewMixin",
     "TopdownGuiMixin",
     "AbstractIllagerMixin"
   ],

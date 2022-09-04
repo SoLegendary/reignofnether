@@ -4,8 +4,8 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.ActionName;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -16,8 +16,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -85,7 +85,7 @@ public class UnitClientEvents {
         if (preselectedUnitIds.size() == 1 && !targetingSelf())
             setUnitIdToFollow(preselectedUnitIds.get(0));
         // move to ground pos (disabled during camera manip)
-        else if (!Keybinds.altMod.isDown()) {
+        else if (!Keybinding.altMod.isDown()) {
             ArrayList<Integer> unitIdsToMove = new ArrayList<>();
             unitIdsToMove.addAll(selectedUnitIds);
             setUnitIdsToMove(unitIdsToMove);
@@ -93,7 +93,7 @@ public class UnitClientEvents {
     }
 
     @SubscribeEvent
-    public static void onEntityLeave(EntityLeaveWorldEvent evt) {
+    public static void onEntityLeave(EntityLeaveLevelEvent evt) {
         int entityId = evt.getEntity().getId();
 
         preselectedUnitIds.removeIf(e -> e == entityId);
@@ -105,14 +105,14 @@ public class UnitClientEvents {
     }
 
     @SubscribeEvent
-    public static void onEntityJoin(EntityJoinWorldEvent evt) {
+    public static void onEntityJoin(EntityJoinLevelEvent evt) {
         Entity entity = evt.getEntity();
-        if (entity instanceof Unit && evt.getWorld().isClientSide)
+        if (entity instanceof Unit && evt.getLevel().isClientSide)
             allUnitIds.add(entity.getId());
     }
 
     @SubscribeEvent
-    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
+    public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         if (!OrthoviewClientEvents.isEnabled()) return;
 
         // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
@@ -161,7 +161,7 @@ public class UnitClientEvents {
             // if shift is held, deselect a unit or add it to the selected group
             else if (preselectedUnitIds.size() == 1 && !isLeftClickAttack()) {
 
-                if (Keybinds.shiftMod.isDown() &&
+                if (Keybinding.shiftMod.isDown() &&
                     !selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0))) &&
                     MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit &&
                     getPlayerToEntityRelationship(preselectedUnitIds.get(0)) == Relationship.OWNED) {
@@ -218,20 +218,20 @@ public class UnitClientEvents {
     public static void onWorldTick(TickEvent.ClientTickEvent evt) {
 
         // deselect everything
-        if (Keybinds.fnums[1].isDown()) {
+        if (Keybinding.getFnum(1).isDown()) {
             selectedUnitIds = new ArrayList<>();
             BuildingClientEvents.setSelectedBuilding(null);
         }
 
         // manage control groups
         if (controlGroups.size() <= 0) // initialise with empty arrays
-            for (KeyMapping keyMapping : Keybinds.nums)
+            for (KeyMapping keyMapping : Keybinding.nums)
                 controlGroups.add(new ArrayList<>());
 
-        for (KeyMapping keyMapping : Keybinds.nums) {
-            int index = Integer.parseInt(keyMapping.getKey().getDisplayName().getContents());
+        for (KeyMapping keyMapping : Keybinding.nums) {
+            int index = Integer.parseInt(keyMapping.getKey().getDisplayName().getString());
 
-            if (Keybinds.ctrlMod.isDown() &&
+            if (Keybinding.ctrlMod.isDown() &&
                 keyMapping.isDown() &&
                 selectedUnitIds.size() > 0 &&
                 getPlayerToEntityRelationship(selectedUnitIds.get(0)) == Relationship.OWNED)
@@ -243,7 +243,7 @@ public class UnitClientEvents {
 
 
     @SubscribeEvent
-    public static void onRenderWorld(RenderLevelLastEvent evt) {
+    public static void onRenderWorld(RenderLevelStageEvent evt) {
 
         if (MC.level == null || !OrthoviewClientEvents.isEnabled())
             return;

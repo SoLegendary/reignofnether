@@ -1,9 +1,8 @@
 package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.registrars.Keybinds;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.units.UnitClientEvents;
-import net.minecraft.client.Minecraft;
 
 // static list of generic unit actions (attack, move, stop, etc.)
 public class ActionButtons {
@@ -15,7 +14,7 @@ public class ActionButtons {
             "Attack",
             itemIconSize,
             "textures/icons/items/sword.png",
-            Keybinds.keyA,
+            Keybinding.attack,
             () -> CursorClientEvents.getLeftClickAction() == ActionName.ATTACK,
             () -> CursorClientEvents.setLeftClickAction(ActionName.ATTACK)
     );
@@ -23,7 +22,7 @@ public class ActionButtons {
             "Stop",
             itemIconSize,
             "textures/icons/items/barrier.png",
-            Keybinds.keyS,
+            Keybinding.stop,
             () -> false, // except if currently clicked on
             () -> UnitClientEvents.sendCommand(ActionName.STOP)
     );
@@ -31,7 +30,7 @@ public class ActionButtons {
             "Hold Position",
             itemIconSize,
             "textures/icons/items/chestplate.png",
-            Keybinds.keyH,
+            Keybinding.hold,
             () -> false, // TODO: if all selected units are holding position (but would need to get this from server?)
             () -> UnitClientEvents.sendCommand(ActionName.HOLD)
     );
@@ -39,7 +38,7 @@ public class ActionButtons {
             "Move",
             itemIconSize,
             "textures/icons/items/boots.png",
-            Keybinds.keyM,
+            Keybinding.move,
             () -> CursorClientEvents.getLeftClickAction() == ActionName.MOVE,
             () -> CursorClientEvents.setLeftClickAction(ActionName.MOVE)
     );

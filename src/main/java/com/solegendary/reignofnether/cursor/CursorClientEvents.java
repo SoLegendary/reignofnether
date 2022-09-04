@@ -2,14 +2,11 @@ package com.solegendary.reignofnether.cursor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.hud.ActionButtons;
 import com.solegendary.reignofnether.hud.ActionName;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Relationship;
-import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
@@ -21,7 +18,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
 import net.minecraftforge.client.event.*;
@@ -78,7 +74,7 @@ public class CursorClientEvents {
     private static final ResourceLocation TEXTURE_CROSS = new ResourceLocation("reignofnether", "textures/cursors/customcursor_cross.png");
 
     @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
+    public static void onDrawScreen(ScreenEvent.Render evt) {
 
         String screenName = evt.getScreen().getTitle().getString();
         long window = MC.getWindow().getWindow();
@@ -109,9 +105,9 @@ public class CursorClientEvents {
         cursorDrawX = Math.max(0,cursorDrawX);
         cursorDrawY = Math.max(0,cursorDrawY);
 
-        if (Keybinds.altMod.isDown() && (leftClickDown || rightClickDown))
+        if (Keybinding.altMod.isDown() && (leftClickDown || rightClickDown))
             RenderSystem.setShaderTexture(0, TEXTURE_HAND_GRAB);
-        else if (Keybinds.altMod.isDown())
+        else if (Keybinding.altMod.isDown())
             RenderSystem.setShaderTexture(0, TEXTURE_HAND);
         else if (leftClickAction != null && leftClickAction.equals(ActionName.ATTACK))
             RenderSystem.setShaderTexture(0, TEXTURE_SWORD);
@@ -189,7 +185,7 @@ public class CursorClientEvents {
         // weird bug when downPos == dragPos makes random entities get selected by this algorithm
         float dist = cursorLeftClickDownPos.distanceToSqr(cursorLeftClickDragPos);
 
-        if (leftClickDown && dist > 0 && !Keybinds.altMod.isDown()) {
+        if (leftClickDown && dist > 0 && !Keybinding.altMod.isDown()) {
 
             // can't use AABB here as it's always axis-aligned (ie. no camera-rotation)
             // instead, improvise our own quad
@@ -216,10 +212,10 @@ public class CursorClientEvents {
 
     // draw box selection rectangle
     @SubscribeEvent
-    public static void renderOverlay(RenderGameOverlayEvent.Post evt) {
+    public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
 
-        if (leftClickDown && !Keybinds.altMod.isDown()) {
-            GuiComponent.fill(evt.getMatrixStack(), // x1,y1, x2,y2,
+        if (leftClickDown && !Keybinding.altMod.isDown()) {
+            GuiComponent.fill(evt.getPoseStack(), // x1,y1, x2,y2,
                     Math.round(cursorLeftClickDownPos.x),
                     Math.round(cursorLeftClickDownPos.y),
                     Math.round(cursorLeftClickDragPos.x),
@@ -229,7 +225,7 @@ public class CursorClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
+    public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         // don't box select
         if (!OrthoviewClientEvents.isEnabled() ||
             MinimapClientEvents.isPointInsideMinimap(evt.getMouseX(), evt.getMouseY()))
@@ -247,7 +243,7 @@ public class CursorClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseDrag(ScreenEvent.MouseDragEvent.Pre evt) {
+    public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
         if (!OrthoviewClientEvents.isEnabled() ||
             (cursorLeftClickDownPos.x < 0 && cursorLeftClickDownPos.y < 0))
             return;
@@ -256,7 +252,7 @@ public class CursorClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseRelease(ScreenEvent.MouseReleasedEvent.Post evt) {
+    public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
         if (!OrthoviewClientEvents.isEnabled()) return;
 
         // select a moused over entity by left clicking it
@@ -268,7 +264,7 @@ public class CursorClientEvents {
             // except if attack-moving or nothing is preselected (to prevent deselection)
             ArrayList<Integer> preselectedUnitIds = UnitClientEvents.getPreselectedUnitIds();
             if (preselectedUnitIds.size() > 0 && !cursorLeftClickDownPos.equals(cursorLeftClickDragPos)) {
-                if (!Keybinds.shiftMod.isDown())
+                if (!Keybinding.shiftMod.isDown())
                     UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
                 for (int unitId : preselectedUnitIds) {
                     Entity entity = MC.level.getEntity(unitId);
@@ -286,13 +282,13 @@ public class CursorClientEvents {
 
     // prevent moused over blocks being outlined in the usual way (ie. by raytracing from player to block)
     @SubscribeEvent
-    public static void onHighlightBlockEvent(DrawSelectionEvent.HighlightBlock evt) {
+    public static void onHighlightBlockEvent(RenderHighlightEvent.Block evt) {
         if (MC.level != null && OrthoviewClientEvents.isEnabled())
             evt.setCanceled(true);
     }
 
     @SubscribeEvent
-    public static void onRenderWorld(RenderLevelLastEvent evt) {
+    public static void onRenderWorld(RenderLevelStageEvent evt) {
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
 
             if (!OrthoviewClientEvents.isCameraMovingByMouse() && !leftClickDown &&
@@ -375,16 +371,16 @@ public class CursorClientEvents {
     static float alpha = 1.0f;
 
     @SubscribeEvent
-    public static void onInput(InputEvent.KeyInputEvent evt) {
+    public static void onInput(InputEvent.Key evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-            if (evt.getKey() == Keybinds.panMinusX.getKey().getValue())
+            if (evt.getKey() == Keybinding.panMinusX.getKey().getValue())
                 alpha -= 0.1f;
-            if (evt.getKey() == Keybinds.panPlusX.getKey().getValue())
+            if (evt.getKey() == Keybinding.panPlusX.getKey().getValue())
                 alpha += 0.1f;
         }
     }
     @SubscribeEvent
-    public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
         /*
         MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
                 "alpha: " + alpha,

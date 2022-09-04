@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.units.monsters;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.ActionName;
-import com.solegendary.reignofnether.registrars.Keybinds;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.goals.MoveToCursorBlockGoal;
 import com.solegendary.reignofnether.units.goals.SelectedTargetGoal;
@@ -93,7 +93,7 @@ public class CreeperUnit extends Creeper implements Unit {
                     "Explode",
                     14,
                     "textures/icons/blocks/tnt.png",
-                    Keybinds.keyQ,
+                    Keybinding.keyQ,
                     () -> CursorClientEvents.getLeftClickAction() == ActionName.EXPLODE,
                     () -> CursorClientEvents.setLeftClickAction(ActionName.EXPLODE),
                     0, 0, 3

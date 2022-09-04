@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -38,8 +38,8 @@ public class UnitServerEvents {
     // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns null
     // remember to always reset targets so that users' actions always overwrite any existing action
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.WorldTickEvent evt) {
-        ServerLevel level = (ServerLevel) evt.world;
+    public static void onWorldTick(TickEvent.LevelTickEvent evt) {
+        ServerLevel level = (ServerLevel) evt.level;
 
         if (!level.isClientSide()) {
             if (specialAction == ActionName.STOP) {
@@ -161,7 +161,7 @@ public class UnitServerEvents {
     @SubscribeEvent
     // TODO: ownerName is lost on serverside too when server is restarted (inc. singleplayer), maybe have to save to world save file?
     // have to setOwnerName here because its lost on logout; note that players join BEFORE other entities
-    public static void onEntityJoin(EntityJoinWorldEvent evt) {
+    public static void onEntityJoin(EntityJoinLevelEvent evt) {
         Entity entity = evt.getEntity();
         if (entity instanceof Unit) {
             String ownerName = ((Unit) entity).getOwnerName();

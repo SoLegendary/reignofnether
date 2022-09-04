@@ -4,7 +4,6 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.event.ScreenOpenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 /**
@@ -21,7 +20,7 @@ public class TopdownGuiClientEvents {
 
     // allow us to go between topdownGui <-> pauseMenu seamlessly by pressing escape
     @SubscribeEvent
-    public static void onOpenGui(ScreenOpenEvent evt) {
+    public static void onOpenGui(ScreenEvent.Opening evt) {
 
         // if getScreen is null, we closed a screen instead of opening it
         // this branch fires twice on screen close - once with screenClosed nonnull, then null
@@ -41,12 +40,12 @@ public class TopdownGuiClientEvents {
             }
             // closed topdowngui with esc -> open menu screen
             else if (lastScreenClosed != null && lastScreenClosed.contains("topdowngui_container"))
-                evt.setScreen(new PauseScreen(true));
+                evt.setNewScreen(new PauseScreen(true));
         }
     }
 
     @SubscribeEvent
-    public static void beforeGuiRender(ScreenEvent.DrawScreenEvent.Pre evt) {
+    public static void beforeGuiRender(ScreenEvent.Render.Pre evt) {
         String guiTitle = evt.getScreen().getTitle().getString();
 
         // cancel drawing the GUI

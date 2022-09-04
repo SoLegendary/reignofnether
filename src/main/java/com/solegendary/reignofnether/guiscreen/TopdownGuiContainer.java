@@ -7,7 +7,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Class which overrides the inventory GUI with an RTS-like one where the mouse is always visible and objects on screen
@@ -18,7 +19,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 public class TopdownGuiContainer extends AbstractContainerMenu {
 
-    public static final Component TITLE = new TranslatableComponent("topdowngui_container");
+    public static final Component TITLE = Component.literal("topdowngui_container");
 
     public static TopdownGuiContainer createContainerClientSide(int windowID, Inventory playerInventory, net.minecraft.network.FriendlyByteBuf extraData) {
         return new TopdownGuiContainer(windowID, playerInventory);
@@ -32,6 +33,11 @@ public class TopdownGuiContainer extends AbstractContainerMenu {
     public TopdownGuiContainer(int id, Inventory playerInventory)
     {
         super(ContainerRegistrar.TOPDOWNGUI_CONTAINER.get(), id);
+    }
+
+    @Override
+    public ItemStack quickMoveStack(Player p_38941_, int p_38942_) {
+        return null;
     }
 
     @Override

@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 // a class for static functions related to reading building NBT data (as created by Structure Blocks)
 
@@ -53,8 +54,8 @@ public class BuildingBlockData {
     public static CompoundTag getBuildingNbt(String structureName, ResourceManager resManager) {
         try {
             ResourceLocation rl = new ResourceLocation("reignofnether", "structures/" + structureName + ".nbt");
-            Resource rs = resManager.getResource(rl);
-            return NbtIo.readCompressed(rs.getInputStream());
+            Optional<Resource> rs = resManager.getResource(rl);
+            return NbtIo.readCompressed(rs.get().open());
         }
         catch (Exception e) {
             System.out.println(e);

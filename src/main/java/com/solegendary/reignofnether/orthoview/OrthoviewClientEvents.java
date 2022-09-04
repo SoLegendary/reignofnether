@@ -1,16 +1,13 @@
 package com.solegendary.reignofnether.orthoview;
 
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
-import com.solegendary.reignofnether.registrars.Keybinds;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
@@ -120,7 +117,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onLivingUpdateEvent(LivingEvent.LivingUpdateEvent evt) {
+    public static void onLivingUpdateEvent(LivingEvent.LivingTickEvent evt) {
         if (isEnabled() && MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
             evt.getEntity().noPhysics = true; // noclip like in spectator mode
             evt.getEntity().setOnGround(false);
@@ -153,27 +150,27 @@ public class OrthoviewClientEvents {
 
     @SubscribeEvent
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
-    public static void onInput(InputEvent.KeyInputEvent evt) {
+    public static void onInput(InputEvent.Key evt) {
 
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-            if (evt.getKey() == Keybinds.fnums[12].getKey().getValue())
+            if (evt.getKey() == Keybinding.getFnum(12).getKey().getValue())
                 toggleEnable();
 
-            if (evt.getKey() == Keybinds.reset.getKey().getValue())
+            if (evt.getKey() == Keybinding.reset.getKey().getValue())
                 reset();
         }
     }
 
     @SubscribeEvent
-    public static void onMouseScroll(ScreenEvent.MouseScrollEvent evt) {
+    public static void onMouseScroll(ScreenEvent.MouseScrolled evt) {
         if (!enabled) return;
 
-        if (Keybinds.ctrlMod.isDown())
+        if (Keybinding.ctrlMod.isDown())
             zoomCam((float) sign(evt.getScrollDelta()) * -ZOOM_STEP_SCROLL);
     }
 
     @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
+    public static void onDrawScreen(ScreenEvent.Render evt) {
         String screenName = evt.getScreen().getTitle().getString();
 
         if (!enabled || !screenName.equals("topdowngui_container")) return;
@@ -194,7 +191,7 @@ public class OrthoviewClientEvents {
         // mouse (0,0) is top left of screen
 
         // for one frame you can take the mouse outside of the window, so use this amount to adjust pan speed
-        if (!Keybinds.altMod.isDown()) {
+        if (!Keybinding.altMod.isDown()) {
             if (cursorX <= 0)
                 panCam(EDGE_CAMPAM_SENSITIVITY, 0);
             else if (cursorX >= glfwWinWidth)
@@ -214,17 +211,41 @@ public class OrthoviewClientEvents {
             GLFW.glfwSetCursorPos(glfwWindow, 0, cursorY);
         if (cursorY <= 0)
             GLFW.glfwSetCursorPos(glfwWindow, cursorX, 0);
+
+        Player player = MC.player;
+
+        // zoom in/out with keys
+        if (Keybinding.zoomIn.isDown())
+            zoomCam(-ZOOM_STEP_KEY);
+        if (Keybinding.zoomOut.isDown())
+            zoomCam(ZOOM_STEP_KEY);
+
+        // pan camera with keys
+        if (Keybinding.panPlusX.isDown())
+            panCam(PAN_KEY_STEP,0);
+        else if (Keybinding.panMinusX.isDown())
+            panCam(-PAN_KEY_STEP,0);
+        if (Keybinding.panPlusZ.isDown())
+            panCam(0, PAN_KEY_STEP);
+        else if (Keybinding.panMinusZ.isDown())
+            panCam(0,-PAN_KEY_STEP);
+
+        // note that we treat x and y rot as horizontal and vertical, but MC treats it the other way around...
+        if (player != null) {
+            player.setXRot(-camRotY - camRotAdjY);
+            player.setYRot(-camRotX - camRotAdjX);
+        }
     }
 
     // prevents stuff like fire and water effects being shown on your HUD
     @SubscribeEvent
-    public static void onRenderBlockOverlay(RenderBlockOverlayEvent evt) {
+    public static void onRenderBlockOverlay(RenderBlockScreenEffectEvent evt) {
         if (enabled)
             evt.setCanceled(true);
     }
     
     @SubscribeEvent
-    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Post evt) {
+    public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         if (!enabled) return;
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -237,7 +258,7 @@ public class OrthoviewClientEvents {
         }
     }
     @SubscribeEvent
-    public static void onMouseRelease(ScreenEvent.MouseReleasedEvent evt) {
+    public static void onMouseRelease(ScreenEvent.MouseButtonReleased evt) {
         if (!enabled) return;
 
         // stop treating the rotation as adjustments and add them to the base amount
@@ -252,16 +273,16 @@ public class OrthoviewClientEvents {
         }
     }
     @SubscribeEvent
-    public static void onMouseDrag(ScreenEvent.MouseDragEvent evt) {
+    public static void onMouseDrag(ScreenEvent.MouseDragged evt) {
         if (!enabled) return;
 
-        if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybinds.altMod.isDown()) {
+        if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybinding.altMod.isDown()) {
             cameraMovingByMouse = true;
             float moveX = (float) evt.getDragX() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX); //* winWidth/1920;
             float moveZ = (float) evt.getDragY() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX); //* winHeight/1080;
             panCam(moveX, moveZ);
         }
-        else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybinds.altMod.isDown()) {
+        else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybinding.altMod.isDown()) {
             cameraMovingByMouse = true;
             camRotAdjX = (float) (evt.getMouseX() - mouseRightDownX) * CAMROT_MOUSE_SENSITIVITY;
             camRotAdjY = (float) -(evt.getMouseY() - mouseRightDownY) * CAMROT_MOUSE_SENSITIVITY;
@@ -276,45 +297,14 @@ public class OrthoviewClientEvents {
     // don't let orthoview players see other orthoview players
     @SubscribeEvent
     public static void onPlayerRender(RenderPlayerEvent.Pre evt) {
-        if (enabled && (evt.getPlayer().isSpectator() || evt.getPlayer().isCreative()))
+        if (enabled && (evt.getEntity().isSpectator() || evt.getEntity().isCreative()))
             evt.setCanceled(true);
     }
 
     @SubscribeEvent
-    public static void onFovModifier(EntityViewRenderEvent.FieldOfView evt) {
+    public static void onFovModifier(ViewportEvent.ComputeFov evt) {
         if (enabled)
             evt.setFOV(180);
-    }
-
-    // on each game render frame
-    @SubscribeEvent
-    public static void onFogDensity(EntityViewRenderEvent.RenderFogEvent evt) {
-        if (!enabled)
-            return;
-
-        Player player = MC.player;
-
-        // zoom in/out with keys
-        if (Keybinds.zoomIn.isDown())
-            zoomCam(-ZOOM_STEP_KEY);
-        if (Keybinds.zoomOut.isDown())
-            zoomCam(ZOOM_STEP_KEY);
-
-        // pan camera with keys
-        if (Keybinds.panPlusX.isDown())
-            panCam(PAN_KEY_STEP,0);
-        else if (Keybinds.panMinusX.isDown())
-            panCam(-PAN_KEY_STEP,0);
-        if (Keybinds.panPlusZ.isDown())
-            panCam(0, PAN_KEY_STEP);
-        else if (Keybinds.panMinusZ.isDown())
-            panCam(0,-PAN_KEY_STEP);
-
-        // note that we treat x and y rot as horizontal and vertical, but MC treats it the other way around...
-        if (player != null) {
-            player.setXRot(-camRotY - camRotAdjY);
-            player.setYRot(-camRotX - camRotAdjX);
-        }
     }
 
     // OrthoViewMixin uses this to generate a customisation orthographic view to replace the usual view

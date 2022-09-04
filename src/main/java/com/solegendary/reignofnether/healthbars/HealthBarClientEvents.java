@@ -19,7 +19,7 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
@@ -52,7 +52,7 @@ public class HealthBarClientEvents {
         prepareRenderInWorld(evt.getEntity());
     }
     @SubscribeEvent
-    public static void renderHealthbar(RenderLevelLastEvent evt) {
+    public static void renderHealthbar(RenderLevelStageEvent evt) {
         Camera camera = MC.gameRenderer.getMainCamera();
         renderInWorld(evt.getPartialTick(), evt.getPoseStack(), camera);
     }

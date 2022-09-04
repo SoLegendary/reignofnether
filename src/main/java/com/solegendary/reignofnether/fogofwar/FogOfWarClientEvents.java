@@ -16,7 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class FogOfWarClientEvents {
     private static int refreshTicksCurrent = 0;
 
     @SubscribeEvent
-    public static void onRenderOverlay(RenderLevelLastEvent evt) {
+    public static void onRenderOverlay(RenderLevelStageEvent evt) {
         if (!OrthoviewClientEvents.isEnabled() || MC.level == null)
             return;
 

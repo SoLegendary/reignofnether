@@ -11,6 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class FrustumMixin {
     // I have no idea why this is needed but without it the game freezes and gets stuck inside
     // this function forever a few seconds after activating orthoView
+    //
+    // seems to be ok in 1.19 though...
     @Inject(
             method = "cubeCompletelyInFrustum(FFFFFF)Z",
             at = @At("HEAD"),

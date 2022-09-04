@@ -12,14 +12,14 @@ public class MinimapServerEvents {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
-        System.out.println("Player logged in: " + evt.getPlayer().getName().getString() + ", id: " + evt.getPlayer().getId());
-        serverPlayers.add((ServerPlayer) evt.getPlayer());
+        System.out.println("Player logged in: " + evt.getEntity().getName().getString() + ", id: " + evt.getEntity().getId());
+        serverPlayers.add((ServerPlayer) evt.getEntity());
     }
 
     @SubscribeEvent
     public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent evt) {
-        int id = evt.getPlayer().getId();
-        System.out.println("Player logged out: " + evt.getPlayer().getName().getString() + ", id: " + id);
+        int id = evt.getEntity().getId();
+        System.out.println("Player logged out: " + evt.getEntity().getName().getString() + ", id: " + id);
         serverPlayers.removeIf(player -> player.getId() == id);
     }
 }

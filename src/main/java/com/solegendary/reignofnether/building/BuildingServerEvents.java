@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -43,16 +43,16 @@ public class BuildingServerEvents {
 
     @SubscribeEvent
     public static void onBlockBreak(BlockEvent.BreakEvent evt) {
-        if (!evt.getWorld().isClientSide()) {
+        if (!evt.getLevel().isClientSide()) {
             for (Building building : buildings)
                 building.onBlockBreak(evt);
         }
     }
 
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.WorldTickEvent evt) {
-        if (!evt.world.isClientSide() && evt.world.dimension() == Level.OVERWORLD) {
-            serverLevel = (ServerLevel) evt.world;
+    public static void onWorldTick(TickEvent.LevelTickEvent evt) {
+        if (!evt.level.isClientSide() && evt.level.dimension() == Level.OVERWORLD) {
+            serverLevel = (ServerLevel) evt.level;
 
             for (Building building : buildings)
                 building.onWorldTick(serverLevel);

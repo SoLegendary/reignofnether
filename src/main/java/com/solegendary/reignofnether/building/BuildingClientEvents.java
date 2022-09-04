@@ -6,8 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Relationship;
 import com.solegendary.reignofnether.units.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -22,16 +22,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.model.ModelDataManager;
-import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -108,7 +105,7 @@ public class BuildingClientEvents {
                     originPos.getY() + block.getBlockPos().getY(),
                     originPos.getZ() + block.getBlockPos().getZ()
             );
-            IModelData modelData = renderer.getBlockModel(bs).getModelData(MC.level, bp, bs, ModelDataManager.getModelData(MC.level, bp));
+            // ModelData modelData = renderer.getBlockModel(bs).getModelData(MC.level, bp, bs, ModelDataManager.getModelData(MC.level, bp));
 
             matrix.pushPose();
             Entity cam = MC.cameraEntity;
@@ -123,8 +120,7 @@ public class BuildingClientEvents {
                     MC.renderBuffers().crumblingBufferSource(), // don't render over other stuff
                     15728880,
                     // red if invalid, else green
-                    valid ? OverlayTexture.pack(0,0) : OverlayTexture.pack(0,3),
-                    modelData);
+                    valid ? OverlayTexture.pack(0,0) : OverlayTexture.pack(0,3));
 
             matrix.popPose();
 
@@ -214,7 +210,7 @@ public class BuildingClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderLevel(RenderLevelLastEvent evt) {
+    public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
@@ -245,17 +241,17 @@ public class BuildingClientEvents {
     }
 
     @SubscribeEvent
-    public static void onInput(InputEvent.KeyInputEvent evt) {
+    public static void onInput(InputEvent.Key evt) {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
 
-            if (evt.getKey() == Keybinds.fnums[6].getKey().getValue())
+            if (evt.getKey() == Keybinding.getFnum(6).getKey().getValue())
                 buildingToPlace = VillagerHouse.class;
-            else if (evt.getKey() == Keybinds.fnums[7].getKey().getValue())
+            else if (evt.getKey() == Keybinding.getFnum(7).getKey().getValue())
                 buildingToPlace = VillagerTower.class;
-            else if (evt.getKey() == Keybinds.fnums[8].getKey().getValue())
+            else if (evt.getKey() == Keybinding.getFnum(8).getKey().getValue())
                 buildingToPlace = null;
 
             if (buildingToPlace != lastBuildingToPlace && buildingToPlace != null) {
@@ -278,7 +274,7 @@ public class BuildingClientEvents {
     // for some reason this event is run twice every scroll
     private static boolean secondScrollEvt = true;
     @SubscribeEvent
-    public static void onMouseScroll(ScreenEvent.MouseScrollEvent evt) {
+    public static void onMouseScroll(ScreenEvent.MouseScrolled evt) {
         secondScrollEvt = !secondScrollEvt;
         if (!secondScrollEvt) return;
 
@@ -291,7 +287,7 @@ public class BuildingClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Pre evt) throws NoSuchFieldException, IllegalAccessException {
+    public static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre evt) throws NoSuchFieldException, IllegalAccessException {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
@@ -341,8 +337,8 @@ public class BuildingClientEvents {
     }
 
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.WorldTickEvent evt) {
-        if (MC.level != null && evt.world.dimension() == Level.OVERWORLD) {
+    public static void onWorldTick(TickEvent.LevelTickEvent evt) {
+        if (MC.level != null && evt.level.dimension() == Level.OVERWORLD) {
 
             for (Building building : buildings)
                 building.onWorldTick(MC.level);

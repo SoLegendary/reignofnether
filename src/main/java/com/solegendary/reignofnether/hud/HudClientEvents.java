@@ -2,11 +2,9 @@ package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.Keybinds;
 import com.solegendary.reignofnether.units.Relationship;
 import com.solegendary.reignofnether.units.Unit;
 import com.solegendary.reignofnether.units.UnitClientEvents;
-import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -17,7 +15,6 @@ import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
@@ -55,7 +52,7 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.DrawScreenEvent evt) {
+    public static void onDrawScreen(ScreenEvent.Render evt) {
         String screenName = evt.getScreen().getTitle().getString();
         if (!OrthoviewClientEvents.isEnabled() || !screenName.equals("topdowngui_container"))
             return;
@@ -209,7 +206,7 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseRelease(ScreenEvent.MouseReleasedEvent.Post evt) {
+    public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
         int mouseX = (int) evt.getMouseX();
         int mouseY = (int) evt.getMouseY();
 
@@ -252,7 +249,7 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderNamePlate(RenderNameplateEvent evt) {
+    public static void onRenderNamePlate(RenderNameTagEvent evt) {
         if (OrthoviewClientEvents.isEnabled())
             evt.setResult(Event.Result.DENY);
     }
@@ -262,18 +259,18 @@ public class HudClientEvents {
     @SubscribeEvent
     public static void onInput(InputEvent.KeyInputEvent evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-            if (evt.getKey() == Keybinds.panMinusX.getKey().getValue())
+            if (evt.getKey() == Keybinding.panMinusX.getKey().getValue())
                 portraitRendererUnit.headOffsetX += 1;
-            if (evt.getKey() == Keybinds.panPlusX.getKey().getValue())
+            if (evt.getKey() == Keybinding.panPlusX.getKey().getValue())
                 portraitRendererUnit.headOffsetX -= 1;
-            if (evt.getKey() == Keybinds.panMinusZ.getKey().getValue())
+            if (evt.getKey() == Keybinding.panMinusZ.getKey().getValue())
                 portraitRendererUnit.headOffsetY += 1;
-            if (evt.getKey() == Keybinds.panPlusZ.getKey().getValue())
+            if (evt.getKey() == Keybinding.panPlusZ.getKey().getValue())
                 portraitRendererUnit.headOffsetY -= 1;
 
-            if (evt.getKey() == Keybinds.nums[9].getKey().getValue())
+            if (evt.getKey() == Keybinding.nums[9].getKey().getValue())
                 portraitRendererUnit.headSize -= 1;
-            if (evt.getKey() == Keybinds.nums[0].getKey().getValue())
+            if (evt.getKey() == Keybinding.nums[0].getKey().getValue())
                 portraitRendererUnit.headSize += 1;
         }
     }
