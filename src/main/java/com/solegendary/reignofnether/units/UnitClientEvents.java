@@ -245,7 +245,10 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
 
-        if (MC.level == null || !OrthoviewClientEvents.isEnabled())
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS)
+            return;
+
+        if (MC.level == null)
             return;
 
         /**

@@ -5,7 +5,9 @@
   "refmap": "reignofnether.refmap.json",
   "mixins": [
     "TopdownGuiMixin",
-    "AbstractIllagerMixin"
+    "AbstractIllagerMixin",
+    "FrustumMixin",
+    "OrthoViewMixin"
   ],
   "minVersion": "0.8"
 }
