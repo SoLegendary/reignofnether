@@ -288,7 +288,7 @@ public class CursorClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderWorld(RenderLevelStageEvent evt) {
+    public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
 
             if (!OrthoviewClientEvents.isCameraMovingByMouse() && !leftClickDown &&

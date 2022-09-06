@@ -52,7 +52,7 @@ public class HealthBarClientEvents {
         prepareRenderInWorld(evt.getEntity());
     }
     @SubscribeEvent
-    public static void renderHealthbar(RenderLevelStageEvent evt) {
+    public static void onRenderLevel(RenderLevelStageEvent evt) {
         Camera camera = MC.gameRenderer.getMainCamera();
         renderInWorld(evt.getPartialTick(), evt.getPoseStack(), camera);
     }

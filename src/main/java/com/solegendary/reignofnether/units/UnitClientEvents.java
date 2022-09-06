@@ -243,7 +243,7 @@ public class UnitClientEvents {
 
 
     @SubscribeEvent
-    public static void onRenderWorld(RenderLevelStageEvent evt) {
+    public static void onRenderLevel(RenderLevelStageEvent evt) {
 
         if (MC.level == null || !OrthoviewClientEvents.isEnabled())
             return;

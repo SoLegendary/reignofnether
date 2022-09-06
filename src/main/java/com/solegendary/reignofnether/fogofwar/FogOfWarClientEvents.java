@@ -35,7 +35,7 @@ public class FogOfWarClientEvents {
     private static int refreshTicksCurrent = 0;
 
     @SubscribeEvent
-    public static void onRenderOverlay(RenderLevelStageEvent evt) {
+    public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (!OrthoviewClientEvents.isEnabled() || MC.level == null)
             return;
 
