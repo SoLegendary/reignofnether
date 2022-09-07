@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
@@ -104,11 +105,11 @@ public class OrthoviewClientEvents {
     public static void toggleEnable() {
         enabled = !enabled;
 
-        if (enabled) { // opening is done by TopdownGui world tick (which opens it whenever no other screen is open)
-            //TopdownGuiServerboundPackets.openTopdownGui();
+        if (enabled) {
             MinimapClientEvents.setMapCentre(MC.player.getX(), MC.player.getZ());
             prevPlayerY = MC.player.getY();
             PlayerServerboundPacket.teleportPlayer(MC.player.getId(), MC.player.getX(), setPlayerY, MC.player.getZ());
+            TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
         }
         else {
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
@@ -133,19 +134,6 @@ public class OrthoviewClientEvents {
     public static void onRenderHand(RenderHandEvent evt) {
         if (isEnabled())
             evt.setCanceled(true);
-    }
-
-
-    // ensure topdownGui is always open whenever Orthoview is enabled (if no other screens are open)
-    // it takes a while for the packet to be received and processed so don't spam the server with it
-    private static int sendPacketCooldown = 10;
-    @SubscribeEvent
-    public static void onWorldTick(TickEvent.ClientTickEvent evt) {
-        if (sendPacketCooldown > 0) sendPacketCooldown -= 1;
-        if (Minecraft.getInstance().screen == null && isEnabled() && sendPacketCooldown <= 0) {
-            TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
-            sendPacketCooldown = 10;
-        }
     }
 
     @SubscribeEvent

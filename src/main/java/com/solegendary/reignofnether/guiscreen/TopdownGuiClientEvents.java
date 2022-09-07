@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 /**
@@ -20,28 +21,15 @@ public class TopdownGuiClientEvents {
 
     // allow us to go between topdownGui <-> pauseMenu seamlessly by pressing escape
     @SubscribeEvent
-    public static void onOpenGui(ScreenEvent.Opening evt) {
-
-        // if getScreen is null, we closed a screen instead of opening it
-        // this branch fires twice on screen close - once with screenClosed nonnull, then null
-        if (evt.getScreen() == null && OrthoviewClientEvents.isEnabled()) {
-            if (MC.screen != null) {
-
-                String screenClosed = MC.screen.getTitle().getString();
-
-                // when we set the menu screen on the same frame as pressing escape, the game tries to close it too
-                if (lastScreenClosed != null &&
-                    lastScreenClosed.contains("Game Menu") &&
-                    screenClosed.contains("topdowngui_container")) {
-
-                    evt.setCanceled(true);
-                }
-                lastScreenClosed = screenClosed;
-            }
-            // closed topdowngui with esc -> open menu screen
-            else if (lastScreenClosed != null && lastScreenClosed.contains("topdowngui_container"))
-                evt.setNewScreen(new PauseScreen(true));
-        }
+    public static void onCloseScreen(ScreenEvent.Closing evt) {
+        if (OrthoviewClientEvents.isEnabled() && evt.getScreen() instanceof PauseScreen)
+            TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
+    }
+    // if no other screen is open and we've got orthoview enabled, open pause screen
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (OrthoviewClientEvents.isEnabled() && Minecraft.getInstance().screen == null)
+            MC.setScreen(new PauseScreen(true));
     }
 
     @SubscribeEvent

@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.units;
 
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.ActionName;
@@ -221,6 +222,7 @@ public class UnitClientEvents {
         if (Keybinding.getFnum(1).isDown()) {
             selectedUnitIds = new ArrayList<>();
             BuildingClientEvents.setSelectedBuilding(null);
+            BuildingClientEvents.setBuildingToPlace(null);
         }
 
         // manage control groups
@@ -245,7 +247,7 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
 
-        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS)
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS)
             return;
 
         if (MC.level == null)

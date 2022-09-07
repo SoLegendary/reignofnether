@@ -55,6 +55,7 @@ public class BuildingClientEvents {
 
     public static Building getSelectedBuilding() { return selectedBuilding; }
     public static void setSelectedBuilding(Building building) { selectedBuilding = building; }
+    public static void setBuildingToPlace(Class<? extends Building> building) { buildingToPlace = building; }
 
     public static void placeBlock(BuildingBlock block) {
         blockPlaceQueue.add(block);
