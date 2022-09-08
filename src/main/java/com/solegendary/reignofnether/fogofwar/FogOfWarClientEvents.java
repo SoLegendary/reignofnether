@@ -36,6 +36,8 @@ public class FogOfWarClientEvents {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+            return;
         if (!OrthoviewClientEvents.isEnabled() || MC.level == null)
             return;
 

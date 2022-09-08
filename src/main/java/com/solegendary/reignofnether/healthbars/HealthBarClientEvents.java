@@ -53,6 +53,9 @@ public class HealthBarClientEvents {
     }
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+            return;
+
         Camera camera = MC.gameRenderer.getMainCamera();
         renderInWorld(evt.getPartialTick(), evt.getPoseStack(), camera);
     }

@@ -212,6 +212,8 @@ public class BuildingClientEvents {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+            return;
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
