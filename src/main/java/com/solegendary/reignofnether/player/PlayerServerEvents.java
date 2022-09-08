@@ -49,6 +49,9 @@ public class PlayerServerEvents {
             MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
             NetworkHooks.openScreen(serverPlayer, namedProvider);
             serverPlayer.setGameMode(GameType.CREATIVE);
+            serverPlayer.noPhysics = true;
+            serverPlayer.getAbilities().flying = true;
+            serverPlayer.onUpdateAbilities();
         }
         else {
             System.out.println("serverPlayer is null, cannot open topdown gui");
@@ -58,6 +61,7 @@ public class PlayerServerEvents {
     public static void closeTopdownGui(int playerId) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
         serverPlayer.setGameMode(GameType.CREATIVE);
+        serverPlayer.noPhysics = false;
     }
 
     public static void movePlayer(int playerId, double x, double y, double z) {
