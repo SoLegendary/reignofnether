@@ -374,9 +374,9 @@ public class BuildingClientEvents {
 
     @SubscribeEvent
     public static void onBlockPlace(BlockEvent.EntityPlaceEvent evt) {
-        if (MC.level != null) {
-            BlockPos bp = evt.getPos();
-            BlockState bs = evt.getState();
+        BlockPos bp = evt.getPos();
+        BlockState bs = evt.getState();
+        if (MC.level != null && MC.level.isLoaded(bp)) {
             MC.level.setBlock(bp.east(), bs, 1);
             MC.level.destroyBlock(bp, false);
         }
