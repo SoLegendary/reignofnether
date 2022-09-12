@@ -39,6 +39,9 @@ public class UnitServerEvents {
     // remember to always reset targets so that users' actions always overwrite any existing action
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END)
+            return;
+
         ServerLevel level = (ServerLevel) evt.level;
 
         if (!level.isClientSide()) {

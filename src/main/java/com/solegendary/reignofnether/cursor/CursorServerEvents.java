@@ -19,6 +19,9 @@ public class CursorServerEvents {
     // create an entity to track the position of the cursor in game space
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END)
+            return;
+
         ServerLevel world = (ServerLevel) evt.level;
 
         // on startup, remove all existing cursorEntities and create a new one

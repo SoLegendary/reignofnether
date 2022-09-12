@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.building;
 
+import it.unimi.dsi.fastutil.ints.IntLists;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -11,15 +13,17 @@ import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class BuildingServerEvents {
 
     private static ServerLevel serverLevel = null;
 
     // buildings that currently exist serverside
-    private static ArrayList<Building> buildings = new ArrayList<>();
-    private static ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
-    private static ArrayList<BlockPos> blockDestroyQueue = new ArrayList<>();
+    private static List<Building> buildings = Collections.synchronizedList(new ArrayList<>());
+    private static List<BuildingBlock> blockPlaceQueue = Collections.synchronizedList(new ArrayList<>());
+    private static List<BlockPos> blockDestroyQueue = Collections.synchronizedList(new ArrayList<>());
 
     public static void placeBlock(BuildingBlock block) {
         blockPlaceQueue.add(block);
@@ -51,7 +55,7 @@ public class BuildingServerEvents {
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (!evt.level.isClientSide() && evt.level.dimension() == Level.OVERWORLD) {
+        if (!evt.level.isClientSide() && evt.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
             serverLevel = (ServerLevel) evt.level;
 
             for (Building building : buildings)
@@ -62,16 +66,20 @@ public class BuildingServerEvents {
                 BuildingBlock nextBlock = blockPlaceQueue.get(0);
                 BlockPos bp = nextBlock.getBlockPos();
                 BlockState bs = nextBlock.getBlockState();
-                BuildingClientboundPacket.placeBlock(bp, Block.getId(bs));
-                serverLevel.setBlock(bp, bs, 1);
-                blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
+                if (serverLevel.isLoaded(bp)) {
+                    //BuildingClientboundPacket.placeBlock(bp, Block.getId(bs));
+                    serverLevel.setBlockAndUpdate(bp, bs);
+                    blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
+                }
             }
 
             if (blockDestroyQueue.size() > 0) {
-                BlockPos nextBlockPos = blockDestroyQueue.get(0);
-                BuildingClientboundPacket.destroyBlock(nextBlockPos);
-                serverLevel.destroyBlock(nextBlockPos, false);
-                blockDestroyQueue.removeIf(b -> b.equals(nextBlockPos));
+                BlockPos bp = blockDestroyQueue.get(0);
+                if (serverLevel.isLoaded(bp)) {
+                    //BuildingClientboundPacket.destroyBlock(bp);
+                    serverLevel.destroyBlock(bp, false);
+                    blockDestroyQueue.removeIf(b -> b.equals(bp));
+                }
             }
         }
     }

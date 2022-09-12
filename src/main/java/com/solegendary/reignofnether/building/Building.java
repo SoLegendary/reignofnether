@@ -9,11 +9,11 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.BlockEvent;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Random;
 
 public abstract class Building {
 
@@ -116,8 +116,7 @@ public abstract class Building {
     // place blocks according to the following rules:
     // - block must be connected to something else (not air)
     // - block must be the lowest Y value possible
-    // - all else equal, randomise the choice so it doesn't look too structured
-    private void buildBlock(Level level) {
+    private void buildNextBlock(Level level) {
         ArrayList<BuildingBlock> unplacedBlocks = new ArrayList<>(blocks.stream().filter(b -> !b.isPlaced).toList());
         int minY = getMinCorner(unplacedBlocks).getY();
         ArrayList<BuildingBlock> validBlocks = new ArrayList<>();
@@ -183,9 +182,19 @@ public abstract class Building {
                 ticksToNextBuild -= 1;
                 if (ticksToNextBuild <= 0) {
                     ticksToNextBuild = ticksPerBuild;
-                    buildBlock(level);
+                    buildNextBlock(level);
                 }
             }
+            else { // start destroying random blocks once built (for testing purposes)
+                ticksToNextBuild -= 1;
+                if (ticksToNextBuild <= 0) {
+                    ticksToNextBuild = ticksPerBuild;
+                    Random random = new Random();
+                    int randint = random.nextInt(blocks.size());
+                    blocks.get(randint).destroy();
+                }
+            }
+
             if (blocksPlaced >= blocksTotal)
                 isBuilding = false;
 

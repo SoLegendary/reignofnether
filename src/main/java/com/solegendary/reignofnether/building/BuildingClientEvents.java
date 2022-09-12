@@ -30,20 +30,23 @@ import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class BuildingClientEvents {
 
     static final Minecraft MC = Minecraft.getInstance();
 
     // clientside buildings used for tracking position (for cursor selection)
-    private static ArrayList<Building> buildings = new ArrayList<>();
-    private static ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
-    private static ArrayList<BlockPos> blockDestroyQueue = new ArrayList<>();
+    private static List<Building> buildings = Collections.synchronizedList(new ArrayList<>());
+    private static List<BuildingBlock> blockPlaceQueue = Collections.synchronizedList(new ArrayList<>());
+    private static List<BlockPos> blockDestroyQueue = Collections.synchronizedList(new ArrayList<>());
 
     private static Building selectedBuilding = null;
     private static Class<? extends Building> buildingToPlace = null;
@@ -341,31 +344,41 @@ public class BuildingClientEvents {
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (MC.level != null && evt.level.dimension() == Level.OVERWORLD) {
+        if (MC.level != null && evt.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
 
             for (Building building : buildings)
                 building.onWorldTick(MC.level);
             buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 && building.tickAge > 10 );
 
-            // TODO: maybe updating to 1.19 can resolve it?
-            // intermittent crashes and/or freezes inside the LongOpenHashSet java class
             if (blockPlaceQueue.size() > 0) {
                 BuildingBlock nextBlock = blockPlaceQueue.get(0);
                 BlockPos bp = nextBlock.getBlockPos();
                 BlockState bs = nextBlock.getBlockState();
-                // place and destroy it once first so we get the break effect
-                // TODO: this is probably causing some intermittent crashes
-                MC.level.setBlock(bp, bs, 1);
-                MC.level.destroyBlock(bp, false);
-                MC.level.setBlock(bp, bs, 1);
-                blockPlaceQueue.removeIf(b -> b.equals(nextBlock));
+                if (MC.level.isLoaded(bp)) {
+                    MC.level.setBlock(bp, bs, 1);
+                    MC.level.destroyBlock(bp, false);
+                    MC.level.setBlock(bp, bs, 1);
+                    blockPlaceQueue.removeIf(b -> b.equals(nextBlock));
+                }
             }
 
             if (blockDestroyQueue.size() > 0) {
-                BlockPos nextBlockPos = blockDestroyQueue.get(0);
-                MC.level.destroyBlock(nextBlockPos, false);
-                blockDestroyQueue.removeIf(b -> b.equals(nextBlockPos));
+                BlockPos bp = blockDestroyQueue.get(0);
+                if (MC.level.isLoaded(bp)) {
+                    MC.level.destroyBlock(bp, false);
+                    blockDestroyQueue.removeIf(b -> b.equals(bp));
+                }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onBlockPlace(BlockEvent.EntityPlaceEvent evt) {
+        if (MC.level != null) {
+            BlockPos bp = evt.getPos();
+            BlockState bs = evt.getState();
+            MC.level.setBlock(bp.east(), bs, 1);
+            MC.level.destroyBlock(bp, false);
         }
     }
 }
