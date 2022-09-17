@@ -45,8 +45,6 @@ public class BuildingClientEvents {
 
     // clientside buildings used for tracking position (for cursor selection)
     private static List<Building> buildings = Collections.synchronizedList(new ArrayList<>());
-    private static List<BuildingBlock> blockPlaceQueue = Collections.synchronizedList(new ArrayList<>());
-    private static List<BlockPos> blockDestroyQueue = Collections.synchronizedList(new ArrayList<>());
 
     private static Building selectedBuilding = null;
     private static Class<? extends Building> buildingToPlace = null;
@@ -59,13 +57,6 @@ public class BuildingClientEvents {
     public static Building getSelectedBuilding() { return selectedBuilding; }
     public static void setSelectedBuilding(Building building) { selectedBuilding = building; }
     public static void setBuildingToPlace(Class<? extends Building> building) { buildingToPlace = building; }
-
-    public static void placeBlock(BuildingBlock block) {
-        blockPlaceQueue.add(block);
-    }
-    public static void destroyBlock(BlockPos pos) {
-        blockDestroyQueue.add(pos);
-    }
 
     // adds a green overlay option to OverlayTexture at (0,0)
     public static void replaceOverlayTexture() {
@@ -339,46 +330,6 @@ public class BuildingClientEvents {
         if (!replacedTexture) {
             replaceOverlayTexture();
             replacedTexture = true;
-        }
-    }
-
-    @SubscribeEvent
-    public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (MC.level != null && evt.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
-
-            for (Building building : buildings)
-                building.onWorldTick(MC.level);
-            buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 && building.tickAge > 10 );
-
-            if (blockPlaceQueue.size() > 0) {
-                BuildingBlock nextBlock = blockPlaceQueue.get(0);
-                BlockPos bp = nextBlock.getBlockPos();
-                BlockState bs = nextBlock.getBlockState();
-                if (MC.level.isLoaded(bp)) {
-                    MC.level.setBlock(bp, bs, 1);
-                    MC.level.destroyBlock(bp, false);
-                    MC.level.setBlock(bp, bs, 1);
-                    blockPlaceQueue.removeIf(b -> b.equals(nextBlock));
-                }
-            }
-
-            if (blockDestroyQueue.size() > 0) {
-                BlockPos bp = blockDestroyQueue.get(0);
-                if (MC.level.isLoaded(bp)) {
-                    MC.level.destroyBlock(bp, false);
-                    blockDestroyQueue.removeIf(b -> b.equals(bp));
-                }
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onBlockPlace(BlockEvent.EntityPlaceEvent evt) {
-        BlockPos bp = evt.getPos();
-        BlockState bs = evt.getState();
-        if (MC.level != null && MC.level.isLoaded(bp)) {
-            MC.level.setBlock(bp.east(), bs, 1);
-            MC.level.destroyBlock(bp, false);
         }
     }
 }

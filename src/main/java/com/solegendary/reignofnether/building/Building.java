@@ -154,6 +154,7 @@ public abstract class Building {
         // - cause fire if < 50% blocksPercent
     }
 
+    // TODO: deadloop inside here when the building's chunks are unloaded while still building
     public void onWorldTick(Level level) {
         this.tickAge += 1;
 

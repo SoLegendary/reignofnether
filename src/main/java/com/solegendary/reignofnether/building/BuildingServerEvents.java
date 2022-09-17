@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
@@ -67,8 +68,8 @@ public class BuildingServerEvents {
                 BlockPos bp = nextBlock.getBlockPos();
                 BlockState bs = nextBlock.getBlockState();
                 if (serverLevel.isLoaded(bp)) {
-                    //BuildingClientboundPacket.placeBlock(bp, Block.getId(bs));
                     serverLevel.setBlockAndUpdate(bp, bs);
+                    serverLevel.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, bp, Block.getId(bs));
                     blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
                 }
             }
@@ -76,7 +77,6 @@ public class BuildingServerEvents {
             if (blockDestroyQueue.size() > 0) {
                 BlockPos bp = blockDestroyQueue.get(0);
                 if (serverLevel.isLoaded(bp)) {
-                    //BuildingClientboundPacket.destroyBlock(bp);
                     serverLevel.destroyBlock(bp, false);
                     blockDestroyQueue.removeIf(b -> b.equals(bp));
                 }
