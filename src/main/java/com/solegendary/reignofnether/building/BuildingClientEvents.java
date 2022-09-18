@@ -341,7 +341,7 @@ public class BuildingClientEvents {
                 building.onWorldTick(MC.level);
 
             // cleanup destroyed buildings
-            if (selectedBuilding.isDestroyed())
+            if (selectedBuilding != null && selectedBuilding.isDestroyed())
                 selectedBuilding = null;
             buildings.removeIf(Building::isDestroyed);
         }
