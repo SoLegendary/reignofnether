@@ -142,6 +142,10 @@ public abstract class Building {
         }
     }
 
+    public boolean isDestroyed() {
+        return getBlocksPlaced() <= 0 && tickAge > 10;
+    }
+
     // destroy all remaining blocks in a final big explosion
     private void destroy() {
 
@@ -191,8 +195,7 @@ public abstract class Building {
                 if (ticksToNextBuild <= 0) {
                     ticksToNextBuild = ticksPerBuild;
                     Random random = new Random();
-                    int randint = random.nextInt(blocks.size());
-                    blocks.get(randint).destroy();
+                    blocks.get(random.nextInt(blocks.size())).destroy();
                 }
             }
 

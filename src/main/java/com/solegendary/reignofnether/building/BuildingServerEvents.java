@@ -61,7 +61,7 @@ public class BuildingServerEvents {
 
             for (Building building : buildings)
                 building.onWorldTick(serverLevel);
-            buildings.removeIf((Building building) -> building.getBlocksPlaced() <= 0 && building.tickAge > 10);
+            buildings.removeIf(Building::isDestroyed);
 
             if (blockPlaceQueue.size() > 0) {
                 BuildingBlock nextBlock = blockPlaceQueue.get(0);

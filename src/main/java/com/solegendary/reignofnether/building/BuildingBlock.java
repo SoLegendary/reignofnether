@@ -34,7 +34,7 @@ public class BuildingBlock {
 
     // isPlaced is set by the tickEvent too but good to
     // set it here immediately to avoid race conditions
-    public void  place() {
+    public void place() {
         isPlaced = true;
         BuildingServerEvents.placeBlock(this);
     }

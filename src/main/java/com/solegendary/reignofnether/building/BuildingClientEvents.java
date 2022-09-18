@@ -332,4 +332,18 @@ public class BuildingClientEvents {
             replacedTexture = true;
         }
     }
+
+    @SubscribeEvent
+    public static void onWorldTick(TickEvent.LevelTickEvent evt) {
+        if (MC.level != null && evt.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
+
+            for (Building building : buildings)
+                building.onWorldTick(MC.level);
+
+            // cleanup destroyed buildings
+            if (selectedBuilding.isDestroyed())
+                selectedBuilding = null;
+            buildings.removeIf(Building::isDestroyed);
+        }
+    }
 }
