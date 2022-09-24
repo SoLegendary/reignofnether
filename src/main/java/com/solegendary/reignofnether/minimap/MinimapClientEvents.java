@@ -105,7 +105,7 @@ public class MinimapClientEvents {
                 BlockState bs;
                 do {
                     bs = MC.level.getBlockState(new BlockPos(x,y,z));
-                    if (!bs.getMaterial().isSolid() && !bs.getMaterial().isLiquid())
+                    if (!bs.getMaterial().isSolid() && !bs.getMaterial().isLiquid() && y > 0)
                         y -= 1;
                     else
                         break;
@@ -115,7 +115,7 @@ public class MinimapClientEvents {
                 BlockState bsNorth;
                 do {
                     bsNorth = MC.level.getBlockState(new BlockPos(x,yNorth,z-1));
-                    if (!bsNorth.getMaterial().isSolid() && !bsNorth.getMaterial().isLiquid())
+                    if (!bsNorth.getMaterial().isSolid() && !bsNorth.getMaterial().isLiquid() && yNorth > 0)
                         yNorth -= 1;
                     else
                         break;

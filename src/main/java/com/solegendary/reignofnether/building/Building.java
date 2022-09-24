@@ -22,7 +22,7 @@ public abstract class Building {
     public final float minBlocksPercent = 0.2f;
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time
     public boolean isBuilding = true; // TODO: only true if // a builder is assigned and actively building or repairing
-    public int ticksPerBuild = 6; // ticks taken to place a single block while isBuilding
+    public int ticksPerBuild = 1; // ticks taken to place a single block while isBuilding
     public int ticksToNextBuild = ticksPerBuild;
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
@@ -143,7 +143,7 @@ public abstract class Building {
     }
 
     public boolean isDestroyed() {
-        return getBlocksPlaced() <= 0 && tickAge > 10;
+        return (getBlocksPlaced() <= 0 || getBlocksPlaced() >= getBlocksTotal()) && tickAge > 10;
     }
 
     // destroy all remaining blocks in a final big explosion
@@ -158,7 +158,7 @@ public abstract class Building {
         // - cause fire if < 50% blocksPercent
     }
 
-    // TODO: deadloop inside here when the building's chunks are unloaded while still building
+    // TODO: deadloop inside here when the building's chunks are unloaded
     public void onWorldTick(Level level) {
         this.tickAge += 1;
 
@@ -172,15 +172,14 @@ public abstract class Building {
             block.isPlaced = bsWorld.equals(bs);
         }
 
+
         if (!isClientSide) {
             float blocksPercent = getBlocksPercent();
             float blocksPlaced = getBlocksPlaced();
             float blocksTotal = getBlocksTotal();
 
-            if (blocksPlaced <= 0)
-                destroy();
-
             // TODO: if builder is assigned, set isBuilding true
+
 
             // place a block if the tick has run down
             if (isBuilding && blocksPlaced < blocksTotal) {
@@ -190,6 +189,7 @@ public abstract class Building {
                     buildNextBlock(level);
                 }
             }
+            /*
             else { // start destroying random blocks once built (for testing purposes)
                 ticksToNextBuild -= 1;
                 if (ticksToNextBuild <= 0) {
@@ -197,7 +197,7 @@ public abstract class Building {
                     Random random = new Random();
                     blocks.get(random.nextInt(blocks.size())).destroy();
                 }
-            }
+            }*/
 
             if (blocksPlaced >= blocksTotal)
                 isBuilding = false;
