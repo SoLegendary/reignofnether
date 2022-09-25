@@ -4,15 +4,11 @@ import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.level.BlockEvent;
@@ -24,14 +20,16 @@ import java.util.Random;
 public abstract class Building {
 
     public String name;
-    // building collapses at a certain % blocks remaining so players don't have to destroy every single block
-    public final float minBlocksPercent = 0.2f;
+
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time
     public boolean isBuilding = true; // TODO: only true if // a builder is assigned and actively building or repairing
     public int ticksPerBuild = 1; // ticks taken to place a single block while isBuilding
     public int ticksToNextBuild = ticksPerBuild;
+    // building collapses at a certain % blocks remaining so players don't have to destroy every single block
+    public final float minBlocksPercent = 0.25f;
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
+    public int explosionCount = 0;
     public float explodeChance = 0.5f;
     public float explodeRadius = 2.0f;
     public float fireThreshold = 0.75f; // if building has less %hp than this, explosions caused can make fires
@@ -114,12 +112,14 @@ public abstract class Building {
     public int getBlocksPlaced() {
         return blocks.stream().filter(b -> b.isPlaced && !b.getBlockState().isAir()).toList().size();
     }
-    public float getBlocksPercent() {
+    public float getBlocksPlacedPercent() {
         return (float) getBlocksPlaced() / (float) getBlocksTotal();
     }
     public boolean isFunctional() {
-        return this.isBuilt && this.getBlocksPercent() >= 0.5f;
+        return this.isBuilt && this.getBlocksPlacedPercent() >= 0.5f;
     }
+
+    // TODO: add some temporary scaffolding blocks if !isBuilt
 
     // place blocks according to the following rules:
     // - block must be connected to something else (not air)
@@ -151,12 +151,30 @@ public abstract class Building {
     }
 
     public boolean isDestroyed() {
-        return getBlocksPlaced() <= 0 && tickAge > 10;
+        if (tickAge < 10)
+            return false;
+        if (getBlocksPlaced() < 0)
+            return true;
+        if (isBuilt)
+            return getBlocksPlacedPercent() <= this.minBlocksPercent;
+        else
+            return explosionCount >= 3;
     }
 
     // destroy all remaining blocks in a final big explosion
-    private void destroy() {
-
+    private void destroy(ServerLevel level) {
+        this.blocks.forEach((BuildingBlock block) -> {
+            if (block.isPlaced) {
+                level.destroyBlock(block.getBlockPos(), false);
+                level.explode(null, null, null,
+                        block.getBlockPos().getX(),
+                        block.getBlockPos().getY(),
+                        block.getBlockPos().getZ(),
+                        1.0f,
+                        false,
+                        Explosion.BlockInteraction.BREAK);
+            }
+        });
     }
 
     // should only be run serverside
@@ -176,8 +194,9 @@ public abstract class Building {
                     evt.getPos().getY(),
                     evt.getPos().getZ(),
                     this.explodeRadius,
-                    this.getBlocksPercent() < this.fireThreshold, // fire
+                    this.getBlocksPlacedPercent() < this.fireThreshold, // fire
                     Explosion.BlockInteraction.BREAK);
+            explosionCount += 1;
         }
     }
 
@@ -195,7 +214,7 @@ public abstract class Building {
         }
 
         if (!isClientSide) {
-            float blocksPercent = getBlocksPercent();
+            float blocksPercent = getBlocksPlacedPercent();
             float blocksPlaced = getBlocksPlaced();
             float blocksTotal = getBlocksTotal();
 
@@ -213,7 +232,11 @@ public abstract class Building {
             if (blocksPlaced >= blocksTotal)
                 isBuilding = false;
 
-            // TODO: if fires exist, put them out one by one (or gradually remove them if blocksPercent > 50%)
+            // TODO: if fires exist, put them out one by one (or gradually remove them if blocksPercent > fireThreshold%)
+
+            if (this.isDestroyed()) {
+                this.destroy((ServerLevel) level);
+            }
         }
     }
 }

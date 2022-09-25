@@ -93,7 +93,7 @@ public class BuildingServerEvents {
         }
     }
 
-    // cancel damage to players if an explosion originated from a non-entity, including from:
+    // cancel damage to entities if an explosion originated from a non-entity, including from:
     // - building block breaks
     // - beds (vanilla)
     // - respawn anchors (vanilla)
@@ -101,6 +101,6 @@ public class BuildingServerEvents {
     public static void onExplosion(ExplosionEvent.Detonate evt) {
         Explosion exp = evt.getExplosion();
         if (exp.getExploder() == null && exp.getSourceMob() == null)
-            System.out.println(evt.getAffectedEntities().removeIf((Entity entity) -> entity instanceof Player));
+            System.out.println(evt.getAffectedEntities().removeIf((Entity entity) -> true));
     }
 }
