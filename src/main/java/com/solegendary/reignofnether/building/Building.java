@@ -153,7 +153,7 @@ public abstract class Building {
     public boolean isDestroyed() {
         if (tickAge < 10)
             return false;
-        if (getBlocksPlaced() < 0)
+        if (getBlocksPlaced() <= 0)
             return true;
         if (isBuilt)
             return getBlocksPlacedPercent() <= this.minBlocksPercent;
