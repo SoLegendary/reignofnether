@@ -4,9 +4,15 @@ import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.level.BlockEvent;
@@ -26,7 +32,9 @@ public abstract class Building {
     public int ticksToNextBuild = ticksPerBuild;
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
-    public float explodeChance;
+    public float explodeChance = 0.5f;
+    public float explodeRadius = 2.0f;
+    public float fireThreshold = 0.75f; // if building has less %hp than this, explosions caused can make fires
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
     public String ownerName;
     public Block portraitBlock; // block rendered in the portrait GUI to represent this building
@@ -143,7 +151,7 @@ public abstract class Building {
     }
 
     public boolean isDestroyed() {
-        return (getBlocksPlaced() <= 0 || getBlocksPlaced() >= getBlocksTotal()) && tickAge > 10;
+        return getBlocksPlaced() <= 0 && tickAge > 10;
     }
 
     // destroy all remaining blocks in a final big explosion
@@ -153,12 +161,26 @@ public abstract class Building {
 
     // should only be run serverside
     public void onBlockBreak(BlockEvent.BreakEvent evt) {
+        if (evt.getLevel().isClientSide())
+            return;
+
+        ServerLevel level = (ServerLevel) evt.getLevel();
+
         // when a player breaks a block that's part of the building:
         // - roll explodeChance to cause explosion effects and destroy more blocks
-        // - cause fire if < 50% blocksPercent
+        // - cause fire if < fireThreshold% blocksPercent
+        Random rand = new Random();
+        if (rand.nextFloat(1.0f) < this.explodeChance) {
+            level.explode(null, null, null,
+                    evt.getPos().getX(),
+                    evt.getPos().getY(),
+                    evt.getPos().getZ(),
+                    this.explodeRadius,
+                    this.getBlocksPercent() < this.fireThreshold, // fire
+                    Explosion.BlockInteraction.BREAK);
+        }
     }
 
-    // TODO: deadloop inside here when the building's chunks are unloaded
     public void onWorldTick(Level level) {
         this.tickAge += 1;
 
@@ -172,14 +194,12 @@ public abstract class Building {
             block.isPlaced = bsWorld.equals(bs);
         }
 
-
         if (!isClientSide) {
             float blocksPercent = getBlocksPercent();
             float blocksPlaced = getBlocksPlaced();
             float blocksTotal = getBlocksTotal();
 
             // TODO: if builder is assigned, set isBuilding true
-
 
             // place a block if the tick has run down
             if (isBuilding && blocksPlaced < blocksTotal) {
@@ -189,15 +209,6 @@ public abstract class Building {
                     buildNextBlock(level);
                 }
             }
-            /*
-            else { // start destroying random blocks once built (for testing purposes)
-                ticksToNextBuild -= 1;
-                if (ticksToNextBuild <= 0) {
-                    ticksToNextBuild = ticksPerBuild;
-                    Random random = new Random();
-                    blocks.get(random.nextInt(blocks.size())).destroy();
-                }
-            }*/
 
             if (blocksPlaced >= blocksTotal)
                 isBuilding = false;

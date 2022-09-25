@@ -1,9 +1,14 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import it.unimi.dsi.fastutil.ints.IntLists;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -12,6 +17,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -47,6 +53,7 @@ public class BuildingServerEvents {
         BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName);
     }
 
+    // if blocks are destroyed manually by a player then help it along by causing periodic explosions
     @SubscribeEvent
     public static void onBlockBreak(BlockEvent.BreakEvent evt) {
         if (!evt.getLevel().isClientSide()) {
@@ -84,5 +91,16 @@ public class BuildingServerEvents {
                 }
             }
         }
+    }
+
+    // cancel damage to players if an explosion originated from a non-entity, including from:
+    // - building block breaks
+    // - beds (vanilla)
+    // - respawn anchors (vanilla)
+    @SubscribeEvent
+    public static void onExplosion(ExplosionEvent.Detonate evt) {
+        Explosion exp = evt.getExplosion();
+        if (exp.getExploder() == null && exp.getSourceMob() == null)
+            System.out.println(evt.getAffectedEntities().removeIf((Entity entity) -> entity instanceof Player));
     }
 }
