@@ -93,14 +93,21 @@ public class BuildingServerEvents {
         }
     }
 
-    // cancel damage to entities if an explosion originated from a non-entity, including from:
+    // cancel damage to entities and non-building blocks if an explosion originated from a non-entity, including from:
     // - building block breaks
     // - beds (vanilla)
     // - respawn anchors (vanilla)
     @SubscribeEvent
     public static void onExplosion(ExplosionEvent.Detonate evt) {
         Explosion exp = evt.getExplosion();
-        if (exp.getExploder() == null && exp.getSourceMob() == null)
-            System.out.println(evt.getAffectedEntities().removeIf((Entity entity) -> true));
+        if (exp.getExploder() == null && exp.getSourceMob() == null) {
+            evt.getAffectedEntities().removeIf((Entity entity) -> true);
+            evt.getAffectedBlocks().removeIf((BlockPos bp) -> {
+                for (Building building : buildings)
+                    if (!building.isPosPartOfBuilding(bp, true))
+                        return true;
+                return false;
+            });
+        }
     }
 }

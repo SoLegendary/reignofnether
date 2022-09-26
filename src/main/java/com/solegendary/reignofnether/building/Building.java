@@ -71,8 +71,15 @@ public abstract class Building {
         Vec3i max = getMaxCorner(this.blocks);
 
         return bp.getX() <= max.getX() && bp.getX() >= min.getX() &&
-               bp.getY() <= max.getY() && bp.getY() >= min.getY() &&
-               bp.getZ() <= max.getZ() && bp.getZ() >= min.getZ();
+                bp.getY() <= max.getY() && bp.getY() >= min.getY() &&
+                bp.getZ() <= max.getZ() && bp.getZ() >= min.getZ();
+    }
+
+    public boolean isPosPartOfBuilding(BlockPos bp, boolean onlyPlacedBlocks) {
+        for (BuildingBlock block : this.blocks)
+            if ((block.isPlaced || !onlyPlacedBlocks) && block.getBlockPos().equals(bp))
+                return true;
+        return false;
     }
 
     public static Vec3i getBuildingSize(ArrayList<BuildingBlock> blocks) {
@@ -162,17 +169,21 @@ public abstract class Building {
     }
 
     // destroy all remaining blocks in a final big explosion
+    // only explode a quarter of the blocks to avoid lag
     private void destroy(ServerLevel level) {
         this.blocks.forEach((BuildingBlock block) -> {
+            level.destroyBlock(block.getBlockPos(), false);
             if (block.isPlaced) {
-                level.destroyBlock(block.getBlockPos(), false);
-                level.explode(null, null, null,
-                        block.getBlockPos().getX(),
-                        block.getBlockPos().getY(),
-                        block.getBlockPos().getZ(),
-                        1.0f,
-                        false,
-                        Explosion.BlockInteraction.BREAK);
+                int x = block.getBlockPos().getX();
+                int y = block.getBlockPos().getY();
+                int z = block.getBlockPos().getZ();
+                if (x % 2 == 0 && z % 2 != 0) {
+                    level.explode(null, null, null,
+                            x,y,z,
+                            1.0f,
+                            false,
+                            Explosion.BlockInteraction.BREAK);
+                }
             }
         });
     }
@@ -228,9 +239,10 @@ public abstract class Building {
                     buildNextBlock(level);
                 }
             }
-
-            if (blocksPlaced >= blocksTotal)
+            if (blocksPlaced >= blocksTotal) {
                 isBuilding = false;
+                isBuilt = true;
+            }
 
             // TODO: if fires exist, put them out one by one (or gradually remove them if blocksPercent > fireThreshold%)
 
