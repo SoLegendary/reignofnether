@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
+import com.solegendary.reignofnether.hud.AbilityButton;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
@@ -15,6 +16,7 @@ import net.minecraftforge.event.level.BlockEvent;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 
 public abstract class Building {
@@ -37,6 +39,7 @@ public abstract class Building {
     public String ownerName;
     public Block portraitBlock; // block rendered in the portrait GUI to represent this building
     public int tickAge = 0; // how many ticks ago this building was placed
+    public boolean canAcceptResources = false; // can workers drop off resources here?
 
     public Building() {
     }
@@ -121,9 +124,6 @@ public abstract class Building {
     }
     public float getBlocksPlacedPercent() {
         return (float) getBlocksPlaced() / (float) getBlocksTotal();
-    }
-    public boolean isFunctional() {
-        return this.isBuilt && this.getBlocksPlacedPercent() >= 0.5f;
     }
 
     // TODO: add some temporary scaffolding blocks if !isBuilt
@@ -211,10 +211,8 @@ public abstract class Building {
         }
     }
 
-    public void onWorldTick(Level level) {
+    public void tick(Level level) {
         this.tickAge += 1;
-
-        boolean isClientSide = level.isClientSide();
 
         // update all the BuildingBlock.isPlaced booleans to match what the world actually has
         for (BuildingBlock block : blocks) {
@@ -223,13 +221,20 @@ public abstract class Building {
             BlockState bsWorld = level.getBlockState(bp);
             block.isPlaced = bsWorld.equals(bs);
         }
+        float blocksPercent = getBlocksPlacedPercent();
+        float blocksPlaced = getBlocksPlaced();
+        float blocksTotal = getBlocksTotal();
 
-        if (!isClientSide) {
-            float blocksPercent = getBlocksPlacedPercent();
-            float blocksPlaced = getBlocksPlaced();
-            float blocksTotal = getBlocksTotal();
+        if (blocksPlaced >= blocksTotal) {
+            isBuilding = false;
+            isBuilt = true;
+        }
+
+        if (!level.isClientSide()) {
 
             // TODO: if builder is assigned, set isBuilding true
+
+            // TODO: keep the surrounding chunks loaded or else the building becomes unselectable when unloaded
 
             // place a block if the tick has run down
             if (isBuilding && blocksPlaced < blocksTotal) {
@@ -239,10 +244,6 @@ public abstract class Building {
                     buildNextBlock(level);
                 }
             }
-            if (blocksPlaced >= blocksTotal) {
-                isBuilding = false;
-                isBuilt = true;
-            }
 
             // TODO: if fires exist, put them out one by one (or gradually remove them if blocksPercent > fireThreshold%)
 
@@ -250,5 +251,7 @@ public abstract class Building {
                 this.destroy((ServerLevel) level);
             }
         }
+
+
     }
 }

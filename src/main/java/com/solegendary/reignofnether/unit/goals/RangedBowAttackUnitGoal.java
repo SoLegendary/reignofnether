@@ -1,6 +1,6 @@
-package com.solegendary.reignofnether.units.goals;
+package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.units.Unit;
+import com.solegendary.reignofnether.unit.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.RangedAttackMob;

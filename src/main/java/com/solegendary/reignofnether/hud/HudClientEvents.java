@@ -1,10 +1,12 @@
 package com.solegendary.reignofnether.hud;
 
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.units.Relationship;
-import com.solegendary.reignofnether.units.Unit;
-import com.solegendary.reignofnether.units.UnitClientEvents;
+import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -66,7 +68,7 @@ public class HudClientEvents {
 
         ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
 
-        // create all of the unit buttons for this frame
+        // create all the unit buttons for this frame
         int screenWidth = MC.getWindow().getGuiScaledWidth();
         int screenHeight = MC.getWindow().getGuiScaledHeight();
 
@@ -91,6 +93,7 @@ public class HudClientEvents {
                         "textures/mobheads/" + unitName + ".png",
                         unit,
                         () -> getSimpleEntityName(hudSelectedEntity).equals(unitName),
+                        () -> false,
                         () -> {
                             // click to select this unit type as a group
                             if (getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
@@ -103,16 +106,50 @@ public class HudClientEvents {
                 ));
             }
         }
-
         int blitX = hudStartingXPos;
         int blitY = MC.getWindow().getGuiScaledHeight();
+
+        Building selBuilding = BuildingClientEvents.getSelectedBuilding();
+
+        if (selBuilding != null) {
+            // -----------------
+            // Building portrait
+            // -----------------
+            blitY -= portraitRendererBuilding.frameHeight;
+
+            portraitRendererBuilding.render(
+                    evt.getPoseStack(),
+                    blitX, blitY, selBuilding);
+
+            blitX += portraitRendererBuilding.frameWidth * 2;
+
+            // -------------------------
+            // Building production queue
+            // -------------------------
+
+
+            // ---------------------------
+            // Building production buttons
+            // ---------------------------
+            blitX = 0;
+            blitY = screenHeight - iconFrameSize;
+
+            if (selBuilding instanceof ProductionBuilding && selBuilding.isBuilt) {
+                for (Button productionButton : ((ProductionBuilding) selBuilding).productionButtons) {
+                    productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                    productionButton.checkPressed();
+                    productionButton.checkClicked(mouseX, mouseY);
+                    blitX += iconFrameSize;
+                }
+            }
+        }
 
         // --------------------------
         // Unit head portrait + stats
         // --------------------------
-        if (hudSelectedEntity != null &&
-            portraitRendererUnit.model != null &&
-            portraitRendererUnit.renderer != null) {
+        else if (hudSelectedEntity != null &&
+                portraitRendererUnit.model != null &&
+                portraitRendererUnit.renderer != null) {
 
             blitY -= portraitRendererUnit.frameHeight;
 
@@ -125,19 +162,6 @@ public class HudClientEvents {
                     blitX, blitY, hudSelectedEntity);
 
             blitX += portraitRendererUnit.frameWidth * 2;
-        }
-
-        // -----------------
-        // Building portrait
-        // -----------------
-        else if (BuildingClientEvents.getSelectedBuilding() != null) {
-            blitY -= portraitRendererBuilding.frameHeight;
-
-            portraitRendererBuilding.render(
-                    evt.getPoseStack(),
-                    blitX, blitY, BuildingClientEvents.getSelectedBuilding());
-
-            blitX += portraitRendererBuilding.frameWidth * 2;
         }
 
         // ----------------------------------------------
@@ -175,10 +199,9 @@ public class HudClientEvents {
             }
         }
 
-        // -------------------------------------------------------
-        // Unit action icons (attack, stop, move, abilities etc.)
-        // -------------------------------------------------------
-
+        // --------------------------------------------------------
+        // Unit action buttons (attack, stop, move, abilities etc.)
+        // --------------------------------------------------------
         ArrayList<Integer> selUnitIds = UnitClientEvents.getSelectedUnitIds();
         if (selUnitIds.size() > 0 &&
             UnitClientEvents.getPlayerToEntityRelationship(selUnitIds.get(0)) == Relationship.OWNED) {
@@ -188,6 +211,7 @@ public class HudClientEvents {
             for (Button actionButton : genericActionButtons) {
                 actionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                 actionButton.checkPressed();
+                actionButton.checkClicked(mouseX, mouseY);
                 blitX += iconFrameSize;
             }
             blitX = 0;
@@ -197,6 +221,7 @@ public class HudClientEvents {
                     for (AbilityButton ability : ((Unit) unit).getAbilities()) {
                         ability.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                         ability.checkPressed();
+                        ability.checkClicked(mouseX, mouseY);
                         blitX += iconFrameSize;
                     }
                     break;
@@ -211,10 +236,8 @@ public class HudClientEvents {
         int mouseY = (int) evt.getMouseY();
 
         ArrayList<Button> buttons = new ArrayList<>();
-        buttons.addAll(genericActionButtons);
         buttons.addAll(unitButtons);
-
-        for (Button button : buttons)
+        for (Button button : unitButtons)
             button.checkClicked(mouseX, mouseY);
     }
 

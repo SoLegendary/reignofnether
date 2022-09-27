@@ -8,8 +8,8 @@ import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.units.Relationship;
-import com.solegendary.reignofnether.units.UnitClientEvents;
+import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -30,7 +30,6 @@ import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -338,7 +337,7 @@ public class BuildingClientEvents {
         if (MC.level != null && evt.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
 
             for (Building building : buildings)
-                building.onWorldTick(MC.level);
+                building.tick(MC.level);
 
             // cleanup destroyed buildings
             if (selectedBuilding != null && selectedBuilding.isDestroyed())

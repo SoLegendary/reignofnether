@@ -1,16 +1,23 @@
 package com.solegendary.reignofnether.building.buildings;
 
-import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingBlockData;
+import com.solegendary.reignofnether.building.ProductionBuilding;
+import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
+import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
+import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
+import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public class VillagerHouse extends Building {
+public class VillagerHouse extends ProductionBuilding {
 
     public final static String buildingName = "Villager House";
     public final static String structureName = "villager_house";
@@ -21,6 +28,45 @@ public class VillagerHouse extends Building {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.OAK_LOG;
+
+        this.productionButtons = Arrays.asList(
+            new Button(
+                "Zombie",
+                14,
+                "textures/mobheads/zombie.png",
+                Keybinding.keyQ,
+                () -> false,
+                () -> false,
+                () -> {
+                    System.out.println("added zombie to queue");
+                    this.productionQueue.add(new ZombieUnitProd(this));
+                }
+            ),
+            new Button(
+                "Skeleton",
+                14,
+                "textures/mobheads/skeleton.png",
+                Keybinding.keyW,
+                () -> false,
+                () -> false,
+                () -> {
+                    System.out.println("added skeleton to queue");
+                    this.productionQueue.add(new SkeletonUnitProd(this));
+                }
+            ),
+            new Button(
+                "Creeper",
+                14,
+                "textures/mobheads/creeper.png",
+                Keybinding.keyE,
+                () -> false,
+                () -> false,
+                () -> {
+                    System.out.println("added creeper to queue");
+                    this.productionQueue.add(new CreeperUnitProd(this));
+                }
+            )
+        );
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

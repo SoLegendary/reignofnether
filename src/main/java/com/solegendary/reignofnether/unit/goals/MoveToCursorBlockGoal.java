@@ -1,6 +1,6 @@
-package com.solegendary.reignofnether.units.goals;
+package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.units.UnitServerEvents;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.PathfinderMob;

@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.units;
+package com.solegendary.reignofnether.unit;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;

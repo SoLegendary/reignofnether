@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.units.goals;
+package com.solegendary.reignofnether.unit.goals;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;

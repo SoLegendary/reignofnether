@@ -1,7 +1,6 @@
-package com.solegendary.reignofnether.units;
+package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.ActionName;
@@ -133,7 +132,7 @@ public class UnitClientEvents {
                 }
             }
 
-            // select all nearby units of the same type when double clicked
+            // select all nearby units of the same type when double-clicked
             if (selectedUnitIds.size() == 1 && MC.level != null &&
                (System.currentTimeMillis() - lastLeftClickTime) < doubleClickTimeMs) {
 
@@ -189,7 +188,7 @@ public class UnitClientEvents {
             }
         }
 
-        // send all of the commands over to server to enact
+        // send all the commands over to server to enact
         if (unitIdToAttack >= 0 ||
             unitIdToFollow >= 0 ||
             unitIdsToMove.size() > 0 ||

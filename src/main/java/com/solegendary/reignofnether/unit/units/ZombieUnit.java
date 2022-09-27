@@ -1,10 +1,10 @@
-package com.solegendary.reignofnether.units.monsters;
+package com.solegendary.reignofnether.unit.units;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.units.Unit;
-import com.solegendary.reignofnether.units.goals.SelectedTargetGoal;
-import com.solegendary.reignofnether.units.goals.MoveToCursorBlockGoal;
-import com.solegendary.reignofnether.units.goals.ZombieAttackUnitGoal;
+import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
+import com.solegendary.reignofnether.unit.goals.ZombieAttackUnitGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;

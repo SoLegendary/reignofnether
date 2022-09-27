@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.units;
+package com.solegendary.reignofnether.unit;
 
 import com.solegendary.reignofnether.hud.ActionName;
 import net.minecraft.core.BlockPos;

@@ -1,9 +1,9 @@
-package com.solegendary.reignofnether.units;
+package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.units.goals.MoveToCursorBlockGoal;
-import com.solegendary.reignofnether.units.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
+import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;

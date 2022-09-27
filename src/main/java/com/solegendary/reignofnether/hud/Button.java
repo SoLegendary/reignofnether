@@ -39,6 +39,7 @@ public class Button {
      * Predicate      x     -> boolean
      */
     public Supplier<Boolean> isSelected; // controls selected frame rendering
+    public Supplier<Boolean> isActive; // special highlighting for an on-state (eg. auto-cast/auto-producing)
     public Runnable onUse;
 
     // TODO: enforce not enabled (and if !enabled and rendered, render dark overlay)
@@ -46,25 +47,29 @@ public class Button {
 
     Minecraft MC = Minecraft.getInstance();
 
+    // constructor for ability/action/production buttons
     public Button(String name, int iconSize,
                   String iconResourcePath, KeyMapping hotkey,
-                  Supplier<Boolean> isSelected, Runnable onClick) {
+                  Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Runnable onClick) {
         this.name = name;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
         this.iconSize = iconSize;
         this.hotkey = hotkey;
         this.isSelected = isSelected;
+        this.isActive = isActive;
         this.onUse = onClick;
     }
 
+    // constructor for unit selection buttons
     public Button(String name, int iconSize,
                   String iconResourcePath, LivingEntity entity,
-                  Supplier<Boolean> isSelected, Runnable onClick) {
+                  Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Runnable onClick) {
         this.name = name;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
         this.iconSize = iconSize;
         this.entity = entity;
         this.isSelected = isSelected;
+        this.isActive = isActive;
         this.onUse = onClick;
     }
 
@@ -142,7 +147,7 @@ public class Button {
     }
 
     public void checkPressed() {
-        if (hotkey != null && hotkey.isDown())
+        if (hotkey != null && hotkey.consumeClick())
             this.onUse.run();
     }
 }

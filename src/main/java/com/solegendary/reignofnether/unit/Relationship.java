@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.units;
+package com.solegendary.reignofnether.unit;
 
 public enum Relationship {
     OWNED, // your own controllable units

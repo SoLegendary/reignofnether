@@ -1,32 +1,29 @@
-package com.solegendary.reignofnether.units.monsters;
+package com.solegendary.reignofnether.unit.units;
 
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.ActionName;
-import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.units.Unit;
-import com.solegendary.reignofnether.units.goals.MoveToCursorBlockGoal;
-import com.solegendary.reignofnether.units.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
+import com.solegendary.reignofnether.unit.goals.RangedBowAttackUnitGoal;
+import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.SwellGoal;
-import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
-public class CreeperUnit extends Creeper implements Unit {
+public class SkeletonUnit extends Skeleton implements Unit {
 
-    public CreeperUnit(EntityType<? extends Creeper> p_32278_, Level p_32279_) { super(p_32278_, p_32279_); }
+    public SkeletonUnit(EntityType<? extends Skeleton> p_33570_, Level p_33571_) {
+        super(p_33570_, p_33571_);
+    }
 
     // region
     public List<AbilityButton> getAbilities() {return abilities;};
@@ -54,7 +51,7 @@ public class CreeperUnit extends Creeper implements Unit {
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
-            SynchedEntityData.defineId(CreeperUnit.class, EntityDataSerializers.STRING);
+            SynchedEntityData.defineId(SkeletonUnit.class, EntityDataSerializers.STRING);
 
     @Override
     protected void defineSynchedData() {
@@ -77,49 +74,39 @@ public class CreeperUnit extends Creeper implements Unit {
 
     // endregion
 
-    final public float damage = 20.0f;
+    final public float damage = 5.0f;
     final public float speedModifier = 1.0f;
-    final public float attackRange = 0; // only used by ranged units
-    final public int attackCooldown = 100; // not used by creepers anyway
+    final public float attackRange = 10.0F; // only used by ranged units
+    final public int attackCooldown = 45;
     final public float aggroRange = 10;
     final public float sightRange = 10f;
     final public boolean willRetaliate = true; // will attack when hurt by an enemy
     final public boolean aggressiveWhenIdle = false;
 
-    public MeleeAttackGoal attackGoal;
+    public RangedBowAttackUnitGoal<? extends LivingEntity> attackGoal;
 
-    private static final List<AbilityButton> abilities = Arrays.asList(
-            new AbilityButton(
-                    "Explode",
-                    14,
-                    "textures/icons/blocks/tnt.png",
-                    Keybinding.keyQ,
-                    () -> CursorClientEvents.getLeftClickAction() == ActionName.EXPLODE,
-                    () -> CursorClientEvents.setLeftClickAction(ActionName.EXPLODE),
-                    0, 0, 3
-            )
-    );
+    private static final List<AbilityButton> abilities = new ArrayList<>();
 
     public void tick() {
         super.tick();
         Unit.tick(this);
+
+        // need to do this outside the goal so it ticks down while not attacking
+        // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
+        if (attackGoal != null)
+            attackGoal.tickCooldown();
     }
 
     @Override
     protected void registerGoals() {
         this.moveGoal = new MoveToCursorBlockGoal(this, speedModifier);
-        this.targetGoal = new SelectedTargetGoal(this, true, true);
+        this.targetGoal = new SelectedTargetGoal(this, true, false);
+        this.attackGoal = new RangedBowAttackUnitGoal(this, 5, attackCooldown, attackRange);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
-        // TODO: extend this to make it also compatible with the Explode ability
-        this.goalSelector.addGoal(2, new SwellGoal(this));
-        this.goalSelector.addGoal(3, moveGoal);
-        this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
-        // TODO: this doesn't cause the creeper to move to the target before attacking
-        this.targetSelector.addGoal(4, targetGoal);
-    }
-
-    // TODO: specifically ground target explode ability; for targeting a mob just set target for regular attack goal
-    public void explode(BlockPos targetPos) {
+        this.goalSelector.addGoal(2, moveGoal);
+        this.goalSelector.addGoal(3, attackGoal);
+        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        this.targetSelector.addGoal(3, targetGoal);
     }
 }

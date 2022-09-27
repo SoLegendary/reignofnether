@@ -58,7 +58,8 @@ public class BuildingServerEvents {
     public static void onBlockBreak(BlockEvent.BreakEvent evt) {
         if (!evt.getLevel().isClientSide()) {
             for (Building building : buildings)
-                building.onBlockBreak(evt);
+                if (building.isPosPartOfBuilding(evt.getPos(), true))
+                    building.onBlockBreak(evt);
         }
     }
 
@@ -68,7 +69,7 @@ public class BuildingServerEvents {
             serverLevel = (ServerLevel) evt.level;
 
             for (Building building : buildings)
-                building.onWorldTick(serverLevel);
+                building.tick(serverLevel);
             buildings.removeIf(Building::isDestroyed);
 
             if (blockPlaceQueue.size() > 0) {
