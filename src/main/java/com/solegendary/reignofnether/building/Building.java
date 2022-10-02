@@ -35,6 +35,7 @@ public abstract class Building {
     public float explodeChance = 0.5f;
     public float explodeRadius = 2.0f;
     public float fireThreshold = 0.75f; // if building has less %hp than this, explosions caused can make fires
+
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
     public String ownerName;
     public Block portraitBlock; // block rendered in the portrait GUI to represent this building
@@ -42,6 +43,10 @@ public abstract class Building {
     public boolean canAcceptResources = false; // can workers drop off resources here?
 
     public Building() {
+    }
+
+    public ArrayList<BuildingBlock> getBlocks() {
+        return blocks;
     }
 
     // given a string name return a new instance of that building

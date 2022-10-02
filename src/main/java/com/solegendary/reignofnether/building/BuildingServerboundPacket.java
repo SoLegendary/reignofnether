@@ -21,46 +21,27 @@ public class BuildingServerboundPacket {
     public static void placeBuilding(String buildingName, BlockPos originPos, Rotation rotation, String ownerName) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.PLACE,
-                buildingName,
-                originPos,
-                rotation,
-                ownerName,
-                0));
+                buildingName, originPos, rotation, ownerName, 0));
     }
     public static void cancelBuilding(BlockPos pos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.CANCEL,
-                "",
-                pos,
-                Rotation.NONE,
-                "",
-                0));
+                "", pos, Rotation.NONE, "", 0));
     }
     public static void repairBuilding(BlockPos pos, int repairAmount) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.REPAIR,
-                "",
-                pos,
-                Rotation.NONE,
-                "",
-                repairAmount));
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.REPAIR,
+                "", pos, Rotation.NONE, "", repairAmount));
     }
     public static void startProduction(BlockPos pos, String itemName) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.START_PRODUCTION,
-                itemName,
-                pos,
-                Rotation.NONE,
-                "",
-                0));
+                itemName, pos, Rotation.NONE, "", 0));
     }
     public static void cancelProduction(BlockPos pos, String itemName, boolean frontItem) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
-                itemName,
-                pos,
-                Rotation.NONE,
-                "",
-                0));
+                itemName, pos, Rotation.NONE, "", 0));
     }
 
 

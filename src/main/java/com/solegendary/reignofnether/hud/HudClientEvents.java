@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
+import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.Unit;
@@ -24,16 +25,17 @@ public class HudClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
-    // TODO: move all of these on-the-fly button creations here so we can check inputs separately
-    // here only add/remove from said array as needed
-    private static final ArrayList<Button> actionButtons = new ArrayList<>();
+
     private static final ArrayList<Button> genericActionButtons = new ArrayList<>(Arrays.asList(
             ActionButtons.attack,
             ActionButtons.stop,
             ActionButtons.hold,
             ActionButtons.move
     ));
+    // here only add/remove from said array as needed
+    private static final ArrayList<Button> actionButtons = new ArrayList<>();
     private static final ArrayList<Button> unitButtons = new ArrayList<>();
+    private static final ArrayList<Button> productionButtons = new ArrayList<>();
 
     // unit type that is selected in the list of unit icons
     public static LivingEntity hudSelectedEntity = null;
@@ -83,6 +85,7 @@ public class HudClientEvents {
         // refresh button lists
         actionButtons.removeIf((Button button) -> true);
         unitButtons.removeIf((Button button) -> true);
+        productionButtons.removeIf((Button button) -> true);
 
         int blitX = hudStartingXPos;
         int blitY = MC.getWindow().getGuiScaledHeight();
@@ -104,6 +107,50 @@ public class HudClientEvents {
             // -------------------------
             // Building production queue
             // -------------------------
+
+            // top row for currently-in-progress item, name and progress bar
+            // bottom row for all other queued items
+            if (selBuilding instanceof ProductionBuilding) {
+                int blitXStart = blitX;
+                blitY = screenHeight - iconFrameSize * 2 - 10;
+
+                // screenWidth ranges roughly between 440-540
+                int unitButtonsPerRow = (int) Math.ceil((float) (screenWidth - 340) / iconFrameSize);
+                unitButtonsPerRow = Math.min(unitButtonsPerRow, 10);
+                unitButtonsPerRow = Math.max(unitButtonsPerRow, 4);
+
+                for (ProductionItem item : (((ProductionBuilding) selBuilding).productionQueue))
+                    productionButtons.add(item.getCancelButton((ProductionBuilding) selBuilding));
+
+                /*
+                if (unitButtons.size() >= 2) {
+                    MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
+                            iconFrameSize * unitButtonsPerRow + 10,
+                            iconFrameSize * 2 + 20,
+                            0xA0000000);
+
+                    for (Button unitButton : unitButtons) {
+                        // replace last icon with a +X number of units icon
+                        if (buttonsRendered == (unitButtonsPerRow * 2) - 1 &&
+                                units.size() > (unitButtonsPerRow * 2)) {
+                            int numExtraUnits = units.size() - (unitButtonsPerRow * 2) + 1;
+                            MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, 0x64000000);
+                            GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraUnits,
+                                    blitX + iconFrameSize/2, blitY + 8, 0xFFFFFF);
+                        }
+                        else {
+                            unitButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                            unitButton.renderHealthBar(evt.getPoseStack());
+                            blitX += iconFrameSize;
+                            buttonsRendered += 1;
+                            if (buttonsRendered == unitButtonsPerRow) {
+                                blitX = blitXStart;
+                                blitY += iconFrameSize + 6;
+                            }
+                        }
+                    }
+                }*/
+            }
 
 
             // ---------------------------
@@ -236,13 +283,16 @@ public class HudClientEvents {
 
     @SubscribeEvent
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
-        actionButtons.forEach((Button button) -> {
-            button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY());
-        });
         genericActionButtons.forEach((Button button) -> {
             button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY());
         });
+        actionButtons.forEach((Button button) -> {
+            button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY());
+        });
         unitButtons.forEach((Button button) -> {
+            button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY());
+        });
+        productionButtons.forEach((Button button) -> {
             button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY());
         });
     }
@@ -253,13 +303,16 @@ public class HudClientEvents {
         if (evt.getAction() != InputConstants.PRESS)
             return;
 
-        actionButtons.forEach((Button button) -> {
-            button.checkPressed(evt.getKey());
-        });
         genericActionButtons.forEach((Button button) -> {
             button.checkPressed(evt.getKey());
         });
+        actionButtons.forEach((Button button) -> {
+            button.checkPressed(evt.getKey());
+        });
         unitButtons.forEach((Button button) -> {
+            button.checkPressed(evt.getKey());
+        });
+        productionButtons.forEach((Button button) -> {
             button.checkPressed(evt.getKey());
         });
     }

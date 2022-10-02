@@ -23,35 +23,37 @@ public class BuildingClientboundPacket {
 
     public static void placeBuilding(BlockPos pos, String buildingName, Rotation rotation, String ownerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new BuildingClientboundPacket(pos,  buildingName, rotation, ownerName, BuildingAction.PLACE));
+            new BuildingClientboundPacket(BuildingAction.PLACE,
+                    pos,  buildingName, rotation, ownerName));
     }
     public static void destroyBuilding(BlockPos pos) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new BuildingClientboundPacket(pos, "", Rotation.NONE, "", BuildingAction.CANCEL));
+            new BuildingClientboundPacket(BuildingAction.CANCEL,
+                    pos, "", Rotation.NONE, ""));
     }
 
-    public BuildingClientboundPacket(BlockPos pos, String buildingName, Rotation rotation, String ownerName, BuildingAction action) {
+    public BuildingClientboundPacket(BuildingAction action, BlockPos pos, String buildingName, Rotation rotation, String ownerName) {
+        this.action = action;
         this.pos = pos;
         this.buildingName = buildingName;
         this.rotation = rotation;
         this.ownerName = ownerName;
-        this.action = action;
     }
 
     public BuildingClientboundPacket(FriendlyByteBuf buffer) {
+        this.action = buffer.readEnum(BuildingAction.class);
         this.pos = buffer.readBlockPos();
         this.buildingName = buffer.readUtf();
         this.rotation = buffer.readEnum(Rotation.class);
         this.ownerName = buffer.readUtf();
-        this.action = buffer.readEnum(BuildingAction.class);
     }
 
     public void encode(FriendlyByteBuf buffer) {
+        buffer.writeEnum(this.action);
         buffer.writeBlockPos(this.pos);
         buffer.writeUtf(this.buildingName);
         buffer.writeEnum(this.rotation);
         buffer.writeUtf(this.ownerName);
-        buffer.writeEnum(this.action);
     }
 
     // server-side packet-consuming functions

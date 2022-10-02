@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.building;
 
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.unit.Unit;
-import net.minecraft.server.level.ServerLevel;
+import com.solegendary.reignofnether.hud.Button;
 import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
@@ -15,13 +13,22 @@ public abstract class ProductionItem {
     // TODO: cost for each resource
     int ticksToProduce; // build time in ticks
     int ticksLeft;
-    boolean canDuplicate; // are we allowed to build more than one of these? eg. tech upgrades can't be duplicated
-    ProductionBuilding building;
-    Consumer<Level> onComplete;
+    boolean canDuplicate; // is building allowed to build more than one of these? eg. tech upgrades can't be duplicated
+    protected ProductionBuilding building;
+    protected Consumer<Level> onComplete;
 
-    public ProductionItem(ProductionBuilding building, Consumer<Level> onComplete) {
+
+    public ProductionItem(ProductionBuilding building) {
         this.building = building;
-        this.onComplete = onComplete;
+    }
+
+    // Button object for use in the hud (to build and to show in-progress items)
+    public Button getStartButton(ProductionBuilding prodBuilding) {
+        return null;
+    }
+    // Button object for use in the hud (to build and to show in-progress items)
+    public Button getCancelButton(ProductionBuilding prodBuilding) {
+        return null;
     }
 
     // return true if the tick finished
