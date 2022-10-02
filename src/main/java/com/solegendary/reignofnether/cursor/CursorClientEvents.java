@@ -197,7 +197,7 @@ public class CursorClientEvents {
                     (int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y
             );
             for (LivingEntity entity : entities) {
-                if (MyMath.isPointInsideRect3d(uvwp, entity.getBoundingBox().getCenter()))
+                if (MyMath.isPointInsideRect3d(uvwp, entity.getBoundingBox().getCenter()) && entity.getId() != MC.player.getId())
                     UnitClientEvents.addPreselectedUnitId(entity.getId());
             }
         }
@@ -260,11 +260,18 @@ public class CursorClientEvents {
             leftClickDown = false;
 
             // enact box selection, excluding non-unit mobs
-            // for single-click selection, see UnitCommonVanillaEvents
+            // for single-click selection, see UnitClientEvents
             // except if attack-moving or nothing is preselected (to prevent deselection)
             ArrayList<Integer> preselectedUnitIds = UnitClientEvents.getPreselectedUnitIds();
             if (preselectedUnitIds.size() > 0 && !cursorLeftClickDownPos.equals(cursorLeftClickDragPos)) {
-                if (!Keybinding.shiftMod.isDown())
+
+                // remove all non-owned entities
+                int nonOwnedEntities = 0;
+                for (int unitId : preselectedUnitIds)
+                    if (UnitClientEvents.getPlayerToEntityRelationship(unitId) == Relationship.OWNED)
+                        nonOwnedEntities += 1;
+
+                if (!Keybinding.shiftMod.isDown() || nonOwnedEntities > 0)
                     UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
                 for (int unitId : preselectedUnitIds) {
                     Entity entity = MC.level.getEntity(unitId);

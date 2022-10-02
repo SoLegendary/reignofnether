@@ -54,15 +54,15 @@ public abstract class Building {
         return building;
     }
 
-    public static Vec3i getMinCorner(ArrayList<BuildingBlock> blocks) {
-        return new Vec3i(
+    public static BlockPos getMinCorner(ArrayList<BuildingBlock> blocks) {
+        return new BlockPos(
             blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
             blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
             blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
         );
     }
-    public static Vec3i getMaxCorner(ArrayList<BuildingBlock> blocks) {
-        return new Vec3i(
+    public static BlockPos getMaxCorner(ArrayList<BuildingBlock> blocks) {
+        return new BlockPos(
             blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
             blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
             blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
@@ -70,8 +70,8 @@ public abstract class Building {
     }
 
     public boolean isPosInsideBuilding(BlockPos bp) {
-        Vec3i min = getMinCorner(this.blocks);
-        Vec3i max = getMaxCorner(this.blocks);
+        BlockPos min = getMinCorner(this.blocks);
+        BlockPos max = getMaxCorner(this.blocks);
 
         return bp.getX() <= max.getX() && bp.getX() >= min.getX() &&
                 bp.getY() <= max.getY() && bp.getY() >= min.getY() &&
@@ -86,8 +86,8 @@ public abstract class Building {
     }
 
     public static Vec3i getBuildingSize(ArrayList<BuildingBlock> blocks) {
-        Vec3i min = getMinCorner(blocks);
-        Vec3i max = getMaxCorner(blocks);
+        BlockPos min = getMinCorner(blocks);
+        BlockPos max = getMaxCorner(blocks);
         return new Vec3i(
                 max.getX() - min.getX(),
                 max.getY() - min.getY(),

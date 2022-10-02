@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hud;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
@@ -17,22 +18,23 @@ import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-
 import java.util.*;
 
 public class HudClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
-    private static int mouseX = 0;
-    private static int mouseY = 0;
 
-    private static ArrayList<Button> unitButtons = new ArrayList<>();
+    // TODO: move all of these on-the-fly button creations here so we can check inputs separately
+    // here only add/remove from said array as needed
+    private static final ArrayList<Button> actionButtons = new ArrayList<>();
     private static final ArrayList<Button> genericActionButtons = new ArrayList<>(Arrays.asList(
             ActionButtons.attack,
             ActionButtons.stop,
             ActionButtons.hold,
             ActionButtons.move
     ));
+    private static final ArrayList<Button> unitButtons = new ArrayList<>();
+
     // unit type that is selected in the list of unit icons
     public static LivingEntity hudSelectedEntity = null;
     // classes used to render unit or building portrait (mode, frame, healthbar, stats)
@@ -41,6 +43,9 @@ public class HudClientEvents {
 
     // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
     private static int hudStartingXPos = 0;
+
+
+
 
     // eg. entity.reignofnether.zombie_unit -> zombie
     public static String getSimpleEntityName(Entity entity) {
@@ -61,10 +66,10 @@ public class HudClientEvents {
         if (MC.level == null)
             return;
 
-        hudStartingXPos = (MC.getWindow().getGuiScaledWidth() / 5) + 4;
+        int mouseX = evt.getMouseX();
+        int mouseY = evt.getMouseY();
 
-        mouseX = evt.getMouseX();
-        mouseY = evt.getMouseY();
+        hudStartingXPos = (MC.getWindow().getGuiScaledWidth() / 5) + 4;
 
         ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
 
@@ -75,37 +80,10 @@ public class HudClientEvents {
         int iconSize = 14;
         int iconFrameSize = Button.iconFrameSize;
 
-        // screenWidth ranges roughly between 440-540
-        int unitButtonsPerRow = (int) Math.ceil((float) (screenWidth - 340) / iconFrameSize);
-        unitButtonsPerRow = Math.min(unitButtonsPerRow, 10);
-        unitButtonsPerRow = Math.max(unitButtonsPerRow, 4);
+        // refresh button lists
+        actionButtons.removeIf((Button button) -> true);
+        unitButtons.removeIf((Button button) -> true);
 
-        unitButtons = new ArrayList<>();
-        for (LivingEntity unit : units) {
-            if (UnitClientEvents.getPlayerToEntityRelationship(unit.getId()) == Relationship.OWNED &&
-                unitButtons.size() < (unitButtonsPerRow * 2)) {
-                // mob head icon
-                String unitName = getSimpleEntityName(unit);
-
-                unitButtons.add(new Button(
-                        unitName,
-                        iconSize,
-                        "textures/mobheads/" + unitName + ".png",
-                        unit,
-                        () -> getSimpleEntityName(hudSelectedEntity).equals(unitName),
-                        () -> false,
-                        () -> {
-                            // click to select this unit type as a group
-                            if (getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
-                                UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
-                                UnitClientEvents.addSelectedUnitId(unit.getId());
-                            } else { // select this one specific unit
-                                hudSelectedEntity = unit;
-                            }
-                        }
-                ));
-            }
-        }
         int blitX = hudStartingXPos;
         int blitY = MC.getWindow().getGuiScaledHeight();
 
@@ -136,9 +114,8 @@ public class HudClientEvents {
 
             if (selBuilding instanceof ProductionBuilding && selBuilding.isBuilt) {
                 for (Button productionButton : ((ProductionBuilding) selBuilding).productionButtons) {
+                    actionButtons.add(productionButton);
                     productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
-                    productionButton.checkPressed();
-                    productionButton.checkClicked(mouseX, mouseY);
                     blitX += iconFrameSize;
                 }
             }
@@ -170,6 +147,37 @@ public class HudClientEvents {
         int buttonsRendered = 0;
         int blitXStart = blitX;
         blitY = screenHeight - iconFrameSize * 2 - 10;
+
+        // screenWidth ranges roughly between 440-540
+        int unitButtonsPerRow = (int) Math.ceil((float) (screenWidth - 340) / iconFrameSize);
+        unitButtonsPerRow = Math.min(unitButtonsPerRow, 10);
+        unitButtonsPerRow = Math.max(unitButtonsPerRow, 4);
+
+        for (LivingEntity unit : units) {
+            if (UnitClientEvents.getPlayerToEntityRelationship(unit.getId()) == Relationship.OWNED &&
+                    unitButtons.size() < (unitButtonsPerRow * 2)) {
+                // mob head icon
+                String unitName = getSimpleEntityName(unit);
+
+                unitButtons.add(new Button(
+                        unitName,
+                        iconSize,
+                        "textures/mobheads/" + unitName + ".png",
+                        unit,
+                        () -> getSimpleEntityName(hudSelectedEntity).equals(unitName),
+                        () -> false,
+                        () -> {
+                            // click to select this unit type as a group
+                            if (getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
+                                UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
+                                UnitClientEvents.addSelectedUnitId(unit.getId());
+                            } else { // select this one specific unit
+                                hudSelectedEntity = unit;
+                            }
+                        }
+                ));
+            }
+        }
 
         if (unitButtons.size() >= 2) {
             MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
@@ -210,8 +218,6 @@ public class HudClientEvents {
             blitY = screenHeight - iconFrameSize;
             for (Button actionButton : genericActionButtons) {
                 actionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
-                actionButton.checkPressed();
-                actionButton.checkClicked(mouseX, mouseY);
                 blitX += iconFrameSize;
             }
             blitX = 0;
@@ -220,8 +226,6 @@ public class HudClientEvents {
                 if (getSimpleEntityName(unit).equals(getSimpleEntityName(hudSelectedEntity))) {
                     for (AbilityButton ability : ((Unit) unit).getAbilities()) {
                         ability.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
-                        ability.checkPressed();
-                        ability.checkClicked(mouseX, mouseY);
                         blitX += iconFrameSize;
                     }
                     break;
@@ -231,18 +235,43 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
-        int mouseX = (int) evt.getMouseX();
-        int mouseY = (int) evt.getMouseY();
+    public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
+        actionButtons.forEach((Button button) -> {
+            button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY());
+        });
+        genericActionButtons.forEach((Button button) -> {
+            button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY());
+        });
+        unitButtons.forEach((Button button) -> {
+            button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY());
+        });
+    }
 
-        ArrayList<Button> buttons = new ArrayList<>();
-        buttons.addAll(unitButtons);
-        for (Button button : unitButtons)
-            button.checkClicked(mouseX, mouseY);
+    // TODO: Q and E don't work properly (probably due to conflicting with vanilla hotkeys?)
+    @SubscribeEvent
+    public static void onKeyPress(InputEvent.Key evt) {
+        if (evt.getAction() != InputConstants.PRESS)
+            return;
+
+        actionButtons.forEach((Button button) -> {
+            button.checkPressed(evt.getKey());
+        });
+        genericActionButtons.forEach((Button button) -> {
+            button.checkPressed(evt.getKey());
+        });
+        unitButtons.forEach((Button button) -> {
+            button.checkPressed(evt.getKey());
+        });
     }
 
     @SubscribeEvent
-    // hudSelectedUnit and portraitRendererUnit should be assigned in the same event to avoid desyncs
+    public static void onTick(TickEvent.ClientTickEvent evt) {
+        if (OrthoviewClientEvents.isEnabled())
+            portraitRendererUnit.tickAnimation();
+    }
+
+    @SubscribeEvent
+    // hudSelectedEntity and portraitRendererUnit should be assigned in the same event to avoid desyncs
     public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
 
         ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
@@ -252,7 +281,7 @@ public class HudClientEvents {
 
         if (units.size() <= 0)
             hudSelectedEntity = null;
-        else if (hudSelectedEntity == null || units.size() == 1)
+        else if (hudSelectedEntity == null || units.size() == 1 || !units.contains(hudSelectedEntity))
             hudSelectedEntity = units.get(0);
 
         if (hudSelectedEntity == null) {
@@ -263,12 +292,6 @@ public class HudClientEvents {
             portraitRendererUnit.model = evt.getRenderer().getModel();
             portraitRendererUnit.renderer = evt.getRenderer();
         }
-    }
-
-    @SubscribeEvent
-    public static void onTick(TickEvent.ClientTickEvent evt) {
-        if (OrthoviewClientEvents.isEnabled())
-            portraitRendererUnit.tickAnimation();
     }
 
     @SubscribeEvent

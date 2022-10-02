@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.building.buildings;
 
-import com.solegendary.reignofnether.building.BuildingBlock;
-import com.solegendary.reignofnether.building.BuildingBlockData;
-import com.solegendary.reignofnether.building.ProductionBuilding;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
 import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
 import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
@@ -29,6 +27,7 @@ public class VillagerHouse extends ProductionBuilding {
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.OAK_LOG;
 
+        // TODO: all these onClick triggers needs to be on serverside
         this.productionButtons = Arrays.asList(
             new Button(
                 "Zombie",
@@ -40,6 +39,7 @@ public class VillagerHouse extends ProductionBuilding {
                 () -> {
                     System.out.println("added zombie to queue");
                     this.productionQueue.add(new ZombieUnitProd(this));
+                    BuildingServerboundPacket.startProduction(getMinCorner(this.blocks), ZombieUnitProd.itemName);
                 }
             ),
             new Button(
@@ -52,6 +52,7 @@ public class VillagerHouse extends ProductionBuilding {
                 () -> {
                     System.out.println("added skeleton to queue");
                     this.productionQueue.add(new SkeletonUnitProd(this));
+                    BuildingServerboundPacket.startProduction(getMinCorner(this.blocks), SkeletonUnitProd.itemName);
                 }
             ),
             new Button(
@@ -64,6 +65,7 @@ public class VillagerHouse extends ProductionBuilding {
                 () -> {
                     System.out.println("added creeper to queue");
                     this.productionQueue.add(new CreeperUnitProd(this));
+                    BuildingServerboundPacket.startProduction(getMinCorner(this.blocks), CreeperUnitProd.itemName);
                 }
             )
         );

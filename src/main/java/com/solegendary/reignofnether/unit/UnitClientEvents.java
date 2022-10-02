@@ -166,6 +166,11 @@ public class UnitClientEvents {
                     MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit &&
                     getPlayerToEntityRelationship(preselectedUnitIds.get(0)) == Relationship.OWNED) {
                         addSelectedUnitId(preselectedUnitIds.get(0));
+
+                        // deselect any non-owned units if we managed to select them with owned units
+                        // and disallow selecting > 1 non-owned unit or the client player
+                        if (selectedUnitIds.size() > 0)
+                            selectedUnitIds.removeIf(id -> getPlayerToEntityRelationship(id) != Relationship.OWNED && id != MC.player.getId());
                 }
                 else { // this should be the only code path that allows you to select a non-owned unit
                     selectedUnitIds = new ArrayList<>();

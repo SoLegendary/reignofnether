@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemStack;
 
-// Renders a Unit's portrait including its animated head, name, healthbar, list of stats and UI frames for these
+// Renders a Building's portrait including an animated block, name, healthbar, list of stats and UI frames
 
 class PortraitRendererBuilding {
     public int frameWidth = 60;

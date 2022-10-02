@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.Rotation;
@@ -12,26 +11,62 @@ import java.util.function.Supplier;
 
 public class BuildingServerboundPacket {
     // pos is used to identify the building object serverside
-    public BlockPos pos; // required for action: PLACE, CANCEL, REPAIR
-    public String buildingName; // PLACE
+    public BlockPos pos; // required for all actions (used to identify the relevant building)
+    public String itemName; // name of the building or production item // PLACE, START_PRODUCTION, CANCEL_PRODUCTION
     public Rotation rotation; // PLACE
     public String ownerName; // PLACE
     public int repairAmount; // REPAIR
     public BuildingAction action;
 
     public static void placeBuilding(String buildingName, BlockPos originPos, Rotation rotation, String ownerName) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.PLACE, buildingName, originPos, rotation, ownerName, 0));
-    }
-    public static void repairBuilding(BlockPos pos, int repairAmount) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.REPAIR, "", pos, Rotation.NONE, "", repairAmount));
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.PLACE,
+                buildingName,
+                originPos,
+                rotation,
+                ownerName,
+                0));
     }
     public static void cancelBuilding(BlockPos pos) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.DESTROY, "", pos, Rotation.NONE, "", 0));
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.CANCEL,
+                "",
+                pos,
+                Rotation.NONE,
+                "",
+                0));
+    }
+    public static void repairBuilding(BlockPos pos, int repairAmount) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(BuildingAction.REPAIR,
+                "",
+                pos,
+                Rotation.NONE,
+                "",
+                repairAmount));
+    }
+    public static void startProduction(BlockPos pos, String itemName) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.START_PRODUCTION,
+                itemName,
+                pos,
+                Rotation.NONE,
+                "",
+                0));
+    }
+    public static void cancelProduction(BlockPos pos, String itemName, boolean frontItem) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
+                itemName,
+                pos,
+                Rotation.NONE,
+                "",
+                0));
     }
 
-    public BuildingServerboundPacket(BuildingAction action, String buildingName, BlockPos pos, Rotation rotation, String ownerName, int repairAmount) {
+
+    public BuildingServerboundPacket(BuildingAction action, String itemName, BlockPos pos, Rotation rotation, String ownerName, int repairAmount) {
         this.action = action;
-        this.buildingName = buildingName;
+        this.itemName = itemName;
         this.pos = pos;
         this.rotation = rotation;
         this.ownerName = ownerName;
@@ -40,7 +75,7 @@ public class BuildingServerboundPacket {
 
     public BuildingServerboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(BuildingAction.class);
-        this.buildingName = buffer.readUtf();
+        this.itemName = buffer.readUtf();
         this.pos = buffer.readBlockPos();
         this.rotation = buffer.readEnum(Rotation.class);
         this.ownerName = buffer.readUtf();
@@ -49,7 +84,7 @@ public class BuildingServerboundPacket {
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
-        buffer.writeUtf(this.buildingName);
+        buffer.writeUtf(this.itemName);
         buffer.writeBlockPos(this.pos);
         buffer.writeEnum(this.rotation);
         buffer.writeUtf(this.ownerName);
@@ -61,13 +96,26 @@ public class BuildingServerboundPacket {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
 
-            if (this.action == BuildingAction.PLACE)
-                BuildingServerEvents.placeBuilding(this.buildingName, this.pos, this.rotation, this.ownerName);
-            else if (this.action == BuildingAction.DESTROY)
-                System.out.println("CANCEL");
-            else if (this.action == BuildingAction.REPAIR)
-                System.out.println("REPAIR");
-
+            switch (this.action) {
+                case PLACE:
+                    BuildingServerEvents.placeBuilding(this.itemName, this.pos, this.rotation, this.ownerName);
+                    return;
+                case CANCEL:
+                    System.out.println("CANCEL");
+                    return;
+                case REPAIR:
+                    System.out.println("REPAIR");
+                    return;
+                case START_PRODUCTION:
+                    BuildingServerEvents.startProductionItem(this.itemName, this.pos);
+                    return;
+                case CANCEL_PRODUCTION:
+                    BuildingServerEvents.cancelProductionItem(this.itemName, this.pos, true);
+                    return;
+                case CANCEL_BACK_PRODUCTION:
+                    BuildingServerEvents.cancelProductionItem(this.itemName, this.pos, false);
+                    return;
+            }
             success.set(true);
         });
         ctx.get().setPacketHandled(true);

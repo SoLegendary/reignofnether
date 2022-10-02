@@ -3,8 +3,9 @@ package com.solegendary.reignofnether.building;
 // actions that can be done to Building objects themselves
 public enum BuildingAction {
     PLACE,
-    DESTROY, // WIP building cancelled by owner
-    REPAIR, // damage is done by directly removing blocks
-    PLACE_BLOCK,
-    DESTROY_BLOCK
+    CANCEL, // WIP building cancelled by owner
+    REPAIR, // or continue build a WIP building
+    START_PRODUCTION, // start producing something
+    CANCEL_PRODUCTION, // stop producing from front of queue
+    CANCEL_BACK_PRODUCTION // stop producing from back of queue
 }

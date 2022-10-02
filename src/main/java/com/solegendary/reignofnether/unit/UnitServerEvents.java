@@ -132,7 +132,7 @@ public class UnitServerEvents {
             float closestPlayerDist = 100;
             Player closestPlayer = null;
             for (Player player : nearbyPlayers) {
-                System.out.println("Found nearby player: " + player.getName().getString() + " " + player.distanceTo(entity));
+                //System.out.println("Found nearby player: " + player.getName().getString() + " " + player.distanceTo(entity));
                 if (player.distanceTo(entity) < closestPlayerDist) {
                     closestPlayerDist = player.distanceTo(entity);
                     closestPlayer = player;
@@ -140,7 +140,7 @@ public class UnitServerEvents {
             }
             if (closestPlayer != null) {
                 ((Unit) entity).setOwnerName(closestPlayer.getName().getString());
-                System.out.println("Assigned ownerName: " + closestPlayer.getName().getString());
+                //System.out.println("Assigned ownerName: " + closestPlayer.getName().getString());
             }
         }
     }

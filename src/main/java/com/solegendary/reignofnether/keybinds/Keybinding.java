@@ -21,7 +21,7 @@ public class Keybinding {
     public static final KeyMapping attack = new KeyMapping("key.reignofnether.orthoview.attack", GLFW.GLFW_KEY_A, KEY_CATEGORY);
     public static final KeyMapping stop = new KeyMapping("key.reignofnether.orthoview.stop", GLFW.GLFW_KEY_S, KEY_CATEGORY);
     public static final KeyMapping hold = new KeyMapping("key.reignofnether.orthoview.hold", GLFW.GLFW_KEY_H, KEY_CATEGORY);
-    public static final KeyMapping move = new KeyMapping("key.reignofnether.orthoview.move =", GLFW.GLFW_KEY_M, KEY_CATEGORY);
+    public static final KeyMapping move = new KeyMapping("key.reignofnether.orthoview.move", GLFW.GLFW_KEY_M, KEY_CATEGORY);
     public static final KeyMapping keyQ = new KeyMapping("key.reignofnether.orthoview.keyQ", GLFW.GLFW_KEY_Q, KEY_CATEGORY);
     public static final KeyMapping keyW = new KeyMapping("key.reignofnether.orthoview.keyW", GLFW.GLFW_KEY_W, KEY_CATEGORY);
     public static final KeyMapping keyE = new KeyMapping("key.reignofnether.orthoview.keyE", GLFW.GLFW_KEY_E, KEY_CATEGORY);

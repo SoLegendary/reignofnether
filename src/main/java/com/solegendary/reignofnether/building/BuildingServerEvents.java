@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
+import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import it.unimi.dsi.fastutil.ints.IntLists;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
@@ -51,6 +53,25 @@ public class BuildingServerEvents {
                     block.place();
         }
         BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName);
+    }
+
+    public static Building findBuilding(BlockPos pos) {
+        for (Building building : buildings)
+            if (building.isPosInsideBuilding(pos))
+                return building;
+        return null;
+    }
+
+    public static void startProductionItem(String itemName, BlockPos pos) {
+        System.out.println("starting: " + itemName);
+        ProductionBuilding building = (ProductionBuilding) findBuilding(pos);
+        if (building != null)
+            building.productionQueue.add(new ZombieUnitProd(building));
+    }
+
+    public static void cancelProductionItem(String itemName, BlockPos pos, boolean frontItem) {
+        System.out.println("cancelling: " + itemName);
+        return;
     }
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions

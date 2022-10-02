@@ -2,11 +2,8 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
@@ -30,7 +27,7 @@ public class BuildingClientboundPacket {
     }
     public static void destroyBuilding(BlockPos pos) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new BuildingClientboundPacket(pos, "", Rotation.NONE, "", BuildingAction.DESTROY));
+            new BuildingClientboundPacket(pos, "", Rotation.NONE, "", BuildingAction.CANCEL));
     }
 
     public BuildingClientboundPacket(BlockPos pos, String buildingName, Rotation rotation, String ownerName, BuildingAction action) {
@@ -66,7 +63,7 @@ public class BuildingClientboundPacket {
             () -> () -> {
                 switch (action) {
                     case PLACE -> BuildingClientEvents.placeBuilding(this.buildingName, this.pos, this.rotation, this.ownerName);
-                    case DESTROY -> BuildingClientEvents.destroyBuilding(this.pos);
+                    case CANCEL -> BuildingClientEvents.destroyBuilding(this.pos);
                 }
                 success.set(true);
             });

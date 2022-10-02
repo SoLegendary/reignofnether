@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.Unit;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -33,7 +34,7 @@ public abstract class ProductionBuilding extends Building {
         Entity unit = entityType.create(level);
         if (unit != null) {
             level.addFreshEntity(unit);
-            Vec3i minCorner = getMinCorner(this.blocks);
+            BlockPos minCorner = getMinCorner(this.blocks);
             unit.moveTo(new Vec3(
                     minCorner.getX() + relativeSpawnPoint.x,
                     minCorner.getX() + relativeSpawnPoint.y,
@@ -45,12 +46,10 @@ public abstract class ProductionBuilding extends Building {
     public void tick(Level level) {
         super.tick(level);
 
-        if (!level.isClientSide()) {
-            if (productionQueue.size() >= 1) {
-                ProductionItem nextItem = productionQueue.get(0);
-                if (nextItem.tick((ServerLevel) level))
-                    productionQueue.remove(0);
-            }
+        if (productionQueue.size() >= 1) {
+            ProductionItem nextItem = productionQueue.get(0);
+            if (nextItem.tick(level))
+                productionQueue.remove(0);
         }
     }
 }

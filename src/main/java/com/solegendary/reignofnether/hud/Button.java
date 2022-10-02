@@ -73,10 +73,16 @@ public class Button {
         this.onUse = onClick;
     }
 
+    public void renderHealthBar(PoseStack poseStack) {
+        HealthBarClientEvents.renderForEntity(poseStack, entity,
+                x + ((float) iconFrameSize / 2), y - 5,
+                iconFrameSize - 1,
+                HealthBarClientEvents.RenderMode.GUI_ICON);
+    }
+
     public void render(PoseStack poseStack, int x, int y, int mouseX, int mouseY) {
         this.x = x;
         this.y = y;
-
         MyRenderer.renderIconFrameWithBg(poseStack, x, y, iconFrameSize, 0x64000000);
 
         // item/unit icon
@@ -86,8 +92,16 @@ public class Button {
                 x+4, y+4,
                 iconSize
         );
+        // hotkey letter
+        if (this.hotkey != null) {
+            GuiComponent.drawCenteredString(poseStack, MC.font,
+                    hotkey.getKey().getDisplayName().getString().toUpperCase(),
+                    x + iconSize + 4,
+                    y + iconSize - 1,
+                    0xFFFFFF);
+        }
 
-        // selected frame
+        // user is holding click or hotkey down over the button and render frame if so
         if (isSelected.get() || (hotkey != null && hotkey.isDown()) || (isMouseOver(mouseX, mouseY) && MiscUtil.isLeftClickDown(MC))) {
             ResourceLocation iconFrameSelectedResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_selected.png");
             MyRenderer.renderIcon(
@@ -97,34 +111,6 @@ public class Button {
                     iconFrameSelectedSize
             );
         }
-
-        // hotkey letter
-        if (this.hotkey != null) {
-            GuiComponent.drawCenteredString(poseStack, MC.font,
-                    hotkey.getKey().getDisplayName().getString().toUpperCase(),
-                    x + iconSize + 4,
-                    y + iconSize - 1,
-                    0xFFFFFF);
-        }
-        checkHover(poseStack, mouseX, mouseY);
-    }
-
-    public void renderHealthBar(PoseStack poseStack) {
-        HealthBarClientEvents.renderForEntity(poseStack, entity,
-                x + ((float) iconFrameSize / 2), y - 5,
-                iconFrameSize - 1,
-                HealthBarClientEvents.RenderMode.GUI_ICON);
-    }
-
-    private boolean isMouseOver(int mouseX, int mouseY) {
-        return (mouseX >= x &&
-                mouseY >= y &&
-                mouseX < x + iconFrameSize &&
-                mouseY < y + iconFrameSize
-        );
-    }
-
-    private void checkHover(PoseStack poseStack, int mouseX, int mouseY) {
         // light up on hover
         if (isMouseOver(mouseX, mouseY)) {
             GuiComponent.fill(poseStack, // x1,y1, x2,y2,
@@ -134,8 +120,17 @@ public class Button {
                     0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
     }
+    private boolean isMouseOver(int mouseX, int mouseY) {
+        return (mouseX >= x &&
+                mouseY >= y &&
+                mouseX < x + iconFrameSize &&
+                mouseY < y + iconFrameSize
+        );
+    }
 
+    // must be done from mouse press event
     public void checkClicked(int mouseX, int mouseY) {
+
         if (isMouseOver(mouseX, mouseY)) {
             if (this.entity != null)
                 System.out.println("Clicked on button - entity id: " + entity.getId());
@@ -146,8 +141,9 @@ public class Button {
         }
     }
 
-    public void checkPressed() {
-        if (hotkey != null && hotkey.consumeClick())
+    // must be done from key press event
+    public void checkPressed(int key) {
+        if (hotkey != null && hotkey.getKey().getValue() == key)
             this.onUse.run();
     }
 }
