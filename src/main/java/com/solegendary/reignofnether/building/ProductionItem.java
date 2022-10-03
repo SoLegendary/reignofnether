@@ -1,9 +1,13 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
+import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
+import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
 import com.solegendary.reignofnether.hud.Button;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 // units and/or research tech that a ProductionBuilding can produce
@@ -28,7 +32,7 @@ public abstract class ProductionItem {
         return ProductionItem.itemName;
     }
 
-    // Button object to build
+    // Button object to build - start buttons are static as they aren't tied to an existing prodItem
     public static Button getStartButton(ProductionBuilding prodBuilding) {
         return null;
     }
@@ -36,22 +40,6 @@ public abstract class ProductionItem {
     // firstItem means this button will cancel the currently-building item
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return null;
-    }
-
-    public void removeSelfFromQueue(boolean first, String itemName) {
-        if (first)
-            this.building.productionQueue.remove(0);
-        else {
-            // find first non-started item to remove
-            for (int i = 0; i < this.building.productionQueue.size(); i++) {
-                ProductionItem prodItem = this.building.productionQueue.get(i);
-                if (prodItem.getItemName().equals(itemName) &&
-                    prodItem.ticksLeft >= prodItem.ticksToProduce) {
-                    this.building.productionQueue.remove(prodItem);
-                    break;
-                }
-            }
-        }
     }
 
     // return true if the tick finished

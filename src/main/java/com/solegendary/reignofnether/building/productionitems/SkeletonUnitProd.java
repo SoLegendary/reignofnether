@@ -11,8 +11,6 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
-import java.util.function.Consumer;
-
 public class SkeletonUnitProd extends ProductionItem {
 
     public final static String itemName = "Skeleton";
@@ -39,11 +37,7 @@ public class SkeletonUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> {
-                System.out.println("added skeleton to queue");
-                prodBuilding.productionQueue.add(new SkeletonUnitProd(prodBuilding));
-                BuildingServerboundPacket.startProduction(Building.getMinCorner(prodBuilding.getBlocks()), SkeletonUnitProd.itemName);
-            }
+            () -> BuildingServerboundPacket.startProduction(Building.getMinCorner(prodBuilding.getBlocks()), itemName)
         );
     }
 
@@ -56,7 +50,7 @@ public class SkeletonUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> removeSelfFromQueue(first)
+            () -> BuildingServerboundPacket.cancelProduction(Building.getMinCorner(prodBuilding.getBlocks()), itemName, first)
         );
     }
 }

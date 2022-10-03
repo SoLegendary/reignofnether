@@ -18,10 +18,10 @@ public class BuildingServerboundPacket {
     public int repairAmount; // REPAIR
     public BuildingAction action;
 
-    public static void placeBuilding(String buildingName, BlockPos originPos, Rotation rotation, String ownerName) {
+    public static void placeBuilding(String itemName, BlockPos originPos, Rotation rotation, String ownerName) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.PLACE,
-                buildingName, originPos, rotation, ownerName, 0));
+                itemName, originPos, rotation, ownerName, 0));
     }
     public static void cancelBuilding(BlockPos pos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
@@ -78,24 +78,21 @@ public class BuildingServerboundPacket {
         ctx.get().enqueueWork(() -> {
 
             switch (this.action) {
-                case PLACE:
-                    BuildingServerEvents.placeBuilding(this.itemName, this.pos, this.rotation, this.ownerName);
-                    return;
-                case CANCEL:
-                    System.out.println("CANCEL");
-                    return;
-                case REPAIR:
-                    System.out.println("REPAIR");
-                    return;
-                case START_PRODUCTION:
-                    BuildingServerEvents.startProductionItem(this.itemName, this.pos);
-                    return;
-                case CANCEL_PRODUCTION:
-                    BuildingServerEvents.cancelProductionItem(this.itemName, this.pos, true);
-                    return;
-                case CANCEL_BACK_PRODUCTION:
-                    BuildingServerEvents.cancelProductionItem(this.itemName, this.pos, false);
-                    return;
+                case PLACE -> BuildingServerEvents.placeBuilding(this.itemName, this.pos, this.rotation, this.ownerName);
+                case CANCEL -> System.out.println("CANCEL");
+                case REPAIR -> System.out.println("REPAIR");
+                case START_PRODUCTION -> {
+                    ProductionBuilding.startProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.pos);
+                    BuildingClientboundPacket.startProduction(pos, itemName);
+                }
+                case CANCEL_PRODUCTION -> {
+                    ProductionBuilding.cancelProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.pos, true);
+                    BuildingClientboundPacket.cancelProduction(pos, itemName, true);
+                }
+                case CANCEL_BACK_PRODUCTION -> {
+                    ProductionBuilding.cancelProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.pos, false);
+                    BuildingClientboundPacket.cancelProduction(pos, itemName, false);
+                }
             }
             success.set(true);
         });

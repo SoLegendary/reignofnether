@@ -11,8 +11,6 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
-import java.util.function.Consumer;
-
 public class ZombieUnitProd extends ProductionItem {
 
     public final static String itemName = "Zombie";
@@ -32,18 +30,14 @@ public class ZombieUnitProd extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding) {
         return new Button(
-                "Zombie",
-                14,
-                "textures/mobheads/zombie.png",
-                Keybinding.keyE,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> {
-                    System.out.println("added zombie to queue");
-                    prodBuilding.productionQueue.add(new ZombieUnitProd(prodBuilding));
-                    BuildingServerboundPacket.startProduction(Building.getMinCorner(prodBuilding.getBlocks()), ZombieUnitProd.itemName);
-                }
+            "Zombie",
+            14,
+            "textures/mobheads/zombie.png",
+            Keybinding.keyE,
+            () -> false,
+            () -> false,
+            () -> true,
+            () -> BuildingServerboundPacket.startProduction(Building.getMinCorner(prodBuilding.getBlocks()), itemName)
         );
     }
 
@@ -56,7 +50,7 @@ public class ZombieUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> removeSelfFromQueue(first)
+            () -> BuildingServerboundPacket.cancelProduction(Building.getMinCorner(prodBuilding.getBlocks()), itemName, first)
         );
     }
 }

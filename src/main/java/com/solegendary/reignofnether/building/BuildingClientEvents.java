@@ -5,6 +5,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
+import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
+import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
+import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -56,6 +59,10 @@ public class BuildingClientEvents {
     public static Building getSelectedBuilding() { return selectedBuilding; }
     public static void setSelectedBuilding(Building building) { selectedBuilding = building; }
     public static void setBuildingToPlace(Class<? extends Building> building) { buildingToPlace = building; }
+
+    public static List<Building> getBuildings() {
+        return buildings;
+    }
 
     // adds a green overlay option to OverlayTexture at (0,0)
     public static void replaceOverlayTexture() {

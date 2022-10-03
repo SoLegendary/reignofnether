@@ -22,6 +22,7 @@ import java.util.Random;
 public abstract class Building {
 
     public String name;
+    public LevelAccessor level;
 
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time
     public boolean isBuilding = true; // TODO: only true if // a builder is assigned and actively building or repairing
@@ -56,7 +57,16 @@ public abstract class Building {
             case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation, ownerName);
             case VillagerTower.buildingName -> building = new VillagerTower(level, pos, rotation, ownerName);
         }
+        if (building != null)
+            building.level = level;
         return building;
+    }
+
+    public static Building findBuilding(List<Building> buildings, BlockPos pos) {
+        for (Building building : buildings)
+            if (building.isPosInsideBuilding(pos))
+                return building;
+        return null;
     }
 
     public static BlockPos getMinCorner(ArrayList<BuildingBlock> blocks) {

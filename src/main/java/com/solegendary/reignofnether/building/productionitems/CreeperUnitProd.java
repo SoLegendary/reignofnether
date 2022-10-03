@@ -11,8 +11,6 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
-import java.util.function.Consumer;
-
 public class CreeperUnitProd extends ProductionItem {
 
     public final static String itemName = "Creeper";
@@ -39,11 +37,7 @@ public class CreeperUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> {
-                System.out.println("added creeper to queue");
-                prodBuilding.productionQueue.add(new CreeperUnitProd(prodBuilding));
-                BuildingServerboundPacket.startProduction(Building.getMinCorner(prodBuilding.getBlocks()), CreeperUnitProd.itemName);
-            }
+            () -> BuildingServerboundPacket.startProduction(Building.getMinCorner(prodBuilding.getBlocks()), itemName)
         );
     }
 
@@ -56,7 +50,7 @@ public class CreeperUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> removeSelfFromQueue(first, itemName)
+            () -> BuildingServerboundPacket.cancelProduction(Building.getMinCorner(prodBuilding.getBlocks()), itemName, first)
         );
     }
 }
