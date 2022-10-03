@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
@@ -16,11 +17,8 @@ public class CreeperUnitProd extends ProductionItem {
 
     public final static String itemName = "Creeper";
 
-    int ticksToProduce = 100; // build time in ticks
-    int ticksLeft = 100;
-
     public CreeperUnitProd(ProductionBuilding building) {
-        super(building);
+        super(building, 100);
         this.onComplete = (Level level) -> {
             System.out.println("produced creeper unit!");
             if (!level.isClientSide())
@@ -28,7 +26,11 @@ public class CreeperUnitProd extends ProductionItem {
         };
     }
 
-    public Button getStartButton(ProductionBuilding prodBuilding) {
+    public String getItemName() {
+        return CreeperUnitProd.itemName;
+    }
+
+    public static Button getStartButton(ProductionBuilding prodBuilding) {
         return new Button(
             "Creeper",
             14,
@@ -36,6 +38,7 @@ public class CreeperUnitProd extends ProductionItem {
             Keybinding.keyQ,
             () -> false,
             () -> false,
+            () -> true,
             () -> {
                 System.out.println("added creeper to queue");
                 prodBuilding.productionQueue.add(new CreeperUnitProd(prodBuilding));
@@ -44,17 +47,16 @@ public class CreeperUnitProd extends ProductionItem {
         );
     }
 
-    public Button getCancelButton(ProductionBuilding prodBuilding) {
+    public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
             "Creeper",
             14,
             "textures/mobheads/creeper.png",
-            Keybinding.keyQ,
+            (KeyMapping) null,
             () -> false,
             () -> false,
-            () -> {
-                System.out.println("removed creeper from queue");
-            }
+            () -> true,
+            () -> removeSelfFromQueue(first, itemName)
         );
     }
 }

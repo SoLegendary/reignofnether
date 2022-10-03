@@ -17,6 +17,7 @@ public class ActionButtons {
             Keybinding.attack,
             () -> CursorClientEvents.getLeftClickAction() == ActionName.ATTACK,
             () -> false,
+            () -> true,
             () -> CursorClientEvents.setLeftClickAction(ActionName.ATTACK)
     );
     public static final Button stop = new Button(
@@ -26,6 +27,7 @@ public class ActionButtons {
             Keybinding.stop,
             () -> false, // except if currently clicked on
             () -> false,
+            () -> true,
             () -> UnitClientEvents.sendCommand(ActionName.STOP)
     );
     public static final Button hold = new Button(
@@ -35,6 +37,7 @@ public class ActionButtons {
             Keybinding.hold,
             () -> false, // TODO: if all selected units are holding position (but would need to get this from server?)
             () -> false,
+            () -> true,
             () -> UnitClientEvents.sendCommand(ActionName.HOLD)
     );
     public static final Button move = new Button(
@@ -44,6 +47,7 @@ public class ActionButtons {
             Keybinding.move,
             () -> CursorClientEvents.getLeftClickAction() == ActionName.MOVE,
             () -> false,
+            () -> true,
             () -> CursorClientEvents.setLeftClickAction(ActionName.MOVE)
     );
 }

@@ -30,8 +30,8 @@ public class VillagerHouse extends ProductionBuilding {
 
         this.productionButtons = Arrays.asList(
                 CreeperUnitProd.getStartButton(this),
-                ZombieUnitProd.getStartButton(this),
-                SkeletonUnitProd.getStartButton(this)
+                SkeletonUnitProd.getStartButton(this),
+                ZombieUnitProd.getStartButton(this)
         );
     }
 

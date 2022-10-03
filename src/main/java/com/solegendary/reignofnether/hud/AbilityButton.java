@@ -12,11 +12,11 @@ public class AbilityButton extends Button {
     float radius = 0; // if <= 0, is single target
 
     public AbilityButton(String abilityName, int iconSize, String iconResourcePath,
-                         KeyMapping hotkey, Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Runnable onClick,
+                         KeyMapping hotkey, Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Supplier<Boolean> isEnabled, Runnable onClick,
                          float cooldown, float range, float radius) {
 
         // generate x/y based on given position (starting at 0 which is bottom left 1 row above generic action buttons)
-        super(abilityName, iconSize, iconResourcePath, hotkey, isSelected, isActive, onClick);
+        super(abilityName, iconSize, iconResourcePath, hotkey, isSelected, isActive, isEnabled, onClick);
 
         this.cooldown = cooldown;
         this.range = range;

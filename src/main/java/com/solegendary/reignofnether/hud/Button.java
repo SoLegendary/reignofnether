@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.hud;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
@@ -40,36 +41,42 @@ public class Button {
      */
     public Supplier<Boolean> isSelected; // controls selected frame rendering
     public Supplier<Boolean> isActive; // special highlighting for an on-state (eg. auto-cast/auto-producing)
+    public Supplier<Boolean> isEnabled; // is the button allowed to be used right now? (eg. off cooldown)
     public Runnable onUse;
 
-    // TODO: enforce not enabled (and if !enabled and rendered, render dark overlay)
-    public boolean enabled = false; // allowed to click and use hotkey?
+    // used for cooldown indication, productionItem progress, etc.
+    // @ 0.0, appears clear and normal
+    // @ 0.5, bottom half is greyed out
+    // @ 1.0, whole button is greyed out
+    public float greyPercent = 0.0f;
 
     Minecraft MC = Minecraft.getInstance();
 
     // constructor for ability/action/production buttons
     public Button(String name, int iconSize,
                   String iconResourcePath, KeyMapping hotkey,
-                  Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Runnable onClick) {
+                  Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Supplier<Boolean> isEnabled, Runnable onClick) {
         this.name = name;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
         this.iconSize = iconSize;
         this.hotkey = hotkey;
         this.isSelected = isSelected;
         this.isActive = isActive;
+        this.isEnabled = isEnabled;
         this.onUse = onClick;
     }
 
     // constructor for unit selection buttons
     public Button(String name, int iconSize,
                   String iconResourcePath, LivingEntity entity,
-                  Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Runnable onClick) {
+                  Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Supplier<Boolean> isEnabled, Runnable onClick) {
         this.name = name;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
         this.iconSize = iconSize;
         this.entity = entity;
         this.isSelected = isSelected;
         this.isActive = isActive;
+        this.isEnabled = isEnabled;
         this.onUse = onClick;
     }
 
@@ -102,7 +109,7 @@ public class Button {
         }
 
         // user is holding click or hotkey down over the button and render frame if so
-        if (isSelected.get() || (hotkey != null && hotkey.isDown()) || (isMouseOver(mouseX, mouseY) && MiscUtil.isLeftClickDown(MC))) {
+        if (isEnabled.get() && (isSelected.get() || (hotkey != null && hotkey.isDown()) || (isMouseOver(mouseX, mouseY) && MiscUtil.isLeftClickDown(MC)))) {
             ResourceLocation iconFrameSelectedResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_selected.png");
             MyRenderer.renderIcon(
                     poseStack,
@@ -112,12 +119,21 @@ public class Button {
             );
         }
         // light up on hover
-        if (isMouseOver(mouseX, mouseY)) {
+        if (isEnabled.get() && isMouseOver(mouseX, mouseY)) {
             GuiComponent.fill(poseStack, // x1,y1, x2,y2,
                     x, y,
                     x + iconFrameSize,
                     y + iconFrameSize,
                     0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
+        }
+
+        if (greyPercent > 0) {
+            int greyHeightPx = Math.round(greyPercent * iconFrameSize);
+            GuiComponent.fill(poseStack, // x1,y1, x2,y2,
+                    x, y + greyHeightPx,
+                    x + iconFrameSize,
+                    y + iconFrameSize,
+                    0x80000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
     }
     private boolean isMouseOver(int mouseX, int mouseY) {
@@ -130,6 +146,8 @@ public class Button {
 
     // must be done from mouse press event
     public void checkClicked(int mouseX, int mouseY) {
+        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
+            return;
 
         if (isMouseOver(mouseX, mouseY)) {
             if (this.entity != null)
@@ -143,6 +161,9 @@ public class Button {
 
     // must be done from key press event
     public void checkPressed(int key) {
+        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
+            return;
+
         if (hotkey != null && hotkey.getKey().getValue() == key)
             this.onUse.run();
     }

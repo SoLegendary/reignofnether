@@ -96,6 +96,7 @@ public class CreeperUnit extends Creeper implements Unit {
                     Keybinding.keyQ,
                     () -> CursorClientEvents.getLeftClickAction() == ActionName.EXPLODE,
                     () -> false,
+                    () -> true,
                     () -> CursorClientEvents.setLeftClickAction(ActionName.EXPLODE),
                     0, 0, 3
             )

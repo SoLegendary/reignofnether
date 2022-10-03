@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
 import com.solegendary.reignofnether.hud.Button;
 import net.minecraft.world.level.Level;
 
@@ -11,24 +12,46 @@ public abstract class ProductionItem {
     public static String itemName;
 
     // TODO: cost for each resource
-    int ticksToProduce; // build time in ticks
-    int ticksLeft;
-    boolean canDuplicate; // is building allowed to build more than one of these? eg. tech upgrades can't be duplicated
+    public int ticksToProduce; // build time in ticks
+    public int ticksLeft;
+    public boolean canDuplicate; // is building allowed to build more than one of these? eg. tech upgrades can't be duplicated
     protected ProductionBuilding building;
     protected Consumer<Level> onComplete;
 
-
-    public ProductionItem(ProductionBuilding building) {
+    public ProductionItem(ProductionBuilding building, int ticksToProduce) {
         this.building = building;
+        this.ticksToProduce = ticksToProduce;
+        this.ticksLeft = ticksToProduce;
     }
 
-    // Button object for use in the hud (to build and to show in-progress items)
-    public Button getStartButton(ProductionBuilding prodBuilding) {
+    public String getItemName() {
+        return ProductionItem.itemName;
+    }
+
+    // Button object to build
+    public static Button getStartButton(ProductionBuilding prodBuilding) {
         return null;
     }
-    // Button object for use in the hud (to build and to show in-progress items)
-    public Button getCancelButton(ProductionBuilding prodBuilding) {
+    // Button object to show in-progress items
+    // firstItem means this button will cancel the currently-building item
+    public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return null;
+    }
+
+    public void removeSelfFromQueue(boolean first, String itemName) {
+        if (first)
+            this.building.productionQueue.remove(0);
+        else {
+            // find first non-started item to remove
+            for (int i = 0; i < this.building.productionQueue.size(); i++) {
+                ProductionItem prodItem = this.building.productionQueue.get(i);
+                if (prodItem.getItemName().equals(itemName) &&
+                    prodItem.ticksLeft >= prodItem.ticksToProduce) {
+                    this.building.productionQueue.remove(prodItem);
+                    break;
+                }
+            }
+        }
     }
 
     // return true if the tick finished

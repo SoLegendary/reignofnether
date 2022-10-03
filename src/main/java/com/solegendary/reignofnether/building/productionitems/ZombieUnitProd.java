@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
@@ -16,11 +17,8 @@ public class ZombieUnitProd extends ProductionItem {
 
     public final static String itemName = "Zombie";
 
-    int ticksToProduce = 100; // build time in ticks
-    int ticksLeft = 100;
-
     public ZombieUnitProd(ProductionBuilding building) {
-        super(building);
+        super(building, 100);
         this.onComplete = (Level level) -> {
             System.out.println("produced zombie unit!");
             if (!level.isClientSide())
@@ -28,14 +26,19 @@ public class ZombieUnitProd extends ProductionItem {
         };
     }
 
-    public Button getStartButton(ProductionBuilding prodBuilding) {
+    public String getItemName() {
+        return ZombieUnitProd.itemName;
+    }
+
+    public static Button getStartButton(ProductionBuilding prodBuilding) {
         return new Button(
                 "Zombie",
                 14,
                 "textures/mobheads/zombie.png",
-                Keybinding.keyQ,
+                Keybinding.keyE,
                 () -> false,
                 () -> false,
+                () -> true,
                 () -> {
                     System.out.println("added zombie to queue");
                     prodBuilding.productionQueue.add(new ZombieUnitProd(prodBuilding));
@@ -44,17 +47,16 @@ public class ZombieUnitProd extends ProductionItem {
         );
     }
 
-    public Button getCancelButton(ProductionBuilding prodBuilding) {
+    public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
             "Zombie",
             14,
             "textures/mobheads/zombie.png",
-            Keybinding.keyQ,
+            (KeyMapping) null,
             () -> false,
             () -> false,
-            () -> {
-                System.out.println("removed zombie from queue");
-            }
+            () -> true,
+            () -> removeSelfFromQueue(first)
         );
     }
 }

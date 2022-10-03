@@ -133,7 +133,7 @@ public class UnitClientEvents {
             }
 
             // select all nearby units of the same type when double-clicked
-            if (selectedUnitIds.size() == 1 && MC.level != null &&
+            if (selectedUnitIds.size() == 1 && MC.level != null && !Keybinding.shiftMod.isDown() &&
                (System.currentTimeMillis() - lastLeftClickTime) < doubleClickTimeMs) {
 
                 lastLeftClickTime = 0;
@@ -157,26 +157,29 @@ public class UnitClientEvents {
             // TODO: resolve unit special abilities
             //else if ()
 
-            // left click -> (de)select a single unit
+            // left click -> select a single unit
             // if shift is held, deselect a unit or add it to the selected group
             else if (preselectedUnitIds.size() == 1 && !isLeftClickAttack()) {
+                boolean deselectedUnit = false;
 
-                if (Keybinding.shiftMod.isDown() &&
-                    !selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0))) &&
+                if (Keybinding.shiftMod.isDown())
+                    deselectedUnit = selectedUnitIds.removeIf(id -> id.equals(preselectedUnitIds.get(0)));
+
+                if (Keybinding.shiftMod.isDown() && !deselectedUnit &&
                     MC.level.getEntity(preselectedUnitIds.get(0)) instanceof Unit &&
                     getPlayerToEntityRelationship(preselectedUnitIds.get(0)) == Relationship.OWNED) {
                         addSelectedUnitId(preselectedUnitIds.get(0));
-
-                        // deselect any non-owned units if we managed to select them with owned units
-                        // and disallow selecting > 1 non-owned unit or the client player
-                        if (selectedUnitIds.size() > 0)
-                            selectedUnitIds.removeIf(id -> getPlayerToEntityRelationship(id) != Relationship.OWNED && id != MC.player.getId());
                 }
-                else { // this should be the only code path that allows you to select a non-owned unit
+                else if (!deselectedUnit) { // select a single unit - this should be the only code path that allows you to select a non-owned unit
                     selectedUnitIds = new ArrayList<>();
                     addSelectedUnitId(preselectedUnitIds.get(0));
                 }
             }
+            // deselect any non-owned units if we managed to select them with owned units
+            // and disallow selecting > 1 non-owned unit or the client player
+            if (selectedUnitIds.size() > 1)
+                selectedUnitIds.removeIf(id -> getPlayerToEntityRelationship(id) != Relationship.OWNED || id == MC.player.getId());
+
             lastLeftClickTime = System.currentTimeMillis();
             CursorClientEvents.setLeftClickAction(ActionName.ATTACK);
         }

@@ -33,6 +33,7 @@ public abstract class ProductionBuilding extends Building {
     public void produceUnit(ServerLevel level, EntityType<? extends Unit> entityType) {
         Entity unit = entityType.create(level);
         if (unit != null) {
+            System.out.println("creating unit: " + entityType.getDescription().getString());
             level.addFreshEntity(unit);
             BlockPos minCorner = getMinCorner(this.blocks);
             unit.moveTo(new Vec3(

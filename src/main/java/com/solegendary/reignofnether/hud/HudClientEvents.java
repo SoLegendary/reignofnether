@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -82,6 +83,11 @@ public class HudClientEvents {
         int iconSize = 14;
         int iconFrameSize = Button.iconFrameSize;
 
+        // screenWidth ranges roughly between 440-540
+        int buttonsPerRow = (int) Math.ceil((float) (screenWidth - 340) / iconFrameSize);
+        buttonsPerRow = Math.min(buttonsPerRow, 8);
+        buttonsPerRow = Math.max(buttonsPerRow, 4);
+
         // refresh button lists
         actionButtons.removeIf((Button button) -> true);
         unitButtons.removeIf((Button button) -> true);
@@ -102,54 +108,65 @@ public class HudClientEvents {
                     evt.getPoseStack(),
                     blitX, blitY, selBuilding);
 
-            blitX += portraitRendererBuilding.frameWidth * 2;
+            blitX += portraitRendererBuilding.frameWidth + 10;
 
             // -------------------------
             // Building production queue
             // -------------------------
+            ProductionBuilding selProdBuilding = null;
+            if (selBuilding instanceof ProductionBuilding)
+                selProdBuilding = (ProductionBuilding) selBuilding;
 
-            // top row for currently-in-progress item, name and progress bar
             // bottom row for all other queued items
-            if (selBuilding instanceof ProductionBuilding) {
+            if (selProdBuilding != null) {
                 int blitXStart = blitX;
-                blitY = screenHeight - iconFrameSize * 2 - 10;
+                blitY = screenHeight - iconFrameSize * 2 - 5;
 
-                // screenWidth ranges roughly between 440-540
-                int unitButtonsPerRow = (int) Math.ceil((float) (screenWidth - 340) / iconFrameSize);
-                unitButtonsPerRow = Math.min(unitButtonsPerRow, 10);
-                unitButtonsPerRow = Math.max(unitButtonsPerRow, 4);
+                for (int i = 0; i < selProdBuilding.productionQueue.size(); i++)
+                    productionButtons.add(selProdBuilding.productionQueue.get(i).getCancelButton(selProdBuilding, i == 0));
 
-                for (ProductionItem item : (((ProductionBuilding) selBuilding).productionQueue))
-                    productionButtons.add(item.getCancelButton((ProductionBuilding) selBuilding));
-
-                /*
-                if (unitButtons.size() >= 2) {
+                if (productionButtons.size() >= 1) {
+                    // background frame
                     MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
-                            iconFrameSize * unitButtonsPerRow + 10,
-                            iconFrameSize * 2 + 20,
+                            iconFrameSize * buttonsPerRow + 10,
+                            iconFrameSize * 2 + 15,
                             0xA0000000);
 
-                    for (Button unitButton : unitButtons) {
-                        // replace last icon with a +X number of units icon
-                        if (buttonsRendered == (unitButtonsPerRow * 2) - 1 &&
-                                units.size() > (unitButtonsPerRow * 2)) {
-                            int numExtraUnits = units.size() - (unitButtonsPerRow * 2) + 1;
-                            MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, 0x64000000);
-                            GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraUnits,
-                                    blitX + iconFrameSize/2, blitY + 8, 0xFFFFFF);
+                    // name and progress %
+                    ProductionItem firstProdItem = selProdBuilding.productionQueue.get(0);
+                    float percentageDone = (float) firstProdItem.ticksLeft / (float) firstProdItem.ticksToProduce;
+
+                    GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font,
+                            Math.round(100 - (percentageDone * 100f)) + "% " + firstProdItem.getItemName(),
+                            blitX + iconFrameSize * 2 + 12,
+                            blitY + 2,
+                            0xFFFFFF);
+
+                    int buttonsRendered = 0;
+                    for (Button prodButton : productionButtons) {
+                        // top row for currently-in-progress item
+                        if (buttonsRendered == 0) {
+                            prodButton.greyPercent = 1 - percentageDone;
+                            prodButton.render(evt.getPoseStack(), blitX, blitY - 5, mouseX, mouseY);
                         }
+                        // replace last icon with a +X number of production items left in queue
+                        else if (buttonsRendered >= buttonsPerRow &&
+                                productionButtons.size() > (buttonsPerRow + 1))
+                        {
+                            int numExtraItems = productionButtons.size() - buttonsPerRow;
+                            MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY + iconFrameSize, iconFrameSize, 0x64000000);
+                            GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraItems,
+                                    blitX + iconFrameSize/2, blitY + iconFrameSize + 8, 0xFFFFFF);
+                            break;
+                        }
+                        // bottom row for all other queued items
                         else {
-                            unitButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
-                            unitButton.renderHealthBar(evt.getPoseStack());
+                            prodButton.render(evt.getPoseStack(), blitX, blitY + iconFrameSize, mouseX, mouseY);
                             blitX += iconFrameSize;
-                            buttonsRendered += 1;
-                            if (buttonsRendered == unitButtonsPerRow) {
-                                blitX = blitXStart;
-                                blitY += iconFrameSize + 6;
-                            }
                         }
+                        buttonsRendered += 1;
                     }
-                }*/
+                }
             }
 
 
@@ -159,8 +176,8 @@ public class HudClientEvents {
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
 
-            if (selBuilding instanceof ProductionBuilding && selBuilding.isBuilt) {
-                for (Button productionButton : ((ProductionBuilding) selBuilding).productionButtons) {
+            if (selProdBuilding != null && selProdBuilding.isBuilt) {
+                for (Button productionButton : selProdBuilding.productionButtons) {
                     actionButtons.add(productionButton);
                     productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                     blitX += iconFrameSize;
@@ -191,66 +208,64 @@ public class HudClientEvents {
         // ----------------------------------------------
         // Unit icons using mob heads on 2 rows if needed
         // ----------------------------------------------
-        int buttonsRendered = 0;
         int blitXStart = blitX;
         blitY = screenHeight - iconFrameSize * 2 - 10;
 
-        // screenWidth ranges roughly between 440-540
-        int unitButtonsPerRow = (int) Math.ceil((float) (screenWidth - 340) / iconFrameSize);
-        unitButtonsPerRow = Math.min(unitButtonsPerRow, 10);
-        unitButtonsPerRow = Math.max(unitButtonsPerRow, 4);
-
         for (LivingEntity unit : units) {
             if (UnitClientEvents.getPlayerToEntityRelationship(unit.getId()) == Relationship.OWNED &&
-                    unitButtons.size() < (unitButtonsPerRow * 2)) {
+                    unitButtons.size() < (buttonsPerRow * 2)) {
                 // mob head icon
                 String unitName = getSimpleEntityName(unit);
 
                 unitButtons.add(new Button(
-                        unitName,
-                        iconSize,
-                        "textures/mobheads/" + unitName + ".png",
-                        unit,
-                        () -> getSimpleEntityName(hudSelectedEntity).equals(unitName),
-                        () -> false,
-                        () -> {
-                            // click to select this unit type as a group
-                            if (getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
-                                UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
-                                UnitClientEvents.addSelectedUnitId(unit.getId());
-                            } else { // select this one specific unit
-                                hudSelectedEntity = unit;
-                            }
+                    unitName,
+                    iconSize,
+                    "textures/mobheads/" + unitName + ".png",
+                    unit,
+                    () -> getSimpleEntityName(hudSelectedEntity).equals(unitName),
+                    () -> false,
+                    () -> true,
+                    () -> {
+                        // click to select this unit type as a group
+                        if (getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
+                            UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
+                            UnitClientEvents.addSelectedUnitId(unit.getId());
+                        } else { // select this one specific unit
+                            hudSelectedEntity = unit;
                         }
+                    }
                 ));
             }
         }
 
         if (unitButtons.size() >= 2) {
+            // background frame
             MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
-                    iconFrameSize * unitButtonsPerRow + 10,
+                    iconFrameSize * buttonsPerRow + 10,
                     iconFrameSize * 2 + 20,
                     0xA0000000);
 
+            int buttonsRendered = 0;
             for (Button unitButton : unitButtons) {
                 // replace last icon with a +X number of units icon
-                if (buttonsRendered == (unitButtonsPerRow * 2) - 1 &&
-                        units.size() > (unitButtonsPerRow * 2)) {
-                    int numExtraUnits = units.size() - (unitButtonsPerRow * 2) + 1;
+                if (buttonsRendered >= (buttonsPerRow * 2) - 1 &&
+                        units.size() > (buttonsPerRow * 2)) {
+                    int numExtraUnits = units.size() - (buttonsPerRow * 2) + 1;
                     MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, 0x64000000);
                     GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraUnits,
                             blitX + iconFrameSize/2, blitY + 8, 0xFFFFFF);
+                    break;
                 }
                 else {
                     unitButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                     unitButton.renderHealthBar(evt.getPoseStack());
                     blitX += iconFrameSize;
-                    buttonsRendered += 1;
-                    if (buttonsRendered == unitButtonsPerRow) {
+                    if (buttonsRendered == buttonsPerRow - 1) {
                         blitX = blitXStart;
                         blitY += iconFrameSize + 6;
                     }
                 }
+                buttonsRendered += 1;
             }
         }
 
@@ -353,6 +368,14 @@ public class HudClientEvents {
             evt.setResult(Event.Result.DENY);
     }
 
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+            "x: " + MC.mouseHandler.xpos(),
+            "y: " + MC.mouseHandler.ypos()
+        });
+    }
+
     // uncomment to adjust render position/size of portraits
     /*
     @SubscribeEvent
@@ -374,10 +397,10 @@ public class HudClientEvents {
         }
     }
     @SubscribeEvent
-    public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
 
         if (hudSelectedEntity != null)
-            MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
+            MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
                     "headOffsetX: " + portraitRendererUnit.headOffsetX,
                     "headOffsetY: " + portraitRendererUnit.headOffsetY,
                     "headSize: " + portraitRendererUnit.headSize,
@@ -388,10 +411,10 @@ public class HudClientEvents {
 
     /*
     @SubscribeEvent
-    public static void onRenderOverLay(RenderGameOverlayEvent.Pre evt) {
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
 
         if (hudSelectedEntity != null)
-            MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
+            MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
                     "entity eye height: " + hudSelectedEntity.getEyeHeight(),
                     "entity eye pos: " + hudSelectedEntity.getEyePosition(),
             });
