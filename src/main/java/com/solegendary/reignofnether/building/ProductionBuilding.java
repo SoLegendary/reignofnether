@@ -33,17 +33,18 @@ public abstract class ProductionBuilding extends Building {
         super();
     }
 
-    public void produceUnit(ServerLevel level, EntityType<? extends Unit> entityType) {
-        Entity unit = entityType.create(level);
-        if (unit != null) {
+    public void produceUnit(ServerLevel level, EntityType<? extends Unit> entityType, String ownerName) {
+        Entity entity = entityType.create(level);
+        if (entity != null) {
             System.out.println("creating unit: " + entityType.getDescription().getString());
-            level.addFreshEntity(unit);
+            level.addFreshEntity(entity);
             BlockPos minCorner = getMinCorner(this.blocks);
-            unit.moveTo(new Vec3(
+            entity.moveTo(new Vec3(
                 minCorner.getX() + relativeSpawnPoint.x,
-                minCorner.getX() + relativeSpawnPoint.y,
-                minCorner.getX() + relativeSpawnPoint.z
+                minCorner.getY() + relativeSpawnPoint.y,
+                minCorner.getZ() + relativeSpawnPoint.z
             ));
+            ((Unit) entity).setOwnerName(ownerName);
         }
     }
 

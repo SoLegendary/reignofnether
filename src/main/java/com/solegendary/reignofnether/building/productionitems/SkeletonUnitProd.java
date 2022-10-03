@@ -18,9 +18,8 @@ public class SkeletonUnitProd extends ProductionItem {
     public SkeletonUnitProd(ProductionBuilding building) {
         super(building, 100);
         this.onComplete = (Level level) -> {
-            System.out.println("produced skeleton unit!");
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.SKELETON_UNIT.get());
+                building.produceUnit((ServerLevel) level, EntityRegistrar.SKELETON_UNIT.get(), building.ownerName);
         };
     }
 

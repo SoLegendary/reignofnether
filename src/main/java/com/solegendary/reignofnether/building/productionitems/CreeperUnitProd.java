@@ -18,9 +18,8 @@ public class CreeperUnitProd extends ProductionItem {
     public CreeperUnitProd(ProductionBuilding building) {
         super(building, 100);
         this.onComplete = (Level level) -> {
-            System.out.println("produced creeper unit!");
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.CREEPER_UNIT.get());
+                building.produceUnit((ServerLevel) level, EntityRegistrar.CREEPER_UNIT.get(), building.ownerName);
         };
     }
 

@@ -18,9 +18,8 @@ public class ZombieUnitProd extends ProductionItem {
     public ZombieUnitProd(ProductionBuilding building) {
         super(building, 100);
         this.onComplete = (Level level) -> {
-            System.out.println("produced zombie unit!");
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get());
+                building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get(), building.ownerName);
         };
     }
 

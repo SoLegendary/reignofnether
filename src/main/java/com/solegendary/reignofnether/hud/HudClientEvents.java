@@ -368,13 +368,14 @@ public class HudClientEvents {
             evt.setResult(Event.Result.DENY);
     }
 
+    /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
         MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
             "x: " + MC.mouseHandler.xpos(),
             "y: " + MC.mouseHandler.ypos()
         });
-    }
+    }*/
 
     // uncomment to adjust render position/size of portraits
     /*
