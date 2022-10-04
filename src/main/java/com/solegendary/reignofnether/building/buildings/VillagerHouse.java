@@ -4,17 +4,12 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
 import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
 import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
-import com.solegendary.reignofnether.hud.Button;
-import com.solegendary.reignofnether.keybinds.Keybinding;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class VillagerHouse extends ProductionBuilding {
 
@@ -28,11 +23,12 @@ public class VillagerHouse extends ProductionBuilding {
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.OAK_LOG;
 
-        this.productionButtons = Arrays.asList(
+        if (level.isClientSide())
+            this.productionButtons = Arrays.asList(
                 CreeperUnitProd.getStartButton(this),
                 SkeletonUnitProd.getStartButton(this),
                 ZombieUnitProd.getStartButton(this)
-        );
+            );
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

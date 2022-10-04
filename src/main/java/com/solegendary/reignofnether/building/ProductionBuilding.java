@@ -25,6 +25,8 @@ public abstract class ProductionBuilding extends Building {
     // spawn point relative to building origin to spawn units
     private Vec3 relativeSpawnPoint = new Vec3(0,0,0);
 
+    // TODO: rally point
+
     private boolean isProducing() {
         return this.productionQueue.size() > 0;
     }

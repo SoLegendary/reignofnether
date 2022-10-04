@@ -20,11 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ZombieUnit extends Zombie implements Unit {
-
-    public ZombieUnit(EntityType<? extends Zombie> p_34271_, Level p_34272_) {
-        super(p_34271_, p_34272_);
-    }
-
     // region
     public List<AbilityButton> getAbilities() {return abilities;};
 
@@ -86,6 +81,10 @@ public class ZombieUnit extends Zombie implements Unit {
     public ZombieAttackUnitGoal attackGoal;
 
     private static final List<AbilityButton> abilities = new ArrayList<>();
+
+    public ZombieUnit(EntityType<? extends Zombie> entityType, Level level) {
+        super(entityType, level);
+    }
 
     public void tick() {
         super.tick();

@@ -21,13 +21,11 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class CreeperUnit extends Creeper implements Unit {
-
-    public CreeperUnit(EntityType<? extends Creeper> p_32278_, Level p_32279_) { super(p_32278_, p_32279_); }
-
     // region
     public List<AbilityButton> getAbilities() {return abilities;};
 
@@ -88,19 +86,23 @@ public class CreeperUnit extends Creeper implements Unit {
 
     public MeleeAttackGoal attackGoal;
 
-    private static final List<AbilityButton> abilities = Arrays.asList(
-            new AbilityButton(
-                    "Explode",
-                    14,
-                    "textures/icons/blocks/tnt.png",
-                    Keybinding.keyQ,
-                    () -> CursorClientEvents.getLeftClickAction() == ActionName.EXPLODE,
-                    () -> false,
-                    () -> true,
-                    () -> CursorClientEvents.setLeftClickAction(ActionName.EXPLODE),
-                    0, 0, 3
-            )
-    );
+    private final List<AbilityButton> abilities = new ArrayList<>();
+
+    public CreeperUnit(EntityType<? extends Creeper> entityType, Level level) {
+        super(entityType, level);
+        if (level.isClientSide())
+            this.abilities.add(new AbilityButton(
+                "Explode",
+                14,
+                "textures/icons/blocks/tnt.png",
+                Keybinding.keyQ,
+                () -> CursorClientEvents.getLeftClickAction() == ActionName.EXPLODE,
+                () -> false,
+                () -> true,
+                () -> CursorClientEvents.setLeftClickAction(ActionName.EXPLODE),
+                0, 0, 3
+            ));
+    }
 
     public void tick() {
         super.tick();

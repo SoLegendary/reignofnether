@@ -69,8 +69,11 @@ public class BuildingServerEvents {
         if (!evt.level.isClientSide() && evt.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
             serverLevel = (ServerLevel) evt.level;
 
-            for (Building building : buildings)
+            for (Building building : buildings) {
                 building.tick(serverLevel);
+                System.out.println("(Server) building blocks placed: " + building.getBlocksPlaced());
+            }
+
             buildings.removeIf(Building::isDestroyed);
 
             if (blockPlaceQueue.size() > 0) {

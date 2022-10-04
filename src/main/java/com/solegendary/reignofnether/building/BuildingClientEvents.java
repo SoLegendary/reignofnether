@@ -337,14 +337,13 @@ public class BuildingClientEvents {
             replaceOverlayTexture();
             replacedTexture = true;
         }
-    }
 
-    @SubscribeEvent
-    public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (MC.level != null && evt.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
+        if (MC.level != null && MC.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
 
-            for (Building building : buildings)
+            for (Building building : buildings) {
                 building.tick(MC.level);
+                System.out.println("(Client) building blocks placed: " + building.getBlocksPlaced());
+            }
 
             // cleanup destroyed buildings
             if (selectedBuilding != null && selectedBuilding.isDestroyed())

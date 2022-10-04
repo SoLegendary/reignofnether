@@ -20,11 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SkeletonUnit extends Skeleton implements Unit {
-
-    public SkeletonUnit(EntityType<? extends Skeleton> p_33570_, Level p_33571_) {
-        super(p_33570_, p_33571_);
-    }
-
     // region
     public List<AbilityButton> getAbilities() {return abilities;};
 
@@ -86,6 +81,10 @@ public class SkeletonUnit extends Skeleton implements Unit {
     public RangedBowAttackUnitGoal<? extends LivingEntity> attackGoal;
 
     private static final List<AbilityButton> abilities = new ArrayList<>();
+
+    public SkeletonUnit(EntityType<? extends Skeleton> entityType, Level level) {
+        super(entityType, level);
+    }
 
     public void tick() {
         super.tick();
