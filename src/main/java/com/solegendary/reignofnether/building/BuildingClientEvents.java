@@ -241,6 +241,17 @@ public class BuildingClientEvents {
                 case HOSTILE -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), aabb, 1.0f, 0.3f, 0.3f, 0.2f);
             }
         }
+
+        // render rally point
+        if (selectedBuilding instanceof ProductionBuilding selProdBuilding && selProdBuilding.rallyPoint != null) {
+            MyRenderer.drawWhiteBox(evt.getPoseStack(),
+                    selProdBuilding.rallyPoint,
+                    0.5f);
+            MyRenderer.drawLine(evt.getPoseStack(),
+                    selProdBuilding.rallyPoint,
+                    Building.getMinCorner(selProdBuilding.getBlocks()),
+                    0, 1.0f, 0, 0.5f);
+        }
     }
 
     @SubscribeEvent
@@ -311,6 +322,12 @@ public class BuildingClientEvents {
                 }
             }
         }
+        else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            // set rally points
+            if (selectedBuilding instanceof ProductionBuilding selProdBuilding) {
+                selProdBuilding.rallyPoint = CursorClientEvents.getPreselectedBlockPos();
+            }
+        }
     }
 
     // place a building clientside that has already been registered on serverside
@@ -340,10 +357,8 @@ public class BuildingClientEvents {
 
         if (MC.level != null && MC.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
 
-            for (Building building : buildings) {
+            for (Building building : buildings)
                 building.tick(MC.level);
-                System.out.println("(Client) building blocks placed: " + building.getBlocksPlaced());
-            }
 
             // cleanup destroyed buildings
             if (selectedBuilding != null && selectedBuilding.isDestroyed())

@@ -23,9 +23,8 @@ public abstract class ProductionBuilding extends Building {
     public List<Button> productionButtons = new ArrayList<>();
     public final List<ProductionItem> productionQueue = new ArrayList<>();
     // spawn point relative to building origin to spawn units
-    private Vec3 relativeSpawnPoint = new Vec3(0,0,0);
-
-    // TODO: rally point
+    private final BlockPos relativeSpawnPoint = new BlockPos(0,0,0);
+    public BlockPos rallyPoint = null;
 
     private boolean isProducing() {
         return this.productionQueue.size() > 0;
@@ -42,11 +41,14 @@ public abstract class ProductionBuilding extends Building {
             level.addFreshEntity(entity);
             BlockPos minCorner = getMinCorner(this.blocks);
             entity.moveTo(new Vec3(
-                minCorner.getX() + relativeSpawnPoint.x,
-                minCorner.getY() + relativeSpawnPoint.y,
-                minCorner.getZ() + relativeSpawnPoint.z
+                minCorner.getX() + relativeSpawnPoint.getX(),
+                minCorner.getY() + relativeSpawnPoint.getY(),
+                minCorner.getZ() + relativeSpawnPoint.getZ()
             ));
             ((Unit) entity).setOwnerName(ownerName);
+            // TODO: doesn't seem to work?
+            if (rallyPoint != null)
+                ((Unit) entity).setMoveTarget(rallyPoint);
         }
     }
 

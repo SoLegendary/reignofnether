@@ -10,6 +10,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Supplier;
@@ -155,6 +156,8 @@ public class Button {
             else if (this.hotkey != null)
                 System.out.println("Clicked on button - hotkey: " + hotkey.getKey().getDisplayName());
 
+            if (MC.player != null)
+                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK);
             this.onUse.run();
         }
     }
@@ -164,7 +167,10 @@ public class Button {
         if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
             return;
 
-        if (hotkey != null && hotkey.getKey().getValue() == key)
+        if (hotkey != null && hotkey.getKey().getValue() == key) {
+            if (MC.player != null)
+                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.5f, 1.0f);
             this.onUse.run();
+        }
     }
 }

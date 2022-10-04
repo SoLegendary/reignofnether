@@ -167,6 +167,29 @@ public class MyRenderer {
         matrixStack.popPose();
     }
 
+    public static void drawLine(PoseStack matrixStack, BlockPos startPos, BlockPos endPos, float r, float g, float b, float a) {
+        Entity camEntity = MC.getCameraEntity();
+        double d0 = camEntity.getX();
+        double d1 = camEntity.getY() + camEntity.getEyeHeight();
+        double d2 = camEntity.getZ();
+
+        RenderSystem.depthMask(false); // disable showing lines through blocks
+
+        matrixStack.pushPose();
+        matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
+        Matrix4f matrix4f = matrixStack.last().pose();
+        Matrix3f matrix3f = matrixStack.last().normal();
+
+        ResourceLocation rl = new ResourceLocation("forge:textures/white.png");
+        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
+
+        vertexConsumer.vertex(matrix4f, startPos.getX(), startPos.getY(), startPos.getX()).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, startPos.getX(), startPos.getY(), startPos.getX()).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, endPos.getX(), endPos.getY(), endPos.getX()).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, endPos.getX(), endPos.getY(), endPos.getX()).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        matrixStack.popPose();
+    }
+
     public static void renderFrameWithBg(PoseStack poseStack, int x, int y, int width, int height, int bgCol) {
         // draw icon frame with dark transparent bg
         GuiComponent.fill(poseStack, // x1,y1, x2,y2,

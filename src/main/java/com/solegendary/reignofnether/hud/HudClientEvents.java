@@ -113,12 +113,9 @@ public class HudClientEvents {
             // -------------------------
             // Building production queue
             // -------------------------
-            ProductionBuilding selProdBuilding = null;
-            if (selBuilding instanceof ProductionBuilding)
-                selProdBuilding = (ProductionBuilding) selBuilding;
 
             // bottom row for all other queued items
-            if (selProdBuilding != null) {
+            if (selBuilding instanceof ProductionBuilding selProdBuilding) {
                 int blitXStart = blitX;
                 blitY = screenHeight - iconFrameSize * 2 - 5;
 
@@ -176,7 +173,7 @@ public class HudClientEvents {
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
 
-            if (selProdBuilding != null && selProdBuilding.isBuilt) {
+            if (selBuilding instanceof ProductionBuilding selProdBuilding && selProdBuilding.isBuilt) {
                 for (Button productionButton : selProdBuilding.productionButtons) {
                     actionButtons.add(productionButton);
                     productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
