@@ -35,6 +35,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
+import org.stringtemplate.v4.misc.Misc;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -242,15 +243,15 @@ public class BuildingClientEvents {
             }
         }
 
-        // render rally point
         if (selectedBuilding instanceof ProductionBuilding selProdBuilding && selProdBuilding.rallyPoint != null) {
-            MyRenderer.drawWhiteBox(evt.getPoseStack(),
+            float a = MiscUtil.getOscillatingFloat(0.5f,1);
+            MyRenderer.drawBox(evt.getPoseStack(),
                     selProdBuilding.rallyPoint,
-                    0.5f);
+                    0, 1, 0, a);
             MyRenderer.drawLine(evt.getPoseStack(),
                     selProdBuilding.rallyPoint,
                     Building.getMinCorner(selProdBuilding.getBlocks()),
-                    0, 1.0f, 0, 0.5f);
+                    0, 1, 0, a);
         }
     }
 

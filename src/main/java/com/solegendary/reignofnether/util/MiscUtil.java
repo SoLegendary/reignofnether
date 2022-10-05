@@ -116,4 +116,17 @@ public class MiscUtil {
 
         return (blue << 16) | (green << 8) | (red);
     }
+
+    // get a float that ranges between 0-1 based on the system clock
+    // used for oscillating an alpha value to make a rendered object pulse
+    public static float getOscillatingFloat(double min, double max) {
+        long ms = System.currentTimeMillis();
+        String msStr = String.valueOf(ms);
+        String last3Digits = msStr.substring(msStr.length()-3);
+        double msOsc = (Math.abs(Double.parseDouble(last3Digits) - 500) / 250) - 1; // +-1 along linear scale
+        msOsc = (Math.asin(msOsc) / Math.PI) + 0.5d; // 0-1 along sin scale
+        msOsc *= (max - min);
+        msOsc += min;
+        return (float) msOsc;
+    }
 }

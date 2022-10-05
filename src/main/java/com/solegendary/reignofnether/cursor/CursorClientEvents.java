@@ -23,6 +23,8 @@ import net.minecraft.world.phys.*;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
+import org.stringtemplate.v4.misc.Misc;
+
 import static net.minecraft.util.Mth.*;
 
 
@@ -303,7 +305,7 @@ public class CursorClientEvents {
             if (!OrthoviewClientEvents.isCameraMovingByMouse() && !leftClickDown &&
                     UnitClientEvents.getSelectedUnitIds().size() > 0 &&
                     UnitClientEvents.getPreselectedUnitIds().size() <= 0) {
-                MyRenderer.drawWhiteBox(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 0.3f : 0.15f);
+                MyRenderer.drawBox(evt.getPoseStack(), preselectedBlockPos, 1, 1, 1, rightClickDown ? 0.3f : 0.15f);
                 MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }
         }
@@ -390,10 +392,9 @@ public class CursorClientEvents {
     }
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        /*
-        MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
-                "alpha: " + alpha,
-        });*/
+        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+                "alpha: " + MiscUtil.getOscillatingFloat(0,1),
+        });
     }
 }
 

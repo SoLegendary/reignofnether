@@ -64,22 +64,12 @@ public class MyRenderer {
     }
 
     // remember white.png can still be used with RGBA values
-    public static void drawWhiteBox(PoseStack matrixStack, BlockPos bp, float a) {
+    public static void drawBox(PoseStack matrixStack, BlockPos bp, float r, float g, float b, float a) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
         drawSolidBox(matrixStack, aabb, null, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/white.png"));
     }
-    public static void drawBlackBox(PoseStack matrixStack, BlockPos bp, float a) {
-        AABB aabb = new AABB(bp);
-        aabb = aabb.setMaxY(aabb.maxY + 0.01f);
-        drawSolidBox(matrixStack, aabb, null, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/black.png"));
-    }
-    public static void drawWhiteBlockFace(PoseStack matrixStack, Direction dir, BlockPos bp, float a) {
-        AABB aabb = new AABB(bp);
-        aabb = aabb.setMaxY(aabb.maxY + 0.01f);
-        drawSolidBox(matrixStack, aabb, dir, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/white.png"));
-    }
-    public static void drawBlackBlockFace(PoseStack matrixStack, Direction dir, BlockPos bp, float a) {
+    public static void drawBlockFace(PoseStack matrixStack, Direction dir, BlockPos bp, float r, float g, float b, float a) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
         drawSolidBox(matrixStack, aabb, dir, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/black.png"));
@@ -183,10 +173,10 @@ public class MyRenderer {
         ResourceLocation rl = new ResourceLocation("forge:textures/white.png");
         VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
 
-        vertexConsumer.vertex(matrix4f, startPos.getX(), startPos.getY(), startPos.getX()).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, startPos.getX(), startPos.getY(), startPos.getX()).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, endPos.getX(), endPos.getY(), endPos.getX()).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, endPos.getX(), endPos.getY(), endPos.getX()).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, startPos.getX(), startPos.getY() + 1, startPos.getZ()).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, startPos.getX() + 1, startPos.getY() + 1, startPos.getZ() + 1).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, endPos.getX(), endPos.getY() + 1, endPos.getZ()).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix4f, endPos.getX() + 1, endPos.getY() + 1, endPos.getZ() + 1).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
         matrixStack.popPose();
     }
 

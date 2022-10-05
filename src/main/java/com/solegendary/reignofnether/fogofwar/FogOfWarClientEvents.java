@@ -116,7 +116,7 @@ public class FogOfWarClientEvents {
 
     public static void renderFogOfWar(PoseStack poseStack) {
         for (Pair<BlockPos, Direction> bpd : foggedBlocks)
-            MyRenderer.drawBlackBlockFace(poseStack, bpd.getSecond(), bpd.getFirst(), 0.5f);
+            MyRenderer.drawBlockFace(poseStack, bpd.getSecond(), bpd.getFirst(), 0, 0, 0, 0.5f);
     }
 
     // checks whether a block is a complete cube or not
