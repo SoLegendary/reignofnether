@@ -16,15 +16,18 @@ import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.findBuilding;
+import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
+
 // buildings which can produce units and/or research tech
 public abstract class ProductionBuilding extends Building {
 
     // includes production options
     public List<Button> productionButtons = new ArrayList<>();
     public final List<ProductionItem> productionQueue = new ArrayList<>();
+
     // spawn point relative to building origin to spawn units
-    private final BlockPos relativeSpawnPoint = new BlockPos(0,0,0);
-    public BlockPos rallyPoint = null;
+    public BlockPos rallyPoint;
 
     private boolean isProducing() {
         return this.productionQueue.size() > 0;
@@ -39,11 +42,11 @@ public abstract class ProductionBuilding extends Building {
         if (entity != null) {
             System.out.println("creating unit: " + entityType.getDescription().getString());
             level.addFreshEntity(entity);
-            BlockPos minCorner = getMinCorner(this.blocks);
+            BlockPos spawnPoint = getMinCorner(this.blocks);
             entity.moveTo(new Vec3(
-                minCorner.getX() + relativeSpawnPoint.getX(),
-                minCorner.getY() + relativeSpawnPoint.getY(),
-                minCorner.getZ() + relativeSpawnPoint.getZ()
+                spawnPoint.getX(),
+                spawnPoint.getY(),
+                spawnPoint.getZ()
             ));
             ((Unit) entity).setOwnerName(ownerName);
             // TODO: doesn't seem to work?

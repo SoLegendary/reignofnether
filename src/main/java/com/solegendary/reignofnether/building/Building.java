@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
-import com.solegendary.reignofnether.hud.AbilityButton;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
@@ -18,6 +17,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+
+import static com.solegendary.reignofnether.building.BuildingUtils.getMaxCorner;
+import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
 
 public abstract class Building {
 
@@ -43,45 +45,10 @@ public abstract class Building {
     public int tickAge = 0; // how many ticks ago this building was placed
     public boolean canAcceptResources = false; // can workers drop off resources here?
 
-    public Building() {
-    }
+    public Building() { }
 
     public ArrayList<BuildingBlock> getBlocks() {
         return blocks;
-    }
-
-    // given a string name return a new instance of that building
-    public static Building getNewBuilding(String buildingName, LevelAccessor level, BlockPos pos, Rotation rotation, String ownerName) {
-        Building building = null;
-        switch(buildingName) {
-            case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation, ownerName);
-            case VillagerTower.buildingName -> building = new VillagerTower(level, pos, rotation, ownerName);
-        }
-        if (building != null)
-            building.level = level;
-        return building;
-    }
-
-    public static Building findBuilding(List<Building> buildings, BlockPos pos) {
-        for (Building building : buildings)
-            if (building.isPosInsideBuilding(pos))
-                return building;
-        return null;
-    }
-
-    public static BlockPos getMinCorner(ArrayList<BuildingBlock> blocks) {
-        return new BlockPos(
-            blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
-            blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
-            blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
-        );
-    }
-    public static BlockPos getMaxCorner(ArrayList<BuildingBlock> blocks) {
-        return new BlockPos(
-            blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
-            blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
-            blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
-        );
     }
 
     public boolean isPosInsideBuilding(BlockPos bp) {
@@ -100,36 +67,24 @@ public abstract class Building {
         return false;
     }
 
-    public static Vec3i getBuildingSize(ArrayList<BuildingBlock> blocks) {
-        BlockPos min = getMinCorner(blocks);
-        BlockPos max = getMaxCorner(blocks);
-        return new Vec3i(
-                max.getX() - min.getX(),
-                max.getY() - min.getY(),
-                max.getZ() - min.getZ()
-        );
-    }
+    // returns the lowest Y value block in this.blocks to the given blockPos
+    public BlockPos getClosestGroundBlock(BlockPos bp) {
+        float minDist = 999999;
+        BlockPos minPos = BuildingUtils.getMinCorner(this.blocks);
+        int minY = minPos.getY();
 
-    // get BlockPos values with absolute world positions
-    public static ArrayList<BuildingBlock> getAbsoluteBlockData(ArrayList<BuildingBlock> staticBlocks, LevelAccessor level, BlockPos originPos, Rotation rotation) {
-        ArrayList<BuildingBlock> blocks = new ArrayList<>();
-
-        for (BuildingBlock block : staticBlocks) {
-            block = block.rotate(level, rotation);
-            BlockPos bp = block.getBlockPos();
-
-            block.setBlockPos(new BlockPos(
-                bp.getX() + originPos.getX(),
-                bp.getY() + originPos.getY() + 1,
-                bp.getZ() + originPos.getZ()
-            ));
-            blocks.add(block);
+        for (BuildingBlock block : this.blocks) {
+            if (block.getBlockPos().getY() != minY)
+                continue;
+            float dist = (float) block.getBlockPos().distToCenterSqr(bp.getX(), bp.getY(), bp.getZ());
+            if (dist < minDist) {
+                minDist = dist;
+                minPos = block.getBlockPos();
+            }
         }
-        return blocks;
+        return minPos;
     }
 
-    // get BlockPos values with relative positions
-    public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) { return new ArrayList<>(); }
 
     public int getBlocksTotal() {
         return blocks.stream().filter(b -> !b.getBlockState().isAir()).toList().size();
@@ -172,7 +127,7 @@ public abstract class Building {
         }
     }
 
-    public boolean isDestroyed() {
+    public boolean shouldBeDestroyed() {
         if (tickAge < 10)
             return false;
         if (getBlocksPlaced() <= 0)
@@ -262,7 +217,7 @@ public abstract class Building {
 
             // TODO: if fires exist, put them out one by one (or gradually remove them if blocksPercent > fireThreshold%)
 
-            if (this.isDestroyed()) {
+            if (this.shouldBeDestroyed()) {
                 this.destroy((ServerLevel) level);
             }
         }

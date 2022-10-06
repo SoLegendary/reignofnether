@@ -1,8 +1,5 @@
 package com.solegendary.reignofnether.building;
 
-import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
-import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
-import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -42,11 +39,11 @@ public class BuildingServerEvents {
     }
 
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName) {
-        Building building = Building.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName);
+        Building building = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName);
         if (building != null) {
             buildings.add(building);
             // place all blocks on the lowest y level
-            int minY = Building.getMinCorner(building.blocks).getY();
+            int minY = BuildingUtils.getMinCorner(building.blocks).getY();
             for (BuildingBlock block : building.blocks)
                 if (block.getBlockPos().getY() == minY)
                     block.place();
@@ -72,7 +69,7 @@ public class BuildingServerEvents {
             for (Building building : buildings)
                 building.tick(serverLevel);
 
-            buildings.removeIf(Building::isDestroyed);
+            buildings.removeIf(Building::shouldBeDestroyed);
 
             if (blockPlaceQueue.size() > 0) {
                 BuildingBlock nextBlock = blockPlaceQueue.get(0);

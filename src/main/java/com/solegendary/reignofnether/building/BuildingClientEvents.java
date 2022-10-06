@@ -5,9 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
-import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
-import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
-import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -35,7 +32,6 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
-import org.stringtemplate.v4.misc.Misc;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -225,8 +221,8 @@ public class BuildingClientEvents {
 
         for (Building building : buildings) {
             AABB aabb = new AABB(
-                    new BlockPos(Building.getMinCorner(building.blocks)),
-                    new BlockPos(Building.getMaxCorner(building.blocks)).offset(1,1,1)
+                    new BlockPos(BuildingUtils.getMinCorner(building.blocks)),
+                    new BlockPos(BuildingUtils.getMaxCorner(building.blocks)).offset(1,1,1)
             );
 
             if (building.equals(selectedBuilding))
@@ -244,13 +240,14 @@ public class BuildingClientEvents {
         }
 
         if (selectedBuilding instanceof ProductionBuilding selProdBuilding && selProdBuilding.rallyPoint != null) {
-            float a = MiscUtil.getOscillatingFloat(0.5f,1);
-            MyRenderer.drawBox(evt.getPoseStack(),
+            float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
+            MyRenderer.drawBlockFace(evt.getPoseStack(),
+                    Direction.UP,
                     selProdBuilding.rallyPoint,
                     0, 1, 0, a);
             MyRenderer.drawLine(evt.getPoseStack(),
+                    BuildingUtils.getCentrePos(selProdBuilding.getBlocks()).offset(0,-1,0),
                     selProdBuilding.rallyPoint,
-                    Building.getMinCorner(selProdBuilding.getBlocks()),
                     0, 1, 0, a);
         }
     }
@@ -275,7 +272,7 @@ public class BuildingClientEvents {
                     Class<?>[] paramTypes = { LevelAccessor.class };
                     Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData", paramTypes);
                     blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level);
-                    buildingDimensions = Building.getBuildingSize(blocksToDraw);
+                    buildingDimensions = BuildingUtils.getBuildingSize(blocksToDraw);
                     buildingRotation = Rotation.NONE;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -327,13 +324,16 @@ public class BuildingClientEvents {
             // set rally points
             if (selectedBuilding instanceof ProductionBuilding selProdBuilding) {
                 selProdBuilding.rallyPoint = CursorClientEvents.getPreselectedBlockPos();
+                BuildingServerboundPacket.setRallyPoint(
+                        BuildingUtils.getMinCorner(selectedBuilding.blocks),
+                        CursorClientEvents.getPreselectedBlockPos());
             }
         }
     }
 
     // place a building clientside that has already been registered on serverside
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName) {
-        Building building = Building.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName);
+        Building building = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName);
         if (building != null)
             buildings.add(building);
     }
@@ -362,9 +362,19 @@ public class BuildingClientEvents {
                 building.tick(MC.level);
 
             // cleanup destroyed buildings
-            if (selectedBuilding != null && selectedBuilding.isDestroyed())
+            if (selectedBuilding != null && selectedBuilding.shouldBeDestroyed())
                 selectedBuilding = null;
-            buildings.removeIf(Building::isDestroyed);
+            buildings.removeIf(Building::shouldBeDestroyed);
         }
     }
+
+    /*
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+                "xn: " + xn,
+                "yn: " + yn,
+                "zn: " + zn,
+        });
+    }*/
 }

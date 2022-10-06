@@ -9,7 +9,6 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -20,6 +19,8 @@ import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.lwjgl.glfw.GLFW;
+
 import java.util.*;
 
 public class HudClientEvents {
@@ -295,17 +296,20 @@ public class HudClientEvents {
 
     @SubscribeEvent
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
+        if (evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
+            return;
+
         genericActionButtons.forEach((Button button) -> {
-            button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY());
+            button.checkLeftClicked((int) evt.getMouseX(), (int) evt.getMouseY());
         });
         actionButtons.forEach((Button button) -> {
-            button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY());
+            button.checkLeftClicked((int) evt.getMouseX(), (int) evt.getMouseY());
         });
         unitButtons.forEach((Button button) -> {
-            button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY());
+            button.checkLeftClicked((int) evt.getMouseX(), (int) evt.getMouseY());
         });
         productionButtons.forEach((Button button) -> {
-            button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY());
+            button.checkLeftClicked((int) evt.getMouseX(), (int) evt.getMouseY());
         });
     }
 

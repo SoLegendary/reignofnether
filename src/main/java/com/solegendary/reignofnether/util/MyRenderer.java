@@ -24,6 +24,7 @@ import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public class MyRenderer {
 
@@ -67,14 +68,15 @@ public class MyRenderer {
     public static void drawBox(PoseStack matrixStack, BlockPos bp, float r, float g, float b, float a) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
-        drawSolidBox(matrixStack, aabb, null, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/white.png"));
+        drawSolidBox(matrixStack, aabb, null, r, g, b, a, new ResourceLocation("forge:textures/white.png"));
     }
     public static void drawBlockFace(PoseStack matrixStack, Direction dir, BlockPos bp, float r, float g, float b, float a) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
-        drawSolidBox(matrixStack, aabb, dir, 1.0f, 1.0f, 1.0f, a, new ResourceLocation("forge:textures/black.png"));
+        drawSolidBox(matrixStack, aabb, dir, r, g, b, a, new ResourceLocation("forge:textures/white.png"));
     }
 
+    // might be null RL for black.png as of 1.19?
     public static void drawSolidBox(PoseStack matrixStack, AABB aabb, Direction dir, float r, float g, float b, float a, ResourceLocation rl) {
         Entity camEntity = MC.getCameraEntity();
         double d0 = camEntity.getX();
@@ -157,8 +159,12 @@ public class MyRenderer {
         matrixStack.popPose();
     }
 
+    // draws a coloured line from centre-top of startPos to centre-top of endPos
     public static void drawLine(PoseStack matrixStack, BlockPos startPos, BlockPos endPos, float r, float g, float b, float a) {
         Entity camEntity = MC.getCameraEntity();
+        if (camEntity == null)
+            return;
+
         double d0 = camEntity.getX();
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
         double d2 = camEntity.getZ();
@@ -170,13 +176,24 @@ public class MyRenderer {
         Matrix4f matrix4f = matrixStack.last().pose();
         Matrix3f matrix3f = matrixStack.last().normal();
 
-        ResourceLocation rl = new ResourceLocation("forge:textures/white.png");
-        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
+        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES);
 
-        vertexConsumer.vertex(matrix4f, startPos.getX(), startPos.getY() + 1, startPos.getZ()).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, startPos.getX() + 1, startPos.getY() + 1, startPos.getZ() + 1).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, endPos.getX(), endPos.getY() + 1, endPos.getZ()).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-        vertexConsumer.vertex(matrix4f, endPos.getX() + 1, endPos.getY() + 1, endPos.getZ() + 1).color(r, g, b, a).uv(0,0).overlayCoords(0,10).uv2(255).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        // centre the start and end pos
+        Vector3f startVec = new Vector3f(
+                startPos.getX() + 0.5f,
+                startPos.getY() + 1.1f,
+                startPos.getZ() + 0.5f
+        );
+        Vector3f endVec = new Vector3f(
+                endPos.getX() + 0.5f,
+                endPos.getY() + 1.1f,
+                endPos.getZ() + 0.5f
+        );
+        // draw two lines on inverse normals so they're visible from any angle
+        vertexConsumer.vertex(matrix4f, startVec.x(), startVec.y(), startVec.z()).color(r, g, b, a).normal(matrix3f, 1.0f, 0,0).endVertex();
+        vertexConsumer.vertex(matrix4f,   endVec.x(),   endVec.y(),   endVec.z()).color(r, g, b, a).normal(matrix3f, 1.0f, 0,0).endVertex();
+        vertexConsumer.vertex(matrix4f, startVec.x(), startVec.y(), startVec.z()).color(r, g, b, a).normal(matrix3f, 0, 0,1.0f).endVertex();
+        vertexConsumer.vertex(matrix4f,   endVec.x(),   endVec.y(),   endVec.z()).color(r, g, b, a).normal(matrix3f, 0, 0,1.0f).endVertex();
         matrixStack.popPose();
     }
 

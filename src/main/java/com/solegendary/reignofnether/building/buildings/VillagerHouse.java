@@ -11,6 +11,8 @@ import net.minecraft.world.level.block.Rotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+
 public class VillagerHouse extends ProductionBuilding {
 
     public final static String buildingName = "Villager House";

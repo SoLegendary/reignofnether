@@ -390,12 +390,13 @@ public class CursorClientEvents {
                 alpha += 0.1f;
         }
     }
+    /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
         MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
                 "alpha: " + MiscUtil.getOscillatingFloat(0,1),
         });
-    }
+    }*/
 }
 
 

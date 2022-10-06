@@ -11,8 +11,9 @@ import java.util.function.Supplier;
 
 public class BuildingServerboundPacket {
     // pos is used to identify the building object serverside
-    public BlockPos pos; // required for all actions (used to identify the relevant building)
     public String itemName; // name of the building or production item // PLACE, START_PRODUCTION, CANCEL_PRODUCTION
+    public BlockPos buildingPos; // required for all actions (used to identify the relevant building)
+    public BlockPos rallyPos; // required for all actions (used to identify the relevant building)
     public Rotation rotation; // PLACE
     public String ownerName; // PLACE
     public int repairAmount; // REPAIR
@@ -21,34 +22,40 @@ public class BuildingServerboundPacket {
     public static void placeBuilding(String itemName, BlockPos originPos, Rotation rotation, String ownerName) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.PLACE,
-                itemName, originPos, rotation, ownerName, 0));
+                itemName, originPos, BlockPos.ZERO, rotation, ownerName, 0));
     }
-    public static void cancelBuilding(BlockPos pos) {
+    public static void cancelBuilding(BlockPos buildingPos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.CANCEL,
-                "", pos, Rotation.NONE, "", 0));
+                "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", 0));
     }
-    public static void repairBuilding(BlockPos pos, int repairAmount) {
+    public static void repairBuilding(BlockPos buildingPos, int repairAmount) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.REPAIR,
-                "", pos, Rotation.NONE, "", repairAmount));
+                "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", repairAmount));
     }
-    public static void startProduction(BlockPos pos, String itemName) {
+    public static void setRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.SET_RALLY_POINT,
+                "", buildingPos, rallyPos, Rotation.NONE, "", 0));
+    }
+    public static void startProduction(BlockPos buildingPos, String itemName) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.START_PRODUCTION,
-                itemName, pos, Rotation.NONE, "", 0));
+                itemName, buildingPos, BlockPos.ZERO, Rotation.NONE, "", 0));
     }
-    public static void cancelProduction(BlockPos pos, String itemName, boolean frontItem) {
+    public static void cancelProduction(BlockPos buildingPos, String itemName, boolean frontItem) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
-                itemName, pos, Rotation.NONE, "", 0));
+                itemName, buildingPos, BlockPos.ZERO, Rotation.NONE, "", 0));
     }
 
 
-    public BuildingServerboundPacket(BuildingAction action, String itemName, BlockPos pos, Rotation rotation, String ownerName, int repairAmount) {
+    public BuildingServerboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, BlockPos rallyPos, Rotation rotation, String ownerName, int repairAmount) {
         this.action = action;
         this.itemName = itemName;
-        this.pos = pos;
+        this.buildingPos = buildingPos;
+        this.rallyPos = rallyPos;
         this.rotation = rotation;
         this.ownerName = ownerName;
         this.repairAmount = repairAmount;
@@ -57,7 +64,8 @@ public class BuildingServerboundPacket {
     public BuildingServerboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(BuildingAction.class);
         this.itemName = buffer.readUtf();
-        this.pos = buffer.readBlockPos();
+        this.buildingPos = buffer.readBlockPos();
+        this.rallyPos = buffer.readBlockPos();
         this.rotation = buffer.readEnum(Rotation.class);
         this.ownerName = buffer.readUtf();
         this.repairAmount = buffer.readInt();
@@ -66,7 +74,8 @@ public class BuildingServerboundPacket {
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeUtf(this.itemName);
-        buffer.writeBlockPos(this.pos);
+        buffer.writeBlockPos(this.buildingPos);
+        buffer.writeBlockPos(this.rallyPos);
         buffer.writeEnum(this.rotation);
         buffer.writeUtf(this.ownerName);
         buffer.writeInt(this.repairAmount);
@@ -78,20 +87,25 @@ public class BuildingServerboundPacket {
         ctx.get().enqueueWork(() -> {
 
             switch (this.action) {
-                case PLACE -> BuildingServerEvents.placeBuilding(this.itemName, this.pos, this.rotation, this.ownerName);
+                case PLACE -> BuildingServerEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName);
                 case CANCEL -> System.out.println("CANCEL");
                 case REPAIR -> System.out.println("REPAIR");
+                case SET_RALLY_POINT -> {
+                    ProductionBuilding building = (ProductionBuilding) BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), this.buildingPos);
+                    if (building != null)
+                        building.rallyPoint = rallyPos;
+                }
                 case START_PRODUCTION -> {
-                    ProductionBuilding.startProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.pos);
-                    BuildingClientboundPacket.startProduction(pos, itemName);
+                    ProductionBuilding.startProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.buildingPos);
+                    BuildingClientboundPacket.startProduction(buildingPos, itemName);
                 }
                 case CANCEL_PRODUCTION -> {
-                    ProductionBuilding.cancelProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.pos, true);
-                    BuildingClientboundPacket.cancelProduction(pos, itemName, true);
+                    ProductionBuilding.cancelProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.buildingPos, true);
+                    BuildingClientboundPacket.cancelProduction(buildingPos, itemName, true);
                 }
                 case CANCEL_BACK_PRODUCTION -> {
-                    ProductionBuilding.cancelProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.pos, false);
-                    BuildingClientboundPacket.cancelProduction(pos, itemName, false);
+                    ProductionBuilding.cancelProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.buildingPos, false);
+                    BuildingClientboundPacket.cancelProduction(buildingPos, itemName, false);
                 }
             }
             success.set(true);

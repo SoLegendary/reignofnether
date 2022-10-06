@@ -146,7 +146,7 @@ public class Button {
     }
 
     // must be done from mouse press event
-    public void checkClicked(int mouseX, int mouseY) {
+    public void checkLeftClicked(int mouseX, int mouseY) {
         if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
             return;
 
@@ -157,7 +157,7 @@ public class Button {
                 System.out.println("Clicked on button - hotkey: " + hotkey.getKey().getDisplayName());
 
             if (MC.player != null)
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK);
+                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.2f, 1.0f);
             this.onUse.run();
         }
     }
@@ -169,7 +169,7 @@ public class Button {
 
         if (hotkey != null && hotkey.getKey().getValue() == key) {
             if (MC.player != null)
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.5f, 1.0f);
+                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.2f, 1.0f);
             this.onUse.run();
         }
     }

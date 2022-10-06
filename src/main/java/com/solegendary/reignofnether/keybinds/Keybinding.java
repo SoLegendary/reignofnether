@@ -53,6 +53,9 @@ public class Keybinding {
             new KeyMapping("key.reignofnether.orthoview.keyF11", GLFW.GLFW_KEY_F11, KEY_CATEGORY),
             new KeyMapping("key.reignofnether.orthoview.keyF12", GLFW.GLFW_KEY_F12, KEY_CATEGORY)
     };
+    public static KeyMapping getNum(int i) {
+        return nums[i];
+    }
     public static KeyMapping getFnum(int i) {
         return fnums[i-1];
     }

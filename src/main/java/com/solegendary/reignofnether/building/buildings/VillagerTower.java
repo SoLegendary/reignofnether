@@ -10,6 +10,8 @@ import net.minecraft.world.level.block.Rotation;
 
 import java.util.ArrayList;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+
 public class VillagerTower extends Building {
 
     public final static String buildingName = "Villager Tower";
