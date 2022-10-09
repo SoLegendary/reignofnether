@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
@@ -13,25 +12,12 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UnitServerEvents {
 
-    // every tick all these vars are enacted upon and then reset
-    private static UnitAction specialAction = null;
-    private static int unitIdToAttack = -1;
-    private static int unitIdToFollow = -1;
-    private static int[] unitIdsToMove = new int[0];
-    private static int[] unitIdsToAttackMove = new int[0];
-    private static int[] preselectedUnitIds = new int[0];
-    private static int[] selectedUnitIds = new int[0];
-    private static BlockPos preselectedBlockPos = null;
-
-    public static int[] getPreselectedUnitIds() { return preselectedUnitIds; }
-    public static int[] getSelectedUnitIds() { return selectedUnitIds; }
-    public static BlockPos getPreselectedBlockPos() { return preselectedBlockPos; }
-
-
+    private static final ArrayList<UnitActionItem> unitActionQueue = new ArrayList<>();
 
     // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns null
     // remember to always reset targets so that users' actions always overwrite any existing action
@@ -41,83 +27,27 @@ public class UnitServerEvents {
             return;
 
         ServerLevel level = (ServerLevel) evt.level;
+        for (UnitActionItem actionItem : unitActionQueue)
+            actionItem.action(level);
 
-        if (!level.isClientSide()) {
-            if (specialAction == UnitAction.STOP) {
-                for (int id : selectedUnitIds) {
-                    Unit unit = (Unit) level.getEntity(id);
-                    if (unit != null)
-                        unit.resetBehaviours();
-                }
-            }
-            if (specialAction == UnitAction.HOLD) {
-                for (int id : selectedUnitIds) {
-                    Unit unit = (Unit) level.getEntity(id);
-                    if (unit != null) {
-                        unit.resetBehaviours();
-                        unit.setHoldPosition(true);
-                    }
-                }
-            }
-            for (int id : unitIdsToMove) {
-                Unit unit = (Unit) level.getEntity(id);
-                if (unit != null) {
-                    unit.resetBehaviours();
-                    unit.setMoveTarget(preselectedBlockPos);
-                }
-            }
-            for (int id : unitIdsToAttackMove) {
-                Unit unit = (Unit) level.getEntity(id);
-                if (unit != null) {
-                    unit.resetBehaviours();
-                    unit.setAttackMoveTarget(preselectedBlockPos);
-                }
-            }
-            for (int id : selectedUnitIds) {
-                Unit unit = (Unit) level.getEntity(id);
-                if (unit != null && id != unitIdToAttack && id != unitIdToFollow) {
-                    if (unitIdToAttack >= 0) {
-                        unit.resetBehaviours();
-                        unit.setAttackTarget((LivingEntity) level.getEntity(unitIdToAttack));
-                    }
-                    if (unitIdToFollow >= 0) {
-                        unit.resetBehaviours();
-                        unit.setFollowTarget((LivingEntity) level.getEntity(unitIdToFollow));
-                    }
-                }
-            }
-            specialAction = null;
-            unitIdToAttack = -1;
-            unitIdToFollow = -1;
-            unitIdsToMove = new int[0];
-            unitIdsToAttackMove = new int[0];
-        }
+        unitActionQueue.clear();
     }
 
     // manually provide all the variables required to do unit actions
-    public static void consumeUnitActionQueues(
-            UnitAction specialActionIn,
-            int unitIdToAttackIn,
-            int unitIdToFollowIn,
-            int[] unitIdsToMoveIn,
-            int[] unitIdsToAttackMoveIn,
-            int[] preselectedUnitIdsIn,
-            int[] selectedUnitIdsIn,
-            BlockPos preselectedBlockPosIn
+    public static void addActionItem(
+            UnitAction action,
+            int unitId,
+            int[] unitIds,
+            BlockPos preselectedBlockPos
     ) {
-        specialAction = specialActionIn;   // ignored value: ActionName.NONE
-        unitIdToAttack = unitIdToAttackIn; // ignored value: -1
-        unitIdToFollow = unitIdToFollowIn; // ignored value: -1
-        unitIdsToMove = unitIdsToMoveIn;   // ignored value: new int[0]
-        unitIdsToAttackMove = unitIdsToAttackMoveIn; // ignored value: new int[0]
-        preselectedUnitIds = preselectedUnitIdsIn;   // ignored value: new int[0]
-        selectedUnitIds = selectedUnitIdsIn;         // ignored value: new int[0]
-        preselectedBlockPos = preselectedBlockPosIn; // ignored value: new BlockPos(0,0,0)
-    }
-
-    public static void moveUnits() {
-        specialAction = UnitAction.MOVE;
-
+        unitActionQueue.add(
+            new UnitActionItem(
+                action,
+                unitId,
+                unitIds,
+                preselectedBlockPos
+            )
+        );
     }
 
     @SubscribeEvent

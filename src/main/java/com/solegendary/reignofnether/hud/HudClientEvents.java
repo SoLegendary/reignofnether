@@ -91,9 +91,9 @@ public class HudClientEvents {
         buttonsPerRow = Math.max(buttonsPerRow, 4);
 
         // refresh button lists
-        actionButtons.removeIf((Button button) -> true);
-        unitButtons.removeIf((Button button) -> true);
-        productionButtons.removeIf((Button button) -> true);
+        actionButtons.clear();
+        unitButtons.clear();
+        productionButtons.clear();
 
         int blitX = hudStartingXPos;
         int blitY = MC.getWindow().getGuiScaledHeight();

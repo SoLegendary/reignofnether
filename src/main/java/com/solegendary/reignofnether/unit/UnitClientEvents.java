@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -20,23 +21,26 @@ import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class UnitClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
+    private static final ArrayList<ArrayList<Integer>> controlGroups = new ArrayList<>(10);
     // units moused over or inside a box select
     private static ArrayList<Integer> preselectedUnitIds = new ArrayList<>();
     // units selected by click or box select
     private static ArrayList<Integer> selectedUnitIds = new ArrayList<>();
-    // unit targeted by a right click for attack or follow
-    private static int unitIdToAttack = -1; // QUEUED - selected units attack this unit
-    private static int unitIdToFollow = -1; // QUEUED - selected units follow this unit
-    private static ArrayList<Integer> unitIdsToMove = new ArrayList<>(); // QUEUED - these units move to cursorBlockPos
-    private static ArrayList<Integer> unitIdsToAttackMove = new ArrayList<>(); // QUEUED - these units attack move to cursorBlockPos
-    private static ArrayList<ArrayList<Integer>> controlGroups = new ArrayList<>(10);
+    // tracking of all existing units
     private static ArrayList<Integer> allUnitIds = new ArrayList<>();
+    // id for actions related to individual units (attack target, follow target, etc.)
+    private static ArrayList<Integer> unitIdForAction = new ArrayList<>();
+    // ids for actions related to groups of units (attack, move, etc.)
+    private static ArrayList<Integer> unitIdsForAction = new ArrayList<>();
+
 
     public static ArrayList<Integer> getPreselectedUnitIds() { return preselectedUnitIds; }
     public static ArrayList<LivingEntity> getPreselectedUnits() {
@@ -65,13 +69,6 @@ public class UnitClientEvents {
         if (selectedUnitIds.size() > 0)
             BuildingClientEvents.setSelectedBuilding(null);
     }
-    public static int getUnitIdToAttack() { return unitIdToAttack; }
-    public static int getUnitIdToFollow() { return unitIdToFollow; }
-    public static void setUnitIdToAttack(int id) { unitIdToAttack = id; }
-    public static void setUnitIdToFollow(int id) { unitIdToFollow = id; }
-    public static void setUnitIdsToMove(ArrayList<Integer> unitIds) { unitIdsToMove = unitIds; }
-    public static void setUnitIdsToAttackMove(ArrayList<Integer> unitIds) { unitIdsToAttackMove = unitIds; }
-
     private static long lastLeftClickTime = 0; // to track double clicks
     private static final long doubleClickTimeMs = 500;
 
@@ -79,15 +76,23 @@ public class UnitClientEvents {
         return CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK;
     }
 
+    public static void sendUnitCommand(UnitAction specialAction) {
+        PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
+            specialAction,
+            preselectedUnitIds.size() > 0 ? preselectedUnitIds.get(0) : -1,
+            selectedUnitIds.stream().mapToInt(i -> i).toArray(),
+            CursorClientEvents.getPreselectedBlockPos()
+        ));
+    }
+
     private static void resolveMoveAction() {
         // follow friendly unit
-        if (preselectedUnitIds.size() == 1 && !targetingSelf())
-            setUnitIdToFollow(preselectedUnitIds.get(0));
+        if (preselectedUnitIds.size() == 1 && !targetingSelf()) {
+            sendUnitCommand(UnitAction.FOLLOW);
+        }
         // move to ground pos (disabled during camera manip)
         else if (!Keybinding.altMod.isDown()) {
-            ArrayList<Integer> unitIdsToMove = new ArrayList<>();
-            unitIdsToMove.addAll(selectedUnitIds);
-            setUnitIdsToMove(unitIdsToMove);
+            sendUnitCommand(UnitAction.MOVE);
         }
     }
 
@@ -121,13 +126,12 @@ public class UnitClientEvents {
 
             if (selectedUnitIds.size() > 0 && isLeftClickAttack()) {
                 // A + left click -> force attack single unit (even if friendly)
-                if (preselectedUnitIds.size() == 1 && !targetingSelf())
-                    setUnitIdToAttack(preselectedUnitIds.get(0));
+                if (preselectedUnitIds.size() == 1 && !targetingSelf()) {
+                    sendUnitCommand(UnitAction.ATTACK);
+                }
                 // A + left click -> attack move ground
                 else {
-                    ArrayList<Integer> unitIdsToAttackMove = new ArrayList<>();
-                    unitIdsToAttackMove.addAll(selectedUnitIds);
-                    setUnitIdsToAttackMove(unitIdsToAttackMove);
+                    sendUnitCommand(UnitAction.ATTACK_MOVE);
                 }
             }
 
@@ -186,37 +190,16 @@ public class UnitClientEvents {
             if (selectedUnitIds.size() > 0) {
                 // right click -> attack unfriendly unit
                 if (preselectedUnitIds.size() == 1 &&
-                        !targetingSelf() &&
-                        getPlayerToEntityRelationship(preselectedUnitIds.get(0)) == Relationship.HOSTILE)
-                    setUnitIdToAttack(preselectedUnitIds.get(0));
+                    !targetingSelf() &&
+                    getPlayerToEntityRelationship(preselectedUnitIds.get(0)) == Relationship.HOSTILE) {
+
+                    sendUnitCommand(UnitAction.ATTACK);
+                }
                 // right click -> follow friendly unit
                 else
                     resolveMoveAction();
             }
         }
-
-        // send all the commands over to server to enact
-        if (unitIdToAttack >= 0 ||
-            unitIdToFollow >= 0 ||
-            unitIdsToMove.size() > 0 ||
-            unitIdsToAttackMove.size() > 0) {
-
-            PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
-                    UnitAction.NONE,
-                    unitIdToAttack,
-                    unitIdToFollow,
-                    unitIdsToMove.stream().mapToInt(i -> i).toArray(), // convert List<Integer> to int[]
-                    unitIdsToAttackMove.stream().mapToInt(i -> i).toArray(),
-                    preselectedUnitIds.stream().mapToInt(i -> i).toArray(),
-                    selectedUnitIds.stream().mapToInt(i -> i).toArray(),
-                    CursorClientEvents.getPreselectedBlockPos()
-            ));
-            unitIdToAttack = -1;
-            unitIdToFollow = -1;
-            unitIdsToMove = new ArrayList<>();
-            unitIdsToAttackMove = new ArrayList<>();
-        }
-
         // clear all cursor actions
         CursorClientEvents.setLeftClickAction(null);
     }
@@ -298,19 +281,6 @@ public class UnitClientEvents {
         }
     }
 
-    public static void sendCommand(UnitAction actionName) {
-        PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
-                actionName,
-                -1, // unitIdToAttack
-                -1, // unitIdToFollow
-                new int[0], // unitIdsToMove
-                new int[0], // unitIdsToAttackMove
-                preselectedUnitIds.stream().mapToInt(i -> i).toArray(),
-                selectedUnitIds.stream().mapToInt(i -> i).toArray(),
-                CursorClientEvents.getPreselectedBlockPos() // used for actions that ground target
-        ));
-    }
-
     public static boolean targetingSelf() {
         return selectedUnitIds.size() == 1 &&
                 preselectedUnitIds.size() == 1 &&
@@ -335,20 +305,4 @@ public class UnitClientEvents {
         }
         return Relationship.NEUTRAL;
     }
-
-    /*
-    @SubscribeEvent
-    public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
-        LivingEntity entity = evt.getEntity();
-        Model model = evt.getRenderer().getModel();
-
-        if (entity instanceof Unit) {
-            if (entity instanceof Creeper) {
-                ((CreeperModel) model).root().visible = false;
-            }
-            else {
-                ((HumanoidModel) model).body.visible = false;
-            }
-        }
-    }*/
 }

@@ -16,6 +16,8 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.findBuilding;
 import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
@@ -64,14 +66,14 @@ public abstract class ProductionBuilding extends Building {
                         spawnPoint.getY() + 0.5f,
                         spawnPoint.getZ() + 0.5f
                 ));
-                UnitServerEvents.consumeUnitActionQueues(
-                    UnitAction.MOVE,
-                    -1,
-                    -1,
-                    new int[]{ entity.getId() },
-                    new int[0], new int[0], new int[0],
-                    this.rallyPoint
-                );
+                CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> {
+                    UnitServerEvents.addActionItem(
+                        UnitAction.MOVE,
+                        -1,
+                        new int[] { entity.getId() },
+                        this.rallyPoint
+                    );
+                });
             }
             else {
                 BlockPos spawnPoint = getMinCorner(this.blocks);

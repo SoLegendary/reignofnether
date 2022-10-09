@@ -10,62 +10,38 @@ import java.util.function.Supplier;
 
 public class UnitServerboundPacket {
 
-    private final UnitAction specialAction;
-    private final int unitIdToAttack;
-    private final int unitIdToFollow;
-    private final int[] unitIdsToMove;
-    private final int[] unitIdsToAttackMove;
-    private final int[] preselectedUnitIds;
-    private final int[] selectedUnitIds;
+    private final UnitAction action;
+    private final int unitId;
+    private final int[] unitIds;
     private final BlockPos preselectedBlockPos;
 
     // packet-handler functions
     public UnitServerboundPacket(
-        UnitAction specialAction,
-        int unitIdToAttack,
-        int unitIdToFollow,
-        int[] unitIdsToMove,
-        int[] unitIdsToAttackMove,
-        int[] preselectedUnitIds,
-        int[] selectedUnitIds,
+        UnitAction action,
+        int unitId,
+        int[] unitIds,
         BlockPos preselectedBlockPos
     ) {
         // filter out non-owned entities so we can't control them
-        this.specialAction = specialAction;
-        this.unitIdToAttack = unitIdToAttack;
-        this.unitIdToFollow = unitIdToFollow;
-        this.unitIdsToMove = Arrays.stream(unitIdsToMove).filter(
+        this.action = action;
+        this.unitId = unitId;
+        this.unitIds = Arrays.stream(unitIds).filter(
                 (int id) -> UnitClientEvents.getPlayerToEntityRelationship(id) == Relationship.OWNED
-        ).toArray();
-        this.unitIdsToAttackMove = Arrays.stream(unitIdsToAttackMove).filter(
-                (int id) -> UnitClientEvents.getPlayerToEntityRelationship(id) == Relationship.OWNED
-        ).toArray();
-        this.preselectedUnitIds = preselectedUnitIds;
-        this.selectedUnitIds = Arrays.stream(selectedUnitIds).filter(
-            (int id) -> UnitClientEvents.getPlayerToEntityRelationship(id) == Relationship.OWNED
         ).toArray();
         this.preselectedBlockPos = preselectedBlockPos;
     }
 
     public UnitServerboundPacket(FriendlyByteBuf buffer) {
-        this.specialAction = buffer.readEnum(UnitAction.class);
-        this.unitIdToAttack = buffer.readInt();
-        this.unitIdToFollow = buffer.readInt();
-        this.unitIdsToMove = buffer.readVarIntArray();
-        this.unitIdsToAttackMove = buffer.readVarIntArray();
-        this.preselectedUnitIds = buffer.readVarIntArray();
-        this.selectedUnitIds = buffer.readVarIntArray();
+        this.action = buffer.readEnum(UnitAction.class);
+        this.unitId = buffer.readInt();
+        this.unitIds = buffer.readVarIntArray();
         this.preselectedBlockPos = buffer.readBlockPos();
     }
 
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeEnum(this.specialAction);
-        buffer.writeInt(this.unitIdToAttack);
-        buffer.writeInt(this.unitIdToFollow);
-        buffer.writeVarIntArray(this.unitIdsToMove);
-        buffer.writeVarIntArray(this.unitIdsToAttackMove);
-        buffer.writeVarIntArray(this.preselectedUnitIds);
-        buffer.writeVarIntArray(this.selectedUnitIds);
+        buffer.writeEnum(this.action);
+        buffer.writeInt(this.unitId);
+        buffer.writeVarIntArray(this.unitIds);
         buffer.writeBlockPos(this.preselectedBlockPos);
     }
 
@@ -73,14 +49,10 @@ public class UnitServerboundPacket {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
-            UnitServerEvents.consumeUnitActionQueues(
-                this.specialAction,
-                this.unitIdToAttack,
-                this.unitIdToFollow,
-                this.unitIdsToMove,
-                this.unitIdsToAttackMove,
-                this.preselectedUnitIds,
-                this.selectedUnitIds,
+            UnitServerEvents.addActionItem(
+                this.action,
+                this.unitId,
+                this.unitIds,
                 this.preselectedBlockPos
             );
             success.set(true);

@@ -14,7 +14,6 @@ public class MoveToCursorBlockGoal extends Goal {
 
     private final PathfinderMob mob;
     private final double speedModifier;
-    private final int maxDist = 20;
     private BlockPos moveTarget = null;
 
     public MoveToCursorBlockGoal(PathfinderMob mob, double speedModifier) {
@@ -23,18 +22,8 @@ public class MoveToCursorBlockGoal extends Goal {
         this.setFlags(EnumSet.of(Goal.Flag.MOVE));
     }
 
-    // only use if the target pos is close enough and the mob is selected
     public boolean canUse() {
-        int[] selectedUnitIds = UnitServerEvents.getSelectedUnitIds();
-
-        for (int unitId : selectedUnitIds) {
-            if (unitId == mob.getId() && moveTarget != null) {
-                BlockPos mobbp = this.mob.blockPosition();
-                int dist = moveTarget.distManhattan(new Vec3i(mobbp.getX(), mobbp.getY()-1, mobbp.getZ()));
-                return dist <= maxDist;
-            }
-        }
-        return false;
+        return moveTarget != null;
     }
 
     public boolean canContinueToUse() {
