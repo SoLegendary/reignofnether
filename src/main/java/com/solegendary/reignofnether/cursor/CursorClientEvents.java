@@ -2,7 +2,8 @@ package com.solegendary.reignofnether.cursor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.hud.ActionName;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -23,7 +24,6 @@ import net.minecraft.world.phys.*;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
-import org.stringtemplate.v4.misc.Misc;
 
 import static net.minecraft.util.Mth.*;
 
@@ -51,7 +51,7 @@ public class CursorClientEvents {
     private static Vec2 cursorLeftClickDownPos = new Vec2(-1,-1);
     private static Vec2 cursorLeftClickDragPos = new Vec2(-1,-1);
     // attack that is performed on the next left click
-    private static ActionName leftClickAction = null;
+    private static UnitAction leftClickAction = null;
 
     public static Vector3d getCursorWorldPos() {
         return cursorWorldPos;
@@ -59,10 +59,10 @@ public class CursorClientEvents {
     public static BlockPos getPreselectedBlockPos() {
         return preselectedBlockPos;
     }
-    public static ActionName getLeftClickAction() {
+    public static UnitAction getLeftClickAction() {
         return leftClickAction;
     }
-    public static void setLeftClickAction(ActionName actionName) {
+    public static void setLeftClickAction(UnitAction actionName) {
         if (UnitClientEvents.getSelectedUnitIds().size() > 0)
             leftClickAction = actionName;
         else if (actionName == null)
@@ -111,7 +111,7 @@ public class CursorClientEvents {
             RenderSystem.setShaderTexture(0, TEXTURE_HAND_GRAB);
         else if (Keybinding.altMod.isDown())
             RenderSystem.setShaderTexture(0, TEXTURE_HAND);
-        else if (leftClickAction != null && leftClickAction.equals(ActionName.ATTACK))
+        else if (leftClickAction != null && leftClickAction.equals(UnitAction.ATTACK))
             RenderSystem.setShaderTexture(0, TEXTURE_SWORD);
         else if (leftClickAction != null) {
             RenderSystem.setShaderTexture(0, TEXTURE_CROSS);
@@ -303,8 +303,9 @@ public class CursorClientEvents {
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
 
             if (!OrthoviewClientEvents.isCameraMovingByMouse() && !leftClickDown &&
-                    UnitClientEvents.getSelectedUnitIds().size() > 0 &&
-                    UnitClientEvents.getPreselectedUnitIds().size() <= 0) {
+                (UnitClientEvents.getSelectedUnitIds().size() > 0 ||
+                BuildingClientEvents.getSelectedBuilding() != null) &&
+                UnitClientEvents.getPreselectedUnitIds().size() == 0) {
                 MyRenderer.drawBox(evt.getPoseStack(), preselectedBlockPos, 1, 1, 1, rightClickDown ? 0.3f : 0.15f);
                 MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }

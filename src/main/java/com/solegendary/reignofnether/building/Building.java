@@ -1,21 +1,15 @@
 package com.solegendary.reignofnether.building;
 
-import com.solegendary.reignofnether.building.buildings.VillagerHouse;
-import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.level.BlockEvent;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Random;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getMaxCorner;
@@ -68,18 +62,26 @@ public abstract class Building {
     }
 
     // returns the lowest Y value block in this.blocks to the given blockPos
-    public BlockPos getClosestGroundBlock(BlockPos bp) {
+    // radius offset is the distance away from the
+    public BlockPos getClosestGroundPos(BlockPos bpTarget, int radiusOffset) {
         float minDist = 999999;
         BlockPos minPos = BuildingUtils.getMinCorner(this.blocks);
+        int minX = minPos.getX() - radiusOffset;
         int minY = minPos.getY();
+        int minZ = minPos.getZ() - radiusOffset;
+        BlockPos maxPos = BuildingUtils.getMaxCorner(this.blocks);
+        int maxX = maxPos.getX() + radiusOffset + 1;
+        int maxZ = maxPos.getZ() + radiusOffset + 1;
 
-        for (BuildingBlock block : this.blocks) {
-            if (block.getBlockPos().getY() != minY)
-                continue;
-            float dist = (float) block.getBlockPos().distToCenterSqr(bp.getX(), bp.getY(), bp.getZ());
-            if (dist < minDist) {
-                minDist = dist;
-                minPos = block.getBlockPos();
+        for (int x = minX; x < maxX; x++) {
+            for (int z = minZ; z < maxZ; z++) {
+                BlockPos bp = new BlockPos(x,minY,z);
+                float dist = (float) bpTarget.distToCenterSqr(bp.getX(), bp.getY(), bp.getZ());
+
+                if (dist < minDist) {
+                    minDist = dist;
+                    minPos = bp;
+                }
             }
         }
         return minPos;

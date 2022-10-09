@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.unit.units;
 
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.ActionName;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
@@ -22,7 +22,6 @@ import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class CreeperUnit extends Creeper implements Unit {
@@ -96,10 +95,10 @@ public class CreeperUnit extends Creeper implements Unit {
                 14,
                 "textures/icons/blocks/tnt.png",
                 Keybinding.keyQ,
-                () -> CursorClientEvents.getLeftClickAction() == ActionName.EXPLODE,
+                () -> CursorClientEvents.getLeftClickAction() == UnitAction.EXPLODE,
                 () -> false,
                 () -> true,
-                () -> CursorClientEvents.setLeftClickAction(ActionName.EXPLODE),
+                () -> CursorClientEvents.setLeftClickAction(UnitAction.EXPLODE),
                 0, 0, 3
             ));
     }

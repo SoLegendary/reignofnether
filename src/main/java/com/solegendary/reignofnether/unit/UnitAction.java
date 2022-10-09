@@ -1,6 +1,6 @@
-package com.solegendary.reignofnether.hud;
+package com.solegendary.reignofnether.unit;
 
-public enum ActionName {
+public enum UnitAction {
     NONE, // basically null, but sending null to server crashes packetHandler
     ATTACK,
     STOP,

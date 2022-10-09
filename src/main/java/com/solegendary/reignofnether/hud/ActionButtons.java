@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 
 // static list of generic unit actions (attack, move, stop, etc.)
@@ -15,10 +16,10 @@ public class ActionButtons {
             itemIconSize,
             "textures/icons/items/sword.png",
             Keybinding.attack,
-            () -> CursorClientEvents.getLeftClickAction() == ActionName.ATTACK,
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK,
             () -> false,
             () -> true,
-            () -> CursorClientEvents.setLeftClickAction(ActionName.ATTACK)
+            () -> CursorClientEvents.setLeftClickAction(UnitAction.ATTACK)
     );
     public static final Button stop = new Button(
             "Stop",
@@ -28,7 +29,7 @@ public class ActionButtons {
             () -> false, // except if currently clicked on
             () -> false,
             () -> true,
-            () -> UnitClientEvents.sendCommand(ActionName.STOP)
+            () -> UnitClientEvents.sendCommand(UnitAction.STOP)
     );
     public static final Button hold = new Button(
             "Hold Position",
@@ -38,16 +39,16 @@ public class ActionButtons {
             () -> false, // TODO: if all selected units are holding position (but would need to get this from server?)
             () -> false,
             () -> true,
-            () -> UnitClientEvents.sendCommand(ActionName.HOLD)
+            () -> UnitClientEvents.sendCommand(UnitAction.HOLD)
     );
     public static final Button move = new Button(
             "Move",
             itemIconSize,
             "textures/icons/items/boots.png",
             Keybinding.move,
-            () -> CursorClientEvents.getLeftClickAction() == ActionName.MOVE,
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOVE,
             () -> false,
             () -> true,
-            () -> CursorClientEvents.setLeftClickAction(ActionName.MOVE)
+            () -> CursorClientEvents.setLeftClickAction(UnitAction.MOVE)
     );
 }

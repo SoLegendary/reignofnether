@@ -48,7 +48,8 @@ public class HudClientEvents {
     // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
     private static int hudStartingXPos = 0;
 
-
+    private static int mouseX = 0;
+    private static int mouseY = 0;
 
 
     // eg. entity.reignofnether.zombie_unit -> zombie
@@ -70,8 +71,8 @@ public class HudClientEvents {
         if (MC.level == null)
             return;
 
-        int mouseX = evt.getMouseX();
-        int mouseY = evt.getMouseY();
+        mouseX = evt.getMouseX();
+        mouseY = evt.getMouseY();
 
         hudStartingXPos = (MC.getWindow().getGuiScaledWidth() / 5) + 4;
 
@@ -294,23 +295,29 @@ public class HudClientEvents {
         }
     }
 
+    private static List<Button> getAllButtons() {
+        List<Button> allButtons = new ArrayList<>();
+        allButtons.addAll(genericActionButtons);
+        allButtons.addAll(actionButtons);
+        allButtons.addAll(unitButtons);
+        allButtons.addAll(productionButtons);
+        return allButtons;
+    }
+
+    public static boolean isMouseOverAnyButton() {
+        for (Button button : getAllButtons()) {
+            if (button.isMouseOver(mouseX, mouseY))
+                return true;
+        }
+        return false;
+    }
+
     @SubscribeEvent
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
         if (evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
             return;
-
-        genericActionButtons.forEach((Button button) -> {
+        for (Button button : getAllButtons())
             button.checkLeftClicked((int) evt.getMouseX(), (int) evt.getMouseY());
-        });
-        actionButtons.forEach((Button button) -> {
-            button.checkLeftClicked((int) evt.getMouseX(), (int) evt.getMouseY());
-        });
-        unitButtons.forEach((Button button) -> {
-            button.checkLeftClicked((int) evt.getMouseX(), (int) evt.getMouseY());
-        });
-        productionButtons.forEach((Button button) -> {
-            button.checkLeftClicked((int) evt.getMouseX(), (int) evt.getMouseY());
-        });
     }
 
     // TODO: Q and E don't work properly (probably due to conflicting with vanilla hotkeys?)
@@ -318,19 +325,8 @@ public class HudClientEvents {
     public static void onKeyPress(InputEvent.Key evt) {
         if (evt.getAction() != InputConstants.PRESS)
             return;
-
-        genericActionButtons.forEach((Button button) -> {
+        for (Button button : getAllButtons())
             button.checkPressed(evt.getKey());
-        });
-        actionButtons.forEach((Button button) -> {
-            button.checkPressed(evt.getKey());
-        });
-        unitButtons.forEach((Button button) -> {
-            button.checkPressed(evt.getKey());
-        });
-        productionButtons.forEach((Button button) -> {
-            button.checkPressed(evt.getKey());
-        });
     }
 
     @SubscribeEvent

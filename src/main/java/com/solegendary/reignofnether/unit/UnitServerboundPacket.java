@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.unit;
 
-import com.solegendary.reignofnether.hud.ActionName;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
@@ -11,7 +10,7 @@ import java.util.function.Supplier;
 
 public class UnitServerboundPacket {
 
-    private final ActionName specialAction;
+    private final UnitAction specialAction;
     private final int unitIdToAttack;
     private final int unitIdToFollow;
     private final int[] unitIdsToMove;
@@ -22,7 +21,7 @@ public class UnitServerboundPacket {
 
     // packet-handler functions
     public UnitServerboundPacket(
-        ActionName specialAction,
+        UnitAction specialAction,
         int unitIdToAttack,
         int unitIdToFollow,
         int[] unitIdsToMove,
@@ -49,7 +48,7 @@ public class UnitServerboundPacket {
     }
 
     public UnitServerboundPacket(FriendlyByteBuf buffer) {
-        this.specialAction = buffer.readEnum(ActionName.class);
+        this.specialAction = buffer.readEnum(UnitAction.class);
         this.unitIdToAttack = buffer.readInt();
         this.unitIdToFollow = buffer.readInt();
         this.unitIdsToMove = buffer.readVarIntArray();

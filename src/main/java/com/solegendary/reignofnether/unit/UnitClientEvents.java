@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.unit;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.ActionName;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
@@ -77,7 +76,7 @@ public class UnitClientEvents {
     private static final long doubleClickTimeMs = 500;
 
     private static boolean isLeftClickAttack() {
-        return CursorClientEvents.getLeftClickAction() == ActionName.ATTACK;
+        return CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK;
     }
 
     private static void resolveMoveAction() {
@@ -151,7 +150,7 @@ public class UnitClientEvents {
 
             }
             // move on left click
-            else if (CursorClientEvents.getLeftClickAction() == ActionName.MOVE)
+            else if (CursorClientEvents.getLeftClickAction() == UnitAction.MOVE)
                 resolveMoveAction();
 
             // TODO: resolve unit special abilities
@@ -181,7 +180,7 @@ public class UnitClientEvents {
                 selectedUnitIds.removeIf(id -> getPlayerToEntityRelationship(id) != Relationship.OWNED || id == MC.player.getId());
 
             lastLeftClickTime = System.currentTimeMillis();
-            CursorClientEvents.setLeftClickAction(ActionName.ATTACK);
+            CursorClientEvents.setLeftClickAction(UnitAction.ATTACK);
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (selectedUnitIds.size() > 0) {
@@ -203,7 +202,7 @@ public class UnitClientEvents {
             unitIdsToAttackMove.size() > 0) {
 
             PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
-                    ActionName.NONE,
+                    UnitAction.NONE,
                     unitIdToAttack,
                     unitIdToFollow,
                     unitIdsToMove.stream().mapToInt(i -> i).toArray(), // convert List<Integer> to int[]
@@ -299,7 +298,7 @@ public class UnitClientEvents {
         }
     }
 
-    public static void sendCommand(ActionName actionName) {
+    public static void sendCommand(UnitAction actionName) {
         PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
                 actionName,
                 -1, // unitIdToAttack

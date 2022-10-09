@@ -24,6 +24,7 @@ public class VillagerHouse extends ProductionBuilding {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.OAK_LOG;
+        this.spawnRadiusOffset = 1;
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(

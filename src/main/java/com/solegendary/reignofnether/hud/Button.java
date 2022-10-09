@@ -137,7 +137,7 @@ public class Button {
                     0x80000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
     }
-    private boolean isMouseOver(int mouseX, int mouseY) {
+    public boolean isMouseOver(int mouseX, int mouseY) {
         return (mouseX >= x &&
                 mouseY >= y &&
                 mouseX < x + iconFrameSize &&
@@ -159,6 +159,16 @@ public class Button {
             if (MC.player != null)
                 MC.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.2f, 1.0f);
             this.onUse.run();
+        }
+    }
+
+    // must be done from mouse press event
+    public void checkRightClicked(int mouseX, int mouseY) {
+        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
+            return;
+
+        if (isMouseOver(mouseX, mouseY)) {
+            return; // TODO: activate autocasts
         }
     }
 

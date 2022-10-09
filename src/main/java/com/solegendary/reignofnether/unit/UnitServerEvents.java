@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.hud.ActionName;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -18,7 +17,8 @@ import java.util.List;
 
 public class UnitServerEvents {
 
-    private static ActionName specialAction = null;
+    // every tick all these vars are enacted upon and then reset
+    private static UnitAction specialAction = null;
     private static int unitIdToAttack = -1;
     private static int unitIdToFollow = -1;
     private static int[] unitIdsToMove = new int[0];
@@ -43,14 +43,14 @@ public class UnitServerEvents {
         ServerLevel level = (ServerLevel) evt.level;
 
         if (!level.isClientSide()) {
-            if (specialAction == ActionName.STOP) {
+            if (specialAction == UnitAction.STOP) {
                 for (int id : selectedUnitIds) {
                     Unit unit = (Unit) level.getEntity(id);
                     if (unit != null)
                         unit.resetBehaviours();
                 }
             }
-            if (specialAction == ActionName.HOLD) {
+            if (specialAction == UnitAction.HOLD) {
                 for (int id : selectedUnitIds) {
                     Unit unit = (Unit) level.getEntity(id);
                     if (unit != null) {
@@ -94,8 +94,9 @@ public class UnitServerEvents {
         }
     }
 
+    // manually provide all the variables required to do unit actions
     public static void consumeUnitActionQueues(
-            ActionName specialActionIn,
+            UnitAction specialActionIn,
             int unitIdToAttackIn,
             int unitIdToFollowIn,
             int[] unitIdsToMoveIn,
@@ -104,16 +105,20 @@ public class UnitServerEvents {
             int[] selectedUnitIdsIn,
             BlockPos preselectedBlockPosIn
     ) {
-        specialAction = specialActionIn;
-        unitIdToAttack = unitIdToAttackIn;
-        unitIdToFollow = unitIdToFollowIn;
-        unitIdsToMove = unitIdsToMoveIn;
-        unitIdsToAttackMove = unitIdsToAttackMoveIn;
-        preselectedUnitIds = preselectedUnitIdsIn;
-        selectedUnitIds = selectedUnitIdsIn;
-        preselectedBlockPos = preselectedBlockPosIn;
+        specialAction = specialActionIn;   // ignored value: ActionName.NONE
+        unitIdToAttack = unitIdToAttackIn; // ignored value: -1
+        unitIdToFollow = unitIdToFollowIn; // ignored value: -1
+        unitIdsToMove = unitIdsToMoveIn;   // ignored value: new int[0]
+        unitIdsToAttackMove = unitIdsToAttackMoveIn; // ignored value: new int[0]
+        preselectedUnitIds = preselectedUnitIdsIn;   // ignored value: new int[0]
+        selectedUnitIds = selectedUnitIdsIn;         // ignored value: new int[0]
+        preselectedBlockPos = preselectedBlockPosIn; // ignored value: new BlockPos(0,0,0)
     }
 
+    public static void moveUnits() {
+        specialAction = UnitAction.MOVE;
+
+    }
 
     @SubscribeEvent
     // assign unit controllingPlayerId when spawned based on whoever is closest

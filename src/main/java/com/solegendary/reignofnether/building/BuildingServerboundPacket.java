@@ -93,7 +93,7 @@ public class BuildingServerboundPacket {
                 case SET_RALLY_POINT -> {
                     ProductionBuilding building = (ProductionBuilding) BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), this.buildingPos);
                     if (building != null)
-                        building.rallyPoint = rallyPos;
+                        building.setRallyPoint(rallyPos);
                 }
                 case START_PRODUCTION -> {
                     ProductionBuilding.startProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.buildingPos);

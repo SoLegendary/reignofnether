@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -239,15 +240,15 @@ public class BuildingClientEvents {
             }
         }
 
-        if (selectedBuilding instanceof ProductionBuilding selProdBuilding && selProdBuilding.rallyPoint != null) {
+        if (selectedBuilding instanceof ProductionBuilding selProdBuilding && selProdBuilding.getRallyPoint() != null) {
             float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
             MyRenderer.drawBlockFace(evt.getPoseStack(),
                     Direction.UP,
-                    selProdBuilding.rallyPoint,
+                    selProdBuilding.getRallyPoint(),
                     0, 1, 0, a);
             MyRenderer.drawLine(evt.getPoseStack(),
                     BuildingUtils.getCentrePos(selProdBuilding.getBlocks()).offset(0,-1,0),
-                    selProdBuilding.rallyPoint,
+                    selProdBuilding.getRallyPoint(),
                     0, 1, 0, a);
         }
     }
@@ -322,11 +323,16 @@ public class BuildingClientEvents {
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             // set rally points
-            if (selectedBuilding instanceof ProductionBuilding selProdBuilding) {
-                selProdBuilding.rallyPoint = CursorClientEvents.getPreselectedBlockPos();
+            if (!Keybinding.altMod.isDown() &&
+                !HudClientEvents.isMouseOverAnyButton() &&
+                selectedBuilding instanceof ProductionBuilding selProdBuilding) {
+
+                BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();
+                selProdBuilding.setRallyPoint(rallyPoint);
                 BuildingServerboundPacket.setRallyPoint(
                         BuildingUtils.getMinCorner(selectedBuilding.blocks),
-                        CursorClientEvents.getPreselectedBlockPos());
+                        rallyPoint
+                );
             }
         }
     }

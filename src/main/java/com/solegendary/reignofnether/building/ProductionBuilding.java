@@ -3,10 +3,11 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
 import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
 import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -27,31 +28,59 @@ public abstract class ProductionBuilding extends Building {
     public final List<ProductionItem> productionQueue = new ArrayList<>();
 
     // spawn point relative to building origin to spawn units
-    public BlockPos rallyPoint;
-
-    private boolean isProducing() {
-        return this.productionQueue.size() > 0;
-    }
+    private BlockPos rallyPoint;
+    protected int spawnRadiusOffset = 0;
 
     public ProductionBuilding() {
         super();
     }
 
+    public BlockPos getRallyPoint() {
+        return this.rallyPoint;
+    }
+
+    public void setRallyPoint(BlockPos rallyPoint) {
+        if (isPosInsideBuilding(rallyPoint))
+            this.rallyPoint = null;
+        else
+            this.rallyPoint = rallyPoint;
+    }
+
+    private boolean isProducing() {
+        return this.productionQueue.size() > 0;
+    }
+
     public void produceUnit(ServerLevel level, EntityType<? extends Unit> entityType, String ownerName) {
         Entity entity = entityType.create(level);
         if (entity != null) {
-            System.out.println("creating unit: " + entityType.getDescription().getString());
             level.addFreshEntity(entity);
-            BlockPos spawnPoint = getMinCorner(this.blocks);
-            entity.moveTo(new Vec3(
-                spawnPoint.getX(),
-                spawnPoint.getY(),
-                spawnPoint.getZ()
-            ));
             ((Unit) entity).setOwnerName(ownerName);
-            // TODO: doesn't seem to work?
-            if (rallyPoint != null)
-                ((Unit) entity).setMoveTarget(rallyPoint);
+
+            if (rallyPoint != null) {
+                // spawn unit at centre of the block
+                BlockPos spawnPoint = getClosestGroundPos(rallyPoint, spawnRadiusOffset);
+                entity.moveTo(new Vec3(
+                        spawnPoint.getX() + 0.5f,
+                        spawnPoint.getY() + 0.5f,
+                        spawnPoint.getZ() + 0.5f
+                ));
+                UnitServerEvents.consumeUnitActionQueues(
+                    UnitAction.MOVE,
+                    -1,
+                    -1,
+                    new int[]{ entity.getId() },
+                    new int[0], new int[0], new int[0],
+                    this.rallyPoint
+                );
+            }
+            else {
+                BlockPos spawnPoint = getMinCorner(this.blocks);
+                entity.moveTo(new Vec3(
+                        spawnPoint.getX() + 0.5f - spawnRadiusOffset,
+                        spawnPoint.getY() + 0.5f,
+                        spawnPoint.getZ() + 0.5f - spawnRadiusOffset
+                ));
+            }
         }
     }
 
