@@ -26,10 +26,6 @@ public class UnitActionItem {
 
     public void action(ServerLevel level) {
 
-        System.out.println("Resolving action: " + action);
-        System.out.println(unitId);
-        System.out.println(Arrays.toString(unitIds));
-
         if (!level.isClientSide()) {
             if (action == UnitAction.STOP) {
                 for (int id : unitIds) {
