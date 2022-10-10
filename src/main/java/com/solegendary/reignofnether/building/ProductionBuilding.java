@@ -66,7 +66,7 @@ public abstract class ProductionBuilding extends Building {
                         spawnPoint.getY() + 0.5f,
                         spawnPoint.getZ() + 0.5f
                 ));
-                CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> {
+                CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
                     UnitServerEvents.addActionItem(
                         UnitAction.MOVE,
                         -1,

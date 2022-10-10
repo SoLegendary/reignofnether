@@ -6,6 +6,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.level.GameType;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
@@ -48,9 +49,9 @@ public class PlayerServerEvents {
             MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
             MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
             NetworkHooks.openScreen(serverPlayer, namedProvider);
-            serverPlayer.setGameMode(GameType.CREATIVE);
-            serverPlayer.noPhysics = true;
-            serverPlayer.getAbilities().flying = true;
+            serverPlayer.setGameMode(GameType.SPECTATOR);
+            //serverPlayer.noPhysics = true; // only needed if in creative mode
+            //serverPlayer.getAbilities().flying = true;
             serverPlayer.onUpdateAbilities();
         }
         else {
@@ -61,7 +62,7 @@ public class PlayerServerEvents {
     public static void closeTopdownGui(int playerId) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
         serverPlayer.setGameMode(GameType.CREATIVE);
-        serverPlayer.noPhysics = false;
+        //serverPlayer.noPhysics = false;
     }
 
     public static void movePlayer(int playerId, double x, double y, double z) {
