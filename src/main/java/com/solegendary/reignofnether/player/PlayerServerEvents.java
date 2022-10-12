@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
@@ -24,6 +26,7 @@ public class PlayerServerEvents {
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         System.out.println("Player logged in: " + evt.getEntity().getName().getString() + ", id: " + evt.getEntity().getId());
+        ServerPlayer serverPlayer = (ServerPlayer) evt.getEntity();
         serverPlayers.add((ServerPlayer) evt.getEntity());
     }
 
