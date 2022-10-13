@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.resources;
 
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -11,6 +10,10 @@ public class ResourcesServerEvents {
     // tracks all players' resources
     public static ArrayList<Resources> resourcesList = new ArrayList<>();
 
+    public static final int startingFood = 300;
+    public static final int startingWood = 100;
+    public static final int startingOre = 100;
+
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
 
@@ -18,16 +21,19 @@ public class ResourcesServerEvents {
 
         Resources playerResources = null;
         for (Resources resources : resourcesList)
-            if (resources.ownerName == playerName)
+            if (resources.ownerName.equals(playerName))
                 playerResources = resources;
 
         if (playerResources == null) {
             System.out.println("Assigning Resources object to: " + playerName + ", id: " + evt.getEntity().getId());
-            playerResources = new Resources(playerName,0,0,0);
+            playerResources = new Resources(playerName,
+                startingFood,
+                startingWood,
+                startingOre);
+            resourcesList.add(playerResources);
         }
-        resourcesList.add(playerResources);
 
-        ResourcesClientboundPacket.syncServerResources(resourcesList);
+        ResourcesClientboundPacket.syncClientResources(resourcesList);
     }
 
 }

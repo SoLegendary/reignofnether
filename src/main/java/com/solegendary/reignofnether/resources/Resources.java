@@ -7,34 +7,34 @@ public class Resources {
 
     String ownerName;
     // present amounts of each resource
-    int wood;
     int food;
+    int wood;
     int ore;
 
     // balances of each resource to add (or remove if < 0)
     // shown as a +-X amount beside the resource on the HUD that is ticked in over time
-    int woodToAdd = 0;
     int foodToAdd = 0;
+    int woodToAdd = 0;
     int oreToAdd = 0;
 
-    public Resources(String ownerName, int wood, int food, int ore) {
+    public Resources(String ownerName, int food, int wood, int ore) {
         this.ownerName = ownerName;
-        this.wood = 0;
         this.food = 0;
+        this.wood = 0;
         this.ore = 0;
     }
 
     // usually used clientside
-    public void changeOverTime(int wood, int food, int ore) {
-        this.woodToAdd += wood;
+    public void changeOverTime(int food, int wood, int ore) {
         this.foodToAdd += food;
+        this.woodToAdd += wood;
         this.oreToAdd += ore;
     }
 
     // usually used serverside
-    public void changeInstantly(int wood, int food, int ore) {
-        this.wood += wood;
+    public void changeInstantly(int food, int wood, int ore) {
         this.food += food;
+        this.wood += wood;
         this.ore += ore;
     }
 

@@ -14,35 +14,44 @@ import java.util.function.Supplier;
 public class ResourcesClientboundPacket {
 
     // pos is used to identify the building object serverside
+    ResourcesAction action;
     public String ownerName;
-    public int wood;
     public int food;
+    public int wood;
     public int ore;
 
-    public static void syncServerResources(ArrayList<Resources> resourcesList) {
+    public static void syncClientResources(ArrayList<Resources> resourcesList) {
         for (Resources resources : resourcesList)
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                    new ResourcesClientboundPacket(resources.ownerName, resources.wood, resources.food, resources.ore));
+                    new ResourcesClientboundPacket(ResourcesAction.SYNC, resources.ownerName, resources.food, resources.wood, resources.ore));
     }
 
-    public ResourcesClientboundPacket(String ownerName, int wood, int food, int ore) {
+    public static void addSubtractClientResources(Resources resources) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new ResourcesClientboundPacket(ResourcesAction.ADD_SUBTRACT, resources.ownerName, resources.food, resources.wood, resources.ore));
+    }
+
+    public ResourcesClientboundPacket(ResourcesAction action, String ownerName, int food, int wood, int ore) {
+        this.action = action;
         this.ownerName = ownerName;
-        this.wood = wood;
         this.food = food;
+        this.wood = wood;
         this.ore = ore;
     }
 
     public ResourcesClientboundPacket(FriendlyByteBuf buffer) {
+        this.action = buffer.readEnum(ResourcesAction.class);
         this.ownerName = buffer.readUtf();
-        this.wood = buffer.readInt();
         this.food = buffer.readInt();
+        this.wood = buffer.readInt();
         this.ore = buffer.readInt();
     }
 
     public void encode(FriendlyByteBuf buffer) {
+        buffer.writeEnum(this.action);
         buffer.writeUtf(this.ownerName);
-        buffer.writeInt(this.wood);
         buffer.writeInt(this.food);
+        buffer.writeInt(this.wood);
         buffer.writeInt(this.ore);
     }
 
@@ -53,12 +62,20 @@ public class ResourcesClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
-                        ResourcesClientEvents.syncServerResources(new Resources(
-                                this.ownerName,
-                                this.wood,
-                                this.food,
-                                this.ore
-                        ));
+                        switch (this.action) {
+                            case SYNC -> ResourcesClientEvents.syncResources(new Resources(
+                                    this.ownerName,
+                                    this.food,
+                                    this.wood,
+                                    this.ore
+                            ));
+                            case ADD_SUBTRACT -> ResourcesClientEvents.addSubtractResources(new Resources(
+                                    this.ownerName,
+                                    this.food,
+                                    this.wood,
+                                    this.ore
+                            ));
+                        }
                         success.set(true);
                     });
         });

@@ -9,9 +9,19 @@ public class ResourcesClientEvents {
     // tracks all players' resources
     public static ArrayList<Resources> resourcesList = new ArrayList<>();
 
-    public static void syncServerResources(Resources serverResources) {
+    public static void syncResources(Resources serverResources) {
         resourcesList.removeIf(resources -> resources.ownerName.equals(serverResources.ownerName));
         resourcesList.add(serverResources);
+    }
+
+    public static void addSubtractResources(Resources serverResources) {
+        for (Resources resources : resourcesList) {
+            if (resources.ownerName.equals(serverResources.ownerName)) {
+                resources.foodToAdd += serverResources.food;
+                resources.woodToAdd += serverResources.wood;
+                resources.oreToAdd += serverResources.ore;
+            }
+        }
     }
 
     public static Resources getOwnResources() {
