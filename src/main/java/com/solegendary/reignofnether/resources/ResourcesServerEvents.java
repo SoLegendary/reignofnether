@@ -10,9 +10,9 @@ public class ResourcesServerEvents {
     // tracks all players' resources
     public static ArrayList<Resources> resourcesList = new ArrayList<>();
 
-    public static final int startingFood = 300;
-    public static final int startingWood = 100;
-    public static final int startingOre = 100;
+    public static final int startingFood = 1;
+    public static final int startingWood = 123;
+    public static final int startingOre = 12345;
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {

@@ -1,11 +1,14 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -13,6 +16,7 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.model.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.client.event.*;
@@ -50,6 +54,9 @@ public class HudClientEvents {
 
     private static int mouseX = 0;
     private static int mouseY = 0;
+
+    private final static int iconBgColour = 0x64000000;
+    private final static int frameBgColour = 0xA0000000;
 
 
     // eg. entity.reignofnether.zombie_unit -> zombie
@@ -129,7 +136,7 @@ public class HudClientEvents {
                     MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
                             iconFrameSize * buttonsPerRow + 10,
                             iconFrameSize * 2 + 15,
-                            0xA0000000);
+                            frameBgColour);
 
                     // name and progress %
                     ProductionItem firstProdItem = selProdBuilding.productionQueue.get(0);
@@ -153,7 +160,7 @@ public class HudClientEvents {
                                 productionButtons.size() > (buttonsPerRow + 1))
                         {
                             int numExtraItems = productionButtons.size() - buttonsPerRow;
-                            MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY + iconFrameSize, iconFrameSize, 0x64000000);
+                            MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY + iconFrameSize, iconFrameSize, iconBgColour);
                             GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraItems,
                                     blitX + iconFrameSize/2, blitY + iconFrameSize + 8, 0xFFFFFF);
                             break;
@@ -242,7 +249,7 @@ public class HudClientEvents {
             MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
                     iconFrameSize * buttonsPerRow + 10,
                     iconFrameSize * 2 + 20,
-                    0xA0000000);
+                    frameBgColour);
 
             int buttonsRendered = 0;
             for (Button unitButton : unitButtons) {
@@ -250,7 +257,7 @@ public class HudClientEvents {
                 if (buttonsRendered >= (buttonsPerRow * 2) - 1 &&
                         units.size() > (buttonsPerRow * 2)) {
                     int numExtraUnits = units.size() - (buttonsPerRow * 2) + 1;
-                    MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, 0x64000000);
+                    MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, iconBgColour);
                     GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraUnits,
                             blitX + iconFrameSize/2, blitY + 8, 0xFFFFFF);
                     break;
@@ -291,6 +298,57 @@ public class HudClientEvents {
                     }
                     break;
                 }
+            }
+        }
+
+        // ---------------------------
+        // Resources icons and amounts
+        // ---------------------------
+        Resources resources = ResourcesClientEvents.getOwnResources();
+
+        if (resources != null) {
+            blitX = 0;
+            blitY = 0;
+
+            for (String resourceName : new String[]{ "food", "wood", "ore" }) {
+                String rlPath = "";
+                int resValue = 0;
+                int resToAddValue = 0;
+                switch (resourceName) {
+                    case "food" -> {
+                        rlPath = "textures/icons/items/wheat.png";
+                        resValue = resources.food;
+                        resToAddValue = resources.foodToAdd;
+                    }
+                    case "wood" -> {
+                        rlPath = "textures/icons/items/wood.png";
+                        resValue = resources.wood;
+                        resToAddValue = resources.woodToAdd;
+                    }
+                    case "ore" -> {
+                        rlPath = "textures/icons/items/iron_ore.png";
+                        resValue = resources.ore;
+                        resToAddValue = resources.oreToAdd;
+                    }
+                }
+                MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX + iconFrameSize - 1, blitY,
+                        49,
+                        iconFrameSize,
+                        frameBgColour);
+                MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, iconBgColour);
+                MyRenderer.renderIcon(evt.getPoseStack(),
+                        new ResourceLocation(ReignOfNether.MOD_ID, rlPath),
+                        blitX+4, blitY+4, iconSize
+                );
+                GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, String.valueOf(resValue),
+                        blitX + (iconFrameSize) + 24 , blitY + (iconSize / 2) + 1, 0xFFFFFF);
+
+                if (resToAddValue != 0) {
+                    boolean positive = resToAddValue > 0;
+                    GuiComponent.drawString(evt.getPoseStack(), MC.font, (positive ? "+" : "-") + resToAddValue,
+                            blitX + (iconFrameSize) * 3/2 + 42, blitY + (iconSize / 2) + 1, (positive ? 0x00FF00 : 0xFF0000));
+                }
+                blitY += iconFrameSize - 1;
             }
         }
     }

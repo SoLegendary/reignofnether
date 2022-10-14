@@ -209,7 +209,7 @@ public class MyRenderer {
         int thickness = 4;
 
         ResourceLocation iconFrameResource;
-        iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame_left.png");
+        iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame_left" + (height < 50 ? "_small" : "") + ".png");
         RenderSystem.setShaderTexture(0, iconFrameResource);
         GuiComponent.blit(poseStack,
                 x, y, 0,
@@ -217,7 +217,7 @@ public class MyRenderer {
                 thickness, height, // dimensions of blit texture
                 thickness, height // size of texture itself (if < dimensions, texture is repeated)
         );
-        iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame_right.png");
+        iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame_right" + (height < 50 ? "_small" : "") + ".png");
         RenderSystem.setShaderTexture(0, iconFrameResource);
         GuiComponent.blit(poseStack,
                 x + width - thickness, y, 0,

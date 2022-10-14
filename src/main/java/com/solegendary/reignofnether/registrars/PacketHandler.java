@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitServerboundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
@@ -44,5 +45,9 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(BuildingClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(BuildingClientboundPacket::encode).decoder(BuildingClientboundPacket::new)
                 .consumer(BuildingClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(ResourcesClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ResourcesClientboundPacket::encode).decoder(ResourcesClientboundPacket::new)
+                .consumer(ResourcesClientboundPacket::handle).add();
     }
 }

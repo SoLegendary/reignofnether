@@ -11,6 +11,8 @@ import com.solegendary.reignofnether.keybinds.KeybindEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraftforge.common.MinecraftForge;
@@ -37,11 +39,13 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(MinimapClientEvents.class);
         vanillaEventBus.register(FogOfWarClientEvents.class);
         vanillaEventBus.register(BuildingClientEvents.class);
+        vanillaEventBus.register(ResourcesClientEvents.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(PlayerServerEvents.class);
         vanillaEventBus.register(UnitServerEvents.class);
         vanillaEventBus.register(BuildingServerEvents.class);
+        vanillaEventBus.register(ResourcesServerEvents.class);
         //vanillaEventBus.register(CursorServerEvents.class);
     }
 }

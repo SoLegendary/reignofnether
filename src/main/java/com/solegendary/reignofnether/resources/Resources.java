@@ -5,23 +5,24 @@ package com.solegendary.reignofnether.resources;
 // but with a clientside copy too for the HUD
 public class Resources {
 
-    String ownerName;
+    public String ownerName;
+
     // present amounts of each resource
-    int food;
-    int wood;
-    int ore;
+    public int food;
+    public int wood;
+    public int ore;
 
     // balances of each resource to add (or remove if < 0)
     // shown as a +-X amount beside the resource on the HUD that is ticked in over time
-    int foodToAdd = 0;
-    int woodToAdd = 0;
-    int oreToAdd = 0;
+    public int foodToAdd = 123;
+    public int woodToAdd = 123;
+    public int oreToAdd = 123;
 
     public Resources(String ownerName, int food, int wood, int ore) {
         this.ownerName = ownerName;
-        this.food = 0;
-        this.wood = 0;
-        this.ore = 0;
+        this.food = food;
+        this.wood = wood;
+        this.ore = ore;
     }
 
     // usually used clientside
@@ -29,6 +30,7 @@ public class Resources {
         this.foodToAdd += food;
         this.woodToAdd += wood;
         this.oreToAdd += ore;
+        // TODO: add delay before changing resource amounts here
     }
 
     // usually used serverside
