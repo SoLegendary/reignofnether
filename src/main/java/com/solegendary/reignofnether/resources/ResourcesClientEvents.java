@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.resources;
 
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 
@@ -14,12 +16,15 @@ public class ResourcesClientEvents {
         resourcesList.add(serverResources);
     }
 
+    // should never be run from clientside except via packet
     public static void addSubtractResources(Resources serverResources) {
         for (Resources resources : resourcesList) {
             if (resources.ownerName.equals(serverResources.ownerName)) {
-                resources.foodToAdd += serverResources.food;
-                resources.woodToAdd += serverResources.wood;
-                resources.oreToAdd += serverResources.ore;
+                resources.changeOverTime(
+                    serverResources.food,
+                    serverResources.wood,
+                    serverResources.ore
+                );
             }
         }
     }
@@ -38,4 +43,9 @@ public class ResourcesClientEvents {
         return null;
     }
 
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        for (Resources resources : resourcesList)
+            resources.tick();
+    }
 }

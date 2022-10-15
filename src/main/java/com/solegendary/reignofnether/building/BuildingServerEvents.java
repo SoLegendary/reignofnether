@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -41,14 +44,29 @@ public class BuildingServerEvents {
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName) {
         Building building = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName);
         if (building != null) {
-            buildings.add(building);
-            // place all blocks on the lowest y level
-            int minY = BuildingUtils.getMinCorner(building.blocks).getY();
-            for (BuildingBlock block : building.blocks)
-                if (block.getBlockPos().getY() == minY)
-                    block.place();
+
+            if (building.canAfford(ownerName)) {
+                buildings.add(building);
+                // place all blocks on the lowest y level
+                int minY = BuildingUtils.getMinCorner(building.blocks).getY();
+                for (BuildingBlock block : building.blocks)
+                    if (block.getBlockPos().getY() == minY)
+                        block.place();
+                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName);
+                ResourcesServerEvents.addSubtractResources(new Resources(
+                    building.ownerName,
+                    -building.foodCost,
+                    -building.woodCost,
+                    -building.oreCost
+                ));
+            }
+            else
+                ResourcesClientboundPacket.warnInsufficientResources(building.ownerName,
+                    building.canAffordFood(building.ownerName),
+                    building.canAffordWood(building.ownerName),
+                    building.canAffordOre(building.ownerName)
+                );
         }
-        BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName);
     }
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions

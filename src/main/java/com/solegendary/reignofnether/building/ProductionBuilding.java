@@ -3,6 +3,10 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
 import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
 import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.Unit;
@@ -101,8 +105,24 @@ public abstract class ProductionBuilding extends Building {
                 case SkeletonUnitProd.itemName -> prodItem = new SkeletonUnitProd(building);
                 case ZombieUnitProd.itemName -> prodItem = new ZombieUnitProd(building);
             }
-            if (prodItem != null)
-                building.productionQueue.add(prodItem);
+            if (prodItem != null) {
+                if (prodItem.canAfford(building.ownerName)) {
+                    building.productionQueue.add(prodItem);
+                    ResourcesServerEvents.addSubtractResources(new Resources(
+                        building.ownerName,
+                        -prodItem.foodCost,
+                        -prodItem.woodCost,
+                        -prodItem.oreCost
+                    ));
+                }
+                else
+                    ResourcesClientboundPacket.warnInsufficientResources(building.ownerName,
+                        prodItem.canAffordFood(building.ownerName),
+                        prodItem.canAffordWood(building.ownerName),
+                        prodItem.canAffordOre(building.ownerName)
+                    );
+            }
+
         }
     }
 
@@ -124,6 +144,12 @@ public abstract class ProductionBuilding extends Building {
                     if (prodItem.getItemName().equals(itemName) &&
                             prodItem.ticksLeft >= prodItem.ticksToProduce) {
                         building.productionQueue.remove(prodItem);
+                        ResourcesClientboundPacket.addSubtractClientResources(new Resources(
+                                building.ownerName,
+                                building.foodCost,
+                                building.woodCost,
+                                building.oreCost
+                        ));
                         break;
                     }
                 }

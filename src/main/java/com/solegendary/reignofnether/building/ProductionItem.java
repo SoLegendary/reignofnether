@@ -4,6 +4,9 @@ import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
 import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
 import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
@@ -15,7 +18,10 @@ public abstract class ProductionItem {
 
     public static String itemName;
 
-    // TODO: cost for each resource
+    public int foodCost;
+    public int woodCost;
+    public int oreCost;
+
     public int ticksToProduce; // build time in ticks
     public int ticksLeft;
     public boolean canDuplicate; // is building allowed to build more than one of these? eg. tech upgrades can't be duplicated
@@ -30,6 +36,33 @@ public abstract class ProductionItem {
 
     public String getItemName() {
         return ProductionItem.itemName;
+    }
+
+    public boolean canAfford(String ownerName) {
+        for (Resources resources : ResourcesServerEvents.resourcesList)
+            if (resources.ownerName.equals(ownerName))
+                return (resources.food >= foodCost &&
+                        resources.wood >= woodCost &&
+                        resources.ore >= oreCost);
+        return false;
+    }
+    public boolean canAffordFood(String ownerName) {
+        for (Resources resources : ResourcesServerEvents.resourcesList)
+            if (resources.ownerName.equals(ownerName))
+                return resources.food >= foodCost;
+        return false;
+    }
+    public boolean canAffordWood(String ownerName) {
+        for (Resources resources : ResourcesServerEvents.resourcesList)
+            if (resources.ownerName.equals(ownerName))
+                return resources.wood >= woodCost;
+        return false;
+    }
+    public boolean canAffordOre(String ownerName) {
+        for (Resources resources : ResourcesServerEvents.resourcesList)
+            if (resources.ownerName.equals(ownerName))
+                return resources.ore >= oreCost;
+        return false;
     }
 
     // Button object to build - start buttons are static as they aren't tied to an existing prodItem

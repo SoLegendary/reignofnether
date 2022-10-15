@@ -10,9 +10,29 @@ public class ResourcesServerEvents {
     // tracks all players' resources
     public static ArrayList<Resources> resourcesList = new ArrayList<>();
 
-    public static final int startingFood = 1;
-    public static final int startingWood = 123;
-    public static final int startingOre = 12345;
+    public static final int startingFood = 3000;
+    public static final int startingWood = 1000;
+    public static final int startingOre = 1000;
+
+    public static void addSubtractResources(Resources resourcesToAdd) {
+        for (Resources resources : resourcesList) {
+            if (resources.ownerName.equals(resourcesToAdd.ownerName)) {
+                // change serverside instantly
+                resources.changeInstantly(
+                    resourcesToAdd.food,
+                    resourcesToAdd.wood,
+                    resourcesToAdd.ore
+                );
+                // change clientside over time
+                ResourcesClientboundPacket.addSubtractClientResources(new Resources(
+                    resourcesToAdd.ownerName,
+                    resourcesToAdd.food,
+                    resourcesToAdd.wood,
+                    resourcesToAdd.ore
+                ));
+            }
+        }
+    }
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
@@ -32,8 +52,6 @@ public class ResourcesServerEvents {
                 startingOre);
             resourcesList.add(playerResources);
         }
-
         ResourcesClientboundPacket.syncClientResources(resourcesList);
     }
-
 }

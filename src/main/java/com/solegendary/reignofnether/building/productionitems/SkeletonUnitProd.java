@@ -18,6 +18,9 @@ public class SkeletonUnitProd extends ProductionItem {
             if (!level.isClientSide())
                 building.produceUnit((ServerLevel) level, EntityRegistrar.SKELETON_UNIT.get(), building.ownerName);
         };
+        this.foodCost = 60;
+        this.woodCost = 40;
+        this.oreCost = 0;
     }
 
     public String getItemName() {

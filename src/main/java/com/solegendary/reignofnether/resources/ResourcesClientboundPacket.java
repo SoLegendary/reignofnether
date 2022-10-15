@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
@@ -29,6 +32,11 @@ public class ResourcesClientboundPacket {
     public static void addSubtractClientResources(Resources resources) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new ResourcesClientboundPacket(ResourcesAction.ADD_SUBTRACT, resources.ownerName, resources.food, resources.wood, resources.ore));
+    }
+
+    public static void warnInsufficientResources(String ownerName, boolean food, boolean wood, boolean ore) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new ResourcesClientboundPacket(ResourcesAction.WARN_INSUFFICIENT_RESOURCES, ownerName, food ? 1 : 0, wood ? 1 : 0, ore ? 1 : 0));
     }
 
     public ResourcesClientboundPacket(ResourcesAction action, String ownerName, int food, int wood, int ore) {
@@ -75,6 +83,16 @@ public class ResourcesClientboundPacket {
                                     this.wood,
                                     this.ore
                             ));
+                            case WARN_INSUFFICIENT_RESOURCES -> {
+                                Player player = Minecraft.getInstance().player;
+                                if (player != null && player.getName().getString().equals(ownerName)) {
+                                    HudClientEvents.showInsufficientResourcesWarning(
+                                        this.food > 0,
+                                        this.wood > 0,
+                                        this.ore > 0
+                                    );
+                                }
+                            }
                         }
                         success.set(true);
                     });

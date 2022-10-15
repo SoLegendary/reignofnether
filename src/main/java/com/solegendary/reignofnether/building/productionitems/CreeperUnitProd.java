@@ -18,6 +18,9 @@ public class CreeperUnitProd extends ProductionItem {
             if (!level.isClientSide())
                 building.produceUnit((ServerLevel) level, EntityRegistrar.CREEPER_UNIT.get(), building.ownerName);
         };
+        this.foodCost = 50;
+        this.woodCost = 0;
+        this.oreCost = 100;
     }
 
     public String getItemName() {

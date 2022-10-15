@@ -23,6 +23,9 @@ public class VillagerTower extends Building {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.OAK_PLANKS;
+        this.foodCost = 0;
+        this.woodCost = 100;
+        this.oreCost = 0;
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

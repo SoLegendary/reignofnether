@@ -18,6 +18,9 @@ public class ZombieUnitProd extends ProductionItem {
             if (!level.isClientSide())
                 building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get(), building.ownerName);
         };
+        this.foodCost = 100;
+        this.woodCost = 0;
+        this.oreCost = 0;
     }
 
     public String getItemName() {

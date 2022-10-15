@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Explosion;
@@ -39,10 +42,41 @@ public abstract class Building {
     public int tickAge = 0; // how many ticks ago this building was placed
     public boolean canAcceptResources = false; // can workers drop off resources here?
 
+    public int foodCost;
+    public int woodCost;
+    public int oreCost;
+
     public Building() { }
 
     public ArrayList<BuildingBlock> getBlocks() {
         return blocks;
+    }
+
+    public boolean canAfford(String ownerName) {
+        for (Resources resources : ResourcesServerEvents.resourcesList)
+            if (resources.ownerName.equals(ownerName))
+                return (resources.food >= foodCost &&
+                        resources.wood >= woodCost &&
+                        resources.ore >= oreCost);
+        return false;
+    }
+    public boolean canAffordFood(String ownerName) {
+        for (Resources resources : ResourcesServerEvents.resourcesList)
+            if (resources.ownerName.equals(ownerName))
+                return resources.food >= foodCost;
+        return false;
+    }
+    public boolean canAffordWood(String ownerName) {
+        for (Resources resources : ResourcesServerEvents.resourcesList)
+            if (resources.ownerName.equals(ownerName))
+                return resources.wood >= woodCost;
+        return false;
+    }
+    public boolean canAffordOre(String ownerName) {
+        for (Resources resources : ResourcesServerEvents.resourcesList)
+            if (resources.ownerName.equals(ownerName))
+                return resources.ore >= oreCost;
+        return false;
     }
 
     public boolean isPosInsideBuilding(BlockPos bp) {

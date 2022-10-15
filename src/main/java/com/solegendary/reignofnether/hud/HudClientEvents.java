@@ -70,6 +70,15 @@ public class HudClientEvents {
             return entity.getName().getString();
     }
 
+    public static void showInsufficientResourcesWarning(boolean foodInsufficient, boolean woodInsufficient, boolean oreInsufficient) {
+        if (foodInsufficient)
+            System.out.println("Not enough food");
+        if (woodInsufficient)
+            System.out.println("Not enough wood");
+        if (oreInsufficient)
+            System.out.println("Not enough ore");
+    }
+
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
         String screenName = evt.getScreen().getTitle().getString();
@@ -345,7 +354,7 @@ public class HudClientEvents {
 
                 if (resToAddValue != 0) {
                     boolean positive = resToAddValue > 0;
-                    GuiComponent.drawString(evt.getPoseStack(), MC.font, (positive ? "+" : "-") + resToAddValue,
+                    GuiComponent.drawString(evt.getPoseStack(), MC.font, (positive ? "+" : "") + resToAddValue,
                             blitX + (iconFrameSize) * 3/2 + 42, blitY + (iconSize / 2) + 1, (positive ? 0x00FF00 : 0xFF0000));
                 }
                 blitY += iconFrameSize - 1;
