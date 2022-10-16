@@ -2,10 +2,8 @@ package com.solegendary.reignofnether.hud;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.ProductionBuilding;
-import com.solegendary.reignofnether.building.ProductionItem;
+import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
@@ -191,9 +189,25 @@ public class HudClientEvents {
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
 
-            if (selBuilding instanceof ProductionBuilding selProdBuilding && selProdBuilding.isBuilt) {
+            if (!selBuilding.isBuilt) {
+                Button cancelButton = new Button(
+                        "Cancel",
+                        iconSize,
+                        "textures/icons/items/barrier.png",
+                        Keybinding.cancelBuild,
+                        () -> false,
+                        () -> false,
+                        () -> true,
+                        () -> {
+                            BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(selBuilding.getBlocks()));
+                        }
+                );
+                actionButtons.add(cancelButton);
+                cancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
+            }
+            else if (selBuilding instanceof ProductionBuilding selProdBuilding) {
                 for (Button productionButton : selProdBuilding.productionButtons) {
-                    actionButtons.add(productionButton);
+                    productionButtons.add(productionButton);
                     productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                     blitX += iconFrameSize;
                 }
@@ -301,8 +315,9 @@ public class HudClientEvents {
             blitY = screenHeight - (iconFrameSize * 2);
             for (LivingEntity unit : units) {
                 if (getSimpleEntityName(unit).equals(getSimpleEntityName(hudSelectedEntity))) {
-                    for (AbilityButton ability : ((Unit) unit).getAbilities()) {
-                        ability.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                    for (AbilityButton abilityButton : ((Unit) unit).getAbilities()) {
+                        actionButtons.add(abilityButton);
+                        abilityButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                         blitX += iconFrameSize;
                     }
                     break;
@@ -351,12 +366,12 @@ public class HudClientEvents {
                 );
                 GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, String.valueOf(resValue),
                         blitX + (iconFrameSize) + 24 , blitY + (iconSize / 2) + 1, 0xFFFFFF);
-
+                /*
                 if (resToAddValue != 0) {
                     boolean positive = resToAddValue > 0;
                     GuiComponent.drawString(evt.getPoseStack(), MC.font, (positive ? "+" : "") + resToAddValue,
                             blitX + (iconFrameSize) * 3/2 + 42, blitY + (iconSize / 2) + 1, (positive ? 0x00FF00 : 0xFF0000));
-                }
+                }*/
                 blitY += iconFrameSize - 1;
             }
         }

@@ -9,6 +9,8 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.findBuilding;
+
 public class BuildingServerboundPacket {
     // pos is used to identify the building object serverside
     public String itemName; // name of the building or production item // PLACE, START_PRODUCTION, CANCEL_PRODUCTION
@@ -86,25 +88,31 @@ public class BuildingServerboundPacket {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
 
+            ProductionBuilding building = null;
+            if (this.action != BuildingAction.PLACE) {
+                building = (ProductionBuilding) findBuilding(BuildingServerEvents.getBuildings(), this.buildingPos);
+                if (building == null)
+                    return;
+            }
             switch (this.action) {
                 case PLACE -> BuildingServerEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName);
-                case CANCEL -> System.out.println("CANCEL");
+                case CANCEL -> {
+                    BuildingServerEvents.cancelBuilding(building);
+                }
                 case REPAIR -> System.out.println("REPAIR");
                 case SET_RALLY_POINT -> {
-                    ProductionBuilding building = (ProductionBuilding) BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), this.buildingPos);
-                    if (building != null)
-                        building.setRallyPoint(rallyPos);
+                    building.setRallyPoint(rallyPos);
                 }
                 case START_PRODUCTION -> {
-                    ProductionBuilding.startProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.buildingPos);
+                    ProductionBuilding.startProductionItem(building, this.itemName, this.buildingPos);
                     BuildingClientboundPacket.startProduction(buildingPos, itemName);
                 }
                 case CANCEL_PRODUCTION -> {
-                    ProductionBuilding.cancelProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.buildingPos, true);
+                    ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, true);
                     BuildingClientboundPacket.cancelProduction(buildingPos, itemName, true);
                 }
                 case CANCEL_BACK_PRODUCTION -> {
-                    ProductionBuilding.cancelProductionItem(BuildingServerEvents.getBuildings(), this.itemName, this.buildingPos, false);
+                    ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, false);
                     BuildingClientboundPacket.cancelProduction(buildingPos, itemName, false);
                 }
             }

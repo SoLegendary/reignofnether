@@ -69,6 +69,24 @@ public class BuildingServerEvents {
         }
     }
 
+    public static void cancelBuilding(Building building) {
+        // remove from tracked buildings, all of its leftover queued blocks and then blow it up
+        buildings.remove(building);
+        for (BuildingBlock block : building.getBlocks())
+            blockPlaceQueue.removeIf(queuedBlock -> queuedBlock.getBlockPos().equals(block.getBlockPos()));
+        building.destroy((ServerLevel) building.level);
+
+        // AOE2-style refund: return the % of the non-built portion of the building
+        // eg. cancelling a building at 70% completion will refund only 30% cost
+        float buildPercent = building.getBlocksPlacedPercent();
+        ResourcesServerEvents.addSubtractResources(new Resources(
+                building.ownerName,
+                Math.round(building.foodCost * (1 - buildPercent)),
+                Math.round(building.woodCost * (1 - buildPercent)),
+                Math.round(building.oreCost * (1 - buildPercent))
+        ));
+    }
+
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions
     @SubscribeEvent
     public static void onBlockBreak(BlockEvent.BreakEvent evt) {
@@ -86,7 +104,6 @@ public class BuildingServerEvents {
 
             for (Building building : buildings)
                 building.tick(serverLevel);
-
             buildings.removeIf(Building::shouldBeDestroyed);
 
             if (blockPlaceQueue.size() > 0) {
@@ -100,7 +117,6 @@ public class BuildingServerEvents {
                     blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
                 }
             }
-
             if (blockDestroyQueue.size() > 0) {
                 BlockPos bp = blockDestroyQueue.get(0);
                 if (serverLevel.isLoaded(bp)) {

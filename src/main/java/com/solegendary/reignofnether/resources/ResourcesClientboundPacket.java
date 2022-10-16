@@ -23,15 +23,20 @@ public class ResourcesClientboundPacket {
     public int wood;
     public int ore;
 
-    public static void syncClientResources(ArrayList<Resources> resourcesList) {
+    public static void syncResources(ArrayList<Resources> resourcesList) {
         for (Resources resources : resourcesList)
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                     new ResourcesClientboundPacket(ResourcesAction.SYNC, resources.ownerName, resources.food, resources.wood, resources.ore));
     }
 
-    public static void addSubtractClientResources(Resources resources) {
+    public static void addSubtractResources(Resources resources) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new ResourcesClientboundPacket(ResourcesAction.ADD_SUBTRACT, resources.ownerName, resources.food, resources.wood, resources.ore));
+    }
+
+    public static void addSubtractResourcesInstantly(Resources resources) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new ResourcesClientboundPacket(ResourcesAction.ADD_SUBTRACT_INSTANT, resources.ownerName, resources.food, resources.wood, resources.ore));
     }
 
     public static void warnInsufficientResources(String ownerName, boolean food, boolean wood, boolean ore) {
@@ -78,6 +83,12 @@ public class ResourcesClientboundPacket {
                                     this.ore
                             ));
                             case ADD_SUBTRACT -> ResourcesClientEvents.addSubtractResources(new Resources(
+                                    this.ownerName,
+                                    this.food,
+                                    this.wood,
+                                    this.ore
+                            ));
+                            case ADD_SUBTRACT_INSTANT -> ResourcesClientEvents.addSubtractResourcesInstantly(new Resources(
                                     this.ownerName,
                                     this.food,
                                     this.wood,

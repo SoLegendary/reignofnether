@@ -18,15 +18,28 @@ public class ResourcesClientEvents {
 
     // should never be run from clientside except via packet
     public static void addSubtractResources(Resources serverResources) {
-        for (Resources resources : resourcesList) {
-            if (resources.ownerName.equals(serverResources.ownerName)) {
+        System.out.println("ResourcesClientEvents addSubtractResources");
+        System.out.println(serverResources.food);
+        System.out.println(serverResources.wood);
+        System.out.println(serverResources.ore);
+
+        for (Resources resources : resourcesList)
+            if (resources.ownerName.equals(serverResources.ownerName))
                 resources.changeOverTime(
                     serverResources.food,
                     serverResources.wood,
                     serverResources.ore
                 );
-            }
-        }
+    }
+
+    public static void addSubtractResourcesInstantly(Resources serverResources) {
+        for (Resources resources : resourcesList)
+            if (resources.ownerName.equals(serverResources.ownerName))
+                resources.changeInstantly(
+                    serverResources.food,
+                    serverResources.wood,
+                    serverResources.ore
+                );
     }
 
     public static Resources getOwnResources() {
@@ -45,6 +58,9 @@ public class ResourcesClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END)
+            return;
+
         for (Resources resources : resourcesList)
             resources.tick();
     }

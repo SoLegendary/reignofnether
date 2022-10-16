@@ -102,9 +102,11 @@ public class Button {
         );
         // hotkey letter
         if (this.hotkey != null) {
+            String hotkeyStr = hotkey.getKey().getDisplayName().getString().toUpperCase();
+            hotkeyStr = hotkeyStr.substring(0,Math.min(3, hotkeyStr.length()));
             GuiComponent.drawCenteredString(poseStack, MC.font,
-                    hotkey.getKey().getDisplayName().getString().toUpperCase(),
-                    x + iconSize + 4,
+                    hotkeyStr,
+                    x + iconSize + 8 - (hotkeyStr.length() * 4),
                     y + iconSize - 1,
                     0xFFFFFF);
         }

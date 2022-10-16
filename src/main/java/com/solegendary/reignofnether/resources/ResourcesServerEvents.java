@@ -17,6 +17,12 @@ public class ResourcesServerEvents {
     public static void addSubtractResources(Resources resourcesToAdd) {
         for (Resources resources : resourcesList) {
             if (resources.ownerName.equals(resourcesToAdd.ownerName)) {
+
+                System.out.println("ResourcesServerEvents addSubtractResources");
+                System.out.println(resourcesToAdd.food);
+                System.out.println(resourcesToAdd.wood);
+                System.out.println(resourcesToAdd.ore);
+
                 // change serverside instantly
                 resources.changeInstantly(
                     resourcesToAdd.food,
@@ -24,7 +30,7 @@ public class ResourcesServerEvents {
                     resourcesToAdd.ore
                 );
                 // change clientside over time
-                ResourcesClientboundPacket.addSubtractClientResources(new Resources(
+                ResourcesClientboundPacket.addSubtractResources(new Resources(
                     resourcesToAdd.ownerName,
                     resourcesToAdd.food,
                     resourcesToAdd.wood,
@@ -52,6 +58,6 @@ public class ResourcesServerEvents {
                 startingOre);
             resourcesList.add(playerResources);
         }
-        ResourcesClientboundPacket.syncClientResources(resourcesList);
+        ResourcesClientboundPacket.syncResources(resourcesList);
     }
 }

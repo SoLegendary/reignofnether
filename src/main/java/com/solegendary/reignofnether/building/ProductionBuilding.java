@@ -4,7 +4,6 @@ import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
 import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
 import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
 import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.solegendary.reignofnether.building.BuildingUtils.findBuilding;
 import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
 
 // buildings which can produce units and/or research tech
@@ -90,8 +88,7 @@ public abstract class ProductionBuilding extends Building {
         }
     }
 
-    public static void startProductionItem(List<Building> buildings, String itemName, BlockPos pos) {
-        ProductionBuilding building = (ProductionBuilding) findBuilding(buildings, pos);
+    public static void startProductionItem(ProductionBuilding building, String itemName, BlockPos pos) {
 
         if (building != null) {
             if (building.level.isClientSide())
@@ -108,26 +105,25 @@ public abstract class ProductionBuilding extends Building {
             if (prodItem != null) {
                 if (prodItem.canAfford(building.ownerName)) {
                     building.productionQueue.add(prodItem);
-                    ResourcesServerEvents.addSubtractResources(new Resources(
-                        building.ownerName,
-                        -prodItem.foodCost,
-                        -prodItem.woodCost,
-                        -prodItem.oreCost
-                    ));
+                    if (!building.level.isClientSide())
+                        ResourcesServerEvents.addSubtractResources(new Resources(
+                            building.ownerName,
+                            -prodItem.foodCost,
+                            -prodItem.woodCost,
+                            -prodItem.oreCost
+                        ));
                 }
-                else
+                else if (!building.level.isClientSide())
                     ResourcesClientboundPacket.warnInsufficientResources(building.ownerName,
                         prodItem.canAffordFood(building.ownerName),
                         prodItem.canAffordWood(building.ownerName),
                         prodItem.canAffordOre(building.ownerName)
                     );
             }
-
         }
     }
 
-    public static void cancelProductionItem(List<Building> buildings, String itemName, BlockPos pos, boolean frontItem) {
-        ProductionBuilding building = (ProductionBuilding) findBuilding(buildings, pos);
+    public static void cancelProductionItem(ProductionBuilding building, String itemName, BlockPos pos, boolean frontItem) {
 
         if (building != null) {
             if (building.level.isClientSide())
@@ -135,22 +131,26 @@ public abstract class ProductionBuilding extends Building {
             if (!building.level.isClientSide())
                 System.out.println("(server) starting: " + itemName);
 
-            if (frontItem)
-                building.productionQueue.remove(0);
-            else {
-                // find first non-started item to remove
-                for (int i = 0; i < building.productionQueue.size(); i++) {
-                    ProductionItem prodItem = building.productionQueue.get(i);
-                    if (prodItem.getItemName().equals(itemName) &&
-                            prodItem.ticksLeft >= prodItem.ticksToProduce) {
-                        building.productionQueue.remove(prodItem);
-                        ResourcesClientboundPacket.addSubtractClientResources(new Resources(
-                                building.ownerName,
-                                building.foodCost,
-                                building.woodCost,
-                                building.oreCost
-                        ));
-                        break;
+            if (building.productionQueue.size() > 0) {
+                if (frontItem)
+                    building.productionQueue.remove(0);
+                else {
+                    // find first non-started item to remove
+                    for (int i = 0; i < building.productionQueue.size(); i++) {
+                        ProductionItem prodItem = building.productionQueue.get(i);
+                        if (prodItem.getItemName().equals(itemName) &&
+                                prodItem.ticksLeft >= prodItem.ticksToProduce) {
+                            building.productionQueue.remove(prodItem);
+                            if (!building.level.isClientSide()) {
+                                ResourcesClientboundPacket.addSubtractResources(new Resources(
+                                        building.ownerName,
+                                        prodItem.foodCost,
+                                        prodItem.woodCost,
+                                        prodItem.oreCost
+                                ));
+                            }
+                            break;
+                        }
                     }
                 }
             }

@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Explosion;
@@ -176,7 +178,7 @@ public abstract class Building {
 
     // destroy all remaining blocks in a final big explosion
     // only explode a quarter of the blocks to avoid lag
-    private void destroy(ServerLevel level) {
+    public void destroy(ServerLevel level) {
         this.blocks.forEach((BuildingBlock block) -> {
             level.destroyBlock(block.getBlockPos(), false);
             if (block.isPlaced) {
@@ -257,7 +259,5 @@ public abstract class Building {
                 this.destroy((ServerLevel) level);
             }
         }
-
-
     }
 }
