@@ -26,6 +26,7 @@ public class VillagerTower extends Building {
         this.foodCost = 0;
         this.woodCost = 100;
         this.oreCost = 0;
+        this.popSupply = 0;
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

@@ -3,6 +3,8 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -12,6 +14,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
@@ -20,6 +24,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static com.solegendary.reignofnether.building.BuildingClientEvents.getPlayerToBuildingRelationship;
 
 public class BuildingServerEvents {
 
@@ -85,6 +91,14 @@ public class BuildingServerEvents {
                 Math.round(building.woodCost * (1 - buildPercent)),
                 Math.round(building.oreCost * (1 - buildPercent))
         ));
+    }
+
+    public static int getMaxPopulation(String ownerName) {
+        int maxPopulation = 0;
+        for (Building building : buildings)
+            if (building.ownerName.equals(ownerName) && building.isBuilt)
+                maxPopulation += building.popSupply;
+        return maxPopulation;
     }
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions

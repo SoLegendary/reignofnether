@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

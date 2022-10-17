@@ -29,6 +29,9 @@ public class UnitClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
+    private static int currentPopulation = 0;
+    public static int getCurrentPopulation() { return currentPopulation; }
+
     private static final ArrayList<ArrayList<Integer>> controlGroups = new ArrayList<>(10);
     // units moused over or inside a box select
     private static ArrayList<Integer> preselectedUnitIds = new ArrayList<>();
@@ -40,7 +43,6 @@ public class UnitClientEvents {
     private static ArrayList<Integer> unitIdForAction = new ArrayList<>();
     // ids for actions related to groups of units (attack, move, etc.)
     private static ArrayList<Integer> unitIdsForAction = new ArrayList<>();
-
 
     public static ArrayList<Integer> getPreselectedUnitIds() { return preselectedUnitIds; }
     public static ArrayList<LivingEntity> getPreselectedUnits() {
@@ -244,12 +246,18 @@ public class UnitClientEvents {
          *  TODO: make these visible to 1st-person players but currently had a visual glitch
          *  doesnt align to camera very well, sometimes sinks below ground and too thin
          */
-        // always-shown highlights to indicate unit relationships
+        currentPopulation = 0;
+
         for (int unitId : allUnitIds) {
             Entity entity = MC.level.getEntity(unitId);
             if (entity != null) {
                 Relationship unitRs = getPlayerToEntityRelationship(unitId);
 
+                // calculate total population
+                if (entity instanceof Unit && unitRs == Relationship.OWNED)
+                    currentPopulation += ((Unit) entity).getPopCost();
+
+                // always-shown highlights to indicate unit relationships
                 switch (unitRs) {
                     case OWNED -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 1.0f, 0.3f, 0.2f);
                     case FRIENDLY -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 0.3f, 1.0f, 0.2f);

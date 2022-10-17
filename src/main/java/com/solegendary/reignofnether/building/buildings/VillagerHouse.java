@@ -28,6 +28,7 @@ public class VillagerHouse extends ProductionBuilding {
         this.foodCost = 0;
         this.woodCost = 200;
         this.oreCost = 0;
+        this.popSupply = 10;
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(

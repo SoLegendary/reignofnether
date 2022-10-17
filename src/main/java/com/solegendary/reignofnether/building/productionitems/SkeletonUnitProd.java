@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.unit.PopulationCosts;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -21,6 +22,7 @@ public class SkeletonUnitProd extends ProductionItem {
         this.foodCost = 60;
         this.woodCost = 40;
         this.oreCost = 0;
+        this.popCost = PopulationCosts.SKELETON;
     }
 
     public String getItemName() {

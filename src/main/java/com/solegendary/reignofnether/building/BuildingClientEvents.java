@@ -43,6 +43,9 @@ public class BuildingClientEvents {
 
     static final Minecraft MC = Minecraft.getInstance();
 
+    private static int maxPopulation = 0;
+    public static int getMaxPopulation() { return maxPopulation; }
+
     // clientside buildings used for tracking position (for cursor selection)
     private static List<Building> buildings = Collections.synchronizedList(new ArrayList<>());
 
@@ -220,6 +223,8 @@ public class BuildingClientEvents {
 
         Building preselectedBuilding = getPreselectedBuilding();
 
+        maxPopulation = 0;
+
         for (Building building : buildings) {
             AABB aabb = new AABB(
                     new BlockPos(BuildingUtils.getMinCorner(building.blocks)),
@@ -232,6 +237,9 @@ public class BuildingClientEvents {
                 MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 0.5f);
 
             Relationship buildingRs = getPlayerToBuildingRelationship(building);
+
+            if (buildingRs == Relationship.OWNED && building.isBuilt)
+                maxPopulation += building.popSupply;
 
             switch (buildingRs) {
                 case OWNED -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), aabb, 0.3f, 1.0f, 0.3f, 0.2f);

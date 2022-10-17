@@ -47,6 +47,7 @@ public abstract class Building {
     public int foodCost;
     public int woodCost;
     public int oreCost;
+    public int popSupply; // max population this building provides
 
     public Building() { }
 

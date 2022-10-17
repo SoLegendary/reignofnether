@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units;
 
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.unit.PopulationCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.Unit;
@@ -68,6 +69,7 @@ public class CreeperUnit extends Creeper implements Unit {
     public float getSpeedModifier() {return speedModifier;}
     public float getDamage() {return damage;}
     public float getSightRange() {return sightRange;}
+    public int getPopCost() {return popCost;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -82,6 +84,7 @@ public class CreeperUnit extends Creeper implements Unit {
     final public float sightRange = 10f;
     final public boolean willRetaliate = true; // will attack when hurt by an enemy
     final public boolean aggressiveWhenIdle = false;
+    final public int popCost = PopulationCosts.CREEPER;
 
     public MeleeAttackGoal attackGoal;
 

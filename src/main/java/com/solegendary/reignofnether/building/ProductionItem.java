@@ -21,6 +21,7 @@ public abstract class ProductionItem {
     public int foodCost;
     public int woodCost;
     public int oreCost;
+    public int popCost; // 0 for non-unit prodItems
 
     public int ticksToProduce; // build time in ticks
     public int ticksLeft;
@@ -45,7 +46,7 @@ public abstract class ProductionItem {
                         resources.wood >= woodCost &&
                         resources.ore >= oreCost);
         return false;
-    }
+    } // TODO: population check
     public boolean canAffordFood(String ownerName) {
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName))

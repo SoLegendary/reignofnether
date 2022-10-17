@@ -334,25 +334,25 @@ public class HudClientEvents {
             blitX = 0;
             blitY = 0;
 
-            for (String resourceName : new String[]{ "food", "wood", "ore" }) {
+            for (String resourceName : new String[]{ "food", "wood", "ore", "pop" }) {
                 String rlPath = "";
-                int resValue = 0;
-                int resToAddValue = 0;
+                String resValueStr = "";
                 switch (resourceName) {
                     case "food" -> {
                         rlPath = "textures/icons/items/wheat.png";
-                        resValue = resources.food;
-                        resToAddValue = resources.foodToAdd;
+                        resValueStr = String.valueOf(resources.food);
                     }
                     case "wood" -> {
                         rlPath = "textures/icons/items/wood.png";
-                        resValue = resources.wood;
-                        resToAddValue = resources.woodToAdd;
+                        resValueStr = String.valueOf(resources.wood);
                     }
                     case "ore" -> {
                         rlPath = "textures/icons/items/iron_ore.png";
-                        resValue = resources.ore;
-                        resToAddValue = resources.oreToAdd;
+                        resValueStr = String.valueOf(resources.ore);
+                    }
+                    case "pop" -> {
+                        rlPath = "textures/icons/items/bed.png";
+                        resValueStr = UnitClientEvents.getCurrentPopulation() + "/" + BuildingClientEvents.getMaxPopulation();
                     }
                 }
                 MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX + iconFrameSize - 1, blitY,
@@ -364,7 +364,7 @@ public class HudClientEvents {
                         new ResourceLocation(ReignOfNether.MOD_ID, rlPath),
                         blitX+4, blitY+4, iconSize
                 );
-                GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, String.valueOf(resValue),
+                GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, resValueStr,
                         blitX + (iconFrameSize) + 24 , blitY + (iconSize / 2) + 1, 0xFFFFFF);
                 /*
                 if (resToAddValue != 0) {
