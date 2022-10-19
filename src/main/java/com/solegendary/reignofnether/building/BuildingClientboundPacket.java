@@ -34,6 +34,7 @@ public class BuildingClientboundPacket {
                     "", buildingPos, Rotation.NONE, ""));
     }
     public static void startProduction(BlockPos buildingPos, String itemName) {
+        System.out.println("Clientbound startProduction");
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new BuildingClientboundPacket(
             BuildingAction.START_PRODUCTION,
@@ -77,18 +78,33 @@ public class BuildingClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
             () -> () -> {
-                ProductionBuilding building = null;
+                Building building = null;
                 if (this.action != BuildingAction.PLACE) {
-                    building = (ProductionBuilding) findBuilding(BuildingClientEvents.getBuildings(), this.buildingPos);
+                    //building = (ProductionBuilding) findBuilding(BuildingClientEvents.getBuildings(), this.buildingPos);
+                    for (Building building2 : BuildingClientEvents.getBuildings())
+                        if (building2.isPosInsideBuilding(this.buildingPos))
+                            building = building2;
+
+                    // TODO: this is returning a different instance of the building and so  (something to do with the casting?)
+
                     if (building == null)
                         return;
                 }
                 switch (action) {
                     case PLACE -> BuildingClientEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName);
                     case CANCEL -> BuildingClientEvents.destroyBuilding(this.buildingPos);
-                    case START_PRODUCTION -> ProductionBuilding.startProductionItem(building, this.itemName, this.buildingPos);
-                    case CANCEL_PRODUCTION -> ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, true);
-                    case CANCEL_BACK_PRODUCTION -> ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, false);
+                    case START_PRODUCTION -> {
+                        ProductionBuilding.startProductionItem((ProductionBuilding)building, this.itemName, this.buildingPos);
+                        System.out.println("(client) START_PRODUCTION");
+                    }
+                    case CANCEL_PRODUCTION -> {
+                        ProductionBuilding.cancelProductionItem((ProductionBuilding)building, this.itemName, this.buildingPos, true);
+                        System.out.println("(client) CANCEL_PRODUCTION");
+                    }
+                    case CANCEL_BACK_PRODUCTION -> {
+                        ProductionBuilding.cancelProductionItem((ProductionBuilding)building, this.itemName, this.buildingPos, false);
+                        System.out.println("(client) CANCEL_BACK_PRODUCTION");
+                    }
                 }
                 success.set(true);
             });

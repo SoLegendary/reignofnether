@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.ProductionBuilding;
+import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -29,8 +32,23 @@ public class UnitClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
-    private static int currentPopulation = 0;
-    public static int getCurrentPopulation() { return currentPopulation; }
+    public static int getCurrentPopulation() {
+        int currentPopulation = 0;
+        if (MC.level != null && MC.player != null) {
+            for (Integer unitId : allUnitIds) {
+                Entity entity = MC.level.getEntity(unitId);
+                if (entity instanceof Unit unit)
+                    if (unit.getOwnerName().equals(MC.player.getName().getString()))
+                        currentPopulation += unit.getPopCost();
+            }
+            for (Building building : BuildingClientEvents.getBuildings())
+                if (building.ownerName.equals(MC.player.getName().getString()))
+                    if (building instanceof ProductionBuilding prodBuilding)
+                        for (ProductionItem prodItem : prodBuilding.productionQueue)
+                            currentPopulation += prodItem.popCost;
+        }
+        return currentPopulation;
+    }
 
     private static final ArrayList<ArrayList<Integer>> controlGroups = new ArrayList<>(10);
     // units moused over or inside a box select
@@ -246,16 +264,11 @@ public class UnitClientEvents {
          *  TODO: make these visible to 1st-person players but currently had a visual glitch
          *  doesnt align to camera very well, sometimes sinks below ground and too thin
          */
-        currentPopulation = 0;
 
         for (int unitId : allUnitIds) {
             Entity entity = MC.level.getEntity(unitId);
             if (entity != null) {
                 Relationship unitRs = getPlayerToEntityRelationship(unitId);
-
-                // calculate total population
-                if (entity instanceof Unit && unitRs == Relationship.OWNED)
-                    currentPopulation += ((Unit) entity).getPopCost();
 
                 // always-shown highlights to indicate unit relationships
                 switch (unitRs) {

@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -14,6 +14,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.apache.logging.log4j.core.jmx.Server;
 import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
@@ -21,20 +22,22 @@ import java.util.List;
 
 public class UnitServerEvents {
 
-    private static ServerLevel serverLevel = null;
-
     private static final ArrayList<UnitActionItem> unitActionQueue = new ArrayList<>();
     private static final ArrayList<Integer> allUnitIds = new ArrayList<>();
 
-    public static int getCurrentPopulation(String ownerName) {
+    public static int getCurrentPopulation(ServerLevel level, String ownerName) {
         int currentPopulation = 0;
         for (Integer unitId : allUnitIds) {
-            Entity entity = serverLevel.getEntity(unitId);
-            if (entity instanceof Unit unit) {
+            Entity entity = level.getEntity(unitId);
+            if (entity instanceof Unit unit)
                 if (unit.getOwnerName().equals(ownerName))
                     currentPopulation += unit.getPopCost();
-            }
         }
+        for (Building building : BuildingServerEvents.getBuildings())
+            if (building.ownerName.equals(ownerName))
+                if (building instanceof ProductionBuilding prodBuilding)
+                    for (ProductionItem prodItem : prodBuilding.productionQueue)
+                        currentPopulation += prodItem.popCost;
         return currentPopulation;
     }
 
@@ -89,9 +92,8 @@ public class UnitServerEvents {
         if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide())
             return;
 
-        serverLevel = (ServerLevel) evt.level;
         for (UnitActionItem actionItem : unitActionQueue)
-            actionItem.action(serverLevel);
+            actionItem.action((ServerLevel) evt.level);
 
         unitActionQueue.clear();
     }
@@ -113,7 +115,6 @@ public class UnitServerEvents {
             float closestPlayerDist = 100;
             Player closestPlayer = null;
             for (Player player : nearbyPlayers) {
-                //System.out.println("Found nearby player: " + player.getName().getString() + " " + player.distanceTo(entity));
                 if (player.distanceTo(entity) < closestPlayerDist) {
                     closestPlayerDist = player.distanceTo(entity);
                     closestPlayer = player;
@@ -121,7 +122,6 @@ public class UnitServerEvents {
             }
             if (closestPlayer != null) {
                 ((Unit) entity).setOwnerName(closestPlayer.getName().getString());
-                //System.out.println("Assigned ownerName: " + closestPlayer.getName().getString());
             }
         }
     }

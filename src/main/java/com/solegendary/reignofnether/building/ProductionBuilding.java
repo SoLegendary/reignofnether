@@ -88,13 +88,15 @@ public abstract class ProductionBuilding extends Building {
         }
     }
 
-    public static void startProductionItem(ProductionBuilding building, String itemName, BlockPos pos) {
+    // return true if successful
+    public static boolean startProductionItem(ProductionBuilding building, String itemName, BlockPos pos) {
+        boolean success = false;
 
         if (building != null) {
-            if (building.level.isClientSide())
-                System.out.println("(client) starting: " + itemName);
-            if (!building.level.isClientSide())
-                System.out.println("(server) starting: " + itemName);
+            //if (building.level.isClientSide())
+            //    System.out.println("(client) starting: " + itemName);
+            //if (!building.level.isClientSide())
+            //    System.out.println("(server) starting: " + itemName);
 
             ProductionItem prodItem = null;
             switch(itemName) {
@@ -103,37 +105,58 @@ public abstract class ProductionBuilding extends Building {
                 case ZombieUnitProd.itemName -> prodItem = new ZombieUnitProd(building);
             }
             if (prodItem != null) {
-                if (prodItem.canAfford(building.ownerName)) {
+                // only worry about checking affordability on serverside
+                if (building.level.isClientSide()) {
                     building.productionQueue.add(prodItem);
-                    if (!building.level.isClientSide())
-                        ResourcesServerEvents.addSubtractResources(new Resources(
-                            building.ownerName,
-                            -prodItem.foodCost,
-                            -prodItem.woodCost,
-                            -prodItem.oreCost
-                        ));
+                    success = true;
                 }
-                else if (!building.level.isClientSide())
-                    ResourcesClientboundPacket.warnInsufficientResources(building.ownerName,
-                        prodItem.canAffordFood(building.ownerName),
-                        prodItem.canAffordWood(building.ownerName),
-                        prodItem.canAffordOre(building.ownerName)
-                    );
+                else {
+                    if (prodItem.canAfford(building.ownerName)) {
+                        building.productionQueue.add(prodItem);
+                        ResourcesServerEvents.addSubtractResources(new Resources(
+                                building.ownerName,
+                                -prodItem.foodCost,
+                                -prodItem.woodCost,
+                                -prodItem.oreCost
+                        ));
+                        success = true;
+                    }
+                    else {
+                        if (!prodItem.isBelowMaxPopulation(building.ownerName))
+                            ResourcesClientboundPacket.warnMaxPopulation(building.ownerName);
+                        else if (!prodItem.canAffordPopulation(building.ownerName))
+                            ResourcesClientboundPacket.warnInsufficientPopulation(building.ownerName);
+                        else
+                            ResourcesClientboundPacket.warnInsufficientResources(building.ownerName,
+                                    prodItem.canAffordFood(building.ownerName),
+                                    prodItem.canAffordWood(building.ownerName),
+                                    prodItem.canAffordOre(building.ownerName)
+                            );
+                    }
+                }
             }
         }
+        return success;
     }
 
-    public static void cancelProductionItem(ProductionBuilding building, String itemName, BlockPos pos, boolean frontItem) {
+    public static boolean cancelProductionItem(ProductionBuilding building, String itemName, BlockPos pos, boolean frontItem) {
+        boolean success = false;
 
         if (building != null) {
-            if (building.level.isClientSide())
-                System.out.println("(client) starting: " + itemName);
-            if (!building.level.isClientSide())
-                System.out.println("(server) starting: " + itemName);
-
             if (building.productionQueue.size() > 0) {
-                if (frontItem)
+                if (frontItem) {
+                    ProductionItem prodItem = building.productionQueue.get(0);
                     building.productionQueue.remove(0);
+                    if (!building.level.isClientSide()) {
+                        ResourcesServerEvents.addSubtractResources(new Resources(
+                                building.ownerName,
+                                prodItem.foodCost,
+                                prodItem.woodCost,
+                                prodItem.oreCost
+                        ));
+                    }
+                    success = true;
+                }
                 else {
                     // find first non-started item to remove
                     for (int i = 0; i < building.productionQueue.size(); i++) {
@@ -142,19 +165,21 @@ public abstract class ProductionBuilding extends Building {
                                 prodItem.ticksLeft >= prodItem.ticksToProduce) {
                             building.productionQueue.remove(prodItem);
                             if (!building.level.isClientSide()) {
-                                ResourcesClientboundPacket.addSubtractResources(new Resources(
+                                ResourcesServerEvents.addSubtractResources(new Resources(
                                         building.ownerName,
                                         prodItem.foodCost,
                                         prodItem.woodCost,
                                         prodItem.oreCost
                                 ));
                             }
+                            success = true;
                             break;
                         }
                     }
                 }
             }
         }
+        return success;
     }
 
     public void tick(Level level) {

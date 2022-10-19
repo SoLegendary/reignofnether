@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.PopulationCosts;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -43,8 +44,10 @@ public class BuildingClientEvents {
 
     static final Minecraft MC = Minecraft.getInstance();
 
-    private static int maxPopulation = 0;
-    public static int getMaxPopulation() { return maxPopulation; }
+    private static int totalPopulationSupply = 0;
+    public static int getTotalPopulationSupply() {
+        return Math.min(PopulationCosts.MAX_POPULATION, totalPopulationSupply);
+    }
 
     // clientside buildings used for tracking position (for cursor selection)
     private static List<Building> buildings = Collections.synchronizedList(new ArrayList<>());
@@ -223,7 +226,7 @@ public class BuildingClientEvents {
 
         Building preselectedBuilding = getPreselectedBuilding();
 
-        maxPopulation = 0;
+        totalPopulationSupply = 0;
 
         for (Building building : buildings) {
             AABB aabb = new AABB(
@@ -239,7 +242,7 @@ public class BuildingClientEvents {
             Relationship buildingRs = getPlayerToBuildingRelationship(building);
 
             if (buildingRs == Relationship.OWNED && building.isBuilt)
-                maxPopulation += building.popSupply;
+                totalPopulationSupply += building.popSupply;
 
             switch (buildingRs) {
                 case OWNED -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), aabb, 0.3f, 1.0f, 0.3f, 0.2f);

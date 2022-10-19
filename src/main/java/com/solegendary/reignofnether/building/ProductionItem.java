@@ -7,8 +7,12 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.unit.PopulationCosts;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -40,13 +44,17 @@ public abstract class ProductionItem {
     }
 
     public boolean canAfford(String ownerName) {
+        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.level, ownerName);
+        int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
+
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName))
                 return (resources.food >= foodCost &&
                         resources.wood >= woodCost &&
-                        resources.ore >= oreCost);
+                        resources.ore >= oreCost &&
+                        (currentPop + popCost) <= popSupply);
         return false;
-    } // TODO: population check
+    }
     public boolean canAffordFood(String ownerName) {
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName))
@@ -63,6 +71,24 @@ public abstract class ProductionItem {
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName))
                 return resources.ore >= oreCost;
+        return false;
+    }
+    public boolean canAffordPopulation(String ownerName) {
+        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.level, ownerName);
+        int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
+
+        for (Resources resources : ResourcesServerEvents.resourcesList)
+            if (resources.ownerName.equals(ownerName))
+                return (currentPop + popCost) <= popSupply;
+        return false;
+    }
+    public boolean isBelowMaxPopulation(String ownerName) {
+        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.level, ownerName);
+        int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
+
+        for (Resources resources : ResourcesServerEvents.resourcesList)
+            if (resources.ownerName.equals(ownerName))
+                return (currentPop + popCost) <= PopulationCosts.MAX_POPULATION;
         return false;
     }
 

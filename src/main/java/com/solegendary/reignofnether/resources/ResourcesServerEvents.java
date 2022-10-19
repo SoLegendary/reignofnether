@@ -17,12 +17,6 @@ public class ResourcesServerEvents {
     public static void addSubtractResources(Resources resourcesToAdd) {
         for (Resources resources : resourcesList) {
             if (resources.ownerName.equals(resourcesToAdd.ownerName)) {
-
-                System.out.println("ResourcesServerEvents addSubtractResources");
-                System.out.println(resourcesToAdd.food);
-                System.out.println(resourcesToAdd.wood);
-                System.out.println(resourcesToAdd.ore);
-
                 // change serverside instantly
                 resources.changeInstantly(
                     resourcesToAdd.food,
@@ -51,7 +45,6 @@ public class ResourcesServerEvents {
                 playerResources = resources;
 
         if (playerResources == null) {
-            System.out.println("Assigning Resources object to: " + playerName + ", id: " + evt.getEntity().getId());
             playerResources = new Resources(playerName,
                 startingFood,
                 startingWood,

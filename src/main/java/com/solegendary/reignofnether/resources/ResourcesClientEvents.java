@@ -20,10 +20,8 @@ public class ResourcesClientEvents {
 
     // should never be run from clientside except via packet
     public static void addSubtractResources(Resources serverResources) {
-        System.out.println("ResourcesClientEvents addSubtractResources");
-        System.out.println(serverResources.food);
-        System.out.println(serverResources.wood);
-        System.out.println(serverResources.ore);
+        //System.out.println("ResourcesClientEvents addSubtractResources");
+        //System.out.println(serverResources.food + " " + serverResources.wood + " " + serverResources.ore);
 
         for (Resources resources : resourcesList)
             if (resources.ownerName.equals(serverResources.ownerName))

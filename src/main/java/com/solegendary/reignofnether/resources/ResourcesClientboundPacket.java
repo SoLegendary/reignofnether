@@ -44,6 +44,16 @@ public class ResourcesClientboundPacket {
                 new ResourcesClientboundPacket(ResourcesAction.WARN_INSUFFICIENT_RESOURCES, ownerName, food ? 1 : 0, wood ? 1 : 0, ore ? 1 : 0));
     }
 
+    public static void warnInsufficientPopulation(String ownerName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new ResourcesClientboundPacket(ResourcesAction.WARN_INSUFFICIENT_POPULATION, ownerName, 0 ,0, 0));
+    }
+
+    public static void warnMaxPopulation(String ownerName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new ResourcesClientboundPacket(ResourcesAction.WARN_MAX_POPULATION, ownerName, 0, 0, 0));
+    }
+
     public ResourcesClientboundPacket(ResourcesAction action, String ownerName, int food, int wood, int ore) {
         this.action = action;
         this.ownerName = ownerName;
@@ -97,12 +107,44 @@ public class ResourcesClientboundPacket {
                             case WARN_INSUFFICIENT_RESOURCES -> {
                                 Player player = Minecraft.getInstance().player;
                                 if (player != null && player.getName().getString().equals(ownerName)) {
-                                    HudClientEvents.showInsufficientResourcesWarning(
-                                        this.food > 0,
-                                        this.wood > 0,
-                                        this.ore > 0
-                                    );
+
+                                    String msg = "You don't have enough ";
+                                    int countTotal = this.food + this.wood + this.ore;
+                                    int count = 0;
+                                    if (this.food <= 0) {
+                                        count += 1;
+                                        msg += "food";
+                                    }
+                                    if (this.wood <= 0) {
+                                        count += 1;
+                                        if (count == 1)
+                                            msg += "wood";
+                                        else if (count == countTotal)
+                                            msg += "and wood";
+                                        else
+                                            msg += ", wood";
+                                    }
+                                    if (this.ore <= 0) {
+                                        count += 1;
+                                        if (count == 1)
+                                            msg += "ore";
+                                        else if (count == countTotal)
+                                            msg += "and ore";
+                                        else
+                                            msg += ", ore";
+                                    }
+                                    HudClientEvents.showTemporaryMessage(msg);
                                 }
+                            }
+                            case WARN_INSUFFICIENT_POPULATION -> {
+                                Player player = Minecraft.getInstance().player;
+                                if (player != null && player.getName().getString().equals(ownerName))
+                                    HudClientEvents.showTemporaryMessage("You don't have enough population supply");
+                            }
+                            case WARN_MAX_POPULATION -> {
+                                Player player = Minecraft.getInstance().player;
+                                if (player != null && player.getName().getString().equals(ownerName))
+                                    HudClientEvents.showTemporaryMessage("You have reached the maximum population");
                             }
                         }
                         success.set(true);

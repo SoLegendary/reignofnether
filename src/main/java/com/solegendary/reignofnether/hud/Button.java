@@ -153,10 +153,10 @@ public class Button {
             return;
 
         if (isMouseOver(mouseX, mouseY)) {
-            if (this.entity != null)
-                System.out.println("Clicked on button - entity id: " + entity.getId());
-            else if (this.hotkey != null)
-                System.out.println("Clicked on button - hotkey: " + hotkey.getKey().getDisplayName());
+            //if (this.entity != null)
+            //    System.out.println("Clicked on button - entity id: " + entity.getId());
+            //else if (this.hotkey != null)
+            //    System.out.println("Clicked on button - hotkey: " + hotkey.getKey().getDisplayName());
 
             if (MC.player != null)
                 MC.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.2f, 1.0f);

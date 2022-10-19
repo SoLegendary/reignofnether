@@ -104,16 +104,22 @@ public class BuildingServerboundPacket {
                     building.setRallyPoint(rallyPos);
                 }
                 case START_PRODUCTION -> {
-                    ProductionBuilding.startProductionItem(building, this.itemName, this.buildingPos);
-                    BuildingClientboundPacket.startProduction(buildingPos, itemName);
+                    boolean prodSuccess = ProductionBuilding.startProductionItem(building, this.itemName, this.buildingPos);
+                    if (prodSuccess)
+                        BuildingClientboundPacket.startProduction(buildingPos, itemName);
+                    System.out.println("(server) START_PRODUCTION");
                 }
                 case CANCEL_PRODUCTION -> {
-                    ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, true);
-                    BuildingClientboundPacket.cancelProduction(buildingPos, itemName, true);
+                    boolean prodSuccess = ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, true);
+                    if (prodSuccess)
+                        BuildingClientboundPacket.cancelProduction(buildingPos, itemName, true);
+                    System.out.println("(server) CANCEL_PRODUCTION");
                 }
                 case CANCEL_BACK_PRODUCTION -> {
-                    ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, false);
-                    BuildingClientboundPacket.cancelProduction(buildingPos, itemName, false);
+                    boolean prodSuccess = ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, false);
+                    if (prodSuccess)
+                        BuildingClientboundPacket.cancelProduction(buildingPos, itemName, false);
+                    System.out.println("(server) CANCEL_BACK_PRODUCTION");
                 }
             }
             success.set(true);

@@ -29,6 +29,10 @@ public class HudClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
+    private static String tempMsg = "";
+    private static int tempMsgTicksLeft = 0;
+    private static final int tempMsgTicksFade = 50; // ticks left when the msg starts to fade
+    private static final int tempMsgTicksMax = 150; // ticks to show the msg for
 
     private static final ArrayList<Button> genericActionButtons = new ArrayList<>(Arrays.asList(
             ActionButtons.attack,
@@ -68,13 +72,9 @@ public class HudClientEvents {
             return entity.getName().getString();
     }
 
-    public static void showInsufficientResourcesWarning(boolean foodInsufficient, boolean woodInsufficient, boolean oreInsufficient) {
-        if (foodInsufficient)
-            System.out.println("Not enough food");
-        if (woodInsufficient)
-            System.out.println("Not enough wood");
-        if (oreInsufficient)
-            System.out.println("Not enough ore");
+    public static void showTemporaryMessage(String msg) {
+        tempMsgTicksLeft = tempMsgTicksMax;
+        tempMsg = msg;
     }
 
     @SubscribeEvent
@@ -352,7 +352,7 @@ public class HudClientEvents {
                     }
                     case "pop" -> {
                         rlPath = "textures/icons/items/bed.png";
-                        resValueStr = UnitClientEvents.getCurrentPopulation() + "/" + BuildingClientEvents.getMaxPopulation();
+                        resValueStr = UnitClientEvents.getCurrentPopulation() + "/" + BuildingClientEvents.getTotalPopulationSupply();
                     }
                 }
                 MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX + iconFrameSize - 1, blitY,
@@ -375,6 +375,22 @@ public class HudClientEvents {
                 blitY += iconFrameSize - 1;
             }
         }
+
+        // --------------------------
+        // Temporary warning messages
+        // --------------------------
+        if (tempMsgTicksLeft > 0 && tempMsg.length() > 0) {
+            int ticksUnderFade = Math.min(tempMsgTicksLeft, tempMsgTicksFade);
+            int alpha = (int) (0xFF * ((float) ticksUnderFade / (float) tempMsgTicksFade));
+
+            GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font,
+                tempMsg,
+                screenWidth / 2,
+                screenHeight - iconFrameSize * 2 - 50,
+                0xFFFFFF + (alpha << 24));
+        }
+        if (tempMsgTicksLeft > 0)
+            tempMsgTicksLeft -= 1;
     }
 
     private static List<Button> getAllButtons() {

@@ -80,8 +80,6 @@ public class MinimapClientEvents {
         if (MC.level == null || MC.player == null)
             return;
 
-        long timeBefore = System.currentTimeMillis();
-
         // get world position of corners of the screen
         Vector3d[] corners = new Vector3d[] {
             MiscUtil.screenPosToWorldPos(MC, 0,0),
@@ -165,8 +163,6 @@ public class MinimapClientEvents {
                 mapColours.add(MiscUtil.reverseHexRGB(rgb) | (0xFF << 24));
             }
         }
-        //System.out.println("updated in: " + (System.currentTimeMillis() - timeBefore) + "ms");
-        //System.out.println("blocks: " + mapColours.size());
     }
 
     private static void renderMap(PoseStack stack)
