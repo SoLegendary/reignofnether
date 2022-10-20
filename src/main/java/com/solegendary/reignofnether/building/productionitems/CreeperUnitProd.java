@@ -49,8 +49,8 @@ public class CreeperUnitProd extends ProductionItem {
                 FormattedCharSequence.forward("Ore: 100", Style.EMPTY.withItalic(true)),
                 FormattedCharSequence.forward("Time: 5s", Style.EMPTY.withItalic(true)),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An unstable, explosive monster that can blow up", Style.EMPTY),
-                FormattedCharSequence.forward("buildings and units alike. Has no regular attack.", Style.EMPTY)
+                FormattedCharSequence.forward("An explosive monster that can blow up units", Style.EMPTY),
+                FormattedCharSequence.forward("and buildings alike. Has no regular attack.", Style.EMPTY)
             )
         );
     }

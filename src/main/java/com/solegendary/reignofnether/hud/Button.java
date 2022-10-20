@@ -151,7 +151,7 @@ public class Button {
 
     public void renderTooltip(PoseStack poseStack, int mouseX, int mouseY) {
         if (MC.screen != null && tooltipLines != null && tooltipLines.size() > 0)
-            MC.screen.renderTooltip(poseStack, tooltipLines, mouseX, mouseY - (8 * (tooltipLines.size() - 1)), MC.font);
+            MC.screen.renderTooltip(poseStack, tooltipLines, mouseX, mouseY - (9 * (tooltipLines.size() - 1)), MC.font);
     }
 
     public boolean isMouseOver(int mouseX, int mouseY) {
