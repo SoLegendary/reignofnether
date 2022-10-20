@@ -6,13 +6,19 @@ import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -44,6 +50,7 @@ public class Button {
     public Supplier<Boolean> isActive; // special highlighting for an on-state (eg. auto-cast/auto-producing)
     public Supplier<Boolean> isEnabled; // is the button allowed to be used right now? (eg. off cooldown)
     public Runnable onUse;
+    public List<FormattedCharSequence> tooltipLines;
 
     // used for cooldown indication, productionItem progress, etc.
     // @ 0.0, appears clear and normal
@@ -54,9 +61,9 @@ public class Button {
     Minecraft MC = Minecraft.getInstance();
 
     // constructor for ability/action/production buttons
-    public Button(String name, int iconSize,
-                  String iconResourcePath, KeyMapping hotkey,
-                  Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Supplier<Boolean> isEnabled, Runnable onClick) {
+    public Button(String name, int iconSize, String iconResourcePath, KeyMapping hotkey,
+                  Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Supplier<Boolean> isEnabled,
+                  Runnable onClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
         this.iconSize = iconSize;
@@ -65,12 +72,13 @@ public class Button {
         this.isActive = isActive;
         this.isEnabled = isEnabled;
         this.onUse = onClick;
+        this.tooltipLines = tooltipLines;
     }
 
     // constructor for unit selection buttons
-    public Button(String name, int iconSize,
-                  String iconResourcePath, LivingEntity entity,
-                  Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Supplier<Boolean> isEnabled, Runnable onClick) {
+    public Button(String name, int iconSize, String iconResourcePath, LivingEntity entity,
+                  Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Supplier<Boolean> isEnabled,
+                  Runnable onClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
         this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
         this.iconSize = iconSize;
@@ -79,6 +87,7 @@ public class Button {
         this.isActive = isActive;
         this.isEnabled = isEnabled;
         this.onUse = onClick;
+        this.tooltipLines = tooltipLines;
     }
 
     public void renderHealthBar(PoseStack poseStack) {
@@ -139,6 +148,12 @@ public class Button {
                     0x80000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
     }
+
+    public void renderTooltip(PoseStack poseStack, int mouseX, int mouseY) {
+        if (MC.screen != null && tooltipLines != null && tooltipLines.size() > 0)
+            MC.screen.renderTooltip(poseStack, tooltipLines, mouseX, mouseY - (8 * (tooltipLines.size() - 1)), MC.font);
+    }
+
     public boolean isMouseOver(int mouseX, int mouseY) {
         return (mouseX >= x &&
                 mouseY >= y &&

@@ -9,9 +9,11 @@ import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -102,6 +104,9 @@ public class CreeperUnit extends Creeper implements Unit {
                 () -> false,
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.EXPLODE),
+                List.of(
+                    FormattedCharSequence.forward("Explode", Style.EMPTY)
+                ),
                 0, 0, 3
             ));
     }

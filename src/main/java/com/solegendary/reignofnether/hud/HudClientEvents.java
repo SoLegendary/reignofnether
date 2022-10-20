@@ -14,7 +14,9 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.model.*;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.client.event.*;
@@ -40,10 +42,10 @@ public class HudClientEvents {
             ActionButtons.hold,
             ActionButtons.move
     ));
-    // here only add/remove from said array as needed
-    private static final ArrayList<Button> actionButtons = new ArrayList<>();
     private static final ArrayList<Button> unitButtons = new ArrayList<>();
     private static final ArrayList<Button> productionButtons = new ArrayList<>();
+    // buttons which are rendered at the moment in RenderEvent
+    private static final ArrayList<Button> renderedButtons = new ArrayList<>();
 
     // unit type that is selected in the list of unit icons
     public static LivingEntity hudSelectedEntity = null;
@@ -105,9 +107,9 @@ public class HudClientEvents {
         buttonsPerRow = Math.max(buttonsPerRow, 4);
 
         // refresh button lists
-        actionButtons.clear();
         unitButtons.clear();
         productionButtons.clear();
+        renderedButtons.clear();
 
         int blitX = hudStartingXPos;
         int blitY = MC.getWindow().getGuiScaledHeight();
@@ -161,6 +163,7 @@ public class HudClientEvents {
                         if (buttonsRendered == 0) {
                             prodButton.greyPercent = 1 - percentageDone;
                             prodButton.render(evt.getPoseStack(), blitX, blitY - 5, mouseX, mouseY);
+                            renderedButtons.add(prodButton);
                         }
                         // replace last icon with a +X number of production items left in queue
                         else if (buttonsRendered >= buttonsPerRow &&
@@ -175,6 +178,7 @@ public class HudClientEvents {
                         // bottom row for all other queued items
                         else {
                             prodButton.render(evt.getPoseStack(), blitX, blitY + iconFrameSize, mouseX, mouseY);
+                            renderedButtons.add(prodButton);
                             blitX += iconFrameSize;
                         }
                         buttonsRendered += 1;
@@ -200,15 +204,17 @@ public class HudClientEvents {
                         () -> true,
                         () -> {
                             BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(selBuilding.getBlocks()));
-                        }
+                        },
+                        List.of(FormattedCharSequence.forward("Cancel", Style.EMPTY))
                 );
-                actionButtons.add(cancelButton);
                 cancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
+                renderedButtons.add(cancelButton);
             }
             else if (selBuilding instanceof ProductionBuilding selProdBuilding) {
                 for (Button productionButton : selProdBuilding.productionButtons) {
-                    productionButtons.add(productionButton);
                     productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                    productionButtons.add(productionButton);
+                    renderedButtons.add(productionButton);
                     blitX += iconFrameSize;
                 }
             }
@@ -262,7 +268,8 @@ public class HudClientEvents {
                         } else { // select this one specific unit
                             hudSelectedEntity = unit;
                         }
-                    }
+                    },
+                    null
                 ));
             }
         }
@@ -287,6 +294,7 @@ public class HudClientEvents {
                 }
                 else {
                     unitButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                    renderedButtons.add(unitButton);
                     unitButton.renderHealthBar(evt.getPoseStack());
                     blitX += iconFrameSize;
                     if (buttonsRendered == buttonsPerRow - 1) {
@@ -309,6 +317,7 @@ public class HudClientEvents {
             blitY = screenHeight - iconFrameSize;
             for (Button actionButton : genericActionButtons) {
                 actionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                renderedButtons.add(actionButton);
                 blitX += iconFrameSize;
             }
             blitX = 0;
@@ -316,8 +325,8 @@ public class HudClientEvents {
             for (LivingEntity unit : units) {
                 if (getSimpleEntityName(unit).equals(getSimpleEntityName(hudSelectedEntity))) {
                     for (AbilityButton abilityButton : ((Unit) unit).getAbilities()) {
-                        actionButtons.add(abilityButton);
                         abilityButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                        renderedButtons.add(abilityButton);
                         blitX += iconFrameSize;
                     }
                     break;
@@ -391,22 +400,19 @@ public class HudClientEvents {
         }
         if (tempMsgTicksLeft > 0)
             tempMsgTicksLeft -= 1;
-    }
 
-    private static List<Button> getAllButtons() {
-        List<Button> allButtons = new ArrayList<>();
-        allButtons.addAll(genericActionButtons);
-        allButtons.addAll(actionButtons);
-        allButtons.addAll(unitButtons);
-        allButtons.addAll(productionButtons);
-        return allButtons;
+        // ------------------------------------------------------
+        // Button tooltips (has to be rendered last to be on top)
+        // ------------------------------------------------------
+        for (Button button : renderedButtons)
+            if (button.isMouseOver(mouseX, mouseY))
+                button.renderTooltip(evt.getPoseStack(), mouseX, mouseY);
     }
 
     public static boolean isMouseOverAnyButton() {
-        for (Button button : getAllButtons()) {
+        for (Button button : renderedButtons)
             if (button.isMouseOver(mouseX, mouseY))
                 return true;
-        }
         return false;
     }
 
@@ -414,7 +420,7 @@ public class HudClientEvents {
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
         if (evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
             return;
-        for (Button button : getAllButtons())
+        for (Button button : renderedButtons)
             button.checkLeftClicked((int) evt.getMouseX(), (int) evt.getMouseY());
     }
 
@@ -423,7 +429,7 @@ public class HudClientEvents {
     public static void onKeyPress(InputEvent.Key evt) {
         if (evt.getAction() != InputConstants.PRESS)
             return;
-        for (Button button : getAllButtons())
+        for (Button button : renderedButtons)
             button.checkPressed(evt.getKey());
     }
 

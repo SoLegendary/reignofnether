@@ -6,8 +6,12 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.unit.PopulationCosts;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
+
+import java.util.List;
 
 public class SkeletonUnitProd extends ProductionItem {
 
@@ -38,7 +42,15 @@ public class SkeletonUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName)
+            () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
+            List.of(
+                FormattedCharSequence.forward("Skeleton", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("Food: 60", Style.EMPTY.withItalic(true)),
+                FormattedCharSequence.forward("Wood: 40", Style.EMPTY.withItalic(true)),
+                FormattedCharSequence.forward("Time: 5s", Style.EMPTY.withItalic(true)),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("An undead soldier with a bow and arrows.", Style.EMPTY)
+            )
         );
     }
 
@@ -51,7 +63,8 @@ public class SkeletonUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName, first)
+            () -> BuildingServerboundPacket.cancelProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName, first),
+            null
         );
     }
 }

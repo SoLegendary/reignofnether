@@ -6,8 +6,12 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.unit.PopulationCosts;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
+
+import java.util.List;
 
 public class CreeperUnitProd extends ProductionItem {
 
@@ -38,7 +42,16 @@ public class CreeperUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName)
+            () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
+            List.of(
+                FormattedCharSequence.forward("Creeper", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("Food: 50", Style.EMPTY.withItalic(true)),
+                FormattedCharSequence.forward("Ore: 100", Style.EMPTY.withItalic(true)),
+                FormattedCharSequence.forward("Time: 5s", Style.EMPTY.withItalic(true)),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("An unstable, explosive monster that can blow up", Style.EMPTY),
+                FormattedCharSequence.forward("buildings and units alike. Has no regular attack.", Style.EMPTY)
+            )
         );
     }
 
@@ -51,7 +64,8 @@ public class CreeperUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName, first)
+            () -> BuildingServerboundPacket.cancelProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName, first),
+            null
         );
     }
 }

@@ -6,6 +6,11 @@ import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerboundPacket;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
+
+import java.util.List;
 
 // static list of generic unit actions (attack, move, stop, etc.)
 public class ActionButtons {
@@ -21,7 +26,8 @@ public class ActionButtons {
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK,
         () -> false,
         () -> true,
-        () -> CursorClientEvents.setLeftClickAction(UnitAction.ATTACK)
+        () -> CursorClientEvents.setLeftClickAction(UnitAction.ATTACK),
+        List.of(FormattedCharSequence.forward("Attack", Style.EMPTY))
     );
     public static final Button stop = new Button(
         "Stop",
@@ -36,7 +42,8 @@ public class ActionButtons {
             -1,
             UnitClientEvents.getSelectedUnitIds().stream().mapToInt(i -> i).toArray(),
             CursorClientEvents.getPreselectedBlockPos()
-        ))
+        )),
+        List.of(FormattedCharSequence.forward("Stop", Style.EMPTY))
     );
     public static final Button hold = new Button(
         "Hold Position",
@@ -51,7 +58,8 @@ public class ActionButtons {
             -1,
             UnitClientEvents.getSelectedUnitIds().stream().mapToInt(i -> i).toArray(),
             CursorClientEvents.getPreselectedBlockPos()
-        ))
+        )),
+        List.of(FormattedCharSequence.forward("Hold Position", Style.EMPTY))
     );
     public static final Button move = new Button(
         "Move",
@@ -61,6 +69,7 @@ public class ActionButtons {
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOVE,
         () -> false,
         () -> true,
-        () -> CursorClientEvents.setLeftClickAction(UnitAction.MOVE)
+        () -> CursorClientEvents.setLeftClickAction(UnitAction.MOVE),
+        List.of(FormattedCharSequence.forward("Move", Style.EMPTY))
     );
 }
