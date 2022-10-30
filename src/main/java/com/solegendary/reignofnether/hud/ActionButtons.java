@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hud;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.PacketHandler;
@@ -8,6 +9,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerboundPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
 import java.util.List;
@@ -28,6 +30,7 @@ public class ActionButtons {
         () -> true,
         () -> CursorClientEvents.setLeftClickAction(UnitAction.ATTACK),
         List.of(FormattedCharSequence.forward("Attack", Style.EMPTY))
+
     );
     public static final Button stop = new Button(
         "Stop",
