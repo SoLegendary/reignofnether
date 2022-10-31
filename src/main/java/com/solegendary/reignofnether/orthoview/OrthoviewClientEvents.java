@@ -108,12 +108,12 @@ public class OrthoviewClientEvents {
         if (enabled) {
             MinimapClientEvents.setMapCentre(MC.player.getX(), MC.player.getZ());
             prevPlayerY = MC.player.getY();
-            PlayerServerboundPacket.teleportPlayer(MC.player.getId(), MC.player.getX(), setPlayerY, MC.player.getZ());
+            PlayerServerboundPacket.teleportPlayer(MC.player.getX(), setPlayerY, MC.player.getZ());
             TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
         }
         else {
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
-            PlayerServerboundPacket.teleportPlayer(MC.player.getId(), MC.player.getX(), prevPlayerY, MC.player.getZ());
+            PlayerServerboundPacket.teleportPlayer(MC.player.getX(), prevPlayerY, MC.player.getZ());
         }
     }
 

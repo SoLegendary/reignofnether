@@ -6,15 +6,18 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.model.*;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -54,8 +57,13 @@ public class HudClientEvents {
     public static PortraitRendererUnit portraitRendererUnit = new PortraitRendererUnit(null);
     public static PortraitRendererBuilding portraitRendererBuilding = new PortraitRendererBuilding();
 
+    private static RectZone unitPortraitZone = null;
+    private static RectZone buildingPortraitZone = null;
+
     private static int mouseX = 0;
     private static int mouseY = 0;
+    private static int mouseDownX = 0;
+    private static int mouseDownY = 0;
 
     private final static int iconBgColour = 0x64000000;
     private final static int frameBgColour = 0xA0000000;
@@ -107,11 +115,12 @@ public class HudClientEvents {
         buttonsPerRow = Math.min(buttonsPerRow, 8);
         buttonsPerRow = Math.max(buttonsPerRow, 4);
 
-        // refresh lists
         unitButtons.clear();
         productionButtons.clear();
         renderedButtons.clear();
         hudZones.clear();
+        unitPortraitZone = null;
+        buildingPortraitZone = null;
 
         int blitX = hudStartingXPos;
         int blitY = MC.getWindow().getGuiScaledHeight();
@@ -124,9 +133,10 @@ public class HudClientEvents {
             // -----------------
             blitY -= portraitRendererBuilding.frameHeight;
 
-            hudZones.add(portraitRendererBuilding.render(
+            buildingPortraitZone = portraitRendererBuilding.render(
                     evt.getPoseStack(),
-                    blitX, blitY, selBuilding));
+                    blitX, blitY, selBuilding);
+            hudZones.add(buildingPortraitZone);
 
             blitX += portraitRendererBuilding.frameWidth + 10;
 
@@ -235,11 +245,20 @@ public class HudClientEvents {
             String name = getSimpleEntityName(hudSelectedEntity);
             String nameCap = name.substring(0, 1).toUpperCase() + name.substring(1);
 
-            hudZones.add(portraitRendererUnit.render(
-                    evt.getPoseStack(), nameCap,
-                    blitX, blitY, hudSelectedEntity));
 
-            blitX += portraitRendererUnit.frameWidth * 2;
+            unitPortraitZone = portraitRendererUnit.render(
+                    evt.getPoseStack(), nameCap,
+                    blitX, blitY, hudSelectedEntity);
+            hudZones.add(unitPortraitZone);
+
+            blitX += portraitRendererUnit.frameWidth - 1;
+
+            if (hudSelectedEntity instanceof Unit)
+                hudZones.add(portraitRendererUnit.renderStats(
+                        evt.getPoseStack(), nameCap,
+                        blitX, blitY, (Unit) hudSelectedEntity));
+
+            blitX += portraitRendererUnit.frameWidth;
         }
 
         // ----------------------------------------------
@@ -455,8 +474,12 @@ public class HudClientEvents {
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
         if (evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
             return;
+
         for (Button button : renderedButtons)
             button.checkLeftClicked((int) evt.getMouseX(), (int) evt.getMouseY());
+
+        mouseDownX = (int) evt.getMouseX();
+        mouseDownY = (int) evt.getMouseY();
     }
 
     // TODO: Q and E don't work properly (probably due to conflicting with vanilla hotkeys?)
@@ -472,6 +495,28 @@ public class HudClientEvents {
     public static void onTick(TickEvent.ClientTickEvent evt) {
         if (OrthoviewClientEvents.isEnabled())
             portraitRendererUnit.tickAnimation();
+
+        // move camera to unit or building when its portrait is clicked/held on
+        if (MiscUtil.isLeftClickDown(MC)) {
+            if (buildingPortraitZone != null &&
+                buildingPortraitZone.isMouseOver(mouseX, mouseY) &&
+                buildingPortraitZone.isMouseOver(mouseDownX, mouseDownY) &&
+                MC.player != null) {
+                Building selBuilding = BuildingClientEvents.getSelectedBuilding();
+                BlockPos pos = BuildingUtils.getCentrePos(selBuilding.getBlocks());
+                PlayerServerboundPacket.teleportPlayer((double) pos.getX(), MC.player.getY(), (double) pos.getZ());
+            }
+            else if (unitPortraitZone != null &&
+                    unitPortraitZone.isMouseOver(mouseX, mouseY) &&
+                    unitPortraitZone.isMouseOver(mouseDownX, mouseDownY) &&
+                    MC.player != null) {
+                PlayerServerboundPacket.teleportPlayer(
+                        hudSelectedEntity.getX(),
+                        MC.player.getY(),
+                        hudSelectedEntity.getZ()
+                );
+            }
+        }
     }
 
     @SubscribeEvent

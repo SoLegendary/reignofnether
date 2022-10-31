@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import org.w3c.dom.css.Rect;
 
@@ -111,7 +112,6 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
     // - unit name
     // Must be called from DrawScreenEvent
     public RectZone render(PoseStack poseStack, String name, int x, int y, LivingEntity entity) {
-
         // draw name
         GuiComponent.drawString(
                 poseStack, Minecraft.getInstance().font,
@@ -127,7 +127,6 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
             case NEUTRAL  -> bgCol = 0x90909000;
             case HOSTILE  -> bgCol = 0x90900000;
         }
-
         MyRenderer.renderFrameWithBg(poseStack, x, y,
                 frameWidth,
                 frameHeight,
@@ -169,40 +168,36 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
                 x+(frameWidth/2), y+frameHeight-13,
                 0xFFFFFFFF
         );
-
-        if (entity instanceof Unit) {
-            int width2 = 43;
-            int x2 = x + frameWidth - 1;
-            MyRenderer.renderFrameWithBg(poseStack, x2, y,
-                    width2,
-                    frameHeight,
-                    0xA0000000);
-
-            rectZone = RectZone.getZoneByLW(x, y, frameWidth + width2, frameHeight);
-
-            int blitXIcon = x2 + 6;
-            int blitYIcon = y + 7;
-            for (int i = 0; i < TEXTURE_STAT_ICONS.length; i++) {
-                MyRenderer.renderIcon(
-                        poseStack,
-                        TEXTURE_STAT_ICONS[i],
-                        blitXIcon, blitYIcon, 8
-                );
-                String statString = "";
-
-                Unit unit = (Unit) entity;
-                switch (i) {
-                    case 0 -> statString = String.valueOf((int) unit.getDamage()); // DAMAGE
-                    case 1 -> statString = String.valueOf((int) (100 / unit.getAttackCooldown())); // ATTACK SPEED
-                    case 2 -> statString = String.valueOf((int) (unit.getAttackRange())); // RANGE
-                    case 3 -> statString = String.valueOf(entity.getArmorValue()); // ARMOUR
-                    case 4 -> statString = String.valueOf((int) (unit.getSpeedModifier() * 100)); // MOVE SPEED
-                }
-                GuiComponent.drawString(poseStack, Minecraft.getInstance().font, statString, blitXIcon + 13, blitYIcon, 0xFFFFFF);
-                blitYIcon += 10;
-            }
-        }
         return rectZone;
+    }
+
+    public RectZone renderStats(PoseStack poseStack, String name, int x, int y, Unit unit) {
+        int width2 = 43;
+        MyRenderer.renderFrameWithBg(poseStack, x, y,
+                width2,
+                frameHeight,
+                0xA0000000);
+
+        int blitXIcon = x + 6;
+        int blitYIcon = y + 7;
+        for (int i = 0; i < TEXTURE_STAT_ICONS.length; i++) {
+            MyRenderer.renderIcon(
+                    poseStack,
+                    TEXTURE_STAT_ICONS[i],
+                    blitXIcon, blitYIcon, 8
+            );
+            String statString = "";
+            switch (i) {
+                case 0 -> statString = String.valueOf((int) unit.getDamage()); // DAMAGE
+                case 1 -> statString = String.valueOf((int) (100 / unit.getAttackCooldown())); // ATTACK SPEED
+                case 2 -> statString = String.valueOf((int) (unit.getAttackRange())); // RANGE
+                case 3 -> statString = String.valueOf(((LivingEntity) unit).getArmorValue()); // ARMOUR
+                case 4 -> statString = String.valueOf((int) (unit.getSpeedModifier() * 100)); // MOVE SPEED
+            }
+            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, statString, blitXIcon + 13, blitYIcon, 0xFFFFFF);
+            blitYIcon += 10;
+        }
+        return RectZone.getZoneByLW(x, y, width2, frameHeight);
     }
 
     private void setNonHeadModelVisibility(Model model, boolean visibility) {

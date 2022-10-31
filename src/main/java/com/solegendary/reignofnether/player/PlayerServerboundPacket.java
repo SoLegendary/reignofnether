@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -13,8 +14,10 @@ public class PlayerServerboundPacket {
     public double z = 0;
     public int playerId = -1; // to track
 
-    public static void teleportPlayer(int playerId, Double x, Double y, Double z) {
-        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(playerId, x, y, z));
+    public static void teleportPlayer(Double x, Double y, Double z) {
+        Minecraft MC = Minecraft.getInstance();
+        if (MC.player != null)
+            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(MC.player.getId(), x, y, z));
     }
 
     // packet-handler functions

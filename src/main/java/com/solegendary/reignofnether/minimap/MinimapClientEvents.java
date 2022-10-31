@@ -234,7 +234,7 @@ public class MinimapClientEvents {
         double zMoveTo = zc_world + clicked.y * pixelsToBlocks * Math.sqrt(2);
 
         if (MC.player != null)
-            PlayerServerboundPacket.teleportPlayer(MC.player.getId(), xMoveTo, MC.player.getY(), zMoveTo);
+            PlayerServerboundPacket.teleportPlayer(xMoveTo, MC.player.getY(), zMoveTo);
     }
 
     // when clicking on map move player there
