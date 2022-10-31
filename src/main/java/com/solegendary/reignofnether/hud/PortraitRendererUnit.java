@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import org.w3c.dom.css.Rect;
 
 import java.util.List;
 
@@ -109,7 +110,7 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
     // - healthbar
     // - unit name
     // Must be called from DrawScreenEvent
-    public void render(PoseStack poseStack, String name, int x, int y, LivingEntity entity) {
+    public RectZone render(PoseStack poseStack, String name, int x, int y, LivingEntity entity) {
 
         // draw name
         GuiComponent.drawString(
@@ -131,6 +132,8 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
                 frameWidth,
                 frameHeight,
                 bgCol);
+
+        RectZone rectZone = RectZone.getZoneByLW(x, y, frameWidth, frameHeight);
 
         int drawX = x + headOffsetX;
         int drawY = y + (int) (entity.getEyeHeight() / standardEyeHeight * headOffsetY);
@@ -168,13 +171,16 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
         );
 
         if (entity instanceof Unit) {
-            x += frameWidth - 1;
-            MyRenderer.renderFrameWithBg(poseStack, x, y,
-                    43,
+            int width2 = 43;
+            int x2 = x + frameWidth - 1;
+            MyRenderer.renderFrameWithBg(poseStack, x2, y,
+                    width2,
                     frameHeight,
                     0xA0000000);
 
-            int blitXIcon = x + 6;
+            rectZone = RectZone.getZoneByLW(x, y, frameWidth + width2, frameHeight);
+
+            int blitXIcon = x2 + 6;
             int blitYIcon = y + 7;
             for (int i = 0; i < TEXTURE_STAT_ICONS.length; i++) {
                 MyRenderer.renderIcon(
@@ -196,6 +202,7 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
                 blitYIcon += 10;
             }
         }
+        return rectZone;
     }
 
     private void setNonHeadModelVisibility(Model model, boolean visibility) {

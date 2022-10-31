@@ -236,7 +236,7 @@ public class BuildingClientEvents {
 
             if (building.equals(selectedBuilding))
                 MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
-            else if (building.equals(preselectedBuilding))
+            else if (building.equals(preselectedBuilding) && !HudClientEvents.isMouseOverAnyButtonOrHud())
                 MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 0.5f);
 
             Relationship buildingRs = getPlayerToBuildingRelationship(building);
@@ -251,6 +251,7 @@ public class BuildingClientEvents {
             }
         }
 
+        // draw rally point and line
         if (selectedBuilding instanceof ProductionBuilding selProdBuilding && selProdBuilding.getRallyPoint() != null) {
             float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
             MyRenderer.drawBlockFace(evt.getPoseStack(),
@@ -315,6 +316,12 @@ public class BuildingClientEvents {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
+        // prevent clicking behind HUDs
+        if (HudClientEvents.isMouseOverAnyButtonOrHud()) {
+            buildingToPlace = null;
+            return;
+        }
+
         BlockPos pos = getOriginPos();
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
 
@@ -335,7 +342,6 @@ public class BuildingClientEvents {
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             // set rally points
             if (!Keybinding.altMod.isDown() &&
-                !HudClientEvents.isMouseOverAnyButton() &&
                 selectedBuilding instanceof ProductionBuilding selProdBuilding) {
 
                 BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();

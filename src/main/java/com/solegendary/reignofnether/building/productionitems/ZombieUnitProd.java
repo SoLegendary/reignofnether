@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.unit.PopulationCosts;
+import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -47,8 +48,8 @@ public class ZombieUnitProd extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
             List.of(
                 FormattedCharSequence.forward("Zombie", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  100", Style.EMPTY.withFont(new ResourceLocation(ReignOfNether.MOD_ID, "resource_icons"))),
-                FormattedCharSequence.forward("\uE003  1     \uE004 5s", Style.EMPTY.withFont(new ResourceLocation(ReignOfNether.MOD_ID, "resource_icons"))),
+                FormattedCharSequence.forward("\uE000  100", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  1     \uE004 5s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("An undead monster with a basic melee attack.", Style.EMPTY)
             )

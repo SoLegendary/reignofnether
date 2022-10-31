@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
@@ -81,6 +82,8 @@ public class UnitClientEvents {
     public static void addPreselectedUnitId(Integer unitId) { preselectedUnitIds.add(unitId); }
     public static void addSelectedUnitId(Integer unitId) {
         selectedUnitIds.add(unitId);
+        if (MC.level != null)
+            selectedUnitIds.sort(Comparator.comparing(a -> HudClientEvents.getSimpleEntityName(MC.level.getEntity(a))));
         BuildingClientEvents.setSelectedBuilding(null);
     }
     public static void setPreselectedUnitIds(ArrayList<Integer> unitIds) { preselectedUnitIds = unitIds; }
@@ -138,6 +141,12 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         if (!OrthoviewClientEvents.isEnabled()) return;
+
+        // prevent clicking behind HUDs
+        if (HudClientEvents.isMouseOverAnyButtonOrHud()) {
+            CursorClientEvents.setLeftClickAction(null);
+            return;
+        }
 
         // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
         // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
@@ -278,7 +287,6 @@ public class UnitClientEvents {
                 }
             }
         }
-
         ArrayList<Integer> selectedUnitIds = getSelectedUnitIds();
         ArrayList<Integer> preselectedUnitIds = getPreselectedUnitIds();
 
@@ -287,16 +295,17 @@ public class UnitClientEvents {
         unitIdsToDraw.addAll(preselectedUnitIds);
 
         // draw outlines on all (pre)selected units but only draw once per unit based on conditions
+        // don't render preselection outlines if mousing over HUD
         for (int idToDraw : unitIdsToDraw) {
             Entity entity = MC.level.getEntity(idToDraw);
             if (entity != null) {
                 if (preselectedUnitIds.contains(idToDraw) &&
                         isLeftClickAttack() &&
-                        !targetingSelf())
+                        !targetingSelf() && !HudClientEvents.isMouseOverAnyButtonOrHud())
                     MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f,0.3f, 1.0f);
                 else if (selectedUnitIds.contains(idToDraw))
                     MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f);
-                else if (preselectedUnitIds.contains(idToDraw))
+                else if (preselectedUnitIds.contains(idToDraw) && !HudClientEvents.isMouseOverAnyButtonOrHud())
                     MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.5f);
             }
         }

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
@@ -53,14 +54,13 @@ public class HudClientEvents {
     public static PortraitRendererUnit portraitRendererUnit = new PortraitRendererUnit(null);
     public static PortraitRendererBuilding portraitRendererBuilding = new PortraitRendererBuilding();
 
-    // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
-    private static int hudStartingXPos = 0;
-
     private static int mouseX = 0;
     private static int mouseY = 0;
 
     private final static int iconBgColour = 0x64000000;
     private final static int frameBgColour = 0xA0000000;
+
+    private static final ArrayList<RectZone> hudZones = new ArrayList<>();
 
 
     // eg. entity.reignofnether.zombie_unit -> zombie
@@ -90,7 +90,8 @@ public class HudClientEvents {
         mouseX = evt.getMouseX();
         mouseY = evt.getMouseY();
 
-        hudStartingXPos = (MC.getWindow().getGuiScaledWidth() / 5) + 4;
+        // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
+        int hudStartingXPos = (MC.getWindow().getGuiScaledWidth() / 5) + 4;
 
         ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
 
@@ -106,10 +107,11 @@ public class HudClientEvents {
         buttonsPerRow = Math.min(buttonsPerRow, 8);
         buttonsPerRow = Math.max(buttonsPerRow, 4);
 
-        // refresh button lists
+        // refresh lists
         unitButtons.clear();
         productionButtons.clear();
         renderedButtons.clear();
+        hudZones.clear();
 
         int blitX = hudStartingXPos;
         int blitY = MC.getWindow().getGuiScaledHeight();
@@ -122,9 +124,9 @@ public class HudClientEvents {
             // -----------------
             blitY -= portraitRendererBuilding.frameHeight;
 
-            portraitRendererBuilding.render(
+            hudZones.add(portraitRendererBuilding.render(
                     evt.getPoseStack(),
-                    blitX, blitY, selBuilding);
+                    blitX, blitY, selBuilding));
 
             blitX += portraitRendererBuilding.frameWidth + 10;
 
@@ -142,10 +144,10 @@ public class HudClientEvents {
 
                 if (productionButtons.size() >= 1) {
                     // background frame
-                    MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
+                    hudZones.add(MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
                             iconFrameSize * buttonsPerRow + 10,
                             iconFrameSize * 2 + 15,
-                            frameBgColour);
+                            frameBgColour));
 
                     // name and progress %
                     ProductionItem firstProdItem = selProdBuilding.productionQueue.get(0);
@@ -233,9 +235,9 @@ public class HudClientEvents {
             String name = getSimpleEntityName(hudSelectedEntity);
             String nameCap = name.substring(0, 1).toUpperCase() + name.substring(1);
 
-            portraitRendererUnit.render(
+            hudZones.add(portraitRendererUnit.render(
                     evt.getPoseStack(), nameCap,
-                    blitX, blitY, hudSelectedEntity);
+                    blitX, blitY, hudSelectedEntity));
 
             blitX += portraitRendererUnit.frameWidth * 2;
         }
@@ -276,20 +278,44 @@ public class HudClientEvents {
 
         if (unitButtons.size() >= 2) {
             // background frame
-            MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
+            hudZones.add(MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
                     iconFrameSize * buttonsPerRow + 10,
                     iconFrameSize * 2 + 20,
-                    frameBgColour);
+                    frameBgColour));
 
             int buttonsRendered = 0;
             for (Button unitButton : unitButtons) {
-                // replace last icon with a +X number of units icon
+                // replace last icon with a +X number of units icon and hover tooltip for what those units are
                 if (buttonsRendered >= (buttonsPerRow * 2) - 1 &&
                         units.size() > (buttonsPerRow * 2)) {
                     int numExtraUnits = units.size() - (buttonsPerRow * 2) + 1;
-                    MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, iconBgColour);
+                    RectZone plusUnitsZone = MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, iconBgColour);
                     GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraUnits,
                             blitX + iconFrameSize/2, blitY + 8, 0xFFFFFF);
+
+                    if (plusUnitsZone.isMouseOver(mouseX, mouseY)) {
+                        List<FormattedCharSequence> tooltipLines = new ArrayList<>();
+                        int numUnits = 0;
+
+                        for (int i = units.size() - numExtraUnits; i < units.size(); i++) {
+
+                            LivingEntity unit = units.get(i);
+                            LivingEntity nextUnit = null;
+                            String unitName = HudClientEvents.getSimpleEntityName(unit);
+                            String nextUnitName = null;
+                            numUnits += 1;
+
+                            if (i < units.size() - 1) {
+                                nextUnit = units.get(i + 1);
+                                nextUnitName = HudClientEvents.getSimpleEntityName(nextUnit);
+                            }
+                            if (!unitName.equals(nextUnitName)) {
+                                tooltipLines.add(FormattedCharSequence.forward("x" + numUnits + " " + unitName, Style.EMPTY));
+                                numUnits = 0;
+                            }
+                        }
+                        MyRenderer.renderTooltip(evt.getPoseStack(), tooltipLines, mouseX, mouseY);
+                    }
                     break;
                 }
                 else {
@@ -364,11 +390,11 @@ public class HudClientEvents {
                         resValueStr = UnitClientEvents.getCurrentPopulation() + "/" + BuildingClientEvents.getTotalPopulationSupply();
                     }
                 }
-                MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX + iconFrameSize - 1, blitY,
+                hudZones.add(MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX + iconFrameSize - 1, blitY,
                         49,
                         iconFrameSize,
-                        frameBgColour);
-                MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, iconBgColour);
+                        frameBgColour));
+                hudZones.add(MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, iconBgColour));
                 MyRenderer.renderIcon(evt.getPoseStack(),
                         new ResourceLocation(ReignOfNether.MOD_ID, rlPath),
                         blitX+4, blitY+4, iconSize
@@ -414,6 +440,15 @@ public class HudClientEvents {
             if (button.isMouseOver(mouseX, mouseY))
                 return true;
         return false;
+    }
+
+    public static boolean isMouseOverAnyButtonOrHud() {
+        for (RectZone hudZone : hudZones)
+            if (hudZone.isMouseOver(mouseX, mouseY))
+                return true;
+        if (MinimapClientEvents.isPointInsideMinimap(mouseX, mouseY))
+            return true;
+        return isMouseOverAnyButton();
     }
 
     @SubscribeEvent

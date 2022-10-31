@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.unit.PopulationCosts;
+import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -47,8 +48,8 @@ public class CreeperUnitProd extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
             List.of(
                 FormattedCharSequence.forward("Creeper", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  50     \uE002  100", Style.EMPTY.withFont(new ResourceLocation(ReignOfNether.MOD_ID, "resource_icons"))),
-                FormattedCharSequence.forward("\uE003  2     \uE004  5s", Style.EMPTY.withFont(new ResourceLocation(ReignOfNether.MOD_ID, "resource_icons"))),
+                FormattedCharSequence.forward("\uE000  50     \uE002  100", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  2     \uE004  5s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("An explosive monster that can blow up units", Style.EMPTY),
                 FormattedCharSequence.forward("and buildings alike. Has no regular attack.", Style.EMPTY)

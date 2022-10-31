@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.unit.PopulationCosts;
+import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -47,8 +48,8 @@ public class SkeletonUnitProd extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
             List.of(
                 FormattedCharSequence.forward("Skeleton", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  60     \uE001  40", Style.EMPTY.withFont(new ResourceLocation(ReignOfNether.MOD_ID, "resource_icons"))),
-                FormattedCharSequence.forward("\uE003  1     \uE004  5s", Style.EMPTY.withFont(new ResourceLocation(ReignOfNether.MOD_ID, "resource_icons"))),
+                FormattedCharSequence.forward("\uE000  60     \uE001  40", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  1     \uE004  5s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("An undead soldier with a bow and arrows.", Style.EMPTY)
             )

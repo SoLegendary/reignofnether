@@ -1,34 +1,32 @@
 package com.solegendary.reignofnether.util;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.RectZone;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.model.CreeperModel;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
+
+import java.util.List;
 
 public class MyRenderer {
 
     private static final Minecraft MC = Minecraft.getInstance();
+
+    public static final Style iconStyle = Style.EMPTY.withFont(new ResourceLocation(ReignOfNether.MOD_ID, "resource_icons"));
 
     public static void drawBlockOutline(PoseStack matrixStack, BlockPos blockpos, float a) {
         AABB aabb = new AABB(blockpos).move(0,0.01,0);
@@ -197,7 +195,8 @@ public class MyRenderer {
         matrixStack.popPose();
     }
 
-    public static void renderFrameWithBg(PoseStack poseStack, int x, int y, int width, int height, int bgCol) {
+    // render a HUD frame and return the RectZone that it represents
+    public static RectZone renderFrameWithBg(PoseStack poseStack, int x, int y, int width, int height, int bgCol) {
         // draw icon frame with dark transparent bg
         GuiComponent.fill(poseStack, // x1,y1, x2,y2,
                 x + 2, y + 2,
@@ -241,9 +240,10 @@ public class MyRenderer {
                 width - thickness*2, thickness, // dimensions of blit texture
                 width, thickness // size of texture itself (if < dimensions, texture is repeated)
         );
+        return RectZone.getZoneByLW(x, y, width, height);
     }
 
-    public static void renderIconFrameWithBg(PoseStack poseStack, int x, int y, int size, int bg) {
+    public static RectZone renderIconFrameWithBg(PoseStack poseStack, int x, int y, int size, int bg) {
         //transparent background
         GuiComponent.fill(poseStack, // x1,y1, x2,y2,
                 x, y,
@@ -260,6 +260,7 @@ public class MyRenderer {
                 size, size, // dimensions of blit texture
                 size, size // size of texture itself (if < dimensions, texture is repeated)
         );
+        return RectZone.getZoneByLW(x, y, size, size);
     }
 
     public static void renderIcon(PoseStack poseStack, ResourceLocation resourceLocation, int x, int y, int size) {
@@ -272,5 +273,8 @@ public class MyRenderer {
         );
     }
 
-
+    public static void renderTooltip(PoseStack poseStack, List<FormattedCharSequence> tooltipLines, int mouseX, int mouseY) {
+        if (MC.screen != null && tooltipLines != null && tooltipLines.size() > 0)
+            MC.screen.renderTooltip(poseStack, tooltipLines, mouseX, mouseY - (9 * (tooltipLines.size() - 1)), MC.font);
+    }
 }

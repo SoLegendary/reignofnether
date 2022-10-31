@@ -34,7 +34,7 @@ class PortraitRendererBuilding {
     // - healthbar
     // - building name
     // Must be called from DrawScreenEvent
-    public void render(PoseStack poseStack, int x, int y, Building building) {
+    public RectZone render(PoseStack poseStack, int x, int y, Building building) {
 
         // draw name
         GuiComponent.drawString(
@@ -68,6 +68,8 @@ class PortraitRendererBuilding {
                 x+(frameWidth/2), y+frameHeight-13,
                 0xFFFFFFFF
         );
+
+        return RectZone.getZoneByLW(x, y, frameWidth, frameHeight);
     }
 
     private void drawBlockOnScreen(int x, int y, Building building) {

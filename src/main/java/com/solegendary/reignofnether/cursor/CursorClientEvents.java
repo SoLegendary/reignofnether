@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.cursor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -228,9 +229,10 @@ public class CursorClientEvents {
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
-        // don't box select
+
         if (!OrthoviewClientEvents.isEnabled() ||
-            MinimapClientEvents.isPointInsideMinimap(evt.getMouseX(), evt.getMouseY()))
+            MinimapClientEvents.isPointInsideMinimap(evt.getMouseX(), evt.getMouseY()) ||
+            HudClientEvents.isMouseOverAnyButtonOrHud())
             return;
 
         // select a moused over entity by left clicking it
@@ -298,7 +300,8 @@ public class CursorClientEvents {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
-        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS ||
+            HudClientEvents.isMouseOverAnyButtonOrHud())
             return;
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
 
