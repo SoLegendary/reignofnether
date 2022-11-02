@@ -2,6 +2,5 @@
   "item.reignofnether.skeleton_unit_spawn_egg": "Spawn Skeleton Unit",
   "item.reignofnether.zombie_unit_spawn_egg": "Spawn Zombie Unit",
   "item.reignofnether.creeper_unit_spawn_egg": "Spawn Creeper Unit",
-
-  "key.category.reignofnether.move": "Move"
+  "item.reignofnether.villager_unit_spawn_egg": "Spawn Villager Unit"
 }

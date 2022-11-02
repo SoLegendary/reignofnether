@@ -77,7 +77,8 @@ public class HudClientEvents {
             return entity.getName().getString()
                 .replace(" ","")
                 .replace("entity.reignofnether.","")
-                .replace("_unit","");
+                .replace("_unit","")
+                .replace(".none","");
         else
             return entity.getName().getString();
     }

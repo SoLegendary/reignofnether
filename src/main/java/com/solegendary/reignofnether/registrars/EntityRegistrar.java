@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.registrars;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.unit.units.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.SkeletonUnit;
+import com.solegendary.reignofnether.unit.units.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.ZombieUnit;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -33,6 +34,11 @@ public class EntityRegistrar {
             () -> EntityType.Builder.of(CreeperUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.CREEPER.getWidth(), EntityType.CREEPER.getHeight())
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "creeper_unit").toString()));
+
+    public static final RegistryObject<EntityType<VillagerUnit>> VILLAGER_UNIT = ENTITIES.register("villager_unit",
+            () -> EntityType.Builder.of(VillagerUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.VILLAGER.getWidth(), EntityType.VILLAGER.getHeight())
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "villager_unit").toString()));
 
     public static void init() {
         ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());

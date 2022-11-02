@@ -21,6 +21,10 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import org.w3c.dom.Attr;
 import org.w3c.dom.css.Rect;
 
 import java.util.List;
@@ -187,12 +191,16 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
                     blitXIcon, blitYIcon, 8
             );
             String statString = "";
+
             switch (i) {
                 case 0 -> statString = String.valueOf((int) unit.getDamage()); // DAMAGE
                 case 1 -> statString = String.valueOf((int) (100 / unit.getAttackCooldown())); // ATTACK SPEED
                 case 2 -> statString = String.valueOf((int) (unit.getAttackRange())); // RANGE
                 case 3 -> statString = String.valueOf(((LivingEntity) unit).getArmorValue()); // ARMOUR
-                case 4 -> statString = String.valueOf((int) (unit.getSpeedModifier() * 100)); // MOVE SPEED
+                case 4 -> {
+                    AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
+                    statString = ms != null ? String.valueOf((int) (ms.getValue() * 100)) : "0"; // MOVE SPEED
+                }
             }
             GuiComponent.drawString(poseStack, Minecraft.getInstance().font, statString, blitXIcon + 13, blitYIcon, 0xFFFFFF);
             blitYIcon += 10;

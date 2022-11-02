@@ -8,4 +8,5 @@ public class PopulationCosts {
     public static final int CREEPER = 2;
     public static final int SKELETON = 1;
     public static final int ZOMBIE = 1;
+    public static final int VILLAGER = 1;
 }
