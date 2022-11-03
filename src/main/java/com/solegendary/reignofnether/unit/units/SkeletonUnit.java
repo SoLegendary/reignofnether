@@ -11,9 +11,12 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -110,5 +113,10 @@ public class SkeletonUnit extends Skeleton implements Unit {
         this.goalSelector.addGoal(3, attackGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(3, targetGoal);
+    }
+
+    @Override
+    public void onBuildingSpawn() {
+        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
     }
 }

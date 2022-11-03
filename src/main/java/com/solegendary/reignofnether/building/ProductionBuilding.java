@@ -59,6 +59,7 @@ public abstract class ProductionBuilding extends Building {
         if (entity != null) {
             level.addFreshEntity(entity);
             ((Unit) entity).setOwnerName(ownerName);
+            ((Unit) entity).onBuildingSpawn();
 
             if (rallyPoint != null) {
                 // spawn unit at centre of the block

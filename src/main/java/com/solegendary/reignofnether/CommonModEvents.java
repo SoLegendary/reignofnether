@@ -4,10 +4,9 @@ import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.registrars.ContainerRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.unit.units.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.SkeletonUnit;
-import com.solegendary.reignofnether.unit.units.VillagerUnit;
-import com.solegendary.reignofnether.unit.units.ZombieUnit;
+import com.solegendary.reignofnether.unit.units.*;
+import com.solegendary.reignofnether.unit.villagers.VillagerUnit;
+import com.solegendary.reignofnether.unit.villagers.VillagerUnitRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.entity.*;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -31,7 +30,7 @@ public class CommonModEvents {
         evt.registerEntityRenderer(EntityRegistrar.ZOMBIE_UNIT.get(), ZombieRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.SKELETON_UNIT.get(), SkeletonRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.CREEPER_UNIT.get(), CreeperRenderer::new);
-        evt.registerEntityRenderer(EntityRegistrar.VILLAGER_UNIT.get(), VillagerRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.VILLAGER_UNIT.get(), VillagerUnitRenderer::new);
     }
 
     @SubscribeEvent

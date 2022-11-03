@@ -8,6 +8,7 @@ import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.villagers.VillagerUnitModel;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -19,13 +20,9 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import org.w3c.dom.Attr;
-import org.w3c.dom.css.Rect;
 
 import java.util.List;
 
@@ -218,15 +215,19 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
             ((HumanoidModel) model).rightLeg.visible = visibility;
             ((HumanoidModel) model).leftLeg.visible = visibility;
         }
-        else if (model instanceof HierarchicalModel) {
+        else if (model instanceof VillagerUnitModel)
+            ((VillagerUnitModel) model).armsVisible = visibility;
 
-            ModelPart root = ((HierarchicalModel) model).root();
+        // hide all non-head models attached to root
+        if (model instanceof HierarchicalModel)
+            setNonHeadRootModelVisibility(((HierarchicalModel) model).root(), visibility);
+    }
 
-            root.children.forEach((String name, ModelPart modelPart) -> {
-                if (!name.contentEquals("head"))
-                    modelPart.visible = visibility;
-            });
-        }
+    private void setNonHeadRootModelVisibility(ModelPart root, boolean visibility) {
+        root.children.forEach((String name, ModelPart modelPart) -> {
+            if (!name.contentEquals("head"))
+                modelPart.visible = visibility;
+        });
     }
 
     private void drawEntityOnScreen(PoseStack poseStack, LivingEntity entity, int x, int y, int size) {

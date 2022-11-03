@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.registrars;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.unit.units.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.SkeletonUnit;
-import com.solegendary.reignofnether.unit.units.VillagerUnit;
+import com.solegendary.reignofnether.unit.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.ZombieUnit;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;

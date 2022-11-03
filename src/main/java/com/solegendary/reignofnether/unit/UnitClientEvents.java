@@ -14,7 +14,6 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -25,7 +24,6 @@ import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 

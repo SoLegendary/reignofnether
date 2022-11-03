@@ -11,8 +11,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.npc.Villager;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -169,4 +167,8 @@ public interface Unit {
     public void setAttackMoveTarget(@Nullable BlockPos bp);
     // continuously move to a target until told to do something else
     public void setFollowTarget(@Nullable LivingEntity target);
+
+    // do one-off stuff to set up the mob when spawned by buildings
+    // eg. equipment isn't provided automatically
+    default void onBuildingSpawn() { }
 }
