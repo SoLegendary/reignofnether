@@ -208,19 +208,19 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
     private void setNonHeadModelVisibility(Model model, boolean visibility) {
 
         if (model instanceof HumanoidModel) {
-            ((HumanoidModel) model).hat.visible = visibility;
-            ((HumanoidModel) model).body.visible = visibility;
-            ((HumanoidModel) model).rightArm.visible = visibility;
-            ((HumanoidModel) model).leftArm.visible = visibility;
-            ((HumanoidModel) model).rightLeg.visible = visibility;
-            ((HumanoidModel) model).leftLeg.visible = visibility;
+            ((HumanoidModel<?>) model).hat.visible = visibility;
+            ((HumanoidModel<?>) model).body.visible = visibility;
+            ((HumanoidModel<?>) model).rightArm.visible = visibility;
+            ((HumanoidModel<?>) model).leftArm.visible = visibility;
+            ((HumanoidModel<?>) model).rightLeg.visible = visibility;
+            ((HumanoidModel<?>) model).leftLeg.visible = visibility;
         }
-        else if (model instanceof VillagerUnitModel)
-            ((VillagerUnitModel) model).armsVisible = visibility;
+        //else if (model instanceof VillagerUnitModel)
+        //    ((VillagerUnitModel<?>) model).armsVisible = visibility;
 
         // hide all non-head models attached to root
         if (model instanceof HierarchicalModel)
-            setNonHeadRootModelVisibility(((HierarchicalModel) model).root(), visibility);
+            setNonHeadRootModelVisibility(((HierarchicalModel<?>) model).root(), visibility);
     }
 
     private void setNonHeadRootModelVisibility(ModelPart root, boolean visibility) {

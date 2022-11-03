@@ -1,28 +1,34 @@
 package com.solegendary.reignofnether.unit.villagers;
 
+import com.mojang.serialization.Dynamic;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.PopulationCosts;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
+import net.minecraft.client.model.VillagerModel;
+import net.minecraft.client.renderer.entity.VillagerRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.monster.Vindicator;
+import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VillagerUnit extends Vindicator implements Unit {
+public class VillagerUnit extends Villager implements Unit {
     // region
     public List<AbilityButton> getAbilities() {return abilities;};
 
@@ -85,9 +91,17 @@ public class VillagerUnit extends Vindicator implements Unit {
 
     private static final List<AbilityButton> abilities = new ArrayList<>();
 
-    public VillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
+    public VillagerUnit(EntityType<? extends Villager> entityType, Level level) {
         super(entityType, level);
     }
+
+    // prevent registering regular villager AI
+    @Override
+    protected Brain<?> makeBrain(Dynamic<?> p_35445_) {
+        return this.brainProvider().makeBrain(p_35445_);
+    }
+    @Override
+    public void refreshBrain(ServerLevel p_35484_) {}
 
     // overwrite regular movespeed of 0.5 (way too fast!)
     public static AttributeSupplier.Builder createAttributes() {
