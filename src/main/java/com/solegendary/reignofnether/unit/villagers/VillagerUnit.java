@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VillagerUnit extends Villager implements Unit {
+public class VillagerUnit extends Vindicator implements Unit {
     // region
     public List<AbilityButton> getAbilities() {return abilities;};
 
@@ -91,17 +91,9 @@ public class VillagerUnit extends Villager implements Unit {
 
     private static final List<AbilityButton> abilities = new ArrayList<>();
 
-    public VillagerUnit(EntityType<? extends Villager> entityType, Level level) {
+    public VillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
     }
-
-    // prevent registering regular villager AI
-    @Override
-    protected Brain<?> makeBrain(Dynamic<?> p_35445_) {
-        return this.brainProvider().makeBrain(p_35445_);
-    }
-    @Override
-    public void refreshBrain(ServerLevel p_35484_) {}
 
     // overwrite regular movespeed of 0.5 (way too fast!)
     public static AttributeSupplier.Builder createAttributes() {

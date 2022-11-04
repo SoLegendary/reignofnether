@@ -215,8 +215,8 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
             ((HumanoidModel<?>) model).rightLeg.visible = visibility;
             ((HumanoidModel<?>) model).leftLeg.visible = visibility;
         }
-        //else if (model instanceof VillagerUnitModel)
-        //    ((VillagerUnitModel<?>) model).armsVisible = visibility;
+        else if (model instanceof VillagerUnitModel)
+            ((VillagerUnitModel<?>) model).armsVisible = visibility;
 
         // hide all non-head models attached to root
         if (model instanceof HierarchicalModel)
