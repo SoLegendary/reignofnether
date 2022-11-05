@@ -1,27 +1,24 @@
 package com.solegendary.reignofnether.unit.villagers;
 
-import com.mojang.serialization.Dynamic;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.PopulationCosts;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
-import net.minecraft.client.model.VillagerModel;
-import net.minecraft.client.renderer.entity.VillagerRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
-import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -69,8 +66,10 @@ public class VillagerUnit extends Vindicator implements Unit {
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
-    public float getSpeedModifier() {return speedModifier;}
-    public float getDamage() {return damage;}
+    public float getMovementSpeed() {return movementSpeed;}
+    public float getAttackDamage() {return attackDamage;}
+    public float getUnitMaxHealth() {return maxHealth;}
+    public float getUnitArmorValue() {return armorValue;}
     public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
 
@@ -79,15 +78,17 @@ public class VillagerUnit extends Vindicator implements Unit {
 
     // endregion
 
-    final public float damage = 0.0f;
-    final public float speedModifier = 1.0f;
-    final public float attackRange = 0; // only used by ranged units
-    final public int attackCooldown = 20;
-    final public float aggroRange = 10;
-    final public float sightRange = 10f;
-    final public boolean willRetaliate = false; // will attack when hurt by an enemy
-    final public boolean aggressiveWhenIdle = false;
-    final public int popCost = PopulationCosts.VILLAGER;
+    final static public float attackDamage = 0.0f;
+    final static public float maxHealth = 10.0f;
+    final static public float armorValue = 0.0f;
+    final static public float movementSpeed = 0.25f;
+    final static public float attackRange = 0; // only used by ranged units
+    final static public int attackCooldown = 20;
+    final static public float aggroRange = 10;
+    final static public float sightRange = 10f;
+    final static public boolean willRetaliate = false; // will attack when hurt by an enemy
+    final static public boolean aggressiveWhenIdle = false;
+    final static public int popCost = PopulationCosts.VILLAGER;
 
     private static final List<AbilityButton> abilities = new ArrayList<>();
 
@@ -95,9 +96,40 @@ public class VillagerUnit extends Vindicator implements Unit {
         super(entityType, level);
     }
 
-    // overwrite regular movespeed of 0.5 (way too fast!)
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.25D);
+        return Monster.createMonsterAttributes()
+                .add(Attributes.MOVEMENT_SPEED, VillagerUnit.movementSpeed)
+                .add(Attributes.MAX_HEALTH, VillagerUnit.maxHealth)
+                .add(Attributes.ATTACK_DAMAGE, VillagerUnit.movementSpeed)
+                .add(Attributes.ARMOR, VillagerUnit.armorValue);
+    }
+
+    public enum ArmPose {
+        CROSSED,
+        ATTACKING,
+        SPELLCASTING,
+        BOW_AND_ARROW,
+        CROSSBOW_HOLD,
+        CROSSBOW_CHARGE,
+        CELEBRATING,
+        NEUTRAL;
+    }
+
+    public ArmPose getVillagerUnitArmPose() {
+        return ArmPose.CROSSED;
+    }
+
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return SoundEvents.VILLAGER_AMBIENT;
+    }
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.VILLAGER_DEATH;
+    }
+    @Override
+    protected SoundEvent getHurtSound(DamageSource p_34103_) {
+        return SoundEvents.VILLAGER_HURT;
     }
 
     public void tick() {
@@ -107,7 +139,7 @@ public class VillagerUnit extends Vindicator implements Unit {
 
     @Override
     protected void registerGoals() {
-        this.moveGoal = new MoveToCursorBlockGoal(this, speedModifier);
+        this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
         this.targetGoal = new SelectedTargetGoal(this, true, true);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));

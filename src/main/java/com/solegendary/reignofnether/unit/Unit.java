@@ -36,8 +36,10 @@ public interface Unit {
     public float getAggroRange();
     public boolean getAggressiveWhenIdle();
     public float getAttackRange();
-    public float getSpeedModifier();
-    public float getDamage();
+    public float getMovementSpeed();
+    public float getAttackDamage();
+    public float getUnitMaxHealth();
+    public float getUnitArmorValue();
     public float getSightRange();
     public int getPopCost();
 

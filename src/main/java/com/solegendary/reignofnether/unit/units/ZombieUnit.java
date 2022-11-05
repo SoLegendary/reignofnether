@@ -12,7 +12,10 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.Level;
 
@@ -61,8 +64,10 @@ public class ZombieUnit extends Zombie implements Unit {
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
-    public float getSpeedModifier() {return speedModifier;}
-    public float getDamage() {return damage;}
+    public float getMovementSpeed() {return movementSpeed;}
+    public float getAttackDamage() {return attackDamage;}
+    public float getUnitMaxHealth() {return maxHealth;}
+    public float getUnitArmorValue() {return armorValue;}
     public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
 
@@ -71,15 +76,17 @@ public class ZombieUnit extends Zombie implements Unit {
 
     // endregion
 
-    final public float damage = 5.0f;
-    final public float speedModifier = 1.0f;
-    final public float attackRange = 0; // only used by ranged units
-    final public int attackCooldown = 20;
-    final public float aggroRange = 10;
-    final public float sightRange = 10f;
-    final public boolean willRetaliate = true; // will attack when hurt by an enemy
-    final public boolean aggressiveWhenIdle = false;
-    final public int popCost = PopulationCosts.ZOMBIE;
+    final static public float attackDamage = 3.0f;
+    final static public float maxHealth = 20.0f;
+    final static public float armorValue = 2.0f;
+    final static public float movementSpeed = 0.25f;
+    final static public float attackRange = 0; // only used by ranged units
+    final static public int attackCooldown = 20;
+    final static public float aggroRange = 10;
+    final static public float sightRange = 10f;
+    final static public boolean willRetaliate = true; // will attack when hurt by an enemy
+    final static public boolean aggressiveWhenIdle = false;
+    final static public int popCost = PopulationCosts.ZOMBIE;
 
     public ZombieAttackUnitGoal attackGoal;
 
@@ -89,6 +96,13 @@ public class ZombieUnit extends Zombie implements Unit {
         super(entityType, level);
     }
 
+    public static AttributeSupplier.Builder createAttributes() {
+        return Monster.createMonsterAttributes()
+                .add(Attributes.MOVEMENT_SPEED, ZombieUnit.movementSpeed)
+                .add(Attributes.ATTACK_DAMAGE, ZombieUnit.attackDamage)
+                .add(Attributes.ARMOR, ZombieUnit.armorValue);
+    }
+
     public void tick() {
         super.tick();
         Unit.tick(this);
@@ -96,7 +110,7 @@ public class ZombieUnit extends Zombie implements Unit {
 
     @Override
     protected void registerGoals() {
-        this.moveGoal = new MoveToCursorBlockGoal(this, speedModifier);
+        this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
         this.targetGoal = new SelectedTargetGoal(this, true, true);
         this.attackGoal = new ZombieAttackUnitGoal(this, attackCooldown, 1.0D, false);
 

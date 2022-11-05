@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.unit.villagers.VillagerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -16,11 +17,14 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.SwellGoal;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -68,8 +72,10 @@ public class CreeperUnit extends Creeper implements Unit {
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
-    public float getSpeedModifier() {return speedModifier;}
-    public float getDamage() {return damage;}
+    public float getMovementSpeed() {return movementSpeed;}
+    public float getAttackDamage() {return attackDamage;}
+    public float getUnitMaxHealth() {return maxHealth;}
+    public float getUnitArmorValue() {return armorValue;}
     public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
 
@@ -78,15 +84,17 @@ public class CreeperUnit extends Creeper implements Unit {
 
     // endregion
 
-    final public float damage = 20.0f;
-    final public float speedModifier = 1.0f;
-    final public float attackRange = 0; // only used by ranged units
-    final public int attackCooldown = 100; // not used by creepers anyway
-    final public float aggroRange = 10;
-    final public float sightRange = 10f;
-    final public boolean willRetaliate = true; // will attack when hurt by an enemy
-    final public boolean aggressiveWhenIdle = false;
-    final public int popCost = PopulationCosts.CREEPER;
+    final static public float attackDamage = 20.0f;
+    final static public float maxHealth = 20.0f;
+    final static public float armorValue = 0.0f;
+    final static public float movementSpeed = 0.25f;
+    final static public float attackRange = 0; // only used by ranged units
+    final static public int attackCooldown = 100; // not used by creepers anyway
+    final static public float aggroRange = 10;
+    final static public float sightRange = 10f;
+    final static public boolean willRetaliate = true; // will attack when hurt by an enemy
+    final static public boolean aggressiveWhenIdle = false;
+    final static public int popCost = PopulationCosts.CREEPER;
 
     public MeleeAttackGoal attackGoal;
 
@@ -111,6 +119,13 @@ public class CreeperUnit extends Creeper implements Unit {
             ));
     }
 
+    public static AttributeSupplier.Builder createAttributes() {
+        return Monster.createMonsterAttributes()
+                .add(Attributes.MOVEMENT_SPEED, VillagerUnit.movementSpeed)
+                .add(Attributes.MAX_HEALTH, VillagerUnit.maxHealth)
+                .add(Attributes.ARMOR, VillagerUnit.armorValue);
+    }
+
     public void tick() {
         super.tick();
         Unit.tick(this);
@@ -118,7 +133,7 @@ public class CreeperUnit extends Creeper implements Unit {
 
     @Override
     protected void registerGoals() {
-        this.moveGoal = new MoveToCursorBlockGoal(this, speedModifier);
+        this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
         this.targetGoal = new SelectedTargetGoal(this, true, true);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));

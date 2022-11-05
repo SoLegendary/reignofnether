@@ -190,10 +190,10 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
             String statString = "";
 
             switch (i) {
-                case 0 -> statString = String.valueOf((int) unit.getDamage()); // DAMAGE
+                case 0 -> statString = String.valueOf((int) unit.getAttackDamage()); // DAMAGE
                 case 1 -> statString = String.valueOf((int) (100 / unit.getAttackCooldown())); // ATTACK SPEED
                 case 2 -> statString = String.valueOf((int) (unit.getAttackRange())); // RANGE
-                case 3 -> statString = String.valueOf(((LivingEntity) unit).getArmorValue()); // ARMOUR
+                case 3 -> statString = String.valueOf((int) (unit.getUnitArmorValue())); // ARMOUR
                 case 4 -> {
                     AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
                     statString = ms != null ? String.valueOf((int) (ms.getValue() * 100)) : "0"; // MOVE SPEED

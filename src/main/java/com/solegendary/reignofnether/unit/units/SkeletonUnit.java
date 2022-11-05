@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
 import com.solegendary.reignofnether.unit.goals.RangedBowAttackUnitGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.unit.villagers.VillagerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -13,7 +14,10 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -64,8 +68,10 @@ public class SkeletonUnit extends Skeleton implements Unit {
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
-    public float getSpeedModifier() {return speedModifier;}
-    public float getDamage() {return damage;}
+    public float getMovementSpeed() {return movementSpeed;}
+    public float getAttackDamage() {return attackDamage;}
+    public float getUnitMaxHealth() {return maxHealth;}
+    public float getUnitArmorValue() {return armorValue;}
     public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
 
@@ -74,15 +80,17 @@ public class SkeletonUnit extends Skeleton implements Unit {
 
     // endregion
 
-    final public float damage = 5.0f;
-    final public float speedModifier = 1.0f;
-    final public float attackRange = 10.0F; // only used by ranged units
-    final public int attackCooldown = 45;
-    final public float aggroRange = 10;
-    final public float sightRange = 10f;
-    final public boolean willRetaliate = true; // will attack when hurt by an enemy
-    final public boolean aggressiveWhenIdle = false;
-    final public int popCost = PopulationCosts.SKELETON;
+    final static public float attackDamage = 5.0f;
+    final static public float maxHealth = 20.0f;
+    final static public float armorValue = 0.0f;
+    final static public float movementSpeed = 0.25f;
+    final static public float attackRange = 10.0F; // only used by ranged units
+    final static public int attackCooldown = 45;
+    final static public float aggroRange = 10;
+    final static public float sightRange = 10f;
+    final static public boolean willRetaliate = true; // will attack when hurt by an enemy
+    final static public boolean aggressiveWhenIdle = false;
+    final static public int popCost = PopulationCosts.SKELETON;
 
     public RangedBowAttackUnitGoal<? extends LivingEntity> attackGoal;
 
@@ -90,6 +98,13 @@ public class SkeletonUnit extends Skeleton implements Unit {
 
     public SkeletonUnit(EntityType<? extends Skeleton> entityType, Level level) {
         super(entityType, level);
+    }
+
+    public static AttributeSupplier.Builder createAttributes() {
+        return Monster.createMonsterAttributes()
+                .add(Attributes.MOVEMENT_SPEED, SkeletonUnit.movementSpeed)
+                .add(Attributes.MAX_HEALTH, SkeletonUnit.maxHealth)
+                .add(Attributes.ARMOR, SkeletonUnit.armorValue);
     }
 
     public void tick() {
@@ -104,7 +119,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
 
     @Override
     protected void registerGoals() {
-        this.moveGoal = new MoveToCursorBlockGoal(this, speedModifier);
+        this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
         this.targetGoal = new SelectedTargetGoal(this, true, false);
         this.attackGoal = new RangedBowAttackUnitGoal(this, 5, attackCooldown, attackRange);
 

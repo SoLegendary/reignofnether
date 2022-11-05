@@ -9,7 +9,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.entity.IllagerRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.monster.AbstractIllager;
@@ -93,14 +92,15 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
             this.leftLeg.zRot = 0.0F;
         }
 
-        AbstractIllager.IllagerArmPose abstractillager$illagerarmpose = p_102928_.getArmPose();
-        if (abstractillager$illagerarmpose == AbstractIllager.IllagerArmPose.ATTACKING) {
+        VillagerUnit.ArmPose armPose = ((VillagerUnit) p_102928_).getVillagerUnitArmPose();
+
+        if (armPose == VillagerUnit.ArmPose.ATTACKING) {
             if (p_102928_.getMainHandItem().isEmpty()) {
                 AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, true, this.attackTime, p_102931_);
             } else {
                 AnimationUtils.swingWeaponDown(this.rightArm, this.leftArm, p_102928_, this.attackTime, p_102931_);
             }
-        } else if (abstractillager$illagerarmpose == AbstractIllager.IllagerArmPose.SPELLCASTING) {
+        } else if (armPose == VillagerUnit.ArmPose.SPELLCASTING) {
             this.rightArm.z = 0.0F;
             this.rightArm.x = -5.0F;
             this.leftArm.z = 0.0F;
@@ -111,17 +111,17 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
             this.leftArm.zRot = -2.3561945F;
             this.rightArm.yRot = 0.0F;
             this.leftArm.yRot = 0.0F;
-        } else if (abstractillager$illagerarmpose == AbstractIllager.IllagerArmPose.BOW_AND_ARROW) {
+        } else if (armPose == VillagerUnit.ArmPose.BOW_AND_ARROW) {
             this.rightArm.yRot = -0.1F + this.head.yRot;
             this.rightArm.xRot = (-(float)Math.PI / 2F) + this.head.xRot;
             this.leftArm.xRot = -0.9424779F + this.head.xRot;
             this.leftArm.yRot = this.head.yRot - 0.4F;
             this.leftArm.zRot = ((float)Math.PI / 2F);
-        } else if (abstractillager$illagerarmpose == AbstractIllager.IllagerArmPose.CROSSBOW_HOLD) {
+        } else if (armPose == VillagerUnit.ArmPose.CROSSBOW_HOLD) {
             AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
-        } else if (abstractillager$illagerarmpose == AbstractIllager.IllagerArmPose.CROSSBOW_CHARGE) {
+        } else if (armPose == VillagerUnit.ArmPose.CROSSBOW_CHARGE) {
             AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, p_102928_, true);
-        } else if (abstractillager$illagerarmpose == AbstractIllager.IllagerArmPose.CELEBRATING) {
+        } else if (armPose == VillagerUnit.ArmPose.CELEBRATING) {
             this.rightArm.z = 0.0F;
             this.rightArm.x = -5.0F;
             this.rightArm.xRot = Mth.cos(p_102931_ * 0.6662F) * 0.05F;
@@ -134,7 +134,7 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
             this.leftArm.yRot = 0.0F;
         }
 
-        boolean flag = abstractillager$illagerarmpose == AbstractIllager.IllagerArmPose.CROSSED;
+        boolean flag = armPose == VillagerUnit.ArmPose.CROSSED;
         this.arms.visible = flag && armsVisible;
         this.leftArm.visible = !flag && armsVisible;
         this.rightArm.visible = !flag && armsVisible;
