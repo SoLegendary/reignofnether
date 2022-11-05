@@ -1,8 +1,9 @@
 package com.solegendary.reignofnether.unit.units;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.unit.PopulationCosts;
+import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.Unit;
@@ -14,6 +15,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -94,7 +96,7 @@ public class CreeperUnit extends Creeper implements Unit {
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
-    final static public int popCost = PopulationCosts.CREEPER;
+    final static public int popCost = ResourceCosts.Creeper.POPULATION;
 
     public MeleeAttackGoal attackGoal;
 
@@ -106,7 +108,7 @@ public class CreeperUnit extends Creeper implements Unit {
             this.abilities.add(new AbilityButton(
                 "Explode",
                 14,
-                "textures/icons/blocks/tnt.png",
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
                 Keybinding.keyQ,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.EXPLODE,
                 () -> false,

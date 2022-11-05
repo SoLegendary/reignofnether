@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.unit.PopulationCosts;
+import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Style;
@@ -21,15 +21,15 @@ public class ZombieUnitProd extends ProductionItem {
     public final static String itemName = "Zombie";
 
     public ZombieUnitProd(ProductionBuilding building) {
-        super(building, 100);
+        super(building, ResourceCosts.Zombie.TICKS);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
                 building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get(), building.ownerName);
         };
-        this.foodCost = 100;
-        this.woodCost = 0;
-        this.oreCost = 0;
-        this.popCost = PopulationCosts.ZOMBIE;
+        this.foodCost = ResourceCosts.Zombie.FOOD;
+        this.woodCost = ResourceCosts.Zombie.WOOD;
+        this.oreCost = ResourceCosts.Zombie.ORE;
+        this.popCost = ResourceCosts.Zombie.POPULATION;
     }
 
     public String getItemName() {
@@ -40,7 +40,7 @@ public class ZombieUnitProd extends ProductionItem {
         return new Button(
             "Zombie",
             14,
-            "textures/mobheads/zombie.png",
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
             Keybinding.keyE,
             () -> false,
             () -> false,
@@ -48,8 +48,8 @@ public class ZombieUnitProd extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
             List.of(
                 FormattedCharSequence.forward("Zombie", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  100", MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  1     \uE004 5s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Zombie.FOOD, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Zombie.POPULATION + "     \uE004 " + ResourceCosts.Zombie.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("An undead monster with a basic melee attack.", Style.EMPTY)
             )
@@ -60,7 +60,7 @@ public class ZombieUnitProd extends ProductionItem {
         return new Button(
             "Zombie",
             14,
-            "textures/mobheads/zombie.png",
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
             (KeyMapping) null,
             () -> false,
             () -> false,

@@ -41,10 +41,10 @@ public class HudClientEvents {
     private static final int tempMsgTicksMax = 150; // ticks to show the msg for
 
     private static final ArrayList<Button> genericActionButtons = new ArrayList<>(Arrays.asList(
-            ActionButtons.attack,
-            ActionButtons.stop,
-            ActionButtons.hold,
-            ActionButtons.move
+            ActionButtons.ATTACK,
+            ActionButtons.STOP,
+            ActionButtons.HOLD,
+            ActionButtons.MOVE
     ));
     private static final ArrayList<Button> unitButtons = new ArrayList<>();
     private static final ArrayList<Button> productionButtons = new ArrayList<>();
@@ -210,7 +210,7 @@ public class HudClientEvents {
                 Button cancelButton = new Button(
                         "Cancel",
                         iconSize,
-                        "textures/icons/items/barrier.png",
+                        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
                         Keybinding.cancelBuild,
                         () -> false,
                         () -> false,
@@ -277,7 +277,7 @@ public class HudClientEvents {
                 unitButtons.add(new Button(
                     unitName,
                     iconSize,
-                    "textures/mobheads/" + unitName + ".png",
+                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png"),
                     unit,
                     () -> getSimpleEntityName(hudSelectedEntity).equals(unitName),
                     () -> false,

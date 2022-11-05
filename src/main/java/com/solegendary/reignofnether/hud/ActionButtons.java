@@ -7,7 +7,6 @@ import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerboundPacket;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -17,13 +16,10 @@ import java.util.List;
 // static list of generic unit actions (attack, move, stop, etc.)
 public class ActionButtons {
 
-    private static final int itemIconSize = 14;
-    private static final int iconFrameSize = Button.iconFrameSize;
-
-    public static final Button attack = new Button(
+    public static final Button ATTACK = new Button(
         "Attack",
-        itemIconSize,
-        "textures/icons/items/sword.png",
+        Button.itemIconSize,
+        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sword.png"),
         Keybinding.attack,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK,
         () -> false,
@@ -32,10 +28,10 @@ public class ActionButtons {
         List.of(FormattedCharSequence.forward("Attack", Style.EMPTY))
 
     );
-    public static final Button stop = new Button(
+    public static final Button STOP = new Button(
         "Stop",
-        itemIconSize,
-        "textures/icons/items/barrier.png",
+        Button.itemIconSize,
+        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
         Keybinding.stop,
         () -> false, // except if currently clicked on
         () -> false,
@@ -48,10 +44,10 @@ public class ActionButtons {
         )),
         List.of(FormattedCharSequence.forward("Stop", Style.EMPTY))
     );
-    public static final Button hold = new Button(
+    public static final Button HOLD = new Button(
         "Hold Position",
-        itemIconSize,
-        "textures/icons/items/chestplate.png",
+        Button.itemIconSize,
+        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chestplate.png"),
         Keybinding.hold,
         () -> false, // TODO: if all selected units are holding position (but would need to get this from server?)
         () -> false,
@@ -64,10 +60,10 @@ public class ActionButtons {
         )),
         List.of(FormattedCharSequence.forward("Hold Position", Style.EMPTY))
     );
-    public static final Button move = new Button(
+    public static final Button MOVE = new Button(
         "Move",
-        itemIconSize,
-        "textures/icons/items/boots.png",
+        Button.itemIconSize,
+        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/boots.png"),
         Keybinding.move,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOVE,
         () -> false,

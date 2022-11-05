@@ -1,20 +1,13 @@
 package com.solegendary.reignofnether.building;
 
-import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
-import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
-import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
-import com.solegendary.reignofnether.unit.PopulationCosts;
+import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import org.apache.logging.log4j.core.jmx.Server;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 // units and/or research tech that a ProductionBuilding can produce
@@ -88,7 +81,7 @@ public abstract class ProductionItem {
 
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName))
-                return (currentPop + popCost) <= PopulationCosts.MAX_POPULATION;
+                return (currentPop + popCost) <= ResourceCosts.MAX_POPULATION;
         return false;
     }
 

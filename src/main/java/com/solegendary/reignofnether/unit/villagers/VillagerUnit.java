@@ -1,16 +1,23 @@
 package com.solegendary.reignofnether.unit.villagers;
 
+import com.solegendary.reignofnether.building.buildings.VillagerHouse;
+import com.solegendary.reignofnether.building.buildings.VillagerTower;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.unit.PopulationCosts;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -88,12 +95,17 @@ public class VillagerUnit extends Vindicator implements Unit {
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = false; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
-    final static public int popCost = PopulationCosts.VILLAGER;
+    final static public int popCost = ResourceCosts.Villager.POPULATION;
 
-    private static final List<AbilityButton> abilities = new ArrayList<>();
+    private final List<AbilityButton> abilities = new ArrayList<>();
 
     public VillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
+        if (level.isClientSide()) {
+            this.abilities.add(VillagerTower.getBuildButton());
+            this.abilities.add(VillagerHouse.getBuildButton());
+        }
+
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -104,6 +116,7 @@ public class VillagerUnit extends Vindicator implements Unit {
                 .add(Attributes.ARMOR, VillagerUnit.armorValue);
     }
 
+    // TODO: use player arm poses and animations
     public enum ArmPose {
         CROSSED,
         ATTACKING,

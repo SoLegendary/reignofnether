@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.unit.PopulationCosts;
+import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Style;
@@ -21,15 +21,15 @@ public class CreeperUnitProd extends ProductionItem {
     public final static String itemName = "Creeper";
 
     public CreeperUnitProd(ProductionBuilding building) {
-        super(building, 100);
+        super(building, ResourceCosts.Creeper.TICKS);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
                 building.produceUnit((ServerLevel) level, EntityRegistrar.CREEPER_UNIT.get(), building.ownerName);
         };
-        this.foodCost = 50;
-        this.woodCost = 0;
-        this.oreCost = 100;
-        this.popCost = PopulationCosts.CREEPER;
+        this.foodCost = ResourceCosts.Creeper.FOOD;
+        this.woodCost = ResourceCosts.Creeper.WOOD;
+        this.oreCost = ResourceCosts.Creeper.ORE;
+        this.popCost = ResourceCosts.Creeper.POPULATION;
     }
 
     public String getItemName() {
@@ -40,7 +40,7 @@ public class CreeperUnitProd extends ProductionItem {
         return new Button(
             "Creeper",
             14,
-            "textures/mobheads/creeper.png",
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
             Keybinding.keyQ,
             () -> false,
             () -> false,
@@ -48,8 +48,8 @@ public class CreeperUnitProd extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
             List.of(
                 FormattedCharSequence.forward("Creeper", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  50     \uE002  100", MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  2     \uE004  5s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Creeper.FOOD + "     \uE002  " + ResourceCosts.Creeper.ORE, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Creeper.POPULATION + "     \uE004 " + ResourceCosts.Creeper.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("An explosive monster that can blow up units", Style.EMPTY),
                 FormattedCharSequence.forward("and buildings alike. Has no regular attack.", Style.EMPTY)
@@ -61,7 +61,7 @@ public class CreeperUnitProd extends ProductionItem {
         return new Button(
             "Creeper",
             14,
-            "textures/mobheads/creeper.png",
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
             (KeyMapping) null,
             () -> false,
             () -> false,

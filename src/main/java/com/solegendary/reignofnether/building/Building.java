@@ -55,6 +55,8 @@ public abstract class Building {
         return blocks;
     }
 
+    public static Button getBuildButton() { return null; }
+
     public boolean canAfford(String ownerName) {
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName))

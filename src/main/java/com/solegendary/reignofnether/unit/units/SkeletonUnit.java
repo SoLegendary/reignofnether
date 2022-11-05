@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.unit.units;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.unit.PopulationCosts;
+import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
 import com.solegendary.reignofnether.unit.goals.RangedBowAttackUnitGoal;
@@ -90,7 +90,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
-    final static public int popCost = PopulationCosts.SKELETON;
+    final static public int popCost = ResourceCosts.Skeleton.POPULATION;
 
     public RangedBowAttackUnitGoal<? extends LivingEntity> attackGoal;
 

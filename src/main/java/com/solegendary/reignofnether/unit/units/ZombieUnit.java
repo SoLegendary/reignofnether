@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.unit.units;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.unit.PopulationCosts;
+import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
@@ -86,7 +86,7 @@ public class ZombieUnit extends Zombie implements Unit {
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
-    final static public int popCost = PopulationCosts.ZOMBIE;
+    final static public int popCost = ResourceCosts.Zombie.POPULATION;
 
     public ZombieAttackUnitGoal attackGoal;
 

@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
-import com.solegendary.reignofnether.unit.PopulationCosts;
+import com.solegendary.reignofnether.unit.ResourceCosts;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -93,7 +93,7 @@ public class BuildingServerEvents {
         for (Building building : buildings)
             if (building.ownerName.equals(ownerName) && building.isBuilt)
                 totalPopulationSupply += building.popSupply;
-        return Math.min(PopulationCosts.MAX_POPULATION, totalPopulationSupply);
+        return Math.min(ResourceCosts.MAX_POPULATION, totalPopulationSupply);
     }
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions

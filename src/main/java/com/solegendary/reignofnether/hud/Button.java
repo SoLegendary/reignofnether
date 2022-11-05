@@ -28,6 +28,8 @@ import java.util.function.Supplier;
 
 public class Button {
 
+    public static final int itemIconSize = 14;
+
     public String name;
     public int x; // top left
     public int y;
@@ -61,11 +63,11 @@ public class Button {
     Minecraft MC = Minecraft.getInstance();
 
     // constructor for ability/action/production buttons
-    public Button(String name, int iconSize, String iconResourcePath, KeyMapping hotkey,
+    public Button(String name, int iconSize, ResourceLocation rl, KeyMapping hotkey,
                   Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Supplier<Boolean> isEnabled,
                   Runnable onClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
-        this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
+        this.iconResource = rl;
         this.iconSize = iconSize;
         this.hotkey = hotkey;
         this.isSelected = isSelected;
@@ -76,11 +78,11 @@ public class Button {
     }
 
     // constructor for unit selection buttons
-    public Button(String name, int iconSize, String iconResourcePath, LivingEntity entity,
+    public Button(String name, int iconSize, ResourceLocation rl, LivingEntity entity,
                   Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Supplier<Boolean> isEnabled,
                   Runnable onClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
-        this.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconResourcePath);
+        this.iconResource = rl;
         this.iconSize = iconSize;
         this.entity = entity;
         this.isSelected = isSelected;

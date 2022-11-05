@@ -9,8 +9,8 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.unit.PopulationCosts;
 import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -46,7 +46,7 @@ public class BuildingClientEvents {
 
     private static int totalPopulationSupply = 0;
     public static int getTotalPopulationSupply() {
-        return Math.min(PopulationCosts.MAX_POPULATION, totalPopulationSupply);
+        return Math.min(ResourceCosts.MAX_POPULATION, totalPopulationSupply);
     }
 
     // clientside buildings used for tracking position (for cursor selection)
@@ -62,7 +62,24 @@ public class BuildingClientEvents {
 
     public static Building getSelectedBuilding() { return selectedBuilding; }
     public static void setSelectedBuilding(Building building) { selectedBuilding = building; }
-    public static void setBuildingToPlace(Class<? extends Building> building) { buildingToPlace = building; }
+    public static void setBuildingToPlace(Class<? extends Building> building) {
+        buildingToPlace = building;
+
+        if (buildingToPlace != lastBuildingToPlace && buildingToPlace != null) {
+            // load the new buildingToPlace's data
+            try {
+                Class<?>[] paramTypes = { LevelAccessor.class };
+                Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData", paramTypes);
+                blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level);
+                buildingDimensions = BuildingUtils.getBuildingSize(blocksToDraw);
+                buildingRotation = Rotation.NONE;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            lastBuildingToPlace = buildingToPlace; // avoid loading the same data twice unnecessarily
+        }
+    }
+    public static Class<? extends Building> getBuildingToPlace() { return buildingToPlace; }
 
     public static List<Building> getBuildings() {
         return buildings;
@@ -273,25 +290,11 @@ public class BuildingClientEvents {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
 
             if (evt.getKey() == Keybinding.getFnum(6).getKey().getValue())
-                buildingToPlace = VillagerHouse.class;
+                setBuildingToPlace(VillagerHouse.class);
             else if (evt.getKey() == Keybinding.getFnum(7).getKey().getValue())
-                buildingToPlace = VillagerTower.class;
+                setBuildingToPlace(VillagerTower.class);
             else if (evt.getKey() == Keybinding.getFnum(8).getKey().getValue())
-                buildingToPlace = null;
-
-            if (buildingToPlace != lastBuildingToPlace && buildingToPlace != null) {
-                // load the new buildingToPlace's data
-                try {
-                    Class<?>[] paramTypes = { LevelAccessor.class };
-                    Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData", paramTypes);
-                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level);
-                    buildingDimensions = BuildingUtils.getBuildingSize(blocksToDraw);
-                    buildingRotation = Rotation.NONE;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                lastBuildingToPlace = buildingToPlace; // avoid loading the same data twice unnecessarily
-            }
+                setBuildingToPlace(null);
         }
     }
 
@@ -318,7 +321,7 @@ public class BuildingClientEvents {
 
         // prevent clicking behind HUDs
         if (HudClientEvents.isMouseOverAnyButtonOrHud()) {
-            buildingToPlace = null;
+            setBuildingToPlace(null);
             return;
         }
 
@@ -329,7 +332,7 @@ public class BuildingClientEvents {
             if (buildingToPlace != null && isBuildingPlacementValid(pos) && MC.player != null) {
                 String buildingName = (String) buildingToPlace.getField("buildingName").get(null);
                 BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString());
-                buildingToPlace = null;
+                setBuildingToPlace(null);
             }
             else if (buildingToPlace == null) {
                 Building building = getPreselectedBuilding();
@@ -350,6 +353,9 @@ public class BuildingClientEvents {
                         BuildingUtils.getMinCorner(selectedBuilding.blocks),
                         rallyPoint
                 );
+            }
+            else {
+                setBuildingToPlace(null);
             }
         }
     }
