@@ -62,6 +62,14 @@ public interface Unit {
 
         if (!unitMob.level.isClientSide) {
 
+            // if target building is max health unassign from buildRepair goal
+            if (unit.canBuildAndRepair()) {
+                Building target = unit.getBuildRepairGoal().getTarget();
+                if (target != null && target.getBlocksPlaced() >= target.getBlocksTotal())
+                    unit.setBuildRepairTarget(null);
+            }
+
+
             // sync target variables between goals and Mob
             if (unit.getTargetGoal().getTarget() == null || !unit.getTargetGoal().getTarget().isAlive() ||
                     unitMob.getTarget() == null || !unitMob.getTarget().isAlive()) {
@@ -158,6 +166,7 @@ public interface Unit {
         this.getMoveGoal().setMoveTarget(null);
         this.setFollowTarget(null);
         this.setHoldPosition(false);
+        this.setBuildRepairTarget(null);
     }
 
     // move to a block ignoring all else until reaching it
@@ -170,7 +179,8 @@ public interface Unit {
     }
     // move to the selected building and start building/repairing it
     public default void setBuildRepairTarget(@Nullable Building building) {
-        this.getBuildRepairGoal().setTarget(building);
+        if (this.getBuildRepairGoal() != null)
+            this.getBuildRepairGoal().setTarget(building);
     }
 
     // these two setters set a Unit field and so can't be defaulted

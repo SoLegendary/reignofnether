@@ -25,6 +25,10 @@ public class UnitServerEvents {
     private static final ArrayList<UnitActionItem> unitActionQueue = new ArrayList<>();
     private static final ArrayList<Integer> allUnitIds = new ArrayList<>();
 
+    public static ArrayList<Integer> getAllUnitIds() {
+        return allUnitIds;
+    }
+
     public static int getCurrentPopulation(ServerLevel level, String ownerName) {
         int currentPopulation = 0;
         for (Integer unitId : allUnitIds) {

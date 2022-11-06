@@ -2,11 +2,13 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -22,13 +24,14 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
 
 public abstract class Building {
 
+    private final static int BASE_MS_PER_BUILD = 50; // time taken to build each block with 1 villager assigned;
+
     public String name;
     public LevelAccessor level;
 
-    public boolean isBuilt; // set true when blocksPercent reaches 100% the first time
-    public boolean isBuilding = true; // TODO: only true if // a builder is assigned and actively building or repairing
-    public int ticksPerBuild = 1; // ticks taken to place a single block while isBuilding
-    public int ticksToNextBuild = ticksPerBuild;
+    public boolean isBuilt; // set true when blocksPercent reaches 100% the first time; the building can then be used
+    public int msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
+
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
     public final float minBlocksPercent = 0.25f;
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
@@ -50,6 +53,20 @@ public abstract class Building {
     public int popSupply; // max population this building provides
 
     public Building() { }
+
+    // TODO: only count towards if the unit is in range
+    public int getBuilderCount(ServerLevel level) {
+        int builderCount = 0;
+        for (int id : UnitServerEvents.getAllUnitIds()) {
+            Entity entity = level.getEntity(id);
+            if (entity instanceof Unit) {
+                BuildRepairGoal goal = ((Unit) entity).getBuildRepairGoal();
+                if (goal != null && goal.getTarget() == this)
+                    builderCount += 1;
+            }
+        }
+        return builderCount;
+    }
 
     public ArrayList<BuildingBlock> getBlocks() {
         return blocks;
@@ -236,31 +253,32 @@ public abstract class Building {
         float blocksPlaced = getBlocksPlaced();
         float blocksTotal = getBlocksTotal();
 
-        if (blocksPlaced >= blocksTotal) {
-            isBuilding = false;
+        if (blocksPlaced >= blocksTotal)
             isBuilt = true;
-        }
 
         if (!level.isClientSide()) {
-
-            // TODO: if builder is assigned, set isBuilding true
+            ServerLevel serverLevel = (ServerLevel) level;
+            int builderCount = getBuilderCount(serverLevel);
 
             // TODO: keep the surrounding chunks loaded or else the building becomes unselectable when unloaded
 
             // place a block if the tick has run down
-            if (isBuilding && blocksPlaced < blocksTotal) {
-                ticksToNextBuild -= 1;
-                if (ticksToNextBuild <= 0) {
-                    ticksToNextBuild = ticksPerBuild;
+            if (blocksPlaced < blocksTotal && builderCount > 0) {
+                int msPerBuild = (3 * BASE_MS_PER_BUILD) / (builderCount + 2);
+                if (msToNextBuild > msPerBuild)
+                    msToNextBuild = msPerBuild;
+
+                msToNextBuild -= 5;
+                if (msToNextBuild <= 0) {
+                    msToNextBuild = msPerBuild;
                     buildNextBlock(level);
                 }
             }
 
             // TODO: if fires exist, put them out one by one (or gradually remove them if blocksPercent > fireThreshold%)
 
-            if (this.shouldBeDestroyed()) {
+            if (this.shouldBeDestroyed())
                 this.destroy((ServerLevel) level);
-            }
         }
     }
 }
