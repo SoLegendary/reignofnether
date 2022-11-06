@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.ResourceCosts;
+import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -253,8 +254,15 @@ public class BuildingClientEvents {
 
             if (building.equals(selectedBuilding))
                 MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
-            else if (building.equals(preselectedBuilding) && !HudClientEvents.isMouseOverAnyButtonOrHud())
-                MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 0.5f);
+            else if (building.equals(preselectedBuilding) && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
+                if (HudClientEvents.hudSelectedEntity instanceof Unit &&
+                    ((Unit) HudClientEvents.hudSelectedEntity).canBuildAndRepair() &&
+                    MiscUtil.isRightClickDown(MC))
+                    MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
+                else
+                    MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 0.5f);
+            }
+
 
             Relationship buildingRs = getPlayerToBuildingRelationship(building);
 

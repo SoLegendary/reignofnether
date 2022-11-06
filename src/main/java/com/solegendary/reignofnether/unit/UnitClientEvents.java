@@ -162,6 +162,8 @@ public class UnitClientEvents {
                 }
             }
 
+
+
             // select all nearby units of the same type when double-clicked
             if (selectedUnitIds.size() == 1 && MC.level != null && !Keybinding.shiftMod.isDown() &&
                (System.currentTimeMillis() - lastLeftClickTime) < doubleClickTimeMs) {
@@ -183,6 +185,8 @@ public class UnitClientEvents {
             // move on left click
             else if (CursorClientEvents.getLeftClickAction() == UnitAction.MOVE)
                 resolveMoveAction();
+            else if (CursorClientEvents.getLeftClickAction() == UnitAction.BUILD_REPAIR)
+                sendUnitCommand(UnitAction.BUILD_REPAIR);
 
             // TODO: resolve unit special abilities
             //else if ()
@@ -222,9 +226,15 @@ public class UnitClientEvents {
 
                     sendUnitCommand(UnitAction.ATTACK);
                 }
-                // right click -> follow friendly unit
+                // right click -> build or repair preselected building
+                else if (HudClientEvents.hudSelectedEntity instanceof Unit &&
+                        ((Unit) HudClientEvents.hudSelectedEntity).canBuildAndRepair() &&
+                        (BuildingClientEvents.getPreselectedBuilding() != null))
+                    sendUnitCommand(UnitAction.BUILD_REPAIR);
+                // right click -> follow friendly unit or go to preselected blockPos
                 else
                     resolveMoveAction();
+
             }
         }
         // clear all cursor actions
@@ -304,7 +314,7 @@ public class UnitClientEvents {
                 else if (selectedUnitIds.contains(idToDraw))
                     MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f);
                 else if (preselectedUnitIds.contains(idToDraw) && !HudClientEvents.isMouseOverAnyButtonOrHud())
-                    MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 0.5f);
+                    MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f);
             }
         }
     }

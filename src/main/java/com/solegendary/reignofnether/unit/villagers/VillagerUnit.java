@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
 import net.minecraft.core.BlockPos;
@@ -40,9 +41,12 @@ public class VillagerUnit extends Vindicator implements Unit {
     public void setMoveGoal(MoveToCursorBlockGoal moveGoal) {this.moveGoal = moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
     public void setTargetGoal(SelectedTargetGoal<? extends LivingEntity> targetGoal) {this.targetGoal = targetGoal;}
+    public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
+    public void setBuildRepairGoal(BuildRepairGoal buildRepairGoal) {this.buildRepairGoal = buildRepairGoal;}
 
     public MoveToCursorBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
+    public BuildRepairGoal buildRepairGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -79,6 +83,8 @@ public class VillagerUnit extends Vindicator implements Unit {
     public float getUnitArmorValue() {return armorValue;}
     public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
+    public boolean canBuildAndRepair() {return canBuildAndRepair;}
+    public boolean canAttack() {return canAttack;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -96,6 +102,8 @@ public class VillagerUnit extends Vindicator implements Unit {
     final static public boolean willRetaliate = false; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.Villager.POPULATION;
+    final static public boolean canBuildAndRepair = true;
+    final static public boolean canAttack = false;
 
     private final List<AbilityButton> abilities = new ArrayList<>();
 
@@ -105,7 +113,6 @@ public class VillagerUnit extends Vindicator implements Unit {
             this.abilities.add(VillagerTower.getBuildButton());
             this.abilities.add(VillagerHouse.getBuildButton());
         }
-
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -154,9 +161,11 @@ public class VillagerUnit extends Vindicator implements Unit {
     protected void registerGoals() {
         this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
         this.targetGoal = new SelectedTargetGoal(this, true, true);
+        this.buildRepairGoal = new BuildRepairGoal();
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, moveGoal);
+        this.goalSelector.addGoal(3, buildRepairGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(3, targetGoal);
     }

@@ -1,10 +1,11 @@
 package com.solegendary.reignofnether.unit;
 
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
-
-import java.util.Arrays;
 
 public class UnitActionItem {
     private final UnitAction action;
@@ -57,7 +58,11 @@ public class UnitActionItem {
                     Unit unit = (Unit) level.getEntity(id);
                     if (unit != null) {
                         unit.resetBehaviours();
-                        unit.setAttackMoveTarget(preselectedBlockPos);
+                        // if the unit can't actually attack just treat this as a move action
+                        if (unit.canAttack())
+                            unit.setAttackMoveTarget(preselectedBlockPos);
+                        else
+                            unit.setMoveTarget(preselectedBlockPos);
                     }
                 }
             }
@@ -66,7 +71,26 @@ public class UnitActionItem {
                     Unit unit = (Unit) level.getEntity(id);
                     if (unit != null) {
                         unit.resetBehaviours();
-                        unit.setAttackTarget((LivingEntity) level.getEntity(unitId));
+                        // if the unit can't actually attack just treat this as a follow action
+                        if (unit.canAttack())
+                            unit.setAttackTarget((LivingEntity) level.getEntity(unitId));
+                        else
+                            unit.setFollowTarget((LivingEntity) level.getEntity(unitId));
+                    }
+                }
+            }
+            else if (action == UnitAction.BUILD_REPAIR) {
+                for (int id : unitIds) {
+                    Unit unit = (Unit) level.getEntity(id);
+                    if (unit != null) {
+                        unit.resetBehaviours();
+                        // if the unit can't actually build/repair just treat this as a move action
+                        if (unit.canBuildAndRepair()) {
+                            Building building = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), preselectedBlockPos);
+                            unit.setBuildRepairTarget(building);
+                        }
+                        else
+                            unit.setMoveTarget(preselectedBlockPos);
                     }
                 }
             }

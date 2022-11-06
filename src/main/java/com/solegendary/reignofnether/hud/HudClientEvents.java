@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -40,7 +41,13 @@ public class HudClientEvents {
     private static final int tempMsgTicksFade = 50; // ticks left when the msg starts to fade
     private static final int tempMsgTicksMax = 150; // ticks to show the msg for
 
-    private static final ArrayList<Button> genericActionButtons = new ArrayList<>(Arrays.asList(
+    private static final ArrayList<Button> genericActionButtonsVillager = new ArrayList<>(Arrays.asList(
+            ActionButtons.BUILD,
+            ActionButtons.STOP,
+            ActionButtons.HOLD,
+            ActionButtons.MOVE
+    ));
+    private static final ArrayList<Button> genericActionButtonsAttacker = new ArrayList<>(Arrays.asList(
             ActionButtons.ATTACK,
             ActionButtons.STOP,
             ActionButtons.HOLD,
@@ -361,6 +368,10 @@ public class HudClientEvents {
 
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
+
+            ArrayList<Button> genericActionButtons = hudSelectedEntity instanceof VillagerUnit ?
+                    genericActionButtonsVillager : genericActionButtonsAttacker;
+
             for (Button actionButton : genericActionButtons) {
                 actionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                 renderedButtons.add(actionButton);

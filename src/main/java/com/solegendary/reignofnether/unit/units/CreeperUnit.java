@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.villagers.VillagerUnit;
@@ -41,9 +42,12 @@ public class CreeperUnit extends Creeper implements Unit {
     public void setMoveGoal(MoveToCursorBlockGoal moveGoal) {this.moveGoal = moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
     public void setTargetGoal(SelectedTargetGoal<? extends LivingEntity> targetGoal) {this.targetGoal = targetGoal;}
+    public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
+    public void setBuildRepairGoal(BuildRepairGoal buildRepairGoal) {this.buildRepairGoal = buildRepairGoal;}
 
     public MoveToCursorBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
+    public BuildRepairGoal buildRepairGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -80,6 +84,8 @@ public class CreeperUnit extends Creeper implements Unit {
     public float getUnitArmorValue() {return armorValue;}
     public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
+    public boolean canBuildAndRepair() {return canBuildAndRepair;}
+    public boolean canAttack() {return canAttack;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -97,6 +103,8 @@ public class CreeperUnit extends Creeper implements Unit {
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.Creeper.POPULATION;
+    final static public boolean canBuildAndRepair = false;
+    final static public boolean canAttack = true;
 
     public MeleeAttackGoal attackGoal;
 

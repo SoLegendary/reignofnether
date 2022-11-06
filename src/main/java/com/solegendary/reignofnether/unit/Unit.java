@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -30,6 +32,8 @@ public interface Unit {
     public void setMoveGoal(MoveToCursorBlockGoal moveGoal);
     public SelectedTargetGoal<?> getTargetGoal();
     public void setTargetGoal(SelectedTargetGoal<?> targetGoal);
+    public BuildRepairGoal getBuildRepairGoal();
+    public void setBuildRepairGoal(BuildRepairGoal buildRepairGoal);
 
     public boolean getWillRetaliate();
     public int getAttackCooldown();
@@ -42,6 +46,8 @@ public interface Unit {
     public float getUnitArmorValue();
     public float getSightRange();
     public int getPopCost();
+    public boolean canBuildAndRepair();
+    public boolean canAttack();
 
     public BlockPos getAttackMoveTarget();
     public LivingEntity getFollowTarget();
@@ -161,6 +167,10 @@ public interface Unit {
     // chase and attack the target ignoring all else until it is dead or out of sight
     public default void setAttackTarget(@Nullable LivingEntity target) {
         this.getTargetGoal().setTarget(target);
+    }
+    // move to the selected building and start building/repairing it
+    public default void setBuildRepairTarget(@Nullable Building building) {
+        this.getBuildRepairGoal().setTarget(building);
     }
 
     // these two setters set a Unit field and so can't be defaulted

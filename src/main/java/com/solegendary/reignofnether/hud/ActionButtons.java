@@ -13,9 +13,20 @@ import net.minecraft.util.FormattedCharSequence;
 
 import java.util.List;
 
-// static list of generic unit actions (attack, move, stop, etc.)
+// static list of generic unit actions (build, attack, move, stop, etc.)
 public class ActionButtons {
 
+    public static final Button BUILD = new Button(
+        "Build",
+        Button.itemIconSize,
+        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shovel.png"),
+        Keybinding.build,
+        () -> CursorClientEvents.getLeftClickAction() == UnitAction.BUILD_REPAIR,
+        () -> false,
+        () -> true,
+        () -> CursorClientEvents.setLeftClickAction(UnitAction.BUILD_REPAIR),
+        List.of(FormattedCharSequence.forward("Build", Style.EMPTY))
+    );
     public static final Button ATTACK = new Button(
         "Attack",
         Button.itemIconSize,
@@ -26,7 +37,6 @@ public class ActionButtons {
         () -> true,
         () -> CursorClientEvents.setLeftClickAction(UnitAction.ATTACK),
         List.of(FormattedCharSequence.forward("Attack", Style.EMPTY))
-
     );
     public static final Button STOP = new Button(
         "Stop",

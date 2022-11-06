@@ -2,8 +2,10 @@ package com.solegendary.reignofnether.cursor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -75,6 +77,7 @@ public class CursorClientEvents {
     private static final ResourceLocation TEXTURE_HAND_GRAB = new ResourceLocation("reignofnether", "textures/cursors/customcursor_hand_grab.png");
     private static final ResourceLocation TEXTURE_SWORD = new ResourceLocation("reignofnether", "textures/cursors/customcursor_sword.png");
     private static final ResourceLocation TEXTURE_CROSS = new ResourceLocation("reignofnether", "textures/cursors/customcursor_cross.png");
+    private static final ResourceLocation TEXTURE_SHOVEL = new ResourceLocation("reignofnether", "textures/cursors/customcursor_shovel.png");
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
@@ -114,6 +117,8 @@ public class CursorClientEvents {
             RenderSystem.setShaderTexture(0, TEXTURE_HAND);
         else if (leftClickAction != null && leftClickAction.equals(UnitAction.ATTACK))
             RenderSystem.setShaderTexture(0, TEXTURE_SWORD);
+        else if (leftClickAction != null && leftClickAction.equals(UnitAction.BUILD_REPAIR))
+            RenderSystem.setShaderTexture(0, TEXTURE_SHOVEL);
         else if (leftClickAction != null) {
             RenderSystem.setShaderTexture(0, TEXTURE_CROSS);
             cursorDrawX -= 8;
@@ -305,10 +310,27 @@ public class CursorClientEvents {
             return;
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
 
-            if (!OrthoviewClientEvents.isCameraMovingByMouse() && !leftClickDown &&
-                (UnitClientEvents.getSelectedUnitIds().size() > 0 ||
-                BuildingClientEvents.getSelectedBuilding() != null) &&
-                UnitClientEvents.getPreselectedUnitIds().size() == 0) {
+            // don't draw block outline if we've selected a builder unit and are mousing over a building (unless leftClick action is MOVE)
+            boolean unitToBuildRepair = (HudClientEvents.hudSelectedEntity instanceof Unit &&
+                    ((Unit) HudClientEvents.hudSelectedEntity).canBuildAndRepair() &&
+                    BuildingClientEvents.getPreselectedBuilding() != null &&
+                    CursorClientEvents.getLeftClickAction() != UnitAction.MOVE);
+
+            // do we own any of the selected buildings or entities?
+            // will be false if there are none selected in the first place
+            boolean ownAnySelected = false;
+            Building selBuilding = BuildingClientEvents.getSelectedBuilding();
+            if (selBuilding != null && BuildingClientEvents.getPlayerToBuildingRelationship(selBuilding) == Relationship.OWNED)
+                ownAnySelected = true;
+            for (int id : UnitClientEvents.getSelectedUnitIds()) {
+                if (UnitClientEvents.getPlayerToEntityRelationship(id) == Relationship.OWNED) {
+                    ownAnySelected = true;
+                    break;
+                }
+            }
+            if (!OrthoviewClientEvents.isCameraMovingByMouse() &&
+                !leftClickDown && ownAnySelected &&
+                UnitClientEvents.getPreselectedUnitIds().size() == 0 && !unitToBuildRepair) {
                 MyRenderer.drawBox(evt.getPoseStack(), preselectedBlockPos, 1, 1, 1, rightClickDown ? 0.3f : 0.15f);
                 MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }

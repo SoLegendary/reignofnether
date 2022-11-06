@@ -32,7 +32,7 @@ import static net.minecraft.util.Mth.sign;
 public class OrthoviewClientEvents {
 
     public static boolean enabled = false;
-    private static boolean cameraMovingByMouse = false; // is the camera being moved using the mouse?
+    private static boolean cameraMovingByMouse = false; // excludes edgepanning
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static final float ZOOM_STEP_KEY = 5;
