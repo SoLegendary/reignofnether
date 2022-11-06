@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.ResourceCosts;
+import com.solegendary.reignofnether.unit.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -42,7 +43,7 @@ public class BuildingServerEvents {
         blockDestroyQueue.add(pos);
     }
 
-    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName) {
+    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int[] builderUnitIds) {
         Building building = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName);
         if (building != null) {
 
@@ -60,6 +61,12 @@ public class BuildingServerEvents {
                     -building.woodCost,
                     -building.oreCost
                 ));
+                // assign the builder unit that placed this building
+                for (int id : builderUnitIds) {
+                    Entity entity = serverLevel.getEntity(id);
+                    if (entity instanceof Unit unit)
+                        unit.setBuildRepairTarget(building);
+                }
             }
             else
                 ResourcesClientboundPacket.warnInsufficientResources(building.ownerName,

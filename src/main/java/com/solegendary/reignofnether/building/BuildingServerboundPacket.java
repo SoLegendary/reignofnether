@@ -6,6 +6,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -18,49 +20,44 @@ public class BuildingServerboundPacket {
     public BlockPos rallyPos; // required for all actions (used to identify the relevant building)
     public Rotation rotation; // PLACE
     public String ownerName; // PLACE
-    public int repairAmount; // REPAIR
+    public int[] builderUnitIds;
     public BuildingAction action;
 
-    public static void placeBuilding(String itemName, BlockPos originPos, Rotation rotation, String ownerName) {
+    public static void placeBuilding(String itemName, BlockPos originPos, Rotation rotation, String ownerName, int[] builderUnitIds) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.PLACE,
-                itemName, originPos, BlockPos.ZERO, rotation, ownerName, 0));
+                itemName, originPos, BlockPos.ZERO, rotation, ownerName, builderUnitIds));
     }
     public static void cancelBuilding(BlockPos buildingPos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.CANCEL,
-                "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", 0));
-    }
-    public static void repairBuilding(BlockPos buildingPos, int repairAmount) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
-                BuildingAction.REPAIR,
-                "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", repairAmount));
+                "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
     }
     public static void setRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.SET_RALLY_POINT,
-                "", buildingPos, rallyPos, Rotation.NONE, "", 0));
+                "", buildingPos, rallyPos, Rotation.NONE, "", new int[0]));
     }
     public static void startProduction(BlockPos buildingPos, String itemName) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.START_PRODUCTION,
-                itemName, buildingPos, BlockPos.ZERO, Rotation.NONE, "", 0));
+                itemName, buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
     }
     public static void cancelProduction(BlockPos buildingPos, String itemName, boolean frontItem) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
-                itemName, buildingPos, BlockPos.ZERO, Rotation.NONE, "", 0));
+                itemName, buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
     }
 
 
-    public BuildingServerboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, BlockPos rallyPos, Rotation rotation, String ownerName, int repairAmount) {
+    public BuildingServerboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, BlockPos rallyPos, Rotation rotation, String ownerName, int[] builderUnitIds) {
         this.action = action;
         this.itemName = itemName;
         this.buildingPos = buildingPos;
         this.rallyPos = rallyPos;
         this.rotation = rotation;
         this.ownerName = ownerName;
-        this.repairAmount = repairAmount;
+        this.builderUnitIds = builderUnitIds;
     }
 
     public BuildingServerboundPacket(FriendlyByteBuf buffer) {
@@ -70,7 +67,7 @@ public class BuildingServerboundPacket {
         this.rallyPos = buffer.readBlockPos();
         this.rotation = buffer.readEnum(Rotation.class);
         this.ownerName = buffer.readUtf();
-        this.repairAmount = buffer.readInt();
+        this.builderUnitIds = buffer.readVarIntArray();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -80,7 +77,7 @@ public class BuildingServerboundPacket {
         buffer.writeBlockPos(this.rallyPos);
         buffer.writeEnum(this.rotation);
         buffer.writeUtf(this.ownerName);
-        buffer.writeInt(this.repairAmount);
+        buffer.writeVarIntArray(this.builderUnitIds);
     }
 
     // server-side packet-consuming functions
@@ -95,11 +92,10 @@ public class BuildingServerboundPacket {
                     return;
             }
             switch (this.action) {
-                case PLACE -> BuildingServerEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName);
+                case PLACE -> BuildingServerEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds);
                 case CANCEL -> {
                     BuildingServerEvents.cancelBuilding(building);
                 }
-                case REPAIR -> System.out.println("REPAIR");
                 case SET_RALLY_POINT -> {
                     building.setRallyPoint(rallyPos);
                 }

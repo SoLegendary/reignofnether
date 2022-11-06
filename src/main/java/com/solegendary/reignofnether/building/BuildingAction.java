@@ -4,7 +4,6 @@ package com.solegendary.reignofnether.building;
 public enum BuildingAction {
     PLACE,
     CANCEL, // WIP building cancelled by owner
-    REPAIR, // or continue build a WIP building
     SET_RALLY_POINT,
     START_PRODUCTION, // start ProductionItem
     CANCEL_PRODUCTION, // remove ProductionItem from front of queue

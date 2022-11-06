@@ -23,6 +23,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
@@ -339,7 +340,14 @@ public class BuildingClientEvents {
             // place a new building
             if (buildingToPlace != null && isBuildingPlacementValid(pos) && MC.player != null) {
                 String buildingName = (String) buildingToPlace.getField("buildingName").get(null);
-                BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString());
+
+                ArrayList<Integer> builderIds = new ArrayList<>();
+                for (LivingEntity builderEntity : UnitClientEvents.getSelectedUnits())
+                    if (builderEntity instanceof Unit && ((Unit) builderEntity).canBuildAndRepair())
+                        builderIds.add(builderEntity.getId());
+
+                BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
+                        builderIds.stream().mapToInt(i -> i).toArray());
                 setBuildingToPlace(null);
             }
             else if (buildingToPlace == null) {
