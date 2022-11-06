@@ -108,7 +108,8 @@ public class ZombieUnit extends Zombie implements Unit {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MOVEMENT_SPEED, ZombieUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, ZombieUnit.attackDamage)
-                .add(Attributes.ARMOR, ZombieUnit.armorValue);
+                .add(Attributes.ARMOR, ZombieUnit.armorValue)
+                .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE, 0); // needs to be added for parent to work
     }
 
     public void tick() {
@@ -119,7 +120,7 @@ public class ZombieUnit extends Zombie implements Unit {
     @Override
     protected void registerGoals() {
         this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
-        this.targetGoal = new SelectedTargetGoal(this, true, true);
+        this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new ZombieAttackUnitGoal(this, attackCooldown, 1.0D, false);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));

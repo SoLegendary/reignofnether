@@ -117,7 +117,7 @@ public abstract class Building {
     }
 
     // returns the lowest Y value block in this.blocks to the given blockPos
-    // radius offset is the distance away from the
+    // radius offset is the distance away from the building itself to have the returned pos
     public BlockPos getClosestGroundPos(BlockPos bpTarget, int radiusOffset) {
         float minDist = 999999;
         BlockPos minPos = BuildingUtils.getMinCorner(this.blocks);

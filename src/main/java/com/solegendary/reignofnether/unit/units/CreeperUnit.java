@@ -144,7 +144,7 @@ public class CreeperUnit extends Creeper implements Unit {
     @Override
     protected void registerGoals() {
         this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
-        this.targetGoal = new SelectedTargetGoal(this, true, true);
+        this.targetGoal = new SelectedTargetGoal<>(this, true, true);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         // TODO: extend this to make it also compatible with the Explode ability

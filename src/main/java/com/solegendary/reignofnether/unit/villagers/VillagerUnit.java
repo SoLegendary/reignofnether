@@ -160,8 +160,8 @@ public class VillagerUnit extends Vindicator implements Unit {
     @Override
     protected void registerGoals() {
         this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
-        this.targetGoal = new SelectedTargetGoal(this, true, true);
-        this.buildRepairGoal = new BuildRepairGoal();
+        this.targetGoal = new SelectedTargetGoal<>(this, true, true);
+        this.buildRepairGoal = new BuildRepairGoal(this, 1.0f);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, moveGoal);

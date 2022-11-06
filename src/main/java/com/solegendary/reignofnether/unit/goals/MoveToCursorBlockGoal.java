@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.pathfinder.Path;
@@ -45,12 +43,12 @@ public class MoveToCursorBlockGoal extends Goal {
     }
 
     // TODO: can sometimes fail to go back uphill when knocked downhill by attacks
-    public void setMoveTarget(@Nullable BlockPos bp) {
+    public void setTarget(@Nullable BlockPos bp) {
         this.moveTarget = bp;
         this.start();
     }
 
-    public BlockPos getMoveTarget() {
+    public BlockPos getTarget() {
         return this.moveTarget;
     }
 }
