@@ -54,14 +54,13 @@ public abstract class Building {
 
     public Building() { }
 
-    // TODO: only count towards if the unit is in range
     public int getBuilderCount(ServerLevel level) {
         int builderCount = 0;
         for (int id : UnitServerEvents.getAllUnitIds()) {
             Entity entity = level.getEntity(id);
             if (entity instanceof Unit) {
                 BuildRepairGoal goal = ((Unit) entity).getBuildRepairGoal();
-                if (goal != null && goal.getTarget() == this)
+                if (goal != null && goal.isBuilding())
                     builderCount += 1;
             }
         }

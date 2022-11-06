@@ -16,6 +16,11 @@ public class BuildRepairGoal extends Goal {
         this.targetBuilding = target;
     }
 
+    // TODO: only count as building if in range of the target {
+    public boolean isBuilding() {
+        return this.targetBuilding != null;
+    }
+
     public boolean canUse() {
         return false;
     }
