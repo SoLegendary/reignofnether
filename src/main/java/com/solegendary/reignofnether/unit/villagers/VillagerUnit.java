@@ -136,6 +136,8 @@ public class VillagerUnit extends Vindicator implements Unit {
     }
 
     public ArmPose getVillagerUnitArmPose() {
+        if (this.buildRepairGoal != null && this.buildRepairGoal.isBuilding())
+            return ArmPose.ATTACKING;
         return ArmPose.CROSSED;
     }
 
@@ -152,9 +154,13 @@ public class VillagerUnit extends Vindicator implements Unit {
         return SoundEvents.VILLAGER_HURT;
     }
 
+
     public void tick() {
         super.tick();
         Unit.tick(this);
+
+        // TODO: run Player place block animations with arms shown when building
+
     }
 
     @Override
