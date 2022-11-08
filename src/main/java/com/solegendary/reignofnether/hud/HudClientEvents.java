@@ -41,17 +41,18 @@ public class HudClientEvents {
     private static final int tempMsgTicksFade = 50; // ticks left when the msg starts to fade
     private static final int tempMsgTicksMax = 150; // ticks to show the msg for
 
-    private static final ArrayList<Button> genericActionButtonsVillager = new ArrayList<>(Arrays.asList(
-            ActionButtons.BUILD,
-            ActionButtons.STOP,
+    private static final ArrayList<Button> genericActionButtonsWorker = new ArrayList<>(Arrays.asList(
+            ActionButtons.BUILD_REPAIR,
+            ActionButtons.GATHER,
             ActionButtons.HOLD,
-            ActionButtons.MOVE
+            ActionButtons.MOVE,
+            ActionButtons.STOP
     ));
     private static final ArrayList<Button> genericActionButtonsAttacker = new ArrayList<>(Arrays.asList(
             ActionButtons.ATTACK,
-            ActionButtons.STOP,
             ActionButtons.HOLD,
-            ActionButtons.MOVE
+            ActionButtons.MOVE,
+            ActionButtons.STOP
     ));
     private static final ArrayList<Button> unitButtons = new ArrayList<>();
     private static final ArrayList<Button> productionButtons = new ArrayList<>();
@@ -107,7 +108,7 @@ public class HudClientEvents {
         mouseY = evt.getMouseY();
 
         // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
-        int hudStartingXPos = (MC.getWindow().getGuiScaledWidth() / 5) + 4;
+        int hudStartingXPos = (MC.getWindow().getGuiScaledWidth() / 5) + 20;
 
         ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
 
@@ -370,7 +371,7 @@ public class HudClientEvents {
             blitY = screenHeight - iconFrameSize;
 
             ArrayList<Button> genericActionButtons = hudSelectedEntity instanceof VillagerUnit ?
-                    genericActionButtonsVillager : genericActionButtonsAttacker;
+                    genericActionButtonsWorker : genericActionButtonsAttacker;
 
             for (Button actionButton : genericActionButtons) {
                 actionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);

@@ -4,28 +4,49 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerboundPacket;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.Entity;
 
 import java.util.List;
+import java.util.Objects;
 
 // static list of generic unit actions (build, attack, move, stop, etc.)
 public class ActionButtons {
 
-    public static final Button BUILD = new Button(
-        "Build",
-        Button.itemIconSize,
-        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shovel.png"),
-        Keybinding.build,
-        () -> CursorClientEvents.getLeftClickAction() == UnitAction.BUILD_REPAIR,
-        () -> false,
-        () -> true,
-        () -> CursorClientEvents.setLeftClickAction(UnitAction.BUILD_REPAIR),
-        List.of(FormattedCharSequence.forward("Build", Style.EMPTY))
+    public static final Button BUILD_REPAIR = new Button(
+            "Build/Repair",
+            Button.itemIconSize,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shovel.png"),
+            Keybinding.build,
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.BUILD_REPAIR,
+            () -> false,
+            () -> true,
+            () -> CursorClientEvents.setLeftClickAction(UnitAction.BUILD_REPAIR),
+            List.of(FormattedCharSequence.forward("Build", Style.EMPTY))
+    );
+    public static final Button GATHER = new Button(
+            "Gather",
+            Button.itemIconSize,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/axe.png"),
+            Keybinding.build,
+            () -> {
+                Entity entity = HudClientEvents.hudSelectedEntity;
+                if (entity instanceof Unit unit && unit.isWorker())
+                    return !unit.getGatherResourceGoal().getTargetResourceName().equals("None");
+                return false;
+            },
+            () -> false,
+            () -> true,
+            () -> {
+
+            },
+            List.of(FormattedCharSequence.forward("Gather wood", Style.EMPTY))
     );
     public static final Button ATTACK = new Button(
         "Attack",

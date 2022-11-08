@@ -228,7 +228,7 @@ public class UnitClientEvents {
                 }
                 // right click -> build or repair preselected building
                 else if (HudClientEvents.hudSelectedEntity instanceof Unit &&
-                        ((Unit) HudClientEvents.hudSelectedEntity).canBuildAndRepair() &&
+                        ((Unit) HudClientEvents.hudSelectedEntity).isWorker() &&
                         (BuildingClientEvents.getPreselectedBuilding() != null))
                     sendUnitCommand(UnitAction.BUILD_REPAIR);
                 // right click -> follow friendly unit or go to preselected blockPos
@@ -317,6 +317,15 @@ public class UnitClientEvents {
                     MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f);
             }
         }
+
+
+        /*
+        for (int unitId : UnitServerEvents.getAllUnitIds()) {
+            Unit unit = (Unit) MC.level.getEntity(unitId);
+            if (unit != null && unit.isWorker() && unit.getGatherWoodGoal() != null)
+                if (unit.getGatherWoodGoal().getGatherTarget() != null)
+                    MyRenderer.drawBlockOutline(evt.getPoseStack(), unit.getGatherWoodGoal().getGatherTarget(), 1.0f);
+        }*/
     }
 
     public static boolean targetingSelf() {

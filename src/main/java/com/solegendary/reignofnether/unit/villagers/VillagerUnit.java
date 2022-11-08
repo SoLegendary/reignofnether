@@ -2,23 +2,19 @@ package com.solegendary.reignofnether.unit.villagers;
 
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.Unit;
-import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
+import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
-import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
+import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -37,16 +33,15 @@ public class VillagerUnit extends Vindicator implements Unit {
     // region
     public List<AbilityButton> getAbilities() {return abilities;};
 
-    public MoveToCursorBlockGoal getMoveGoal() {return moveGoal;}
-    public void setMoveGoal(MoveToCursorBlockGoal moveGoal) {this.moveGoal = moveGoal;}
+    public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
-    public void setTargetGoal(SelectedTargetGoal<? extends LivingEntity> targetGoal) {this.targetGoal = targetGoal;}
     public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
-    public void setBuildRepairGoal(BuildRepairGoal buildRepairGoal) {this.buildRepairGoal = buildRepairGoal;}
+    public GatherResourcesGoal getGatherResourceGoal() {return gatherResourcesGoal;}
 
-    public MoveToCursorBlockGoal moveGoal;
+    public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
     public BuildRepairGoal buildRepairGoal;
+    public GatherResourcesGoal gatherResourcesGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -83,7 +78,7 @@ public class VillagerUnit extends Vindicator implements Unit {
     public float getUnitArmorValue() {return armorValue;}
     public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
-    public boolean canBuildAndRepair() {return canBuildAndRepair;}
+    public boolean isWorker() {return canBuildAndRepair;}
     public boolean canAttack() {return canAttack;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
@@ -165,13 +160,15 @@ public class VillagerUnit extends Vindicator implements Unit {
 
     @Override
     protected void registerGoals() {
-        this.moveGoal = new MoveToCursorBlockGoal(this, 1.0f);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.buildRepairGoal = new BuildRepairGoal(this, 1.0f);
+        this.gatherResourcesGoal = new GatherResourcesGoal(this, 1.0f);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, moveGoal);
         this.goalSelector.addGoal(3, buildRepairGoal);
+        this.goalSelector.addGoal(3, gatherResourcesGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(3, targetGoal);
     }

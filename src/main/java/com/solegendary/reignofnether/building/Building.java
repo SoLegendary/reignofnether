@@ -60,7 +60,7 @@ public abstract class Building {
             Entity entity = level.getEntity(id);
             if (entity instanceof Unit) {
                 BuildRepairGoal goal = ((Unit) entity).getBuildRepairGoal();
-                if (goal != null && goal.getTarget() == this && goal.isBuilding())
+                if (goal != null && goal.getBuildingTarget() == this && goal.isBuilding())
                     builderCount += 1;
             }
         }

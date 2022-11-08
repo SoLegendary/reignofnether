@@ -6,17 +6,41 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class MiscUtil {
+
+    // search outward and return the first block of the type in the blocks list that matches the predicate
+    public static BlockPos findNearestBlock(ServerLevel level, Vec3i originPos, int dist, List<Block> blocks, Predicate<BlockPos> condition) {
+
+        for (int d = 0; d <= dist; d++)
+            for (int x = -dist; x <= dist; x++)
+                for (int y = -dist; y <= dist; y++)
+                    for (int z = -dist; z <= dist; z++) {
+                        Vec3i pos = new Vec3i(x,y,z);
+                        if (pos.distSqr(originPos) >= Math.pow(d,2)) {
+                            BlockPos bp = new BlockPos(pos.getX(), pos.getY(), pos.getZ());
+                            Block block = level.getBlockState(bp).getBlock();
+                            if (blocks.contains(block) && condition.test(bp))
+                                return bp;
+                        }
+                    }
+        return null;
+    }
 
     public static boolean listContainsObjectValue(List<Object> objs, String obj){
         return objs.stream().anyMatch(o -> o.equals(obj));

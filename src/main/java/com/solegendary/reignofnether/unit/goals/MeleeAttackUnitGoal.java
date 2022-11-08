@@ -11,6 +11,7 @@ import net.minecraft.world.level.pathfinder.Path;
 
 import java.util.EnumSet;
 
+// based on MeleeAttackGoal
 public class MeleeAttackUnitGoal extends Goal {
     protected final PathfinderMob mob;
     private final double speedModifier;

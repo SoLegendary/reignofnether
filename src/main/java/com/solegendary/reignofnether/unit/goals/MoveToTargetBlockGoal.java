@@ -8,15 +8,19 @@ import net.minecraft.world.level.pathfinder.Path;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class MoveToCursorBlockGoal extends Goal {
+public class MoveToTargetBlockGoal extends Goal {
 
-    private final PathfinderMob mob;
-    private final double speedModifier;
-    private BlockPos moveTarget = null;
+    protected final PathfinderMob mob;
+    protected final double speedModifier;
+    protected BlockPos moveTarget = null;
+    protected boolean persistent; // will keep trying to move back to the target if moved externally
+    protected int reachRange = 0; // how far away from the target block to stop moving
 
-    public MoveToCursorBlockGoal(PathfinderMob mob, double speedModifier) {
+    public MoveToTargetBlockGoal(PathfinderMob mob, boolean persistent, double speedModifier, int reachRange) {
         this.mob = mob;
+        this.persistent = persistent;
         this.speedModifier = speedModifier;
+        this.reachRange = reachRange;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE));
     }
 
@@ -25,8 +29,9 @@ public class MoveToCursorBlockGoal extends Goal {
     }
 
     public boolean canContinueToUse() {
-        if (this.mob.getNavigation().isDone()) {
-            moveTarget = null;
+        if (this.mob.getNavigation().isDone() || moveTarget == null) {
+            if (!persistent)
+                moveTarget = null;
             return false;
         }
         return true;
@@ -43,12 +48,17 @@ public class MoveToCursorBlockGoal extends Goal {
     }
 
     // TODO: can sometimes fail to go back uphill when knocked downhill by attacks
-    public void setTarget(@Nullable BlockPos bp) {
+    public void setMoveTarget(@Nullable BlockPos bp) {
         this.moveTarget = bp;
         this.start();
     }
 
-    public BlockPos getTarget() {
+    public BlockPos getMoveTarget() {
         return this.moveTarget;
+    }
+
+    public void stop() {
+        this.moveTarget = null;
+        this.mob.getNavigation().stop();
     }
 }

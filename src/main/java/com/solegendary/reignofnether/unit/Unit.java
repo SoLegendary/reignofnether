@@ -1,14 +1,13 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
-import com.solegendary.reignofnether.unit.goals.MoveToCursorBlockGoal;
+import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
+import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,12 +28,10 @@ public interface Unit {
     public List<AbilityButton> getAbilities();
 
     // note that attackGoal is specific to unit types
-    public MoveToCursorBlockGoal getMoveGoal();
-    public void setMoveGoal(MoveToCursorBlockGoal moveGoal);
+    public MoveToTargetBlockGoal getMoveGoal();
     public SelectedTargetGoal<?> getTargetGoal();
-    public void setTargetGoal(SelectedTargetGoal<?> targetGoal);
     public BuildRepairGoal getBuildRepairGoal();
-    public void setBuildRepairGoal(BuildRepairGoal buildRepairGoal);
+    public GatherResourcesGoal getGatherResourceGoal();
 
     public boolean getWillRetaliate();
     public int getAttackCooldown();
@@ -47,7 +44,7 @@ public interface Unit {
     public float getUnitArmorValue();
     public float getSightRange();
     public int getPopCost();
-    public boolean canBuildAndRepair();
+    public boolean isWorker();
     public boolean canAttack();
 
     public BlockPos getAttackMoveTarget();
@@ -64,7 +61,7 @@ public interface Unit {
         if (!unitMob.level.isClientSide) {
 
             // if target building is max health unassign from buildRepair goal
-            if (unit.canBuildAndRepair()) {
+            if (unit.isWorker()) {
                 BuildRepairGoal goal = unit.getBuildRepairGoal();
                 if (goal != null)
                     goal.tick();
@@ -88,7 +85,7 @@ public interface Unit {
             if (unit.getAttackMoveTarget() != null && !unit.hasLivingTarget()) {
                 boolean attacked = unit.attackClosestEnemy((ServerLevel) unitMob.level);
 
-                if (!attacked && unit.getMoveGoal().getTarget() == null)
+                if (!attacked && unit.getMoveGoal().getMoveTarget() == null)
                     unit.setMoveTarget(unit.getAttackMoveTarget());
 
                 else if (!attacked && !unit.getMoveGoal().canContinueToUse()) // finished attack-moving
@@ -97,7 +94,7 @@ public interface Unit {
 
             // retaliate against a mob that damaged us UNLESS already on a move or follow command
             if (unitMob.getLastDamageSource() != null && unit.getWillRetaliate() &&
-                unit.getMoveGoal().getTarget() == null && unit.getFollowTarget() == null) {
+                unit.getMoveGoal().getMoveTarget() == null && unit.getFollowTarget() == null) {
 
                 Entity lastDSEntity = unitMob.getLastDamageSource().getEntity();
                 Relationship rs = UnitServerEvents.getUnitToEntityRelationship(unit, lastDSEntity);
@@ -151,7 +148,7 @@ public interface Unit {
     public default boolean isIdle() {
         return this.getAttackMoveTarget() == null &&
                 !this.hasLivingTarget() &&
-                this.getMoveGoal().getTarget() == null &&
+                this.getMoveGoal().getMoveTarget() == null &&
                 this.getFollowTarget() == null;
     }
 
@@ -163,24 +160,22 @@ public interface Unit {
     public default void resetBehaviours() {
         this.setAttackMoveTarget(null);
         this.getTargetGoal().setTarget(null);
-        this.getMoveGoal().setTarget(null);
+        this.getMoveGoal().stop();
         this.setFollowTarget(null);
         this.setHoldPosition(false);
-        this.setBuildRepairTarget(null);
+        if (isWorker()) {
+            this.getBuildRepairGoal().stopBuilding();
+            this.getGatherResourceGoal().stopGathering();
+        }
     }
 
     // move to a block ignoring all else until reaching it
     public default void setMoveTarget(@Nullable BlockPos bp) {
-        this.getMoveGoal().setTarget(bp);
+        this.getMoveGoal().setMoveTarget(bp);
     }
     // chase and attack the target ignoring all else until it is dead or out of sight
     public default void setAttackTarget(@Nullable LivingEntity target) {
         this.getTargetGoal().setTarget(target);
-    }
-    // move to the selected building and start building/repairing it
-    public default void setBuildRepairTarget(@Nullable Building building) {
-        if (this.getBuildRepairGoal() != null)
-            this.getBuildRepairGoal().setTarget(building);
     }
 
     // these two setters set a Unit field and so can't be defaulted

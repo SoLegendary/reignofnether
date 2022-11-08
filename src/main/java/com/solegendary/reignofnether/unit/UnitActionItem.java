@@ -85,9 +85,9 @@ public class UnitActionItem {
                     if (unit != null) {
                         unit.resetBehaviours();
                         // if the unit can't actually build/repair just treat this as a move action
-                        if (unit.canBuildAndRepair()) {
+                        if (unit.isWorker()) {
                             Building building = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), preselectedBlockPos);
-                            unit.setBuildRepairTarget(building);
+                            unit.getBuildRepairGoal().setBuildingTarget(building);
                         }
                         else
                             unit.setMoveTarget(preselectedBlockPos);

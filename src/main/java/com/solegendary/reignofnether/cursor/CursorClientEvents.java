@@ -312,7 +312,7 @@ public class CursorClientEvents {
 
             // don't draw block outline if we've selected a builder unit and are mousing over a building (unless leftClick action is MOVE)
             boolean unitToBuildRepair = (HudClientEvents.hudSelectedEntity instanceof Unit &&
-                    ((Unit) HudClientEvents.hudSelectedEntity).canBuildAndRepair() &&
+                    ((Unit) HudClientEvents.hudSelectedEntity).isWorker() &&
                     BuildingClientEvents.getPreselectedBuilding() != null &&
                     CursorClientEvents.getLeftClickAction() != UnitAction.MOVE);
 

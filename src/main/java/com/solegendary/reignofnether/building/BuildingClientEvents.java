@@ -257,7 +257,7 @@ public class BuildingClientEvents {
                 MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
             else if (building.equals(preselectedBuilding) && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
                 if (HudClientEvents.hudSelectedEntity instanceof Unit &&
-                    ((Unit) HudClientEvents.hudSelectedEntity).canBuildAndRepair() &&
+                    ((Unit) HudClientEvents.hudSelectedEntity).isWorker() &&
                     MiscUtil.isRightClickDown(MC))
                     MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
                 else
@@ -343,7 +343,7 @@ public class BuildingClientEvents {
 
                 ArrayList<Integer> builderIds = new ArrayList<>();
                 for (LivingEntity builderEntity : UnitClientEvents.getSelectedUnits())
-                    if (builderEntity instanceof Unit && ((Unit) builderEntity).canBuildAndRepair())
+                    if (builderEntity instanceof Unit && ((Unit) builderEntity).isWorker())
                         builderIds.add(builderEntity.getId());
 
                 BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
