@@ -98,10 +98,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     public void setTargetResource(String resourceName) {
         targetResourceName = resourceName;
         switch(targetResourceName) {
-            case "None" -> targetResourceBlocks = FOOD_BLOCKS;
-            case "Food" -> targetResourceBlocks = WOOD_BLOCKS;
-            case "Wood" -> targetResourceBlocks = ORE_BLOCKS;
-            case "Ore" -> targetResourceBlocks = null;
+            case "None" -> targetResourceBlocks = null;
+            case "Food" -> targetResourceBlocks = FOOD_BLOCKS;
+            case "Wood" -> targetResourceBlocks = WOOD_BLOCKS;
+            case "Ore" -> targetResourceBlocks = ORE_BLOCKS;
         }
     }
 
