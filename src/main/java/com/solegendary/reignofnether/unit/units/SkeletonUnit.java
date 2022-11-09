@@ -120,17 +120,22 @@ public class SkeletonUnit extends Skeleton implements Unit {
             attackGoal.tickCooldown();
     }
 
-    @Override
-    protected void registerGoals() {
+    public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
         this.attackGoal = new RangedBowAttackUnitGoal<>(this, 5, attackCooldown, attackRange);
+    }
+
+    @Override
+    protected void registerGoals() {
+        initialiseGoals();
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, moveGoal);
         this.goalSelector.addGoal(3, attackGoal);
-        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(3, targetGoal);
+        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+
     }
 
     @Override

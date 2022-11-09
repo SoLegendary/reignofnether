@@ -12,6 +12,7 @@ public enum UnitAction {
     ATTACK_MOVE, // enacted by attack button + left click on ground
     FOLLOW, // enacted by move button + left click on another entity
     BUILD_REPAIR, // build or repair the building at the targeted blockPos
+    TOGGLE_GATHER_TARGET, // cycle between gathering nothing, food, wood or ore
 
     // special abilities
     EXPLODE,

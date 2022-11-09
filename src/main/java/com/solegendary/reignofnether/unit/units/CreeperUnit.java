@@ -7,10 +7,8 @@ import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.Unit;
-import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
-import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
-import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
-import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.villagers.VillagerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -48,6 +46,7 @@ public class CreeperUnit extends Creeper implements Unit {
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
     public BuildRepairGoal buildRepairGoal;
     public GatherResourcesGoal gatherResourcesGoal;
+    public CreeperAttackUnitGoal attackGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -106,9 +105,9 @@ public class CreeperUnit extends Creeper implements Unit {
     final static public boolean canBuildAndRepair = false;
     final static public boolean canAttack = true;
 
-    public MeleeAttackGoal attackGoal;
-
     private final List<AbilityButton> abilities = new ArrayList<>();
+
+    private boolean forceExplode = false;
 
     public CreeperUnit(EntityType<? extends Creeper> entityType, Level level) {
         super(entityType, level);
@@ -118,15 +117,22 @@ public class CreeperUnit extends Creeper implements Unit {
                 14,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
                 Keybinding.keyQ,
-                () -> CursorClientEvents.getLeftClickAction() == UnitAction.EXPLODE,
+                () -> false,//CursorClientEvents.getLeftClickAction() == UnitAction.EXPLODE,
                 () -> false,
                 () -> true,
-                () -> CursorClientEvents.setLeftClickAction(UnitAction.EXPLODE),
+                () -> UnitClientEvents.sendUnitCommand(UnitAction.EXPLODE),//CursorClientEvents.setLeftClickAction(UnitAction.EXPLODE),
                 List.of(
                     FormattedCharSequence.forward("Explode", Style.EMPTY)
                 ),
                 0, 0, 3
             ));
+    }
+
+    public boolean canExplodeOnTarget() {
+        LivingEntity target = this.getTarget();
+        if (target != null && target.position().distanceTo(this.position()) <= 2f)
+            return true;
+        return false;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -139,23 +145,41 @@ public class CreeperUnit extends Creeper implements Unit {
     public void tick() {
         super.tick();
         Unit.tick(this);
+        if (forceExplode)
+            this.setSwellDir(1);
+        else if (!canExplodeOnTarget())
+            this.setSwellDir(-1);
+    }
+
+    public void initialiseGoals() {
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.targetGoal = new SelectedTargetGoal<>(this, true, true);
+        this.attackGoal = new CreeperAttackUnitGoal(this, attackCooldown, 1.0f, false);
+    }
+
+    @Override
+    public void resetBehaviours() {
+        this.setAttackMoveTarget(null);
+        this.getTargetGoal().setTarget(null);
+        this.getMoveGoal().stop();
+        this.setFollowTarget(null);
+        this.setHoldPosition(false);
+        forceExplode = false;
     }
 
     @Override
     protected void registerGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
-        this.targetGoal = new SelectedTargetGoal<>(this, true, true);
+        initialiseGoals();
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
-        // TODO: extend this to make it also compatible with the Explode ability
-        this.goalSelector.addGoal(2, new SwellGoal(this));
+        this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(3, moveGoal);
-        this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
-        // TODO: this doesn't cause the creeper to move to the target before attacking
         this.targetSelector.addGoal(4, targetGoal);
+        this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
     }
 
-    // TODO: specifically ground target explode ability; for targeting a mob just set target for regular attack goal
-    public void explode(BlockPos targetPos) {
+    // TODO: instead, activate a goal to move towards the target entity/block and then explode
+    public void explode() {
+        forceExplode = true;
     }
 }

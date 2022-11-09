@@ -23,6 +23,7 @@ public class Keybinding {
     public static final KeyMapping hold = new KeyMapping("key.reignofnether.orthoview.hold", GLFW.GLFW_KEY_H, KEY_CATEGORY);
     public static final KeyMapping move = new KeyMapping("key.reignofnether.orthoview.move", GLFW.GLFW_KEY_M, KEY_CATEGORY);
     public static final KeyMapping build = new KeyMapping("key.reignofnether.orthoview.build", GLFW.GLFW_KEY_B, KEY_CATEGORY);
+    public static final KeyMapping gather = new KeyMapping("key.reignofnether.orthoview.gather", GLFW.GLFW_KEY_G, KEY_CATEGORY);
     public static final KeyMapping cancelBuild = new KeyMapping("key.reignofnether.orthoview.cancelBuild", GLFW.GLFW_KEY_DELETE, KEY_CATEGORY);
     public static final KeyMapping keyQ = new KeyMapping("key.reignofnether.orthoview.keyQ", GLFW.GLFW_KEY_Q, KEY_CATEGORY);
     public static final KeyMapping keyW = new KeyMapping("key.reignofnether.orthoview.keyW", GLFW.GLFW_KEY_W, KEY_CATEGORY);
@@ -77,6 +78,8 @@ public class Keybinding {
         evt.register(stop);
         evt.register(hold);
         evt.register(move);
+        evt.register(build);
+        evt.register(gather);
         evt.register(cancelBuild);
         evt.register(keyQ);
         evt.register(keyW);

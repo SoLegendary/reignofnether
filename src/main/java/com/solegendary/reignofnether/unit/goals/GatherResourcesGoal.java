@@ -78,9 +78,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 mob.level.destroyBlock(moveTarget, false);
                 ResourcesServerEvents.addSubtractResources(new Resources(
                     ((Unit) mob).getOwnerName(),
-                    targetResourceName.equals("Food") ? 10 : 0,
+                    targetResourceName.equals("Food") ? 50 : 0,
                     targetResourceName.equals("Wood") ? 10 : 0,
-                    targetResourceName.equals("Ore") ? 10 : 0
+                    targetResourceName.equals("Ore") ? 25 : 0
                 ));
             }
         }

@@ -37,7 +37,7 @@ public class Button {
     public static int iconFrameSize = 22;
     public static int iconFrameSelectedSize = 24;
 
-    ResourceLocation iconResource;
+    public ResourceLocation iconResource;
 
     public KeyMapping hotkey = null; // for action/ability buttons
     public LivingEntity entity = null; // for selected unit buttons

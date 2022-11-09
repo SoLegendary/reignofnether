@@ -14,8 +14,6 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.apache.logging.log4j.core.jmx.Server;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +95,7 @@ public class UnitServerEvents {
             return;
 
         for (UnitActionItem actionItem : unitActionQueue)
-            actionItem.action((ServerLevel) evt.level);
+            actionItem.action(evt.level);
 
         unitActionQueue.clear();
     }

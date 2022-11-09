@@ -169,11 +169,12 @@ public class CursorClientEvents {
         // ****************************************
         // Find entity moused over and/or selected
         // ****************************************
-        List<LivingEntity> entities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, LivingEntity.class, MC.level);
+        // TODO: ignore units behind blocks
+        List<LivingEntity> nearbyEntities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 10, LivingEntity.class, MC.level);
 
         UnitClientEvents.setPreselectedUnitIds(new ArrayList<>());
 
-        for (LivingEntity entity : entities) {
+        for (LivingEntity entity : nearbyEntities) {
             // don't let the player select themselves
             if (entity.getId() == MC.player.getId())
                 continue;
@@ -204,7 +205,7 @@ public class CursorClientEvents {
                     (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y,
                     (int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y
             );
-            for (LivingEntity entity : entities) {
+            for (LivingEntity entity : MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, LivingEntity.class, MC.level)) {
                 if (MyMath.isPointInsideRect3d(uvwp, entity.getBoundingBox().getCenter()) && entity.getId() != MC.player.getId())
                     UnitClientEvents.addPreselectedUnitId(entity.getId());
             }

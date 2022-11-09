@@ -185,6 +185,8 @@ public interface Unit {
     // continuously move to a target until told to do something else
     public void setFollowTarget(@Nullable LivingEntity target);
 
+    public void initialiseGoals();
+
     // do one-off stuff to set up the mob when spawned by buildings
     // eg. equipment isn't provided automatically
     default void onBuildingSpawn() { }

@@ -16,6 +16,8 @@ import net.minecraft.world.entity.Entity;
 import java.util.List;
 import java.util.Objects;
 
+import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
+
 // static list of generic unit actions (build, attack, move, stop, etc.)
 public class ActionButtons {
 
@@ -33,20 +35,13 @@ public class ActionButtons {
     public static final Button GATHER = new Button(
             "Gather",
             Button.itemIconSize,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/axe.png"),
-            Keybinding.build,
-            () -> {
-                Entity entity = HudClientEvents.hudSelectedEntity;
-                if (entity instanceof Unit unit && unit.isWorker())
-                    return !unit.getGatherResourceGoal().getTargetResourceName().equals("None");
-                return false;
-            },
+            null, // changes depending on the gather target
+            Keybinding.gather,
+            () -> !UnitClientEvents.getSelectedUnitResourceTarget().equals("None"),
             () -> false,
             () -> true,
-            () -> {
-
-            },
-            List.of(FormattedCharSequence.forward("Gather wood", Style.EMPTY))
+            () -> sendUnitCommand(UnitAction.TOGGLE_GATHER_TARGET),
+            null
     );
     public static final Button ATTACK = new Button(
         "Attack",

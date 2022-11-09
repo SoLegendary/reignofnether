@@ -97,9 +97,17 @@ public class UnitClientEvents {
         return CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK;
     }
 
-    public static void sendUnitCommand(UnitAction specialAction) {
+    public static void sendUnitCommand(UnitAction action) {
+        UnitActionItem actionItem = new UnitActionItem(
+            action,
+            preselectedUnitIds.size() > 0 ? preselectedUnitIds.get(0) : -1,
+            selectedUnitIds.stream().mapToInt(i -> i).toArray(),
+            CursorClientEvents.getPreselectedBlockPos()
+        );
+        actionItem.action(MC.level);
+
         PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
-            specialAction,
+            action,
             preselectedUnitIds.size() > 0 ? preselectedUnitIds.get(0) : -1,
             selectedUnitIds.stream().mapToInt(i -> i).toArray(),
             CursorClientEvents.getPreselectedBlockPos()
@@ -117,6 +125,13 @@ public class UnitClientEvents {
         }
     }
 
+    public static String getSelectedUnitResourceTarget() {
+        Entity entity = HudClientEvents.hudSelectedEntity;
+        if (entity instanceof Unit unit && unit.isWorker())
+            return unit.getGatherResourceGoal().getTargetResourceName();
+        return "None";
+    }
+
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveLevelEvent evt) {
         int entityId = evt.getEntity().getId();
@@ -132,8 +147,11 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
         Entity entity = evt.getEntity();
-        if (entity instanceof Unit && evt.getLevel().isClientSide)
+        if (entity instanceof Unit unit && evt.getLevel().isClientSide) {
             allUnitIds.add(entity.getId());
+            unit.initialiseGoals(); // for clientside data tracking
+        }
+
     }
 
     @SubscribeEvent

@@ -155,21 +155,24 @@ public class VillagerUnit extends Vindicator implements Unit {
         Unit.tick(this);
 
         // TODO: run Player place block animations with arms shown when building
-
     }
 
-    @Override
-    protected void registerGoals() {
+    public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.buildRepairGoal = new BuildRepairGoal(this, 1.0f);
         this.gatherResourcesGoal = new GatherResourcesGoal(this, 1.0f);
+    }
+
+    @Override
+    protected void registerGoals() {
+        initialiseGoals();
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, moveGoal);
         this.goalSelector.addGoal(3, buildRepairGoal);
         this.goalSelector.addGoal(3, gatherResourcesGoal);
-        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(3, targetGoal);
+        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }
 }
