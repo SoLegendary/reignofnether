@@ -24,6 +24,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
@@ -376,24 +377,6 @@ public class BuildingClientEvents {
         }
     }
 
-    // place a building clientside that has already been registered on serverside
-    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName) {
-        Building building = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName);
-        if (building != null)
-            buildings.add(building);
-    }
-
-    public static void destroyBuilding(BlockPos pos) {
-        buildings.removeIf(building -> building.isPosInsideBuilding(pos));
-    }
-
-    public static Relationship getPlayerToBuildingRelationship(Building building) {
-        if (MC.player != null && building.ownerName.equals(MC.player.getName().getString()))
-            return Relationship.OWNED;
-        else
-            return Relationship.HOSTILE;
-    }
-
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (!replacedTexture) {
@@ -413,13 +396,34 @@ public class BuildingClientEvents {
         }
     }
 
-    /*
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "xn: " + xn,
-                "yn: " + yn,
-                "zn: " + zn,
-        });
-    }*/
+    // place a building clientside that has already been registered on serverside
+    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName) {
+        Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName);
+
+        if (newBuilding != null) {
+            boolean buildingExists = false;
+            for (Building building : buildings)
+                if (building.originPos == pos) {
+                    buildingExists = true;
+                    break;
+                }
+            if (!buildingExists)
+                buildings.add(newBuilding);
+        }
+
+
+
+
+    }
+
+    public static void destroyBuilding(BlockPos pos) {
+        buildings.removeIf(building -> building.isPosInsideBuilding(pos));
+    }
+
+    public static Relationship getPlayerToBuildingRelationship(Building building) {
+        if (MC.player != null && building.ownerName.equals(MC.player.getName().getString()))
+            return Relationship.OWNED;
+        else
+            return Relationship.HOSTILE;
+    }
 }

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.Unit;
 import net.minecraft.core.BlockPos;
@@ -15,6 +16,7 @@ import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -101,6 +103,25 @@ public class BuildingServerEvents {
             if (building.ownerName.equals(ownerName) && building.isBuilt)
                 totalPopulationSupply += building.popSupply;
         return Math.min(ResourceCosts.MAX_POPULATION, totalPopulationSupply);
+    }
+
+    // similar to BuildingClientEvents getPlayerToBuildingRelationship: given a Unit and Building, what is the relationship between them
+    public static Relationship getUnitToBuildingRelationship(Unit unit, Building building) {
+        if (unit.getOwnerName().equals(building.ownerName))
+            return Relationship.OWNED;
+        else
+            return Relationship.HOSTILE;
+    }
+
+    @SubscribeEvent
+    public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
+        for (Building building : buildings)
+            BuildingClientboundPacket.placeBuilding(
+                building.originPos,
+                building.name,
+                building.rotation,
+                building.ownerName
+            );
     }
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions

@@ -34,7 +34,6 @@ public class BuildingClientboundPacket {
                     "", buildingPos, Rotation.NONE, ""));
     }
     public static void startProduction(BlockPos buildingPos, String itemName) {
-        System.out.println("Clientbound startProduction");
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new BuildingClientboundPacket(
             BuildingAction.START_PRODUCTION,
@@ -90,15 +89,12 @@ public class BuildingClientboundPacket {
                     case CANCEL -> BuildingClientEvents.destroyBuilding(this.buildingPos);
                     case START_PRODUCTION -> {
                         ProductionBuilding.startProductionItem(building, this.itemName, this.buildingPos);
-                        System.out.println("(client) START_PRODUCTION");
                     }
                     case CANCEL_PRODUCTION -> {
                         ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, true);
-                        System.out.println("(client) CANCEL_PRODUCTION");
                     }
                     case CANCEL_BACK_PRODUCTION -> {
                         ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, false);
-                        System.out.println("(client) CANCEL_BACK_PRODUCTION");
                     }
                 }
                 success.set(true);

@@ -137,6 +137,8 @@ public class HudClientEvents {
         Building selBuilding = BuildingClientEvents.getSelectedBuilding();
 
         if (selBuilding != null) {
+            boolean buildingOwned = BuildingClientEvents.getPlayerToBuildingRelationship(selBuilding) == Relationship.OWNED;
+
             // -----------------
             // Building portrait
             // -----------------
@@ -154,7 +156,7 @@ public class HudClientEvents {
             // -------------------------
 
             // bottom row for all other queued items
-            if (selBuilding instanceof ProductionBuilding selProdBuilding) {
+            if (buildingOwned && selBuilding instanceof ProductionBuilding selProdBuilding) {
                 int blitXStart = blitX;
                 blitY = screenHeight - iconFrameSize * 2 - 5;
 
@@ -214,7 +216,8 @@ public class HudClientEvents {
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
 
-            if (!selBuilding.isBuilt) {
+            // TODO: doesn't work for towers?
+            if (buildingOwned && !selBuilding.isBuilt) {
                 Button cancelButton = new Button(
                         "Cancel",
                         iconSize,
@@ -223,15 +226,13 @@ public class HudClientEvents {
                         () -> false,
                         () -> false,
                         () -> true,
-                        () -> {
-                            BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(selBuilding.getBlocks()));
-                        },
+                        () -> BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(selBuilding.getBlocks())),
                         List.of(FormattedCharSequence.forward("Cancel", Style.EMPTY))
                 );
                 cancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
                 renderedButtons.add(cancelButton);
             }
-            else if (selBuilding instanceof ProductionBuilding selProdBuilding) {
+            else if (buildingOwned && selBuilding instanceof ProductionBuilding selProdBuilding) {
                 for (Button productionButton : selProdBuilding.productionButtons) {
                     productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                     productionButtons.add(productionButton);
@@ -574,57 +575,4 @@ public class HudClientEvents {
         if (OrthoviewClientEvents.isEnabled())
             evt.setResult(Event.Result.DENY);
     }
-
-    /*
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-            "x: " + MC.mouseHandler.xpos(),
-            "y: " + MC.mouseHandler.ypos()
-        });
-    }*/
-
-    // uncomment to adjust render position/size of portraits
-    /*
-    @SubscribeEvent
-    public static void onInput(InputEvent.KeyInputEvent evt) {
-        if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-            if (evt.getKey() == Keybinding.panMinusX.getKey().getValue())
-                portraitRendererUnit.headOffsetX += 1;
-            if (evt.getKey() == Keybinding.panPlusX.getKey().getValue())
-                portraitRendererUnit.headOffsetX -= 1;
-            if (evt.getKey() == Keybinding.panMinusZ.getKey().getValue())
-                portraitRendererUnit.headOffsetY += 1;
-            if (evt.getKey() == Keybinding.panPlusZ.getKey().getValue())
-                portraitRendererUnit.headOffsetY -= 1;
-
-            if (evt.getKey() == Keybinding.nums[9].getKey().getValue())
-                portraitRendererUnit.headSize -= 1;
-            if (evt.getKey() == Keybinding.nums[0].getKey().getValue())
-                portraitRendererUnit.headSize += 1;
-        }
-    }
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-
-        if (hudSelectedEntity != null)
-            MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                    "headOffsetX: " + portraitRendererUnit.headOffsetX,
-                    "headOffsetY: " + portraitRendererUnit.headOffsetY,
-                    "headSize: " + portraitRendererUnit.headSize,
-                    "eyeHeight: " + hudSelectedEntity.getEyeHeight(),
-            });
-    }
-     */
-
-    /*
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-
-        if (hudSelectedEntity != null)
-            MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                    "entity eye height: " + hudSelectedEntity.getEyeHeight(),
-                    "entity eye pos: " + hudSelectedEntity.getEyePosition(),
-            });
-    }*/
 }

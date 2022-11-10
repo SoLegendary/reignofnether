@@ -29,7 +29,7 @@ public class VillagerTower extends Building {
     public final static String structureName = "villager_tower";
 
     public VillagerTower(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super();
+        super(level, originPos, rotation, ownerName);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);

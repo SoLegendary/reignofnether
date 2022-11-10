@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -12,6 +14,15 @@ public class ResourcesClientEvents {
 
     // tracks all players' resources
     public static ArrayList<Resources> resourcesList = new ArrayList<>();
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END)
+            return;
+
+        for (Resources resources : resourcesList)
+            resources.tick();
+    }
 
     public static void syncResources(Resources serverResources) {
         resourcesList.removeIf(resources -> resources.ownerName.equals(serverResources.ownerName));
@@ -56,12 +67,48 @@ public class ResourcesClientEvents {
         return null;
     }
 
-    @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
-            return;
+    public static void warnInsufficientResources(String ownerName, int food, int wood, int ore) {
+        Player player = Minecraft.getInstance().player;
+        if (player != null && player.getName().getString().equals(ownerName)) {
 
-        for (Resources resources : resourcesList)
-            resources.tick();
+            String msg = "You don't have enough ";
+            int countTotal = food + wood + ore;
+            int count = 0;
+            if (food <= 0) {
+                count += 1;
+                msg += "food";
+            }
+            if (wood <= 0) {
+                count += 1;
+                if (count == 1)
+                    msg += "wood";
+                else if (count == countTotal)
+                    msg += "and wood";
+                else
+                    msg += ", wood";
+            }
+            if (ore <= 0) {
+                count += 1;
+                if (count == 1)
+                    msg += "ore";
+                else if (count == countTotal)
+                    msg += "and ore";
+                else
+                    msg += ", ore";
+            }
+            HudClientEvents.showTemporaryMessage(msg);
+        }
+    }
+
+    public static void warnInsufficientPopulation(String ownerName) {
+        Player player = Minecraft.getInstance().player;
+        if (player != null && player.getName().getString().equals(ownerName))
+            HudClientEvents.showTemporaryMessage("You don't have enough population supply");
+    }
+
+    public static void warnMaxPopulation(String ownerName) {
+        Player player = Minecraft.getInstance().player;
+        if (player != null && player.getName().getString().equals(ownerName))
+            HudClientEvents.showTemporaryMessage("You have reached the maximum population");
     }
 }

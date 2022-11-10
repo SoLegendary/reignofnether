@@ -13,6 +13,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.level.BlockEvent;
 
@@ -28,6 +29,8 @@ public abstract class Building {
 
     public String name;
     public LevelAccessor level;
+    BlockPos originPos;
+    Rotation rotation;
 
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time; the building can then be used
     public int msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
@@ -52,7 +55,12 @@ public abstract class Building {
     public int oreCost;
     public int popSupply; // max population this building provides
 
-    public Building() { }
+    public Building(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
+        this.level = level;
+        this.originPos = originPos;
+        this.rotation = rotation;
+        this.ownerName = ownerName;
+    }
 
     public int getBuilderCount(ServerLevel level) {
         int builderCount = 0;

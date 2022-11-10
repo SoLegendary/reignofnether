@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.resources;
 
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -39,6 +40,7 @@ public class ResourcesServerEvents {
 
         String playerName = evt.getEntity().getName().getString();
 
+
         Resources playerResources = null;
         for (Resources resources : resourcesList)
             if (resources.ownerName.equals(playerName))
@@ -51,6 +53,7 @@ public class ResourcesServerEvents {
                 startingOre);
             resourcesList.add(playerResources);
         }
+        // TODO: server doesn't like us loading LocalPlayer class in here...
         ResourcesClientboundPacket.syncResources(resourcesList);
     }
 }

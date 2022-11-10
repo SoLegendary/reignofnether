@@ -104,48 +104,9 @@ public class ResourcesClientboundPacket {
                                     this.wood,
                                     this.ore
                             ));
-                            case WARN_INSUFFICIENT_RESOURCES -> {
-                                Player player = Minecraft.getInstance().player;
-                                if (player != null && player.getName().getString().equals(ownerName)) {
-
-                                    String msg = "You don't have enough ";
-                                    int countTotal = this.food + this.wood + this.ore;
-                                    int count = 0;
-                                    if (this.food <= 0) {
-                                        count += 1;
-                                        msg += "food";
-                                    }
-                                    if (this.wood <= 0) {
-                                        count += 1;
-                                        if (count == 1)
-                                            msg += "wood";
-                                        else if (count == countTotal)
-                                            msg += "and wood";
-                                        else
-                                            msg += ", wood";
-                                    }
-                                    if (this.ore <= 0) {
-                                        count += 1;
-                                        if (count == 1)
-                                            msg += "ore";
-                                        else if (count == countTotal)
-                                            msg += "and ore";
-                                        else
-                                            msg += ", ore";
-                                    }
-                                    HudClientEvents.showTemporaryMessage(msg);
-                                }
-                            }
-                            case WARN_INSUFFICIENT_POPULATION -> {
-                                Player player = Minecraft.getInstance().player;
-                                if (player != null && player.getName().getString().equals(ownerName))
-                                    HudClientEvents.showTemporaryMessage("You don't have enough population supply");
-                            }
-                            case WARN_MAX_POPULATION -> {
-                                Player player = Minecraft.getInstance().player;
-                                if (player != null && player.getName().getString().equals(ownerName))
-                                    HudClientEvents.showTemporaryMessage("You have reached the maximum population");
-                            }
+                            case WARN_INSUFFICIENT_RESOURCES -> ResourcesClientEvents.warnInsufficientResources(this.ownerName, this.food, this.wood, this.ore);
+                            case WARN_INSUFFICIENT_POPULATION -> ResourcesClientEvents.warnInsufficientPopulation(this.ownerName);
+                            case WARN_MAX_POPULATION -> ResourcesClientEvents.warnMaxPopulation(this.ownerName);
                         }
                         success.set(true);
                     });

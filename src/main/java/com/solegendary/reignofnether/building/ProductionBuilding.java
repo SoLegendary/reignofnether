@@ -15,6 +15,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
@@ -35,8 +37,8 @@ public abstract class ProductionBuilding extends Building {
     private BlockPos rallyPoint;
     protected int spawnRadiusOffset = 0;
 
-    public ProductionBuilding() {
-        super();
+    public ProductionBuilding(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
+        super(level, originPos, rotation, ownerName);
     }
 
     public BlockPos getRallyPoint() {

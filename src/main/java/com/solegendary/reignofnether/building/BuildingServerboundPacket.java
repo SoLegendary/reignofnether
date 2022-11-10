@@ -103,19 +103,16 @@ public class BuildingServerboundPacket {
                     boolean prodSuccess = ProductionBuilding.startProductionItem(building, this.itemName, this.buildingPos);
                     if (prodSuccess)
                         BuildingClientboundPacket.startProduction(buildingPos, itemName);
-                    System.out.println("(server) START_PRODUCTION");
                 }
                 case CANCEL_PRODUCTION -> {
                     boolean prodSuccess = ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, true);
                     if (prodSuccess)
                         BuildingClientboundPacket.cancelProduction(buildingPos, itemName, true);
-                    System.out.println("(server) CANCEL_PRODUCTION");
                 }
                 case CANCEL_BACK_PRODUCTION -> {
                     boolean prodSuccess = ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, false);
                     if (prodSuccess)
                         BuildingClientboundPacket.cancelProduction(buildingPos, itemName, false);
-                    System.out.println("(server) CANCEL_BACK_PRODUCTION");
                 }
             }
             success.set(true);

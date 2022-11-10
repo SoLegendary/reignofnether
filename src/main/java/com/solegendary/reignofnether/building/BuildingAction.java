@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.building;
 
 // actions that can be done to Building objects themselves
 public enum BuildingAction {
-    PLACE,
+    PLACE, // provide serverside building data to client (on new placement and sync existing buildings for new logins)
     CANCEL, // WIP building cancelled by owner
     SET_RALLY_POINT,
     START_PRODUCTION, // start ProductionItem
