@@ -1,0 +1,14 @@
+TODO before playtesting:
+
+1. automated resource gathering
+2. keep chunks around buildings and units persistently loaded
+3. graveyard building (to produce monster units)
+4. setup shockbyte server (~3gb?)
+
+Stretch goals
+
+1. Pillager and vindicator units
+2. Arm animations and block cracking/particles
+3. Wheat farm buildings
+4. Fix body rendering issues (to do with portrait head rendering)
+5. wild animal hunting

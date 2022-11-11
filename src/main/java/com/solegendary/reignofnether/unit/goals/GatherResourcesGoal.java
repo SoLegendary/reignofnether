@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.resources.ResourceBlocks;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -10,50 +13,47 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.material.Material;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Predicate;
 
 // Move towards the nearest open resource blocks and start gathering them
 // Can be toggled between food, wood and ore, and disabled by clicking
-// TODO: make class for blocks individual resource value and hardness
 
 public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
-    private final List<Material> CLEAR_MATERIALS = List.of(Material.LEAVES, Material.WATER, Material.AIR, Material.GRASS);
-    private final List<Block> FOOD_BLOCKS = List.of(Blocks.WHEAT, Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM, Blocks.SWEET_BERRY_BUSH, Blocks.POTATOES, Blocks.CARROTS, Blocks.BEETROOTS, Blocks.SUGAR_CANE);
-    private final List<Block> WOOD_BLOCKS = List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG);
-    private final List<Block> ORE_BLOCKS = List.of(Blocks.COAL_ORE, Blocks.IRON_ORE, Blocks.EMERALD_ORE, Blocks.COPPER_ORE, Blocks.DIAMOND_ORE, Blocks.REDSTONE_ORE, Blocks.GOLD_ORE, Blocks.LAPIS_ORE);
-
-    private final int BLOCK_BREAK_TICKS_MAX = 10;
+    private static final int REACH_RANGE = 3;
+    private static final int BLOCK_BREAK_TICKS_MAX = 50;
     private int breakTicksLeft = BLOCK_BREAK_TICKS_MAX;
 
     private String targetResourceName = "None";
     private List<Block> targetResourceBlocks = null;
 
     public GatherResourcesGoal(PathfinderMob mob, double speedModifier) {
-        super(mob, true, speedModifier, 2);
+        super(mob, true, speedModifier, REACH_RANGE);
     }
 
-    // move towards
+    // move towards the targeted block and start gathering it
     public void tick() {
         if (moveTarget == null && targetResourceBlocks != null) {
 
-            // not covered by solid blocks and not targeted by another worker
             Predicate<BlockPos> condition = bp -> {
+                // not covered by solid blocks and
                 boolean hasClearNeighbour = false;
                 for (BlockPos adjBp : List.of(bp.north(), bp.south(), bp.east(), bp.west(), bp.above(), bp.below()))
-                    if (CLEAR_MATERIALS.contains(mob.level.getBlockState(adjBp).getMaterial()))
+                    if (ResourceBlocks.CLEAR_MATERIALS.contains(mob.level.getBlockState(adjBp).getMaterial()))
                         hasClearNeighbour = true;
                 if (!hasClearNeighbour)
                     return false;
+                // not targeted by another worker
                 for (int unitId : UnitServerEvents.getAllUnitIds()) {
                     Unit unit = (Unit) mob.level.getEntity(unitId);
-                    if (unit != null && unit.isWorker() && unit.getGatherResourceGoal() != null)
-                        if (unit.getGatherResourceGoal().getGatherTarget().equals(moveTarget))
+                    if (unit != null && unit.isWorker() && unit.getGatherResourceGoal() != null && unitId != this.mob.getId()) {
+                        BlockPos otherUnitTarget = unit.getGatherResourceGoal().getGatherTarget();
+                        if (otherUnitTarget != null && unit.getGatherResourceGoal().getGatherTarget().equals(moveTarget))
                             return false;
+                    }
                 }
                 return true;
             };
@@ -68,10 +68,13 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 targetResourceBlocks,
                 condition);
 
-            this.mob.getLookControl().setLookAt(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ());
+            if (this.moveTarget != null) {
+                this.mob.getLookControl().setLookAt(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ());
+                this.start();
+            }
         }
 
-        if (moveTarget != null) {
+        if (isGathering()) {
             breakTicksLeft -= 1;
             if (breakTicksLeft <= 0) {
                 breakTicksLeft = BLOCK_BREAK_TICKS_MAX;
@@ -84,6 +87,13 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 ));
             }
         }
+    }
+
+    // only count as gathering if in range of the target
+    public boolean isGathering() {
+        if (this.moveTarget != null && !ResourceBlocks.getResourceBlockType(this.moveTarget, mob.level).equals("None"))
+            return Math.sqrt(moveTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) <= REACH_RANGE + 1;
+        return false;
     }
 
     public void toggleTargetResource() {
@@ -99,14 +109,21 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         targetResourceName = resourceName;
         switch(targetResourceName) {
             case "None" -> targetResourceBlocks = null;
-            case "Food" -> targetResourceBlocks = FOOD_BLOCKS;
-            case "Wood" -> targetResourceBlocks = WOOD_BLOCKS;
-            case "Ore" -> targetResourceBlocks = ORE_BLOCKS;
+            case "Food" -> targetResourceBlocks = ResourceBlocks.FOOD_BLOCKS;
+            case "Wood" -> targetResourceBlocks = ResourceBlocks.WOOD_BLOCKS;
+            case "Ore" -> targetResourceBlocks = ResourceBlocks.ORE_BLOCKS;
         }
     }
 
     public String getTargetResourceName() {
         return targetResourceName;
+    }
+
+    @Override
+    public void setTarget(@Nullable BlockPos bp) {
+        super.setTarget(bp);
+        if (bp != null)
+            this.setTargetResource(ResourceBlocks.getResourceBlockType(bp, this.mob.level));
     }
 
     public void stopGathering() {

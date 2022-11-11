@@ -14,7 +14,7 @@ public class MoveToTargetBlockGoal extends Goal {
     protected final double speedModifier;
     protected BlockPos moveTarget = null;
     protected boolean persistent; // will keep trying to move back to the target if moved externally
-    protected int reachRange = 0; // how far away from the target block to stop moving
+    protected int reachRange = 0; // how far away from the target block to stop moving (manhattan distance)
 
     public MoveToTargetBlockGoal(PathfinderMob mob, boolean persistent, double speedModifier, int reachRange) {
         this.mob = mob;
@@ -40,7 +40,7 @@ public class MoveToTargetBlockGoal extends Goal {
     public void start() {
         if (moveTarget != null) {
             // move to exact goal instead of 1 block away
-            Path path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), 0);
+            Path path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), reachRange);
             this.mob.getNavigation().moveTo(path, speedModifier);
         }
         else
@@ -48,12 +48,12 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     // TODO: can sometimes fail to go back uphill when knocked downhill by attacks
-    public void setMoveTarget(@Nullable BlockPos bp) {
+    public void setTarget(@Nullable BlockPos bp) {
         this.moveTarget = bp;
         this.start();
     }
 
-    public BlockPos getMoveTarget() {
+    public BlockPos getTarget() {
         return this.moveTarget;
     }
 

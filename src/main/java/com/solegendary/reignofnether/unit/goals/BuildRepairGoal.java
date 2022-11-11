@@ -38,7 +38,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
         }
     }
 
-    // only count as building if in range of the target,
+    // only count as building if in range of the target
     public boolean isBuilding() {
         if (buildingTarget != null && this.moveTarget != null)
             if (BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED)

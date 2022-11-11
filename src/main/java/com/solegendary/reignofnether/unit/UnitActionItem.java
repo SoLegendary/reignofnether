@@ -3,9 +3,9 @@ package com.solegendary.reignofnether.unit;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.resources.ResourceBlocks;
 import com.solegendary.reignofnether.unit.units.CreeperUnit;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
@@ -48,7 +48,11 @@ public class UnitActionItem {
             for (int id : unitIds) {
                 if (level.getEntity(id) instanceof Unit unit) {
                     unit.resetBehaviours();
-                    unit.setMoveTarget(preselectedBlockPos);
+
+                    if (unit.isWorker() && !ResourceBlocks.getResourceBlockType(preselectedBlockPos, level).equals("None"))
+                        unit.getGatherResourceGoal().setTarget(preselectedBlockPos);
+                    else
+                        unit.setMoveTarget(preselectedBlockPos);
                 }
             }
         }

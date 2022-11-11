@@ -31,7 +31,11 @@ public class MiscUtil {
             for (int x = -dist; x <= dist; x++)
                 for (int y = -dist; y <= dist; y++)
                     for (int z = -dist; z <= dist; z++) {
-                        Vec3i pos = new Vec3i(x,y,z);
+                        Vec3i pos = new Vec3i(
+                            originPos.getX() + x,
+                            originPos.getY() + y,
+                            originPos.getZ() + z
+                        );
                         if (pos.distSqr(originPos) >= Math.pow(d,2)) {
                             BlockPos bp = new BlockPos(pos.getX(), pos.getY(), pos.getZ());
                             Block block = level.getBlockState(bp).getBlock();
