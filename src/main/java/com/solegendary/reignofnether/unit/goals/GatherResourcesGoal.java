@@ -23,7 +23,7 @@ import java.util.function.Predicate;
 
 public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
-    private static final int REACH_RANGE = 3;
+    private static final int REACH_RANGE = 4;
     private static final int BLOCK_BREAK_TICKS_MAX = 50;
     private int breakTicksLeft = BLOCK_BREAK_TICKS_MAX;
 
@@ -47,16 +47,18 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 if (!hasClearNeighbour)
                     return false;
                 // not targeted by another worker
+                System.out.println("______");
                 for (int unitId : UnitServerEvents.getAllUnitIds()) {
                     Unit unit = (Unit) mob.level.getEntity(unitId);
+
                     if (unit != null && unit.isWorker() && unit.getGatherResourceGoal() != null && unitId != this.mob.getId()) {
                         BlockPos otherUnitTarget = unit.getGatherResourceGoal().getGatherTarget();
-                        if (otherUnitTarget != null && unit.getGatherResourceGoal().getGatherTarget().equals(moveTarget)) {
-                            // TODO: seems to not ever reach this point
+                        if (otherUnitTarget != null && otherUnitTarget.equals(bp))
                             return false;
-                        }
                     }
+
                 }
+                System.out.println("------");
                 return true;
             };
 
