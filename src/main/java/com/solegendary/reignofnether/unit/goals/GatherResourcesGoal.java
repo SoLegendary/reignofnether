@@ -51,8 +51,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                     Unit unit = (Unit) mob.level.getEntity(unitId);
                     if (unit != null && unit.isWorker() && unit.getGatherResourceGoal() != null && unitId != this.mob.getId()) {
                         BlockPos otherUnitTarget = unit.getGatherResourceGoal().getGatherTarget();
-                        if (otherUnitTarget != null && unit.getGatherResourceGoal().getGatherTarget().equals(moveTarget))
+                        if (otherUnitTarget != null && unit.getGatherResourceGoal().getGatherTarget().equals(moveTarget)) {
+                            // TODO: seems to not ever reach this point
                             return false;
+                        }
                     }
                 }
                 return true;
