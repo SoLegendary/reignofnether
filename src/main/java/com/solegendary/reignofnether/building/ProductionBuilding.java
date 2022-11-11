@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
 import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
+import com.solegendary.reignofnether.building.productionitems.VillagerUnitProd;
 import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
@@ -106,6 +107,7 @@ public abstract class ProductionBuilding extends Building {
                 case CreeperUnitProd.itemName -> prodItem = new CreeperUnitProd(building);
                 case SkeletonUnitProd.itemName -> prodItem = new SkeletonUnitProd(building);
                 case ZombieUnitProd.itemName -> prodItem = new ZombieUnitProd(building);
+                case VillagerUnitProd.itemName -> prodItem = new VillagerUnitProd(building);
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside

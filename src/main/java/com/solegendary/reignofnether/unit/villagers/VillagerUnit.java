@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.villagers;
 
+import com.solegendary.reignofnether.building.buildings.Graveyard;
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -107,6 +108,7 @@ public class VillagerUnit extends Vindicator implements Unit {
         if (level.isClientSide()) {
             this.abilities.add(VillagerTower.getBuildButton());
             this.abilities.add(VillagerHouse.getBuildButton());
+            this.abilities.add(Graveyard.getBuildButton());
         }
     }
 

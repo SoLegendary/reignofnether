@@ -29,6 +29,7 @@ public class Keybinding {
     public static final KeyMapping keyW = new KeyMapping("key.reignofnether.orthoview.keyW", GLFW.GLFW_KEY_W, KEY_CATEGORY);
     public static final KeyMapping keyE = new KeyMapping("key.reignofnether.orthoview.keyE", GLFW.GLFW_KEY_E, KEY_CATEGORY);
     public static final KeyMapping keyR = new KeyMapping("key.reignofnether.orthoview.keyR", GLFW.GLFW_KEY_R, KEY_CATEGORY);
+    public static final KeyMapping keyV = new KeyMapping("key.reignofnether.orthoview.keyV", GLFW.GLFW_KEY_V, KEY_CATEGORY);
 
     public static final KeyMapping[] nums = {
             new KeyMapping("key.reignofnether.orthoview.key0", GLFW.GLFW_KEY_0, KEY_CATEGORY),
@@ -85,6 +86,7 @@ public class Keybinding {
         evt.register(keyW);
         evt.register(keyE);
         evt.register(keyR);
+        evt.register(keyV);
 
         for (KeyMapping numKey : nums)
             evt.register(numKey);

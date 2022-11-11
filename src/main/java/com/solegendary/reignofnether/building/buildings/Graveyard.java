@@ -4,7 +4,6 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
 import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
-import com.solegendary.reignofnether.building.productionitems.VillagerUnitProd;
 import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
@@ -24,27 +23,31 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class VillagerHouse extends ProductionBuilding {
+public class Graveyard extends ProductionBuilding {
 
-    public final static String buildingName = "Villager House";
-    public final static String structureName = "villager_house";
+    public final static String buildingName = "Graveyard";
+    public final static String structureName = "graveyard";
 
-    public VillagerHouse(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
+    public Graveyard(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
-        this.portraitBlock = Blocks.OAK_LOG;
+        this.portraitBlock = Blocks.MOSSY_STONE_BRICKS;
         this.spawnRadiusOffset = 1;
 
-        this.foodCost = ResourceCosts.VillagerHouse.FOOD;
-        this.woodCost = ResourceCosts.VillagerHouse.WOOD;
-        this.oreCost = ResourceCosts.VillagerHouse.ORE;
-        this.popSupply = ResourceCosts.VillagerHouse.SUPPLY;
+        this.foodCost = ResourceCosts.Graveyard.FOOD;
+        this.woodCost = ResourceCosts.Graveyard.WOOD;
+        this.oreCost = ResourceCosts.Graveyard.ORE;
+        this.popSupply = ResourceCosts.Graveyard.SUPPLY;
+
+        this.explodeChance = 0;
 
         if (level.isClientSide())
-            this.productionButtons = List.of(
-                VillagerUnitProd.getStartButton(this)
+            this.productionButtons = Arrays.asList(
+                ZombieUnitProd.getStartButton(this),
+                SkeletonUnitProd.getStartButton(this),
+                CreeperUnitProd.getStartButton(this)
             );
     }
 
@@ -54,22 +57,21 @@ public class VillagerHouse extends ProductionBuilding {
 
     public static AbilityButton getBuildButton() {
         return new AbilityButton(
-            VillagerHouse.buildingName,
-            Button.itemIconSize,
-            new ResourceLocation("minecraft", "textures/block/oak_log.png"),
-            null,
-            () -> BuildingClientEvents.getBuildingToPlace() == VillagerHouse.class,
-            () -> false,
-            () -> true,
-            () -> BuildingClientEvents.setBuildingToPlace(VillagerHouse.class),
-            List.of(
-                    FormattedCharSequence.forward(VillagerHouse.buildingName, Style.EMPTY),
-                    FormattedCharSequence.forward("\uE001  " + ResourceCosts.VillagerHouse.WOOD, MyRenderer.iconStyle),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("A simple house that can produce villagers.", Style.EMPTY),
-                    FormattedCharSequence.forward("Supports " + ResourceCosts.VillagerHouse.SUPPLY + " population.", Style.EMPTY)
-            ),
-            0,0,0
+                Graveyard.buildingName,
+                Button.itemIconSize,
+                new ResourceLocation("minecraft", "textures/block/mossy_stone_bricks.png"),
+                null,
+                () -> BuildingClientEvents.getBuildingToPlace() == Graveyard.class,
+                () -> false,
+                () -> true,
+                () -> BuildingClientEvents.setBuildingToPlace(Graveyard.class),
+                List.of(
+                        FormattedCharSequence.forward(Graveyard.buildingName, Style.EMPTY),
+                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.Graveyard.WOOD, MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.forward("A spooky field that can create monster units", Style.EMPTY)
+                ),
+                0,0,0
         );
     }
 }

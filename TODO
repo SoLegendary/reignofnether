@@ -1,9 +1,10 @@
 TODO before playtesting:
 
-1. automated resource gathering
+1. Fix hotkeys (Q,E?)
 2. keep chunks around buildings and units persistently loaded
-3. graveyard building (to produce monster units)
+3. fix tower not cancelling
 4. setup shockbyte server (~3gb?)
+
 
 Stretch goals
 

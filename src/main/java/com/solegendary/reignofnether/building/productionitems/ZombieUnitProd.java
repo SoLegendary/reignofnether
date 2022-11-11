@@ -41,7 +41,7 @@ public class ZombieUnitProd extends ProductionItem {
             "Zombie",
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
-            Keybinding.keyE,
+            Keybinding.keyQ,
             () -> false,
             () -> false,
             () -> true,

@@ -44,7 +44,7 @@ public class VillagerUnitProd extends ProductionItem {
             "Villager",
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
-            Keybinding.keyE,
+            Keybinding.keyV,
             () -> false,
             () -> false,
             () -> true,
@@ -54,7 +54,7 @@ public class VillagerUnitProd extends ProductionItem {
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Villager.FOOD, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("\uE003  " + ResourceCosts.Villager.POPULATION + "     \uE004 " + ResourceCosts.Villager.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An undead monster with a basic melee attack.", Style.EMPTY)
+                FormattedCharSequence.forward("A worker unit that can construct or repair buildings and gather resources.", Style.EMPTY)
             )
         );
     }

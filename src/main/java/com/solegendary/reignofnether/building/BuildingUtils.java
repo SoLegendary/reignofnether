@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 // class for static building functions
 
+import com.solegendary.reignofnether.building.buildings.Graveyard;
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import net.minecraft.core.BlockPos;
@@ -22,6 +23,7 @@ public class BuildingUtils {
         switch(buildingName) {
             case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation, ownerName);
             case VillagerTower.buildingName -> building = new VillagerTower(level, pos, rotation, ownerName);
+            case Graveyard.buildingName -> building = new Graveyard(level, pos, rotation, ownerName);
         }
         if (building != null)
             building.level = level;

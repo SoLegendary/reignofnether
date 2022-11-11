@@ -41,7 +41,7 @@ public class CreeperUnitProd extends ProductionItem {
             "Creeper",
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
-            Keybinding.keyQ,
+            Keybinding.keyE,
             () -> false,
             () -> false,
             () -> true,
