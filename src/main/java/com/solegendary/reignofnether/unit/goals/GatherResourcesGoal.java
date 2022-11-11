@@ -47,18 +47,14 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 if (!hasClearNeighbour)
                     return false;
                 // not targeted by another worker
-                System.out.println("______");
                 for (int unitId : UnitServerEvents.getAllUnitIds()) {
                     Unit unit = (Unit) mob.level.getEntity(unitId);
-
                     if (unit != null && unit.isWorker() && unit.getGatherResourceGoal() != null && unitId != this.mob.getId()) {
                         BlockPos otherUnitTarget = unit.getGatherResourceGoal().getGatherTarget();
                         if (otherUnitTarget != null && otherUnitTarget.equals(bp))
                             return false;
                     }
-
                 }
-                System.out.println("------");
                 return true;
             };
 
