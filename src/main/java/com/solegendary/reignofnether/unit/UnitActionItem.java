@@ -50,7 +50,7 @@ public class UnitActionItem {
                     unit.resetBehaviours();
 
                     if (unit.isWorker() && !ResourceBlocks.getResourceBlockType(preselectedBlockPos, level).equals("None"))
-                        unit.getGatherResourceGoal().setTarget(preselectedBlockPos);
+                        unit.getGatherResourceGoal().setMoveTarget(preselectedBlockPos);
                     else
                         unit.setMoveTarget(preselectedBlockPos);
                 }

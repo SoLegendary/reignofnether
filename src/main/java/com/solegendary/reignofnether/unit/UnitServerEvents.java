@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -8,7 +9,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
@@ -83,8 +86,12 @@ public class UnitServerEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
         Entity entity = evt.getEntity();
-        if (entity instanceof Unit && !evt.getLevel().isClientSide)
+        if (entity instanceof Unit && !evt.getLevel().isClientSide) {
             allUnitIds.add(entity.getId());
+            //ChunkAccess chunk = evt.getLevel().getChunk(entity.blockPosition());
+            //boolean success = ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
+            //System.out.println(success);
+        }
     }
 
     // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns null

@@ -58,17 +58,16 @@ public interface Unit {
     public static void tick(Unit unit) {
         Mob unitMob = (Mob) unit;
 
-        if (!unitMob.level.isClientSide) {
+        if (unit.isWorker()) {
+            BuildRepairGoal buildRepairGoal = unit.getBuildRepairGoal();
+            if (buildRepairGoal != null)
+                buildRepairGoal.tick();
+            GatherResourcesGoal gatherResourcesGoal = unit.getGatherResourceGoal();
+            if (gatherResourcesGoal != null)
+                gatherResourcesGoal.tick();
+        }
 
-            // if target building is max health unassign from buildRepair goal
-            if (unit.isWorker()) {
-                BuildRepairGoal buildRepairGoal = unit.getBuildRepairGoal();
-                if (buildRepairGoal != null)
-                    buildRepairGoal.tick();
-                GatherResourcesGoal gatherResourcesGoal = unit.getGatherResourceGoal();
-                if (gatherResourcesGoal != null)
-                    gatherResourcesGoal.tick();
-            }
+        if (!unitMob.level.isClientSide) {
 
             // sync target variables between goals and Mob
             if (unit.getTargetGoal().getTarget() == null || !unit.getTargetGoal().getTarget().isAlive() ||
@@ -88,7 +87,7 @@ public interface Unit {
             if (unit.getAttackMoveTarget() != null && !unit.hasLivingTarget()) {
                 boolean attacked = unit.attackClosestEnemy((ServerLevel) unitMob.level);
 
-                if (!attacked && unit.getMoveGoal().getTarget() == null)
+                if (!attacked && unit.getMoveGoal().getMoveTarget() == null)
                     unit.setMoveTarget(unit.getAttackMoveTarget());
 
                 else if (!attacked && !unit.getMoveGoal().canContinueToUse()) // finished attack-moving
@@ -97,7 +96,7 @@ public interface Unit {
 
             // retaliate against a mob that damaged us UNLESS already on a move or follow command
             if (unitMob.getLastDamageSource() != null && unit.getWillRetaliate() &&
-                unit.getMoveGoal().getTarget() == null && unit.getFollowTarget() == null) {
+                unit.getMoveGoal().getMoveTarget() == null && unit.getFollowTarget() == null) {
 
                 Entity lastDSEntity = unitMob.getLastDamageSource().getEntity();
                 Relationship rs = UnitServerEvents.getUnitToEntityRelationship(unit, lastDSEntity);
@@ -151,7 +150,7 @@ public interface Unit {
     public default boolean isIdle() {
         return this.getAttackMoveTarget() == null &&
                 !this.hasLivingTarget() &&
-                this.getMoveGoal().getTarget() == null &&
+                this.getMoveGoal().getMoveTarget() == null &&
                 this.getFollowTarget() == null;
     }
 
@@ -174,7 +173,7 @@ public interface Unit {
 
     // move to a block ignoring all else until reaching it
     public default void setMoveTarget(@Nullable BlockPos bp) {
-        this.getMoveGoal().setTarget(bp);
+        this.getMoveGoal().setMoveTarget(bp);
     }
     // chase and attack the target ignoring all else until it is dead or out of sight
     public default void setAttackTarget(@Nullable LivingEntity target) {

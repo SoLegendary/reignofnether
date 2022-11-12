@@ -48,12 +48,12 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     // TODO: can sometimes fail to go back uphill when knocked downhill by attacks
-    public void setTarget(@Nullable BlockPos bp) {
+    public void setMoveTarget(@Nullable BlockPos bp) {
         this.moveTarget = bp;
         this.start();
     }
 
-    public BlockPos getTarget() {
+    public BlockPos getMoveTarget() {
         return this.moveTarget;
     }
 

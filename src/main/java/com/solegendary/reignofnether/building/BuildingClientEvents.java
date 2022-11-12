@@ -411,9 +411,10 @@ public class BuildingClientEvents {
                 buildings.add(newBuilding);
         }
 
-
-
-
+        // sync the goal so we can display the correct animations
+        Entity entity = HudClientEvents.hudSelectedEntity;
+        if (entity instanceof Unit unit && unit.isWorker())
+            unit.getBuildRepairGoal().setBuildingTarget(newBuilding);
     }
 
     public static void destroyBuilding(BlockPos pos) {

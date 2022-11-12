@@ -27,7 +27,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
 
     public void tick() {
         if (buildingTarget != null) {
-            this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 0);
+            calcMoveTarget();
             if (buildingTarget.getBlocksPlaced() >= buildingTarget.getBlocksTotal())
                 buildingTarget = null;
 
@@ -36,9 +36,15 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
                 this.mob.getLookControl().setLookAt(bp.getX(), bp.getY(), bp.getZ());
             }
         }
+        else
+            this.moveTarget = null;
     }
 
-    // only count as building if in range of the target
+    private void calcMoveTarget() {
+        this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 0);
+    }
+
+    // only count as building if in range of the target - building is actioned in Building.tick()
     public boolean isBuilding() {
         if (buildingTarget != null && this.moveTarget != null)
             if (BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED)
@@ -48,6 +54,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
 
     public void setBuildingTarget(@Nullable Building target) {
         this.buildingTarget = target;
+        calcMoveTarget();
         this.start();
     }
 

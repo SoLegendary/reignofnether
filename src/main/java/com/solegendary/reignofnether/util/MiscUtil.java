@@ -25,7 +25,7 @@ import java.util.function.Predicate;
 public class MiscUtil {
 
     // search outward and return the first block of the type in the blocks list that matches the predicate
-    public static BlockPos findNearestBlock(ServerLevel level, Vec3i originPos, int dist, List<Block> blocks, Predicate<BlockPos> condition) {
+    public static BlockPos findNearestBlock(Level level, Vec3i originPos, int dist, List<Block> blocks, Predicate<BlockPos> condition) {
 
         for (int d = 0; d <= dist; d++)
             for (int x = -dist; x <= dist; x++)

@@ -135,6 +135,8 @@ public class VillagerUnit extends Vindicator implements Unit {
     public ArmPose getVillagerUnitArmPose() {
         if (this.buildRepairGoal != null && this.buildRepairGoal.isBuilding())
             return ArmPose.ATTACKING;
+        else if (this.gatherResourcesGoal != null && this.gatherResourcesGoal.isGathering())
+            return ArmPose.CELEBRATING;
         return ArmPose.CROSSED;
     }
 

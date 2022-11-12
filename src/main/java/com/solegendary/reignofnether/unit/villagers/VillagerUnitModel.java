@@ -93,6 +93,7 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
         }
 
         VillagerUnit.ArmPose armPose = ((VillagerUnit) p_102928_).getVillagerUnitArmPose();
+        //System.out.println(armPose);
 
         if (armPose == VillagerUnit.ArmPose.ATTACKING) {
             if (p_102928_.getMainHandItem().isEmpty()) {

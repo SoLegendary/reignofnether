@@ -62,12 +62,7 @@ public class ActionButtons {
         () -> false, // except if currently clicked on
         () -> false,
         () -> true,
-        () -> PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
-            UnitAction.STOP,
-            -1,
-            UnitClientEvents.getSelectedUnitIds().stream().mapToInt(i -> i).toArray(),
-            CursorClientEvents.getPreselectedBlockPos()
-        )),
+        () -> sendUnitCommand(UnitAction.STOP),
         List.of(FormattedCharSequence.forward("Stop", Style.EMPTY))
     );
     public static final Button HOLD = new Button(
@@ -78,12 +73,7 @@ public class ActionButtons {
         () -> false, // TODO: if all selected units are holding position (but would need to get this from server?)
         () -> false,
         () -> true,
-        () -> PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
-            UnitAction.HOLD,
-            -1,
-            UnitClientEvents.getSelectedUnitIds().stream().mapToInt(i -> i).toArray(),
-            CursorClientEvents.getPreselectedBlockPos()
-        )),
+        () -> sendUnitCommand(UnitAction.HOLD),
         List.of(FormattedCharSequence.forward("Hold Position", Style.EMPTY))
     );
     public static final Button MOVE = new Button(

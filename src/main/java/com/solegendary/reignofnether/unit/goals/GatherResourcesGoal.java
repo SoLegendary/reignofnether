@@ -1,10 +1,8 @@
 package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.resources.ResourceBlocks;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
-import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -24,10 +22,11 @@ import java.util.function.Predicate;
 public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     private static final int REACH_RANGE = 4;
-    private static final int BLOCK_BREAK_TICKS_MAX = 50;
+    private static final int BLOCK_BREAK_TICKS_MAX = 100;
     private int breakTicksLeft = BLOCK_BREAK_TICKS_MAX;
 
-    private String targetResourceName = "None";
+    private BlockPos gatherTarget = null;
+    private String targetResourceName = "None"; // if !None, will passively target blocks around it
     private List<Block> targetResourceBlocks = null;
 
     public GatherResourcesGoal(PathfinderMob mob, double speedModifier) {
@@ -36,7 +35,17 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     // move towards the targeted block and start gathering it
     public void tick() {
-        if (moveTarget == null && targetResourceBlocks != null) {
+
+        if (gatherTarget != null) {
+            // if the block is no longer valid (destroyed or somehow badly targeted)
+            String resourceBlockType = ResourceBlocks.getResourceBlockType(this.gatherTarget, mob.level);
+            if (resourceBlockType.equals("None"))
+                this.gatherTarget = null;
+            else // keep persistently moving towards the target
+                this.setMoveTarget(gatherTarget);
+        }
+
+        if (gatherTarget == null && targetResourceBlocks != null) {
 
             Predicate<BlockPos> condition = bp -> {
                 // not covered by solid blocks and
@@ -58,8 +67,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 return true;
             };
 
-            this.moveTarget = MiscUtil.findNearestBlock(
-                (ServerLevel) mob.level,
+            this.gatherTarget = MiscUtil.findNearestBlock(
+                mob.level,
                 new Vec3i(
                     mob.getEyePosition().x,
                     mob.getEyePosition().y,
@@ -67,32 +76,40 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 ), 5,
                 targetResourceBlocks,
                 condition);
-
-            if (this.moveTarget != null) {
-                this.mob.getLookControl().setLookAt(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ());
-                this.start();
-            }
         }
 
-        if (isGathering()) {
-            breakTicksLeft -= 1;
-            if (breakTicksLeft <= 0) {
-                breakTicksLeft = BLOCK_BREAK_TICKS_MAX;
-                mob.level.destroyBlock(moveTarget, false);
-                ResourcesServerEvents.addSubtractResources(new Resources(
-                    ((Unit) mob).getOwnerName(),
-                    targetResourceName.equals("Food") ? 50 : 0,
-                    targetResourceName.equals("Wood") ? 10 : 0,
-                    targetResourceName.equals("Ore") ? 25 : 0
-                ));
+        if (gatherTarget != null) {
+            this.setMoveTarget(gatherTarget);
+
+            // if the block is no longer valid (destroyed or somehow badly targeted)
+            String resourceBlockType = ResourceBlocks.getResourceBlockType(this.gatherTarget, mob.level);
+            if (resourceBlockType.equals("None"))
+                this.gatherTarget = null;
+
+            if (isGathering()) {
+                if (!this.mob.level.isClientSide())
+                {
+                    breakTicksLeft -= 1;
+                    if (breakTicksLeft <= 0) {
+                        breakTicksLeft = BLOCK_BREAK_TICKS_MAX;
+                        mob.level.destroyBlock(gatherTarget, false);
+                        ResourcesServerEvents.addSubtractResources(new Resources(
+                                ((Unit) mob).getOwnerName(),
+                                resourceBlockType.equals("Food") ? 50 : 0,
+                                resourceBlockType.equals("Wood") ? 10 : 0,
+                                resourceBlockType.equals("Ore") ? 25 : 0
+                        ));
+                    }
+                }
+                this.mob.getLookControl().setLookAt(gatherTarget.getX(), gatherTarget.getY(), gatherTarget.getZ());
             }
         }
     }
 
     // only count as gathering if in range of the target
     public boolean isGathering() {
-        if (this.moveTarget != null && !ResourceBlocks.getResourceBlockType(this.moveTarget, mob.level).equals("None"))
-            return Math.sqrt(moveTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) <= REACH_RANGE + 1;
+        if (this.gatherTarget != null && !ResourceBlocks.getResourceBlockType(this.gatherTarget, mob.level).equals("None"))
+            return Math.sqrt(gatherTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) <= REACH_RANGE + 1;
         return false;
     }
 
@@ -119,19 +136,22 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         return targetResourceName;
     }
 
+    // is both the move and the gather target
     @Override
-    public void setTarget(@Nullable BlockPos bp) {
-        super.setTarget(bp);
+    public void setMoveTarget(@Nullable BlockPos bp) {
+        super.setMoveTarget(bp);
+        this.gatherTarget = bp;
         if (bp != null)
             this.setTargetResource(ResourceBlocks.getResourceBlockType(bp, this.mob.level));
     }
 
     public void stopGathering() {
-        setTargetResource("None");
-        this.stop();
+        this.gatherTarget = null;
+        this.setTargetResource("None");
+        super.stop();
     }
 
     public BlockPos getGatherTarget() {
-        return moveTarget;
+        return gatherTarget;
     }
 }
