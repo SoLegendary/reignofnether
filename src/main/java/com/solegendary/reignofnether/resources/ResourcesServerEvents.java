@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.resources;
 
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -11,9 +10,9 @@ public class ResourcesServerEvents {
     // tracks all players' resources
     public static ArrayList<Resources> resourcesList = new ArrayList<>();
 
-    public static final int startingFood = 3000;
-    public static final int startingWood = 1000;
-    public static final int startingOre = 1000;
+    public static final int STARTING_FOOD = 1000;
+    public static final int STARTING_WOOD = 1000;
+    public static final int STARTING_ORE = 1000;
 
     public static void addSubtractResources(Resources resourcesToAdd) {
         for (Resources resources : resourcesList) {
@@ -35,6 +34,24 @@ public class ResourcesServerEvents {
         }
     }
 
+    public static boolean canAfford(String ownerName, String resourceType, int cost) {
+        for (Resources resources : ResourcesServerEvents.resourcesList)
+            if (resources.ownerName.equals(ownerName)) {
+                switch(resourceType.toLowerCase()) {
+                    case "food" -> {
+                        return resources.food >= cost;
+                    }
+                    case "wood" -> {
+                        return resources.wood >= cost;
+                    }
+                    case "ore" -> {
+                        return resources.ore >= cost;
+                    }
+                }
+            }
+        return false;
+    }
+
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
 
@@ -48,9 +65,9 @@ public class ResourcesServerEvents {
 
         if (playerResources == null) {
             playerResources = new Resources(playerName,
-                startingFood,
-                startingWood,
-                startingOre);
+                    STARTING_FOOD,
+                    STARTING_WOOD,
+                    STARTING_ORE);
             resourcesList.add(playerResources);
         }
         // TODO: server doesn't like us loading LocalPlayer class in here...

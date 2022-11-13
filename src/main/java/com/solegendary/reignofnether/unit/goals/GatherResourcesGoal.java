@@ -1,7 +1,11 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.resources.ResourceBlocks;
 import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -55,6 +59,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         hasClearNeighbour = true;
                 if (!hasClearNeighbour)
                     return false;
+                // is not part of a building and
+                if (BuildingUtils.isPosPartOfAnyBuilding(mob.level, bp, true))
+                    return false;
                 // not targeted by another worker
                 for (int unitId : UnitServerEvents.getAllUnitIds()) {
                     Unit unit = (Unit) mob.level.getEntity(unitId);
@@ -98,7 +105,12 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                                 resourceBlockType.equals("Food") ? 50 : 0,
                                 resourceBlockType.equals("Wood") ? 10 : 0,
                                 resourceBlockType.equals("Ore") ? 25 : 0
-                        ));
+                        )); // TODO: disallow gathering young wheat blocks
+                        // if it was a farm block attempt to replant it
+                        if (ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), "wood", 5)) {
+                            ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, 5, 0));
+                            // TODO: replant it
+                        }
                     }
                 }
                 this.mob.getLookControl().setLookAt(gatherTarget.getX(), gatherTarget.getY(), gatherTarget.getZ());
@@ -111,15 +123,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         if (this.gatherTarget != null && !ResourceBlocks.getResourceBlockType(this.gatherTarget, mob.level).equals("None"))
             return Math.sqrt(gatherTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) <= REACH_RANGE + 1;
         return false;
-    }
-
-    public void toggleTargetResource() {
-        switch (targetResourceName) {
-            case "None" -> setTargetResource("Food");
-            case "Food" -> setTargetResource("Wood");
-            case "Wood" -> setTargetResource("Ore");
-            case "Ore" -> setTargetResource("None");
-        }
     }
 
     public void setTargetResource(String resourceName) {

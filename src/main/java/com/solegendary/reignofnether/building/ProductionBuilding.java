@@ -133,9 +133,9 @@ public abstract class ProductionBuilding extends Building {
                             ResourcesClientboundPacket.warnInsufficientPopulation(building.ownerName);
                         else
                             ResourcesClientboundPacket.warnInsufficientResources(building.ownerName,
-                                    prodItem.canAffordFood(building.ownerName),
-                                    prodItem.canAffordWood(building.ownerName),
-                                    prodItem.canAffordOre(building.ownerName)
+                                ResourcesServerEvents.canAfford(building.ownerName, "food", prodItem.foodCost),
+                                ResourcesServerEvents.canAfford(building.ownerName, "wood", prodItem.woodCost),
+                                ResourcesServerEvents.canAfford(building.ownerName, "ore", prodItem.oreCost)
                             );
                     }
                 }

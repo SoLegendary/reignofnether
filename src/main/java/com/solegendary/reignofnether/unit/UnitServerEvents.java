@@ -88,9 +88,9 @@ public class UnitServerEvents {
         Entity entity = evt.getEntity();
         if (entity instanceof Unit && !evt.getLevel().isClientSide) {
             allUnitIds.add(entity.getId());
-            //ChunkAccess chunk = evt.getLevel().getChunk(entity.blockPosition());
-            //boolean success = ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
-            //System.out.println(success);
+            ChunkAccess chunk = evt.getLevel().getChunk(entity.blockPosition());
+            boolean success = ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
+            System.out.println(success);
         }
     }
 

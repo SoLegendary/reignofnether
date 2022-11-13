@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.villagers;
 
+import com.solegendary.reignofnether.building.buildings.Farm;
 import com.solegendary.reignofnether.building.buildings.Graveyard;
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
@@ -106,8 +107,8 @@ public class VillagerUnit extends Vindicator implements Unit {
     public VillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
         if (level.isClientSide()) {
-            this.abilities.add(VillagerTower.getBuildButton());
             this.abilities.add(VillagerHouse.getBuildButton());
+            this.abilities.add(Farm.getBuildButton());
             this.abilities.add(Graveyard.getBuildButton());
         }
     }
@@ -123,20 +124,15 @@ public class VillagerUnit extends Vindicator implements Unit {
     // TODO: use player arm poses and animations
     public enum ArmPose {
         CROSSED,
-        ATTACKING,
-        SPELLCASTING,
-        BOW_AND_ARROW,
-        CROSSBOW_HOLD,
-        CROSSBOW_CHARGE,
-        CELEBRATING,
-        NEUTRAL;
+        BUILDING,
+        GATHERING
     }
 
     public ArmPose getVillagerUnitArmPose() {
         if (this.buildRepairGoal != null && this.buildRepairGoal.isBuilding())
-            return ArmPose.ATTACKING;
+            return ArmPose.BUILDING;
         else if (this.gatherResourcesGoal != null && this.gatherResourcesGoal.isGathering())
-            return ArmPose.CELEBRATING;
+            return ArmPose.GATHERING;
         return ArmPose.CROSSED;
     }
 

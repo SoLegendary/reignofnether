@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.resources.ResourceBlocks;
+import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.units.CreeperUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -113,8 +114,17 @@ public class UnitActionItem {
         else if (action == UnitAction.TOGGLE_GATHER_TARGET) {
             for (int id : unitIds) {
                 if (level.getEntity(id) instanceof Unit unit) {
-                    if (unit.isWorker())
-                        unit.getGatherResourceGoal().toggleTargetResource();
+                    GatherResourcesGoal goal = unit.getGatherResourceGoal();
+                    if (unit.isWorker() && goal != null) {
+                        String targetResourceName = goal.getTargetResourceName();
+                        unit.resetBehaviours();
+                        switch (targetResourceName) {
+                            case "None" -> goal.setTargetResource("Food");
+                            case "Food" -> goal.setTargetResource("Wood");
+                            case "Wood" -> goal.setTargetResource("Ore");
+                            case "Ore" -> goal.setTargetResource("None");
+                        }
+                    }
                 }
             }
         }

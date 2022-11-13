@@ -2,11 +2,13 @@ package com.solegendary.reignofnether.building;
 
 // class for static building functions
 
+import com.solegendary.reignofnether.building.buildings.Farm;
 import com.solegendary.reignofnether.building.buildings.Graveyard;
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
@@ -24,6 +26,7 @@ public class BuildingUtils {
             case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation, ownerName);
             case VillagerTower.buildingName -> building = new VillagerTower(level, pos, rotation, ownerName);
             case Graveyard.buildingName -> building = new Graveyard(level, pos, rotation, ownerName);
+            case Farm.buildingName -> building = new Farm(level, pos, rotation, ownerName);
         }
         if (building != null)
             building.level = level;
@@ -91,4 +94,18 @@ public class BuildingUtils {
 
     // get BlockPos values with relative positions
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) { return new ArrayList<>(); }
+
+    // returns whether the given pos is part of ANY building in the level
+    public static boolean isPosPartOfAnyBuilding(Level level, BlockPos bp, boolean onlyPlacedBlocks) {
+        List<Building> buildings;
+        if (level.isClientSide())
+            buildings = BuildingClientEvents.getBuildings();
+        else
+            buildings = BuildingServerEvents.getBuildings();
+
+        for (Building building : buildings)
+            if (building.isPosPartOfBuilding(bp, onlyPlacedBlocks))
+                return true;
+        return false;
+    }
 }

@@ -45,6 +45,12 @@ public class ResourceCosts {
         public static final int ORE = 0;
         public static final int SUPPLY = 0;
     }
+    public static class Farm {
+        public static final int FOOD = 0;
+        public static final int WOOD = 100;
+        public static final int ORE = 0;
+        public static final int SUPPLY = 0;
+    }
     public static class Graveyard {
         public static final int FOOD = 0;
         public static final int WOOD = 150;

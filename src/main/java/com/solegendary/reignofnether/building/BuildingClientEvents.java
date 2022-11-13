@@ -292,22 +292,6 @@ public class BuildingClientEvents {
         }
     }
 
-    @SubscribeEvent
-    public static void onInput(InputEvent.Key evt) {
-        if (!OrthoviewClientEvents.isEnabled())
-            return;
-
-        if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-
-            if (evt.getKey() == Keybinding.getFnum(6).getKey().getValue())
-                setBuildingToPlace(VillagerHouse.class);
-            else if (evt.getKey() == Keybinding.getFnum(7).getKey().getValue())
-                setBuildingToPlace(VillagerTower.class);
-            else if (evt.getKey() == Keybinding.getFnum(8).getKey().getValue())
-                setBuildingToPlace(null);
-        }
-    }
-
     // on scroll rotate the building placement by 90deg by resorting the blocks list
     // for some reason this event is run twice every scroll
     private static boolean secondScrollEvt = true;

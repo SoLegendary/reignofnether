@@ -9,6 +9,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.VindicatorRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.monster.AbstractIllager;
@@ -61,84 +62,65 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
         return this.root;
     }
 
-    public void setupAnim(T p_102928_, float p_102929_, float p_102930_, float p_102931_, float p_102932_, float p_102933_) {
+    public void setupAnim(T entity, float p_102929_, float p_102930_, float p_102931_, float p_102932_, float p_102933_) {
         this.head.yRot = p_102932_ * ((float)Math.PI / 180F);
         this.head.xRot = p_102933_ * ((float)Math.PI / 180F);
-        if (this.riding) {
-            this.rightArm.xRot = (-(float)Math.PI / 5F);
-            this.rightArm.yRot = 0.0F;
-            this.rightArm.zRot = 0.0F;
-            this.leftArm.xRot = (-(float)Math.PI / 5F);
-            this.leftArm.yRot = 0.0F;
-            this.leftArm.zRot = 0.0F;
-            this.rightLeg.xRot = -1.4137167F;
-            this.rightLeg.yRot = ((float)Math.PI / 10F);
-            this.rightLeg.zRot = 0.07853982F;
-            this.leftLeg.xRot = -1.4137167F;
-            this.leftLeg.yRot = (-(float)Math.PI / 10F);
-            this.leftLeg.zRot = -0.07853982F;
-        } else {
-            this.rightArm.xRot = Mth.cos(p_102929_ * 0.6662F + (float)Math.PI) * 2.0F * p_102930_ * 0.5F;
-            this.rightArm.yRot = 0.0F;
-            this.rightArm.zRot = 0.0F;
-            this.leftArm.xRot = Mth.cos(p_102929_ * 0.6662F) * 2.0F * p_102930_ * 0.5F;
-            this.leftArm.yRot = 0.0F;
-            this.leftArm.zRot = 0.0F;
-            this.rightLeg.xRot = Mth.cos(p_102929_ * 0.6662F) * 1.4F * p_102930_ * 0.5F;
-            this.rightLeg.yRot = 0.0F;
-            this.rightLeg.zRot = 0.0F;
-            this.leftLeg.xRot = Mth.cos(p_102929_ * 0.6662F + (float)Math.PI) * 1.4F * p_102930_ * 0.5F;
-            this.leftLeg.yRot = 0.0F;
-            this.leftLeg.zRot = 0.0F;
+
+        VillagerUnit.ArmPose armPose = ((VillagerUnit) entity).getVillagerUnitArmPose();
+
+        // default arm positions when not visible (ie. not crossed)
+        boolean flag = entity.getFallFlyingTicks() > 4;
+        this.rightArm.z = 0.0F;
+        this.rightArm.x = -5.0F;
+        this.leftArm.z = 0.0F;
+        this.leftArm.x = 5.0F;
+        float f = 1.0F;
+        if (flag) {
+            f = (float) entity.getDeltaMovement().lengthSqr();
+            f /= 0.2F;
+            f *= f * f;
         }
-
-        VillagerUnit.ArmPose armPose = ((VillagerUnit) p_102928_).getVillagerUnitArmPose();
-        //System.out.println(armPose);
-
-        if (armPose == VillagerUnit.ArmPose.ATTACKING) {
-            if (p_102928_.getMainHandItem().isEmpty()) {
-                AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, true, this.attackTime, p_102931_);
-            } else {
-                AnimationUtils.swingWeaponDown(this.rightArm, this.leftArm, p_102928_, this.attackTime, p_102931_);
-            }
-        } else if (armPose == VillagerUnit.ArmPose.SPELLCASTING) {
-            this.rightArm.z = 0.0F;
-            this.rightArm.x = -5.0F;
-            this.leftArm.z = 0.0F;
-            this.leftArm.x = 5.0F;
-            this.rightArm.xRot = Mth.cos(p_102931_ * 0.6662F) * 0.25F;
-            this.leftArm.xRot = Mth.cos(p_102931_ * 0.6662F) * 0.25F;
-            this.rightArm.zRot = 2.3561945F;
-            this.leftArm.zRot = -2.3561945F;
-            this.rightArm.yRot = 0.0F;
-            this.leftArm.yRot = 0.0F;
-        } else if (armPose == VillagerUnit.ArmPose.BOW_AND_ARROW) {
-            this.rightArm.yRot = -0.1F + this.head.yRot;
-            this.rightArm.xRot = (-(float)Math.PI / 2F) + this.head.xRot;
-            this.leftArm.xRot = -0.9424779F + this.head.xRot;
-            this.leftArm.yRot = this.head.yRot - 0.4F;
-            this.leftArm.zRot = ((float)Math.PI / 2F);
-        } else if (armPose == VillagerUnit.ArmPose.CROSSBOW_HOLD) {
-            AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
-        } else if (armPose == VillagerUnit.ArmPose.CROSSBOW_CHARGE) {
-            AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, p_102928_, true);
-        } else if (armPose == VillagerUnit.ArmPose.CELEBRATING) {
-            this.rightArm.z = 0.0F;
-            this.rightArm.x = -5.0F;
-            this.rightArm.xRot = Mth.cos(p_102931_ * 0.6662F) * 0.05F;
-            this.rightArm.zRot = 2.670354F;
-            this.rightArm.yRot = 0.0F;
-            this.leftArm.z = 0.0F;
-            this.leftArm.x = 5.0F;
-            this.leftArm.xRot = Mth.cos(p_102931_ * 0.6662F) * 0.05F;
-            this.leftArm.zRot = -2.3561945F;
-            this.leftArm.yRot = 0.0F;
+        if (f < 1.0F) {
+            f = 1.0F;
         }
+        this.rightArm.xRot = Mth.cos(p_102929_ * 0.6662F + (float)Math.PI) * 2.0F * p_102929_ * 0.5F / f;
+        this.leftArm.xRot = Mth.cos(p_102929_ * 0.6662F) * 2.0F * p_102929_ * 0.5F / f;
+        this.rightArm.zRot = 0.0F;
+        this.leftArm.zRot = 0.0F;
+        this.rightArm.yRot = 0.0F;
+        this.leftArm.yRot = 0.0F;
 
-        boolean flag = armPose == VillagerUnit.ArmPose.CROSSED;
-        this.arms.visible = flag && armsVisible;
-        this.leftArm.visible = !flag && armsVisible;
-        this.rightArm.visible = !flag && armsVisible;
+        boolean armsCrossed = armPose == VillagerUnit.ArmPose.CROSSED;
+
+        //if (!armsCrossed)
+        //    setupAttackAnimation();
+
+        this.arms.visible = armsCrossed && armsVisible;
+        this.leftArm.visible = !armsCrossed && armsVisible;
+        this.rightArm.visible = !armsCrossed && armsVisible;
+    }
+
+    protected void setupAttackAnimation() {
+        if (!(this.attackTime <= 0.0F)) {
+            float f = this.attackTime;
+            this.arms.yRot = Mth.sin(Mth.sqrt(f) * ((float)Math.PI * 2F)) * 0.2F;
+            this.rightArm.z = Mth.sin(this.arms.yRot) * 5.0F;
+            this.rightArm.x = -Mth.cos(this.arms.yRot) * 5.0F;
+            this.leftArm.z = -Mth.sin(this.arms.yRot) * 5.0F;
+            this.leftArm.x = Mth.cos(this.arms.yRot) * 5.0F;
+            this.rightArm.yRot += this.arms.yRot;
+            this.leftArm.yRot += this.arms.yRot;
+            this.leftArm.xRot += this.arms.yRot;
+            f = 1.0F - this.attackTime;
+            f *= f;
+            f *= f;
+            f = 1.0F - f;
+            float f1 = Mth.sin(f * (float)Math.PI);
+            float f2 = Mth.sin(this.attackTime * (float)Math.PI) * -(this.head.xRot - 0.7F) * 0.75F;
+            this.rightArm.xRot -= f1 * 1.2F + f2;
+            this.rightArm.yRot += this.arms.yRot * 2.0F;
+            this.rightArm.zRot += Mth.sin(this.attackTime * (float)Math.PI) * -0.4F;
+        }
     }
 
     private ModelPart getArm(HumanoidArm p_102923_) {

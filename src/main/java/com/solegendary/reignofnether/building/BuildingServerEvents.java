@@ -72,9 +72,9 @@ public class BuildingServerEvents {
             }
             else
                 ResourcesClientboundPacket.warnInsufficientResources(building.ownerName,
-                    building.canAffordFood(building.ownerName),
-                    building.canAffordWood(building.ownerName),
-                    building.canAffordOre(building.ownerName)
+                    ResourcesServerEvents.canAfford(building.ownerName, "food", building.foodCost),
+                    ResourcesServerEvents.canAfford(building.ownerName, "wood", building.woodCost),
+                    ResourcesServerEvents.canAfford(building.ownerName, "ore", building.oreCost)
                 );
         }
     }

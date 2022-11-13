@@ -136,6 +136,8 @@ public class UnitClientEvents {
     public static void onEntityLeave(EntityLeaveLevelEvent evt) {
         int entityId = evt.getEntity().getId();
 
+        if (evt.getEntity() instanceof Unit unit)
+            System.out.println("unit left clientside");
         preselectedUnitIds.removeIf(e -> e == entityId);
         selectedUnitIds.removeIf(e -> e == entityId);
         allUnitIds.removeIf(e -> e == entityId);
@@ -150,6 +152,7 @@ public class UnitClientEvents {
         if (entity instanceof Unit unit && evt.getLevel().isClientSide) {
             allUnitIds.add(entity.getId());
             unit.initialiseGoals(); // for clientside data tracking
+            System.out.println("unit joined clientside");
         }
 
     }

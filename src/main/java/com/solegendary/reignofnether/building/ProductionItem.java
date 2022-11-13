@@ -48,24 +48,6 @@ public abstract class ProductionItem {
                         (currentPop + popCost) <= popSupply);
         return false;
     }
-    public boolean canAffordFood(String ownerName) {
-        for (Resources resources : ResourcesServerEvents.resourcesList)
-            if (resources.ownerName.equals(ownerName))
-                return resources.food >= foodCost;
-        return false;
-    }
-    public boolean canAffordWood(String ownerName) {
-        for (Resources resources : ResourcesServerEvents.resourcesList)
-            if (resources.ownerName.equals(ownerName))
-                return resources.wood >= woodCost;
-        return false;
-    }
-    public boolean canAffordOre(String ownerName) {
-        for (Resources resources : ResourcesServerEvents.resourcesList)
-            if (resources.ownerName.equals(ownerName))
-                return resources.ore >= oreCost;
-        return false;
-    }
     public boolean canAffordPopulation(String ownerName) {
         int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.level, ownerName);
         int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);

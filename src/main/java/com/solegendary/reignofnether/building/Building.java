@@ -89,24 +89,6 @@ public abstract class Building {
                         resources.ore >= oreCost);
         return false;
     }
-    public boolean canAffordFood(String ownerName) {
-        for (Resources resources : ResourcesServerEvents.resourcesList)
-            if (resources.ownerName.equals(ownerName))
-                return resources.food >= foodCost;
-        return false;
-    }
-    public boolean canAffordWood(String ownerName) {
-        for (Resources resources : ResourcesServerEvents.resourcesList)
-            if (resources.ownerName.equals(ownerName))
-                return resources.wood >= woodCost;
-        return false;
-    }
-    public boolean canAffordOre(String ownerName) {
-        for (Resources resources : ResourcesServerEvents.resourcesList)
-            if (resources.ownerName.equals(ownerName))
-                return resources.ore >= oreCost;
-        return false;
-    }
 
     public boolean isPosInsideBuilding(BlockPos bp) {
         BlockPos min = getMinCorner(this.blocks);
