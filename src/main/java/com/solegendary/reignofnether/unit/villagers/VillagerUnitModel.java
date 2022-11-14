@@ -66,7 +66,7 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
         this.head.yRot = p_102932_ * ((float)Math.PI / 180F);
         this.head.xRot = p_102933_ * ((float)Math.PI / 180F);
 
-        VillagerUnit.ArmPose armPose = ((VillagerUnit) entity).getVillagerUnitArmPose();
+        VillagerUnit.ArmPose armPose = VillagerUnit.ArmPose.CROSSED;//((VillagerUnit) entity).getVillagerUnitArmPose();
 
         // default arm positions when not visible (ie. not crossed)
         boolean flag = entity.getFallFlyingTicks() > 4;
