@@ -14,10 +14,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.Property;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -45,7 +43,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             // if the block is no longer valid (destroyed or somehow badly targeted)
             String resourceBlockType = ResourceBlocks.getResourceBlockType(this.gatherTarget, mob.level);
             if (resourceBlockType.equals("None"))
-                this.gatherTarget = null;
+                gatherTarget = null;
             else // keep persistently moving towards the target
                 this.setMoveTarget(gatherTarget);
         }
@@ -53,6 +51,12 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         if (gatherTarget == null && targetResourceBlocks != null) {
 
             Predicate<BlockPos> condition = bp -> {
+                Block block = mob.level.getBlockState(bp).getBlock();
+                BlockState bsAbove = mob.level.getBlockState(bp.above());
+                if (block == Blocks.FARMLAND)
+                    if (!bsAbove.isAir() || !canAffordReplant())
+                        return false;
+
                 // not covered by solid blocks and
                 boolean hasClearNeighbour = false;
                 for (BlockPos adjBp : List.of(bp.north(), bp.south(), bp.east(), bp.west(), bp.above(), bp.below()))
@@ -63,8 +67,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
                 // not targeting a young farmable block (eg. wheat)
                 if (targetResourceName.equals("Food") &&
-                    ResourceBlocks.FARMABLE_BLOCKS.contains(mob.level.getBlockState(bp).getBlock()) &&
-                    getReplantBlockState(bp) == null)
+                    ResourceBlocks.FARMABLE_BLOCKS.contains(block) &&
+                    getReplantBlockStateFromExistingCrop(bp) == null)
                     return false;
 
                 // is not part of a building and
@@ -99,36 +103,37 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             // if the block is no longer valid (destroyed or somehow badly targeted)
             String resourceBlockType = ResourceBlocks.getResourceBlockType(this.gatherTarget, mob.level);
             if (resourceBlockType.equals("None"))
-                this.gatherTarget = null;
+                gatherTarget = null;
 
             if (isGathering()) {
-                if (!this.mob.level.isClientSide())
+                mob.getLookControl().setLookAt(gatherTarget.getX(), gatherTarget.getY(), gatherTarget.getZ());
+                if (!mob.level.isClientSide())
                 {
-                    breakTicksLeft -= 1;
-                    if (breakTicksLeft <= 0) {
-                        breakTicksLeft = BLOCK_BREAK_TICKS_MAX;
+                    // replant blocks
+                    if (mob.level.getBlockState(gatherTarget).getBlock() == Blocks.FARMLAND) {
+                        // TODO: create fresh crop blockstates with age 0
+                        tryToReplantCrop();
+                    }
+                    else {
+                        breakTicksLeft -= 1;
+                        if (breakTicksLeft <= 0) {
+                            breakTicksLeft = BLOCK_BREAK_TICKS_MAX;
 
-                        BlockState replantBlock = getReplantBlockState(gatherTarget);
+                            BlockState replantBs = getReplantBlockStateFromExistingCrop(gatherTarget);
 
-                        if (mob.level.destroyBlock(gatherTarget, false)) {
-                            ResourcesServerEvents.addSubtractResources(new Resources(
-                                    ((Unit) mob).getOwnerName(),
-                                    resourceBlockType.equals("Food") ? 50 : 0,
-                                    resourceBlockType.equals("Wood") ? 10 : 0,
-                                    resourceBlockType.equals("Ore") ? 25 : 0
-                            ));
-                            // if it was a farm block attempt to replant it
-                            if (ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), "wood", 5)) {
-                                ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -5, 0));
-                                if (replantBlock != null) {
-                                    mob.level.setBlockAndUpdate(gatherTarget, replantBlock);
-                                    gatherTarget = null;
-                                }
+                            if (mob.level.destroyBlock(gatherTarget, false)) {
+                                ResourcesServerEvents.addSubtractResources(new Resources(
+                                        ((Unit) mob).getOwnerName(),
+                                        resourceBlockType.equals("Food") ? 50 : 0,
+                                        resourceBlockType.equals("Wood") ? 10 : 0,
+                                        resourceBlockType.equals("Ore") ? 25 : 0
+                                ));
+                                // if it was a farm block attempt to replant it
+                                tryToReplantCrop(replantBs);
                             }
                         }
                     }
                 }
-                this.mob.getLookControl().setLookAt(gatherTarget.getX(), gatherTarget.getY(), gatherTarget.getZ());
             }
         }
     }
@@ -140,9 +145,24 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         return false;
     }
 
+    private boolean canAffordReplant() {
+        return ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), "wood", 5);
+    }
+
+    private void tryToReplantCrop(BlockState bs) {
+        // if it was a farm block attempt to replant it
+        if (canAffordReplant()) {
+            ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -5, 0));
+            if (bs != null) {
+                mob.level.setBlockAndUpdate(gatherTarget, bs);
+                gatherTarget = null;
+            }
+        }
+    }
+
     // returns the blockstate to be placed for a farmable block
     // returns null if no replant is needed or the block is not fully grown
-    public BlockState getReplantBlockState(BlockPos bp) {
+    public BlockState getReplantBlockStateFromExistingCrop(BlockPos bp) {
         if (!targetResourceName.equals("Food"))
             return null;
 

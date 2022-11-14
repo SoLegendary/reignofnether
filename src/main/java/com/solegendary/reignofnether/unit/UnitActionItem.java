@@ -111,6 +111,18 @@ public class UnitActionItem {
                 }
             }
         }
+        else if (action == UnitAction.FARM) {
+            for (int id : unitIds) {
+                if (level.getEntity(id) instanceof Unit unit) {
+                    GatherResourcesGoal goal = unit.getGatherResourceGoal();
+                    if (unit.isWorker() && goal != null) {
+                        unit.resetBehaviours();
+                        goal.setMoveTarget(preselectedBlockPos);
+                        goal.setTargetResource("Food");
+                    }
+                }
+            }
+        }
         else if (action == UnitAction.TOGGLE_GATHER_TARGET) {
             for (int id : unitIds) {
                 if (level.getEntity(id) instanceof Unit unit) {

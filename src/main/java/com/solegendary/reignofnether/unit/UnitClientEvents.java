@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
+import com.solegendary.reignofnether.building.buildings.Farm;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -250,12 +251,16 @@ public class UnitClientEvents {
                 // right click -> build or repair preselected building
                 else if (HudClientEvents.hudSelectedEntity instanceof Unit &&
                         ((Unit) HudClientEvents.hudSelectedEntity).isWorker() &&
-                        (BuildingClientEvents.getPreselectedBuilding() != null))
-                    sendUnitCommand(UnitAction.BUILD_REPAIR);
+                        (BuildingClientEvents.getPreselectedBuilding() != null)) {
+
+                    if (BuildingClientEvents.getPreselectedBuilding() instanceof Farm)
+                        sendUnitCommand(UnitAction.FARM);
+                    else
+                        sendUnitCommand(UnitAction.BUILD_REPAIR);
+                }
                 // right click -> follow friendly unit or go to preselected blockPos
                 else
                     resolveMoveAction();
-
             }
         }
         // clear all cursor actions
