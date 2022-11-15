@@ -92,9 +92,6 @@ public class BuildingUtils {
         return blocks;
     }
 
-    // get BlockPos values with relative positions
-    public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) { return new ArrayList<>(); }
-
     // returns whether the given pos is part of ANY building in the level
     public static boolean isPosPartOfAnyBuilding(Level level, BlockPos bp, boolean onlyPlacedBlocks) {
         List<Building> buildings;

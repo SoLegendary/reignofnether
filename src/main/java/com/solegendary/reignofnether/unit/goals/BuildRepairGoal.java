@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.Farm;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.Unit;
 import net.minecraft.core.BlockPos;
@@ -28,9 +29,11 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     public void tick() {
         if (buildingTarget != null) {
             calcMoveTarget();
-            if (buildingTarget.getBlocksPlaced() >= buildingTarget.getBlocksTotal())
-                buildingTarget = null;
-
+            if (buildingTarget.getBlocksPlaced() >= buildingTarget.getBlocksTotal()) {
+                if (buildingTarget instanceof Farm)
+                    ((Unit) mob).getGatherResourceGoal().setTargetResource("Food");
+                stopBuilding();
+            }
             if (isBuilding()) {
                 BlockPos bp = BuildingUtils.getCentrePos(buildingTarget.getBlocks());
                 this.mob.getLookControl().setLookAt(bp.getX(), bp.getY(), bp.getZ());

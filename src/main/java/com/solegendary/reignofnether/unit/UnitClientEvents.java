@@ -330,28 +330,21 @@ public class UnitClientEvents {
 
         // draw outlines on all (pre)selected units but only draw once per unit based on conditions
         // don't render preselection outlines if mousing over HUD
-        for (int idToDraw : unitIdsToDraw) {
-            Entity entity = MC.level.getEntity(idToDraw);
-            if (entity != null) {
-                if (preselectedUnitIds.contains(idToDraw) &&
-                        isLeftClickAttack() &&
-                        !targetingSelf() && !HudClientEvents.isMouseOverAnyButtonOrHud())
-                    MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f,0.3f, 1.0f);
-                else if (selectedUnitIds.contains(idToDraw))
-                    MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f);
-                else if (preselectedUnitIds.contains(idToDraw) && !HudClientEvents.isMouseOverAnyButtonOrHud())
-                    MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f);
+        if (OrthoviewClientEvents.isEnabled()) {
+            for (int idToDraw : unitIdsToDraw) {
+                Entity entity = MC.level.getEntity(idToDraw);
+                if (entity != null) {
+                    if (preselectedUnitIds.contains(idToDraw) &&
+                            isLeftClickAttack() &&
+                            !targetingSelf() && !HudClientEvents.isMouseOverAnyButtonOrHud())
+                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 1.0f);
+                    else if (selectedUnitIds.contains(idToDraw))
+                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f);
+                    else if (preselectedUnitIds.contains(idToDraw) && !HudClientEvents.isMouseOverAnyButtonOrHud())
+                        MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f);
+                }
             }
         }
-
-
-        /*
-        for (int unitId : UnitServerEvents.getAllUnitIds()) {
-            Unit unit = (Unit) MC.level.getEntity(unitId);
-            if (unit != null && unit.isWorker() && unit.getGatherWoodGoal() != null)
-                if (unit.getGatherWoodGoal().getGatherTarget() != null)
-                    MyRenderer.drawBlockOutline(evt.getPoseStack(), unit.getGatherWoodGoal().getGatherTarget(), 1.0f);
-        }*/
     }
 
     public static boolean targetingSelf() {

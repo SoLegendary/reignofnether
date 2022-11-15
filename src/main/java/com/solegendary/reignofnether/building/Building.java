@@ -13,6 +13,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.level.BlockEvent;
@@ -28,6 +29,7 @@ public abstract class Building {
     private final static int BASE_MS_PER_BUILD = 50; // time taken to build each block with 1 villager assigned;
 
     public String name;
+    public static String structureName;
     public LevelAccessor level;
     BlockPos originPos;
     Rotation rotation;
@@ -36,13 +38,13 @@ public abstract class Building {
     public int msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
 
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
-    public final float minBlocksPercent = 0.25f;
+    protected float minBlocksPercent = 0.3f;
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
-    public int explosionCount = 0;
-    public float explodeChance = 0.5f;
-    public float explodeRadius = 2.0f;
-    public float fireThreshold = 0.75f; // if building has less %hp than this, explosions caused can make fires
+    protected int explosionCount = 0;
+    protected float explodeChance = 0.5f;
+    protected float explodeRadius = 2.0f;
+    protected float fireThreshold = 0.75f; // if building has less %hp than this, explosions caused can make fires
 
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
     public String ownerName;
@@ -62,17 +64,17 @@ public abstract class Building {
         this.ownerName = ownerName;
     }
 
-    public int getBuilderCount(ServerLevel level) {
-        int builderCount = 0;
+    public ArrayList<Unit> getBuilders(Level level) {
+        ArrayList<Unit> builders = new ArrayList<>();
         for (int id : UnitServerEvents.getAllUnitIds()) {
             Entity entity = level.getEntity(id);
-            if (entity instanceof Unit) {
-                BuildRepairGoal goal = ((Unit) entity).getBuildRepairGoal();
+            if (entity instanceof Unit unit) {
+                BuildRepairGoal goal = unit.getBuildRepairGoal();
                 if (goal != null && goal.getBuildingTarget() == this && goal.isBuilding())
-                    builderCount += 1;
+                    builders.add(unit);
             }
         }
-        return builderCount;
+        return builders;
     }
 
     public ArrayList<BuildingBlock> getBlocks() {
@@ -189,6 +191,10 @@ public abstract class Building {
     // only explode a quarter of the blocks to avoid lag
     public void destroy(ServerLevel level) {
         this.blocks.forEach((BuildingBlock block) -> {
+            if (block.getBlockState().getMaterial().isLiquid()) {
+                BlockState air = Blocks.AIR.defaultBlockState();
+                level.setBlockAndUpdate(block.getBlockPos(), air);
+            }
             level.destroyBlock(block.getBlockPos(), false);
             if (block.isPlaced) {
                 int x = block.getBlockPos().getX();
@@ -228,6 +234,10 @@ public abstract class Building {
         }
     }
 
+    public void onBuilt() {
+        isBuilt = true;
+    }
+
     public void tick(Level level) {
         this.tickAge += 1;
 
@@ -242,12 +252,12 @@ public abstract class Building {
         float blocksPlaced = getBlocksPlaced();
         float blocksTotal = getBlocksTotal();
 
-        if (blocksPlaced >= blocksTotal)
-            isBuilt = true;
+        if (blocksPlaced >= blocksTotal && !isBuilt)
+            onBuilt();
 
         if (!level.isClientSide()) {
             ServerLevel serverLevel = (ServerLevel) level;
-            int builderCount = getBuilderCount(serverLevel);
+            int builderCount = getBuilders(serverLevel).size();
 
             // TODO: keep the surrounding chunks loaded or else the building becomes unselectable when unloaded
 

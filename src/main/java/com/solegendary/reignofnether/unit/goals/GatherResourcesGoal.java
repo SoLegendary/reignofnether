@@ -25,12 +25,53 @@ import java.util.function.Predicate;
 public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     private static final int REACH_RANGE = 4;
+    private static final int REPLANT_TICKS_MAX = 20;
     private static final int BLOCK_BREAK_TICKS_MAX = 100;
-    private int breakTicksLeft = BLOCK_BREAK_TICKS_MAX;
+    private int ticksLeft = BLOCK_BREAK_TICKS_MAX;
 
     private BlockPos gatherTarget = null;
     private String targetResourceName = "None"; // if !None, will passively target blocks around it
     private List<Block> targetResourceBlocks = null;
+
+    // whenever we attempt to assign a block as a target it must pass this test
+    private final Predicate<BlockPos> BLOCK_CONDITION = bp -> {
+        BlockState bs = mob.level.getBlockState(bp);
+        BlockState bsAbove = mob.level.getBlockState(bp.above());
+
+        if (bs.getBlock() == Blocks.FARMLAND) {
+            System.out.println(bsAbove.getBlock().getName().getString());
+            if (!bsAbove.isAir() || !canAffordReplant() || bs.getValue(BlockStateProperties.MOISTURE) != 7)
+                return false;
+        }
+        // is not part of a building and
+        else if (BuildingUtils.isPosPartOfAnyBuilding(mob.level, bp, true))
+            return false;
+
+        // not covered by solid blocks and
+        boolean hasClearNeighbour = false;
+        for (BlockPos adjBp : List.of(bp.north(), bp.south(), bp.east(), bp.west(), bp.above(), bp.below()))
+            if (ResourceBlocks.CLEAR_MATERIALS.contains(mob.level.getBlockState(adjBp).getMaterial()))
+                hasClearNeighbour = true;
+        if (!hasClearNeighbour)
+            return false;
+
+        // not targeting a young farmable block (eg. wheat)
+        if (targetResourceName.equals("Food") &&
+                ResourceBlocks.FARMABLE_BLOCKS.contains(bs.getBlock()) &&
+                getReplantBlockStateFromExistingCrop(bp) == null)
+            return false;
+
+        // not targeted by another worker
+        for (int unitId : UnitServerEvents.getAllUnitIds()) {
+            Unit unit = (Unit) mob.level.getEntity(unitId);
+            if (unit != null && unit.isWorker() && unit.getGatherResourceGoal() != null && unitId != this.mob.getId()) {
+                BlockPos otherUnitTarget = unit.getGatherResourceGoal().getGatherTarget();
+                if (otherUnitTarget != null && otherUnitTarget.equals(bp))
+                    return false;
+            }
+        }
+        return true;
+    };
 
     public GatherResourcesGoal(PathfinderMob mob, double speedModifier) {
         super(mob, true, speedModifier, REACH_RANGE);
@@ -49,44 +90,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         }
 
         if (gatherTarget == null && targetResourceBlocks != null) {
-
-            Predicate<BlockPos> condition = bp -> {
-                BlockState bs = mob.level.getBlockState(bp);
-                BlockState bsAbove = mob.level.getBlockState(bp.above());
-                System.out.println(bsAbove.getBlock().getName().getString());
-                if (bs.getBlock() == Blocks.FARMLAND)
-                    if (!bsAbove.isAir() || !canAffordReplant() || bs.getValue(BlockStateProperties.MOISTURE) != 7)
-                        return false;
-
-                // not covered by solid blocks and
-                boolean hasClearNeighbour = false;
-                for (BlockPos adjBp : List.of(bp.north(), bp.south(), bp.east(), bp.west(), bp.above(), bp.below()))
-                    if (ResourceBlocks.CLEAR_MATERIALS.contains(mob.level.getBlockState(adjBp).getMaterial()))
-                        hasClearNeighbour = true;
-                if (!hasClearNeighbour)
-                    return false;
-
-                // not targeting a young farmable block (eg. wheat)
-                if (targetResourceName.equals("Food") &&
-                    ResourceBlocks.FARMABLE_BLOCKS.contains(bs.getBlock()) &&
-                    getReplantBlockStateFromExistingCrop(bp) == null)
-                    return false;
-
-                // is not part of a building and
-                if (BuildingUtils.isPosPartOfAnyBuilding(mob.level, bp, true))
-                    return false;
-                // not targeted by another worker
-                for (int unitId : UnitServerEvents.getAllUnitIds()) {
-                    Unit unit = (Unit) mob.level.getEntity(unitId);
-                    if (unit != null && unit.isWorker() && unit.getGatherResourceGoal() != null && unitId != this.mob.getId()) {
-                        BlockPos otherUnitTarget = unit.getGatherResourceGoal().getGatherTarget();
-                        if (otherUnitTarget != null && otherUnitTarget.equals(bp))
-                            return false;
-                    }
-                }
-                return true;
-            };
-
             this.gatherTarget = MiscUtil.findNearestBlock(
                 mob.level,
                 new Vec3i(
@@ -95,7 +98,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                     mob.getEyePosition().z
                 ), 5,
                 targetResourceBlocks,
-                condition);
+                    BLOCK_CONDITION);
         }
 
         if (gatherTarget != null) {
@@ -112,17 +115,24 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 {
                     // replant crops on empty farmland
                     if (mob.level.getBlockState(gatherTarget).getBlock() == Blocks.FARMLAND) {
-                        BlockState replantBs = Blocks.WHEAT.defaultBlockState();
-                        if (canAffordReplant()) {
-                            ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -5, 0));
-                            mob.level.setBlockAndUpdate(gatherTarget.above(), replantBs);
-                            gatherTarget = null;
+                        ticksLeft -= 1;
+                        ticksLeft = Math.min(ticksLeft, REPLANT_TICKS_MAX);
+                        if (ticksLeft <= 0) {
+                            ticksLeft = REPLANT_TICKS_MAX;
+
+                            BlockState replantBs = Blocks.WHEAT.defaultBlockState();
+                            if (canAffordReplant()) {
+                                ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -5, 0));
+                                mob.level.setBlockAndUpdate(gatherTarget.above(), replantBs);
+                                gatherTarget = null;
+                            }
                         }
                     }
                     else {
-                        breakTicksLeft -= 1;
-                        if (breakTicksLeft <= 0) {
-                            breakTicksLeft = BLOCK_BREAK_TICKS_MAX;
+                        ticksLeft -= 1;
+                        ticksLeft = Math.min(ticksLeft, BLOCK_BREAK_TICKS_MAX);
+                        if (ticksLeft <= 0) {
+                            ticksLeft = BLOCK_BREAK_TICKS_MAX;
 
                             BlockState replantBs = getReplantBlockStateFromExistingCrop(gatherTarget);
 
@@ -194,7 +204,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     @Override
     public void setMoveTarget(@Nullable BlockPos bp) {
         super.setMoveTarget(bp);
-        this.gatherTarget = bp;
+        if (BLOCK_CONDITION.test(bp))
+            this.gatherTarget = bp;
         if (bp != null)
             this.setTargetResource(ResourceBlocks.getResourceBlockType(bp, this.mob.level));
     }
