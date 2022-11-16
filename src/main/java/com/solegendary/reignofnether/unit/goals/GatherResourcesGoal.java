@@ -1,19 +1,15 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.resources.ResourceBlocks;
-import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -25,22 +21,27 @@ import java.util.function.Predicate;
 public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     private static final int REACH_RANGE = 4;
-    private static final int REPLANT_TICKS_MAX = 20;
-    private static final int BLOCK_BREAK_TICKS_MAX = 100;
-    private int ticksLeft = BLOCK_BREAK_TICKS_MAX;
+    private static final int DEFAULT_MAX_TICKS = 100; // actual ticks may be lower, depending on the ResourceBlock targeted
+    private int ticksLeft = DEFAULT_MAX_TICKS;
 
     private BlockPos gatherTarget = null;
-    private String targetResourceName = "None"; // if !None, will passively target blocks around it
-    private List<Block> targetResourceBlocks = null;
+    private ResourceName targetResourceName = ResourceName.NONE; // if !None, will passively target blocks around it
+    private ResourceBlock targetResourceBlock = null;
 
     // whenever we attempt to assign a block as a target it must pass this test
     private final Predicate<BlockPos> BLOCK_CONDITION = bp -> {
         BlockState bs = mob.level.getBlockState(bp);
         BlockState bsAbove = mob.level.getBlockState(bp.above());
+        ResourceBlock resBlock = ResourceBlocks.getResourceBlock(bp, mob.level);
+
+        // is a valid resource block and meets the target ResourceBlock's blockstate condition
+        if (resBlock == null || resBlock.resourceName != targetResourceName)
+            return false;
+        if (!resBlock.blockStateTest.test(bs))
+            return false;
 
         if (bs.getBlock() == Blocks.FARMLAND) {
-            System.out.println(bsAbove.getBlock().getName().getString());
-            if (!bsAbove.isAir() || !canAffordReplant() || bs.getValue(BlockStateProperties.MOISTURE) != 7)
+            if (!bsAbove.isAir() || !canAffordReplant())
                 return false;
         }
         // is not part of a building and
@@ -53,12 +54,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             if (ResourceBlocks.CLEAR_MATERIALS.contains(mob.level.getBlockState(adjBp).getMaterial()))
                 hasClearNeighbour = true;
         if (!hasClearNeighbour)
-            return false;
-
-        // not targeting a young farmable block (eg. wheat)
-        if (targetResourceName.equals("Food") &&
-                ResourceBlocks.FARMABLE_BLOCKS.contains(bs.getBlock()) &&
-                getReplantBlockStateFromExistingCrop(bp) == null)
             return false;
 
         // not targeted by another worker
@@ -80,34 +75,29 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     // move towards the targeted block and start gathering it
     public void tick() {
 
-        if (gatherTarget != null) {
-            // if the block is no longer valid (destroyed or somehow badly targeted)
-            String resourceBlockType = ResourceBlocks.getResourceBlockType(this.gatherTarget, mob.level);
-            if (resourceBlockType.equals("None"))
-                gatherTarget = null;
-            else // keep persistently moving towards the target
-                this.setMoveTarget(gatherTarget);
-        }
-
-        if (gatherTarget == null && targetResourceBlocks != null) {
-            this.gatherTarget = MiscUtil.findNearestBlock(
+        if (gatherTarget == null && targetResourceName != ResourceName.NONE) {
+            gatherTarget = MiscUtil.findNearestBlock(
                 mob.level,
                 new Vec3i(
                     mob.getEyePosition().x,
                     mob.getEyePosition().y,
                     mob.getEyePosition().z
-                ), 5,
-                targetResourceBlocks,
+                ), REACH_RANGE + 1,
                     BLOCK_CONDITION);
+
+            if (gatherTarget != null)
+                targetResourceBlock = ResourceBlocks.getResourceBlock(gatherTarget, mob.level);
         }
 
         if (gatherTarget != null) {
             this.setMoveTarget(gatherTarget);
 
             // if the block is no longer valid (destroyed or somehow badly targeted)
-            String resourceBlockType = ResourceBlocks.getResourceBlockType(this.gatherTarget, mob.level);
-            if (resourceBlockType.equals("None"))
-                gatherTarget = null;
+            ResourceName resourceBlockType = ResourceBlocks.getResourceBlockName(this.gatherTarget, mob.level);
+            if (resourceBlockType == ResourceName.NONE)
+                removeGatherTarget();
+            else // keep persistently moving towards the target
+                this.setMoveTarget(gatherTarget);
 
             if (isGathering()) {
                 mob.getLookControl().setLookAt(gatherTarget.getX(), gatherTarget.getY(), gatherTarget.getZ());
@@ -116,41 +106,30 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                     // replant crops on empty farmland
                     if (mob.level.getBlockState(gatherTarget).getBlock() == Blocks.FARMLAND) {
                         ticksLeft -= 1;
-                        ticksLeft = Math.min(ticksLeft, REPLANT_TICKS_MAX);
+                        ticksLeft = Math.min(ticksLeft, ResourceBlocks.REPLANT_TICKS_MAX);
                         if (ticksLeft <= 0) {
-                            ticksLeft = REPLANT_TICKS_MAX;
+                            ticksLeft = DEFAULT_MAX_TICKS;
 
-                            BlockState replantBs = Blocks.WHEAT.defaultBlockState();
                             if (canAffordReplant()) {
-                                ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -5, 0));
-                                mob.level.setBlockAndUpdate(gatherTarget.above(), replantBs);
-                                gatherTarget = null;
+                                ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -ResourceBlocks.REPLANT_WOOD_COST, 0));
+                                mob.level.setBlockAndUpdate(gatherTarget.above(), ResourceBlocks.REPLANT_BLOCKSTATE);
+                                removeGatherTarget();
                             }
                         }
                     }
                     else {
                         ticksLeft -= 1;
-                        ticksLeft = Math.min(ticksLeft, BLOCK_BREAK_TICKS_MAX);
+                        ticksLeft = Math.min(ticksLeft, targetResourceBlock.ticksToGather);
                         if (ticksLeft <= 0) {
-                            ticksLeft = BLOCK_BREAK_TICKS_MAX;
-
-                            BlockState replantBs = getReplantBlockStateFromExistingCrop(gatherTarget);
+                            ticksLeft = DEFAULT_MAX_TICKS;
 
                             if (mob.level.destroyBlock(gatherTarget, false)) {
                                 ResourcesServerEvents.addSubtractResources(new Resources(
                                         ((Unit) mob).getOwnerName(),
-                                        resourceBlockType.equals("Food") ? 50 : 0,
-                                        resourceBlockType.equals("Wood") ? 10 : 0,
-                                        resourceBlockType.equals("Ore") ? 25 : 0
+                                        resourceBlockType.equals(ResourceName.FOOD) ? targetResourceBlock.resourceValue : 0,
+                                        resourceBlockType.equals(ResourceName.WOOD) ? targetResourceBlock.resourceValue : 0,
+                                        resourceBlockType.equals(ResourceName.ORE) ? targetResourceBlock.resourceValue : 0
                                 ));
-                                // replant a crop that we just collected
-                                if (canAffordReplant()) {
-                                    ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -5, 0));
-                                    if (replantBs != null) {
-                                        mob.level.setBlockAndUpdate(gatherTarget, replantBs);
-                                        gatherTarget = null;
-                                    }
-                                }
                             }
                         }
                     }
@@ -161,58 +140,44 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     // only count as gathering if in range of the target
     public boolean isGathering() {
-        if (this.gatherTarget != null && !ResourceBlocks.getResourceBlockType(this.gatherTarget, mob.level).equals("None"))
-            return Math.sqrt(gatherTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) <= REACH_RANGE + 1;
+        if (this.gatherTarget != null && this.targetResourceBlock != null &&
+            ResourceBlocks.getResourceBlockName(this.gatherTarget, mob.level) != ResourceName.NONE)
+            return Math.sqrt(gatherTarget.distSqr(new Vec3i(mob.getX(), mob.getEyeY(), mob.getZ()))) <= REACH_RANGE + 1;
         return false;
     }
 
     private boolean canAffordReplant() {
-        return ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), "wood", 5);
+        return ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), ResourceName.WOOD, ResourceBlocks.REPLANT_WOOD_COST);
     }
 
-    // returns the blockstate to be placed for a farmable block
-    // returns null if no replant is needed or the block is not fully grown
-    public BlockState getReplantBlockStateFromExistingCrop(BlockPos bp) {
-        if (!targetResourceName.equals("Food"))
-            return null;
-
-        BlockState bs = mob.level.getBlockState(bp);
-        if (ResourceBlocks.FARMABLE_BLOCKS.contains(bs.getBlock())) {
-            if (bs.getBlock() == Blocks.BEETROOTS && bs.getValue(BlockStateProperties.AGE_3) == 3)
-                return bs.setValue(BlockStateProperties.AGE_3, 0);
-            else if (bs.getValue(BlockStateProperties.AGE_7) == 7)
-                return bs.setValue(BlockStateProperties.AGE_7, 0);
-        }
-        return null;
-    }
-
-    public void setTargetResource(String resourceName) {
+    public void setTargetResourceName(ResourceName resourceName) {
         targetResourceName = resourceName;
-        switch(targetResourceName) {
-            case "None" -> targetResourceBlocks = null;
-            case "Food" -> targetResourceBlocks = ResourceBlocks.FOOD_BLOCKS;
-            case "Wood" -> targetResourceBlocks = ResourceBlocks.WOOD_BLOCKS;
-            case "Ore" -> targetResourceBlocks = ResourceBlocks.ORE_BLOCKS;
-        }
     }
 
-    public String getTargetResourceName() {
+    public ResourceName getTargetResourceName() {
         return targetResourceName;
     }
 
-    // is both the move and the gather target
     @Override
     public void setMoveTarget(@Nullable BlockPos bp) {
         super.setMoveTarget(bp);
-        if (BLOCK_CONDITION.test(bp))
+        if (BLOCK_CONDITION.test(bp)) {
             this.gatherTarget = bp;
-        if (bp != null)
-            this.setTargetResource(ResourceBlocks.getResourceBlockType(bp, this.mob.level));
+            this.targetResourceBlock = ResourceBlocks.getResourceBlock(gatherTarget, this.mob.level);
+        }
     }
 
+    // stop attempting to gather the current target but continue searching
+    public void removeGatherTarget() {
+        gatherTarget = null;
+        targetResourceBlock = null;
+        ticksLeft = DEFAULT_MAX_TICKS;
+    }
+
+    // stop gathering and searching entirely
     public void stopGathering() {
-        this.gatherTarget = null;
-        this.setTargetResource("None");
+        removeGatherTarget();
+        this.setTargetResourceName(ResourceName.NONE);
         super.stop();
     }
 

@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
@@ -126,11 +127,11 @@ public class UnitClientEvents {
         }
     }
 
-    public static String getSelectedUnitResourceTarget() {
+    public static ResourceName getSelectedUnitResourceTarget() {
         Entity entity = HudClientEvents.hudSelectedEntity;
         if (entity instanceof Unit unit && unit.isWorker())
             return unit.getGatherResourceGoal().getTargetResourceName();
-        return "None";
+        return ResourceName.NONE;
     }
 
     @SubscribeEvent

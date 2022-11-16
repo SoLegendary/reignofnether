@@ -34,17 +34,17 @@ public class ResourcesServerEvents {
         }
     }
 
-    public static boolean canAfford(String ownerName, String resourceType, int cost) {
+    public static boolean canAfford(String ownerName, ResourceName resourceName, int cost) {
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName)) {
-                switch(resourceType.toLowerCase()) {
-                    case "food" -> {
+                switch(resourceName) {
+                    case FOOD -> {
                         return resources.food >= cost;
                     }
-                    case "wood" -> {
+                    case WOOD -> {
                         return resources.wood >= cost;
                     }
-                    case "ore" -> {
+                    case ORE -> {
                         return resources.ore >= cost;
                     }
                 }

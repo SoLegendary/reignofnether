@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
 import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
 import com.solegendary.reignofnether.building.productionitems.VillagerUnitProd;
 import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
+import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
@@ -133,9 +134,9 @@ public abstract class ProductionBuilding extends Building {
                             ResourcesClientboundPacket.warnInsufficientPopulation(building.ownerName);
                         else
                             ResourcesClientboundPacket.warnInsufficientResources(building.ownerName,
-                                ResourcesServerEvents.canAfford(building.ownerName, "food", prodItem.foodCost),
-                                ResourcesServerEvents.canAfford(building.ownerName, "wood", prodItem.woodCost),
-                                ResourcesServerEvents.canAfford(building.ownerName, "ore", prodItem.oreCost)
+                                ResourcesServerEvents.canAfford(building.ownerName, ResourceName.FOOD, prodItem.foodCost),
+                                ResourcesServerEvents.canAfford(building.ownerName, ResourceName.WOOD, prodItem.woodCost),
+                                ResourcesServerEvents.canAfford(building.ownerName, ResourceName.ORE, prodItem.oreCost)
                             );
                     }
                 }

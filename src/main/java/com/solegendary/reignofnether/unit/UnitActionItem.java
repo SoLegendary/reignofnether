@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.resources.ResourceBlocks;
+import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.units.CreeperUnit;
 import net.minecraft.core.BlockPos;
@@ -50,8 +51,11 @@ public class UnitActionItem {
                 if (level.getEntity(id) instanceof Unit unit) {
                     unit.resetBehaviours();
 
-                    if (unit.isWorker() && !ResourceBlocks.getResourceBlockType(preselectedBlockPos, level).equals("None"))
+                    ResourceName resName = ResourceBlocks.getResourceBlockName(preselectedBlockPos, level);
+                    if (unit.isWorker() && resName != ResourceName.NONE) {
+                        unit.getGatherResourceGoal().setTargetResourceName(resName);
                         unit.getGatherResourceGoal().setMoveTarget(preselectedBlockPos);
+                    }
                     else
                         unit.setMoveTarget(preselectedBlockPos);
                 }
@@ -117,8 +121,8 @@ public class UnitActionItem {
                     GatherResourcesGoal goal = unit.getGatherResourceGoal();
                     if (unit.isWorker() && goal != null) {
                         unit.resetBehaviours();
+                        goal.setTargetResourceName(ResourceName.FOOD);
                         goal.setMoveTarget(preselectedBlockPos);
-                        goal.setTargetResource("Food");
                     }
                 }
             }
@@ -128,13 +132,13 @@ public class UnitActionItem {
                 if (level.getEntity(id) instanceof Unit unit) {
                     GatherResourcesGoal goal = unit.getGatherResourceGoal();
                     if (unit.isWorker() && goal != null) {
-                        String targetResourceName = goal.getTargetResourceName();
+                        ResourceName targetResourceName = goal.getTargetResourceName();
                         unit.resetBehaviours();
                         switch (targetResourceName) {
-                            case "None" -> goal.setTargetResource("Food");
-                            case "Food" -> goal.setTargetResource("Wood");
-                            case "Wood" -> goal.setTargetResource("Ore");
-                            case "Ore" -> goal.setTargetResource("None");
+                            case NONE -> goal.setTargetResourceName(ResourceName.FOOD);
+                            case FOOD -> goal.setTargetResourceName(ResourceName.WOOD);
+                            case WOOD -> goal.setTargetResourceName(ResourceName.ORE);
+                            case ORE -> goal.setTargetResourceName(ResourceName.NONE);
                         }
                     }
                 }

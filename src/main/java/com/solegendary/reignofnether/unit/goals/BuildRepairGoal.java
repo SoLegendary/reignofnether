@@ -1,10 +1,10 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.Farm;
+import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.Unit;
 import net.minecraft.core.BlockPos;
@@ -31,7 +31,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
             calcMoveTarget();
             if (buildingTarget.getBlocksPlaced() >= buildingTarget.getBlocksTotal()) {
                 if (buildingTarget instanceof Farm)
-                    ((Unit) mob).getGatherResourceGoal().setTargetResource("Food");
+                    ((Unit) mob).getGatherResourceGoal().setTargetResourceName(ResourceName.FOOD);
                 stopBuilding();
             }
             if (isBuilding()) {

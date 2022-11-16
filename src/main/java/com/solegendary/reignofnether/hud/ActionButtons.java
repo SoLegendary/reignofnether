@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -37,7 +38,7 @@ public class ActionButtons {
             Button.itemIconSize,
             null, // changes depending on the gather target
             Keybinding.gather,
-            () -> !UnitClientEvents.getSelectedUnitResourceTarget().equals("None"),
+            () -> UnitClientEvents.getSelectedUnitResourceTarget() != ResourceName.NONE,
             () -> false,
             () -> true,
             () -> sendUnitCommand(UnitAction.TOGGLE_GATHER_TARGET),

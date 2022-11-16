@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
@@ -72,9 +73,9 @@ public class BuildingServerEvents {
             }
             else
                 ResourcesClientboundPacket.warnInsufficientResources(building.ownerName,
-                    ResourcesServerEvents.canAfford(building.ownerName, "food", building.foodCost),
-                    ResourcesServerEvents.canAfford(building.ownerName, "wood", building.woodCost),
-                    ResourcesServerEvents.canAfford(building.ownerName, "ore", building.oreCost)
+                    ResourcesServerEvents.canAfford(building.ownerName, ResourceName.FOOD, building.foodCost),
+                    ResourcesServerEvents.canAfford(building.ownerName, ResourceName.WOOD, building.woodCost),
+                    ResourcesServerEvents.canAfford(building.ownerName, ResourceName.ORE, building.oreCost)
                 );
         }
     }

@@ -379,10 +379,10 @@ public class HudClientEvents {
                 // GATHER button does not have a static icon
                 if (actionButton == ActionButtons.GATHER) {
                     switch(((Unit) hudSelectedEntity).getGatherResourceGoal().getTargetResourceName()) {
-                        case "None" -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/no_gather.png");
-                        case "Food" -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/hoe.png");
-                        case "Wood" -> actionButton.iconResource =  new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/axe.png");
-                        case "Ore" -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/pickaxe.png");
+                        case NONE -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/no_gather.png");
+                        case FOOD -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/hoe.png");
+                        case WOOD -> actionButton.iconResource =  new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/axe.png");
+                        case ORE -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/pickaxe.png");
                     }
                     actionButton.tooltipLines = List.of(
                         FormattedCharSequence.forward("Gather Resources (" + UnitClientEvents.getSelectedUnitResourceTarget() + ")", Style.EMPTY),

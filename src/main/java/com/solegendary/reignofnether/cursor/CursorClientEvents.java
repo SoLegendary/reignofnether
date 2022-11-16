@@ -5,6 +5,7 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.resources.ResourceBlocks;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -396,11 +397,19 @@ public class CursorClientEvents {
         for (BlockPos block : blocks) {
             double dist = new Vec3(block.getX(), block.getY(), block.getZ())
                     .distanceTo(new Vec3(cursorWorldPosNear.x, cursorWorldPosNear.y, cursorWorldPosNear.z));
-            if (MC.level.getBlockState(block).getMaterial().isSolidBlocking()
-                    && MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, lookVector, new AABB(block))
-                    && dist < smallestDist ) {
-                smallestDist = dist;
-                bestBp = block;
+
+            if (MC.level != null) {
+                // if we have a worker selected then include resource blocks that would otherwise be ignored like plants
+                boolean isBlockSelectableResource = false;
+                if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.isWorker())
+                    isBlockSelectableResource = ResourceBlocks.getResourceBlock(block, MC.level) != null;
+
+                if ((MC.level.getBlockState(block).getMaterial().isSolidBlocking() || isBlockSelectableResource) &&
+                    MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, lookVector, new AABB(block)) &&
+                    dist < smallestDist ) {
+                    smallestDist = dist;
+                    bestBp = block;
+                }
             }
         }
         return bestBp;
