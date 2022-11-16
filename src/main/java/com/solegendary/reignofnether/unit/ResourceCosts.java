@@ -5,6 +5,9 @@ package com.solegendary.reignofnether.unit;
 // and we can't declare static getters in the Unit interface
 public class ResourceCosts {
 
+    public static final int REPLANT_WOOD_COST = 5;
+    public static final int MAX_POPULATION = 100; // max possible pop you can have regardless of buildings
+
     public static class Creeper {
         public static final int FOOD = 50;
         public static final int WOOD = 0;
@@ -57,6 +60,4 @@ public class ResourceCosts {
         public static final int ORE = 0;
         public static final int SUPPLY = 0;
     }
-
-    public static final int MAX_POPULATION = 100; // max possible pop you can have regardless of buildings
 }

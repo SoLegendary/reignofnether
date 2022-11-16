@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -111,7 +112,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                             ticksLeft = DEFAULT_MAX_TICKS;
 
                             if (canAffordReplant()) {
-                                ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -ResourceBlocks.REPLANT_WOOD_COST, 0));
+                                ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -ResourceCosts.REPLANT_WOOD_COST, 0));
                                 mob.level.setBlockAndUpdate(gatherTarget.above(), ResourceBlocks.REPLANT_BLOCKSTATE);
                                 removeGatherTarget();
                             }
@@ -147,7 +148,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     private boolean canAffordReplant() {
-        return ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), ResourceName.WOOD, ResourceBlocks.REPLANT_WOOD_COST);
+        return ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), ResourceName.WOOD, ResourceCosts.REPLANT_WOOD_COST);
     }
 
     public void setTargetResourceName(ResourceName resourceName) {

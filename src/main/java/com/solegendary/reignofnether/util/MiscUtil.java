@@ -26,6 +26,7 @@ public class MiscUtil {
 
     // search outward and return the first block of the type in the blocks list that matches the predicate
     public static BlockPos findNearestBlock(Level level, Vec3i originPos, int dist, Predicate<BlockPos> condition) {
+        ArrayList<Vec3i> checkedBlocks = new ArrayList<>();
 
         for (int d = 0; d <= dist; d++)
             for (int x = -dist; x <= dist; x++)
@@ -36,7 +37,8 @@ public class MiscUtil {
                             originPos.getY() + y,
                             originPos.getZ() + z
                         );
-                        if (pos.distSqr(originPos) >= Math.pow(d,2)) {
+                        if (!checkedBlocks.contains(pos)) {
+                            checkedBlocks.add(pos);
                             BlockPos bp = new BlockPos(pos.getX(), pos.getY(), pos.getZ());
                             Block block = level.getBlockState(bp).getBlock();
                             if (condition.test(bp))

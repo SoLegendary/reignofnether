@@ -23,4 +23,13 @@ public class ResourceBlock {
         this.resourceName = resourceName;
         this.blockStateTest = blockStateTest;
     }
+
+    public ResourceBlock(String name, List<Block> validBlocks, int ticksToGather, int resourceValue, ResourceName resourceName) {
+        this.name = name;
+        this.validBlocks = validBlocks;
+        this.ticksToGather = ticksToGather;
+        this.resourceValue = resourceValue;
+        this.resourceName = resourceName;
+        this.blockStateTest = (bs) -> true;
+    }
 }
