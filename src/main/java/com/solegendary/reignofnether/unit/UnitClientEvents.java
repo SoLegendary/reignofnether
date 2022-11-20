@@ -16,11 +16,14 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.entity.LevelCallback;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -30,6 +33,9 @@ import java.util.*;
 import java.util.List;
 
 public class UnitClientEvents {
+
+    public static ArrayList<Entity> allEntities = new ArrayList<>();
+
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -139,7 +145,7 @@ public class UnitClientEvents {
         int entityId = evt.getEntity().getId();
 
         if (evt.getEntity() instanceof Unit unit)
-            System.out.println("unit left clientside");
+            System.out.println("unit left clientside: " + entityId);
         preselectedUnitIds.removeIf(e -> e == entityId);
         selectedUnitIds.removeIf(e -> e == entityId);
         allUnitIds.removeIf(e -> e == entityId);
@@ -152,11 +158,14 @@ public class UnitClientEvents {
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
         Entity entity = evt.getEntity();
         if (entity instanceof Unit unit && evt.getLevel().isClientSide) {
+
+            //if (OrthoviewClientEvents.isEnabled())
+            //    allEntities.add(evt.getEntity());
+
             allUnitIds.add(entity.getId());
             unit.initialiseGoals(); // for clientside data tracking
-            System.out.println("unit joined clientside");
+            System.out.println("unit joined clientside: " + entity.getId());
         }
-
     }
 
     @SubscribeEvent
