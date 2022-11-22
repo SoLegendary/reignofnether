@@ -278,7 +278,7 @@ public class HudClientEvents {
         blitY = screenHeight - iconFrameSize * 2 - 10;
 
         for (LivingEntity unit : units) {
-            if (UnitClientEvents.getPlayerToEntityRelationship(unit.getId()) == Relationship.OWNED &&
+            if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED &&
                     unitButtons.size() < (buttonsPerRow * 2)) {
                 // mob head icon
                 String unitName = getSimpleEntityName(unit);
@@ -294,8 +294,8 @@ public class HudClientEvents {
                     () -> {
                         // click to select this unit type as a group
                         if (getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
-                            UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
-                            UnitClientEvents.addSelectedUnitId(unit.getId());
+                            UnitClientEvents.setSelectedUnits(new ArrayList<>());
+                            UnitClientEvents.addSelectedUnit(unit);
                         } else { // select this one specific unit
                             hudSelectedEntity = unit;
                         }
@@ -364,9 +364,9 @@ public class HudClientEvents {
         // --------------------------------------------------------
         // Unit action buttons (attack, stop, move, abilities etc.)
         // --------------------------------------------------------
-        ArrayList<Integer> selUnitIds = UnitClientEvents.getSelectedUnitIds();
-        if (selUnitIds.size() > 0 &&
-            UnitClientEvents.getPlayerToEntityRelationship(selUnitIds.get(0)) == Relationship.OWNED) {
+        ArrayList<LivingEntity> selUnits = UnitClientEvents.getSelectedUnits();
+        if (selUnits.size() > 0 &&
+            UnitClientEvents.getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED) {
 
             blitX = 0;
             blitY = screenHeight - iconFrameSize;

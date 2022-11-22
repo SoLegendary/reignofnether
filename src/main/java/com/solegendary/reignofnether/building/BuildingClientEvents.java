@@ -3,8 +3,6 @@ package com.solegendary.reignofnether.building;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.solegendary.reignofnether.building.buildings.VillagerHouse;
-import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -24,14 +22,12 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -339,7 +335,7 @@ public class BuildingClientEvents {
                 Building building = getPreselectedBuilding();
                 if (building != null && CursorClientEvents.getLeftClickAction() == null) {
                     selectedBuilding = building;
-                    UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
+                    UnitClientEvents.setSelectedUnits(new ArrayList<>());
                 }
             }
         }

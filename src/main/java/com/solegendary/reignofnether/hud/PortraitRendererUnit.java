@@ -122,7 +122,7 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
         );
 
         int bgCol = 0x0;
-        switch (UnitClientEvents.getPlayerToEntityRelationship(entity.getId())) {
+        switch (UnitClientEvents.getPlayerToEntityRelationship(entity)) {
             case OWNED    -> bgCol = 0x90000000;
             case FRIENDLY -> bgCol = 0x90009000;
             case NEUTRAL  -> bgCol = 0x90909000;

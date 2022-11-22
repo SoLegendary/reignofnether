@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -66,8 +67,7 @@ public abstract class Building {
 
     public ArrayList<Unit> getBuilders(Level level) {
         ArrayList<Unit> builders = new ArrayList<>();
-        for (int id : UnitServerEvents.getAllUnitIds()) {
-            Entity entity = level.getEntity(id);
+        for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
             if (entity instanceof Unit unit) {
                 BuildRepairGoal goal = unit.getBuildRepairGoal();
                 if (goal != null && goal.getBuildingTarget() == this && goal.isBuilding())

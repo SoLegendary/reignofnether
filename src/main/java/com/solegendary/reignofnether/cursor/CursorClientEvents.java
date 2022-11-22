@@ -21,7 +21,6 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
@@ -67,7 +66,7 @@ public class CursorClientEvents {
         return leftClickAction;
     }
     public static void setLeftClickAction(UnitAction actionName) {
-        if (UnitClientEvents.getSelectedUnitIds().size() > 0)
+        if (UnitClientEvents.getSelectedUnits().size() > 0)
             leftClickAction = actionName;
         else if (actionName == null)
             leftClickAction = null;
@@ -173,7 +172,7 @@ public class CursorClientEvents {
         // TODO: ignore units behind blocks
         List<LivingEntity> nearbyEntities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 10, LivingEntity.class, MC.level);
 
-        UnitClientEvents.setPreselectedUnitIds(new ArrayList<>());
+        UnitClientEvents.setPreselectedUnits(new ArrayList<>());
 
         for (LivingEntity entity : nearbyEntities) {
             // don't let the player select themselves
@@ -184,7 +183,7 @@ public class CursorClientEvents {
             AABB entityaabb = entity.getBoundingBox().inflate(0.1);
 
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, getPlayerLookVector(), entityaabb)) {
-                UnitClientEvents.addPreselectedUnitId(entity.getId());
+                UnitClientEvents.addPreselectedUnit(entity);
                 break; // only allow one moused-over unit at a time
             }
         }
@@ -208,7 +207,7 @@ public class CursorClientEvents {
             );
             for (LivingEntity entity : MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, LivingEntity.class, MC.level)) {
                 if (MyMath.isPointInsideRect3d(uvwp, entity.getBoundingBox().getCenter()) && entity.getId() != MC.player.getId())
-                    UnitClientEvents.addPreselectedUnitId(entity.getId());
+                    UnitClientEvents.addPreselectedUnit(entity);
             }
         }
     }
@@ -273,21 +272,20 @@ public class CursorClientEvents {
             // enact box selection, excluding non-unit mobs
             // for single-click selection, see UnitClientEvents
             // except if attack-moving or nothing is preselected (to prevent deselection)
-            ArrayList<Integer> preselectedUnitIds = UnitClientEvents.getPreselectedUnitIds();
-            if (preselectedUnitIds.size() > 0 && !cursorLeftClickDownPos.equals(cursorLeftClickDragPos)) {
+            ArrayList<LivingEntity> preselectedUnit = UnitClientEvents.getPreselectedUnits();
+            if (preselectedUnit.size() > 0 && !cursorLeftClickDownPos.equals(cursorLeftClickDragPos)) {
 
                 // remove all non-owned entities
                 int nonOwnedEntities = 0;
-                for (int unitId : preselectedUnitIds)
-                    if (UnitClientEvents.getPlayerToEntityRelationship(unitId) == Relationship.OWNED)
+                for (LivingEntity unit : preselectedUnit)
+                    if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
                         nonOwnedEntities += 1;
 
                 if (!Keybinding.shiftMod.isDown() || nonOwnedEntities > 0)
-                    UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
-                for (int unitId : preselectedUnitIds) {
-                    Entity entity = MC.level.getEntity(unitId);
-                    if (UnitClientEvents.getPlayerToEntityRelationship(unitId) == Relationship.OWNED)
-                        UnitClientEvents.addSelectedUnitId(entity.getId());
+                    UnitClientEvents.setSelectedUnits(new ArrayList<>());
+                for (LivingEntity unit : preselectedUnit) {
+                    if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
+                        UnitClientEvents.addSelectedUnit(unit);
                 }
             }
             cursorLeftClickDownPos = new Vec2(-1,-1);
@@ -324,15 +322,15 @@ public class CursorClientEvents {
             Building selBuilding = BuildingClientEvents.getSelectedBuilding();
             if (selBuilding != null && BuildingClientEvents.getPlayerToBuildingRelationship(selBuilding) == Relationship.OWNED)
                 ownAnySelected = true;
-            for (int id : UnitClientEvents.getSelectedUnitIds()) {
-                if (UnitClientEvents.getPlayerToEntityRelationship(id) == Relationship.OWNED) {
+            for (LivingEntity entity : UnitClientEvents.getSelectedUnits()) {
+                if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED) {
                     ownAnySelected = true;
                     break;
                 }
             }
             if (!OrthoviewClientEvents.isCameraMovingByMouse() &&
                 !leftClickDown && ownAnySelected &&
-                UnitClientEvents.getPreselectedUnitIds().size() == 0 && !unitToBuildRepair) {
+                UnitClientEvents.getPreselectedUnits().size() == 0 && !unitToBuildRepair) {
                 MyRenderer.drawBox(evt.getPoseStack(), preselectedBlockPos, 1, 1, 1, rightClickDown ? 0.3f : 0.15f);
                 MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }

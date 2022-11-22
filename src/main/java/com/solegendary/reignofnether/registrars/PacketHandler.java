@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
+import com.solegendary.reignofnether.unit.UnitClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitServerboundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
@@ -34,6 +35,10 @@ public final class PacketHandler {
                 .encoder(UnitServerboundPacket::encode).decoder(UnitServerboundPacket::new)
                 .consumer(UnitServerboundPacket::handle).add();
 
+        INSTANCE.messageBuilder(UnitClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(UnitClientboundPacket::encode).decoder(UnitClientboundPacket::new)
+                .consumer(UnitClientboundPacket::handle).add();
+
         INSTANCE.messageBuilder(PlayerServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(PlayerServerboundPacket::encode).decoder(PlayerServerboundPacket::new)
                 .consumer(PlayerServerboundPacket::handle).add();
@@ -49,5 +54,6 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(ResourcesClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(ResourcesClientboundPacket::encode).decoder(ResourcesClientboundPacket::new)
                 .consumer(ResourcesClientboundPacket::handle).add();
+
     }
 }

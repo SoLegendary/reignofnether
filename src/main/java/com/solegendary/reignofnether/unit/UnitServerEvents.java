@@ -3,10 +3,13 @@ package com.solegendary.reignofnether.unit;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -17,6 +20,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,20 +28,18 @@ import java.util.List;
 public class UnitServerEvents {
 
     private static final ArrayList<UnitActionItem> unitActionQueue = new ArrayList<>();
-    private static final ArrayList<Integer> allUnitIds = new ArrayList<>();
+    private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
-    public static ArrayList<Integer> getAllUnitIds() {
-        return allUnitIds;
+    public static ArrayList<LivingEntity> getAllUnits() {
+        return allUnits;
     }
 
     public static int getCurrentPopulation(ServerLevel level, String ownerName) {
         int currentPopulation = 0;
-        for (Integer unitId : allUnitIds) {
-            Entity entity = level.getEntity(unitId);
+        for (LivingEntity entity : allUnits)
             if (entity instanceof Unit unit)
                 if (unit.getOwnerName().equals(ownerName))
                     currentPopulation += unit.getPopCost();
-        }
         for (Building building : BuildingServerEvents.getBuildings())
             if (building.ownerName.equals(ownerName))
                 if (building instanceof ProductionBuilding prodBuilding)
@@ -48,6 +50,7 @@ public class UnitServerEvents {
 
     // manually provide all the variables required to do unit actions
     public static void addActionItem(
+            String ownerName,
             UnitAction action,
             int unitId,
             int[] unitIds,
@@ -55,6 +58,7 @@ public class UnitServerEvents {
     ) {
         unitActionQueue.add(
             new UnitActionItem(
+                ownerName,
                 action,
                 unitId,
                 unitIds,
@@ -79,18 +83,23 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveLevelEvent evt) {
-        int entityId = evt.getEntity().getId();
-        allUnitIds.removeIf(e -> e == entityId);
+        Entity entity = evt.getEntity();
+        allUnits.removeIf(e -> e.getId() == entity.getId());
+        if (evt.getEntity() instanceof Unit && !evt.getLevel().isClientSide) {
+            System.out.println("unit left serverside: " + entity.getId());
+
+            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                    new UnitClientboundPacket(UnitSyncAction.LEAVE_LEVEL,
+                            entity.getId(), entity.getOnPos()));
+        }
     }
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
         Entity entity = evt.getEntity();
         if (entity instanceof Unit && !evt.getLevel().isClientSide) {
-            allUnitIds.add(entity.getId());
-            ChunkAccess chunk = evt.getLevel().getChunk(entity.blockPosition());
-            boolean success = ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
-            System.out.println(success);
+            allUnits.add((LivingEntity) entity);
+            System.out.println("unit joined serverside: " + entity.getId());
         }
     }
 

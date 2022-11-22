@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -58,9 +59,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             return false;
 
         // not targeted by another worker
-        for (int unitId : UnitServerEvents.getAllUnitIds()) {
-            Unit unit = (Unit) mob.level.getEntity(unitId);
-            if (unit != null && unit.isWorker() && unit.getGatherResourceGoal() != null && unitId != this.mob.getId()) {
+        for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
+            Unit unit = (Unit) entity;
+            if (unit != null && unit.isWorker() && unit.getGatherResourceGoal() != null && entity.getId() != this.mob.getId()) {
                 BlockPos otherUnitTarget = unit.getGatherResourceGoal().getGatherTarget();
                 if (otherUnitTarget != null && otherUnitTarget.equals(bp))
                     return false;
