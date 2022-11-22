@@ -45,31 +45,25 @@ public class UnitActionItem {
             if (level.getEntity(id) instanceof Unit unit && unit.getOwnerName().equals(this.ownerName))
                 actionableUnits.add(unit);
 
-        if (action == UnitAction.STOP) {
-            for (Unit unit : actionableUnits)
-                unit.resetBehaviours();
-        }
-        else if (action == UnitAction.HOLD) {
-            for (Unit unit : actionableUnits) {
-                unit.resetBehaviours();
-                unit.setHoldPosition(true);
-            }
-        }
-        else if (action == UnitAction.MOVE) {
-            for (Unit unit : actionableUnits) {
-                unit.resetBehaviours();
+        for (Unit unit : actionableUnits) {
 
-                ResourceName resName = ResourceBlocks.getResourceBlockName(preselectedBlockPos, level);
-                if (unit.isWorker() && resName != ResourceName.NONE) {
-                    unit.getGatherResourceGoal().setTargetResourceName(resName);
-                    unit.getGatherResourceGoal().setMoveTarget(preselectedBlockPos);
+            switch (action) {
+                case STOP -> unit.resetBehaviours();
+                case HOLD -> {
+                    unit.resetBehaviours();
+                    unit.setHoldPosition(true);
                 }
-                else
-                    unit.setMoveTarget(preselectedBlockPos);
-            }
-        }
-        else if (action == UnitAction.ATTACK_MOVE) {
-            for (Unit unit : actionableUnits) {
+                case MOVE -> {
+                    unit.resetBehaviours();
+                    ResourceName resName = ResourceBlocks.getResourceBlockName(preselectedBlockPos, level);
+                    if (unit.isWorker() && resName != ResourceName.NONE) {
+                        unit.getGatherResourceGoal().setTargetResourceName(resName);
+                        unit.getGatherResourceGoal().setMoveTarget(preselectedBlockPos);
+                    }
+                    else
+                        unit.setMoveTarget(preselectedBlockPos);
+                }
+                case ATTACK_MOVE -> {
                     unit.resetBehaviours();
                     // if the unit can't actually attack just treat this as a move action
                     if (unit.canAttack())
@@ -77,9 +71,7 @@ public class UnitActionItem {
                     else
                         unit.setMoveTarget(preselectedBlockPos);
                 }
-        }
-        else if (action == UnitAction.ATTACK) {
-            for (Unit unit : actionableUnits) {
+                case ATTACK -> {
                     unit.resetBehaviours();
                     // if the unit can't actually attack just treat this as a follow action
                     if (unit.canAttack())
@@ -87,54 +79,45 @@ public class UnitActionItem {
                     else
                         unit.setFollowTarget((LivingEntity) level.getEntity(unitId));
                 }
-        }
-        else if (action == UnitAction.FOLLOW) {
-            for (Unit unit : actionableUnits) {
+                case FOLLOW -> {
                     unit.resetBehaviours();
                     unit.setFollowTarget((LivingEntity) level.getEntity(unitId));
                 }
-        }
-        else if (action == UnitAction.EXPLODE) {
-            for (Unit unit : actionableUnits) {
-                if (unit instanceof CreeperUnit creeper) {
-                    creeper.resetBehaviours();
-                    creeper.explode();
+                case EXPLODE -> {
+                    if (unit instanceof CreeperUnit creeper) {
+                        creeper.resetBehaviours();
+                        creeper.explode();
+                    }
                 }
-            }
-        }
-        else if (action == UnitAction.BUILD_REPAIR) {
-            for (Unit unit : actionableUnits) {
-                unit.resetBehaviours();
-                // if the unit can't actually build/repair just treat this as a move action
-                if (unit.isWorker()) {
-                    Building building = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), preselectedBlockPos);
-                    unit.getBuildRepairGoal().setBuildingTarget(building);
-                }
-                else
-                    unit.setMoveTarget(preselectedBlockPos);
-            }
-        }
-        else if (action == UnitAction.FARM) {
-            for (Unit unit : actionableUnits) {
-                GatherResourcesGoal goal = unit.getGatherResourceGoal();
-                if (unit.isWorker() && goal != null) {
+                case BUILD_REPAIR -> {
                     unit.resetBehaviours();
-                    goal.setTargetResourceName(ResourceName.FOOD);
-                    goal.setMoveTarget(preselectedBlockPos);
+                    // if the unit can't actually build/repair just treat this as a move action
+                    if (unit.isWorker()) {
+                        Building building = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), preselectedBlockPos);
+                        unit.getBuildRepairGoal().setBuildingTarget(building);
+                    }
+                    else
+                        unit.setMoveTarget(preselectedBlockPos);
                 }
-            }
-        }
-        else if (action == UnitAction.TOGGLE_GATHER_TARGET) {
-            for (Unit unit : actionableUnits) {
-                GatherResourcesGoal goal = unit.getGatherResourceGoal();
-                if (unit.isWorker() && goal != null) {
-                    ResourceName targetResourceName = goal.getTargetResourceName();
-                    unit.resetBehaviours();
-                    switch (targetResourceName) {
-                        case NONE -> goal.setTargetResourceName(ResourceName.FOOD);
-                        case FOOD -> goal.setTargetResourceName(ResourceName.WOOD);
-                        case WOOD -> goal.setTargetResourceName(ResourceName.ORE);
-                        case ORE -> goal.setTargetResourceName(ResourceName.NONE);
+                case FARM -> {
+                    GatherResourcesGoal goal = unit.getGatherResourceGoal();
+                    if (unit.isWorker() && goal != null) {
+                        unit.resetBehaviours();
+                        goal.setTargetResourceName(ResourceName.FOOD);
+                        goal.setMoveTarget(preselectedBlockPos);
+                    }
+                }
+                case TOGGLE_GATHER_TARGET -> {
+                    GatherResourcesGoal goal = unit.getGatherResourceGoal();
+                    if (unit.isWorker() && goal != null) {
+                        ResourceName targetResourceName = goal.getTargetResourceName();
+                        unit.resetBehaviours();
+                        switch (targetResourceName) {
+                            case NONE -> goal.setTargetResourceName(ResourceName.FOOD);
+                            case FOOD -> goal.setTargetResourceName(ResourceName.WOOD);
+                            case WOOD -> goal.setTargetResourceName(ResourceName.ORE);
+                            case ORE -> goal.setTargetResourceName(ResourceName.NONE);
+                        }
                     }
                 }
             }
