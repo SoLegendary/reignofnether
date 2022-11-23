@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.unit.units;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -22,9 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.SwellGoal;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
@@ -161,7 +158,7 @@ public class CreeperUnit extends Creeper implements Unit {
     public void resetBehaviours() {
         this.setAttackMoveTarget(null);
         this.getTargetGoal().setTarget(null);
-        this.getMoveGoal().stop();
+        this.getMoveGoal().stopMoving();
         this.setFollowTarget(null);
         this.setHoldPosition(false);
         forceExplode = false;
@@ -178,7 +175,6 @@ public class CreeperUnit extends Creeper implements Unit {
         this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
     }
 
-    // TODO: instead, activate a goal to move towards the target entity/block and then explode
     public void explode() {
         forceExplode = true;
     }

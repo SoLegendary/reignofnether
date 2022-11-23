@@ -1,9 +1,7 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -12,9 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
@@ -26,6 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UnitServerEvents {
+
+    private static final int UNIT_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
+    private static int unitSyncTicks = UNIT_SYNC_TICKS_MAX;
 
     private static final ArrayList<UnitActionItem> unitActionQueue = new ArrayList<>();
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
@@ -83,23 +82,17 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveLevelEvent evt) {
-        Entity entity = evt.getEntity();
-        allUnits.removeIf(e -> e.getId() == entity.getId());
-        if (evt.getEntity() instanceof Unit && !evt.getLevel().isClientSide) {
-            System.out.println("unit left serverside: " + entity.getId());
+        if (evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
+            allUnits.removeIf(e -> e.getId() == entity.getId());
 
-            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                    new UnitClientboundPacket(UnitSyncAction.LEAVE_LEVEL,
-                            entity.getId(), entity.getOnPos()));
+            UnitClientboundPacket.sendLeavePacket(entity);
         }
     }
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
-        Entity entity = evt.getEntity();
-        if (entity instanceof Unit && !evt.getLevel().isClientSide) {
-            allUnits.add((LivingEntity) entity);
-            System.out.println("unit joined serverside: " + entity.getId());
+        if (evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
+            allUnits.add(entity);
         }
     }
 
@@ -109,6 +102,13 @@ public class UnitServerEvents {
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide())
             return;
+
+        unitSyncTicks -= 1;
+        if (unitSyncTicks <= 0) {
+            unitSyncTicks = UNIT_SYNC_TICKS_MAX;
+            for (LivingEntity entity : allUnits)
+                UnitClientboundPacket.sendSyncPacket(entity);
+        }
 
         for (UnitActionItem actionItem : unitActionQueue)
             actionItem.action(evt.level);

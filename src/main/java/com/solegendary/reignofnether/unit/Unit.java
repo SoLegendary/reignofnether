@@ -162,7 +162,7 @@ public interface Unit {
     public default void resetBehaviours() {
         this.setAttackMoveTarget(null);
         this.getTargetGoal().setTarget(null);
-        this.getMoveGoal().stop();
+        this.getMoveGoal().stopMoving();
         this.setFollowTarget(null);
         this.setHoldPosition(false);
         if (isWorker()) {

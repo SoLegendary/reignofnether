@@ -44,7 +44,8 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     }
 
     private void calcMoveTarget() {
-        this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 0);
+        if (this.buildingTarget != null)
+            this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 0);
     }
 
     // only count as building if in range of the target - building is actioned in Building.tick()
@@ -66,6 +67,6 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     // if we override stop() it for some reason is called after start() and we can never begin this goal...
     public void stopBuilding() {
         buildingTarget = null;
-        super.stop();
+        super.stopMoving();
     }
 }

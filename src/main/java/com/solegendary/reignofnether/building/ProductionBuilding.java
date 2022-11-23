@@ -12,10 +12,12 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
@@ -73,14 +75,18 @@ public abstract class ProductionBuilding extends Building {
                         spawnPoint.getY() + 0.5f,
                         spawnPoint.getZ() + 0.5f
                 ));
-                CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
-                    UnitServerEvents.addActionItem(
-                        UnitAction.MOVE,
-                        -1,
-                        new int[] { entity.getId() },
-                        this.rallyPoint
-                    );
-                });
+                Player player = Minecraft.getInstance().player;
+                if (player != null) {
+                    CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
+                        UnitServerEvents.addActionItem(
+                                player.getName().getString(),
+                                UnitAction.MOVE,
+                                -1,
+                                new int[] { entity.getId() },
+                                this.rallyPoint
+                        );
+                    });
+                }
             }
             else {
                 BlockPos spawnPoint = getMinCorner(this.blocks);

@@ -16,9 +16,11 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -29,9 +31,6 @@ import java.util.*;
 import java.util.List;
 
 public class UnitClientEvents {
-
-    public static ArrayList<Entity> allEntities = new ArrayList<>();
-
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -64,6 +63,9 @@ public class UnitClientEvents {
     public static ArrayList<LivingEntity> getSelectedUnits() {
         return selectedUnits;
     }
+    public static ArrayList<LivingEntity> getAllUnits() {
+        return allUnits;
+    }
     public static void addPreselectedUnit(LivingEntity unit) { preselectedUnits.add(unit); }
     public static void addSelectedUnit(LivingEntity unit) {
         selectedUnits.add(unit);
@@ -88,22 +90,24 @@ public class UnitClientEvents {
     }
 
     public static void sendUnitCommand(UnitAction action) {
-        UnitActionItem actionItem = new UnitActionItem(
-            action,
-            preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
-            selectedUnits.stream().mapToInt(Entity::getId).toArray(),
-            CursorClientEvents.getPreselectedBlockPos()
-        );
-        actionItem.action(MC.level);
+        if (MC.player != null) {
+            UnitActionItem actionItem = new UnitActionItem(
+                    MC.player.getName().getString(),
+                    action,
+                    preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
+                    selectedUnits.stream().mapToInt(Entity::getId).toArray(),
+                    CursorClientEvents.getPreselectedBlockPos()
+            );
+            actionItem.action(MC.level);
 
-        if (MC.player != null)
             PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
-                MC.player.getName().getString(),
-                action,
-                preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
-                selectedUnits.stream().mapToInt(Entity::getId).toArray(),
-                CursorClientEvents.getPreselectedBlockPos()
+                    MC.player.getName().getString(),
+                    action,
+                    preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
+                    selectedUnits.stream().mapToInt(Entity::getId).toArray(),
+                    CursorClientEvents.getPreselectedBlockPos()
             ));
+        }
     }
 
     private static void resolveMoveAction() {
@@ -124,7 +128,18 @@ public class UnitClientEvents {
         return ResourceName.NONE;
     }
 
-
+    /**
+     * Update data on a unit from serverside, mainly to ensure unit HUD data is up-to-date
+     * Only try to update SELECTED clientside entities that are out of view range
+     */
+    public static void syncUnitData(int entityId, float health, Vec3 pos) {
+        for(LivingEntity entity : selectedUnits) {
+            if (entity.getId() == entityId && MC.level != null && MC.level.getEntity(entityId) == null) {
+                entity.setHealth(health);
+                entity.setPos(pos);
+            }
+        }
+    }
     /**
      * Clientside entities will join and leave based on render distance, but we want to keep entities tracked at all times
      * Therefore, only remove entities if they leave serverside via UnitClientboundPacket.
@@ -146,11 +161,10 @@ public class UnitClientEvents {
                 selectedUnits.add((LivingEntity) entity);
             if (preselectedUnits.removeIf(e -> e.getId() == entity.getId()))
                 preselectedUnits.add((LivingEntity) entity);
-            if (allUnits.removeIf(e -> e.getId() == entity.getId()))
-                allUnits.add((LivingEntity) entity);
+            allUnits.removeIf(e -> e.getId() == entity.getId());
+            allUnits.add((LivingEntity) entity);
 
             unit.initialiseGoals(); // for clientside data tracking
-            System.out.println("unit joined clientside: " + entity.getId());
         }
     }
 
@@ -206,9 +220,6 @@ public class UnitClientEvents {
                 resolveMoveAction();
             else if (CursorClientEvents.getLeftClickAction() == UnitAction.BUILD_REPAIR)
                 sendUnitCommand(UnitAction.BUILD_REPAIR);
-
-            // TODO: resolve unit special abilities
-            //else if ()
 
             // left click -> select a single unit
             // if shift is held, deselect a unit or add it to the selected group

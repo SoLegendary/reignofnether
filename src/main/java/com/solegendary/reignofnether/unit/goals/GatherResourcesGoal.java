@@ -60,11 +60,12 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
         // not targeted by another worker
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
-            Unit unit = (Unit) entity;
-            if (unit != null && unit.isWorker() && unit.getGatherResourceGoal() != null && entity.getId() != this.mob.getId()) {
-                BlockPos otherUnitTarget = unit.getGatherResourceGoal().getGatherTarget();
-                if (otherUnitTarget != null && otherUnitTarget.equals(bp))
-                    return false;
+            if (entity instanceof Unit unit) {
+                if (unit.isWorker() && unit.getGatherResourceGoal() != null && entity.getId() != this.mob.getId()) {
+                    BlockPos otherUnitTarget = unit.getGatherResourceGoal().getGatherTarget();
+                    if (otherUnitTarget != null && otherUnitTarget.equals(bp))
+                        return false;
+                }
             }
         }
         return true;
@@ -180,7 +181,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     public void stopGathering() {
         removeGatherTarget();
         this.setTargetResourceName(ResourceName.NONE);
-        super.stop();
+        super.stopMoving();
     }
 
     public BlockPos getGatherTarget() {
