@@ -49,7 +49,7 @@ public class BuildingClientEvents {
     }
 
     // clientside buildings used for tracking position (for cursor selection)
-    private static List<Building> buildings = Collections.synchronizedList(new ArrayList<>());
+    private static final ArrayList<Building> buildings = new ArrayList<>();
 
     private static Building selectedBuilding = null;
     private static Class<? extends Building> buildingToPlace = null;
@@ -82,6 +82,12 @@ public class BuildingClientEvents {
 
     public static List<Building> getBuildings() {
         return buildings;
+    }
+
+    public static void syncBuilding(Building serverBuilding, int blocksPlaced) {
+        for (Building building : buildings)
+            if (building.originPos.equals(serverBuilding.originPos))
+                building.serverBlocksPlaced = blocksPlaced;
     }
 
     // adds a green overlay option to OverlayTexture at (0,0)

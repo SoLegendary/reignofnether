@@ -17,41 +17,48 @@ import static com.solegendary.reignofnether.building.BuildingUtils.findBuilding;
 public class BuildingClientboundPacket {
 
     // pos is used to identify the building object serverside
+    public BuildingAction action;
     public BlockPos buildingPos;
     public String itemName;
     public Rotation rotation;
     public String ownerName;
-    public BuildingAction action;
+    public int blocksPlaced; // for syncing out-of-view clientside buildings
 
     public static void placeBuilding(BlockPos buildingPos, String itemName, Rotation rotation, String ownerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new BuildingClientboundPacket(BuildingAction.PLACE,
-                    itemName, buildingPos, rotation, ownerName));
+                    itemName, buildingPos, rotation, ownerName, 0));
     }
     public static void destroyBuilding(BlockPos buildingPos) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new BuildingClientboundPacket(BuildingAction.CANCEL,
-                    "", buildingPos, Rotation.NONE, ""));
+                new BuildingClientboundPacket(BuildingAction.DESTROY,
+                        "", buildingPos, Rotation.NONE, "", 0));
+    }
+    public static void syncBuilding(BlockPos buildingPos, int blocksPlaced) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new BuildingClientboundPacket(BuildingAction.SYNC,
+                        "", buildingPos, Rotation.NONE, "", blocksPlaced));
     }
     public static void startProduction(BlockPos buildingPos, String itemName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new BuildingClientboundPacket(
             BuildingAction.START_PRODUCTION,
-            itemName, buildingPos, Rotation.NONE, ""));
+            itemName, buildingPos, Rotation.NONE, "", 0));
     }
     public static void cancelProduction(BlockPos buildingPos, String itemName, boolean frontItem) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new BuildingClientboundPacket(
             frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
-            itemName, buildingPos, Rotation.NONE, ""));
+            itemName, buildingPos, Rotation.NONE, "", 0));
     }
 
-    public BuildingClientboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, Rotation rotation, String ownerName) {
+    public BuildingClientboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, Rotation rotation, String ownerName, int blocksPlaced) {
         this.action = action;
         this.itemName = itemName;
         this.buildingPos = buildingPos;
         this.rotation = rotation;
         this.ownerName = ownerName;
+        this.blocksPlaced = blocksPlaced;
     }
 
     public BuildingClientboundPacket(FriendlyByteBuf buffer) {
@@ -60,6 +67,7 @@ public class BuildingClientboundPacket {
         this.buildingPos = buffer.readBlockPos();
         this.rotation = buffer.readEnum(Rotation.class);
         this.ownerName = buffer.readUtf();
+        this.blocksPlaced = buffer.readInt();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -68,6 +76,7 @@ public class BuildingClientboundPacket {
         buffer.writeBlockPos(this.buildingPos);
         buffer.writeEnum(this.rotation);
         buffer.writeUtf(this.ownerName);
+        buffer.writeInt(this.blocksPlaced);
     }
 
     // server-side packet-consuming functions
@@ -77,24 +86,24 @@ public class BuildingClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
             () -> () -> {
-                ProductionBuilding building = null;
+                Building building = null;
                 if (this.action != BuildingAction.PLACE) {
-                    building = (ProductionBuilding) findBuilding(BuildingClientEvents.getBuildings(), this.buildingPos);
-
+                    building = findBuilding(BuildingClientEvents.getBuildings(), this.buildingPos);
                     if (building == null)
                         return;
                 }
                 switch (action) {
                     case PLACE -> BuildingClientEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName);
-                    case CANCEL -> BuildingClientEvents.destroyBuilding(this.buildingPos);
+                    case DESTROY -> BuildingClientEvents.destroyBuilding(this.buildingPos);
+                    case SYNC -> BuildingClientEvents.syncBuilding(building, this.blocksPlaced);
                     case START_PRODUCTION -> {
-                        ProductionBuilding.startProductionItem(building, this.itemName, this.buildingPos);
+                        ProductionBuilding.startProductionItem((ProductionBuilding) building, this.itemName, this.buildingPos);
                     }
                     case CANCEL_PRODUCTION -> {
-                        ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, true);
+                        ProductionBuilding.cancelProductionItem((ProductionBuilding) building, this.itemName, this.buildingPos, true);
                     }
                     case CANCEL_BACK_PRODUCTION -> {
-                        ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, false);
+                        ProductionBuilding.cancelProductionItem((ProductionBuilding) building, this.itemName, this.buildingPos, false);
                     }
                 }
                 success.set(true);

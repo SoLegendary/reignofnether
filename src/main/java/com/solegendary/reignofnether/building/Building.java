@@ -42,16 +42,17 @@ public abstract class Building {
     protected float minBlocksPercent = 0.3f;
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
-    protected int explosionCount = 0;
     protected float explodeChance = 0.5f;
     protected float explodeRadius = 2.0f;
     protected float fireThreshold = 0.75f; // if building has less %hp than this, explosions caused can make fires
+    protected int unrepairedBlocksDestroyed = 0; // ticks up on a block being destroyed, ticks down on a block being built
 
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
     public String ownerName;
     public Block portraitBlock; // block rendered in the portrait GUI to represent this building
     public int tickAge = 0; // how many ticks ago this building was placed
     public boolean canAcceptResources = false; // can workers drop off resources here?
+    public int serverBlocksPlaced = 1;
 
     public int foodCost;
     public int woodCost;
@@ -134,12 +135,15 @@ public abstract class Building {
         return minPos;
     }
 
-
     public int getBlocksTotal() {
         return blocks.stream().filter(b -> !b.getBlockState().isAir()).toList().size();
     }
-    public int getBlocksPlaced() {
-        return blocks.stream().filter(b -> b.isPlaced && !b.getBlockState().isAir()).toList().size();
+
+    public int getBlocksPlaced() { // on clientside a building outside of render view would always be 0
+        if (this.level.isClientSide())
+            return this.serverBlocksPlaced;
+        else
+            return blocks.stream().filter(b -> b.isPlaced && !b.getBlockState().isAir()).toList().size();
     }
     public float getBlocksPlacedPercent() {
         return (float) getBlocksPlaced() / (float) getBlocksTotal();
@@ -169,10 +173,7 @@ public abstract class Building {
         }
         if (validBlocks.size() > 0) {
             validBlocks.get(0).place();
-            /*
-            Random rand = new Random();
-            validBlocks.get(rand.nextInt(validBlocks.size())).place();
-            */
+            unrepairedBlocksDestroyed += 1;
         }
     }
 
@@ -184,7 +185,7 @@ public abstract class Building {
         if (isBuilt)
             return getBlocksPlacedPercent() <= this.minBlocksPercent;
         else
-            return explosionCount >= 3;
+            return unrepairedBlocksDestroyed >= 10;
     }
 
     // destroy all remaining blocks in a final big explosion
@@ -216,6 +217,7 @@ public abstract class Building {
         if (evt.getLevel().isClientSide())
             return;
 
+        unrepairedBlocksDestroyed += 1;
         ServerLevel level = (ServerLevel) evt.getLevel();
 
         // when a player breaks a block that's part of the building:
@@ -230,7 +232,6 @@ public abstract class Building {
                     this.explodeRadius,
                     this.getBlocksPlacedPercent() < this.fireThreshold, // fire
                     Explosion.BlockInteraction.BREAK);
-            explosionCount += 1;
         }
     }
 

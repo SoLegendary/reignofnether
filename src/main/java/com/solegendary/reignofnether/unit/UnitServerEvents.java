@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -10,13 +11,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +88,8 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
             allUnits.removeIf(e -> e.getId() == entity.getId());
 
+            if (entity instanceof Unit)
+                System.out.println("unit left: " + entity.getId());
             UnitClientboundPacket.sendLeavePacket(entity);
         }
     }
@@ -93,6 +98,12 @@ public class UnitServerEvents {
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
         if (evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
             allUnits.add(entity);
+
+            // TODO: remove this on leaving
+            if (entity instanceof Unit) {
+                ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
+                ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
+            }
         }
     }
 
@@ -100,7 +111,7 @@ public class UnitServerEvents {
     // remember to always reset targets so that users' actions always overwrite any existing action
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide())
+        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
             return;
 
         unitSyncTicks -= 1;
@@ -109,7 +120,6 @@ public class UnitServerEvents {
             for (LivingEntity entity : allUnits)
                 UnitClientboundPacket.sendSyncPacket(entity);
         }
-
         for (UnitActionItem actionItem : unitActionQueue)
             actionItem.action(evt.level);
 
