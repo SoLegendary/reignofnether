@@ -1,7 +1,10 @@
 TODO before playtesting:
 
-1. Fix hotkeys (Q,E?)
-2. keep chunks around buildings loaded and stop clientside removal of selected building
+1. keep chunks around buildings loaded and stop clientside removal of selected building
+    - need to force chunks and remove on building removal
+    - fix syncing of serverBlocksPlaced
+
+2. Fix hotkeys (Q,E?)
 3. fix control groups and allow buildings in control groups
 4. fix tower not cancelling
 5. setup shockbyte server (~3gb?)
