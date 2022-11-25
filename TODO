@@ -2,13 +2,12 @@ TODO before playtesting:
 
 1. keep chunks around buildings loaded and stop clientside removal of selected building
     - need to force chunks and remove on building removal
-    - fix syncing of serverBlocksPlaced
+    - remove forced chunks on dead entities
 
 2. Fix hotkeys (Q,E?)
 3. fix control groups and allow buildings in control groups
-4. fix tower not cancelling
-5. setup shockbyte server (~3gb?)
-6. Melee unit building damage (at least play local-in-world door-breaking sounds in lieu of animations)
+4. setup shockbyte server (~3gb?)
+5. Melee unit building damage (at least play local-in-world door-breaking sounds in lieu of animations)
 
 
 Misc additions/fixes
