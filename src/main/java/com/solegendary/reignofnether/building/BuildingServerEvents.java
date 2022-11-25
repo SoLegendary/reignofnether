@@ -123,7 +123,7 @@ public class BuildingServerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         for (Building building : buildings)
             BuildingClientboundPacket.placeBuilding(
-                building.originPos,
+                BuildingUtils.getMinCorner(building.getBlocks()),
                 building.name,
                 building.rotation,
                 building.ownerName
@@ -151,7 +151,7 @@ public class BuildingServerEvents {
         if (buildingSyncTicks <= 0) {
             buildingSyncTicks = BUILDING_SYNC_TICKS_MAX;
             for (Building building : buildings)
-                BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced());
+                BuildingClientboundPacket.syncBuilding(BuildingUtils.getMinCorner(building.getBlocks()), building.getBlocksPlaced());
         }
 
         for (Building building : buildings)

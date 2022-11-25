@@ -59,7 +59,11 @@ public class BuildingClientEvents {
     private static Rotation buildingRotation = Rotation.NONE;
     private static Vec3i buildingDimensions = new Vec3i(0,0,0);
 
-    public static Building getSelectedBuilding() { return selectedBuilding; }
+    public static Building getSelectedBuilding() {
+        if (!buildings.contains(selectedBuilding))
+            selectedBuilding = null;
+        return selectedBuilding;
+    }
     public static void setSelectedBuilding(Building building) { selectedBuilding = building; }
     public static void setBuildingToPlace(Class<? extends Building> building) {
         buildingToPlace = building;

@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -135,15 +136,23 @@ public abstract class Building {
         return minPos;
     }
 
+    private boolean isFullyLoadedClientSide(ClientLevel level) {
+        for (BuildingBlock block : this.blocks)
+            if (level.getBlockState(block.getBlockPos()).getBlock() == Blocks.VOID_AIR)
+                return false;
+        return true;
+    }
+
     public int getBlocksTotal() {
         return blocks.stream().filter(b -> !b.getBlockState().isAir()).toList().size();
     }
 
-    public int getBlocksPlaced() { // on clientside a building outside of render view would always be 0
-        if (this.level.isClientSide())
-            return this.serverBlocksPlaced;
-        else
+    public int getBlocksPlaced() {
+        // on clientside a building outside of render view would always be 0
+        if (!this.level.isClientSide() || isFullyLoadedClientSide((ClientLevel) this.level))
             return blocks.stream().filter(b -> b.isPlaced && !b.getBlockState().isAir()).toList().size();
+        else
+            return this.serverBlocksPlaced;
     }
     public float getBlocksPlacedPercent() {
         return (float) getBlocksPlaced() / (float) getBlocksTotal();
@@ -173,7 +182,8 @@ public abstract class Building {
         }
         if (validBlocks.size() > 0) {
             validBlocks.get(0).place();
-            unrepairedBlocksDestroyed += 1;
+            if (unrepairedBlocksDestroyed > 0)
+                unrepairedBlocksDestroyed -= 1;
         }
     }
 
@@ -191,6 +201,8 @@ public abstract class Building {
     // destroy all remaining blocks in a final big explosion
     // only explode a quarter of the blocks to avoid lag
     public void destroy(ServerLevel level) {
+        BuildingClientboundPacket.destroyBuilding(BuildingUtils.getMinCorner(this.getBlocks()));
+
         this.blocks.forEach((BuildingBlock block) -> {
             if (block.getBlockState().getMaterial().isLiquid()) {
                 BlockState air = Blocks.AIR.defaultBlockState();
@@ -240,6 +252,7 @@ public abstract class Building {
     }
 
     public void tick(Level level) {
+
         this.tickAge += 1;
 
         // update all the BuildingBlock.isPlaced booleans to match what the world actually has
