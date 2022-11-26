@@ -3,14 +3,14 @@ package com.solegendary.reignofnether.unit.villagers;
 import com.solegendary.reignofnether.building.buildings.Farm;
 import com.solegendary.reignofnether.building.buildings.Graveyard;
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
-import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.ResourceCosts;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VillagerUnit extends Vindicator implements Unit {
+public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
     // region
     public List<AbilityButton> getAbilities() {return abilities;};
 
@@ -45,14 +45,12 @@ public class VillagerUnit extends Vindicator implements Unit {
     public BuildRepairGoal buildRepairGoal;
     public GatherResourcesGoal gatherResourcesGoal;
 
-    public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
     public boolean getHoldPosition() { return holdPosition; }
     public void setHoldPosition(boolean holdPosition) { this.holdPosition = holdPosition; }
 
     // if true causes moveGoal and attackGoal to work together to allow attack moving
     // moves to a block but will chase/attack nearby monsters in range up to a certain distance away
-    private BlockPos attackMoveTarget = null;
     private LivingEntity followTarget = null; // if nonnull, continuously moves to the target
     private boolean holdPosition = false;
 
@@ -69,38 +67,21 @@ public class VillagerUnit extends Vindicator implements Unit {
     }
 
     // combat stats
-    public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return attackCooldown;}
-    public float getAggroRange() {return aggroRange;}
-    public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
-    public float getAttackRange() {return attackRange;}
     public float getMovementSpeed() {return movementSpeed;}
-    public float getAttackDamage() {return attackDamage;}
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
     public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
-    public boolean isWorker() {return canBuildAndRepair;}
-    public boolean canAttack() {return canAttack;}
 
-    public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
     // endregion
 
-    final static public float attackDamage = 0.0f;
     final static public float maxHealth = 10.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
-    final static public float attackRange = 0; // only used by ranged units
-    final static public int attackCooldown = 20;
-    final static public float aggroRange = 10;
     final static public float sightRange = 10f;
-    final static public boolean willRetaliate = false; // will attack when hurt by an enemy
-    final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.Villager.POPULATION;
-    final static public boolean canBuildAndRepair = true;
-    final static public boolean canAttack = false;
 
     private final List<AbilityButton> abilities = new ArrayList<>();
 
@@ -153,8 +134,14 @@ public class VillagerUnit extends Vindicator implements Unit {
     public void tick() {
         super.tick();
         Unit.tick(this);
+        WorkerUnit.tick(this);
 
         // TODO: run Player place block animations with arms shown when building
+    }
+
+    public void resetBehaviours() {
+        Unit.resetBehaviours(this);
+        WorkerUnit.resetBehaviours(this);
     }
 
     public void initialiseGoals() {

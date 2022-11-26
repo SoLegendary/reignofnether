@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -10,8 +11,7 @@ import java.util.ArrayList;
 
 public class BuildingBlock {
     private BlockPos blockPos;
-    private BlockState blockState;
-    public Boolean isPlaced = false;
+    private BlockState blockState; // ideal blockstate when placed, not actual world state
 
     public BuildingBlock(BlockPos blockPos, BlockState blockState) {
         this.blockPos = blockPos;
@@ -32,15 +32,15 @@ public class BuildingBlock {
         );
     }
 
-    // isPlaced is set by the tickEvent too but good to
-    // set it here immediately to avoid race conditions
+    public boolean isPlaced(Level level) {
+        return !this.blockState.isAir() && level.getBlockState(this.blockPos) == this.blockState;
+    }
+
     public void place() {
-        isPlaced = true;
         BuildingServerEvents.placeBlock(this);
     }
 
     public void destroy() {
-        isPlaced = false;
         BuildingServerEvents.destroyBlock(this.blockPos);
     }
 }

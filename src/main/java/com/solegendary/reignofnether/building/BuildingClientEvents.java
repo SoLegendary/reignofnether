@@ -9,8 +9,9 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.ResourceCosts;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -31,12 +32,12 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class BuildingClientEvents {
@@ -263,8 +264,7 @@ public class BuildingClientEvents {
             if (building.equals(selectedBuilding))
                 MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
             else if (building.equals(preselectedBuilding) && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
-                if (HudClientEvents.hudSelectedEntity instanceof Unit &&
-                    ((Unit) HudClientEvents.hudSelectedEntity).isWorker() &&
+                if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
                     MiscUtil.isRightClickDown(MC))
                     MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
                 else
@@ -334,7 +334,7 @@ public class BuildingClientEvents {
 
                 ArrayList<Integer> builderIds = new ArrayList<>();
                 for (LivingEntity builderEntity : UnitClientEvents.getSelectedUnits())
-                    if (builderEntity instanceof Unit && ((Unit) builderEntity).isWorker())
+                    if (builderEntity instanceof WorkerUnit)
                         builderIds.add(builderEntity.getId());
 
                 BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
@@ -403,12 +403,14 @@ public class BuildingClientEvents {
 
         // sync the goal so we can display the correct animations
         Entity entity = HudClientEvents.hudSelectedEntity;
-        if (entity instanceof Unit unit && unit.isWorker())
-            unit.getBuildRepairGoal().setBuildingTarget(newBuilding);
+        if (entity instanceof WorkerUnit workerUnit)
+            workerUnit.getBuildRepairGoal().setBuildingTarget(newBuilding);
     }
 
     public static void destroyBuilding(BlockPos pos) {
-        buildings.removeIf(building -> building.isPosInsideBuilding(pos));
+        Building building = BuildingUtils.findBuilding(buildings, pos);
+        if (building != null)
+            building.serverBlocksPlaced = 0;
     }
 
     public static Relationship getPlayerToBuildingRelationship(Building building) {

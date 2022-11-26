@@ -10,8 +10,9 @@ import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -261,7 +262,7 @@ public class HudClientEvents {
                     blitX, blitY, hudSelectedEntity);
             hudZones.add(unitPortraitZone);
 
-            blitX += portraitRendererUnit.frameWidth - 1;
+            blitX += portraitRendererUnit.frameWidth;
 
             if (hudSelectedEntity instanceof Unit)
                 hudZones.add(portraitRendererUnit.renderStats(
@@ -377,8 +378,8 @@ public class HudClientEvents {
             for (Button actionButton : genericActionButtons) {
 
                 // GATHER button does not have a static icon
-                if (actionButton == ActionButtons.GATHER) {
-                    switch(((Unit) hudSelectedEntity).getGatherResourceGoal().getTargetResourceName()) {
+                if (actionButton == ActionButtons.GATHER && hudSelectedEntity instanceof WorkerUnit workerUnit) {
+                    switch(workerUnit.getGatherResourceGoal().getTargetResourceName()) {
                         case NONE -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/no_gather.png");
                         case FOOD -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/hoe.png");
                         case WOOD -> actionButton.iconResource =  new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/axe.png");

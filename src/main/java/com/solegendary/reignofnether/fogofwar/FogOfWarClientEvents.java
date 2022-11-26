@@ -5,7 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;

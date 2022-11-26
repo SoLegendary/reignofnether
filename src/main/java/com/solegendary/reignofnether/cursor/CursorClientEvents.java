@@ -6,13 +6,15 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.resources.ResourceBlocks;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -310,11 +312,19 @@ public class CursorClientEvents {
             return;
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
 
+            Building preSelBuilding = BuildingClientEvents.getPreselectedBuilding();
             // don't draw block outline if we've selected a builder unit and are mousing over a building (unless leftClick action is MOVE)
-            boolean unitToBuildRepair = (HudClientEvents.hudSelectedEntity instanceof Unit &&
-                    ((Unit) HudClientEvents.hudSelectedEntity).isWorker() &&
-                    BuildingClientEvents.getPreselectedBuilding() != null &&
-                    CursorClientEvents.getLeftClickAction() != UnitAction.MOVE);
+            boolean buildingTargetedByWorker = (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
+                    preSelBuilding != null &&
+                    CursorClientEvents.getLeftClickAction() != UnitAction.MOVE &&
+                    (BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED ||
+                    CursorClientEvents.getLeftClickAction() == UnitAction.BUILD_REPAIR));
+            // same for attacker
+            boolean buildingTargetedByAttacker = (HudClientEvents.hudSelectedEntity instanceof AttackerUnit &&
+                    preSelBuilding != null &&
+                    CursorClientEvents.getLeftClickAction() != UnitAction.MOVE &&
+                    (BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) != Relationship.OWNED ||
+                    CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK));
 
             // do we own any of the selected buildings or entities?
             // will be false if there are none selected in the first place
@@ -330,7 +340,7 @@ public class CursorClientEvents {
             }
             if (!OrthoviewClientEvents.isCameraMovingByMouse() &&
                 !leftClickDown && ownAnySelected &&
-                UnitClientEvents.getPreselectedUnits().size() == 0 && !unitToBuildRepair) {
+                UnitClientEvents.getPreselectedUnits().size() == 0 && !buildingTargetedByWorker && !buildingTargetedByAttacker) {
                 MyRenderer.drawBox(evt.getPoseStack(), preselectedBlockPos, 1, 1, 1, rightClickDown ? 0.3f : 0.15f);
                 MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }
@@ -399,7 +409,7 @@ public class CursorClientEvents {
             if (MC.level != null) {
                 // if we have a worker selected then include resource blocks that would otherwise be ignored like plants
                 boolean isBlockSelectableResource = false;
-                if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.isWorker())
+                if (HudClientEvents.hudSelectedEntity instanceof Unit workerUnit)
                     isBlockSelectableResource = ResourceBlocks.getResourceBlock(block, MC.level) != null;
 
                 if ((MC.level.getBlockState(block).getMaterial().isSolidBlocking() || isBlockSelectableResource) &&

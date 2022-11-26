@@ -6,6 +6,7 @@ public enum UnitAction {
 
     NONE, // basically null, but sending null to server crashes packetHandler
     ATTACK,
+    ATTACK_BUILDING,
     STOP,
     HOLD,
     MOVE,

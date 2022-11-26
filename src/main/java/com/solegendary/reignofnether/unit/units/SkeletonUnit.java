@@ -2,7 +2,8 @@ package com.solegendary.reignofnether.unit.units;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.ResourceCosts;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.goals.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -24,19 +25,15 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SkeletonUnit extends Skeleton implements Unit {
+public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     // region
     public List<AbilityButton> getAbilities() {return abilities;};
-
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
-    public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
-    public GatherResourcesGoal getGatherResourceGoal() {return gatherResourcesGoal;}
+    public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
-    public BuildRepairGoal buildRepairGoal;
-    public GatherResourcesGoal gatherResourcesGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -73,8 +70,7 @@ public class SkeletonUnit extends Skeleton implements Unit {
     public float getUnitArmorValue() {return armorValue;}
     public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
-    public boolean isWorker() {return canBuildAndRepair;}
-    public boolean canAttack() {return canAttack;}
+    public boolean canAttackBuildings() {return canAttackBuildings;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -92,10 +88,10 @@ public class SkeletonUnit extends Skeleton implements Unit {
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.Skeleton.POPULATION;
-    final static public boolean canBuildAndRepair = false;
-    final static public boolean canAttack = true;
+    final static public boolean canAttackBuildings = false;
 
     public RangedBowAttackUnitGoal<? extends LivingEntity> attackGoal;
+    public AttackBuildingGoal attackBuildingGoal;
 
     private static final List<AbilityButton> abilities = new ArrayList<>();
 
@@ -113,11 +109,17 @@ public class SkeletonUnit extends Skeleton implements Unit {
     public void tick() {
         super.tick();
         Unit.tick(this);
+        AttackerUnit.tick(this);
 
         // need to do this outside the goal so it ticks down while not attacking
         // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
         if (attackGoal != null)
             attackGoal.tickCooldown();
+    }
+
+    public void resetBehaviours(Unit unit) {
+        Unit.resetBehaviours(this);
+        AttackerUnit.resetBehaviours(this);
     }
 
     public void initialiseGoals() {

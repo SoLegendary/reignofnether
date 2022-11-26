@@ -10,7 +10,7 @@ import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.hud.Button;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;

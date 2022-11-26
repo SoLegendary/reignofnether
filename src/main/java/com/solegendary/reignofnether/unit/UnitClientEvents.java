@@ -12,11 +12,13 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -24,6 +26,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -123,8 +127,8 @@ public class UnitClientEvents {
 
     public static ResourceName getSelectedUnitResourceTarget() {
         Entity entity = HudClientEvents.hudSelectedEntity;
-        if (entity instanceof Unit unit && unit.isWorker())
-            return unit.getGatherResourceGoal().getTargetResourceName();
+        if (entity instanceof WorkerUnit workerUnit)
+            return workerUnit.getGatherResourceGoal().getTargetResourceName();
         return ResourceName.NONE;
     }
 
@@ -138,6 +142,15 @@ public class UnitClientEvents {
                 entity.setHealth(health);
                 entity.setPos(pos);
             }
+        }
+    }
+    // client log out - remove all entities so we don't duplicate on logging back in
+    @SubscribeEvent
+    public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
+        if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
+            selectedUnits.removeIf(e -> true);
+            preselectedUnits.removeIf(e -> true);
+            allUnits.removeIf(e -> true);
         }
     }
     /**
@@ -192,10 +205,12 @@ public class UnitClientEvents {
                 if (preselectedUnits.size() == 1 && !targetingSelf()) {
                     sendUnitCommand(UnitAction.ATTACK);
                 }
+                // A + left click -> force attack building (even if friendly)
+                else if (BuildingClientEvents.getPreselectedBuilding() != null)
+                    sendUnitCommand(UnitAction.ATTACK_BUILDING);
                 // A + left click -> attack move ground
-                else {
+                else
                     sendUnitCommand(UnitAction.ATTACK_MOVE);
-                }
             }
 
 
@@ -259,9 +274,17 @@ public class UnitClientEvents {
 
                     sendUnitCommand(UnitAction.ATTACK);
                 }
+                // right click -> attack unfriendly building
+                else if (HudClientEvents.hudSelectedEntity instanceof AttackerUnit &&
+                        (BuildingClientEvents.getPreselectedBuilding() != null)) {
+
+                    if (BuildingClientEvents.getPlayerToBuildingRelationship(BuildingClientEvents.getPreselectedBuilding()) == Relationship.HOSTILE)
+                        sendUnitCommand(UnitAction.ATTACK_BUILDING);
+                    else
+                        sendUnitCommand(UnitAction.MOVE);
+                }
                 // right click -> build or repair preselected building
-                else if (HudClientEvents.hudSelectedEntity instanceof Unit &&
-                        ((Unit) HudClientEvents.hudSelectedEntity).isWorker() &&
+                else if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
                         (BuildingClientEvents.getPreselectedBuilding() != null)) {
 
                     if (BuildingClientEvents.getPreselectedBuilding() instanceof Farm)
@@ -269,6 +292,7 @@ public class UnitClientEvents {
                     else
                         sendUnitCommand(UnitAction.BUILD_REPAIR);
                 }
+
                 // right click -> follow friendly unit or go to preselected blockPos
                 else
                     resolveMoveAction();

@@ -6,12 +6,11 @@ import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.ResourceCosts;
-import com.solegendary.reignofnether.unit.Unit;
-import com.solegendary.reignofnether.unit.UnitClientboundPacket;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -25,8 +24,6 @@ import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class BuildingServerEvents {
 
@@ -72,8 +69,8 @@ public class BuildingServerEvents {
                 // assign the builder unit that placed this building
                 for (int id : builderUnitIds) {
                     Entity entity = serverLevel.getEntity(id);
-                    if (entity instanceof Unit unit)
-                        unit.getBuildRepairGoal().setBuildingTarget(building);
+                    if (entity instanceof WorkerUnit workerUnit)
+                        workerUnit.getBuildRepairGoal().setBuildingTarget(building);
                 }
             }
             else
@@ -121,13 +118,19 @@ public class BuildingServerEvents {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
+        /*
         for (Building building : buildings)
             BuildingClientboundPacket.placeBuilding(
                 BuildingUtils.getMinCorner(building.getBlocks()),
                 building.name,
                 building.rotation,
                 building.ownerName
-            );
+            );*/
+    }
+    @SubscribeEvent
+    public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent evt) {
+        System.out.println("removing all buildings, player left");
+        buildings.removeIf(b -> true);
     }
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions

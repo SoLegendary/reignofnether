@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.unit.Unit;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.TickEvent;

@@ -3,13 +3,13 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.level.BlockEvent;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getMaxCorner;
@@ -29,6 +30,7 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
 public abstract class Building {
 
     private final static int BASE_MS_PER_BUILD = 50; // time taken to build each block with 1 villager assigned;
+    public final float MELEE_DAMAGE_MULTIPLIER = 0.5f; // damage multiplier applied to melee attackers
 
     public String name;
     public static String structureName;
@@ -67,13 +69,13 @@ public abstract class Building {
         this.ownerName = ownerName;
     }
 
-    public ArrayList<Unit> getBuilders(Level level) {
-        ArrayList<Unit> builders = new ArrayList<>();
+    public ArrayList<WorkerUnit> getBuilders(Level level) {
+        ArrayList<WorkerUnit> builders = new ArrayList<>();
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
-            if (entity instanceof Unit unit) {
-                BuildRepairGoal goal = unit.getBuildRepairGoal();
+            if (entity instanceof WorkerUnit workerUnit) {
+                BuildRepairGoal goal = workerUnit.getBuildRepairGoal();
                 if (goal != null && goal.getBuildingTarget() == this && goal.isBuilding())
-                    builders.add(unit);
+                    builders.add(workerUnit);
             }
         }
         return builders;
@@ -105,7 +107,7 @@ public abstract class Building {
 
     public boolean isPosPartOfBuilding(BlockPos bp, boolean onlyPlacedBlocks) {
         for (BuildingBlock block : this.blocks)
-            if ((block.isPlaced || !onlyPlacedBlocks) && block.getBlockPos().equals(bp))
+            if ((block.isPlaced((Level) this.level) || !onlyPlacedBlocks) && block.getBlockPos().equals(bp))
                 return true;
         return false;
     }
@@ -150,7 +152,7 @@ public abstract class Building {
     public int getBlocksPlaced() {
         // on clientside a building outside of render view would always be 0
         if (!this.level.isClientSide() || isFullyLoadedClientSide((ClientLevel) this.level))
-            return blocks.stream().filter(b -> b.isPlaced && !b.getBlockState().isAir()).toList().size();
+            return blocks.stream().filter(b -> b.isPlaced((Level) this.level) && !b.getBlockState().isAir()).toList().size();
         else
             return this.serverBlocksPlaced;
     }
@@ -164,7 +166,7 @@ public abstract class Building {
     // - block must be connected to something else (not air)
     // - block must be the lowest Y value possible
     private void buildNextBlock(Level level) {
-        ArrayList<BuildingBlock> unplacedBlocks = new ArrayList<>(blocks.stream().filter(b -> !b.isPlaced).toList());
+        ArrayList<BuildingBlock> unplacedBlocks = new ArrayList<>(blocks.stream().filter(b -> !b.isPlaced((Level) this.level)).toList());
         int minY = getMinCorner(unplacedBlocks).getY();
         ArrayList<BuildingBlock> validBlocks = new ArrayList<>();
 
@@ -185,6 +187,15 @@ public abstract class Building {
             if (unrepairedBlocksDestroyed > 0)
                 unrepairedBlocksDestroyed -= 1;
         }
+    }
+
+    public void destroyRandomBlocks(int amount) {
+        if (this.level.isClientSide())
+            return;
+        ArrayList<BuildingBlock> placedBlocks = new ArrayList<>(blocks.stream().filter(b -> b.isPlaced((Level) this.level)).toList());
+        Collections.shuffle(placedBlocks);
+        for (int i = 0; i < amount && i < placedBlocks.size(); i++)
+            placedBlocks.get(i).destroy();
     }
 
     public boolean shouldBeDestroyed() {
@@ -209,7 +220,7 @@ public abstract class Building {
                 level.setBlockAndUpdate(block.getBlockPos(), air);
             }
             level.destroyBlock(block.getBlockPos(), false);
-            if (block.isPlaced) {
+            if (block.isPlaced(level)) {
                 int x = block.getBlockPos().getX();
                 int y = block.getBlockPos().getY();
                 int z = block.getBlockPos().getZ();
@@ -255,12 +266,10 @@ public abstract class Building {
 
         this.tickAge += 1;
 
-        // update all the BuildingBlock.isPlaced booleans to match what the world actually has
         for (BuildingBlock block : blocks) {
             BlockPos bp = block.getBlockPos();
             BlockState bs = block.getBlockState();
             BlockState bsWorld = level.getBlockState(bp);
-            block.isPlaced = bsWorld.equals(bs);
         }
         float blocksPercent = getBlocksPlacedPercent();
         float blocksPlaced = getBlocksPlaced();

@@ -3,8 +3,9 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.ResourceCosts;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -61,8 +62,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         // not targeted by another worker
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
             if (entity instanceof Unit unit) {
-                if (unit.isWorker() && unit.getGatherResourceGoal() != null && entity.getId() != this.mob.getId()) {
-                    BlockPos otherUnitTarget = unit.getGatherResourceGoal().getGatherTarget();
+                if (unit instanceof WorkerUnit workerUnit && workerUnit.getGatherResourceGoal() != null && entity.getId() != this.mob.getId()) {
+                    BlockPos otherUnitTarget = workerUnit.getGatherResourceGoal().getGatherTarget();
                     if (otherUnitTarget != null && otherUnitTarget.equals(bp))
                         return false;
                 }
@@ -96,8 +97,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             this.setMoveTarget(gatherTarget);
 
             // if the block is no longer valid (destroyed or somehow badly targeted)
-            ResourceName resourceBlockType = ResourceBlocks.getResourceBlockName(this.gatherTarget, mob.level);
-            if (resourceBlockType == ResourceName.NONE)
+            if (!BLOCK_CONDITION.test(this.gatherTarget))
                 removeGatherTarget();
             else // keep persistently moving towards the target
                 this.setMoveTarget(gatherTarget);
@@ -127,6 +127,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                             ticksLeft = DEFAULT_MAX_TICKS;
 
                             if (mob.level.destroyBlock(gatherTarget, false)) {
+                                ResourceName resourceBlockType = ResourceBlocks.getResourceBlockName(this.gatherTarget, mob.level);
                                 ResourcesServerEvents.addSubtractResources(new Resources(
                                         ((Unit) mob).getOwnerName(),
                                         resourceBlockType.equals(ResourceName.FOOD) ? targetResourceBlock.resourceValue : 0,
