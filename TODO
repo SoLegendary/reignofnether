@@ -4,18 +4,16 @@ TODO before playtesting:
     - need to force chunks and remove on building removal
     - remove forced chunks on dead entities
 
-3. Can't log back into running world with buildings in it (due to BuildingServerEvents.buildings being populated)
-
 2. Fix hotkeys (Q,E?)
 3. fix control groups and allow buildings in control groups
 4. setup shockbyte server (~3gb?)
 
 Misc additions/fixes
 
-0. Fix not being able to cancel farms
 1. Arm animations and block cracking/particles
 2. Fix body rendering issues (to do with portrait head rendering)
 3. Minimap 90deg rotations
+4. Minimap building/unit indicators
 
 Villager faction:
     - Pillager and vindicator

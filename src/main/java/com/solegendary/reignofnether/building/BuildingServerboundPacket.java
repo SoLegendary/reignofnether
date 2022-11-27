@@ -83,9 +83,9 @@ public class BuildingServerboundPacket {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
 
-            ProductionBuilding building = null;
+            Building building = null;
             if (this.action != BuildingAction.PLACE) {
-                building = (ProductionBuilding) findBuilding(BuildingServerEvents.getBuildings(), this.buildingPos);
+                building = findBuilding(BuildingServerEvents.getBuildings(), this.buildingPos);
                 if (building == null)
                     return;
             }
@@ -95,20 +95,20 @@ public class BuildingServerboundPacket {
                     BuildingServerEvents.cancelBuilding(building);
                 }
                 case SET_RALLY_POINT -> {
-                    building.setRallyPoint(rallyPos);
+                    ((ProductionBuilding) building).setRallyPoint(rallyPos);
                 }
                 case START_PRODUCTION -> {
-                    boolean prodSuccess = ProductionBuilding.startProductionItem(building, this.itemName, this.buildingPos);
+                    boolean prodSuccess = ProductionBuilding.startProductionItem(((ProductionBuilding) building), this.itemName, this.buildingPos);
                     if (prodSuccess)
                         BuildingClientboundPacket.startProduction(buildingPos, itemName);
                 }
                 case CANCEL_PRODUCTION -> {
-                    boolean prodSuccess = ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, true);
+                    boolean prodSuccess = ProductionBuilding.cancelProductionItem(((ProductionBuilding) building), this.itemName, this.buildingPos, true);
                     if (prodSuccess)
                         BuildingClientboundPacket.cancelProduction(buildingPos, itemName, true);
                 }
                 case CANCEL_BACK_PRODUCTION -> {
-                    boolean prodSuccess = ProductionBuilding.cancelProductionItem(building, this.itemName, this.buildingPos, false);
+                    boolean prodSuccess = ProductionBuilding.cancelProductionItem(((ProductionBuilding) building), this.itemName, this.buildingPos, false);
                     if (prodSuccess)
                         BuildingClientboundPacket.cancelProduction(buildingPos, itemName, false);
                 }

@@ -117,13 +117,23 @@ public class UnitServerEvents {
     @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent evt) {
         if (evt.getEntity() instanceof Animal animal && !(evt.getEntity() instanceof Unit)) {
-            for (ResourceAnimal resAnimal : ResourceAnimals.animals)
-                if (resAnimal.animalName.equals(animal.getName().getString()) && evt.getSource().getEntity() instanceof Unit unit)
-                    ResourcesServerEvents.addSubtractResources(new Resources(
-                        unit.getOwnerName(),
-                        animal.isBaby() ? resAnimal.foodValue / 2 : resAnimal.foodValue,
-                        0,0
-                    ));
+            for (ResourceAnimal resAnimal : ResourceAnimals.animals) {
+                if (resAnimal.animalName.equals(animal.getName().getString())) {
+                    Entity entity = evt.getSource().getEntity();
+                    if (entity instanceof Unit unit)
+                        ResourcesServerEvents.addSubtractResources(new Resources(
+                            unit.getOwnerName(),
+                            animal.isBaby() ? resAnimal.foodValue / 2 : resAnimal.foodValue,
+                            0,0
+                        ));
+                    else if (entity instanceof Player player)
+                        ResourcesServerEvents.addSubtractResources(new Resources(
+                            player.getName().getString(),
+                            animal.isBaby() ? resAnimal.foodValue / 2 : resAnimal.foodValue,
+                            0,0
+                        ));
+                }
+            }
         }
     }
 

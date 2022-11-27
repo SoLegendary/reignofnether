@@ -94,7 +94,6 @@ public class BuildingServerEvents {
         buildings.remove(building);
         for (BuildingBlock block : building.getBlocks())
             blockPlaceQueue.removeIf(queuedBlock -> queuedBlock.getBlockPos().equals(block.getBlockPos()));
-        building.destroy((ServerLevel) building.getLevel());
 
         // AOE2-style refund: return the % of the non-built portion of the building
         // eg. cancelling a building at 70% completion will refund only 30% cost
@@ -105,6 +104,7 @@ public class BuildingServerEvents {
                 Math.round(building.woodCost * (1 - buildPercent)),
                 Math.round(building.oreCost * (1 - buildPercent))
         ));
+        building.destroy((ServerLevel) building.getLevel());
     }
 
     public static int getTotalPopulationSupply(String ownerName) {

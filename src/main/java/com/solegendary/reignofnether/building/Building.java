@@ -244,7 +244,7 @@ public abstract class Building {
     }
 
     // destroy all remaining blocks in a final big explosion
-    // only explode a quarter of the blocks to avoid lag
+    // only explode a fraction of the blocks to avoid lag and sound spikes
     public void destroy(ServerLevel serverLevel) {
         BuildingClientboundPacket.destroyBuilding(BuildingUtils.getMinCorner(this.getBlocks()));
 
@@ -257,7 +257,7 @@ public abstract class Building {
             int x = block.getBlockPos().getX();
             int y = block.getBlockPos().getY();
             int z = block.getBlockPos().getZ();
-            if (block.isPlaced(serverLevel) && x % 2 == 0 && z % 2 != 0) {
+            if (block.isPlaced(serverLevel) && x % 4 == 0 && z % 4 != 0) {
                 serverLevel.explode(null, null, null,
                         x,y,z,
                         1.0f,
