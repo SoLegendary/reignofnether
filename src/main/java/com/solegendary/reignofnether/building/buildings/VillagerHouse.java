@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
@@ -29,7 +30,7 @@ public class VillagerHouse extends ProductionBuilding {
     public final static String buildingName = "Villager House";
     public final static String structureName = "villager_house";
 
-    public VillagerHouse(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
+    public VillagerHouse(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName);
         this.name = buildingName;
         this.ownerName = ownerName;

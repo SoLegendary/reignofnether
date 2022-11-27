@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -34,7 +35,7 @@ public abstract class Building {
 
     public String name;
     public static String structureName;
-    public LevelAccessor level;
+    private Level level; // directly return MC.level if it's clientside to avoid stale references
     BlockPos originPos;
     Rotation rotation;
 
@@ -62,7 +63,12 @@ public abstract class Building {
     public int oreCost;
     public int popSupply; // max population this building provides
 
-    public Building(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
+    public Level getLevel() {
+        return level;
+    }
+    public void setLevel(Level level) { this.level = level; }
+
+    public Building(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         this.level = level;
         this.originPos = originPos;
         this.rotation = rotation;
@@ -107,7 +113,7 @@ public abstract class Building {
 
     public boolean isPosPartOfBuilding(BlockPos bp, boolean onlyPlacedBlocks) {
         for (BuildingBlock block : this.blocks)
-            if ((block.isPlaced((Level) this.level) || !onlyPlacedBlocks) && block.getBlockPos().equals(bp))
+            if ((block.isPlaced(getLevel()) || !onlyPlacedBlocks) && block.getBlockPos().equals(bp))
                 return true;
         return false;
     }
@@ -151,8 +157,33 @@ public abstract class Building {
 
     public int getBlocksPlaced() {
         // on clientside a building outside of render view would always be 0
-        if (!this.level.isClientSide() || isFullyLoadedClientSide((ClientLevel) this.level))
-            return blocks.stream().filter(b -> b.isPlaced((Level) this.level) && !b.getBlockState().isAir()).toList().size();
+        if (!getLevel().isClientSide() || isFullyLoadedClientSide((ClientLevel) getLevel())) {
+
+            return blocks.stream().filter(b -> b.isPlaced(getLevel()) && !b.getBlockState().isAir()).toList().size();
+            /*
+            if (getLevel().isClientSide())
+                return blocks.stream().filter(b -> b.isPlaced(Minecraft.getInstance().level) && !b.getBlockState().isAir()).toList().size();
+            else
+                return blocks.stream().filter(b -> b.isPlaced(getLevel()) && !b.getBlockState().isAir()).toList().size();
+            */
+            /*
+            int blocksPlaced = 0;
+            for (BuildingBlock block : blocks) {
+
+                BlockState blockStateIdeal = block.getBlockState();
+                BlockState blockStateActual;
+
+                if (getLevel().isClientSide())
+                    blockStateActual = Minecraft.getInstance().level.getBlockState(block.getBlockPos());
+                else
+                    blockStateActual = getLevel().getBlockState(block.getBlockPos());
+
+                if (blockStateIdeal == blockStateActual && !blockStateIdeal.isAir())
+                    blocksPlaced += 1;
+            }
+            return blocksPlaced;
+             */
+        }
         else
             return this.serverBlocksPlaced;
     }
@@ -167,7 +198,7 @@ public abstract class Building {
     // - block must be the lowest Y value possible
     private void buildNextBlock(Level level) {
         ArrayList<BuildingBlock> unplacedBlocks = new ArrayList<>(blocks.stream().filter(
-                b -> !b.isPlaced((Level) this.level) && !b.getBlockState().isAir()
+                b -> !b.isPlaced(getLevel()) && !b.getBlockState().isAir()
         ).toList());
 
         int minY = getMinCorner(unplacedBlocks).getY();
@@ -193,9 +224,9 @@ public abstract class Building {
     }
 
     public void destroyRandomBlocks(int amount) {
-        if (this.level.isClientSide())
+        if (getLevel().isClientSide())
             return;
-        ArrayList<BuildingBlock> placedBlocks = new ArrayList<>(blocks.stream().filter(b -> b.isPlaced((Level) this.level)).toList());
+        ArrayList<BuildingBlock> placedBlocks = new ArrayList<>(blocks.stream().filter(b -> b.isPlaced(getLevel())).toList());
         Collections.shuffle(placedBlocks);
         for (int i = 0; i < amount && i < placedBlocks.size(); i++)
             placedBlocks.get(i).destroy();
@@ -214,27 +245,26 @@ public abstract class Building {
 
     // destroy all remaining blocks in a final big explosion
     // only explode a quarter of the blocks to avoid lag
-    public void destroy(ServerLevel level) {
+    public void destroy(ServerLevel serverLevel) {
         BuildingClientboundPacket.destroyBuilding(BuildingUtils.getMinCorner(this.getBlocks()));
 
         this.blocks.forEach((BuildingBlock block) -> {
             if (block.getBlockState().getMaterial().isLiquid()) {
                 BlockState air = Blocks.AIR.defaultBlockState();
-                level.setBlockAndUpdate(block.getBlockPos(), air);
+                serverLevel.setBlockAndUpdate(block.getBlockPos(), air);
             }
-            if (block.isPlaced(level)) {
-                level.destroyBlock(block.getBlockPos(), false);
-                int x = block.getBlockPos().getX();
-                int y = block.getBlockPos().getY();
-                int z = block.getBlockPos().getZ();
-                if (x % 2 == 0 && z % 2 != 0) {
-                    level.explode(null, null, null,
-                            x,y,z,
-                            1.0f,
-                            false,
-                            Explosion.BlockInteraction.BREAK);
-                }
+            // attempt to destroy regardless of whether it's placed since blocks can change state when neighbours change
+            int x = block.getBlockPos().getX();
+            int y = block.getBlockPos().getY();
+            int z = block.getBlockPos().getZ();
+            if (block.isPlaced(serverLevel) && x % 2 == 0 && z % 2 != 0) {
+                serverLevel.explode(null, null, null,
+                        x,y,z,
+                        1.0f,
+                        false,
+                        Explosion.BlockInteraction.BREAK);
             }
+            serverLevel.destroyBlock(block.getBlockPos(), false);
         });
     }
 
@@ -265,14 +295,14 @@ public abstract class Building {
         isBuilt = true;
     }
 
-    public void tick(Level level) {
+    public void tick(Level tickLevel) {
 
         this.tickAge += 1;
 
         for (BuildingBlock block : blocks) {
             BlockPos bp = block.getBlockPos();
             BlockState bs = block.getBlockState();
-            BlockState bsWorld = level.getBlockState(bp);
+            BlockState bsWorld = tickLevel.getBlockState(bp);
         }
         float blocksPercent = getBlocksPlacedPercent();
         float blocksPlaced = getBlocksPlaced();
@@ -281,8 +311,8 @@ public abstract class Building {
         if (blocksPlaced >= blocksTotal && !isBuilt)
             onBuilt();
 
-        if (!level.isClientSide()) {
-            ServerLevel serverLevel = (ServerLevel) level;
+        if (!tickLevel.isClientSide()) {
+            ServerLevel serverLevel = (ServerLevel) tickLevel;
             int builderCount = getBuilders(serverLevel).size();
 
             // TODO: keep the surrounding chunks loaded or else the building becomes unselectable when unloaded
@@ -296,14 +326,14 @@ public abstract class Building {
                 msToNextBuild -= 5;
                 if (msToNextBuild <= 0) {
                     msToNextBuild = msPerBuild;
-                    buildNextBlock(level);
+                    buildNextBlock(tickLevel);
                 }
             }
 
             // TODO: if fires exist, put them out one by one (or gradually remove them if blocksPercent > fireThreshold%)
 
             if (this.shouldBeDestroyed())
-                this.destroy((ServerLevel) level);
+                this.destroy((ServerLevel) tickLevel);
         }
     }
 }

@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
@@ -23,7 +24,7 @@ public class Farm extends Building {
     public final static String buildingName = "Farm";
     public final static String structureName = "farm";
 
-    public Farm(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
+    public Farm(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName);
         this.name = buildingName;
         this.ownerName = ownerName;

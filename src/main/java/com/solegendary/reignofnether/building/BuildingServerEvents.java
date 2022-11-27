@@ -94,7 +94,7 @@ public class BuildingServerEvents {
         buildings.remove(building);
         for (BuildingBlock block : building.getBlocks())
             blockPlaceQueue.removeIf(queuedBlock -> queuedBlock.getBlockPos().equals(block.getBlockPos()));
-        building.destroy((ServerLevel) building.level);
+        building.destroy((ServerLevel) building.getLevel());
 
         // AOE2-style refund: return the % of the non-built portion of the building
         // eg. cancelling a building at 70% completion will refund only 30% cost
@@ -127,17 +127,11 @@ public class BuildingServerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         for (Building building : buildings)
             BuildingClientboundPacket.placeBuilding(
-                BuildingUtils.getMinCorner(building.getBlocks()),
+                building.originPos,
                 building.name,
                 building.rotation,
                 building.ownerName
             );
-    }
-    @SubscribeEvent
-    public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent evt) {
-        //System.out.println("removing all buildings, player left");
-        //buildingsBackup.addAll(buildings);
-        //buildings.removeIf(b -> true);
     }
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions

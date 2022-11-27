@@ -20,7 +20,7 @@ import java.util.List;
 public class BuildingUtils {
 
     // given a string name return a new instance of that building
-    public static Building getNewBuilding(String buildingName, LevelAccessor level, BlockPos pos, Rotation rotation, String ownerName) {
+    public static Building getNewBuilding(String buildingName, Level level, BlockPos pos, Rotation rotation, String ownerName) {
         Building building = null;
         switch(buildingName) {
             case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation, ownerName);
@@ -29,13 +29,14 @@ public class BuildingUtils {
             case Farm.buildingName -> building = new Farm(level, pos, rotation, ownerName);
         }
         if (building != null)
-            building.level = level;
+            building.setLevel(level);
         return building;
     }
 
+    // note originPos may not actually be a part of the building itself
     public static Building findBuilding(List<Building> buildings, BlockPos pos) {
         for (Building building : buildings)
-            if (building.isPosInsideBuilding(pos))
+            if (building.originPos == pos || building.isPosInsideBuilding(pos))
                 return building;
         return null;
     }

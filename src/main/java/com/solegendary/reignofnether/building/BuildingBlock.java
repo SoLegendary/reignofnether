@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -33,7 +34,12 @@ public class BuildingBlock {
     }
 
     public boolean isPlaced(Level level) {
-        return !this.blockState.isAir() && level.getBlockState(this.blockPos) == this.blockState;
+        if (level.isClientSide())
+            return !this.blockState.isAir() && Minecraft.getInstance().level.getBlockState(this.blockPos) == this.blockState;
+        else
+            return !this.blockState.isAir() && level.getBlockState(this.blockPos) == this.blockState;
+
+
     }
 
     public void place() {

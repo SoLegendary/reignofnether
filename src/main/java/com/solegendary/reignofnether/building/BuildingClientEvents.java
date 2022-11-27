@@ -366,9 +366,7 @@ public class BuildingClientEvents {
             replaceOverlayTexture();
             replacedTexture = true;
         }
-
         if (MC.level != null && MC.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
-
             for (Building building : buildings)
                 building.tick(MC.level);
 
