@@ -36,8 +36,8 @@ public abstract class Building {
     public String name;
     public static String structureName;
     private Level level; // directly return MC.level if it's clientside to avoid stale references
-    BlockPos originPos;
-    Rotation rotation;
+    public BlockPos originPos;
+    public Rotation rotation;
 
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time; the building can then be used
     public int msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
@@ -157,33 +157,8 @@ public abstract class Building {
 
     public int getBlocksPlaced() {
         // on clientside a building outside of render view would always be 0
-        if (!getLevel().isClientSide() || isFullyLoadedClientSide((ClientLevel) getLevel())) {
-
+        if (!getLevel().isClientSide() || isFullyLoadedClientSide((ClientLevel) getLevel()))
             return blocks.stream().filter(b -> b.isPlaced(getLevel()) && !b.getBlockState().isAir()).toList().size();
-            /*
-            if (getLevel().isClientSide())
-                return blocks.stream().filter(b -> b.isPlaced(Minecraft.getInstance().level) && !b.getBlockState().isAir()).toList().size();
-            else
-                return blocks.stream().filter(b -> b.isPlaced(getLevel()) && !b.getBlockState().isAir()).toList().size();
-            */
-            /*
-            int blocksPlaced = 0;
-            for (BuildingBlock block : blocks) {
-
-                BlockState blockStateIdeal = block.getBlockState();
-                BlockState blockStateActual;
-
-                if (getLevel().isClientSide())
-                    blockStateActual = Minecraft.getInstance().level.getBlockState(block.getBlockPos());
-                else
-                    blockStateActual = getLevel().getBlockState(block.getBlockPos());
-
-                if (blockStateIdeal == blockStateActual && !blockStateIdeal.isAir())
-                    blocksPlaced += 1;
-            }
-            return blocksPlaced;
-             */
-        }
         else
             return this.serverBlocksPlaced;
     }
@@ -257,7 +232,7 @@ public abstract class Building {
             int x = block.getBlockPos().getX();
             int y = block.getBlockPos().getY();
             int z = block.getBlockPos().getZ();
-            if (block.isPlaced(serverLevel) && x % 4 == 0 && z % 4 != 0) {
+            if (block.isPlaced(serverLevel) && x % 2 == 0 && z % 2 != 0) {
                 serverLevel.explode(null, null, null,
                         x,y,z,
                         1.0f,

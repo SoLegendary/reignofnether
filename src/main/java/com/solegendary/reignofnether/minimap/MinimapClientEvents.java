@@ -6,9 +6,14 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
@@ -18,7 +23,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -144,6 +151,47 @@ public class MinimapClientEvents {
                     depth = (int) (5*(Math.ceil(Math.abs(depth/5))));
 
                     rgb = MiscUtil.shadeHexRGB(rgb, 1.2F - (0.025F * depth));
+                }
+
+
+
+                // draw buildings
+                for (Building building : BuildingClientEvents.getBuildings()) {
+
+                    int xDiff = Math.abs(building.originPos.getX() + 3 - x);
+                    int zDiff = Math.abs(building.originPos.getZ() + 3 - z);
+
+                    // black outline
+                    if (xDiff <= 6 && zDiff <= 6) {
+                        rgb = 0x000000;
+                    }
+                    if (xDiff <= 4 && zDiff <= 4) {
+                        switch (BuildingClientEvents.getPlayerToBuildingRelationship(building)) {
+                            case OWNED -> rgb = 0x00FF00;
+                            case FRIENDLY -> rgb = 0x0000FF;
+                            case HOSTILE -> rgb = 0xFF0000;
+                            case NEUTRAL -> rgb = 0xFFFF00;
+                        }
+                    }
+                }
+
+                // draw units
+                for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+                    int xDiff = Math.abs(entity.getOnPos().getX() - x);
+                    int zDiff = Math.abs(entity.getOnPos().getZ() - z);
+
+                    // black outline
+                    if (xDiff <= 3 && zDiff <= 3) {
+                        rgb = 0x000000;
+                    }
+                    if (xDiff <= 2 && zDiff <= 2) {
+                        switch (UnitClientEvents.getPlayerToEntityRelationship(entity)) {
+                            case OWNED -> rgb = 0x00FF00;
+                            case FRIENDLY -> rgb = 0x0000FF;
+                            case HOSTILE -> rgb = 0xFF0000;
+                            case NEUTRAL -> rgb = 0xFFFF00;
+                        }
+                    }
                 }
 
                 // draw view quad
