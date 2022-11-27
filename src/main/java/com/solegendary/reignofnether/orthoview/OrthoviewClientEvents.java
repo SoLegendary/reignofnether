@@ -81,11 +81,13 @@ public class OrthoviewClientEvents {
         if (camRotX <= -360)
             camRotX += 360;
 
+        /*
         camRotY += y;
         if (camRotY > CAMROTY_MAX)
             camRotY = CAMROTY_MAX;
         if (camRotY < CAMROTY_MIN)
             camRotY = CAMROTY_MIN;
+         */
     }
     public static void zoomCam(float zoomAdj) {
         zoom += zoomAdj;
@@ -265,12 +267,14 @@ public class OrthoviewClientEvents {
         else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybinding.altMod.isDown()) {
             cameraMovingByMouse = true;
             camRotAdjX = (float) (evt.getMouseX() - mouseRightDownX) * CAMROT_MOUSE_SENSITIVITY;
-            camRotAdjY = (float) -(evt.getMouseY() - mouseRightDownY) * CAMROT_MOUSE_SENSITIVITY;
+            //camRotAdjY = (float) -(evt.getMouseY() - mouseRightDownY) * CAMROT_MOUSE_SENSITIVITY;
 
+            /*
             if (camRotY + camRotAdjY > CAMROTY_MAX)
                 camRotAdjY = CAMROTY_MAX - camRotY;
             if (camRotY + camRotAdjY < CAMROTY_MIN)
                 camRotAdjY = CAMROTY_MIN - camRotY;
+             */
         }
     }
 

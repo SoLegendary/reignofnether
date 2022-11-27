@@ -49,6 +49,7 @@ public class LevelRendererMixin {
         if (!OrthoviewClientEvents.isEnabled())
             return;
 
+        /*
         Vec3 vec3 = p_109604_.getPosition();
         double d0 = vec3.x();
         double d1 = vec3.y();
@@ -56,13 +57,9 @@ public class LevelRendererMixin {
 
         MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
 
-        for(Entity entity : UnitClientEvents.allEntities) {
+        for(Entity entity : UnitClientEvents.getAllUnits()) {
             this.renderEntity(entity, d0, d1, d2, p_109601_, p_109600_, multibuffersource$buffersource);
-        }
-
-        // TODO: this technically works and triggers renderEvents but the units still leave the level
-        // TODO: maybe for clientside try saving the Entity reference directly instead of id only?
-        // TODO: maybe we can prevent LevelCallback.onTrackingEnd from affecting Units?
+        }*/
     }
 
 }

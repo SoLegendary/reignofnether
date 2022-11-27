@@ -6,8 +6,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -30,7 +28,7 @@ public class BuildingServerboundPacket {
     }
     public static void cancelBuilding(BlockPos buildingPos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
-                BuildingAction.CANCEL,
+                BuildingAction.DESTROY,
                 "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
     }
     public static void setRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
@@ -93,7 +91,7 @@ public class BuildingServerboundPacket {
             }
             switch (this.action) {
                 case PLACE -> BuildingServerEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds);
-                case CANCEL -> {
+                case DESTROY -> {
                     BuildingServerEvents.cancelBuilding(building);
                 }
                 case SET_RALLY_POINT -> {

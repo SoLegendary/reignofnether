@@ -70,7 +70,6 @@ public class ResourcesServerEvents {
                     STARTING_ORE);
             resourcesList.add(playerResources);
         }
-        // TODO: server doesn't like us loading LocalPlayer class in here...
         ResourcesClientboundPacket.syncResources(resourcesList);
     }
 }

@@ -37,7 +37,7 @@ public abstract class ProductionItem {
     }
 
     public boolean canAfford(String ownerName) {
-        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.level, ownerName);
+        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), ownerName);
         int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
 
         for (Resources resources : ResourcesServerEvents.resourcesList)
@@ -49,7 +49,7 @@ public abstract class ProductionItem {
         return false;
     }
     public boolean canAffordPopulation(String ownerName) {
-        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.level, ownerName);
+        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), ownerName);
         int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
 
         for (Resources resources : ResourcesServerEvents.resourcesList)
@@ -58,7 +58,7 @@ public abstract class ProductionItem {
         return false;
     }
     public boolean isBelowMaxPopulation(String ownerName) {
-        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.level, ownerName);
+        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), ownerName);
         int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
 
         for (Resources resources : ResourcesServerEvents.resourcesList)

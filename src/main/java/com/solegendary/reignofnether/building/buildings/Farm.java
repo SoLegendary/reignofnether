@@ -4,7 +4,6 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.ResourceCosts;
-import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -25,7 +24,7 @@ public class Farm extends Building {
     public final static String buildingName = "Farm";
     public final static String structureName = "farm";
 
-    public Farm(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
+    public Farm(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName);
         this.name = buildingName;
         this.ownerName = ownerName;
@@ -57,7 +56,7 @@ public class Farm extends Building {
                 () -> BuildingClientEvents.setBuildingToPlace(Farm.class),
                 List.of(
                         FormattedCharSequence.forward(Farm.buildingName, Style.EMPTY),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.Farm.WOOD + " + 5 per crop planted", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.Farm.WOOD + "  +  5  per  crop  planted", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A wheat field that be can tilled to collect food.", Style.EMPTY),
                         FormattedCharSequence.forward("Workers will automatically use wood to replant seeds while working.", Style.EMPTY)

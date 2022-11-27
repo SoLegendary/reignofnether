@@ -2,8 +2,10 @@ package com.solegendary.reignofnether.unit.units;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.ResourceCosts;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.goals.*;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -21,19 +23,15 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ZombieUnit extends Zombie implements Unit {
+public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
     // region
     public List<AbilityButton> getAbilities() {return abilities;};
-
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
-    public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
-    public GatherResourcesGoal getGatherResourceGoal() {return gatherResourcesGoal;}
+    public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
-    public BuildRepairGoal buildRepairGoal;
-    public GatherResourcesGoal gatherResourcesGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -70,8 +68,7 @@ public class ZombieUnit extends Zombie implements Unit {
     public float getUnitArmorValue() {return armorValue;}
     public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
-    public boolean isWorker() {return canBuildAndRepair;}
-    public boolean canAttack() {return canAttack;}
+    public boolean canAttackBuildings() {return canAttackBuildings;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -83,16 +80,16 @@ public class ZombieUnit extends Zombie implements Unit {
     final static public float armorValue = 2.0f;
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 0; // only used by ranged units
-    final static public int attackCooldown = 20;
+    final static public int attackCooldown = 30;
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.Zombie.POPULATION;
-    final static public boolean canBuildAndRepair = false;
-    final static public boolean canAttack = true;
+    final static public boolean canAttackBuildings = true;
 
-    public ZombieAttackUnitGoal attackGoal;
+    public ZombieAttackUnitGoal attackUnitGoal;
+    public AttackBuildingGoal attackBuildingGoal;
 
     private static final List<AbilityButton> abilities = new ArrayList<>();
 
@@ -111,12 +108,19 @@ public class ZombieUnit extends Zombie implements Unit {
     public void tick() {
         super.tick();
         Unit.tick(this);
+        AttackerUnit.tick(this);
+    }
+
+    public void resetBehaviours() {
+        Unit.resetBehaviours(this);
+        AttackerUnit.resetBehaviours(this);
     }
 
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.attackGoal = new ZombieAttackUnitGoal(this, attackCooldown, 1.0D, false);
+        this.attackUnitGoal = new ZombieAttackUnitGoal(this, attackCooldown, 1.0D, false);
+        this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
     }
 
     @Override
@@ -125,7 +129,8 @@ public class ZombieUnit extends Zombie implements Unit {
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, moveGoal);
-        this.goalSelector.addGoal(3, attackGoal);
+        this.goalSelector.addGoal(3, attackUnitGoal);
+        this.goalSelector.addGoal(3, attackBuildingGoal);
         this.targetSelector.addGoal(3, targetGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }

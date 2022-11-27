@@ -6,7 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.villagers.VillagerUnitModel;
 import com.solegendary.reignofnether.util.MyMath;
@@ -24,6 +25,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // Renders a Unit's portrait including its animated head, name, healthbar, list of stats and UI frames for these
@@ -53,13 +55,7 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
     private final int lookRangeX = 100;
     private final int lookRangeY = 40;
 
-    private static final ResourceLocation[] TEXTURE_STAT_ICONS = {
-            new ResourceLocation("reignofnether", "textures/icons/items/sword.png"), // DAMAGE
-            new ResourceLocation("reignofnether", "textures/icons/items/sparkler.png"), // ATTACK SPEED
-            new ResourceLocation("reignofnether", "textures/icons/items/bow.png"), // RANGE
-            new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"), // ARMOUR
-            new ResourceLocation("reignofnether", "textures/icons/items/boots.png"), // MOVE SPEED
-    };
+
 
 
     public PortraitRendererUnit(R renderer) {
@@ -122,7 +118,7 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
         );
 
         int bgCol = 0x0;
-        switch (UnitClientEvents.getPlayerToEntityRelationship(entity.getId())) {
+        switch (UnitClientEvents.getPlayerToEntityRelationship(entity)) {
             case OWNED    -> bgCol = 0x90000000;
             case FRIENDLY -> bgCol = 0x90009000;
             case NEUTRAL  -> bgCol = 0x90909000;
@@ -181,25 +177,34 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
 
         int blitXIcon = x + 6;
         int blitYIcon = y + 7;
-        for (int i = 0; i < TEXTURE_STAT_ICONS.length; i++) {
+
+        // prep strings/icons to render
+        ArrayList<ResourceLocation> textureStatIcons = new ArrayList<>();
+        ArrayList<String> statStrings = new ArrayList<>();
+
+        if (unit instanceof AttackerUnit attackerUnit) {
+            textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sword.png")); // DAMAGE
+            textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sparkler.png")); // ATTACK SPEED
+            textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/bow.png")); // RANGE
+            statStrings.add(String.valueOf((int) attackerUnit.getAttackDamage()));
+            statStrings.add(String.valueOf((int) (100 / attackerUnit.getAttackCooldown())));
+            statStrings.add(String.valueOf((int) (attackerUnit.getAttackRange())));
+        }
+        textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"));
+        textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/boots.png"));
+
+        statStrings.add(String.valueOf((int) (unit.getUnitArmorValue())));
+        AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
+        statStrings.add(ms != null ? String.valueOf((int) (ms.getValue() * 100)) : "0");
+
+        // render based on prepped strings/icons
+        for (int i = 0; i < statStrings.size(); i++) {
             MyRenderer.renderIcon(
                     poseStack,
-                    TEXTURE_STAT_ICONS[i],
+                    textureStatIcons.get(i),
                     blitXIcon, blitYIcon, 8
             );
-            String statString = "";
-
-            switch (i) {
-                case 0 -> statString = String.valueOf((int) unit.getAttackDamage()); // DAMAGE
-                case 1 -> statString = String.valueOf((int) (100 / unit.getAttackCooldown())); // ATTACK SPEED
-                case 2 -> statString = String.valueOf((int) (unit.getAttackRange())); // RANGE
-                case 3 -> statString = String.valueOf((int) (unit.getUnitArmorValue())); // ARMOUR
-                case 4 -> {
-                    AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
-                    statString = ms != null ? String.valueOf((int) (ms.getValue() * 100)) : "0"; // MOVE SPEED
-                }
-            }
-            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, statString, blitXIcon + 13, blitYIcon, 0xFFFFFF);
+            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, statStrings.get(i), blitXIcon + 13, blitYIcon, 0xFFFFFF);
             blitYIcon += 10;
         }
         return RectZone.getZoneByLW(x, y, width2, frameHeight);

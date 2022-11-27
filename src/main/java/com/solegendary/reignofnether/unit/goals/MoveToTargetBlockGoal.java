@@ -47,7 +47,6 @@ public class MoveToTargetBlockGoal extends Goal {
             this.mob.getNavigation().stop();
     }
 
-    // TODO: can sometimes fail to go back uphill when knocked downhill by attacks
     public void setMoveTarget(@Nullable BlockPos bp) {
         this.moveTarget = bp;
         this.start();
@@ -57,7 +56,7 @@ public class MoveToTargetBlockGoal extends Goal {
         return this.moveTarget;
     }
 
-    public void stop() {
+    public void stopMoving() {
         this.moveTarget = null;
         this.mob.getNavigation().stop();
     }

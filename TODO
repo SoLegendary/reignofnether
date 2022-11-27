@@ -1,15 +1,31 @@
 TODO before playtesting:
 
-1. Fix hotkeys (Q,E?)
-2. keep chunks around buildings and units persistently loaded
-3. fix tower not cancelling
+1. keep chunks around buildings loaded and stop clientside removal of selected building
+    - need to force chunks and remove on building removal
+    - remove forced chunks on dead entities
+
+3. Can't log back into running world with buildings in it (due to BuildingServerEvents.buildings being populated)
+
+2. Fix hotkeys (Q,E?)
+3. fix control groups and allow buildings in control groups
 4. setup shockbyte server (~3gb?)
 
+Misc additions/fixes
 
-Stretch goals
+0. Fix not being able to cancel farms
+1. Arm animations and block cracking/particles
+2. Fix body rendering issues (to do with portrait head rendering)
+3. Minimap 90deg rotations
 
-1. Pillager and vindicator units
-2. Arm animations and block cracking/particles
-3. Wheat farm buildings
-4. Fix body rendering issues (to do with portrait head rendering)
-5. wild animal hunting
+Villager faction:
+    - Pillager and vindicator
+    - Witch (has ground target potion abilities, or autoattacks with basic splash harmings)
+    - town center (move villager production to this)
+    - villager barracks
+    - armory (upgrade building)
+
+Undead faction:
+    - Zombie villager unit (identical to villagers except with more health and burn in sunlight)
+    - necropolis (town center)
+    - tomb (upgrade building)
+    - obelisk (population + prevent daylight burn while near it)

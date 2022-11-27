@@ -6,7 +6,10 @@ import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.ResourceCosts;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -21,21 +24,27 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class BuildingServerEvents {
+
+    private static final int BUILDING_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
+    private static int buildingSyncTicks = BUILDING_SYNC_TICKS_MAX;
 
     private static ServerLevel serverLevel = null;
 
     // buildings that currently exist serverside
-    private static List<Building> buildings = Collections.synchronizedList(new ArrayList<>());
-    private static List<BuildingBlock> blockPlaceQueue = Collections.synchronizedList(new ArrayList<>());
-    private static List<BlockPos> blockDestroyQueue = Collections.synchronizedList(new ArrayList<>());
+    private static final ArrayList<Building> buildings = new ArrayList<>();
+    private static final ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
+    private static final ArrayList<BlockPos> blockDestroyQueue = new ArrayList<>();
 
-    public static List<Building> getBuildings() {
+    private static final ArrayList<Building> buildingsBackup = new ArrayList<>();
+
+    public static ArrayList<Building> getBuildings() {
         return buildings;
     }
 
@@ -67,8 +76,8 @@ public class BuildingServerEvents {
                 // assign the builder unit that placed this building
                 for (int id : builderUnitIds) {
                     Entity entity = serverLevel.getEntity(id);
-                    if (entity instanceof Unit unit)
-                        unit.getBuildRepairGoal().setBuildingTarget(building);
+                    if (entity instanceof WorkerUnit workerUnit)
+                        workerUnit.getBuildRepairGoal().setBuildingTarget(building);
                 }
             }
             else
@@ -85,7 +94,7 @@ public class BuildingServerEvents {
         buildings.remove(building);
         for (BuildingBlock block : building.getBlocks())
             blockPlaceQueue.removeIf(queuedBlock -> queuedBlock.getBlockPos().equals(block.getBlockPos()));
-        building.destroy((ServerLevel) building.level);
+        building.destroy((ServerLevel) building.getLevel());
 
         // AOE2-style refund: return the % of the non-built portion of the building
         // eg. cancelling a building at 70% completion will refund only 30% cost
@@ -137,30 +146,38 @@ public class BuildingServerEvents {
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (!evt.level.isClientSide() && evt.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
-            serverLevel = (ServerLevel) evt.level;
+        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
+            return;
 
+        serverLevel = (ServerLevel) evt.level;
+
+        buildingSyncTicks -= 1;
+        if (buildingSyncTicks <= 0) {
+            buildingSyncTicks = BUILDING_SYNC_TICKS_MAX;
             for (Building building : buildings)
-                building.tick(serverLevel);
-            buildings.removeIf(Building::shouldBeDestroyed);
+                BuildingClientboundPacket.syncBuilding(BuildingUtils.getMinCorner(building.getBlocks()), building.getBlocksPlaced());
+        }
 
-            if (blockPlaceQueue.size() > 0) {
-                BuildingBlock nextBlock = blockPlaceQueue.get(0);
-                BlockPos bp = nextBlock.getBlockPos();
-                BlockState bs = nextBlock.getBlockState();
-                if (serverLevel.isLoaded(bp)) {
-                    serverLevel.setBlockAndUpdate(bp, bs);
-                    serverLevel.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, bp, Block.getId(bs));
-                    serverLevel.levelEvent(bs.getSoundType().getPlaceSound().hashCode(), bp, Block.getId(bs));
-                    blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
-                }
+        for (Building building : buildings)
+            building.tick(serverLevel);
+        buildings.removeIf(Building::shouldBeDestroyed);
+
+        if (blockPlaceQueue.size() > 0) {
+            BuildingBlock nextBlock = blockPlaceQueue.get(0);
+            BlockPos bp = nextBlock.getBlockPos();
+            BlockState bs = nextBlock.getBlockState();
+            if (serverLevel.isLoaded(bp)) {
+                serverLevel.setBlockAndUpdate(bp, bs);
+                serverLevel.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, bp, Block.getId(bs));
+                serverLevel.levelEvent(bs.getSoundType().getPlaceSound().hashCode(), bp, Block.getId(bs));
+                blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
             }
-            if (blockDestroyQueue.size() > 0) {
-                BlockPos bp = blockDestroyQueue.get(0);
-                if (serverLevel.isLoaded(bp)) {
-                    serverLevel.destroyBlock(bp, false);
-                    blockDestroyQueue.removeIf(b -> b.equals(bp));
-                }
+        }
+        if (blockDestroyQueue.size() > 0) {
+            BlockPos bp = blockDestroyQueue.get(0);
+            if (serverLevel.isLoaded(bp)) {
+                serverLevel.destroyBlock(bp, false);
+                blockDestroyQueue.removeIf(b -> b.equals(bp));
             }
         }
     }

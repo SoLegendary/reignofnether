@@ -10,12 +10,14 @@ import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.hud.Button;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
@@ -39,7 +41,7 @@ public abstract class ProductionBuilding extends Building {
     private BlockPos rallyPoint;
     protected int spawnRadiusOffset = 0;
 
-    public ProductionBuilding(LevelAccessor level, BlockPos originPos, Rotation rotation, String ownerName) {
+    public ProductionBuilding(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName);
     }
 
@@ -75,10 +77,11 @@ public abstract class ProductionBuilding extends Building {
                 ));
                 CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
                     UnitServerEvents.addActionItem(
-                        UnitAction.MOVE,
-                        -1,
-                        new int[] { entity.getId() },
-                        this.rallyPoint
+                            this.ownerName,
+                            UnitAction.MOVE,
+                            -1,
+                            new int[] { entity.getId() },
+                            this.rallyPoint
                     );
                 });
             }
@@ -98,11 +101,6 @@ public abstract class ProductionBuilding extends Building {
         boolean success = false;
 
         if (building != null) {
-            //if (building.level.isClientSide())
-            //    System.out.println("(client) starting: " + itemName);
-            //if (!building.level.isClientSide())
-            //    System.out.println("(server) starting: " + itemName);
-
             ProductionItem prodItem = null;
             switch(itemName) {
                 case CreeperUnitProd.itemName -> prodItem = new CreeperUnitProd(building);
@@ -112,7 +110,7 @@ public abstract class ProductionBuilding extends Building {
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside
-                if (building.level.isClientSide()) {
+                if (building.getLevel().isClientSide()) {
                     building.productionQueue.add(prodItem);
                     success = true;
                 }
@@ -153,7 +151,7 @@ public abstract class ProductionBuilding extends Building {
                 if (frontItem) {
                     ProductionItem prodItem = building.productionQueue.get(0);
                     building.productionQueue.remove(0);
-                    if (!building.level.isClientSide()) {
+                    if (!building.getLevel().isClientSide()) {
                         ResourcesServerEvents.addSubtractResources(new Resources(
                                 building.ownerName,
                                 prodItem.foodCost,
@@ -170,7 +168,7 @@ public abstract class ProductionBuilding extends Building {
                         if (prodItem.getItemName().equals(itemName) &&
                                 prodItem.ticksLeft >= prodItem.ticksToProduce) {
                             building.productionQueue.remove(prodItem);
-                            if (!building.level.isClientSide()) {
+                            if (!building.getLevel().isClientSide()) {
                                 ResourcesServerEvents.addSubtractResources(new Resources(
                                         building.ownerName,
                                         prodItem.foodCost,
@@ -188,12 +186,12 @@ public abstract class ProductionBuilding extends Building {
         return success;
     }
 
-    public void tick(Level level) {
-        super.tick(level);
+    public void tick(Level tickLevel) {
+        super.tick(tickLevel);
 
         if (productionQueue.size() >= 1) {
             ProductionItem nextItem = productionQueue.get(0);
-            if (nextItem.tick(level))
+            if (nextItem.tick(tickLevel))
                 productionQueue.remove(0);
         }
     }

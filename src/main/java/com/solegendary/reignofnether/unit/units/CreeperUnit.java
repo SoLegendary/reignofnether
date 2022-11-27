@@ -1,12 +1,12 @@
 package com.solegendary.reignofnether.unit.units;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.villagers.VillagerUnit;
@@ -22,9 +22,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.SwellGoal;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
@@ -33,19 +31,15 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreeperUnit extends Creeper implements Unit {
+public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     // region
     public List<AbilityButton> getAbilities() {return abilities;};
-
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
-    public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
-    public GatherResourcesGoal getGatherResourceGoal() {return gatherResourcesGoal;}
+    public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
-    public BuildRepairGoal buildRepairGoal;
-    public GatherResourcesGoal gatherResourcesGoal;
     public CreeperAttackUnitGoal attackGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
@@ -83,8 +77,7 @@ public class CreeperUnit extends Creeper implements Unit {
     public float getUnitArmorValue() {return armorValue;}
     public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
-    public boolean isWorker() {return canBuildAndRepair;}
-    public boolean canAttack() {return canAttack;}
+    public boolean canAttackBuildings() {return canAttackBuildings;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -102,8 +95,9 @@ public class CreeperUnit extends Creeper implements Unit {
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.Creeper.POPULATION;
-    final static public boolean canBuildAndRepair = false;
-    final static public boolean canAttack = true;
+    final static public boolean canAttackBuildings = false;
+
+    public AttackBuildingGoal attackBuildingGoal;
 
     private final List<AbilityButton> abilities = new ArrayList<>();
 
@@ -145,26 +139,24 @@ public class CreeperUnit extends Creeper implements Unit {
     public void tick() {
         super.tick();
         Unit.tick(this);
+        AttackerUnit.tick(this);
+
         if (forceExplode)
             this.setSwellDir(1);
         else if (!canExplodeOnTarget())
             this.setSwellDir(-1);
     }
 
+    public void resetBehaviours() {
+        Unit.resetBehaviours(this);
+        AttackerUnit.resetBehaviours(this);
+        forceExplode = false;
+    }
+
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new CreeperAttackUnitGoal(this, attackCooldown, 1.0f, false);
-    }
-
-    @Override
-    public void resetBehaviours() {
-        this.setAttackMoveTarget(null);
-        this.getTargetGoal().setTarget(null);
-        this.getMoveGoal().stop();
-        this.setFollowTarget(null);
-        this.setHoldPosition(false);
-        forceExplode = false;
     }
 
     @Override
@@ -178,7 +170,6 @@ public class CreeperUnit extends Creeper implements Unit {
         this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
     }
 
-    // TODO: instead, activate a goal to move towards the target entity/block and then explode
     public void explode() {
         forceExplode = true;
     }

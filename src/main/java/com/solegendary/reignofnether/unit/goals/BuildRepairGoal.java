@@ -6,7 +6,8 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.Farm;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.Relationship;
-import com.solegendary.reignofnether.unit.Unit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.PathfinderMob;
@@ -30,8 +31,8 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
         if (buildingTarget != null) {
             calcMoveTarget();
             if (buildingTarget.getBlocksPlaced() >= buildingTarget.getBlocksTotal()) {
-                if (buildingTarget instanceof Farm)
-                    ((Unit) mob).getGatherResourceGoal().setTargetResourceName(ResourceName.FOOD);
+                if (buildingTarget instanceof Farm && mob instanceof WorkerUnit workerUnit)
+                    ((WorkerUnit) mob).getGatherResourceGoal().setTargetResourceName(ResourceName.FOOD);
                 stopBuilding();
             }
             if (isBuilding()) {
@@ -44,7 +45,8 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     }
 
     private void calcMoveTarget() {
-        this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 0);
+        if (this.buildingTarget != null)
+            this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 0);
     }
 
     // only count as building if in range of the target - building is actioned in Building.tick()
@@ -66,6 +68,6 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     // if we override stop() it for some reason is called after start() and we can never begin this goal...
     public void stopBuilding() {
         buildingTarget = null;
-        super.stop();
+        super.stopMoving();
     }
 }

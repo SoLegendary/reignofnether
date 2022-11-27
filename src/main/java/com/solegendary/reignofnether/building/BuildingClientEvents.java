@@ -3,16 +3,14 @@ package com.solegendary.reignofnether.building;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.solegendary.reignofnether.building.buildings.VillagerHouse;
-import com.solegendary.reignofnether.building.buildings.VillagerTower;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.ResourceCosts;
-import com.solegendary.reignofnether.unit.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -24,23 +22,21 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class BuildingClientEvents {
@@ -53,7 +49,7 @@ public class BuildingClientEvents {
     }
 
     // clientside buildings used for tracking position (for cursor selection)
-    private static List<Building> buildings = Collections.synchronizedList(new ArrayList<>());
+    private static final ArrayList<Building> buildings = new ArrayList<>();
 
     private static Building selectedBuilding = null;
     private static Class<? extends Building> buildingToPlace = null;
@@ -63,7 +59,11 @@ public class BuildingClientEvents {
     private static Rotation buildingRotation = Rotation.NONE;
     private static Vec3i buildingDimensions = new Vec3i(0,0,0);
 
-    public static Building getSelectedBuilding() { return selectedBuilding; }
+    public static Building getSelectedBuilding() {
+        if (!buildings.contains(selectedBuilding))
+            selectedBuilding = null;
+        return selectedBuilding;
+    }
     public static void setSelectedBuilding(Building building) { selectedBuilding = building; }
     public static void setBuildingToPlace(Class<? extends Building> building) {
         buildingToPlace = building;
@@ -257,8 +257,7 @@ public class BuildingClientEvents {
             if (building.equals(selectedBuilding))
                 MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
             else if (building.equals(preselectedBuilding) && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
-                if (HudClientEvents.hudSelectedEntity instanceof Unit &&
-                    ((Unit) HudClientEvents.hudSelectedEntity).isWorker() &&
+                if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
                     MiscUtil.isRightClickDown(MC))
                     MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
                 else
@@ -328,7 +327,7 @@ public class BuildingClientEvents {
 
                 ArrayList<Integer> builderIds = new ArrayList<>();
                 for (LivingEntity builderEntity : UnitClientEvents.getSelectedUnits())
-                    if (builderEntity instanceof Unit && ((Unit) builderEntity).isWorker())
+                    if (builderEntity instanceof WorkerUnit)
                         builderIds.add(builderEntity.getId());
 
                 BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
@@ -339,7 +338,7 @@ public class BuildingClientEvents {
                 Building building = getPreselectedBuilding();
                 if (building != null && CursorClientEvents.getLeftClickAction() == null) {
                     selectedBuilding = building;
-                    UnitClientEvents.setSelectedUnitIds(new ArrayList<>());
+                    UnitClientEvents.setSelectedUnits(new ArrayList<>());
                 }
             }
         }
@@ -367,9 +366,7 @@ public class BuildingClientEvents {
             replaceOverlayTexture();
             replacedTexture = true;
         }
-
         if (MC.level != null && MC.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
-
             for (Building building : buildings)
                 building.tick(MC.level);
 
@@ -382,6 +379,12 @@ public class BuildingClientEvents {
 
     // place a building clientside that has already been registered on serverside
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName) {
+        for (Building building : buildings)
+            if (BuildingUtils.isPosPartOfAnyBuilding(MC.level, pos, false))
+                return; // building already exists clientside
+
+        System.out.println("Added building from server");
+
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName);
 
         if (newBuilding != null) {
@@ -397,12 +400,18 @@ public class BuildingClientEvents {
 
         // sync the goal so we can display the correct animations
         Entity entity = HudClientEvents.hudSelectedEntity;
-        if (entity instanceof Unit unit && unit.isWorker())
-            unit.getBuildRepairGoal().setBuildingTarget(newBuilding);
+        if (entity instanceof WorkerUnit workerUnit)
+            workerUnit.getBuildRepairGoal().setBuildingTarget(newBuilding);
     }
 
     public static void destroyBuilding(BlockPos pos) {
-        buildings.removeIf(building -> building.isPosInsideBuilding(pos));
+        buildings.removeIf(b -> b.isPosPartOfBuilding(pos, false));
+    }
+
+    public static void syncBuildingBlocks(Building serverBuilding, int blocksPlaced) {
+        for (Building building : buildings)
+            if (building.originPos.equals(serverBuilding.originPos))
+                building.serverBlocksPlaced = blocksPlaced;
     }
 
     public static Relationship getPlayerToBuildingRelationship(Building building) {

@@ -3,18 +3,27 @@ package com.solegendary.reignofnether.unit;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.resources.ResourceAnimal;
+import com.solegendary.reignofnether.resources.ResourceAnimals;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -23,21 +32,22 @@ import java.util.List;
 
 public class UnitServerEvents {
 
-    private static final ArrayList<UnitActionItem> unitActionQueue = new ArrayList<>();
-    private static final ArrayList<Integer> allUnitIds = new ArrayList<>();
+    private static final int UNIT_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
+    private static int unitSyncTicks = UNIT_SYNC_TICKS_MAX;
 
-    public static ArrayList<Integer> getAllUnitIds() {
-        return allUnitIds;
+    private static final ArrayList<UnitActionItem> unitActionQueue = new ArrayList<>();
+    private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
+
+    public static ArrayList<LivingEntity> getAllUnits() {
+        return allUnits;
     }
 
     public static int getCurrentPopulation(ServerLevel level, String ownerName) {
         int currentPopulation = 0;
-        for (Integer unitId : allUnitIds) {
-            Entity entity = level.getEntity(unitId);
+        for (LivingEntity entity : allUnits)
             if (entity instanceof Unit unit)
                 if (unit.getOwnerName().equals(ownerName))
                     currentPopulation += unit.getPopCost();
-        }
         for (Building building : BuildingServerEvents.getBuildings())
             if (building.ownerName.equals(ownerName))
                 if (building instanceof ProductionBuilding prodBuilding)
@@ -48,6 +58,7 @@ public class UnitServerEvents {
 
     // manually provide all the variables required to do unit actions
     public static void addActionItem(
+            String ownerName,
             UnitAction action,
             int unitId,
             int[] unitIds,
@@ -55,6 +66,7 @@ public class UnitServerEvents {
     ) {
         unitActionQueue.add(
             new UnitActionItem(
+                ownerName,
                 action,
                 unitId,
                 unitIds,
@@ -79,18 +91,39 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveLevelEvent evt) {
-        int entityId = evt.getEntity().getId();
-        allUnitIds.removeIf(e -> e == entityId);
+        if (evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
+            allUnits.removeIf(e -> e.getId() == entity.getId());
+
+            if (entity instanceof Unit)
+                System.out.println("unit left: " + entity.getId());
+            UnitClientboundPacket.sendLeavePacket(entity);
+        }
     }
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
-        Entity entity = evt.getEntity();
-        if (entity instanceof Unit && !evt.getLevel().isClientSide) {
-            allUnitIds.add(entity.getId());
-            ChunkAccess chunk = evt.getLevel().getChunk(entity.blockPosition());
-            boolean success = ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
-            System.out.println(success);
+        if (evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
+            allUnits.add(entity);
+
+            // TODO: remove this on leaving
+            if (entity instanceof Unit) {
+                ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
+                ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
+            }
+        }
+    }
+
+    // award food to killer of wild animal mobs
+    @SubscribeEvent
+    public static void onLivingDeath(LivingDeathEvent evt) {
+        if (evt.getEntity() instanceof Animal animal && !(evt.getEntity() instanceof Unit)) {
+            for (ResourceAnimal resAnimal : ResourceAnimals.animals)
+                if (resAnimal.animalName.equals(animal.getName().getString()) && evt.getSource().getEntity() instanceof Unit unit)
+                    ResourcesServerEvents.addSubtractResources(new Resources(
+                        unit.getOwnerName(),
+                        animal.isBaby() ? resAnimal.foodValue / 2 : resAnimal.foodValue,
+                        0,0
+                    ));
         }
     }
 
@@ -98,9 +131,15 @@ public class UnitServerEvents {
     // remember to always reset targets so that users' actions always overwrite any existing action
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide())
+        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
             return;
 
+        unitSyncTicks -= 1;
+        if (unitSyncTicks <= 0) {
+            unitSyncTicks = UNIT_SYNC_TICKS_MAX;
+            for (LivingEntity entity : allUnits)
+                UnitClientboundPacket.sendSyncPacket(entity);
+        }
         for (UnitActionItem actionItem : unitActionQueue)
             actionItem.action(evt.level);
 
