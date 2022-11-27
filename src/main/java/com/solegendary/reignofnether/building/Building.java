@@ -140,7 +140,7 @@ public abstract class Building {
 
     private boolean isFullyLoadedClientSide(ClientLevel level) {
         for (BuildingBlock block : this.blocks)
-            if (level.getBlockState(block.getBlockPos()).getBlock() == Blocks.VOID_AIR)
+            if (!level.isLoaded(block.getBlockPos()))
                 return false;
         return true;
     }
@@ -166,7 +166,10 @@ public abstract class Building {
     // - block must be connected to something else (not air)
     // - block must be the lowest Y value possible
     private void buildNextBlock(Level level) {
-        ArrayList<BuildingBlock> unplacedBlocks = new ArrayList<>(blocks.stream().filter(b -> !b.isPlaced((Level) this.level)).toList());
+        ArrayList<BuildingBlock> unplacedBlocks = new ArrayList<>(blocks.stream().filter(
+                b -> !b.isPlaced((Level) this.level) && !b.getBlockState().isAir()
+        ).toList());
+
         int minY = getMinCorner(unplacedBlocks).getY();
         ArrayList<BuildingBlock> validBlocks = new ArrayList<>();
 
@@ -219,8 +222,8 @@ public abstract class Building {
                 BlockState air = Blocks.AIR.defaultBlockState();
                 level.setBlockAndUpdate(block.getBlockPos(), air);
             }
-            level.destroyBlock(block.getBlockPos(), false);
             if (block.isPlaced(level)) {
+                level.destroyBlock(block.getBlockPos(), false);
                 int x = block.getBlockPos().getX();
                 int y = block.getBlockPos().getY();
                 int z = block.getBlockPos().getZ();

@@ -5,12 +5,10 @@ TODO before playtesting:
     - remove forced chunks on dead entities
 
 3. Can't log back into running world with buildings in it (due to BuildingServerEvents.buildings being populated)
+
 2. Fix hotkeys (Q,E?)
 3. fix control groups and allow buildings in control groups
 4. setup shockbyte server (~3gb?)
-
-5. Melee unit building damage (at least play local-in-world door-breaking sounds in lieu of animations)
-    - Fix attack move (at the moment monster will go to the move target THEN seek targets)
 
 Misc additions/fixes
 

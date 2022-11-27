@@ -6,6 +6,8 @@ import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.ResourceCosts;
+import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
@@ -22,8 +24,11 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class BuildingServerEvents {
 
@@ -36,6 +41,8 @@ public class BuildingServerEvents {
     private static final ArrayList<Building> buildings = new ArrayList<>();
     private static final ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
     private static final ArrayList<BlockPos> blockDestroyQueue = new ArrayList<>();
+
+    private static final ArrayList<Building> buildingsBackup = new ArrayList<>();
 
     public static ArrayList<Building> getBuildings() {
         return buildings;
@@ -118,19 +125,23 @@ public class BuildingServerEvents {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
-        /*
         for (Building building : buildings)
             BuildingClientboundPacket.placeBuilding(
                 BuildingUtils.getMinCorner(building.getBlocks()),
                 building.name,
                 building.rotation,
                 building.ownerName
-            );*/
+            );
+        //CompletableFuture.delayedExecutor(20000, TimeUnit.MILLISECONDS).execute(() -> {
+        //    System.out.println("readded from backups");
+        //    buildings.addAll(buildingsBackup);
+        //});
     }
     @SubscribeEvent
     public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent evt) {
-        System.out.println("removing all buildings, player left");
-        buildings.removeIf(b -> true);
+        //System.out.println("removing all buildings, player left");
+        //buildingsBackup.addAll(buildings);
+        //buildings.removeIf(b -> true);
     }
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions

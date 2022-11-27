@@ -119,11 +119,11 @@ public interface AttackerUnit {
                 nearbyHostileMobs.add(mob);
         }
         // find the closest mob
-        double closestDist = Math.max(this.getAttackRange() + 1, getAggroRange());
+        double closestDist = getAggroRange();
         PathfinderMob closestMob = null;
         for (PathfinderMob mob : nearbyHostileMobs) {
             double dist = unitMob.position().distanceTo(mob.position());
-            if (dist < closestDist && dist < this.getAggroRange()) {
+            if (dist < closestDist) {
                 closestDist = unitMob.position().distanceTo(mob.position());
                 closestMob = mob;
             }

@@ -75,18 +75,15 @@ public abstract class ProductionBuilding extends Building {
                         spawnPoint.getY() + 0.5f,
                         spawnPoint.getZ() + 0.5f
                 ));
-                Player player = Minecraft.getInstance().player;
-                if (player != null) {
-                    CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
-                        UnitServerEvents.addActionItem(
-                                player.getName().getString(),
-                                UnitAction.MOVE,
-                                -1,
-                                new int[] { entity.getId() },
-                                this.rallyPoint
-                        );
-                    });
-                }
+                CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
+                    UnitServerEvents.addActionItem(
+                            this.ownerName,
+                            UnitAction.MOVE,
+                            -1,
+                            new int[] { entity.getId() },
+                            this.rallyPoint
+                    );
+                });
             }
             else {
                 BlockPos spawnPoint = getMinCorner(this.blocks);
