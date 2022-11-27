@@ -36,7 +36,7 @@ public class BuildingClientboundPacket {
     }
     public static void syncBuilding(BlockPos buildingPos, int blocksPlaced) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new BuildingClientboundPacket(BuildingAction.SYNC,
+                new BuildingClientboundPacket(BuildingAction.SYNC_BLOCKS,
                         "", buildingPos, Rotation.NONE, "", blocksPlaced));
     }
     public static void startProduction(BlockPos buildingPos, String itemName) {
@@ -95,7 +95,7 @@ public class BuildingClientboundPacket {
                 switch (action) {
                     case PLACE -> BuildingClientEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName);
                     case DESTROY -> BuildingClientEvents.destroyBuilding(this.buildingPos);
-                    case SYNC -> BuildingClientEvents.syncBuilding(building, this.blocksPlaced);
+                    case SYNC_BLOCKS -> BuildingClientEvents.syncBuildingBlocks(building, this.blocksPlaced);
                     case START_PRODUCTION -> {
                         ProductionBuilding.startProductionItem((ProductionBuilding) building, this.itemName, this.buildingPos);
                     }

@@ -9,7 +9,6 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.ResourceCosts;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -87,12 +86,6 @@ public class BuildingClientEvents {
 
     public static List<Building> getBuildings() {
         return buildings;
-    }
-
-    public static void syncBuilding(Building serverBuilding, int blocksPlaced) {
-        for (Building building : buildings)
-            if (building.originPos.equals(serverBuilding.originPos))
-                building.serverBlocksPlaced = blocksPlaced;
     }
 
     // adds a green overlay option to OverlayTexture at (0,0)
@@ -388,6 +381,12 @@ public class BuildingClientEvents {
 
     // place a building clientside that has already been registered on serverside
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName) {
+        for (Building building : buildings)
+            if (BuildingUtils.isPosPartOfAnyBuilding(MC.level, pos, false))
+                return; // building already exists clientside
+
+        System.out.println("Added building from server");
+
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName);
 
         if (newBuilding != null) {
@@ -408,9 +407,13 @@ public class BuildingClientEvents {
     }
 
     public static void destroyBuilding(BlockPos pos) {
-        Building building = BuildingUtils.findBuilding(buildings, pos);
-        if (building != null)
-            building.serverBlocksPlaced = 0;
+        buildings.removeIf(b -> b.isPosPartOfBuilding(pos, false));
+    }
+
+    public static void syncBuildingBlocks(Building serverBuilding, int blocksPlaced) {
+        for (Building building : buildings)
+            if (building.originPos.equals(serverBuilding.originPos))
+                building.serverBlocksPlaced = blocksPlaced;
     }
 
     public static Relationship getPlayerToBuildingRelationship(Building building) {

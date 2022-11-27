@@ -132,10 +132,6 @@ public class BuildingServerEvents {
                 building.rotation,
                 building.ownerName
             );
-        //CompletableFuture.delayedExecutor(20000, TimeUnit.MILLISECONDS).execute(() -> {
-        //    System.out.println("readded from backups");
-        //    buildings.addAll(buildingsBackup);
-        //});
     }
     @SubscribeEvent
     public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent evt) {

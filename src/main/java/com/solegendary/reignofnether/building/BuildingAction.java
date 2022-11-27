@@ -4,7 +4,7 @@ package com.solegendary.reignofnether.building;
 public enum BuildingAction {
     PLACE, // provide serverside building data to client (on new placement and sync existing buildings for new logins)
     DESTROY, // WIP building cancelled by owner or destroyed by someone
-    SYNC, // sync client building health with server (client doesn't always have the blocks loaded to check natively)
+    SYNC_BLOCKS, // sync client building health with server (client doesn't always have the blocks loaded to check natively)
     SET_RALLY_POINT,
     START_PRODUCTION, // start ProductionItem
     CANCEL_PRODUCTION, // remove ProductionItem from front of queue

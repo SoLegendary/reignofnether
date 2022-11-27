@@ -144,7 +144,7 @@ public class UnitClientEvents {
             }
         }
     }
-    // client log out - remove all entities so we don't duplicate on logging back in
+    // SINGLEPLAYER ONLY - client log out: remove all entities so we don't duplicate on logging back in
     @SubscribeEvent
     public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
         if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
