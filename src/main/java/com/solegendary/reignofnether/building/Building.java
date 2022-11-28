@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -10,6 +12,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
@@ -171,7 +174,18 @@ public abstract class Building {
     // place blocks according to the following rules:
     // - block must be connected to something else (not air)
     // - block must be the lowest Y value possible
-    private void buildNextBlock(Level level) {
+    private void buildNextBlock(ServerLevel level) {
+
+        // if the building is already constructed then start subtracting resources for repairs
+        if (isBuilt) {
+            if (!ResourcesServerEvents.canAfford(ownerName, ResourceName.WOOD, 1)) {
+                ResourcesClientboundPacket.warnInsufficientResources(ownerName, true, false, true);
+                return;
+            }
+            else
+                ResourcesServerEvents.addSubtractResources(new Resources(ownerName,0,-1,0));
+        }
+
         ArrayList<BuildingBlock> unplacedBlocks = new ArrayList<>(blocks.stream().filter(
                 b -> !b.isPlaced(getLevel()) && !b.getBlockState().isAir()
         ).toList());
@@ -196,6 +210,20 @@ public abstract class Building {
             if (unrepairedBlocksDestroyed > 0)
                 unrepairedBlocksDestroyed -= 1;
         }
+
+    }
+
+    private void extinguishRandomFire(ServerLevel level) {
+        BlockPos minPos = BuildingUtils.getMinCorner(blocks).offset(-1,-1,-1);
+        BlockPos maxPos = BuildingUtils.getMaxCorner(blocks).offset(1,1,1);
+
+        for (int x = minPos.getX(); x <= maxPos.getX(); x++)
+            for (int y = minPos.getY(); y <= maxPos.getY(); y++)
+                for (int z = minPos.getZ(); z <= maxPos.getZ(); z++)
+                    if (level.getBlockState(new BlockPos(x,y,z)).getBlock() == Blocks.FIRE) {
+                        level.destroyBlock(new BlockPos(x,y,z), false);
+                        return;
+                    }
     }
 
     public void destroyRandomBlocks(int amount) {
@@ -301,14 +329,13 @@ public abstract class Building {
                 msToNextBuild -= 5;
                 if (msToNextBuild <= 0) {
                     msToNextBuild = msPerBuild;
-                    buildNextBlock(tickLevel);
+                    extinguishRandomFire(serverLevel);
+                    buildNextBlock(serverLevel);
                 }
             }
 
-            // TODO: if fires exist, put them out one by one (or gradually remove them if blocksPercent > fireThreshold%)
-
             if (this.shouldBeDestroyed())
-                this.destroy((ServerLevel) tickLevel);
+                this.destroy(serverLevel);
         }
     }
 }

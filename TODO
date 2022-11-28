@@ -13,7 +13,6 @@ Misc additions/fixes
 1. Arm animations and block cracking/particles
 2. Fix body rendering issues (to do with portrait head rendering)
 3. Minimap 90deg rotations
-4. Minimap building/unit indicators
 
 Villager faction:
     - Pillager and vindicator
