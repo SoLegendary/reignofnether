@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.buildings.Farm;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.ResourceName;
@@ -17,7 +18,6 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,7 +27,6 @@ import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -120,7 +119,7 @@ public class UnitClientEvents {
             sendUnitCommand(UnitAction.FOLLOW);
         }
         // move to ground pos (disabled during camera manip)
-        else if (!Keybinding.altMod.isDown()) {
+        else if (!Keybindings.altMod.isDown()) {
             sendUnitCommand(UnitAction.MOVE);
         }
     }
@@ -213,10 +212,8 @@ public class UnitClientEvents {
                     sendUnitCommand(UnitAction.ATTACK_MOVE);
             }
 
-
-
             // select all nearby units of the same type when double-clicked
-            if (selectedUnits.size() == 1 && MC.level != null && !Keybinding.shiftMod.isDown() &&
+            if (selectedUnits.size() == 1 && MC.level != null && !Keybindings.shiftMod.isDown() &&
                (System.currentTimeMillis() - lastLeftClickTime) < doubleClickTimeMs) {
 
                 lastLeftClickTime = 0;
@@ -244,10 +241,10 @@ public class UnitClientEvents {
             else if (preselectedUnits.size() == 1 && !isLeftClickAttack()) {
                 boolean deselectedUnit = false;
 
-                if (Keybinding.shiftMod.isDown())
+                if (Keybindings.shiftMod.isDown())
                     deselectedUnit = selectedUnits.removeIf(id -> id.equals(preselectedUnits.get(0)));
 
-                if (Keybinding.shiftMod.isDown() && !deselectedUnit &&
+                if (Keybindings.shiftMod.isDown() && !deselectedUnit &&
                     preselectedUnits.get(0) instanceof Unit &&
                     getPlayerToEntityRelationship(preselectedUnits.get(0)) == Relationship.OWNED) {
                         addSelectedUnit(preselectedUnits.get(0));
@@ -306,7 +303,7 @@ public class UnitClientEvents {
     public static void onWorldTick(TickEvent.ClientTickEvent evt) {
 
         // deselect everything
-        if (Keybinding.getFnum(1).isDown()) {
+        if (Keybindings.getFnum(1).isDown()) {
             setSelectedUnits(new ArrayList<>());
             BuildingClientEvents.setSelectedBuilding(null);
             BuildingClientEvents.setBuildingToPlace(null);
@@ -314,18 +311,18 @@ public class UnitClientEvents {
 
         // manage control groups
         if (controlGroups.size() <= 0) // initialise with empty arrays
-            for (KeyMapping keyMapping : Keybinding.nums)
+            for (Keybinding keybinding : Keybindings.nums)
                 controlGroups.add(new ArrayList<>());
 
-        for (KeyMapping keyMapping : Keybinding.nums) {
-            int index = Integer.parseInt(keyMapping.getKey().getDisplayName().getString());
+        for (Keybinding keybinding : Keybindings.nums) {
+            int index = Integer.parseInt(keybinding.buttonLabel);
 
-            if (Keybinding.ctrlMod.isDown() &&
-                keyMapping.isDown() &&
+            if (Keybindings.ctrlMod.isDown() &&
+                keybinding.isDown() &&
                 selectedUnits.size() > 0 &&
                 getPlayerToEntityRelationship(selectedUnits.get(0)) == Relationship.OWNED)
                 controlGroups.set(index, selectedUnits);
-            else if (keyMapping.isDown() && controlGroups.get(index).size() > 0)
+            else if (keybinding.isDown() && controlGroups.get(index).size() > 0)
                 setSelectedUnits(controlGroups.get(index));
         }
     }

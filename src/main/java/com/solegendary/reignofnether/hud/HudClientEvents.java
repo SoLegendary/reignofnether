@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.hud;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
@@ -223,7 +223,7 @@ public class HudClientEvents {
                         "Cancel",
                         iconSize,
                         new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
-                        Keybinding.cancelBuild,
+                        Keybindings.cancelBuild,
                         () -> false,
                         () -> false,
                         () -> true,
@@ -510,13 +510,11 @@ public class HudClientEvents {
         mouseDownY = (int) evt.getMouseY();
     }
 
-    // TODO: Q and E don't work properly (probably due to conflicting with vanilla hotkeys?)
+    // for some reason some bound vanilla keys like Q and E don't trigger KeyPressed but still trigger keyReleased
     @SubscribeEvent
-    public static void onKeyPress(InputEvent.Key evt) {
-        if (evt.getAction() != InputConstants.PRESS)
-            return;
+    public static void onKeyRelease(ScreenEvent.KeyReleased.KeyReleased.Post evt) {
         for (Button button : renderedButtons)
-            button.checkPressed(evt.getKey());
+            button.checkPressed(evt.getKeyCode());
     }
 
     @SubscribeEvent

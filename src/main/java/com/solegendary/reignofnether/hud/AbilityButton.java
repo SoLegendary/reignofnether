@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.hud;
 
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -15,7 +14,7 @@ public class AbilityButton extends Button {
     float radius = 0; // if <= 0, is single target
 
     public AbilityButton(String abilityName, int iconSize, ResourceLocation rl,
-                         KeyMapping hotkey, Supplier<Boolean> isSelected, Supplier<Boolean> isActive,
+                         Keybinding hotkey, Supplier<Boolean> isSelected, Supplier<Boolean> isActive,
                          Supplier<Boolean> isEnabled, Runnable onClick, List<FormattedCharSequence> tooltipLines,
                          float cooldown, float range, float radius) {
 

@@ -5,7 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.ResourceCosts;
@@ -31,7 +31,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -344,7 +343,7 @@ public class BuildingClientEvents {
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             // set rally points
-            if (!Keybinding.altMod.isDown() &&
+            if (!Keybindings.altMod.isDown() &&
                 selectedBuilding instanceof ProductionBuilding selProdBuilding) {
 
                 BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();

@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -21,7 +21,7 @@ public class ActionButtons {
             "Build/Repair",
             Button.itemIconSize,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shovel.png"),
-            Keybinding.build,
+            Keybindings.build,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.BUILD_REPAIR,
             () -> false,
             () -> true,
@@ -32,7 +32,7 @@ public class ActionButtons {
             "Gather",
             Button.itemIconSize,
             null, // changes depending on the gather target
-            Keybinding.gather,
+            Keybindings.gather,
             () -> UnitClientEvents.getSelectedUnitResourceTarget() != ResourceName.NONE,
             () -> false,
             () -> true,
@@ -43,7 +43,7 @@ public class ActionButtons {
         "Attack",
         Button.itemIconSize,
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sword.png"),
-        Keybinding.attack,
+        Keybindings.attack,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK,
         () -> false,
         () -> true,
@@ -54,7 +54,7 @@ public class ActionButtons {
         "Stop",
         Button.itemIconSize,
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
-        Keybinding.stop,
+        Keybindings.stop,
         () -> false, // except if currently clicked on
         () -> false,
         () -> true,
@@ -65,7 +65,7 @@ public class ActionButtons {
         "Hold Position",
         Button.itemIconSize,
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chestplate.png"),
-        Keybinding.hold,
+        Keybindings.hold,
         () -> false, // TODO: if all selected units are holding position (but would need to get this from server?)
         () -> false,
         () -> true,
@@ -76,7 +76,7 @@ public class ActionButtons {
         "Move",
         Button.itemIconSize,
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/boots.png"),
-        Keybinding.move,
+        Keybindings.move,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOVE,
         () -> false,
         () -> true,

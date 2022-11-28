@@ -7,7 +7,6 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiClientEvents;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.keybinds.KeybindEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -29,7 +28,6 @@ public class ClientEventRegistrar {
      */
 
     public void registerClientEvents() {
-        vanillaEventBus.register(KeybindEvents.class);
         vanillaEventBus.register(OrthoviewClientEvents.class);
         vanillaEventBus.register(TopdownGuiClientEvents.class);
         vanillaEventBus.register(UnitClientEvents.class);

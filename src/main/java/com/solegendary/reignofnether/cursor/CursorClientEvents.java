@@ -5,11 +5,11 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceBlocks;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -113,9 +113,9 @@ public class CursorClientEvents {
         cursorDrawX = Math.max(0,cursorDrawX);
         cursorDrawY = Math.max(0,cursorDrawY);
 
-        if (Keybinding.altMod.isDown() && (leftClickDown || rightClickDown))
+        if (Keybindings.altMod.isDown() && (leftClickDown || rightClickDown))
             RenderSystem.setShaderTexture(0, TEXTURE_HAND_GRAB);
-        else if (Keybinding.altMod.isDown())
+        else if (Keybindings.altMod.isDown())
             RenderSystem.setShaderTexture(0, TEXTURE_HAND);
         else if (leftClickAction != null && leftClickAction.equals(UnitAction.ATTACK))
             RenderSystem.setShaderTexture(0, TEXTURE_SWORD);
@@ -196,7 +196,7 @@ public class CursorClientEvents {
         // weird bug when downPos == dragPos makes random entities get selected by this algorithm
         float dist = cursorLeftClickDownPos.distanceToSqr(cursorLeftClickDragPos);
 
-        if (leftClickDown && dist > 0 && !Keybinding.altMod.isDown()) {
+        if (leftClickDown && dist > 0 && !Keybindings.altMod.isDown()) {
 
             // can't use AABB here as it's always axis-aligned (ie. no camera-rotation)
             // instead, improvise our own quad
@@ -225,7 +225,7 @@ public class CursorClientEvents {
     @SubscribeEvent
     public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
 
-        if (leftClickDown && !Keybinding.altMod.isDown()) {
+        if (leftClickDown && !Keybindings.altMod.isDown()) {
             GuiComponent.fill(evt.getPoseStack(), // x1,y1, x2,y2,
                     Math.round(cursorLeftClickDownPos.x),
                     Math.round(cursorLeftClickDownPos.y),
@@ -283,7 +283,7 @@ public class CursorClientEvents {
                     if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
                         nonOwnedEntities += 1;
 
-                if (!Keybinding.shiftMod.isDown() || nonOwnedEntities > 0)
+                if (!Keybindings.shiftMod.isDown() || nonOwnedEntities > 0)
                     UnitClientEvents.setSelectedUnits(new ArrayList<>());
                 for (LivingEntity unit : preselectedUnit) {
                     if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
@@ -426,13 +426,11 @@ public class CursorClientEvents {
     static float alpha = 1.0f;
 
     @SubscribeEvent
-    public static void onInput(InputEvent.Key evt) {
-        if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-            if (evt.getKey() == Keybinding.panMinusX.getKey().getValue())
-                alpha -= 0.1f;
-            if (evt.getKey() == Keybinding.panPlusX.getKey().getValue())
-                alpha += 0.1f;
-        }
+    public static void onKeyRelease(ScreenEvent.KeyPressed.KeyPressed.Post evt) {
+        if (evt.getKeyCode() == Keybindings.panMinusX.key)
+            alpha -= 0.1f;
+        if (evt.getKeyCode() == Keybindings.panPlusX.key)
+            alpha += 0.1f;
     }
     /*
     @SubscribeEvent

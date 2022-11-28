@@ -1,19 +1,16 @@
 package com.solegendary.reignofnether.orthoview;
 
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
-import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
@@ -133,12 +130,11 @@ public class OrthoviewClientEvents {
     @SubscribeEvent
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.Key evt) {
-
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-            if (evt.getKey() == Keybinding.getFnum(12).getKey().getValue())
+            if (evt.getKey() == Keybindings.getFnum(12).key)
                 toggleEnable();
 
-            if (evt.getKey() == Keybinding.reset.getKey().getValue())
+            if (evt.getKey() == Keybindings.reset.key)
                 reset();
         }
     }
@@ -147,7 +143,7 @@ public class OrthoviewClientEvents {
     public static void onMouseScroll(ScreenEvent.MouseScrolled evt) {
         if (!enabled) return;
 
-        if (Keybinding.ctrlMod.isDown())
+        if (Keybindings.ctrlMod.isDown())
             zoomCam((float) sign(evt.getScrollDelta()) * -ZOOM_STEP_SCROLL);
     }
 
@@ -173,7 +169,7 @@ public class OrthoviewClientEvents {
         // mouse (0,0) is top left of screen
 
         // for one frame you can take the mouse outside of the window, so use this amount to adjust pan speed
-        if (!Keybinding.altMod.isDown()) {
+        if (!Keybindings.altMod.isDown()) {
             if (cursorX <= 0)
                 panCam(EDGE_CAMPAM_SENSITIVITY, 0);
             else if (cursorX >= glfwWinWidth)
@@ -197,19 +193,19 @@ public class OrthoviewClientEvents {
         Player player = MC.player;
 
         // zoom in/out with keys
-        if (Keybinding.zoomIn.isDown())
+        if (Keybindings.zoomIn.isDown())
             zoomCam(-ZOOM_STEP_KEY);
-        if (Keybinding.zoomOut.isDown())
+        if (Keybindings.zoomOut.isDown())
             zoomCam(ZOOM_STEP_KEY);
 
         // pan camera with keys
-        if (Keybinding.panPlusX.isDown())
+        if (Keybindings.panPlusX.isDown())
             panCam(PAN_KEY_STEP,0);
-        else if (Keybinding.panMinusX.isDown())
+        else if (Keybindings.panMinusX.isDown())
             panCam(-PAN_KEY_STEP,0);
-        if (Keybinding.panPlusZ.isDown())
+        if (Keybindings.panPlusZ.isDown())
             panCam(0, PAN_KEY_STEP);
-        else if (Keybinding.panMinusZ.isDown())
+        else if (Keybindings.panMinusZ.isDown())
             panCam(0,-PAN_KEY_STEP);
 
         // note that we treat x and y rot as horizontal and vertical, but MC treats it the other way around...
@@ -258,13 +254,13 @@ public class OrthoviewClientEvents {
     public static void onMouseDrag(ScreenEvent.MouseDragged evt) {
         if (!enabled) return;
 
-        if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybinding.altMod.isDown()) {
+        if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;
             float moveX = (float) evt.getDragX() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX); //* winWidth/1920;
             float moveZ = (float) evt.getDragY() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX); //* winHeight/1080;
             panCam(moveX, moveZ);
         }
-        else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybinding.altMod.isDown()) {
+        else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;
             camRotAdjX = (float) (evt.getMouseX() - mouseRightDownX) * CAMROT_MOUSE_SENSITIVITY;
             //camRotAdjY = (float) -(evt.getMouseY() - mouseRightDownY) * CAMROT_MOUSE_SENSITIVITY;

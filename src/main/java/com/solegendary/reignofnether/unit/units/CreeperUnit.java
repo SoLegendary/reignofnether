@@ -2,9 +2,9 @@ package com.solegendary.reignofnether.unit.units;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -110,7 +110,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
                 "Explode",
                 14,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
-                Keybinding.keyQ,
+                Keybindings.keyQ,
                 () -> false,//CursorClientEvents.getLeftClickAction() == UnitAction.EXPLODE,
                 () -> false,
                 () -> true,

@@ -3,21 +3,18 @@ package com.solegendary.reignofnether.hud;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -39,7 +36,7 @@ public class Button {
 
     public ResourceLocation iconResource;
 
-    public KeyMapping hotkey = null; // for action/ability buttons
+    public Keybinding hotkey = null; // for action/ability buttons
     public LivingEntity entity = null; // for selected unit buttons
 
     /** https://stackoverflow.com/questions/29945627/java-8-lambda-void-argument
@@ -63,7 +60,7 @@ public class Button {
     Minecraft MC = Minecraft.getInstance();
 
     // constructor for ability/action/production buttons
-    public Button(String name, int iconSize, ResourceLocation rl, KeyMapping hotkey,
+    public Button(String name, int iconSize, ResourceLocation rl, @Nullable Keybinding hotkey,
                   Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Supplier<Boolean> isEnabled,
                   Runnable onClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
@@ -113,7 +110,8 @@ public class Button {
         );
         // hotkey letter
         if (this.hotkey != null) {
-            String hotkeyStr = hotkey.getKey().getDisplayName().getString().toUpperCase();
+
+            String hotkeyStr = hotkey.buttonLabel;
             hotkeyStr = hotkeyStr.substring(0,Math.min(3, hotkeyStr.length()));
             GuiComponent.drawCenteredString(poseStack, MC.font,
                     hotkeyStr,
@@ -195,7 +193,7 @@ public class Button {
         if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
             return;
 
-        if (hotkey != null && hotkey.getKey().getValue() == key) {
+        if (hotkey != null && hotkey.key == key) {
             if (MC.player != null)
                 MC.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.2f, 1.0f);
             this.onUse.run();

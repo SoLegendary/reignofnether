@@ -7,10 +7,10 @@ import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -44,7 +44,7 @@ public class VillagerUnitProd extends ProductionItem {
             "Villager",
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
-            Keybinding.keyV,
+            Keybindings.keyV,
             () -> false,
             () -> false,
             () -> true,
@@ -64,7 +64,7 @@ public class VillagerUnitProd extends ProductionItem {
             "Villager",
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
-            (KeyMapping) null,
+            (Keybinding) null,
             () -> false,
             () -> false,
             () -> true,

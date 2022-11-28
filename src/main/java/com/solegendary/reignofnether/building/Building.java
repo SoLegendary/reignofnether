@@ -318,8 +318,6 @@ public abstract class Building {
             ServerLevel serverLevel = (ServerLevel) tickLevel;
             int builderCount = getBuilders(serverLevel).size();
 
-            // TODO: keep the surrounding chunks loaded or else the building becomes unselectable when unloaded
-
             // place a block if the tick has run down
             if (blocksPlaced < blocksTotal && builderCount > 0) {
                 int msPerBuild = (3 * BASE_MS_PER_BUILD) / (builderCount + 2);
@@ -333,7 +331,6 @@ public abstract class Building {
                     buildNextBlock(serverLevel);
                 }
             }
-
             if (this.shouldBeDestroyed())
                 this.destroy(serverLevel);
         }
