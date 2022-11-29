@@ -1,6 +1,5 @@
 TODO before playtesting:
 
-1. allow buildings in control groups
 2. keep chunks around buildings loaded and stop clientside removal of selected building
     - need to force chunks and remove on building removal
     - remove forced chunks on dead entities
@@ -8,6 +7,7 @@ TODO before playtesting:
 
 Misc additions/fixes
 
+0. Fix camera centering on units and buildings
 1. Arm animations and block cracking/particles
 2. Fix body rendering issues (to do with portrait head rendering)
 3. Minimap 90deg rotations

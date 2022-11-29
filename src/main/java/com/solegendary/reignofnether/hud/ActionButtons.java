@@ -26,6 +26,7 @@ public class ActionButtons {
             () -> false,
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.BUILD_REPAIR),
+            null,
             List.of(FormattedCharSequence.forward("Build", Style.EMPTY))
     );
     public static final Button GATHER = new Button(
@@ -37,6 +38,7 @@ public class ActionButtons {
             () -> false,
             () -> true,
             () -> sendUnitCommand(UnitAction.TOGGLE_GATHER_TARGET),
+            null,
             null
     );
     public static final Button ATTACK = new Button(
@@ -48,6 +50,7 @@ public class ActionButtons {
         () -> false,
         () -> true,
         () -> CursorClientEvents.setLeftClickAction(UnitAction.ATTACK),
+        null,
         List.of(FormattedCharSequence.forward("Attack", Style.EMPTY))
     );
     public static final Button STOP = new Button(
@@ -59,6 +62,7 @@ public class ActionButtons {
         () -> false,
         () -> true,
         () -> sendUnitCommand(UnitAction.STOP),
+        null,
         List.of(FormattedCharSequence.forward("Stop", Style.EMPTY))
     );
     public static final Button HOLD = new Button(
@@ -70,6 +74,7 @@ public class ActionButtons {
         () -> false,
         () -> true,
         () -> sendUnitCommand(UnitAction.HOLD),
+        null,
         List.of(FormattedCharSequence.forward("Hold Position", Style.EMPTY))
     );
     public static final Button MOVE = new Button(
@@ -81,6 +86,7 @@ public class ActionButtons {
         () -> false,
         () -> true,
         () -> CursorClientEvents.setLeftClickAction(UnitAction.MOVE),
+        null,
         List.of(FormattedCharSequence.forward("Move", Style.EMPTY))
     );
 }

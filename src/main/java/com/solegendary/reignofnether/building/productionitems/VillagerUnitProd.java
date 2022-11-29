@@ -49,6 +49,7 @@ public class VillagerUnitProd extends ProductionItem {
             () -> false,
             () -> true,
             () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
+            null,
             List.of(
                 FormattedCharSequence.forward("Villager", Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Villager.FOOD, MyRenderer.iconStyle),
@@ -69,6 +70,7 @@ public class VillagerUnitProd extends ProductionItem {
             () -> false,
             () -> true,
             () -> BuildingServerboundPacket.cancelProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName, first),
+            null,
             null
         );
     }

@@ -55,6 +55,7 @@ public class Farm extends Building {
                 () -> false,
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(Farm.class),
+                null,
                 List.of(
                         FormattedCharSequence.forward(Farm.buildingName, Style.EMPTY),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.Farm.WOOD + "  +  5  per  crop  planted", MyRenderer.iconStyle),

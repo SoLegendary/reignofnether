@@ -46,6 +46,7 @@ public class SkeletonUnitProd extends ProductionItem {
             () -> false,
             () -> true,
             () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
+            null,
             List.of(
                 FormattedCharSequence.forward("Skeleton", Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Skeleton.FOOD + "     \uE001  " + ResourceCosts.Skeleton.WOOD, MyRenderer.iconStyle),
@@ -66,6 +67,7 @@ public class SkeletonUnitProd extends ProductionItem {
             () -> false,
             () -> true,
             () -> BuildingServerboundPacket.cancelProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName, first),
+            null,
             null
         );
     }

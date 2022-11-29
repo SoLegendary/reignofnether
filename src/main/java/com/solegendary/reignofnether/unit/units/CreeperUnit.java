@@ -115,6 +115,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
                 () -> false,
                 () -> true,
                 () -> UnitClientEvents.sendUnitCommand(UnitAction.EXPLODE),//CursorClientEvents.setLeftClickAction(UnitAction.EXPLODE),
+                null,
                 List.of(
                     FormattedCharSequence.forward("Explode", Style.EMPTY)
                 ),

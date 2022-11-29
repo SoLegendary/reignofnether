@@ -55,6 +55,7 @@ public class VillagerTower extends Building {
             () -> false,
             () -> true,
             () -> BuildingClientEvents.setBuildingToPlace(VillagerTower.class),
+            null,
             List.of(
                     FormattedCharSequence.forward(VillagerTower.buildingName, Style.EMPTY),
                     FormattedCharSequence.forward("\uE001  " + ResourceCosts.VillagerTower.WOOD, MyRenderer.iconStyle),

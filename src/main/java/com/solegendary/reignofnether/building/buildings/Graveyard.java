@@ -65,6 +65,7 @@ public class Graveyard extends ProductionBuilding {
                 () -> false,
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(Graveyard.class),
+                null,
                 List.of(
                         FormattedCharSequence.forward(Graveyard.buildingName, Style.EMPTY),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.Graveyard.WOOD, MyRenderer.iconStyle),

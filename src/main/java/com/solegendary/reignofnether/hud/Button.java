@@ -48,7 +48,8 @@ public class Button {
     public Supplier<Boolean> isSelected; // controls selected frame rendering
     public Supplier<Boolean> isActive; // special highlighting for an on-state (eg. auto-cast/auto-producing)
     public Supplier<Boolean> isEnabled; // is the button allowed to be used right now? (eg. off cooldown)
-    public Runnable onUse;
+    public Runnable onLeftClick;
+    public Runnable onRightClick;
     public List<FormattedCharSequence> tooltipLines;
 
     // used for cooldown indication, productionItem progress, etc.
@@ -60,9 +61,9 @@ public class Button {
     Minecraft MC = Minecraft.getInstance();
 
     // constructor for ability/action/production buttons
-    public Button(String name, int iconSize, ResourceLocation rl, @Nullable Keybinding hotkey,
-                  Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Supplier<Boolean> isEnabled,
-                  Runnable onClick, @Nullable List<FormattedCharSequence> tooltipLines) {
+    public Button(String name, int iconSize, ResourceLocation rl, @Nullable Keybinding hotkey, Supplier<Boolean> isSelected,
+                  Supplier<Boolean> isActive, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
+                  @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
         this.iconResource = rl;
         this.iconSize = iconSize;
@@ -70,14 +71,15 @@ public class Button {
         this.isSelected = isSelected;
         this.isActive = isActive;
         this.isEnabled = isEnabled;
-        this.onUse = onClick;
+        this.onLeftClick = onLeftClick;
+        this.onRightClick = onRightClick;
         this.tooltipLines = tooltipLines;
     }
 
     // constructor for unit selection buttons
-    public Button(String name, int iconSize, ResourceLocation rl, LivingEntity entity,
-                  Supplier<Boolean> isSelected, Supplier<Boolean> isActive, Supplier<Boolean> isEnabled,
-                  Runnable onClick, @Nullable List<FormattedCharSequence> tooltipLines) {
+    public Button(String name, int iconSize, ResourceLocation rl, LivingEntity entity, Supplier<Boolean> isSelected,
+                  Supplier<Boolean> isActive, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
+                  @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
         this.iconResource = rl;
         this.iconSize = iconSize;
@@ -85,7 +87,8 @@ public class Button {
         this.isSelected = isSelected;
         this.isActive = isActive;
         this.isEnabled = isEnabled;
-        this.onUse = onClick;
+        this.onLeftClick = onLeftClick;
+        this.onRightClick = onRightClick;
         this.tooltipLines = tooltipLines;
     }
 
@@ -162,29 +165,19 @@ public class Button {
     }
 
     // must be done from mouse press event
-    public void checkLeftClicked(int mouseX, int mouseY) {
+    public void checkClicked(int mouseX, int mouseY, boolean leftClick) {
         if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
             return;
 
-        if (isMouseOver(mouseX, mouseY)) {
-            //if (this.entity != null)
-            //    System.out.println("Clicked on button - entity id: " + entity.getId());
-            //else if (this.hotkey != null)
-            //    System.out.println("Clicked on button - hotkey: " + hotkey.getKey().getDisplayName());
-
-            if (MC.player != null)
+        if (isMouseOver(mouseX, mouseY) && MC.player != null) {
+            if (leftClick && this.onLeftClick != null) {
                 MC.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.2f, 1.0f);
-            this.onUse.run();
-        }
-    }
-
-    // must be done from mouse press event
-    public void checkRightClicked(int mouseX, int mouseY) {
-        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
-            return;
-
-        if (isMouseOver(mouseX, mouseY)) {
-            return; // TODO: activate autocasts
+                this.onLeftClick.run();
+            }
+            else if (!leftClick && this.onRightClick != null) {
+                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.2f, 1.0f);
+                this.onRightClick.run();
+            }
         }
     }
 
@@ -196,7 +189,7 @@ public class Button {
         if (hotkey != null && hotkey.key == key) {
             if (MC.player != null)
                 MC.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.2f, 1.0f);
-            this.onUse.run();
+            this.onLeftClick.run();
         }
     }
 }

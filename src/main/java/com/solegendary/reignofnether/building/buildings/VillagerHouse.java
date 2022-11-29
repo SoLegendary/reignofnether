@@ -58,6 +58,7 @@ public class VillagerHouse extends ProductionBuilding {
             () -> false,
             () -> true,
             () -> BuildingClientEvents.setBuildingToPlace(VillagerHouse.class),
+            null,
             List.of(
                     FormattedCharSequence.forward(VillagerHouse.buildingName, Style.EMPTY),
                     FormattedCharSequence.forward("\uE001  " + ResourceCosts.VillagerHouse.WOOD, MyRenderer.iconStyle),

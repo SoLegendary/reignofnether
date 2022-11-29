@@ -15,11 +15,11 @@ public class AbilityButton extends Button {
 
     public AbilityButton(String abilityName, int iconSize, ResourceLocation rl,
                          Keybinding hotkey, Supplier<Boolean> isSelected, Supplier<Boolean> isActive,
-                         Supplier<Boolean> isEnabled, Runnable onClick, List<FormattedCharSequence> tooltipLines,
+                         Supplier<Boolean> isEnabled, Runnable onLeftClick, Runnable onRightClick, List<FormattedCharSequence> tooltipLines,
                          float cooldown, float range, float radius) {
 
         // generate x/y based on given position (starting at 0 which is bottom left 1 row above generic action buttons)
-        super(abilityName, iconSize, rl, hotkey, isSelected, isActive, isEnabled, onClick, tooltipLines);
+        super(abilityName, iconSize, rl, hotkey, isSelected, isActive, isEnabled, onLeftClick, onRightClick, tooltipLines);
 
         this.cooldown = cooldown;
         this.range = range;

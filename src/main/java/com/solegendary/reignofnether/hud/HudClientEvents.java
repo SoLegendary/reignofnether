@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.hud;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -76,8 +75,8 @@ public class HudClientEvents {
 
     private static int mouseX = 0;
     private static int mouseY = 0;
-    private static int mouseDownX = 0;
-    private static int mouseDownY = 0;
+    private static int mouseLeftDownX = 0;
+    private static int mouseLeftDownY = 0;
 
     private final static int iconBgColour = 0x64000000;
     private final static int frameBgColour = 0xA0000000;
@@ -233,6 +232,7 @@ public class HudClientEvents {
                         () -> false,
                         () -> true,
                         () -> BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(selBuilding.getBlocks())),
+                        null,
                         List.of(FormattedCharSequence.forward("Cancel", Style.EMPTY))
                 );
                 cancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
@@ -306,6 +306,7 @@ public class HudClientEvents {
                             hudSelectedEntity = unit;
                         }
                     },
+                    null,
                     null
                 ));
             }
@@ -453,12 +454,6 @@ public class HudClientEvents {
                 );
                 GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, resValueStr,
                         blitX + (iconFrameSize) + 24 , blitY + (iconSize / 2) + 1, 0xFFFFFF);
-                /*
-                if (resToAddValue != 0) {
-                    boolean positive = resToAddValue > 0;
-                    GuiComponent.drawString(evt.getPoseStack(), MC.font, (positive ? "+" : "") + resToAddValue,
-                            blitX + (iconFrameSize) * 3/2 + 42, blitY + (iconSize / 2) + 1, (positive ? 0x00FF00 : 0xFF0000));
-                }*/
                 blitY += iconFrameSize - 1;
             }
         }
@@ -478,6 +473,23 @@ public class HudClientEvents {
         }
         if (tempMsgTicksLeft > 0)
             tempMsgTicksLeft -= 1;
+
+        // ---------------------
+        // Control group buttons
+        // ---------------------
+
+        blitX = 70;
+        // clean up untracked entities/buildings from control groups
+        for (ControlGroup controlGroup : controlGroups) {
+            controlGroup.clean();
+
+            if (!controlGroup.isEmpty()) {
+                Button ctrlGroupButton = controlGroup.getButton();
+                ctrlGroupButton.render(evt.getPoseStack(), blitX, 0, mouseX, mouseY);
+                renderedButtons.add(ctrlGroupButton);
+                blitX += iconFrameSize;
+            }
+        }
 
         // ------------------------------------------------------
         // Button tooltips (has to be rendered last to be on top)
@@ -505,14 +517,17 @@ public class HudClientEvents {
 
     @SubscribeEvent
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
-        if (evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
-            return;
 
-        for (Button button : renderedButtons)
-            button.checkLeftClicked((int) evt.getMouseX(), (int) evt.getMouseY());
-
-        mouseDownX = (int) evt.getMouseX();
-        mouseDownY = (int) evt.getMouseY();
+        for (Button button : renderedButtons) {
+            if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1)
+                button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
+            else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2)
+                button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
+        }
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            mouseLeftDownX = (int) evt.getMouseX();
+            mouseLeftDownY = (int) evt.getMouseY();
+        }
     }
 
     // for some reason some bound vanilla keys like Q and E don't trigger KeyPressed but still trigger keyReleased
@@ -522,8 +537,16 @@ public class HudClientEvents {
             button.checkPressed(evt.getKeyCode());
     }
 
+    // remove effects clientside when in orthoview to stop it rendering
+    @SubscribeEvent
+    public static void onRenderMobEffects(ScreenEvent.RenderInventoryMobEffects evt) {
+        if (OrthoviewClientEvents.isEnabled())
+            evt.setCanceled(true);
+    }
+
     @SubscribeEvent
     public static void onTick(TickEvent.ClientTickEvent evt) {
+
         if (OrthoviewClientEvents.isEnabled())
             portraitRendererUnit.tickAnimation();
 
@@ -531,7 +554,7 @@ public class HudClientEvents {
         if (MiscUtil.isLeftClickDown(MC)) {
             if (buildingPortraitZone != null &&
                 buildingPortraitZone.isMouseOver(mouseX, mouseY) &&
-                buildingPortraitZone.isMouseOver(mouseDownX, mouseDownY) &&
+                buildingPortraitZone.isMouseOver(mouseLeftDownX, mouseLeftDownY) &&
                 MC.player != null) {
                 Building selBuilding = BuildingClientEvents.getSelectedBuilding();
                 BlockPos pos = BuildingUtils.getCentrePos(selBuilding.getBlocks());
@@ -539,7 +562,7 @@ public class HudClientEvents {
             }
             else if (unitPortraitZone != null &&
                     unitPortraitZone.isMouseOver(mouseX, mouseY) &&
-                    unitPortraitZone.isMouseOver(mouseDownX, mouseDownY) &&
+                    unitPortraitZone.isMouseOver(mouseLeftDownX, mouseLeftDownY) &&
                     MC.player != null) {
                 PlayerServerboundPacket.teleportPlayer(
                         hudSelectedEntity.getX(),
@@ -605,12 +628,9 @@ public class HudClientEvents {
         for (Keybinding keybinding : Keybindings.nums) {
             int index = Integer.parseInt(keybinding.buttonLabel);
 
-            if (Keybindings.ctrlMod.isDown() && evt.getKeyCode() == keybinding.key) {
-                controlGroups.get(index).setSelected(keybinding);
-            }
-            else if (evt.getKeyCode() == keybinding.key) {
-                controlGroups.get(index).assignToSelected();
-            }
+            // loadToSelected is handled by renderedButtons
+            if (Keybindings.ctrlMod.isDown() && evt.getKeyCode() == keybinding.key)
+                controlGroups.get(index).saveFromSelected(keybinding);
         }
     }
 }

@@ -7,9 +7,7 @@ import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.building.buildings.Farm;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
@@ -25,7 +23,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -69,7 +66,7 @@ public class UnitClientEvents {
             BuildingClientEvents.setSelectedBuilding(null);
     }
     private static long lastLeftClickTime = 0; // to track double clicks
-    private static final long doubleClickTimeMs = 500;
+    private static final long DOUBLE_CLICK_TIME_MS = 500;
 
     private static boolean isLeftClickAttack() {
         return CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK;
@@ -214,7 +211,7 @@ public class UnitClientEvents {
 
             // select all nearby units of the same type when double-clicked
             if (selectedUnits.size() == 1 && MC.level != null && !Keybindings.shiftMod.isDown() &&
-               (System.currentTimeMillis() - lastLeftClickTime) < doubleClickTimeMs) {
+               (System.currentTimeMillis() - lastLeftClickTime) < DOUBLE_CLICK_TIME_MS) {
 
                 lastLeftClickTime = 0;
                 Entity selectedUnit = selectedUnits.get(0);

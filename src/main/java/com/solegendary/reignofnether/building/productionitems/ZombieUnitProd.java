@@ -46,6 +46,7 @@ public class ZombieUnitProd extends ProductionItem {
             () -> false,
             () -> true,
             () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
+            null,
             List.of(
                 FormattedCharSequence.forward("Zombie", Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Zombie.FOOD, MyRenderer.iconStyle),
@@ -66,6 +67,7 @@ public class ZombieUnitProd extends ProductionItem {
             () -> false,
             () -> true,
             () -> BuildingServerboundPacket.cancelProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName, first),
+            null,
             null
         );
     }
