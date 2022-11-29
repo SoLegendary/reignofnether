@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.building.buildings.Farm;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -37,24 +38,6 @@ public class UnitClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
-    public static int getCurrentPopulation() {
-        int currentPopulation = 0;
-        if (MC.level != null && MC.player != null) {
-            for (LivingEntity entity : allUnits) {
-                if (entity instanceof Unit unit)
-                    if (unit.getOwnerName().equals(MC.player.getName().getString()))
-                        currentPopulation += unit.getPopCost();
-            }
-            for (Building building : BuildingClientEvents.getBuildings())
-                if (building.ownerName.equals(MC.player.getName().getString()))
-                    if (building instanceof ProductionBuilding prodBuilding)
-                        for (ProductionItem prodItem : prodBuilding.productionQueue)
-                            currentPopulation += prodItem.popCost;
-        }
-        return currentPopulation;
-    }
-
-    private static final ArrayList<ArrayList<LivingEntity>> controlGroups = new ArrayList<>(10);
     // units moused over or inside a box select
     private static final ArrayList<LivingEntity> preselectedUnits = new ArrayList<>();
     // units selected by click or box select
@@ -76,11 +59,11 @@ public class UnitClientEvents {
         BuildingClientEvents.setSelectedBuilding(null);
     }
     public static void setPreselectedUnits(ArrayList<LivingEntity> units) {
-        preselectedUnits.removeIf(e -> true);
+        preselectedUnits.clear();
         preselectedUnits.addAll(units);
     }
     public static void setSelectedUnits(ArrayList<LivingEntity> units) {
-        selectedUnits.removeIf(e -> true);
+        selectedUnits.clear();
         selectedUnits.addAll(units);
         if (selectedUnits.size() > 0)
             BuildingClientEvents.setSelectedBuilding(null);
@@ -90,6 +73,23 @@ public class UnitClientEvents {
 
     private static boolean isLeftClickAttack() {
         return CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK;
+    }
+
+    public static int getCurrentPopulation() {
+        int currentPopulation = 0;
+        if (MC.level != null && MC.player != null) {
+            for (LivingEntity entity : allUnits) {
+                if (entity instanceof Unit unit)
+                    if (unit.getOwnerName().equals(MC.player.getName().getString()))
+                        currentPopulation += unit.getPopCost();
+            }
+            for (Building building : BuildingClientEvents.getBuildings())
+                if (building.ownerName.equals(MC.player.getName().getString()))
+                    if (building instanceof ProductionBuilding prodBuilding)
+                        for (ProductionItem prodItem : prodBuilding.productionQueue)
+                            currentPopulation += prodItem.popCost;
+        }
+        return currentPopulation;
     }
 
     public static void sendUnitCommand(UnitAction action) {
@@ -147,9 +147,9 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
         if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
-            selectedUnits.removeIf(e -> true);
-            preselectedUnits.removeIf(e -> true);
-            allUnits.removeIf(e -> true);
+            selectedUnits.clear();
+            preselectedUnits.clear();
+            allUnits.clear();
         }
     }
     /**
@@ -298,35 +298,6 @@ public class UnitClientEvents {
         // clear all cursor actions
         CursorClientEvents.setLeftClickAction(null);
     }
-
-    @SubscribeEvent
-    public static void onWorldTick(TickEvent.ClientTickEvent evt) {
-
-        // deselect everything
-        if (Keybindings.getFnum(1).isDown()) {
-            setSelectedUnits(new ArrayList<>());
-            BuildingClientEvents.setSelectedBuilding(null);
-            BuildingClientEvents.setBuildingToPlace(null);
-        }
-
-        // manage control groups
-        if (controlGroups.size() <= 0) // initialise with empty arrays
-            for (Keybinding keybinding : Keybindings.nums)
-                controlGroups.add(new ArrayList<>());
-
-        for (Keybinding keybinding : Keybindings.nums) {
-            int index = Integer.parseInt(keybinding.buttonLabel);
-
-            if (Keybindings.ctrlMod.isDown() &&
-                keybinding.isDown() &&
-                selectedUnits.size() > 0 &&
-                getPlayerToEntityRelationship(selectedUnits.get(0)) == Relationship.OWNED)
-                controlGroups.set(index, selectedUnits);
-            else if (keybinding.isDown() && controlGroups.get(index).size() > 0)
-                setSelectedUnits(controlGroups.get(index));
-        }
-    }
-
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {

@@ -33,6 +33,7 @@ public class VillagerTower extends Building {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.OAK_PLANKS;
+        this.icon = new ResourceLocation("minecraft", "textures/block/oak_planks.png");
 
         this.foodCost = ResourceCosts.VillagerTower.FOOD;
         this.woodCost = ResourceCosts.VillagerTower.WOOD;

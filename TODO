@@ -1,12 +1,10 @@
 TODO before playtesting:
 
-1. keep chunks around buildings loaded and stop clientside removal of selected building
+1. allow buildings in control groups
+2. keep chunks around buildings loaded and stop clientside removal of selected building
     - need to force chunks and remove on building removal
     - remove forced chunks on dead entities
-
-2. Fix hotkeys (Q,E?)
-3. fix control groups and allow buildings in control groups
-4. setup shockbyte server (~3gb?)
+3. setup shockbyte server (~3gb?)
 
 Misc additions/fixes
 

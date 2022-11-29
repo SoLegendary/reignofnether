@@ -30,6 +30,7 @@ public class Farm extends Building {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.HAY_BLOCK;
+        this.icon = new ResourceLocation("minecraft", "textures/block/hay_block_side.png");
 
         this.foodCost = ResourceCosts.Farm.FOOD;
         this.woodCost = ResourceCosts.Farm.WOOD;

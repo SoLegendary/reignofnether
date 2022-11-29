@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
@@ -41,6 +42,7 @@ public abstract class Building {
     private Level level; // directly return MC.level if it's clientside to avoid stale references
     public BlockPos originPos;
     public Rotation rotation;
+    public ResourceLocation icon;
 
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time; the building can then be used
     public int msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick

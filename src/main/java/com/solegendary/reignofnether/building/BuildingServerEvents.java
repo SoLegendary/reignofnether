@@ -192,7 +192,7 @@ public class BuildingServerEvents {
         Explosion exp = evt.getExplosion();
 
         if (exp.getExploder() == null && exp.getSourceMob() == null) {
-            evt.getAffectedEntities().removeIf((Entity entity) -> true);
+            evt.getAffectedEntities().clear();
             evt.getAffectedBlocks().removeIf((BlockPos bp) -> {
                 boolean isPartOfBuilding = false;
                 for (Building building : buildings)

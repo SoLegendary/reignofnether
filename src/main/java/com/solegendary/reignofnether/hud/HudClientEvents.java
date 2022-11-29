@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.hud;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -33,6 +34,8 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
+import static com.solegendary.reignofnether.unit.UnitClientEvents.getPlayerToEntityRelationship;
+
 public class HudClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
@@ -55,6 +58,8 @@ public class HudClientEvents {
             ActionButtons.MOVE,
             ActionButtons.STOP
     ));
+    private static final ArrayList<ControlGroup> controlGroups = new ArrayList<>(10);
+
     private static final ArrayList<Button> unitButtons = new ArrayList<>();
     private static final ArrayList<Button> productionButtons = new ArrayList<>();
     // buttons which are rendered at the moment in RenderEvent
@@ -279,7 +284,7 @@ public class HudClientEvents {
         blitY = screenHeight - iconFrameSize * 2 - 10;
 
         for (LivingEntity unit : units) {
-            if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED &&
+            if (getPlayerToEntityRelationship(unit) == Relationship.OWNED &&
                     unitButtons.size() < (buttonsPerRow * 2)) {
                 // mob head icon
                 String unitName = getSimpleEntityName(unit);
@@ -367,7 +372,7 @@ public class HudClientEvents {
         // --------------------------------------------------------
         ArrayList<LivingEntity> selUnits = UnitClientEvents.getSelectedUnits();
         if (selUnits.size() > 0 &&
-            UnitClientEvents.getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED) {
+            getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED) {
 
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
@@ -573,5 +578,39 @@ public class HudClientEvents {
     public static void onRenderNamePlate(RenderNameTagEvent evt) {
         if (OrthoviewClientEvents.isEnabled())
             evt.setResult(Event.Result.DENY);
+    }
+
+    // MANAGE CONTROL GROUPS
+    @SubscribeEvent
+    public static void onKeyPress(ScreenEvent.KeyPressed.KeyPressed.Pre evt) {
+        // prevent spectator mode options from showing up
+        if (OrthoviewClientEvents.isEnabled()) {
+            for (Keybinding numKey : Keybindings.nums)
+                if (numKey.key == evt.getKeyCode())
+                    evt.setCanceled(true);
+        }
+
+        // deselect everything
+        if (evt.getKeyCode() == Keybindings.getFnum(1).key) {
+            UnitClientEvents.setSelectedUnits(new ArrayList<>());
+            BuildingClientEvents.setSelectedBuilding(null);
+            BuildingClientEvents.setBuildingToPlace(null);
+        }
+
+        // initialise with empty arrays
+        if (controlGroups.size() <= 0)
+            for (Keybinding keybinding : Keybindings.nums)
+                controlGroups.add(new ControlGroup());
+
+        for (Keybinding keybinding : Keybindings.nums) {
+            int index = Integer.parseInt(keybinding.buttonLabel);
+
+            if (Keybindings.ctrlMod.isDown() && evt.getKeyCode() == keybinding.key) {
+                controlGroups.get(index).setSelected(keybinding);
+            }
+            else if (evt.getKeyCode() == keybinding.key) {
+                controlGroups.get(index).assignToSelected();
+            }
+        }
     }
 }

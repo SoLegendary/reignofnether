@@ -31,6 +31,7 @@ public class VillagerHouse extends ProductionBuilding {
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.OAK_LOG;
         this.spawnRadiusOffset = 1;
+        this.icon = new ResourceLocation("minecraft", "textures/block/oak_log.png");
 
         this.foodCost = ResourceCosts.VillagerHouse.FOOD;
         this.woodCost = ResourceCosts.VillagerHouse.WOOD;
