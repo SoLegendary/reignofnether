@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.MoverType;
@@ -114,6 +115,13 @@ public class OrthoviewClientEvents {
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
             PlayerServerboundPacket.teleportPlayer(MC.player.getX(), prevPlayerY, MC.player.getZ());
         }
+    }
+
+    // moves the camera to the position such that x,z is at the centre of the screen
+    public static void centreCameraOnPos(double x, double z) {
+        // at 0deg by default camera is facing +Z and we want to move it backwards from this
+        Vec2 XZRotated = MyMath.rotateCoords(0,-20, OrthoviewClientEvents.getCamRotX());
+        PlayerServerboundPacket.teleportPlayer(x + XZRotated.x, MC.player.getY(), z + XZRotated.y);
     }
 
     @SubscribeEvent
@@ -286,6 +294,15 @@ public class OrthoviewClientEvents {
         if (enabled)
             evt.setFOV(180);
     }
+
+    /*
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+                "camRotX: " + getCamRotX(),
+                "camRotY: " + getCamRotY()
+        });
+    }*/
 
     // OrthoViewMixin uses this to generate a customisation orthographic view to replace the usual view
     // shamelessly copied from ImmersivePortals 1.16

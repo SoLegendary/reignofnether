@@ -558,17 +558,13 @@ public class HudClientEvents {
                 MC.player != null) {
                 Building selBuilding = BuildingClientEvents.getSelectedBuilding();
                 BlockPos pos = BuildingUtils.getCentrePos(selBuilding.getBlocks());
-                PlayerServerboundPacket.teleportPlayer((double) pos.getX(), MC.player.getY(), (double) pos.getZ());
+                OrthoviewClientEvents.centreCameraOnPos(pos.getX(), pos.getZ());
             }
             else if (unitPortraitZone != null &&
                     unitPortraitZone.isMouseOver(mouseX, mouseY) &&
                     unitPortraitZone.isMouseOver(mouseLeftDownX, mouseLeftDownY) &&
                     MC.player != null) {
-                PlayerServerboundPacket.teleportPlayer(
-                        hudSelectedEntity.getX(),
-                        MC.player.getY(),
-                        hudSelectedEntity.getZ()
-                );
+                OrthoviewClientEvents.centreCameraOnPos(hudSelectedEntity.getX(), hudSelectedEntity.getZ());
             }
         }
     }

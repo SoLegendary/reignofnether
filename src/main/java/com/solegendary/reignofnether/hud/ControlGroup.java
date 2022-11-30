@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -86,24 +87,15 @@ public class ControlGroup {
         if (entities.size() > 0) {
             BuildingClientEvents.setSelectedBuilding(null);
             UnitClientEvents.setSelectedUnits(entities);
-            if (doubleClicked) {
-                PlayerServerboundPacket.teleportPlayer(
-                        entities.get(0).getX(),
-                        player.getY(),
-                        entities.get(0).getZ()
-                );
-            }
+            if (doubleClicked)
+                OrthoviewClientEvents.centreCameraOnPos(entities.get(0).getX(), entities.get(0).getZ());
         }
         else if (buildings.size() > 0) { // TODO: update when we can select multiple buildings
             UnitClientEvents.setSelectedUnits(new ArrayList<>());
             BuildingClientEvents.setSelectedBuilding(buildings.get(0));
             if (doubleClicked) {
                 BlockPos pos = BuildingUtils.getCentrePos(buildings.get(0).getBlocks());
-                PlayerServerboundPacket.teleportPlayer(
-                    (double) pos.getX(),
-                    player.getY(),
-                    (double) pos.getZ()
-                );
+                OrthoviewClientEvents.centreCameraOnPos(pos.getX(), pos.getZ());
             }
         }
         lastClickTime = System.currentTimeMillis();
