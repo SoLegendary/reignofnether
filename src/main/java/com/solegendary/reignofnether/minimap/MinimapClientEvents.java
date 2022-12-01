@@ -7,9 +7,7 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
@@ -17,17 +15,13 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
@@ -37,25 +31,23 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 public class MinimapClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
     public static final int WORLD_RADIUS = 100; // how many world blocks should be mapped
-    public static final int RENDER_RADIUS = 50; // actual size on GUI
+    public static final int MAP_RADIUS = 50; // actual size on GUI
     private static final int REFRESH_TICKS_MAX = 100;
     private static int refreshTicksCurrent = 0;
     private static final float CORNER_OFFSET = 10;
     private static final float BG_OFFSET = 6;
+    private static final int UNIT_RADIUS = 4;
+    private static final int BUILDING_RADIUS = 7;
 
     private static final DynamicTexture MAP_TEXTURE = new DynamicTexture(WORLD_RADIUS * 2, WORLD_RADIUS * 2, true);
     private static final RenderType MAP_RENDER_TYPE = RenderType.textSeeThrough(Minecraft.getInstance()
             .textureManager.register(ReignOfNether.MOD_ID + "_" + "minimap", MAP_TEXTURE));
 
-    private static List<Integer> mapColours = new ArrayList<>();
+    private static int[][] mapColours = new int[WORLD_RADIUS*2][WORLD_RADIUS*2];
     private static int xc_world = 0; // world pos x centre, maps to xc
     private static int zc_world = 0; // world pos zcentre, maps to yc
 
@@ -72,9 +64,9 @@ public class MinimapClientEvents {
         if (pixels != null)
         {
             int i = 0;
-            for (int y = 0; y < WORLD_RADIUS *2; y ++) {
+            for (int z = 0; z < WORLD_RADIUS *2; z ++) {
                 for (int x = 0; x < WORLD_RADIUS *2; x ++) {
-                    pixels.setPixelRGBA(x, y, mapColours.get(i));
+                    pixels.setPixelRGBA(x, z, mapColours[x][z]);
                     i += 1;
                 }
             }
@@ -101,7 +93,8 @@ public class MinimapClientEvents {
         corners[2] = MyMath.addVector3d(corners[2], lookVector, 75-OrthoviewClientEvents.getCamRotY());
         corners[3] = MyMath.addVector3d(corners[3], lookVector, 90-OrthoviewClientEvents.getCamRotY());
 
-        mapColours = new ArrayList<>();
+        mapColours = new int[WORLD_RADIUS*2][WORLD_RADIUS*2];
+
         for (int z = zc_world - WORLD_RADIUS; z < zc_world + WORLD_RADIUS; z++)
         {
             for (int x = xc_world - WORLD_RADIUS; x < xc_world + WORLD_RADIUS; x++) {
@@ -149,49 +142,7 @@ public class MinimapClientEvents {
 
                     // only reduce shade every nth step to have the map look sharper
                     depth = (int) (5*(Math.ceil(Math.abs(depth/5))));
-
                     rgb = MiscUtil.shadeHexRGB(rgb, 1.2F - (0.025F * depth));
-                }
-
-
-
-                // draw buildings
-                for (Building building : BuildingClientEvents.getBuildings()) {
-
-                    int xDiff = Math.abs(building.originPos.getX() + 3 - x);
-                    int zDiff = Math.abs(building.originPos.getZ() + 3 - z);
-
-                    // black outline
-                    if (xDiff <= 6 && zDiff <= 6) {
-                        rgb = 0x000000;
-                    }
-                    if (xDiff <= 4 && zDiff <= 4) {
-                        switch (BuildingClientEvents.getPlayerToBuildingRelationship(building)) {
-                            case OWNED -> rgb = 0x00FF00;
-                            case FRIENDLY -> rgb = 0x0000FF;
-                            case HOSTILE -> rgb = 0xFF0000;
-                            case NEUTRAL -> rgb = 0xFFFF00;
-                        }
-                    }
-                }
-
-                // draw units
-                for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
-                    int xDiff = Math.abs(entity.getOnPos().getX() - x);
-                    int zDiff = Math.abs(entity.getOnPos().getZ() - z);
-
-                    // black outline
-                    if (xDiff <= 3 && zDiff <= 3) {
-                        rgb = 0x000000;
-                    }
-                    if (xDiff <= 2 && zDiff <= 2) {
-                        switch (UnitClientEvents.getPlayerToEntityRelationship(entity)) {
-                            case OWNED -> rgb = 0x00FF00;
-                            case FRIENDLY -> rgb = 0x0000FF;
-                            case HOSTILE -> rgb = 0xFF0000;
-                            case NEUTRAL -> rgb = 0xFFFF00;
-                        }
-                    }
                 }
 
                 // draw view quad
@@ -207,10 +158,79 @@ public class MinimapClientEvents {
                     ))
                         rgb = 0xFFFFFF;
                 }
+                // normalise xz back to 0,0
+                int x0 = x - xc_world + WORLD_RADIUS;
+                int z0 = z - zc_world + WORLD_RADIUS;
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
-                mapColours.add(MiscUtil.reverseHexRGB(rgb) | (0xFF << 24));
+                mapColours[x0][z0] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
             }
         }
+
+
+        // draw buildings
+        for (Building building : BuildingClientEvents.getBuildings()) {
+            int xc = building.originPos.getX() + (BUILDING_RADIUS / 2);
+            int zc = building.originPos.getZ() + (BUILDING_RADIUS / 2);
+
+            for (int x = xc - BUILDING_RADIUS; x < xc + BUILDING_RADIUS; x++) {
+                for (int z = zc - BUILDING_RADIUS; z < zc + BUILDING_RADIUS; z++) {
+                    if (isXZinsideMap(x,z)) {
+                        int x0 = x - xc + BUILDING_RADIUS;
+                        int z0 = z - zc + BUILDING_RADIUS;
+                        int rgb = 0x000000;
+
+                        // if pixel is on the edge of the square keep it coloured black
+                        if (!(x0 < 2 || x0 >= (BUILDING_RADIUS * 2) - 2 ||
+                              z0 < 2 || z0 >= (BUILDING_RADIUS * 2) - 2)) {
+                            switch (BuildingClientEvents.getPlayerToBuildingRelationship(building)) {
+                                case OWNED -> rgb = 0x00FF00;
+                                case FRIENDLY -> rgb = 0x0000FF;
+                                case HOSTILE -> rgb = 0xFF0000;
+                                case NEUTRAL -> rgb = 0xFFFF00;
+                            }
+                        }
+                        int xN = x - xc_world + (MAP_RADIUS * 2);
+                        int zN = z - zc_world + (MAP_RADIUS * 2);
+                        mapColours[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
+                    }
+                }
+            }
+        }
+
+        // draw units
+        for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+            int xc = entity.getOnPos().getX();
+            int zc = entity.getOnPos().getZ();
+
+            for (int x = xc - UNIT_RADIUS; x < xc + UNIT_RADIUS; x++) {
+                for (int z = zc - UNIT_RADIUS; z < zc + UNIT_RADIUS; z++) {
+                    if (isXZinsideMap(x,z)) {
+                        int x0 = x - xc + UNIT_RADIUS;
+                        int z0 = z - zc + UNIT_RADIUS;
+                        int rgb = 0x000000;
+
+                        // if pixel is on the edge of the square keep it coloured black
+                        if (!(x0 < 1 || x0 >= (UNIT_RADIUS * 1) - 2 ||
+                              z0 < 1 || z0 >= (UNIT_RADIUS * 1) - 2)) {
+                            switch (UnitClientEvents.getPlayerToEntityRelationship(entity)) {
+                                case OWNED -> rgb = 0x00FF00;
+                                case FRIENDLY -> rgb = 0x0000FF;
+                                case HOSTILE -> rgb = 0xFF0000;
+                                case NEUTRAL -> rgb = 0xFFFF00;
+                            }
+                        }
+                        int xN = x - xc_world + (MAP_RADIUS * 2);
+                        int zN = z - zc_world + (MAP_RADIUS * 2);
+                        mapColours[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean isXZinsideMap(int x, int z) {
+        return x >= xc_world - WORLD_RADIUS && x < xc_world + WORLD_RADIUS &&
+               z >= zc_world - WORLD_RADIUS && z < zc_world + WORLD_RADIUS;
     }
 
     private static void renderMap(PoseStack stack)
@@ -219,11 +239,11 @@ public class MinimapClientEvents {
 
         // place vertices in a diamond shape - left, centre, right, top, centre, bottom
         // map vertex coordinates (left, centre, right, top, centre, bottom)
-        xl = MC.getWindow().getGuiScaledWidth() - (RENDER_RADIUS * 2) - CORNER_OFFSET;
-        xc = MC.getWindow().getGuiScaledWidth() - RENDER_RADIUS - CORNER_OFFSET;
+        xl = MC.getWindow().getGuiScaledWidth() - (MAP_RADIUS * 2) - CORNER_OFFSET;
+        xc = MC.getWindow().getGuiScaledWidth() - MAP_RADIUS - CORNER_OFFSET;
         xr = MC.getWindow().getGuiScaledWidth() - CORNER_OFFSET;
-        yt = MC.getWindow().getGuiScaledHeight() - (RENDER_RADIUS * 2) - CORNER_OFFSET;
-        yc = MC.getWindow().getGuiScaledHeight() - RENDER_RADIUS - CORNER_OFFSET;
+        yt = MC.getWindow().getGuiScaledHeight() - (MAP_RADIUS * 2) - CORNER_OFFSET;
+        yc = MC.getWindow().getGuiScaledHeight() - MAP_RADIUS - CORNER_OFFSET;
         yb = MC.getWindow().getGuiScaledHeight() - CORNER_OFFSET;
 
         // background vertex coords need to be slightly larger
@@ -263,7 +283,7 @@ public class MinimapClientEvents {
     public static boolean isPointInsideMinimap(double x, double y) {
         double dx = Math.abs(x - xc);
         double dy = Math.abs(y - yc);
-        double d = dx / (RENDER_RADIUS * 2) + dy / (RENDER_RADIUS * 2);
+        double d = dx / (MAP_RADIUS * 2) + dy / (MAP_RADIUS * 2);
         return d <= 0.5;
     }
 
@@ -271,7 +291,7 @@ public class MinimapClientEvents {
         if (!isPointInsideMinimap(x,y) || CursorClientEvents.isBoxSelecting())
             return;
 
-        float pixelsToBlocks = (float) WORLD_RADIUS / (float) RENDER_RADIUS;
+        float pixelsToBlocks = (float) WORLD_RADIUS / (float) MAP_RADIUS;
 
         // offset y up so that user clicks the centre of the view quad instead of bottom border
         y += OrthoviewClientEvents.getZoom() * 0.5F / pixelsToBlocks;

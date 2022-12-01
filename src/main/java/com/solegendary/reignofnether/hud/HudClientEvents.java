@@ -478,7 +478,7 @@ public class HudClientEvents {
         // Control group buttons
         // ---------------------
 
-        blitX = 70;
+        blitX = 100;
         // clean up untracked entities/buildings from control groups
         for (ControlGroup controlGroup : controlGroups) {
             controlGroup.clean();
