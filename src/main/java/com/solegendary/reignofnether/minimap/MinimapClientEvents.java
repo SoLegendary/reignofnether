@@ -40,8 +40,11 @@ public class MinimapClientEvents {
     private static int refreshTicksCurrent = 0;
     private static final float CORNER_OFFSET = 10;
     private static final float BG_OFFSET = 6;
-    private static final int UNIT_RADIUS = 4;
+
+    private static final int UNIT_RADIUS = 3;
+    private static final int UNIT_THICKNESS = 1;
     private static final int BUILDING_RADIUS = 7;
+    private static final int BUILDING_THICKNESS = 2;
 
     private static final DynamicTexture MAP_TEXTURE = new DynamicTexture(WORLD_RADIUS * 2, WORLD_RADIUS * 2, true);
     private static final RenderType MAP_RENDER_TYPE = RenderType.textSeeThrough(Minecraft.getInstance()
@@ -180,8 +183,8 @@ public class MinimapClientEvents {
                         int rgb = 0x000000;
 
                         // if pixel is on the edge of the square keep it coloured black
-                        if (!(x0 < 2 || x0 >= (BUILDING_RADIUS * 2) - 2 ||
-                              z0 < 2 || z0 >= (BUILDING_RADIUS * 2) - 2)) {
+                        if (!(x0 < BUILDING_THICKNESS || x0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS ||
+                              z0 < BUILDING_THICKNESS || z0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS)) {
                             switch (BuildingClientEvents.getPlayerToBuildingRelationship(building)) {
                                 case OWNED -> rgb = 0x00FF00;
                                 case FRIENDLY -> rgb = 0x0000FF;
@@ -210,8 +213,8 @@ public class MinimapClientEvents {
                         int rgb = 0x000000;
 
                         // if pixel is on the edge of the square keep it coloured black
-                        if (!(x0 < 1 || x0 >= (UNIT_RADIUS * 1) - 2 ||
-                              z0 < 1 || z0 >= (UNIT_RADIUS * 1) - 2)) {
+                        if (!(x0 < UNIT_THICKNESS || x0 >= (UNIT_RADIUS * 2) - UNIT_THICKNESS ||
+                              z0 < UNIT_THICKNESS || z0 >= (UNIT_RADIUS * 2) - UNIT_THICKNESS)) {
                             switch (UnitClientEvents.getPlayerToEntityRelationship(entity)) {
                                 case OWNED -> rgb = 0x00FF00;
                                 case FRIENDLY -> rgb = 0x0000FF;
