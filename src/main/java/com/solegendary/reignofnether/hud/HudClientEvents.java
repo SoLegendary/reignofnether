@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -64,8 +63,10 @@ public class HudClientEvents {
     // buttons which are rendered at the moment in RenderEvent
     private static final ArrayList<Button> renderedButtons = new ArrayList<>();
 
-    // unit type that is selected in the list of unit icons
+    // unit that is selected in the list of unit icons
     public static LivingEntity hudSelectedEntity = null;
+    // building that is selected in the list of unit icons
+    public static Building hudSelectedBuilding = null;
     // classes used to render unit or building portrait (mode, frame, healthbar, stats)
     public static PortraitRendererUnit portraitRendererUnit = new PortraitRendererUnit(null);
     public static PortraitRendererBuilding portraitRendererBuilding = new PortraitRendererBuilding();
@@ -139,10 +140,13 @@ public class HudClientEvents {
         int blitX = hudStartingXPos;
         int blitY = MC.getWindow().getGuiScaledHeight();
 
-        Building selBuilding = BuildingClientEvents.getSelectedBuilding();
+        hudSelectedBuilding = null;
+        ArrayList<Building> selBuildings = BuildingClientEvents.getSelectedBuildings();
+        if (selBuildings.size() > 0)
+            hudSelectedBuilding = selBuildings.get(0);
 
-        if (selBuilding != null) {
-            boolean buildingOwned = BuildingClientEvents.getPlayerToBuildingRelationship(selBuilding) == Relationship.OWNED;
+        if (hudSelectedBuilding != null) {
+            boolean buildingOwned = BuildingClientEvents.getPlayerToBuildingRelationship(hudSelectedBuilding) == Relationship.OWNED;
 
             // -----------------
             // Building portrait
@@ -151,7 +155,7 @@ public class HudClientEvents {
 
             buildingPortraitZone = portraitRendererBuilding.render(
                     evt.getPoseStack(),
-                    blitX, blitY, selBuilding);
+                    blitX, blitY, hudSelectedBuilding);
             hudZones.add(buildingPortraitZone);
 
             blitX += portraitRendererBuilding.frameWidth + 10;
@@ -161,7 +165,7 @@ public class HudClientEvents {
             // -------------------------
 
             // bottom row for all other queued items
-            if (buildingOwned && selBuilding instanceof ProductionBuilding selProdBuilding) {
+            if (buildingOwned && hudSelectedBuilding instanceof ProductionBuilding selProdBuilding) {
                 int blitXStart = blitX;
                 blitY = screenHeight - iconFrameSize * 2 - 5;
 
@@ -222,7 +226,7 @@ public class HudClientEvents {
             blitY = screenHeight - iconFrameSize;
 
             // TODO: doesn't work for towers?
-            if (buildingOwned && !selBuilding.isBuilt) {
+            if (buildingOwned && !hudSelectedBuilding.isBuilt) {
                 Button cancelButton = new Button(
                         "Cancel",
                         iconSize,
@@ -231,14 +235,14 @@ public class HudClientEvents {
                         () -> false,
                         () -> false,
                         () -> true,
-                        () -> BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(selBuilding.getBlocks())),
+                        () -> BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(hudSelectedBuilding.getBlocks())),
                         null,
                         List.of(FormattedCharSequence.forward("Cancel", Style.EMPTY))
                 );
                 cancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
                 renderedButtons.add(cancelButton);
             }
-            else if (buildingOwned && selBuilding instanceof ProductionBuilding selProdBuilding) {
+            else if (buildingOwned && hudSelectedBuilding instanceof ProductionBuilding selProdBuilding) {
                 for (Button productionButton : selProdBuilding.productionButtons) {
                     productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                     productionButtons.add(productionButton);
@@ -555,9 +559,9 @@ public class HudClientEvents {
             if (buildingPortraitZone != null &&
                 buildingPortraitZone.isMouseOver(mouseX, mouseY) &&
                 buildingPortraitZone.isMouseOver(mouseLeftDownX, mouseLeftDownY) &&
-                MC.player != null) {
-                Building selBuilding = BuildingClientEvents.getSelectedBuilding();
-                BlockPos pos = BuildingUtils.getCentrePos(selBuilding.getBlocks());
+                MC.player != null &&
+                hudSelectedBuilding != null) {
+                BlockPos pos = BuildingUtils.getCentrePos(hudSelectedBuilding.getBlocks());
                 OrthoviewClientEvents.centreCameraOnPos(pos.getX(), pos.getZ());
             }
             else if (unitPortraitZone != null &&
@@ -612,7 +616,7 @@ public class HudClientEvents {
         // deselect everything
         if (evt.getKeyCode() == Keybindings.getFnum(1).key) {
             UnitClientEvents.setSelectedUnits(new ArrayList<>());
-            BuildingClientEvents.setSelectedBuilding(null);
+            BuildingClientEvents.setSelectedBuildings(new ArrayList<>());
             BuildingClientEvents.setBuildingToPlace(null);
         }
 

@@ -1,16 +1,21 @@
 TODO before playtesting:
 
-2. keep chunks around buildings loaded and stop clientside removal of selected building
+1. keep chunks around buildings loaded and stop clientside removal of selected building
     - need to force chunks and remove on building removal
     - remove forced chunks on dead entities
-3. setup shockbyte server (~3gb?)
+2. setup shockbyte server (~3gb?)
 
 Misc additions/fixes
 
-0. Fix camera centering on units and buildings
+0. Select multiple buildings
+    - BuildingServerBoundPackets should only ever refer to .originPos and cancelling a building should only be able to cancel one building
+    - Hud elements for multiple buildings selected
+    - Fix double click selecting same type of building
+
 1. Arm animations and block cracking/particles
 2. Fix body rendering issues (to do with portrait head rendering)
 3. Minimap 90deg rotations
+4. Change GatherResourcesGoal search to centre on the last gathered block
 
 Villager faction:
     - Pillager and vindicator

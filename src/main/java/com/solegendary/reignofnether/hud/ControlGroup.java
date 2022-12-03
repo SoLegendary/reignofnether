@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.Minecraft;
@@ -69,13 +68,13 @@ public class ControlGroup {
         this.keybinding = keybinding;
 
         ArrayList<LivingEntity> selUnits = UnitClientEvents.getSelectedUnits();
-        Building selBuilding = BuildingClientEvents.getSelectedBuilding();
+        ArrayList<Building> selBuildings = BuildingClientEvents.getSelectedBuildings();
 
         if (selUnits.size() > 0 && getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED) {
             this.entities.addAll(selUnits);
         }
-        else if (selBuilding != null && BuildingClientEvents.getPlayerToBuildingRelationship(selBuilding) == Relationship.OWNED) {
-            this.buildings.add(selBuilding);
+        else if (selBuildings.size() > 0 && BuildingClientEvents.getPlayerToBuildingRelationship(selBuildings.get(0)) == Relationship.OWNED) {
+            this.buildings.addAll(selBuildings);
         }
     }
 
@@ -85,14 +84,14 @@ public class ControlGroup {
         boolean doubleClicked = (System.currentTimeMillis() - lastClickTime) < DOUBLE_CLICK_TIME_MS && player != null;
 
         if (entities.size() > 0) {
-            BuildingClientEvents.setSelectedBuilding(null);
+            BuildingClientEvents.setSelectedBuildings(new ArrayList<>());
             UnitClientEvents.setSelectedUnits(entities);
             if (doubleClicked)
                 OrthoviewClientEvents.centreCameraOnPos(entities.get(0).getX(), entities.get(0).getZ());
         }
-        else if (buildings.size() > 0) { // TODO: update when we can select multiple buildings
+        else if (buildings.size() > 0) {
             UnitClientEvents.setSelectedUnits(new ArrayList<>());
-            BuildingClientEvents.setSelectedBuilding(buildings.get(0));
+            BuildingClientEvents.setSelectedBuildings(buildings);
             if (doubleClicked) {
                 BlockPos pos = BuildingUtils.getCentrePos(buildings.get(0).getBlocks());
                 OrthoviewClientEvents.centreCameraOnPos(pos.getX(), pos.getZ());

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -10,6 +11,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -28,6 +30,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -36,6 +39,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class BuildingClientEvents {
@@ -50,7 +54,7 @@ public class BuildingClientEvents {
     // clientside buildings used for tracking position (for cursor selection)
     private static final ArrayList<Building> buildings = new ArrayList<>();
 
-    private static Building selectedBuilding = null;
+    private static ArrayList<Building> selectedBuildings = new ArrayList<>();
     private static Class<? extends Building> buildingToPlace = null;
     private static Class<? extends Building> lastBuildingToPlace = null;
     private static ArrayList<BuildingBlock> blocksToDraw = new ArrayList<>();
@@ -58,12 +62,33 @@ public class BuildingClientEvents {
     private static Rotation buildingRotation = Rotation.NONE;
     private static Vec3i buildingDimensions = new Vec3i(0,0,0);
 
-    public static Building getSelectedBuilding() {
-        if (!buildings.contains(selectedBuilding))
-            selectedBuilding = null;
-        return selectedBuilding;
+    private static long lastLeftClickTime = 0; // to track double clicks
+    private static final long DOUBLE_CLICK_TIME_MS = 500;
+
+    // can only be one preselected building as you can't box-select them like units
+    public static Building getPreselectedBuilding() {
+        for (Building building: buildings)
+            if (building.isPosInsideBuilding(CursorClientEvents.getPreselectedBlockPos()))
+                return building;
+        return null;
     }
-    public static void setSelectedBuilding(Building building) { selectedBuilding = building; }
+    public static ArrayList<Building> getSelectedBuildings() { return selectedBuildings; }
+    public static List<Building> getBuildings() {
+        return buildings;
+    }
+
+    public static void setSelectedBuildings(ArrayList<Building> buildings) {
+        selectedBuildings.clear();
+        selectedBuildings.addAll(buildings);
+        if (selectedBuildings.size() > 0)
+            UnitClientEvents.setSelectedUnits(new ArrayList<>());
+    }
+    public static void addSelectedBuilding(Building building) {
+        selectedBuildings.add(building);
+        selectedBuildings.sort(Comparator.comparing(b -> b.name));
+        UnitClientEvents.setSelectedUnits(new ArrayList<>());
+    }
+
     public static void setBuildingToPlace(Class<? extends Building> building) {
         buildingToPlace = building;
 
@@ -83,10 +108,6 @@ public class BuildingClientEvents {
     }
     public static Class<? extends Building> getBuildingToPlace() { return buildingToPlace; }
 
-    public static List<Building> getBuildings() {
-        return buildings;
-    }
-
     // adds a green overlay option to OverlayTexture at (0,0)
     public static void replaceOverlayTexture() {
         NativeImage nativeimage = MC.gameRenderer.overlayTexture.texture.getPixels();
@@ -98,14 +119,6 @@ public class BuildingClientEvents {
             nativeimage.upload(0, 0, 0, 0, 0, nativeimage.getWidth(), nativeimage.getHeight(), false, true, false, false);
             RenderSystem.activeTexture(33984);
         }
-    }
-
-    public static Building getPreselectedBuilding() {
-        for (Building building: buildings) {
-            if (building.isPosInsideBuilding(CursorClientEvents.getPreselectedBlockPos()))
-                return building;
-        }
-        return null;
     }
 
     // draws the building with a green/red overlay (based on placement validity) at the target position
@@ -253,7 +266,7 @@ public class BuildingClientEvents {
                     new BlockPos(BuildingUtils.getMaxCorner(building.blocks)).offset(1,1,1)
             );
 
-            if (building.equals(selectedBuilding))
+            if (selectedBuildings.contains(building))
                 MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
             else if (building.equals(preselectedBuilding) && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
                 if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
@@ -277,16 +290,18 @@ public class BuildingClientEvents {
         }
 
         // draw rally point and line
-        if (selectedBuilding instanceof ProductionBuilding selProdBuilding && selProdBuilding.getRallyPoint() != null) {
-            float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
-            MyRenderer.drawBlockFace(evt.getPoseStack(),
-                    Direction.UP,
-                    selProdBuilding.getRallyPoint(),
-                    0, 1, 0, a);
-            MyRenderer.drawLine(evt.getPoseStack(),
-                    BuildingUtils.getCentrePos(selProdBuilding.getBlocks()).offset(0,-1,0),
-                    selProdBuilding.getRallyPoint(),
-                    0, 1, 0, a);
+        for (Building selBuilding : selectedBuildings) {
+            if (selBuilding instanceof ProductionBuilding selProdBuilding && selProdBuilding.getRallyPoint() != null) {
+                float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
+                MyRenderer.drawBlockFace(evt.getPoseStack(),
+                        Direction.UP,
+                        selProdBuilding.getRallyPoint(),
+                        0, 1, 0, a);
+                MyRenderer.drawLine(evt.getPoseStack(),
+                        BuildingUtils.getCentrePos(selProdBuilding.getBlocks()).offset(0,-1,0),
+                        selProdBuilding.getRallyPoint(),
+                        0, 1, 0, a);
+            }
         }
     }
 
@@ -319,6 +334,7 @@ public class BuildingClientEvents {
 
         BlockPos pos = getOriginPos();
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            Building preSelBuilding = getPreselectedBuilding();
 
             // place a new building
             if (buildingToPlace != null && isBuildingPlacementValid(pos) && MC.player != null) {
@@ -333,25 +349,66 @@ public class BuildingClientEvents {
                         builderIds.stream().mapToInt(i -> i).toArray());
                 setBuildingToPlace(null);
             }
+            // equivalent of UnitClientEvents.onMouseClick()
             else if (buildingToPlace == null) {
-                Building building = getPreselectedBuilding();
-                if (building != null && CursorClientEvents.getLeftClickAction() == null) {
-                    selectedBuilding = building;
-                    UnitClientEvents.setSelectedUnits(new ArrayList<>());
+
+                // select all nearby units of the same type when double-clicked
+                if (selectedBuildings.size() == 1 && MC.level != null && !Keybindings.shiftMod.isDown() &&
+                        (System.currentTimeMillis() - lastLeftClickTime) < DOUBLE_CLICK_TIME_MS) {
+
+                    lastLeftClickTime = 0;
+                    Building selBuilding = selectedBuildings.get(0);
+                    BlockPos centre = BuildingUtils.getCentrePos(selBuilding.blocks);
+                    ArrayList<Building> nearbyBuildings = getBuildingsWithinRange(
+                            new Vec3(centre.getX(), centre.getY(), centre.getZ()),
+                            OrthoviewClientEvents.getZoom(),
+                            selBuilding.name
+                    );
+                    setSelectedBuildings(new ArrayList<>());
+                    for (Building building : nearbyBuildings)
+                        if (getPlayerToBuildingRelationship(building) == Relationship.OWNED)
+                            addSelectedBuilding(building);
+                }
+
+                // left click -> select a single building
+                // if shift is held, deselect a building or add it to the selected group
+                if (preSelBuilding != null && CursorClientEvents.getLeftClickAction() == null) {
+                    boolean deselected = false;
+
+                    if (Keybindings.shiftMod.isDown())
+                        deselected = selectedBuildings.remove(preSelBuilding);
+
+                    if (Keybindings.shiftMod.isDown() && !deselected &&
+                            getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED) {
+                        addSelectedBuilding(preSelBuilding);
+                    }
+                    else if (!deselected) { // select a single building - this should be the only code path that allows you to select a non-owned building
+                        setSelectedBuildings(new ArrayList<>());
+                        addSelectedBuilding(preSelBuilding);
+                    }
                 }
             }
+
+            // deselect any non-owned buildings if we managed to select them with owned buildings
+            // and disallow selecting > 1 non-owned building
+            if (selectedBuildings.size() > 1)
+                selectedBuildings.removeIf(b -> getPlayerToBuildingRelationship(b) != Relationship.OWNED);
+
+            lastLeftClickTime = System.currentTimeMillis();
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             // set rally points
-            if (!Keybindings.altMod.isDown() &&
-                selectedBuilding instanceof ProductionBuilding selProdBuilding) {
-
-                BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();
-                selProdBuilding.setRallyPoint(rallyPoint);
-                BuildingServerboundPacket.setRallyPoint(
-                        BuildingUtils.getMinCorner(selectedBuilding.blocks),
-                        rallyPoint
-                );
+            if (!Keybindings.altMod.isDown()) {
+                for (Building selBuilding : selectedBuildings) {
+                    if (selBuilding instanceof ProductionBuilding selProdBuilding) {
+                        BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();
+                        selProdBuilding.setRallyPoint(rallyPoint);
+                        BuildingServerboundPacket.setRallyPoint(
+                                BuildingUtils.getMinCorner(selBuilding.blocks),
+                                rallyPoint
+                        );
+                    }
+                }
             }
             else {
                 setBuildingToPlace(null);
@@ -370,10 +427,22 @@ public class BuildingClientEvents {
                 building.tick(MC.level);
 
             // cleanup destroyed buildings
-            if (selectedBuilding != null && selectedBuilding.shouldBeDestroyed())
-                selectedBuilding = null;
+            selectedBuildings.removeIf(Building::shouldBeDestroyed);
             buildings.removeIf(Building::shouldBeDestroyed);
         }
+    }
+
+    public static ArrayList<Building> getBuildingsWithinRange(Vec3 pos, float range, String buildingName) {
+        ArrayList<Building> retBuildings = new ArrayList<>();
+        for (Building building : buildings) {
+            if (building.name.equals(buildingName)) {
+                BlockPos centre = BuildingUtils.getCentrePos(building.blocks);
+                Vec3 centreVec3 = new Vec3(centre.getX(), centre.getX(), centre.getY());
+                if (pos.distanceTo(centreVec3) <= range)
+                    retBuildings.add(building);
+            }
+        }
+        return retBuildings;
     }
 
     // place a building clientside that has already been registered on serverside

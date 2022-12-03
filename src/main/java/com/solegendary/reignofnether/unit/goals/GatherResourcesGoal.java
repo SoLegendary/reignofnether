@@ -126,8 +126,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         if (ticksLeft <= 0) {
                             ticksLeft = DEFAULT_MAX_TICKS;
 
+                            ResourceName resourceBlockType = ResourceBlocks.getResourceBlockName(this.gatherTarget, mob.level);
                             if (mob.level.destroyBlock(gatherTarget, false)) {
-                                ResourceName resourceBlockType = ResourceBlocks.getResourceBlockName(this.gatherTarget, mob.level);
                                 ResourcesServerEvents.addSubtractResources(new Resources(
                                         ((Unit) mob).getOwnerName(),
                                         resourceBlockType.equals(ResourceName.FOOD) ? targetResourceBlock.resourceValue : 0,
