@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -27,6 +28,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private static final int DEFAULT_MAX_TICKS = 100; // actual ticks may be lower, depending on the ResourceBlock targeted
     private int ticksLeft = DEFAULT_MAX_TICKS;
 
+    private final ArrayList<BlockPos> oldSuccessfulGatherTargets = new ArrayList<>();
     private BlockPos gatherTarget = null;
     private ResourceName targetResourceName = ResourceName.NONE; // if !None, will passively target blocks around it
     private ResourceBlock targetResourceBlock = null;
@@ -80,14 +82,30 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     public void tick() {
 
         if (gatherTarget == null && targetResourceName != ResourceName.NONE) {
-            gatherTarget = MiscUtil.findNearestBlock(
-                mob.level,
-                new Vec3i(
-                    mob.getEyePosition().x,
-                    mob.getEyePosition().y,
-                    mob.getEyePosition().z
-                ), REACH_RANGE + 1,
-                    BLOCK_CONDITION);
+
+            // find new blocks adjacent to the last dug blocks first before searching for a new one
+            ArrayList<BlockPos> oldTargetsCopy = new ArrayList<>(oldSuccessfulGatherTargets);
+            for (BlockPos oldBp : oldTargetsCopy) {
+                gatherTarget = MiscUtil.findAdjacentBlock(
+                        mob.level,
+                        oldBp,
+                        BLOCK_CONDITION
+                );
+                if (gatherTarget == null)
+                    oldSuccessfulGatherTargets.remove(oldBp);
+                else
+                    break;
+            }
+
+            if (gatherTarget == null)
+                gatherTarget = MiscUtil.findNearestBlock(
+                        mob.level,
+                        new Vec3i(
+                                mob.getEyePosition().x,
+                                mob.getEyePosition().y,
+                                mob.getEyePosition().z
+                        ), REACH_RANGE + 1,
+                        BLOCK_CONDITION);
 
             if (gatherTarget != null)
                 targetResourceBlock = ResourceBlocks.getResourceBlock(gatherTarget, mob.level);
@@ -125,9 +143,11 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         ticksLeft = Math.min(ticksLeft, targetResourceBlock.ticksToGather);
                         if (ticksLeft <= 0) {
                             ticksLeft = DEFAULT_MAX_TICKS;
-
                             ResourceName resourceBlockType = ResourceBlocks.getResourceBlockName(this.gatherTarget, mob.level);
                             if (mob.level.destroyBlock(gatherTarget, false)) {
+                                if (oldSuccessfulGatherTargets.size() < 10)
+                                    oldSuccessfulGatherTargets.add(gatherTarget);
+
                                 ResourcesServerEvents.addSubtractResources(new Resources(
                                         ((Unit) mob).getOwnerName(),
                                         resourceBlockType.equals(ResourceName.FOOD) ? targetResourceBlock.resourceValue : 0,

@@ -19,6 +19,7 @@ import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -45,6 +46,23 @@ public class MiscUtil {
                                 return bp;
                         }
                     }
+        return null;
+    }
+
+    public static BlockPos findAdjacentBlock(Level level, BlockPos originPos, Predicate<BlockPos> condition) {
+        ArrayList<BlockPos> adjBps = new ArrayList<>();
+
+        adjBps.add(originPos.above());
+        adjBps.add(originPos.below());
+        adjBps.add(originPos.north());
+        adjBps.add(originPos.south());
+        adjBps.add(originPos.east());
+        adjBps.add(originPos.west());
+
+        Collections.shuffle(adjBps);
+        for (BlockPos bp : adjBps)
+            if (condition.test(bp))
+                return bp;
         return null;
     }
 

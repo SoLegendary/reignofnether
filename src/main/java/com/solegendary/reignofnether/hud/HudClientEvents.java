@@ -199,6 +199,8 @@ public class HudClientEvents {
             }
 
             if (buildingButtons.size() >= 2) {
+                blitX += 20;
+                blitY += 6;
                 // background frame
                 hudZones.add(MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
                         iconFrameSize * buttonsPerRow + 10,
@@ -258,9 +260,7 @@ public class HudClientEvents {
             // ---------------------------------------------------------------
             // Building production queue (show only if 1 building is selected)
             // ---------------------------------------------------------------
-
-            if (hudSelBuildingOwned && hudSelectedBuilding instanceof ProductionBuilding selProdBuilding) {
-                blitXStart = blitX;
+            else if (hudSelBuildingOwned && hudSelectedBuilding instanceof ProductionBuilding selProdBuilding) {
                 blitY = screenHeight - iconFrameSize * 2 - 5;
 
                 for (int i = 0; i < selProdBuilding.productionQueue.size(); i++)
