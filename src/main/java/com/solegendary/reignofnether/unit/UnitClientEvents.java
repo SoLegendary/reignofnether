@@ -155,12 +155,12 @@ public class UnitClientEvents {
      * Therefore, only remove entities if they leave serverside via UnitClientboundPacket.
      */
     public static void onEntityLeave(int entityId) {
-        //if (selectedUnits.removeIf(e -> e.getId() == entityId))
-        //    System.out.println("selectedUnits removed entity: " + entityId);
-        //if (preselectedUnits.removeIf(e -> e.getId() == entityId))
-        //    System.out.println("preselectedUnits removed entity: " + entityId);
-        //if (allUnits.removeIf(e -> e.getId() == entityId))
-        //    System.out.println("allUnits removed entity: " + entityId);
+        selectedUnits.removeIf(e -> e.getId() == entityId);
+        //System.out.println("selectedUnits removed entity: " + entityId);
+        preselectedUnits.removeIf(e -> e.getId() == entityId);
+        //System.out.println("preselectedUnits removed entity: " + entityId);
+        allUnits.removeIf(e -> e.getId() == entityId);
+        //System.out.println("allUnits removed entity: " + entityId);
     }
     /**
      * Add and update entities from clientside action
