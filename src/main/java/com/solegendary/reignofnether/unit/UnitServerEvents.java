@@ -93,9 +93,6 @@ public class UnitServerEvents {
     public static void onEntityLeave(EntityLeaveLevelEvent evt) {
         if (evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
             allUnits.removeIf(e -> e.getId() == entity.getId());
-
-            if (entity instanceof Unit)
-                System.out.println("unit left: " + entity.getId());
             UnitClientboundPacket.sendLeavePacket(entity);
         }
     }

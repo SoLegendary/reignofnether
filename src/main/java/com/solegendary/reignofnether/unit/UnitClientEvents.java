@@ -50,11 +50,7 @@ public class UnitClientEvents {
         return allUnits;
     }
     public static void addPreselectedUnit(LivingEntity unit) { preselectedUnits.add(unit); }
-    public static void addSelectedUnit(LivingEntity unit) {
-        selectedUnits.add(unit);
-        selectedUnits.sort(Comparator.comparing(HudClientEvents::getSimpleEntityName));
-        BuildingClientEvents.setSelectedBuilding(null);
-    }
+
     public static void setPreselectedUnits(ArrayList<LivingEntity> units) {
         preselectedUnits.clear();
         preselectedUnits.addAll(units);
@@ -63,7 +59,12 @@ public class UnitClientEvents {
         selectedUnits.clear();
         selectedUnits.addAll(units);
         if (selectedUnits.size() > 0)
-            BuildingClientEvents.setSelectedBuilding(null);
+            BuildingClientEvents.setSelectedBuildings(new ArrayList<>());
+    }
+    public static void addSelectedUnit(LivingEntity unit) {
+        selectedUnits.add(unit);
+        selectedUnits.sort(Comparator.comparing(HudClientEvents::getSimpleEntityName));
+        BuildingClientEvents.setSelectedBuildings(new ArrayList<>());
     }
     private static long lastLeftClickTime = 0; // to track double clicks
     private static final long DOUBLE_CLICK_TIME_MS = 500;
@@ -154,12 +155,12 @@ public class UnitClientEvents {
      * Therefore, only remove entities if they leave serverside via UnitClientboundPacket.
      */
     public static void onEntityLeave(int entityId) {
-        if (selectedUnits.removeIf(e -> e.getId() == entityId))
-            System.out.println("selectedUnits removed entity: " + entityId);
-        if (preselectedUnits.removeIf(e -> e.getId() == entityId))
-            System.out.println("preselectedUnits removed entity: " + entityId);
-        if (allUnits.removeIf(e -> e.getId() == entityId))
-            System.out.println("allUnits removed entity: " + entityId);
+        selectedUnits.removeIf(e -> e.getId() == entityId);
+        //System.out.println("selectedUnits removed entity: " + entityId);
+        preselectedUnits.removeIf(e -> e.getId() == entityId);
+        //System.out.println("preselectedUnits removed entity: " + entityId);
+        allUnits.removeIf(e -> e.getId() == entityId);
+        //System.out.println("allUnits removed entity: " + entityId);
     }
     /**
      * Add and update entities from clientside action
@@ -193,7 +194,6 @@ public class UnitClientEvents {
 
         // Can only detect clicks client side but only see and modify goals serverside so produce entity queues here
         // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
-
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
 
             if (selectedUnits.size() > 0 && isLeftClickAttack()) {
@@ -236,17 +236,17 @@ public class UnitClientEvents {
             // left click -> select a single unit
             // if shift is held, deselect a unit or add it to the selected group
             else if (preselectedUnits.size() == 1 && !isLeftClickAttack()) {
-                boolean deselectedUnit = false;
+                boolean deselected = false;
 
                 if (Keybindings.shiftMod.isDown())
-                    deselectedUnit = selectedUnits.removeIf(id -> id.equals(preselectedUnits.get(0)));
+                    deselected = selectedUnits.removeIf(id -> id.equals(preselectedUnits.get(0)));
 
-                if (Keybindings.shiftMod.isDown() && !deselectedUnit &&
+                if (Keybindings.shiftMod.isDown() && !deselected &&
                     preselectedUnits.get(0) instanceof Unit &&
                     getPlayerToEntityRelationship(preselectedUnits.get(0)) == Relationship.OWNED) {
                         addSelectedUnit(preselectedUnits.get(0));
                 }
-                else if (!deselectedUnit) { // select a single unit - this should be the only code path that allows you to select a non-owned unit
+                else if (!deselected) { // select a single unit - this should be the only code path that allows you to select a non-owned unit
                     setSelectedUnits(new ArrayList<>());
                     addSelectedUnit(preselectedUnits.get(0));
                 }
@@ -254,10 +254,9 @@ public class UnitClientEvents {
             // deselect any non-owned units if we managed to select them with owned units
             // and disallow selecting > 1 non-owned unit or the client player
             if (selectedUnits.size() > 1)
-                selectedUnits.removeIf(entity -> getPlayerToEntityRelationship(entity) != Relationship.OWNED || entity.getId() == MC.player.getId());
+                selectedUnits.removeIf(e -> getPlayerToEntityRelationship(e) != Relationship.OWNED || e.getId() == MC.player.getId());
 
             lastLeftClickTime = System.currentTimeMillis();
-            CursorClientEvents.setLeftClickAction(UnitAction.ATTACK);
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (selectedUnits.size() > 0) {

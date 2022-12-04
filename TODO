@@ -1,16 +1,20 @@
 TODO before playtesting:
 
-2. keep chunks around buildings loaded and stop clientside removal of selected building
+1. keep chunks around buildings loaded and stop clientside removal of selected building
     - need to force chunks and remove on building removal
     - remove forced chunks on dead entities
-3. setup shockbyte server (~3gb?)
+2. setup shockbyte server (~3gb?)
 
-Misc additions/fixes
 
-0. Fix camera centering on units and buildings
-1. Arm animations and block cracking/particles
-2. Fix body rendering issues (to do with portrait head rendering)
-3. Minimap 90deg rotations
+TODO bugfixes:
+
+1. Change GatherResourcesGoal search to centre on the last gathered block
+    - maybe try searching for grouped blocks of resources to gather?
+
+2. Arm animations and block cracking/particles
+3. Fix body rendering issues (to do with portrait head rendering)
+4. Minimap 90deg rotations
+
 
 Villager faction:
     - Pillager and vindicator

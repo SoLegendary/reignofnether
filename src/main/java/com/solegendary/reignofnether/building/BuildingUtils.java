@@ -36,7 +36,7 @@ public class BuildingUtils {
     // note originPos may not actually be a part of the building itself
     public static Building findBuilding(List<Building> buildings, BlockPos pos) {
         for (Building building : buildings)
-            if (building.originPos == pos || building.isPosInsideBuilding(pos))
+            if (building.originPos.equals(pos) || building.isPosInsideBuilding(pos))
                 return building;
         return null;
     }

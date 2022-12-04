@@ -329,9 +329,10 @@ public class CursorClientEvents {
             // do we own any of the selected buildings or entities?
             // will be false if there are none selected in the first place
             boolean ownAnySelected = false;
-            Building selBuilding = BuildingClientEvents.getSelectedBuilding();
-            if (selBuilding != null && BuildingClientEvents.getPlayerToBuildingRelationship(selBuilding) == Relationship.OWNED)
-                ownAnySelected = true;
+            ArrayList<Building> selBuildings = BuildingClientEvents.getSelectedBuildings();
+            for (Building building : selBuildings)
+                if (building != null && BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED)
+                    ownAnySelected = true;
             for (LivingEntity entity : UnitClientEvents.getSelectedUnits()) {
                 if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED) {
                     ownAnySelected = true;
@@ -340,7 +341,10 @@ public class CursorClientEvents {
             }
             if (!OrthoviewClientEvents.isCameraMovingByMouse() &&
                 !leftClickDown && ownAnySelected &&
-                UnitClientEvents.getPreselectedUnits().size() == 0 && !buildingTargetedByWorker && !buildingTargetedByAttacker) {
+                UnitClientEvents.getPreselectedUnits().size() == 0 &&
+                BuildingClientEvents.getPreselectedBuilding() == null &&
+                !buildingTargetedByWorker && !buildingTargetedByAttacker) {
+
                 MyRenderer.drawBox(evt.getPoseStack(), preselectedBlockPos, 1, 1, 1, rightClickDown ? 0.3f : 0.15f);
                 MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
             }

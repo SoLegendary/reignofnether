@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.hud;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -38,6 +39,7 @@ public class Button {
 
     public Keybinding hotkey = null; // for action/ability buttons
     public LivingEntity entity = null; // for selected unit buttons
+    public Building building = null; // for selected building buttons
 
     /** https://stackoverflow.com/questions/29945627/java-8-lambda-void-argument
      * Supplier       ()    -> x
@@ -92,11 +94,33 @@ public class Button {
         this.tooltipLines = tooltipLines;
     }
 
+    // constructor for building selection buttons
+    public Button(String name, int iconSize, ResourceLocation rl, Building building, Supplier<Boolean> isSelected,
+                  Supplier<Boolean> isActive, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
+                  @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
+        this.name = name;
+        this.iconResource = rl;
+        this.iconSize = iconSize;
+        this.building = building;
+        this.isSelected = isSelected;
+        this.isActive = isActive;
+        this.isEnabled = isEnabled;
+        this.onLeftClick = onLeftClick;
+        this.onRightClick = onRightClick;
+        this.tooltipLines = tooltipLines;
+    }
+
     public void renderHealthBar(PoseStack poseStack) {
-        HealthBarClientEvents.renderForEntity(poseStack, entity,
-                x + ((float) iconFrameSize / 2), y - 5,
-                iconFrameSize - 1,
-                HealthBarClientEvents.RenderMode.GUI_ICON);
+        if (entity != null)
+            HealthBarClientEvents.renderForEntity(poseStack, entity,
+                    x + ((float) iconFrameSize / 2), y - 5,
+                    iconFrameSize - 1,
+                    HealthBarClientEvents.RenderMode.GUI_ICON);
+        else if (building != null)
+            HealthBarClientEvents.renderForBuilding(poseStack, building,
+                    x + ((float) iconFrameSize / 2), y - 5,
+                    iconFrameSize - 1,
+                    HealthBarClientEvents.RenderMode.GUI_ICON);
     }
 
     public void render(PoseStack poseStack, int x, int y, int mouseX, int mouseY) {
