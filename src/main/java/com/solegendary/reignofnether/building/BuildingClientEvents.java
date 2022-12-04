@@ -352,7 +352,7 @@ public class BuildingClientEvents {
             // equivalent of UnitClientEvents.onMouseClick()
             else if (buildingToPlace == null) {
 
-                // select all nearby units of the same type when double-clicked
+                // select all nearby buildings of the same type when double-clicked
                 if (selectedBuildings.size() == 1 && MC.level != null && !Keybindings.shiftMod.isDown() &&
                         (System.currentTimeMillis() - lastLeftClickTime) < DOUBLE_CLICK_TIME_MS) {
 
@@ -361,7 +361,7 @@ public class BuildingClientEvents {
                     BlockPos centre = BuildingUtils.getCentrePos(selBuilding.blocks);
                     ArrayList<Building> nearbyBuildings = getBuildingsWithinRange(
                             new Vec3(centre.getX(), centre.getY(), centre.getZ()),
-                            OrthoviewClientEvents.getZoom(),
+                            OrthoviewClientEvents.getZoom() * 2,
                             selBuilding.name
                     );
                     setSelectedBuildings(new ArrayList<>());
@@ -372,7 +372,7 @@ public class BuildingClientEvents {
 
                 // left click -> select a single building
                 // if shift is held, deselect a building or add it to the selected group
-                if (preSelBuilding != null && CursorClientEvents.getLeftClickAction() == null) {
+                else if (preSelBuilding != null && CursorClientEvents.getLeftClickAction() == null) {
                     boolean deselected = false;
 
                     if (Keybindings.shiftMod.isDown())
@@ -404,7 +404,7 @@ public class BuildingClientEvents {
                         BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();
                         selProdBuilding.setRallyPoint(rallyPoint);
                         BuildingServerboundPacket.setRallyPoint(
-                                BuildingUtils.getMinCorner(selBuilding.blocks),
+                                selBuilding.originPos,
                                 rallyPoint
                         );
                     }
@@ -437,7 +437,7 @@ public class BuildingClientEvents {
         for (Building building : buildings) {
             if (building.name.equals(buildingName)) {
                 BlockPos centre = BuildingUtils.getCentrePos(building.blocks);
-                Vec3 centreVec3 = new Vec3(centre.getX(), centre.getX(), centre.getY());
+                Vec3 centreVec3 = new Vec3(centre.getX(), centre.getY(), centre.getZ());
                 if (pos.distanceTo(centreVec3) <= range)
                     retBuildings.add(building);
             }
@@ -473,7 +473,7 @@ public class BuildingClientEvents {
     }
 
     public static void destroyBuilding(BlockPos pos) {
-        buildings.removeIf(b -> b.isPosPartOfBuilding(pos, false));
+        buildings.removeIf(b -> b.originPos == pos);
     }
 
     public static void syncBuildingBlocks(Building serverBuilding, int blocksPlaced) {

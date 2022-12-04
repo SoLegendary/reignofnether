@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.level.BlockEvent;
@@ -57,6 +58,7 @@ public abstract class Building {
     protected int unrepairedBlocksDestroyed = 0; // ticks up on a block being destroyed, ticks down on a block being built
 
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
+    protected ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
     public String ownerName;
     public Block portraitBlock; // block rendered in the portrait GUI to represent this building
     public int tickAge = 0; // how many ticks ago this building was placed
@@ -78,6 +80,10 @@ public abstract class Building {
         this.originPos = originPos;
         this.rotation = rotation;
         this.ownerName = ownerName;
+    }
+
+    public void addToBlockPlaceQueue(BuildingBlock block) {
+        this.blockPlaceQueue.add(block);
     }
 
     public ArrayList<WorkerUnit> getBuilders(Level level) {
@@ -208,11 +214,10 @@ public abstract class Building {
                 validBlocks.add(block);
         }
         if (validBlocks.size() > 0) {
-            validBlocks.get(0).place();
+            this.blockPlaceQueue.add(validBlocks.get(0));
             if (unrepairedBlocksDestroyed > 0)
                 unrepairedBlocksDestroyed -= 1;
         }
-
     }
 
     private void extinguishRandomFire(ServerLevel level) {
@@ -234,7 +239,7 @@ public abstract class Building {
         ArrayList<BuildingBlock> placedBlocks = new ArrayList<>(blocks.stream().filter(b -> b.isPlaced(getLevel())).toList());
         Collections.shuffle(placedBlocks);
         for (int i = 0; i < amount && i < placedBlocks.size(); i++)
-            placedBlocks.get(i).destroy();
+            getLevel().destroyBlock(placedBlocks.get(i).getBlockPos(), false);
     }
 
     public boolean shouldBeDestroyed() {
@@ -251,7 +256,7 @@ public abstract class Building {
     // destroy all remaining blocks in a final big explosion
     // only explode a fraction of the blocks to avoid lag and sound spikes
     public void destroy(ServerLevel serverLevel) {
-        BuildingClientboundPacket.destroyBuilding(BuildingUtils.getMinCorner(this.getBlocks()));
+        BuildingClientboundPacket.destroyBuilding(this.originPos);
 
         this.blocks.forEach((BuildingBlock block) -> {
             if (block.getBlockState().getMaterial().isLiquid()) {
@@ -335,6 +340,19 @@ public abstract class Building {
             }
             if (this.shouldBeDestroyed())
                 this.destroy(serverLevel);
+
+            // blocks that will build themselves on each tick (eg. foundations from placement, upgrade sections)
+            if (blockPlaceQueue.size() > 0) {
+                BuildingBlock nextBlock = blockPlaceQueue.get(0);
+                BlockPos bp = nextBlock.getBlockPos();
+                BlockState bs = nextBlock.getBlockState();
+                if (level.isLoaded(bp)) {
+                    level.setBlockAndUpdate(bp, bs);
+                    level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, bp, Block.getId(bs));
+                    level.levelEvent(bs.getSoundType().getPlaceSound().hashCode(), bp, Block.getId(bs));
+                    blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
+                }
+            }
         }
     }
 }

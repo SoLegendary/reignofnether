@@ -39,20 +39,11 @@ public class BuildingServerEvents {
 
     // buildings that currently exist serverside
     private static final ArrayList<Building> buildings = new ArrayList<>();
-    private static final ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
-    private static final ArrayList<BlockPos> blockDestroyQueue = new ArrayList<>();
 
     private static final ArrayList<Building> buildingsBackup = new ArrayList<>();
 
     public static ArrayList<Building> getBuildings() {
         return buildings;
-    }
-
-    public static void placeBlock(BuildingBlock block) {
-        blockPlaceQueue.add(block);
-    }
-    public static void destroyBlock(BlockPos pos) {
-        blockDestroyQueue.add(pos);
     }
 
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int[] builderUnitIds) {
@@ -65,7 +56,7 @@ public class BuildingServerEvents {
                 int minY = BuildingUtils.getMinCorner(building.blocks).getY();
                 for (BuildingBlock block : building.blocks)
                     if (block.getBlockPos().getY() == minY)
-                        block.place();
+                        building.addToBlockPlaceQueue(block);
                 BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName);
                 ResourcesServerEvents.addSubtractResources(new Resources(
                     building.ownerName,
@@ -92,8 +83,6 @@ public class BuildingServerEvents {
     public static void cancelBuilding(Building building) {
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);
-        for (BuildingBlock block : building.getBlocks())
-            blockPlaceQueue.removeIf(queuedBlock -> queuedBlock.getBlockPos().equals(block.getBlockPos()));
 
         // AOE2-style refund: return the % of the non-built portion of the building
         // eg. cancelling a building at 70% completion will refund only 30% cost
@@ -155,31 +144,12 @@ public class BuildingServerEvents {
         if (buildingSyncTicks <= 0) {
             buildingSyncTicks = BUILDING_SYNC_TICKS_MAX;
             for (Building building : buildings)
-                BuildingClientboundPacket.syncBuilding(BuildingUtils.getMinCorner(building.getBlocks()), building.getBlocksPlaced());
+                BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced());
         }
 
         for (Building building : buildings)
             building.tick(serverLevel);
         buildings.removeIf(Building::shouldBeDestroyed);
-
-        if (blockPlaceQueue.size() > 0) {
-            BuildingBlock nextBlock = blockPlaceQueue.get(0);
-            BlockPos bp = nextBlock.getBlockPos();
-            BlockState bs = nextBlock.getBlockState();
-            if (serverLevel.isLoaded(bp)) {
-                serverLevel.setBlockAndUpdate(bp, bs);
-                serverLevel.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, bp, Block.getId(bs));
-                serverLevel.levelEvent(bs.getSoundType().getPlaceSound().hashCode(), bp, Block.getId(bs));
-                blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
-            }
-        }
-        if (blockDestroyQueue.size() > 0) {
-            BlockPos bp = blockDestroyQueue.get(0);
-            if (serverLevel.isLoaded(bp)) {
-                serverLevel.destroyBlock(bp, false);
-                blockDestroyQueue.removeIf(b -> b.equals(bp));
-            }
-        }
     }
 
     // cancel all explosion damage to non-building blocks

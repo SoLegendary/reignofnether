@@ -38,15 +38,5 @@ public class BuildingBlock {
             return !this.blockState.isAir() && Minecraft.getInstance().level.getBlockState(this.blockPos) == this.blockState;
         else
             return !this.blockState.isAir() && level.getBlockState(this.blockPos) == this.blockState;
-
-
-    }
-
-    public void place() {
-        BuildingServerEvents.placeBlock(this);
-    }
-
-    public void destroy() {
-        BuildingServerEvents.destroyBlock(this.blockPos);
     }
 }

@@ -8,9 +8,9 @@ TODO before playtesting:
 Misc additions/fixes
 
 0. Select multiple buildings
-    - BuildingServerBoundPackets should only ever refer to .originPos and cancelling a building should only be able to cancel one building
     - Hud elements for multiple buildings selected
-    - Fix double click selecting same type of building
+
+Disallow overlapping building placements
 
 1. Arm animations and block cracking/particles
 2. Fix body rendering issues (to do with portrait head rendering)
