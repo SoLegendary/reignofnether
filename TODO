@@ -8,8 +8,6 @@ TODO before playtesting:
 
 TODO bugfixes:
 
-Disallow overlapping building placements
-
 1. Change GatherResourcesGoal search to centre on the last gathered block
     - maybe try searching for grouped blocks of resources to gather?
 
