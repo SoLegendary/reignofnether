@@ -31,6 +31,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getPlayerToEntityRelationship;
 
@@ -58,6 +60,7 @@ public class HudClientEvents {
     ));
     private static final ArrayList<ControlGroup> controlGroups = new ArrayList<>(10);
 
+    private static final ArrayList<Button> buildingButtons = new ArrayList<>();
     private static final ArrayList<Button> unitButtons = new ArrayList<>();
     private static final ArrayList<Button> productionButtons = new ArrayList<>();
     // buttons which are rendered at the moment in RenderEvent
@@ -116,7 +119,8 @@ public class HudClientEvents {
         // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
         int hudStartingXPos = (MC.getWindow().getGuiScaledWidth() / 5) + 20;
 
-        ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
+        ArrayList<LivingEntity> selUnits = UnitClientEvents.getSelectedUnits();
+        ArrayList<Building> selBuildings = BuildingClientEvents.getSelectedBuildings();
 
         // create all the unit buttons for this frame
         int screenWidth = MC.getWindow().getGuiScaledWidth();
@@ -130,6 +134,7 @@ public class HudClientEvents {
         buttonsPerRow = Math.min(buttonsPerRow, 8);
         buttonsPerRow = Math.max(buttonsPerRow, 4);
 
+        buildingButtons.clear();
         unitButtons.clear();
         productionButtons.clear();
         renderedButtons.clear();
@@ -139,14 +144,16 @@ public class HudClientEvents {
 
         int blitX = hudStartingXPos;
         int blitY = MC.getWindow().getGuiScaledHeight();
+        int blitXStart = blitX;
 
-        hudSelectedBuilding = null;
-        ArrayList<Building> selBuildings = BuildingClientEvents.getSelectedBuildings();
-        if (selBuildings.size() > 0)
+        // assign hudSelectedBuilding like hudSelectedUnit in onRenderLiving
+        if (selBuildings.size() <= 0)
+            hudSelectedBuilding = null;
+        else if (hudSelectedBuilding == null || selBuildings.size() == 1 || !selBuildings.contains(hudSelectedBuilding))
             hudSelectedBuilding = selBuildings.get(0);
 
         if (hudSelectedBuilding != null) {
-            boolean buildingOwned = BuildingClientEvents.getPlayerToBuildingRelationship(hudSelectedBuilding) == Relationship.OWNED;
+            boolean hudSelBuildingOwned = BuildingClientEvents.getPlayerToBuildingRelationship(hudSelectedBuilding) == Relationship.OWNED;
 
             // -----------------
             // Building portrait
@@ -160,13 +167,100 @@ public class HudClientEvents {
 
             blitX += portraitRendererBuilding.frameWidth + 10;
 
-            // -------------------------
-            // Building production queue
-            // -------------------------
 
-            // bottom row for all other queued items
-            if (buildingOwned && hudSelectedBuilding instanceof ProductionBuilding selProdBuilding) {
-                int blitXStart = blitX;
+            // ---------------------------
+            // Multiple selected buildings
+            // ---------------------------
+            for (Building building : selBuildings) {
+                if (hudSelBuildingOwned && buildingButtons.size() < (buttonsPerRow * 2)) {
+                    // mob head icon
+
+                    buildingButtons.add(new Button(
+                            building.name,
+                            iconSize,
+                            building.icon,
+                            building,
+                            () -> hudSelectedBuilding.name.equals(building.name),
+                            () -> false,
+                            () -> true,
+                            () -> {
+                                // click to select this unit type as a group
+                                if (hudSelectedBuilding.name.equals(building.name)) {
+                                    BuildingClientEvents.setSelectedBuildings(new ArrayList<>());
+                                    BuildingClientEvents.addSelectedBuilding(building);
+                                } else { // select this one specific unit
+                                    hudSelectedBuilding = building;
+                                }
+                            },
+                            null,
+                            null
+                    ));
+                }
+            }
+
+            if (buildingButtons.size() >= 2) {
+                // background frame
+                hudZones.add(MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX - 5, blitY - 10,
+                        iconFrameSize * buttonsPerRow + 10,
+                        iconFrameSize * 2 + 20,
+                        frameBgColour));
+
+                int buttonsRendered = 0;
+                for (Button buildingButton : buildingButtons) {
+                    // replace last icon with a +X number of buildings icon and hover tooltip for what those buildings are
+                    if (buttonsRendered >= (buttonsPerRow * 2) - 1 &&
+                        selBuildings.size() > (buttonsPerRow * 2)) {
+                        int numExtraBuildings = selBuildings.size() - (buttonsPerRow * 2) + 1;
+                        RectZone plusBuildingsZone = MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, iconBgColour);
+                        GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraBuildings,
+                                blitX + iconFrameSize/2, blitY + 8, 0xFFFFFF);
+
+                        if (plusBuildingsZone.isMouseOver(mouseX, mouseY)) {
+                            List<FormattedCharSequence> tooltipLines = new ArrayList<>();
+                            int numBuildings = 0;
+
+                            for (int i = selBuildings.size() - numExtraBuildings; i < selBuildings.size(); i++) {
+
+                                Building building = selBuildings.get(i);
+                                Building nextBuilding = null;
+                                String buildingName = building.name;
+
+                                String nextBuildingName = null;
+                                numBuildings += 1;
+
+                                if (i < selBuildings.size() - 1) {
+                                    nextBuilding = selBuildings.get(i + 1);
+                                    nextBuildingName = nextBuilding.name;
+                                }
+                                if (!buildingName.equals(nextBuildingName)) {
+                                    tooltipLines.add(FormattedCharSequence.forward("x" + numBuildings + " " + buildingName, Style.EMPTY));
+                                    numBuildings = 0;
+                                }
+                            }
+                            MyRenderer.renderTooltip(evt.getPoseStack(), tooltipLines, mouseX, mouseY);
+                        }
+                        break;
+                    }
+                    else {
+                        buildingButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                        renderedButtons.add(buildingButton);
+                        buildingButton.renderHealthBar(evt.getPoseStack());
+                        blitX += iconFrameSize;
+                        if (buttonsRendered == buttonsPerRow - 1) {
+                            blitX = blitXStart;
+                            blitY += iconFrameSize + 6;
+                        }
+                    }
+                    buttonsRendered += 1;
+                }
+            }
+
+            // ---------------------------------------------------------------
+            // Building production queue (show only if 1 building is selected)
+            // ---------------------------------------------------------------
+
+            if (hudSelBuildingOwned && hudSelectedBuilding instanceof ProductionBuilding selProdBuilding) {
+                blitXStart = blitX;
                 blitY = screenHeight - iconFrameSize * 2 - 5;
 
                 for (int i = 0; i < selProdBuilding.productionQueue.size(); i++)
@@ -225,8 +319,7 @@ public class HudClientEvents {
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
 
-            // TODO: doesn't work for towers?
-            if (buildingOwned && !hudSelectedBuilding.isBuilt) {
+            if (hudSelBuildingOwned && !hudSelectedBuilding.isBuilt) {
                 Button cancelButton = new Button(
                         "Cancel",
                         iconSize,
@@ -242,7 +335,7 @@ public class HudClientEvents {
                 cancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
                 renderedButtons.add(cancelButton);
             }
-            else if (buildingOwned && hudSelectedBuilding instanceof ProductionBuilding selProdBuilding) {
+            else if (hudSelBuildingOwned && hudSelectedBuilding instanceof ProductionBuilding selProdBuilding) {
                 for (Button productionButton : selProdBuilding.productionButtons) {
                     productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                     productionButtons.add(productionButton);
@@ -282,12 +375,12 @@ public class HudClientEvents {
         }
 
         // ----------------------------------------------
-        // Unit icons using mob heads on 2 rows if needed
+        // Unit icons to select tyoes and show healthbars
         // ----------------------------------------------
-        int blitXStart = blitX;
+        blitXStart = blitX;
         blitY = screenHeight - iconFrameSize * 2 - 10;
 
-        for (LivingEntity unit : units) {
+        for (LivingEntity unit : selUnits) {
             if (getPlayerToEntityRelationship(unit) == Relationship.OWNED &&
                     unitButtons.size() < (buttonsPerRow * 2)) {
                 // mob head icon
@@ -327,8 +420,8 @@ public class HudClientEvents {
             for (Button unitButton : unitButtons) {
                 // replace last icon with a +X number of units icon and hover tooltip for what those units are
                 if (buttonsRendered >= (buttonsPerRow * 2) - 1 &&
-                        units.size() > (buttonsPerRow * 2)) {
-                    int numExtraUnits = units.size() - (buttonsPerRow * 2) + 1;
+                        selUnits.size() > (buttonsPerRow * 2)) {
+                    int numExtraUnits = selUnits.size() - (buttonsPerRow * 2) + 1;
                     RectZone plusUnitsZone = MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, iconBgColour);
                     GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraUnits,
                             blitX + iconFrameSize/2, blitY + 8, 0xFFFFFF);
@@ -337,16 +430,16 @@ public class HudClientEvents {
                         List<FormattedCharSequence> tooltipLines = new ArrayList<>();
                         int numUnits = 0;
 
-                        for (int i = units.size() - numExtraUnits; i < units.size(); i++) {
+                        for (int i = selUnits.size() - numExtraUnits; i < selUnits.size(); i++) {
 
-                            LivingEntity unit = units.get(i);
+                            LivingEntity unit = selUnits.get(i);
                             LivingEntity nextUnit = null;
                             String unitName = HudClientEvents.getSimpleEntityName(unit);
                             String nextUnitName = null;
                             numUnits += 1;
 
-                            if (i < units.size() - 1) {
-                                nextUnit = units.get(i + 1);
+                            if (i < selUnits.size() - 1) {
+                                nextUnit = selUnits.get(i + 1);
                                 nextUnitName = HudClientEvents.getSimpleEntityName(nextUnit);
                             }
                             if (!unitName.equals(nextUnitName)) {
@@ -375,7 +468,6 @@ public class HudClientEvents {
         // --------------------------------------------------------
         // Unit action buttons (attack, stop, move, abilities etc.)
         // --------------------------------------------------------
-        ArrayList<LivingEntity> selUnits = UnitClientEvents.getSelectedUnits();
         if (selUnits.size() > 0 &&
             getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED) {
 
@@ -405,7 +497,7 @@ public class HudClientEvents {
             }
             blitX = 0;
             blitY = screenHeight - (iconFrameSize * 2);
-            for (LivingEntity unit : units) {
+            for (LivingEntity unit : selUnits) {
                 if (getSimpleEntityName(unit).equals(getSimpleEntityName(hudSelectedEntity))) {
                     for (AbilityButton abilityButton : ((Unit) unit).getAbilities()) {
                         abilityButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
@@ -539,13 +631,6 @@ public class HudClientEvents {
     public static void onKeyRelease(ScreenEvent.KeyReleased.KeyReleased.Post evt) {
         for (Button button : renderedButtons)
             button.checkPressed(evt.getKeyCode());
-    }
-
-    // remove effects clientside when in orthoview to stop it rendering
-    @SubscribeEvent
-    public static void onRenderMobEffects(ScreenEvent.RenderInventoryMobEffects evt) {
-        if (OrthoviewClientEvents.isEnabled())
-            evt.setCanceled(true);
     }
 
     @SubscribeEvent

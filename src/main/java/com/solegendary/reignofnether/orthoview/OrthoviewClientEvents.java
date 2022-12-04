@@ -105,13 +105,17 @@ public class OrthoviewClientEvents {
     public static void toggleEnable() {
         enabled = !enabled;
 
+
+
         if (enabled) {
+            PlayerServerboundPacket.enableOrthoview();
             MinimapClientEvents.setMapCentre(MC.player.getX(), MC.player.getZ());
             prevPlayerY = MC.player.getY();
             PlayerServerboundPacket.teleportPlayer(MC.player.getX(), setPlayerY, MC.player.getZ());
             TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
         }
         else {
+            PlayerServerboundPacket.disableOrthoview();
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
             PlayerServerboundPacket.teleportPlayer(MC.player.getX(), prevPlayerY, MC.player.getZ());
         }

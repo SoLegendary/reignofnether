@@ -5,17 +5,18 @@ TODO before playtesting:
     - remove forced chunks on dead entities
 2. setup shockbyte server (~3gb?)
 
-Misc additions/fixes
 
-0. Select multiple buildings
-    - Hud elements for multiple buildings selected
+TODO bugfixes:
 
 Disallow overlapping building placements
 
-1. Arm animations and block cracking/particles
-2. Fix body rendering issues (to do with portrait head rendering)
-3. Minimap 90deg rotations
-4. Change GatherResourcesGoal search to centre on the last gathered block
+1. Change GatherResourcesGoal search to centre on the last gathered block
+    - maybe try searching for grouped blocks of resources to gather?
+
+2. Arm animations and block cracking/particles
+3. Fix body rendering issues (to do with portrait head rendering)
+4. Minimap 90deg rotations
+
 
 Villager faction:
     - Pillager and vindicator

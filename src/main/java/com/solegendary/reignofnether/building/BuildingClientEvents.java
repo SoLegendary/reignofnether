@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -184,11 +185,12 @@ public class BuildingClientEvents {
     }
 
     public static boolean isBuildingPlacementValid(BlockPos originPos) {
-        boolean inAir = isBuildingPlacementInAir(originPos);
-        boolean clipping = isBuildingPlacementClipping(originPos);
-        return !inAir && !clipping;
+        return !isBuildingPlacementInAir(originPos) &&
+               !isBuildingPlacementClipping(originPos) &&
+               !isOverlappingAnyOtherBuilding();
     }
 
+    // disallow any building block from clipping into any other existing blocks
     public static boolean isBuildingPlacementClipping(BlockPos originPos) {
         for (BuildingBlock block : blocksToDraw) {
             Material bm = block.getBlockState().getMaterial();
@@ -228,6 +230,26 @@ public class BuildingClientEvents {
         }
         if (blocksBelow <= 0) return false; // avoid division by 0
         return ((float) solidBlocksBelow / (float) blocksBelow) < 0.9f;
+    }
+
+    // disallow the building borders from overlapping any other's, even if they don't collide physical blocks
+    public static boolean isOverlappingAnyOtherBuilding() {
+
+        BlockPos origin = getOriginPos();
+        Vec3i originOffset = new Vec3i(origin.getX(), origin.getY(), origin.getZ());
+        BlockPos minPos = BuildingUtils.getMinCorner(blocksToDraw).offset(originOffset);
+        BlockPos maxPos = BuildingUtils.getMaxCorner(blocksToDraw).offset(originOffset);
+
+        for (Building building : buildings) {
+            for (BuildingBlock block : building.blocks) {
+                BlockPos bp = block.getBlockPos();
+                if (bp.getX() >= minPos.getX() && bp.getX() <= maxPos.getX() &&
+                    bp.getY() >= minPos.getY() && bp.getY() <= maxPos.getY() &&
+                    bp.getZ() >= minPos.getZ() && bp.getZ() <= maxPos.getZ())
+                    return true;
+            }
+        }
+        return false;
     }
 
     // gets the cursor position rotated according to the preselected building
@@ -410,9 +432,7 @@ public class BuildingClientEvents {
                     }
                 }
             }
-            else {
-                setBuildingToPlace(null);
-            }
+            setBuildingToPlace(null);
         }
     }
 
@@ -450,8 +470,6 @@ public class BuildingClientEvents {
         for (Building building : buildings)
             if (BuildingUtils.isPosPartOfAnyBuilding(MC.level, pos, false))
                 return; // building already exists clientside
-
-        System.out.println("Added building from server");
 
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName);
 

@@ -1,18 +1,15 @@
 package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.level.GameType;
-import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
-import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.ArrayList;
 
@@ -21,24 +18,36 @@ import java.util.ArrayList;
 
 public class PlayerServerEvents {
 
-    private static final ArrayList<ServerPlayer> serverPlayers = new ArrayList<>();
+    private static final ArrayList<ServerPlayer> players = new ArrayList<>();
+    private static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         System.out.println("Player logged in: " + evt.getEntity().getName().getString() + ", id: " + evt.getEntity().getId());
         ServerPlayer serverPlayer = (ServerPlayer) evt.getEntity();
-        serverPlayers.add((ServerPlayer) evt.getEntity());
+        players.add((ServerPlayer) evt.getEntity());
     }
 
     @SubscribeEvent
     public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent evt) {
         int id = evt.getEntity().getId();
         System.out.println("Player logged out: " + evt.getEntity().getName().getString() + ", id: " + id);
-        serverPlayers.removeIf(player -> player.getId() == id);
+        players.removeIf(player -> player.getId() == id);
+    }
+
+    public static void enableOrthoview(int id) {
+        ServerPlayer player = getPlayerById(id);
+        player.removeAllEffects();
+
+        orthoviewPlayers.removeIf(p -> p.getId() == id);
+        orthoviewPlayers.add(player);
+    }
+    public static void disableOrthoview(int id) {
+        orthoviewPlayers.removeIf(p -> p.getId() == id);
     }
 
     private static ServerPlayer getPlayerById(int playerId) {
-        return serverPlayers.stream()
+        return players.stream()
             .filter(player -> playerId == player.getId())
             .findAny()
             .orElse(null);
