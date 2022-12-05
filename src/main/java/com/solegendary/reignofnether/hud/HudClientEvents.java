@@ -472,7 +472,7 @@ public class HudClientEvents {
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
 
-            ArrayList<Button> genericActionButtons = hudSelectedEntity instanceof VillagerUnit ?
+            ArrayList<Button> genericActionButtons = hudSelectedEntity instanceof WorkerUnit ?
                     genericActionButtonsWorker : genericActionButtonsAttacker;
 
             for (Button actionButton : genericActionButtons) {
