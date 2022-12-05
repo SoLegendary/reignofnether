@@ -28,7 +28,7 @@ public class Laboratory extends ProductionBuilding {
         this.name = buildingName;
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
-        this.portraitBlock = Blocks.SMITHING_TABLE;
+        this.portraitBlock = Blocks.BREWING_STAND;
         this.spawnRadiusOffset = 1;
         this.icon = new ResourceLocation("minecraft", "textures/block/brewing_stand.png");
 
