@@ -28,7 +28,11 @@ public class ItemRegistrar {
 
     public static final RegistryObject<ForgeSpawnEggItem> VILLAGER_UNIT_SPAWN_EGG =
             ITEMS.register("villager_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.VILLAGER_UNIT,
-                    0x0c990a, 0x000000, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+                    0x523632, 0x946F66, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
+    public static final RegistryObject<ForgeSpawnEggItem> ZOMBIE_VILLAGER_UNIT_SPAWN_EGG =
+            ITEMS.register("zombie_villager_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.ZOMBIE_VILLAGER_UNIT,
+                    0x523632, 0x647E51, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
     public static void init() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());

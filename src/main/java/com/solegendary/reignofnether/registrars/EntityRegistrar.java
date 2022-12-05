@@ -1,10 +1,11 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.unit.units.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.SkeletonUnit;
-import com.solegendary.reignofnether.unit.villagers.VillagerUnit;
-import com.solegendary.reignofnether.unit.units.ZombieUnit;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -19,6 +20,12 @@ public class EntityRegistrar {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, ReignOfNether.MOD_ID);
 
     // Entity Types
+
+    public static final RegistryObject<EntityType<ZombieVillagerUnit>> ZOMBIE_VILLAGER_UNIT = ENTITIES.register("zombie_villager_unit",
+            () -> EntityType.Builder.of(ZombieVillagerUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.ZOMBIE_VILLAGER.getWidth(), EntityType.ZOMBIE_VILLAGER.getHeight())
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "zombie_villager_unit").toString()));
+
     public static final RegistryObject<EntityType<ZombieUnit>> ZOMBIE_UNIT = ENTITIES.register("zombie_unit",
             // can add other attributes here like sized() for hitbox, no summon, fire immunity, etc.
             () -> EntityType.Builder.of(ZombieUnit::new, MobCategory.CREATURE)

@@ -1,16 +1,22 @@
-package com.solegendary.reignofnether.unit.villagers;
+package com.solegendary.reignofnether.unit.units.monsters;
 
-import com.solegendary.reignofnether.building.buildings.WheatFarm;
-import com.solegendary.reignofnether.building.buildings.Graveyard;
-import com.solegendary.reignofnether.building.buildings.VillagerHouse;
+import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
+import com.solegendary.reignofnether.building.buildings.monsters.HauntedHouse;
+import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
+import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
+import com.solegendary.reignofnether.building.buildings.villagers.Barracks;
+import com.solegendary.reignofnether.building.buildings.villagers.Blacksmith;
+import com.solegendary.reignofnether.building.buildings.villagers.VillagerHouse;
+import com.solegendary.reignofnether.building.buildings.villagers.WheatFarm;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.ResourceCosts;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
-import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
+import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -22,7 +28,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.level.Level;
@@ -31,9 +38,9 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
+public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
     // region
-    public Faction getFaction() {return Faction.VILLAGERS;}
+    public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilities() {return abilities;};
 
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
@@ -59,7 +66,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
-            SynchedEntityData.defineId(VillagerUnit.class, EntityDataSerializers.STRING);
+            SynchedEntityData.defineId(ZombieVillagerUnit.class, EntityDataSerializers.STRING);
 
     @Override
     protected void defineSynchedData() {
@@ -86,49 +93,43 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
 
     private final List<AbilityButton> abilities = new ArrayList<>();
 
-    public VillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
+    public ZombieVillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
         if (level.isClientSide()) {
-            this.abilities.add(VillagerHouse.getBuildButton());
-            this.abilities.add(WheatFarm.getBuildButton());
+            this.abilities.add(HauntedHouse.getBuildButton());
+            this.abilities.add(PumpkinFarm.getBuildButton());
             this.abilities.add(Graveyard.getBuildButton());
+            this.abilities.add(Laboratory.getBuildButton());
         }
     }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MOVEMENT_SPEED, VillagerUnit.movementSpeed)
-                .add(Attributes.MAX_HEALTH, VillagerUnit.maxHealth)
-                .add(Attributes.ATTACK_DAMAGE, VillagerUnit.movementSpeed)
-                .add(Attributes.ARMOR, VillagerUnit.armorValue);
+                .add(Attributes.MOVEMENT_SPEED, ZombieVillagerUnit.movementSpeed)
+                .add(Attributes.MAX_HEALTH, ZombieVillagerUnit.maxHealth)
+                .add(Attributes.ATTACK_DAMAGE, ZombieVillagerUnit.movementSpeed)
+                .add(Attributes.ARMOR, ZombieVillagerUnit.armorValue);
     }
 
-    // TODO: use player arm poses and animations
-    public enum ArmPose {
-        CROSSED,
-        BUILDING,
-        GATHERING
-    }
-
-    public ArmPose getVillagerUnitArmPose() {
+    public VillagerUnitModel.ArmPose getZombieVillagerUnitArmPose() {
         if (this.buildRepairGoal != null && this.buildRepairGoal.isBuilding())
-            return ArmPose.BUILDING;
+            return VillagerUnitModel.ArmPose.BUILDING;
         else if (this.gatherResourcesGoal != null && this.gatherResourcesGoal.isGathering())
-            return ArmPose.GATHERING;
-        return ArmPose.CROSSED;
+            return VillagerUnitModel.ArmPose.GATHERING;
+        return VillagerUnitModel.ArmPose.CROSSED;
     }
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.VILLAGER_AMBIENT;
+        return SoundEvents.ZOMBIE_VILLAGER_AMBIENT;
     }
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.VILLAGER_DEATH;
+        return SoundEvents.ZOMBIE_VILLAGER_DEATH;
     }
     @Override
     protected SoundEvent getHurtSound(DamageSource p_34103_) {
-        return SoundEvents.VILLAGER_HURT;
+        return SoundEvents.ZOMBIE_VILLAGER_HURT;
     }
 
 

@@ -12,6 +12,7 @@ TODO bugs/features:
 
 1. When multiple buildings are selected production items should be spread evenly across them
 2. Spawned units should be in set locations inside buildings (remove the doors) instead of outside
+3. Reduce size of initial foundations for some buildings that are low to the ground
 
 TODO buildings/units
 
@@ -32,7 +33,6 @@ TODO bugs/features (backlog)
 1. Arm animations and block cracking/particles
 2. Fix body rendering issues (to do with portrait head rendering)
 3. Minimap 90deg rotations
-
 
 TODO buildings/units (backlog)
 

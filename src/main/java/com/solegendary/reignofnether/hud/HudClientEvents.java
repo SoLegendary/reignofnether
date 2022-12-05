@@ -12,7 +12,7 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.unit.villagers.VillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -31,8 +31,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getPlayerToEntityRelationship;
 

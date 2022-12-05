@@ -9,7 +9,7 @@ import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.unit.villagers.VillagerUnitModel;
+import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;

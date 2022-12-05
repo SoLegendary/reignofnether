@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.unit.units;
+package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.ResourceCosts;

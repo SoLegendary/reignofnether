@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.unit.units.ZombieUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 
 public class ZombieAttackUnitGoal extends MeleeAttackUnitGoal {
     private final ZombieUnit zombieUnit;

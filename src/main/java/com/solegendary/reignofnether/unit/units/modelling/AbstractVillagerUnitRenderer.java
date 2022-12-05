@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.unit.villagers;
+package com.solegendary.reignofnether.unit.units.modelling;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;

@@ -8,6 +8,13 @@ public class ResourceCosts {
     public static final int REPLANT_WOOD_COST = 5;
     public static final int MAX_POPULATION = 100; // max possible pop you can have regardless of buildings
 
+    public static class ZombieVillager {
+        public static final int FOOD = 50;
+        public static final int WOOD = 0;
+        public static final int ORE = 0;
+        public static final int TICKS = 100;
+        public static final int POPULATION = 1;
+    }
     public static class Creeper {
         public static final int FOOD = 50;
         public static final int WOOD = 0;
@@ -36,17 +43,23 @@ public class ResourceCosts {
         public static final int TICKS = 100;
         public static final int POPULATION = 1;
     }
+    public static class VillagerTower {
+        public static final int FOOD = 0;
+        public static final int WOOD = 100;
+        public static final int ORE = 0;
+        public static final int SUPPLY = 0;
+    }
     public static class VillagerHouse {
         public static final int FOOD = 0;
         public static final int WOOD = 200;
         public static final int ORE = 0;
         public static final int SUPPLY = 10;
     }
-    public static class VillagerTower {
+    public static class HauntedHouse {
         public static final int FOOD = 0;
-        public static final int WOOD = 100;
+        public static final int WOOD = 200;
         public static final int ORE = 0;
-        public static final int SUPPLY = 0;
+        public static final int SUPPLY = 10;
     }
     public static class WheatFarm {
         public static final int FOOD = 0;
@@ -54,10 +67,34 @@ public class ResourceCosts {
         public static final int ORE = 0;
         public static final int SUPPLY = 0;
     }
+    public static class PumpkinFarm {
+        public static final int FOOD = 0;
+        public static final int WOOD = 100;
+        public static final int ORE = 0;
+        public static final int SUPPLY = 0;
+    }
+    public static class Barracks {
+        public static final int FOOD = 0;
+        public static final int WOOD = 150;
+        public static final int ORE = 0;
+        public static final int SUPPLY = 0;
+    }
     public static class Graveyard {
         public static final int FOOD = 0;
         public static final int WOOD = 150;
         public static final int ORE = 0;
+        public static final int SUPPLY = 0;
+    }
+    public static class Blacksmith {
+        public static final int FOOD = 0;
+        public static final int WOOD = 250;
+        public static final int ORE = 100;
+        public static final int SUPPLY = 0;
+    }
+    public static class Laboratory {
+        public static final int FOOD = 0;
+        public static final int WOOD = 250;
+        public static final int ORE = 100;
         public static final int SUPPLY = 0;
     }
 }

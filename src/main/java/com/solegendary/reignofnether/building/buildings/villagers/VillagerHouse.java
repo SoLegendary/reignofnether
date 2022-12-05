@@ -1,7 +1,7 @@
-package com.solegendary.reignofnether.building.buildings;
+package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.productionitems.VillagerUnitProd;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.ResourceCosts;

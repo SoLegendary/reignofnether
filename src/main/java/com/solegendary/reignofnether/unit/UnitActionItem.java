@@ -9,7 +9,7 @@ import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.unit.units.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;

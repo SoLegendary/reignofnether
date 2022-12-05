@@ -1,6 +1,7 @@
-package com.solegendary.reignofnether.unit.villagers;
+package com.solegendary.reignofnether.unit.units.modelling;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import net.minecraft.client.model.*;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -9,7 +10,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.entity.VindicatorRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.monster.AbstractIllager;
@@ -29,6 +29,13 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
     private final ModelPart leftArm;
 
     public boolean armsVisible = true;
+
+    // TODO: use player arm poses and animations
+    public enum ArmPose {
+        CROSSED,
+        BUILDING,
+        GATHERING
+    }
 
     public VillagerUnitModel(ModelPart p_170688_) {
         this.root = p_170688_;
@@ -66,7 +73,7 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
         this.head.yRot = p_102932_ * ((float)Math.PI / 180F);
         this.head.xRot = p_102933_ * ((float)Math.PI / 180F);
 
-        VillagerUnit.ArmPose armPose = VillagerUnit.ArmPose.CROSSED;//((VillagerUnit) entity).getVillagerUnitArmPose();
+        ArmPose armPose = ArmPose.CROSSED;//((VillagerUnit) entity).getVillagerUnitArmPose();
 
         // default arm positions when not visible (ie. not crossed)
         boolean flag = entity.getFallFlyingTicks() > 4;
@@ -90,7 +97,7 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
         this.rightArm.yRot = 0.0F;
         this.leftArm.yRot = 0.0F;
 
-        boolean armsCrossed = armPose == VillagerUnit.ArmPose.CROSSED;
+        boolean armsCrossed = armPose == ArmPose.CROSSED;
 
         //if (!armsCrossed)
         //    setupAttackAnimation();

@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
-import com.solegendary.reignofnether.building.buildings.WheatFarm;
+import com.solegendary.reignofnether.building.buildings.villagers.WheatFarm;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;

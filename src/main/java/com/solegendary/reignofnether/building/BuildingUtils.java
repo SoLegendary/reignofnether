@@ -2,10 +2,11 @@ package com.solegendary.reignofnether.building;
 
 // class for static building functions
 
-import com.solegendary.reignofnether.building.buildings.WheatFarm;
-import com.solegendary.reignofnether.building.buildings.Graveyard;
-import com.solegendary.reignofnether.building.buildings.VillagerHouse;
-import com.solegendary.reignofnether.building.buildings.VillagerTower;
+import com.solegendary.reignofnether.building.buildings.monsters.HauntedHouse;
+import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
+import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
+import com.solegendary.reignofnether.building.buildings.villagers.*;
+import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
@@ -26,6 +27,11 @@ public class BuildingUtils {
             case VillagerTower.buildingName -> building = new VillagerTower(level, pos, rotation, ownerName);
             case Graveyard.buildingName -> building = new Graveyard(level, pos, rotation, ownerName);
             case WheatFarm.buildingName -> building = new WheatFarm(level, pos, rotation, ownerName);
+            case Laboratory.buildingName -> building = new Laboratory(level, pos, rotation, ownerName);
+            case Barracks.buildingName -> building = new Barracks(level, pos, rotation, ownerName);
+            case PumpkinFarm.buildingName -> building = new PumpkinFarm(level, pos, rotation, ownerName);
+            case HauntedHouse.buildingName -> building = new HauntedHouse(level, pos, rotation, ownerName);
+            case Blacksmith.buildingName -> building = new Blacksmith(level, pos, rotation, ownerName);
         }
         if (building != null)
             building.setLevel(level);

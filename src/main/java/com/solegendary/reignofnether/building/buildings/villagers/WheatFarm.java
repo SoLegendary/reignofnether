@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.building.buildings;
+package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -38,7 +38,6 @@ public class WheatFarm extends Building {
         this.popSupply = ResourceCosts.WheatFarm.SUPPLY;
 
         this.explodeChance = 0;
-        this.minBlocksPercent = 0.5f;
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
@@ -47,7 +46,7 @@ public class WheatFarm extends Building {
 
     public static AbilityButton getBuildButton() {
         return new AbilityButton(
-                com.solegendary.reignofnether.building.buildings.WheatFarm.buildingName,
+                WheatFarm.buildingName,
                 Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/hay_block_side.png"),
                 null,
@@ -57,7 +56,7 @@ public class WheatFarm extends Building {
                 () -> BuildingClientEvents.setBuildingToPlace(WheatFarm.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(com.solegendary.reignofnether.building.buildings.WheatFarm.buildingName, Style.EMPTY),
+                        FormattedCharSequence.forward(WheatFarm.buildingName, Style.EMPTY),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.WheatFarm.WOOD + "  +  5  per  crop  planted", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A wheat field that be can tilled to collect food.", Style.EMPTY),

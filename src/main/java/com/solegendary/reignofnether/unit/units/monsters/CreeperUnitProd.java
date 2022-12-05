@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.building.productionitems;
+package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
@@ -16,52 +16,53 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class ZombieUnitProd extends ProductionItem {
+public class CreeperUnitProd extends ProductionItem {
 
-    public final static String itemName = "Zombie";
+    public final static String itemName = "Creeper";
 
-    public ZombieUnitProd(ProductionBuilding building) {
-        super(building, ResourceCosts.Zombie.TICKS);
+    public CreeperUnitProd(ProductionBuilding building) {
+        super(building, ResourceCosts.Creeper.TICKS);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get(), building.ownerName);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.CREEPER_UNIT.get(), building.ownerName);
         };
-        this.foodCost = ResourceCosts.Zombie.FOOD;
-        this.woodCost = ResourceCosts.Zombie.WOOD;
-        this.oreCost = ResourceCosts.Zombie.ORE;
-        this.popCost = ResourceCosts.Zombie.POPULATION;
+        this.foodCost = ResourceCosts.Creeper.FOOD;
+        this.woodCost = ResourceCosts.Creeper.WOOD;
+        this.oreCost = ResourceCosts.Creeper.ORE;
+        this.popCost = ResourceCosts.Creeper.POPULATION;
     }
 
     public String getItemName() {
-        return ZombieUnitProd.itemName;
+        return CreeperUnitProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding) {
         return new Button(
-            "Zombie",
+            "Creeper",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
-            Keybindings.keyQ,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
+            Keybindings.keyE,
             () -> false,
             () -> false,
             () -> true,
             () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
             null,
             List.of(
-                FormattedCharSequence.forward("Zombie", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Zombie.FOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Zombie.POPULATION + "     \uE004 " + ResourceCosts.Zombie.TICKS/20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("Creeper", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Creeper.FOOD + "     \uE002  " + ResourceCosts.Creeper.ORE, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Creeper.POPULATION + "     \uE004 " + ResourceCosts.Creeper.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An undead monster with a basic melee attack.", Style.EMPTY)
+                FormattedCharSequence.forward("An explosive monster that can blow up units", Style.EMPTY),
+                FormattedCharSequence.forward("and buildings alike. Has no regular attack.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            "Zombie",
+            "Creeper",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

@@ -1,9 +1,9 @@
-package com.solegendary.reignofnether.building.buildings;
+package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.productionitems.CreeperUnitProd;
-import com.solegendary.reignofnether.building.productionitems.SkeletonUnitProd;
-import com.solegendary.reignofnether.building.productionitems.ZombieUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnitProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.ResourceCosts;
@@ -41,7 +41,7 @@ public class Graveyard extends ProductionBuilding {
         this.oreCost = ResourceCosts.Graveyard.ORE;
         this.popSupply = ResourceCosts.Graveyard.SUPPLY;
 
-        this.explodeChance = 0;
+        this.explodeChance = 0.2f;
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
@@ -70,7 +70,7 @@ public class Graveyard extends ProductionBuilding {
                         FormattedCharSequence.forward(Graveyard.buildingName, Style.EMPTY),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.Graveyard.WOOD, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A spooky field that can create monster units", Style.EMPTY)
+                        FormattedCharSequence.forward("An eerie field that can raise Zombies and Skeletons", Style.EMPTY)
                 ),
                 0,0,0
         );

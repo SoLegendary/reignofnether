@@ -1,11 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.unit.units.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.ZombieUnit;
-import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.world.entity.LivingEntity;
-
-import javax.swing.text.html.parser.Entity;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 
 public class CreeperAttackUnitGoal extends MeleeAttackUnitGoal {
     private final CreeperUnit creeperUnit;

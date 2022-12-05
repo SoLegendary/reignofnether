@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.building.buildings;
+package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;

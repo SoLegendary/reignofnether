@@ -81,7 +81,7 @@ class PortraitRendererBuilding {
         PoseStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushPose();
         poseStack.translate(x+xBlock, y+yBlock, 100.0F);
-        poseStack.scale(blockScale, blockScale, blockScale);
+        poseStack.scale(blockScale, -blockScale, blockScale);
         RenderSystem.applyModelViewMatrix();
 
         float angle = (System.currentTimeMillis() / 100) % 360;
