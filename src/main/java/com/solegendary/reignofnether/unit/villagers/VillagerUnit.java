@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.unit.villagers;
 
-import com.solegendary.reignofnether.building.buildings.Farm;
+import com.solegendary.reignofnether.building.buildings.WheatFarm;
 import com.solegendary.reignofnether.building.buildings.Graveyard;
 import com.solegendary.reignofnether.building.buildings.VillagerHouse;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -11,7 +11,7 @@ import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import net.minecraft.core.BlockPos;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -33,6 +33,7 @@ import java.util.List;
 
 public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
     // region
+    public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilities() {return abilities;};
 
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
@@ -89,7 +90,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
         super(entityType, level);
         if (level.isClientSide()) {
             this.abilities.add(VillagerHouse.getBuildButton());
-            this.abilities.add(Farm.getBuildButton());
+            this.abilities.add(WheatFarm.getBuildButton());
             this.abilities.add(Graveyard.getBuildButton());
         }
     }

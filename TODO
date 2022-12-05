@@ -8,10 +8,10 @@ TODO before playtesting:
 2. setup shockbyte server (~3gb?)
 
 
-TODO bugfixes:
+TODO bugs/features:
 
-0. When multiple buildings are selected production items should be spread evenly across them
-
+1. When multiple buildings are selected production items should be spread evenly across them
+2. Spawned units should be in set locations inside buildings (remove the doors) instead of outside
 
 TODO buildings/units
 
@@ -24,6 +24,7 @@ Undead faction:
     - Zombie villager unit (identical to villagers except with more health and burn in sunlight)
     - haunted house (functionality) (population + builds zombie villagers)
     - laboratory (build + functionality)  (upgrade building + builds creepers)
+        - maybe just model on the blacksmith but make it potion-based?
 
 
 TODO bugs/features (backlog)

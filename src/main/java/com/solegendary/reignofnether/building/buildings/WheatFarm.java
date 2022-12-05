@@ -19,12 +19,12 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Farm extends Building {
+public class WheatFarm extends Building {
 
-    public final static String buildingName = "Farm";
-    public final static String structureName = "farm";
+    public final static String buildingName = "Wheat Farm";
+    public final static String structureName = "wheat_farm";
 
-    public Farm(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
+    public WheatFarm(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName);
         this.name = buildingName;
         this.ownerName = ownerName;
@@ -32,10 +32,10 @@ public class Farm extends Building {
         this.portraitBlock = Blocks.HAY_BLOCK;
         this.icon = new ResourceLocation("minecraft", "textures/block/hay_block_side.png");
 
-        this.foodCost = ResourceCosts.Farm.FOOD;
-        this.woodCost = ResourceCosts.Farm.WOOD;
-        this.oreCost = ResourceCosts.Farm.ORE;
-        this.popSupply = ResourceCosts.Farm.SUPPLY;
+        this.foodCost = ResourceCosts.WheatFarm.FOOD;
+        this.woodCost = ResourceCosts.WheatFarm.WOOD;
+        this.oreCost = ResourceCosts.WheatFarm.ORE;
+        this.popSupply = ResourceCosts.WheatFarm.SUPPLY;
 
         this.explodeChance = 0;
         this.minBlocksPercent = 0.5f;
@@ -47,18 +47,18 @@ public class Farm extends Building {
 
     public static AbilityButton getBuildButton() {
         return new AbilityButton(
-                Farm.buildingName,
+                com.solegendary.reignofnether.building.buildings.WheatFarm.buildingName,
                 Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/hay_block_side.png"),
                 null,
-                () -> BuildingClientEvents.getBuildingToPlace() == Farm.class,
+                () -> BuildingClientEvents.getBuildingToPlace() == WheatFarm.class,
                 () -> false,
                 () -> true,
-                () -> BuildingClientEvents.setBuildingToPlace(Farm.class),
+                () -> BuildingClientEvents.setBuildingToPlace(WheatFarm.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(Farm.buildingName, Style.EMPTY),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.Farm.WOOD + "  +  5  per  crop  planted", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward(com.solegendary.reignofnether.building.buildings.WheatFarm.buildingName, Style.EMPTY),
+                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.WheatFarm.WOOD + "  +  5  per  crop  planted", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A wheat field that be can tilled to collect food.", Style.EMPTY),
                         FormattedCharSequence.forward("Workers will automatically use wood to replant seeds while working.", Style.EMPTY)

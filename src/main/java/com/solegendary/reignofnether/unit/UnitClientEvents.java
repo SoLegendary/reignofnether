@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
-import com.solegendary.reignofnether.building.buildings.Farm;
+import com.solegendary.reignofnether.building.buildings.WheatFarm;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -281,7 +281,7 @@ public class UnitClientEvents {
                 else if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
                         (BuildingClientEvents.getPreselectedBuilding() != null)) {
 
-                    if (BuildingClientEvents.getPreselectedBuilding() instanceof Farm)
+                    if (BuildingClientEvents.getPreselectedBuilding() instanceof WheatFarm)
                         sendUnitCommand(UnitAction.FARM);
                     else
                         sendUnitCommand(UnitAction.BUILD_REPAIR);

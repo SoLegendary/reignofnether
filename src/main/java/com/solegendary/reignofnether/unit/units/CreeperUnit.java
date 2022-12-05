@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.villagers.VillagerUnit;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -33,6 +34,7 @@ import java.util.List;
 
 public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     // region
+    public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilities() {return abilities;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}

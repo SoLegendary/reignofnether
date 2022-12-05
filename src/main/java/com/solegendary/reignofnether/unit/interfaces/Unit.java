@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -26,6 +27,8 @@ import java.util.List;
 // (including getters/setters themselves)
 
 public interface Unit {
+
+    public Faction getFaction();
 
     public List<AbilityButton> getAbilities();
 

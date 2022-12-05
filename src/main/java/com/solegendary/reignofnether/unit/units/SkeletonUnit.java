@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.goals.*;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -27,6 +28,7 @@ import java.util.List;
 
 public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     // region
+    public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilities() {return abilities;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
