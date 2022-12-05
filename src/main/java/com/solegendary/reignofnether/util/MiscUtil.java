@@ -49,8 +49,9 @@ public class MiscUtil {
         return null;
     }
 
-    public static BlockPos findAdjacentBlock(Level level, BlockPos originPos, Predicate<BlockPos> condition) {
+    public static ArrayList<BlockPos> findAdjacentBlocks(Level level, BlockPos originPos, Predicate<BlockPos> condition) {
         ArrayList<BlockPos> adjBps = new ArrayList<>();
+        ArrayList<BlockPos> retBps = new ArrayList<>();
 
         adjBps.add(originPos.above());
         adjBps.add(originPos.below());
@@ -62,8 +63,8 @@ public class MiscUtil {
         Collections.shuffle(adjBps);
         for (BlockPos bp : adjBps)
             if (condition.test(bp))
-                return bp;
-        return null;
+                retBps.add(bp);
+        return retBps;
     }
 
     public static boolean listContainsObjectValue(List<Object> objs, String obj){

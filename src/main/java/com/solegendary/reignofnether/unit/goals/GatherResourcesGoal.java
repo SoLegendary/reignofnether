@@ -24,11 +24,11 @@ import java.util.function.Predicate;
 
 public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
-    private static final int REACH_RANGE = 4;
+    private static final int REACH_RANGE = 5;
     private static final int DEFAULT_MAX_TICKS = 100; // actual ticks may be lower, depending on the ResourceBlock targeted
     private int ticksLeft = DEFAULT_MAX_TICKS;
 
-    private final ArrayList<BlockPos> oldSuccessfulGatherTargets = new ArrayList<>();
+    private final ArrayList<BlockPos> todoGatherTargets = new ArrayList<>();
     private BlockPos gatherTarget = null;
     private ResourceName targetResourceName = ResourceName.NONE; // if !None, will passively target blocks around it
     private ResourceBlock targetResourceBlock = null;
@@ -74,8 +74,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         return true;
     };
 
+    // set move goal as range -1, so we aren't slightly out of range
     public GatherResourcesGoal(PathfinderMob mob, double speedModifier) {
-        super(mob, true, speedModifier, REACH_RANGE);
+        super(mob, true, speedModifier, REACH_RANGE - 1);
     }
 
     // move towards the targeted block and start gathering it
@@ -83,19 +84,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
         if (gatherTarget == null && targetResourceName != ResourceName.NONE) {
 
-            // find new blocks adjacent to the last dug blocks first before searching for a new one
-            ArrayList<BlockPos> oldTargetsCopy = new ArrayList<>(oldSuccessfulGatherTargets);
-            for (BlockPos oldBp : oldTargetsCopy) {
-                gatherTarget = MiscUtil.findAdjacentBlock(
-                        mob.level,
-                        oldBp,
-                        BLOCK_CONDITION
-                );
-                if (gatherTarget == null)
-                    oldSuccessfulGatherTargets.remove(oldBp);
-                else
-                    break;
-            }
+            // prioritise gathering adjacent targets first
+            todoGatherTargets.removeIf(bp -> !BLOCK_CONDITION.test(bp) || !isBlockInRange(bp));
+            if (todoGatherTargets.size() > 0)
+                gatherTarget = todoGatherTargets.get(0);
 
             if (gatherTarget == null)
                 gatherTarget = MiscUtil.findNearestBlock(
@@ -104,7 +96,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                                 mob.getEyePosition().x,
                                 mob.getEyePosition().y,
                                 mob.getEyePosition().z
-                        ), REACH_RANGE + 1,
+                        ), REACH_RANGE,
                         BLOCK_CONDITION);
 
             if (gatherTarget != null)
@@ -145,8 +137,15 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                             ticksLeft = DEFAULT_MAX_TICKS;
                             ResourceName resourceBlockType = ResourceBlocks.getResourceBlockName(this.gatherTarget, mob.level);
                             if (mob.level.destroyBlock(gatherTarget, false)) {
-                                if (oldSuccessfulGatherTargets.size() < 10)
-                                    oldSuccessfulGatherTargets.add(gatherTarget);
+
+                                // prioritise gathering adjacent targets first
+                                todoGatherTargets.remove(gatherTarget);
+                                ArrayList<BlockPos> adjTarget = MiscUtil.findAdjacentBlocks(
+                                    mob.level,
+                                    gatherTarget,
+                                    BLOCK_CONDITION
+                                );
+                                todoGatherTargets.addAll(adjTarget);
 
                                 ResourcesServerEvents.addSubtractResources(new Resources(
                                         ((Unit) mob).getOwnerName(),
@@ -162,11 +161,15 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         }
     }
 
+    private boolean isBlockInRange(BlockPos target) {
+        return Math.sqrt(target.distSqr(new Vec3i(mob.getX(), mob.getEyeY(), mob.getZ()))) <= REACH_RANGE;
+    }
+
     // only count as gathering if in range of the target
     public boolean isGathering() {
         if (this.gatherTarget != null && this.targetResourceBlock != null &&
             ResourceBlocks.getResourceBlockName(this.gatherTarget, mob.level) != ResourceName.NONE)
-            return Math.sqrt(gatherTarget.distSqr(new Vec3i(mob.getX(), mob.getEyeY(), mob.getZ()))) <= REACH_RANGE + 1;
+            return isBlockInRange(gatherTarget);
         return false;
     }
 

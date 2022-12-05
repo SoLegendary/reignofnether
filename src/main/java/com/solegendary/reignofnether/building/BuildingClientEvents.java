@@ -374,9 +374,10 @@ public class BuildingClientEvents {
             // equivalent of UnitClientEvents.onMouseClick()
             else if (buildingToPlace == null) {
 
-                // select all nearby buildings of the same type when double-clicked
+                // select all nearby buildings of the same type when the same building is double-clicked
                 if (selectedBuildings.size() == 1 && MC.level != null && !Keybindings.shiftMod.isDown() &&
-                        (System.currentTimeMillis() - lastLeftClickTime) < DOUBLE_CLICK_TIME_MS) {
+                    (System.currentTimeMillis() - lastLeftClickTime) < DOUBLE_CLICK_TIME_MS &&
+                    preSelBuilding != null && selectedBuildings.contains(preSelBuilding)) {
 
                     lastLeftClickTime = 0;
                     Building selBuilding = selectedBuildings.get(0);

@@ -8,11 +8,9 @@ TODO before playtesting:
 
 TODO bugfixes:
 
-1. Double click to select same type of unit/building should only be when you double click the SAME unit or building
-
-2. Arm animations and block cracking/particles
-3. Fix body rendering issues (to do with portrait head rendering)
-4. Minimap 90deg rotations
+1. Arm animations and block cracking/particles
+2. Fix body rendering issues (to do with portrait head rendering)
+3. Minimap 90deg rotations
 
 
 Villager faction:

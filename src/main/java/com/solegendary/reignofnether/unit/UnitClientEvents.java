@@ -209,9 +209,10 @@ public class UnitClientEvents {
                     sendUnitCommand(UnitAction.ATTACK_MOVE);
             }
 
-            // select all nearby units of the same type when double-clicked
+            // select all nearby units of the same type when the same unit is double-clicked
             if (selectedUnits.size() == 1 && MC.level != null && !Keybindings.shiftMod.isDown() &&
-               (System.currentTimeMillis() - lastLeftClickTime) < DOUBLE_CLICK_TIME_MS) {
+               (System.currentTimeMillis() - lastLeftClickTime) < DOUBLE_CLICK_TIME_MS &&
+                preselectedUnits.size() > 0 && selectedUnits.contains(preselectedUnits.get(0))) {
 
                 lastLeftClickTime = 0;
                 Entity selectedUnit = selectedUnits.get(0);
