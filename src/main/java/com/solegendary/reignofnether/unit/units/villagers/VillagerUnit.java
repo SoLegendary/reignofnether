@@ -29,6 +29,8 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -80,6 +82,10 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
     // endregion
+
+    public BlockState getReplantBlockState() {
+        return Blocks.WHEAT.defaultBlockState();
+    }
 
     final static public float maxHealth = 10.0f;
     final static public float armorValue = 0.0f;

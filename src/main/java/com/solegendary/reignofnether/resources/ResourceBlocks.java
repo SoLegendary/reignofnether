@@ -37,8 +37,6 @@ public class ResourceBlocks {
     }
 
     public static final int REPLANT_TICKS_MAX = 10;
-    // TODO: define on worker unit side, possibly with mixed randomness?
-    public static final BlockState REPLANT_BLOCKSTATE = Blocks.WHEAT.defaultBlockState();
 
     public static final List<ResourceBlock> FOOD_BLOCKS = List.of(
             new ResourceBlock("Farmland",

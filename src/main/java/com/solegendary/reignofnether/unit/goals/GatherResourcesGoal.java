@@ -125,7 +125,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
                             if (canAffordReplant()) {
                                 ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -ResourceCosts.REPLANT_WOOD_COST, 0));
-                                mob.level.setBlockAndUpdate(gatherTarget.above(), ResourceBlocks.REPLANT_BLOCKSTATE);
+                                mob.level.setBlockAndUpdate(gatherTarget.above(), ((WorkerUnit) mob).getReplantBlockState());
                                 removeGatherTarget();
                             }
                         }

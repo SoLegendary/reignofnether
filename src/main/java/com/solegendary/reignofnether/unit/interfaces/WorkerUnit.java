@@ -8,10 +8,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.level.block.state.BlockState;
 
 public interface WorkerUnit {
     public BuildRepairGoal getBuildRepairGoal();
     public GatherResourcesGoal getGatherResourceGoal();
+    public BlockState getReplantBlockState();
 
     public static void tick(WorkerUnit unit) {
         BuildRepairGoal buildRepairGoal = unit.getBuildRepairGoal();
