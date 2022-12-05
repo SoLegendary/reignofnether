@@ -3,25 +3,43 @@ TODO before playtesting:
 1. keep chunks around buildings loaded and stop clientside removal of selected building
     - need to force chunks and remove on building removal
     - remove forced chunks on dead entities
+    - check that these are even needed?
+
 2. setup shockbyte server (~3gb?)
 
 
 TODO bugfixes:
+
+0. When multiple buildings are selected production items should be spread evenly across them
+
+
+TODO buildings/units
+
+Villager faction:
+    - vindicators and pillagers
+    - blacksmith (functionality) (upgrade building + builds iron golems)
+    - tower (functionality) (garrisons ranged units)
+
+Undead faction:
+    - Zombie villager unit (identical to villagers except with more health and burn in sunlight)
+    - haunted house (functionality) (population + builds zombie villagers)
+    - laboratory (build + functionality)  (upgrade building + builds creepers)
+
+
+TODO bugs/features (backlog)
 
 1. Arm animations and block cracking/particles
 2. Fix body rendering issues (to do with portrait head rendering)
 3. Minimap 90deg rotations
 
 
+TODO buildings/units (backlog)
+
 Villager faction:
-    - Pillager and vindicator
-    - Witch (has ground target potion abilities, or autoattacks with basic splash harmings)
-    - town center (move villager production to this)
-    - villager barracks
-    - armory (upgrade building)
+    - town centre (move villager units to this)
+    - tower (garrisons ranged units)
 
 Undead faction:
-    - Zombie villager unit (identical to villagers except with more health and burn in sunlight)
-    - necropolis (town center)
-    - tomb (upgrade building)
+    - haunted town centre (move zombie villager units to this)
+    - laboratory lightning rod (cooldown ability to cast lightning to charge creepers and defend base)
     - obelisk (population + prevent daylight burn while near it)
