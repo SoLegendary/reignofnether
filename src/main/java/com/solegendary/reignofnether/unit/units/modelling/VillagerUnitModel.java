@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.unit.units.modelling;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import net.minecraft.client.model.*;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -11,18 +13,22 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 // Based on IllagerModel
+
+// This class should be the basis of all villager-like units so that we have granular control over the arm models
+
 @OnlyIn(Dist.CLIENT)
 public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalModel<T> implements ArmedModel, HeadedModel {
     private final ModelPart root;
     private final ModelPart head;
     private final ModelPart hat;
-    private final ModelPart arms;
+    private final ModelPart crossedArms;
     private final ModelPart leftLeg;
     private final ModelPart rightLeg;
     private final ModelPart rightArm;
@@ -33,8 +39,13 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
     // TODO: use player arm poses and animations
     public enum ArmPose {
         CROSSED,
+        ATTACKING,
+        CROSSBOW_HOLD,
+        CROSSBOW_CHARGE,
         BUILDING,
-        GATHERING
+        GATHERING,
+        SPELLCASTING,
+        BOW_AND_ARROW
     }
 
     public VillagerUnitModel(ModelPart p_170688_) {
@@ -42,7 +53,7 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
         this.head = p_170688_.getChild("head");
         this.hat = this.head.getChild("hat");
         this.hat.visible = false;
-        this.arms = p_170688_.getChild("arms");
+        this.crossedArms = p_170688_.getChild("arms");
         this.leftLeg = p_170688_.getChild("left_leg");
         this.rightLeg = p_170688_.getChild("right_leg");
         this.leftArm = p_170688_.getChild("left_arm");
@@ -69,65 +80,62 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
         return this.root;
     }
 
+    private ArmPose getArmPose(Entity entity) {
+        if (entity instanceof WorkerUnit workerUnit) {
+            // BUILDING
+            // GATHERING
+        }
+        else if (entity instanceof VindicatorUnit vindicator) {
+            if (vindicator.getTarget() != null || vindicator.getAttackBuildingGoal().isAttacking())
+                return ArmPose.ATTACKING;
+        }
+        else if (entity instanceof PillagerUnit) {
+            // CROSSBOW_HOLD
+            // CROSSBOW_CHARGE
+            return ArmPose.CROSSBOW_CHARGE;
+        }
+        return ArmPose.CROSSED;
+    }
+
     public void setupAnim(T entity, float p_102929_, float p_102930_, float p_102931_, float p_102932_, float p_102933_) {
         this.head.yRot = p_102932_ * ((float)Math.PI / 180F);
         this.head.xRot = p_102933_ * ((float)Math.PI / 180F);
 
-        ArmPose armPose = ArmPose.CROSSED;//((VillagerUnit) entity).getVillagerUnitArmPose();
+        ArmPose armPose = getArmPose(entity);
 
-        // default arm positions when not visible (ie. not crossed)
-        boolean flag = entity.getFallFlyingTicks() > 4;
-        this.rightArm.z = 0.0F;
-        this.rightArm.x = -5.0F;
-        this.leftArm.z = 0.0F;
-        this.leftArm.x = 5.0F;
-        float f = 1.0F;
-        if (flag) {
-            f = (float) entity.getDeltaMovement().lengthSqr();
-            f /= 0.2F;
-            f *= f * f;
+        switch(armPose) {
+            case ATTACKING -> {
+                if (entity.getMainHandItem().isEmpty())
+                    AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, true, this.attackTime, p_102931_);
+                else
+                    AnimationUtils.swingWeaponDown(this.rightArm, this.leftArm, entity, this.attackTime, p_102931_);
+            }
+            case SPELLCASTING -> {
+                this.rightArm.z = 0.0F;
+                this.rightArm.x = -5.0F;
+                this.leftArm.z = 0.0F;
+                this.leftArm.x = 5.0F;
+                this.rightArm.xRot = Mth.cos(p_102931_ * 0.6662F) * 0.25F;
+                this.leftArm.xRot = Mth.cos(p_102931_ * 0.6662F) * 0.25F;
+                this.rightArm.zRot = 2.3561945F;
+                this.leftArm.zRot = -2.3561945F;
+                this.rightArm.yRot = 0.0F;
+                this.leftArm.yRot = 0.0F;
+            }
+            case BOW_AND_ARROW -> {
+                this.rightArm.yRot = -0.1F + this.head.yRot;
+                this.rightArm.xRot = (-(float)Math.PI / 2F) + this.head.xRot;
+                this.leftArm.xRot = -0.9424779F + this.head.xRot;
+                this.leftArm.yRot = this.head.yRot - 0.4F;
+                this.leftArm.zRot = ((float)Math.PI / 2F);
+            }
+            case CROSSBOW_HOLD -> AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
+            case CROSSBOW_CHARGE -> AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, entity, true);
         }
-        if (f < 1.0F) {
-            f = 1.0F;
-        }
-        this.rightArm.xRot = Mth.cos(p_102929_ * 0.6662F + (float)Math.PI) * 2.0F * p_102929_ * 0.5F / f;
-        this.leftArm.xRot = Mth.cos(p_102929_ * 0.6662F) * 2.0F * p_102929_ * 0.5F / f;
-        this.rightArm.zRot = 0.0F;
-        this.leftArm.zRot = 0.0F;
-        this.rightArm.yRot = 0.0F;
-        this.leftArm.yRot = 0.0F;
-
         boolean armsCrossed = armPose == ArmPose.CROSSED;
-
-        //if (!armsCrossed)
-        //    setupAttackAnimation();
-
-        this.arms.visible = armsCrossed && armsVisible;
+        this.crossedArms.visible = armsCrossed && armsVisible;
         this.leftArm.visible = !armsCrossed && armsVisible;
         this.rightArm.visible = !armsCrossed && armsVisible;
-    }
-
-    protected void setupAttackAnimation() {
-        if (!(this.attackTime <= 0.0F)) {
-            float f = this.attackTime;
-            this.arms.yRot = Mth.sin(Mth.sqrt(f) * ((float)Math.PI * 2F)) * 0.2F;
-            this.rightArm.z = Mth.sin(this.arms.yRot) * 5.0F;
-            this.rightArm.x = -Mth.cos(this.arms.yRot) * 5.0F;
-            this.leftArm.z = -Mth.sin(this.arms.yRot) * 5.0F;
-            this.leftArm.x = Mth.cos(this.arms.yRot) * 5.0F;
-            this.rightArm.yRot += this.arms.yRot;
-            this.leftArm.yRot += this.arms.yRot;
-            this.leftArm.xRot += this.arms.yRot;
-            f = 1.0F - this.attackTime;
-            f *= f;
-            f *= f;
-            f = 1.0F - f;
-            float f1 = Mth.sin(f * (float)Math.PI);
-            float f2 = Mth.sin(this.attackTime * (float)Math.PI) * -(this.head.xRot - 0.7F) * 0.75F;
-            this.rightArm.xRot -= f1 * 1.2F + f2;
-            this.rightArm.yRot += this.arms.yRot * 2.0F;
-            this.rightArm.zRot += Mth.sin(this.attackTime * (float)Math.PI) * -0.4F;
-        }
     }
 
     private ModelPart getArm(HumanoidArm p_102923_) {

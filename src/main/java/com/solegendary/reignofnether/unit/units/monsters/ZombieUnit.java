@@ -29,6 +29,7 @@ public class ZombieUnit extends Zombie implements com.solegendary.reignofnether.
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
     public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
+    public Goal getAttackGoal() {return attackGoal;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
@@ -88,7 +89,7 @@ public class ZombieUnit extends Zombie implements com.solegendary.reignofnether.
     final static public int popCost = ResourceCosts.Zombie.POPULATION;
     final static public boolean canAttackBuildings = true;
 
-    public MeleeAttackUnitGoal attackUnitGoal;
+    public MeleeAttackUnitGoal attackGoal;
     public AttackBuildingGoal attackBuildingGoal;
 
     private static final List<AbilityButton> abilities = new ArrayList<>();
@@ -120,7 +121,7 @@ public class ZombieUnit extends Zombie implements com.solegendary.reignofnether.
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.attackUnitGoal = new MeleeAttackUnitGoal(this, attackCooldown, 1.0D, false);
+        this.attackGoal = new MeleeAttackUnitGoal(this, attackCooldown, 1.0D, false);
         this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
     }
 
@@ -130,7 +131,7 @@ public class ZombieUnit extends Zombie implements com.solegendary.reignofnether.
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, moveGoal);
-        this.goalSelector.addGoal(3, attackUnitGoal);
+        this.goalSelector.addGoal(3, attackGoal);
         this.goalSelector.addGoal(3, attackBuildingGoal);
         this.targetSelector.addGoal(3, targetGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));

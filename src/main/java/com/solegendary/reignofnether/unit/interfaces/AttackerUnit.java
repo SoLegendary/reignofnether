@@ -4,8 +4,6 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
-import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
-import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -13,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.Goal;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -29,6 +28,7 @@ public interface AttackerUnit {
     public BlockPos getAttackMoveTarget();
     public boolean canAttackBuildings();
 
+    public Goal getAttackGoal(); // not necessarily the same goal, eg. could be melee or ranged
     public AttackBuildingGoal getAttackBuildingGoal();
 
     // chase and attack the target ignoring all else until it is dead or out of sight
