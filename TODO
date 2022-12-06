@@ -5,7 +5,11 @@ TODO before playtesting:
     - remove forced chunks on dead entities
     - check that these are even needed?
 
-2. setup shockbyte server (~3gb?)
+2. Implement proper build times
+    - units
+    - buildings
+    - resource gathering
+3. setup shockbyte server (~3gb?)
 
 
 TODO bugs/features:

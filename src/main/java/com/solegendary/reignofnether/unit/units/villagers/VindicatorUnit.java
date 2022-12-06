@@ -1,9 +1,13 @@
-package com.solegendary.reignofnether.unit.units.monsters;
+package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.ResourceCosts;
+import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
+import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
+import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.goals.*;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -13,16 +17,17 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ZombieUnit extends Zombie implements com.solegendary.reignofnether.unit.interfaces.Unit, AttackerUnit {
+public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     // region
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilities() {return abilities;};
@@ -48,7 +53,7 @@ public class ZombieUnit extends Zombie implements com.solegendary.reignofnether.
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
-            SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.STRING);
+            SynchedEntityData.defineId(VindicatorUnit.class, EntityDataSerializers.STRING);
 
     @Override
     protected void defineSynchedData() {
@@ -85,7 +90,7 @@ public class ZombieUnit extends Zombie implements com.solegendary.reignofnether.
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
-    final static public int popCost = ResourceCosts.Zombie.POPULATION;
+    final static public int popCost = ResourceCosts.Vindicator.POPULATION;
     final static public boolean canAttackBuildings = true;
 
     public MeleeAttackUnitGoal attackUnitGoal;
@@ -93,27 +98,26 @@ public class ZombieUnit extends Zombie implements com.solegendary.reignofnether.
 
     private static final List<AbilityButton> abilities = new ArrayList<>();
 
-    public ZombieUnit(EntityType<? extends Zombie> entityType, Level level) {
+    public VindicatorUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MOVEMENT_SPEED, ZombieUnit.movementSpeed)
-                .add(Attributes.ATTACK_DAMAGE, ZombieUnit.attackDamage)
-                .add(Attributes.ARMOR, ZombieUnit.armorValue)
-                .add(Attributes.MAX_HEALTH, ZombieUnit.maxHealth)
-                .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE, 0); // needs to be added for parent to work
+                .add(Attributes.MOVEMENT_SPEED, VindicatorUnit.movementSpeed)
+                .add(Attributes.ATTACK_DAMAGE, VindicatorUnit.attackDamage)
+                .add(Attributes.ARMOR, VindicatorUnit.armorValue)
+                .add(Attributes.MAX_HEALTH, VindicatorUnit.maxHealth);
     }
 
     public void tick() {
         super.tick();
-        com.solegendary.reignofnether.unit.interfaces.Unit.tick(this);
+        Unit.tick(this);
         AttackerUnit.tick(this);
     }
 
     public void resetBehaviours() {
-        com.solegendary.reignofnether.unit.interfaces.Unit.resetBehaviours(this);
+        Unit.resetBehaviours(this);
         AttackerUnit.resetBehaviours(this);
     }
 

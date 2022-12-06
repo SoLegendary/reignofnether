@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.ResourceCosts;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
@@ -37,14 +39,10 @@ public class Laboratory extends ProductionBuilding {
         this.oreCost = ResourceCosts.Laboratory.ORE;
         this.popSupply = ResourceCosts.Laboratory.SUPPLY;
 
-        /*
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                    ZombieUnitProd.getStartButton(this),
-                    SkeletonUnitProd.getStartButton(this),
-                    CreeperUnitProd.getStartButton(this)
+                CreeperUnitProd.getStartButton(this)
             );
-         */
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

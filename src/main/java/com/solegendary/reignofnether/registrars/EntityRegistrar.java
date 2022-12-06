@@ -3,9 +3,11 @@ package com.solegendary.reignofnether.registrars;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -46,6 +48,16 @@ public class EntityRegistrar {
             () -> EntityType.Builder.of(VillagerUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.VILLAGER.getWidth(), EntityType.VILLAGER.getHeight())
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "villager_unit").toString()));
+
+    public static final RegistryObject<EntityType<VindicatorUnit>> VINDICATOR_UNIT = ENTITIES.register("vindicator_unit",
+            () -> EntityType.Builder.of(VindicatorUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.VINDICATOR.getWidth(), EntityType.VINDICATOR.getHeight())
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "vindicator_unit").toString()));
+
+    public static final RegistryObject<EntityType<PillagerUnit>> PILLAGER_UNIT = ENTITIES.register("pillager_unit",
+            () -> EntityType.Builder.of(PillagerUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.PILLAGER.getWidth(), EntityType.PILLAGER.getHeight())
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "pillager_unit").toString()));
 
     public static void init() {
         ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());

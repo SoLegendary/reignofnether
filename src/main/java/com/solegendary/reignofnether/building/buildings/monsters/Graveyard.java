@@ -46,8 +46,7 @@ public class Graveyard extends ProductionBuilding {
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
                 ZombieUnitProd.getStartButton(this),
-                SkeletonUnitProd.getStartButton(this),
-                CreeperUnitProd.getStartButton(this)
+                SkeletonUnitProd.getStartButton(this)
             );
     }
 

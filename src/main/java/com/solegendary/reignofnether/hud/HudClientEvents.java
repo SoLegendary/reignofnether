@@ -353,9 +353,8 @@ public class HudClientEvents {
             blitY -= portraitRendererUnit.frameHeight;
 
             // write capitalised unit name
-            String name = getSimpleEntityName(hudSelectedEntity);
+            String name = getSimpleEntityName(hudSelectedEntity).replace("_"," ");
             String nameCap = name.substring(0, 1).toUpperCase() + name.substring(1);
-
 
             unitPortraitZone = portraitRendererUnit.render(
                     evt.getPoseStack(), nameCap,

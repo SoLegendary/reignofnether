@@ -4,6 +4,8 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.ResourceCosts;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnitProd;
+import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnitProd;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -14,6 +16,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
@@ -39,14 +42,11 @@ public class Barracks extends ProductionBuilding {
 
         this.explodeChance = 0.2f;
 
-        /*
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                    ZombieUnitProd.getStartButton(this),
-                    SkeletonUnitProd.getStartButton(this),
-                    CreeperUnitProd.getStartButton(this)
+                    VindicatorUnitProd.getStartButton(this),
+                    PillagerUnitProd.getStartButton(this)
             );
-         */
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

@@ -34,6 +34,14 @@ public class ItemRegistrar {
             ITEMS.register("zombie_villager_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.ZOMBIE_VILLAGER_UNIT,
                     0x523632, 0x647E51, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
+    public static final RegistryObject<ForgeSpawnEggItem> VINDICATOR_UNIT_SPAWN_EGG =
+            ITEMS.register("vindicator_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.VINDICATOR_UNIT,
+                    0x523632, 0x946F66, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
+    public static final RegistryObject<ForgeSpawnEggItem> PILLAGER_UNIT_SPAWN_EGG =
+            ITEMS.register("pillager_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.PILLAGER_UNIT,
+                    0x523632, 0x647E51, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
     public static void init() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
