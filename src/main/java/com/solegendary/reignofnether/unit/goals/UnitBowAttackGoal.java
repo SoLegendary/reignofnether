@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.RangedBowAttackGoal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.BowItem;
@@ -17,18 +18,17 @@ import java.util.EnumSet;
 // - does not require the user to wind up bow attacks, instead using RTS-like attack cooldowns
 // TODO: prevent friendly fire
 
-public class RangedBowAttackUnitGoal<T extends net.minecraft.world.entity.Mob & RangedAttackMob> extends Goal {
+public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & RangedAttackMob> extends Goal {
     private final T mob;
-    private int attackWindupTime; // time to wind up a bow attack
+    private final int attackWindupTime = 5; // time to wind up a bow attack
     private int attackCooldownMax;
     private int attackCooldown = 0; // time to wait between bow windups
     private final float attackRadiusSqr;
     private int attackTime = -1;
     private int seeTime; // how long we have seen the target for
 
-    public RangedBowAttackUnitGoal(T mob, int attackWindupTime, int attackCooldown, float attackRadius) {
+    public UnitBowAttackGoal(T mob, int attackCooldown, float attackRadius) {
         this.mob = mob;
-        this.attackWindupTime = attackWindupTime;
         this.attackCooldownMax = attackCooldown;
         this.attackRadiusSqr = attackRadius * attackRadius;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));

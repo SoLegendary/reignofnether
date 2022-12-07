@@ -93,7 +93,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     final static public int popCost = ResourceCosts.Skeleton.POPULATION;
     final static public boolean canAttackBuildings = false;
 
-    public RangedBowAttackUnitGoal<? extends LivingEntity> attackGoal;
+    public UnitBowAttackGoal<? extends LivingEntity> attackGoal;
     public AttackBuildingGoal attackBuildingGoal;
 
     private static final List<AbilityButton> abilities = new ArrayList<>();
@@ -128,7 +128,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, true, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
-        this.attackGoal = new RangedBowAttackUnitGoal<>(this, 5, attackCooldown, attackRange);
+        this.attackGoal = new UnitBowAttackGoal<>(this, attackCooldown, attackRange);
     }
 
     @Override

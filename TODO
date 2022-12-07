@@ -9,6 +9,9 @@ TODO before playtesting:
     - units
     - buildings
     - resource gathering
+
+3. Tie pillager and skeleton damage stats to their bow damage
+
 3. setup shockbyte server (~3gb?)
 
 
@@ -21,15 +24,11 @@ TODO bugs/features:
 TODO buildings/units
 
 Villager faction:
-    - vindicators and pillagers
     - blacksmith (functionality) (upgrade building + builds iron golems)
     - tower (functionality) (garrisons ranged units)
 
 Undead faction:
-    - Zombie villager unit (identical to villagers except with more health and burn in sunlight)
-    - haunted house (functionality) (population + builds zombie villagers)
-    - laboratory (build + functionality)  (upgrade building + builds creepers)
-        - maybe just model on the blacksmith but make it potion-based?
+    - laboratory (functionality)  (upgrade building)
 
 
 TODO bugs/features (backlog)

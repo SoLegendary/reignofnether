@@ -4,12 +4,11 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
-import com.solegendary.reignofnether.unit.goals.RangedCrossbowAttackUnitGoal;
+import com.solegendary.reignofnether.unit.goals.UnitCrossbowAttackGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
-import net.minecraft.client.renderer.entity.PillagerRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -99,7 +98,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     final static public int popCost = ResourceCosts.Pillager.POPULATION;
     final static public boolean canAttackBuildings = false;
 
-    public RangedCrossbowAttackUnitGoal<? extends LivingEntity> attackGoal;
+    public UnitCrossbowAttackGoal<? extends LivingEntity> attackGoal;
     public AttackBuildingGoal attackBuildingGoal;
 
     private static final List<AbilityButton> abilities = new ArrayList<>();
@@ -134,7 +133,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, true, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
-        this.attackGoal = new RangedCrossbowAttackUnitGoal<>(this, 5, attackCooldown, attackRange);
+        this.attackGoal = new UnitCrossbowAttackGoal<>(this, attackCooldown, attackRange);
     }
 
     @Override
