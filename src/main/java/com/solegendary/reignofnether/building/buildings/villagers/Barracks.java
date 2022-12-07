@@ -3,9 +3,11 @@ package com.solegendary.reignofnether.building.buildings.villagers;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.ResourceCosts;
-import com.solegendary.reignofnether.unit.units.villagers.PillagerUnitProd;
-import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnitProd;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerProdItem;
+import com.solegendary.reignofnether.unit.units.villagers.VindicatorProdItem;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -44,8 +46,8 @@ public class Barracks extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                    VindicatorUnitProd.getStartButton(this),
-                    PillagerUnitProd.getStartButton(this)
+                    VindicatorProdItem.getStartButton(this, Keybindings.keyQ),
+                    PillagerProdItem.getStartButton(this, Keybindings.keyW)
             );
     }
 
@@ -53,12 +55,12 @@ public class Barracks extends ProductionBuilding {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 
-    public static AbilityButton getBuildButton() {
+    public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 Barracks.buildingName,
                 Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/fletching_table_front.png"),
-                null,
+                hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Barracks.class,
                 () -> false,
                 () -> true,

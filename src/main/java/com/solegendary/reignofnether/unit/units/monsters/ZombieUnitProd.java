@@ -36,12 +36,12 @@ public class ZombieUnitProd extends ProductionItem {
         return ZombieUnitProd.itemName;
     }
 
-    public static Button getStartButton(ProductionBuilding prodBuilding) {
+    public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
             "Zombie",
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
-            Keybindings.keyQ,
+            hotkey,
             () -> false,
             () -> false,
             () -> true,

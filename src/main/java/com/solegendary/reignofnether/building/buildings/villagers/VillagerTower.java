@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
@@ -45,12 +46,12 @@ public class VillagerTower extends Building {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 
-    public static AbilityButton getBuildButton() {
+    public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
             VillagerTower.buildingName,
             Button.itemIconSize,
             new ResourceLocation("minecraft", "textures/block/oak_planks.png"),
-            null,
+            hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == VillagerTower.class,
             () -> false,
             () -> true,

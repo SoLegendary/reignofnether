@@ -3,6 +3,8 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -41,7 +43,7 @@ public class Laboratory extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                CreeperUnitProd.getStartButton(this)
+                CreeperUnitProd.getStartButton(this, Keybindings.keyQ)
             );
     }
 
@@ -49,12 +51,12 @@ public class Laboratory extends ProductionBuilding {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 
-    public static AbilityButton getBuildButton() {
+    public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 Laboratory.buildingName,
                 Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/brewing_stand.png"),
-                null,
+                hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Laboratory.class,
                 () -> false,
                 () -> true,

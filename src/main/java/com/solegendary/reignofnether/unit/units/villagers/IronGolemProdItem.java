@@ -19,52 +19,52 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class PillagerUnitProd extends ProductionItem {
+public class IronGolemProdItem extends ProductionItem {
 
-    public final static String itemName = "Pillager";
+    public final static String itemName = "Iron Golem";
 
-    public PillagerUnitProd(ProductionBuilding building) {
-        super(building, ResourceCosts.Pillager.TICKS);
+    public IronGolemProdItem(ProductionBuilding building) {
+        super(building, ResourceCosts.IronGolem.TICKS);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.PILLAGER_UNIT.get(), building.ownerName);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.IRON_GOLEM_UNIT.get(), building.ownerName);
         };
-        this.foodCost = ResourceCosts.Pillager.FOOD;
-        this.woodCost = ResourceCosts.Pillager.WOOD;
-        this.oreCost = ResourceCosts.Pillager.ORE;
-        this.popCost = ResourceCosts.Pillager.POPULATION;
+        this.foodCost = ResourceCosts.IronGolem.FOOD;
+        this.woodCost = ResourceCosts.IronGolem.WOOD;
+        this.oreCost = ResourceCosts.IronGolem.ORE;
+        this.popCost = ResourceCosts.IronGolem.POPULATION;
     }
 
     public String getItemName() {
-        return PillagerUnitProd.itemName;
+        return IronGolemProdItem.itemName;
     }
 
-    public static Button getStartButton(ProductionBuilding prodBuilding) {
+    public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            "Pillager",
+            "Iron Golem",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/pillager.png"),
-            Keybindings.keyW,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
+                hotkey,
             () -> false,
             () -> false,
             () -> true,
             () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
             null,
             List.of(
-                FormattedCharSequence.forward("Pillager", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Pillager.FOOD + "     \uE001  " + ResourceCosts.Pillager.WOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Pillager.POPULATION + "     \uE004 " + ResourceCosts.Pillager.TICKS/20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("Iron Golem", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("\uE000  " + ResourceCosts.IronGolem.FOOD + "\uE002  " + ResourceCosts.IronGolem.ORE, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.IronGolem.POPULATION + "     \uE004 " + ResourceCosts.IronGolem.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A villager armed with a crossbow for ranged combat.", Style.EMPTY)
+                FormattedCharSequence.forward("A hulking golem of metal with a powerful melee attack and high armour.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            "Pillager",
+            "Iron Golem",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/pillager.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

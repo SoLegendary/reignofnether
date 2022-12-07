@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.buildings.villagers.WheatFarm;
 import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
 import com.solegendary.reignofnether.building.buildings.villagers.VillagerHouse;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
@@ -98,10 +99,10 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
     public VillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
         if (level.isClientSide()) {
-            this.abilities.add(VillagerHouse.getBuildButton());
-            this.abilities.add(WheatFarm.getBuildButton());
-            this.abilities.add(Barracks.getBuildButton());
-            this.abilities.add(Blacksmith.getBuildButton());
+            this.abilities.add(VillagerHouse.getBuildButton(Keybindings.keyQ));
+            this.abilities.add(WheatFarm.getBuildButton(Keybindings.keyW));
+            this.abilities.add(Barracks.getBuildButton(Keybindings.keyE));
+            this.abilities.add(Blacksmith.getBuildButton(Keybindings.keyR));
         }
     }
 

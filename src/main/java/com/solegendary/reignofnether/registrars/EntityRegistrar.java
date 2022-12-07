@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
@@ -58,6 +59,11 @@ public class EntityRegistrar {
             () -> EntityType.Builder.of(PillagerUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PILLAGER.getWidth(), EntityType.PILLAGER.getHeight())
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "pillager_unit").toString()));
+
+    public static final RegistryObject<EntityType<IronGolemUnit>> IRON_GOLEM_UNIT = ENTITIES.register("iron_golem_unit",
+            () -> EntityType.Builder.of(IronGolemUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.IRON_GOLEM.getWidth(), EntityType.IRON_GOLEM.getHeight())
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "iron_golem_unit").toString()));
 
     public static void init() {
         ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());

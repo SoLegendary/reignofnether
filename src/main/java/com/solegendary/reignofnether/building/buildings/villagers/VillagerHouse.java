@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProd;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerProdItem;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.ResourceCosts;
@@ -40,7 +42,7 @@ public class VillagerHouse extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = List.of(
-                VillagerUnitProd.getStartButton(this)
+                VillagerProdItem.getStartButton(this, Keybindings.keyQ)
             );
     }
 
@@ -48,12 +50,12 @@ public class VillagerHouse extends ProductionBuilding {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 
-    public static AbilityButton getBuildButton() {
+    public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
             VillagerHouse.buildingName,
             Button.itemIconSize,
             new ResourceLocation("minecraft", "textures/block/oak_log.png"),
-            null,
+            hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == VillagerHouse.class,
             () -> false,
             () -> true,

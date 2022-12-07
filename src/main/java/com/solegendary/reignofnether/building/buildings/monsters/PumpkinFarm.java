@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
@@ -44,12 +45,12 @@ public class PumpkinFarm extends Building {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 
-    public static AbilityButton getBuildButton() {
+    public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 PumpkinFarm.buildingName,
                 Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/pumpkin_side.png"),
-                null,
+                hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == PumpkinFarm.class,
                 () -> false,
                 () -> true,

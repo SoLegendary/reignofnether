@@ -5,6 +5,8 @@ import com.solegendary.reignofnether.building.buildings.monsters.HauntedHouse;
 import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
@@ -98,10 +100,10 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
     public ZombieVillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
         if (level.isClientSide()) {
-            this.abilities.add(HauntedHouse.getBuildButton());
-            this.abilities.add(PumpkinFarm.getBuildButton());
-            this.abilities.add(Graveyard.getBuildButton());
-            this.abilities.add(Laboratory.getBuildButton());
+            this.abilities.add(HauntedHouse.getBuildButton(Keybindings.keyQ));
+            this.abilities.add(PumpkinFarm.getBuildButton(Keybindings.keyW));
+            this.abilities.add(Graveyard.getBuildButton(Keybindings.keyE));
+            this.abilities.add(Laboratory.getBuildButton(Keybindings.keyR));
         }
     }
 

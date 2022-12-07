@@ -19,52 +19,52 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class VindicatorUnitProd extends ProductionItem {
+public class PillagerProdItem extends ProductionItem {
 
-    public final static String itemName = "Vindicator";
+    public final static String itemName = "Pillager";
 
-    public VindicatorUnitProd(ProductionBuilding building) {
-        super(building, ResourceCosts.Vindicator.TICKS);
+    public PillagerProdItem(ProductionBuilding building) {
+        super(building, ResourceCosts.Pillager.TICKS);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.VINDICATOR_UNIT.get(), building.ownerName);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.PILLAGER_UNIT.get(), building.ownerName);
         };
-        this.foodCost = ResourceCosts.Vindicator.FOOD;
-        this.woodCost = ResourceCosts.Vindicator.WOOD;
-        this.oreCost = ResourceCosts.Vindicator.ORE;
-        this.popCost = ResourceCosts.Vindicator.POPULATION;
+        this.foodCost = ResourceCosts.Pillager.FOOD;
+        this.woodCost = ResourceCosts.Pillager.WOOD;
+        this.oreCost = ResourceCosts.Pillager.ORE;
+        this.popCost = ResourceCosts.Pillager.POPULATION;
     }
 
     public String getItemName() {
-        return VindicatorUnitProd.itemName;
+        return PillagerProdItem.itemName;
     }
 
-    public static Button getStartButton(ProductionBuilding prodBuilding) {
+    public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            "Vindicator",
+            "Pillager",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
-            Keybindings.keyQ,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/pillager.png"),
+            hotkey,
             () -> false,
             () -> false,
             () -> true,
             () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
             null,
             List.of(
-                FormattedCharSequence.forward("Vindicator", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Vindicator.FOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Vindicator.POPULATION + "     \uE004 " + ResourceCosts.Vindicator.TICKS/20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("Pillager", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Pillager.FOOD + "     \uE001  " + ResourceCosts.Pillager.WOOD, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Pillager.POPULATION + "     \uE004 " + ResourceCosts.Pillager.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A villager armed with an axe for melee combat.", Style.EMPTY)
+                FormattedCharSequence.forward("A villager armed with a crossbow for ranged combat.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            "Vindicator",
+            "Pillager",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/pillager.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

@@ -3,7 +3,10 @@ package com.solegendary.reignofnether.building.buildings.villagers;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.ResourceCosts;
+import com.solegendary.reignofnether.unit.units.villagers.IronGolemProdItem;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -14,6 +17,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
@@ -37,26 +41,22 @@ public class Blacksmith extends ProductionBuilding {
         this.oreCost = ResourceCosts.Blacksmith.ORE;
         this.popSupply = ResourceCosts.Blacksmith.SUPPLY;
 
-        /*
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                    ZombieUnitProd.getStartButton(this),
-                    SkeletonUnitProd.getStartButton(this),
-                    CreeperUnitProd.getStartButton(this)
+                IronGolemProdItem.getStartButton(this, Keybindings.keyQ)
             );
-         */
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 
-    public static AbilityButton getBuildButton() {
+    public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 Blacksmith.buildingName,
                 Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/smithing_table_front.png"),
-                null,
+                hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Blacksmith.class,
                 () -> false,
                 () -> true,

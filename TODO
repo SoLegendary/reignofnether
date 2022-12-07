@@ -10,9 +10,13 @@ TODO before playtesting:
     - buildings
     - resource gathering
 
-3. Tie pillager and skeleton damage stats to their bow damage
+3. Fix unit damage to be based only on their attribute damage, currently:
+    - Ranged unit damage is only based on their weapon
+    - Melee unit damage is based on attribute + weapon
 
-3. setup shockbyte server (~3gb?)
+Haunted house doesn't build?
+
+4. setup shockbyte server (~3gb?)
 
 
 TODO bugs/features:
@@ -21,14 +25,6 @@ TODO bugs/features:
 2. Spawned units should be in set locations inside buildings (remove the doors) instead of outside
 3. Reduce size of initial foundations for some buildings that are low to the ground
 
-TODO buildings/units
-
-Villager faction:
-    - blacksmith (functionality) (upgrade building + builds iron golems)
-    - tower (functionality) (garrisons ranged units)
-
-Undead faction:
-    - laboratory (functionality)  (upgrade building)
 
 
 TODO bugs/features (backlog)
@@ -38,6 +34,8 @@ TODO bugs/features (backlog)
 3. Minimap 90deg rotations
 
 TODO buildings/units (backlog)
+
+Upgrade production items
 
 Villager faction:
     - town centre (move villager units to this)

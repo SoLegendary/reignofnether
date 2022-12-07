@@ -36,12 +36,12 @@ public class CreeperUnitProd extends ProductionItem {
         return CreeperUnitProd.itemName;
     }
 
-    public static Button getStartButton(ProductionBuilding prodBuilding) {
+    public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
             "Creeper",
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
-            Keybindings.keyE,
+            hotkey,
             () -> false,
             () -> false,
             () -> true,

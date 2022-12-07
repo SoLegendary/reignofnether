@@ -48,7 +48,7 @@ public class ResourceCosts {
         public static final int WOOD = 0;
         public static final int ORE = 300;
         public static final int TICKS = 100;
-        public static final int POPULATION = 1;
+        public static final int POPULATION = 6;
     }
     public static class Pillager {
         public static final int FOOD = 60;

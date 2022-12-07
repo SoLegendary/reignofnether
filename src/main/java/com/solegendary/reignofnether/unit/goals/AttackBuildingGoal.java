@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.sounds.SoundEvents;
@@ -57,7 +58,6 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
                     if (new Random().nextDouble(1.0f) < damageFloat - damageFloor)
                         damageInt += 1;
                     buildingTarget.destroyRandomBlocks(damageInt);
-                    System.out.println(damageInt);
                     this.mob.playSound(SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR);
                 }
             }
@@ -75,7 +75,7 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
     public boolean isAttacking() {
         if (buildingTarget != null && this.moveTarget != null)
             if (BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED)
-                return Math.sqrt(moveTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) < 2;
+                return Math.sqrt(moveTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) < ((AttackerUnit) mob).getAttackRange();
         return false;
     }
 

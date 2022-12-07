@@ -36,12 +36,12 @@ public class SkeletonUnitProd extends ProductionItem {
         return SkeletonUnitProd.itemName;
     }
 
-    public static Button getStartButton(ProductionBuilding prodBuilding) {
+    public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
             "Skeleton",
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png"),
-            Keybindings.keyW,
+            hotkey,
             () -> false,
             () -> false,
             () -> true,

@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnitProd;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnitProd;
@@ -45,8 +47,8 @@ public class Graveyard extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                ZombieUnitProd.getStartButton(this),
-                SkeletonUnitProd.getStartButton(this)
+                ZombieUnitProd.getStartButton(this, Keybindings.keyQ),
+                SkeletonUnitProd.getStartButton(this, Keybindings.keyW)
             );
     }
 
@@ -54,12 +56,12 @@ public class Graveyard extends ProductionBuilding {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 
-    public static AbilityButton getBuildButton() {
+    public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 Graveyard.buildingName,
                 Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/mossy_stone_bricks.png"),
-                null,
+                hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Graveyard.class,
                 () -> false,
                 () -> true,

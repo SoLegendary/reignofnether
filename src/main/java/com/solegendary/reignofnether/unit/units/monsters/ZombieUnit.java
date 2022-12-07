@@ -80,7 +80,7 @@ public class ZombieUnit extends Zombie implements com.solegendary.reignofnether.
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 2.0f;
     final static public float movementSpeed = 0.25f;
-    final static public float attackRange = 0; // only used by ranged units
+    final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public int attackCooldown = 30;
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;

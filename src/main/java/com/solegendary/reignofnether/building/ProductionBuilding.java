@@ -3,8 +3,8 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnitProd;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnitProd;
-import com.solegendary.reignofnether.unit.units.villagers.PillagerUnitProd;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProd;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerProdItem;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerProdItem;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnitProd;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
@@ -14,7 +14,7 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnitProd;
+import com.solegendary.reignofnether.unit.units.villagers.VindicatorProdItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -106,10 +106,10 @@ public abstract class ProductionBuilding extends Building {
                 case CreeperUnitProd.itemName -> prodItem = new CreeperUnitProd(building);
                 case SkeletonUnitProd.itemName -> prodItem = new SkeletonUnitProd(building);
                 case ZombieUnitProd.itemName -> prodItem = new ZombieUnitProd(building);
-                case VillagerUnitProd.itemName -> prodItem = new VillagerUnitProd(building);
+                case VillagerProdItem.itemName -> prodItem = new VillagerProdItem(building);
                 case ZombieVillagerUnitProd.itemName -> prodItem = new ZombieVillagerUnitProd(building);
-                case VindicatorUnitProd.itemName -> prodItem = new VindicatorUnitProd(building);
-                case PillagerUnitProd.itemName -> prodItem = new PillagerUnitProd(building);
+                case VindicatorProdItem.itemName -> prodItem = new VindicatorProdItem(building);
+                case PillagerProdItem.itemName -> prodItem = new PillagerProdItem(building);
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside

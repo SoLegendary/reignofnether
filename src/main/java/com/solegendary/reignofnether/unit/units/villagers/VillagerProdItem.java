@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.unit.units.monsters;
+package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
@@ -19,31 +19,31 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class ZombieVillagerUnitProd extends ProductionItem {
+public class VillagerProdItem extends ProductionItem {
 
-    public final static String itemName = "Zombie Villager";
+    public final static String itemName = "Villager";
 
-    public ZombieVillagerUnitProd(ProductionBuilding building) {
-        super(building, ResourceCosts.ZombieVillager.TICKS);
+    public VillagerProdItem(ProductionBuilding building) {
+        super(building, ResourceCosts.Villager.TICKS);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), building.ownerName);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.VILLAGER_UNIT.get(), building.ownerName);
         };
-        this.foodCost = ResourceCosts.ZombieVillager.FOOD;
-        this.woodCost = ResourceCosts.ZombieVillager.WOOD;
-        this.oreCost = ResourceCosts.ZombieVillager.ORE;
-        this.popCost = ResourceCosts.ZombieVillager.POPULATION;
+        this.foodCost = ResourceCosts.Villager.FOOD;
+        this.woodCost = ResourceCosts.Villager.WOOD;
+        this.oreCost = ResourceCosts.Villager.ORE;
+        this.popCost = ResourceCosts.Villager.POPULATION;
     }
 
     public String getItemName() {
-        return ZombieVillagerUnitProd.itemName;
+        return VillagerProdItem.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            "Zombie Villager",
+            "Villager",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
             hotkey,
             () -> false,
             () -> false,
@@ -51,20 +51,20 @@ public class ZombieVillagerUnitProd extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
             null,
             List.of(
-                FormattedCharSequence.forward("Zombie Villager", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.ZombieVillager.FOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.ZombieVillager.POPULATION + "     \uE004 " + ResourceCosts.ZombieVillager.TICKS/20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("Villager", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Villager.FOOD, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Villager.POPULATION + "     \uE004 " + ResourceCosts.Villager.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An undead worker unit that can construct or repair buildings and gather resources.", Style.EMPTY)
+                FormattedCharSequence.forward("A worker unit that can construct or repair buildings and gather resources.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            "Zombie Villager",
+            "Villager",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
             (Keybinding) null,
             () -> false,
             () -> false,
