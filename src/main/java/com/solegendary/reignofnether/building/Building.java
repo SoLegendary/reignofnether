@@ -52,7 +52,7 @@ public abstract class Building {
     protected float minBlocksPercent = 0.5f;
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
-    protected float explodeChance = 0.5f;
+    protected float explodeChance = 0.3f;
     protected float explodeRadius = 2.0f;
     protected float fireThreshold = 0.75f; // if building has less %hp than this, explosions caused can make fires
     protected int unrepairedBlocksDestroyed = 0; // ticks up on a block being destroyed, ticks down on a block being built
@@ -202,17 +202,30 @@ public abstract class Building {
         ArrayList<BuildingBlock> validBlocks = new ArrayList<>();
 
         // iterate through unplaced blocks and start at the bottom Y values
+        // prioritise placing blocks that are connected to other blocks (nonfloating)
+        int nonFloatingBlocks = 0;
         for (BuildingBlock block : unplacedBlocks) {
             BlockPos bp = block.getBlockPos();
             if ((bp.getY() <= minY) &&
-                (!level.getBlockState(bp.below()).isAir() ||
-                 !level.getBlockState(bp.east()).isAir() ||
-                 !level.getBlockState(bp.west()).isAir() ||
-                 !level.getBlockState(bp.south()).isAir() ||
-                 !level.getBlockState(bp.north()).isAir() ||
-                 !level.getBlockState(bp.above()).isAir()))
+                    (!level.getBlockState(bp.below()).isAir() ||
+                            !level.getBlockState(bp.east()).isAir() ||
+                            !level.getBlockState(bp.west()).isAir() ||
+                            !level.getBlockState(bp.south()).isAir() ||
+                            !level.getBlockState(bp.north()).isAir() ||
+                            !level.getBlockState(bp.above()).isAir())) {
+                nonFloatingBlocks += 1;
                 validBlocks.add(block);
+            }
         }
+        // if there were no nonFloating blocks then allow floating blocks
+        if (nonFloatingBlocks == 0) {
+            for (BuildingBlock block : unplacedBlocks) {
+                BlockPos bp = block.getBlockPos();
+                if (bp.getY() <= minY)
+                    validBlocks.add(block);
+            }
+        }
+
         if (validBlocks.size() > 0) {
             this.blockPlaceQueue.add(validBlocks.get(0));
             if (unrepairedBlocksDestroyed > 0)

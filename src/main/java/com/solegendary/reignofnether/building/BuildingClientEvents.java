@@ -233,12 +233,13 @@ public class BuildingClientEvents {
     }
 
     // disallow the building borders from overlapping any other's, even if they don't collide physical blocks
+    // also allow for a 1 block gap between buildings so units can spawn and stairs don't have their blockstates messed up
     public static boolean isOverlappingAnyOtherBuilding() {
 
         BlockPos origin = getOriginPos();
         Vec3i originOffset = new Vec3i(origin.getX(), origin.getY(), origin.getZ());
-        BlockPos minPos = BuildingUtils.getMinCorner(blocksToDraw).offset(originOffset);
-        BlockPos maxPos = BuildingUtils.getMaxCorner(blocksToDraw).offset(originOffset);
+        BlockPos minPos = BuildingUtils.getMinCorner(blocksToDraw).offset(originOffset).offset(-1,-1,-1);
+        BlockPos maxPos = BuildingUtils.getMaxCorner(blocksToDraw).offset(originOffset).offset(1,1,1);
 
         for (Building building : buildings) {
             for (BuildingBlock block : building.blocks) {

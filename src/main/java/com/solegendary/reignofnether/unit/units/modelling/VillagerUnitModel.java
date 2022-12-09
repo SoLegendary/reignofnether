@@ -98,6 +98,36 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
     }
 
     public void setupAnim(T entity, float p_102929_, float p_102930_, float p_102931_, float p_102932_, float p_102933_) {
+
+        // leg movements
+        if (this.riding) {
+            this.rightArm.xRot = (-(float)Math.PI / 5F);
+            this.rightArm.yRot = 0.0F;
+            this.rightArm.zRot = 0.0F;
+            this.leftArm.xRot = (-(float)Math.PI / 5F);
+            this.leftArm.yRot = 0.0F;
+            this.leftArm.zRot = 0.0F;
+            this.rightLeg.xRot = -1.4137167F;
+            this.rightLeg.yRot = ((float)Math.PI / 10F);
+            this.rightLeg.zRot = 0.07853982F;
+            this.leftLeg.xRot = -1.4137167F;
+            this.leftLeg.yRot = (-(float)Math.PI / 10F);
+            this.leftLeg.zRot = -0.07853982F;
+        } else {
+            this.rightArm.xRot = Mth.cos(p_102929_ * 0.6662F + (float)Math.PI) * 2.0F * p_102930_ * 0.5F;
+            this.rightArm.yRot = 0.0F;
+            this.rightArm.zRot = 0.0F;
+            this.leftArm.xRot = Mth.cos(p_102929_ * 0.6662F) * 2.0F * p_102930_ * 0.5F;
+            this.leftArm.yRot = 0.0F;
+            this.leftArm.zRot = 0.0F;
+            this.rightLeg.xRot = Mth.cos(p_102929_ * 0.6662F) * 1.4F * p_102930_ * 0.5F;
+            this.rightLeg.yRot = 0.0F;
+            this.rightLeg.zRot = 0.0F;
+            this.leftLeg.xRot = Mth.cos(p_102929_ * 0.6662F + (float)Math.PI) * 1.4F * p_102930_ * 0.5F;
+            this.leftLeg.yRot = 0.0F;
+            this.leftLeg.zRot = 0.0F;
+        }
+
         this.head.yRot = p_102932_ * ((float)Math.PI / 180F);
         this.head.xRot = p_102933_ * ((float)Math.PI / 180F);
 
