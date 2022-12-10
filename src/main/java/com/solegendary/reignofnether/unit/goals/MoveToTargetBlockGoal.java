@@ -32,12 +32,14 @@ public class MoveToTargetBlockGoal extends Goal {
     public boolean canContinueToUse() {
 
         // PathNavigation seems to have a max length so restart it if we haven't actually reached the target yet
-        if (this.mob.getNavigation().isDone() &&
+        if (this.mob.getNavigation().isDone() && moveTarget != null &&
             this.mob.getOnPos().distSqr(new Vec3i(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ())) > 1) {
             this.start();
             return true;
         }
-        else if (this.mob.getNavigation().isDone() || moveTarget == null) {
+        else if (moveTarget == null)
+            return false;
+        else if (this.mob.getNavigation().isDone()) {
             if (!persistent)
                 moveTarget = null;
             return false;

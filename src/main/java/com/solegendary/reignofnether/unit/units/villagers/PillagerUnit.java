@@ -23,6 +23,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Pillager;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -150,6 +151,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
 
     @Override
     public void onBuildingSpawn() {
-        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
+        ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
+        this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
     }
 }
