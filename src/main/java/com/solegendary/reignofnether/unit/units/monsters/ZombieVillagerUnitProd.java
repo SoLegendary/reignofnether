@@ -27,7 +27,7 @@ public class ZombieVillagerUnitProd extends ProductionItem {
         super(building, ResourceCosts.ZombieVillager.TICKS);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), building.ownerName);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = ResourceCosts.ZombieVillager.FOOD;
         this.woodCost = ResourceCosts.ZombieVillager.WOOD;
@@ -48,7 +48,7 @@ public class ZombieVillagerUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
+            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
                 FormattedCharSequence.forward("Zombie Villager", Style.EMPTY.withBold(true)),
@@ -69,7 +69,7 @@ public class ZombieVillagerUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName, first),
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, itemName, first),
             null,
             null
         );

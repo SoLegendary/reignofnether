@@ -24,7 +24,7 @@ public class SkeletonUnitProd extends ProductionItem {
         super(building, ResourceCosts.Skeleton.TICKS);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.SKELETON_UNIT.get(), building.ownerName);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.SKELETON_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = ResourceCosts.Skeleton.FOOD;
         this.woodCost = ResourceCosts.Skeleton.WOOD;
@@ -45,7 +45,7 @@ public class SkeletonUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
+            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
                 FormattedCharSequence.forward("Skeleton", Style.EMPTY.withBold(true)),
@@ -66,7 +66,7 @@ public class SkeletonUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName, first),
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, itemName, first),
             null,
             null
         );

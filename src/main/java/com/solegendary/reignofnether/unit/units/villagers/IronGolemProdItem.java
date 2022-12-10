@@ -27,7 +27,7 @@ public class IronGolemProdItem extends ProductionItem {
         super(building, ResourceCosts.IronGolem.TICKS);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.IRON_GOLEM_UNIT.get(), building.ownerName);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.IRON_GOLEM_UNIT.get(), building.ownerName, false);
         };
         this.foodCost = ResourceCosts.IronGolem.FOOD;
         this.woodCost = ResourceCosts.IronGolem.WOOD;
@@ -48,11 +48,11 @@ public class IronGolemProdItem extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
+            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
                 FormattedCharSequence.forward("Iron Golem", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.IronGolem.FOOD + "\uE002  " + ResourceCosts.IronGolem.ORE, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE000  " + ResourceCosts.IronGolem.FOOD + "  \uE002  " + ResourceCosts.IronGolem.ORE, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("\uE003  " + ResourceCosts.IronGolem.POPULATION + "     \uE004 " + ResourceCosts.IronGolem.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A hulking golem of metal with a powerful melee attack and high armour.", Style.EMPTY)
@@ -69,7 +69,7 @@ public class IronGolemProdItem extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName, first),
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, itemName, first),
             null,
             null
         );

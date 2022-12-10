@@ -24,7 +24,7 @@ public class CreeperUnitProd extends ProductionItem {
         super(building, ResourceCosts.Creeper.TICKS);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.CREEPER_UNIT.get(), building.ownerName);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.CREEPER_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = ResourceCosts.Creeper.FOOD;
         this.woodCost = ResourceCosts.Creeper.WOOD;
@@ -45,7 +45,7 @@ public class CreeperUnitProd extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
+            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
                 FormattedCharSequence.forward("Creeper", Style.EMPTY.withBold(true)),

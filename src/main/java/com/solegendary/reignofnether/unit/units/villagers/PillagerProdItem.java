@@ -27,7 +27,7 @@ public class PillagerProdItem extends ProductionItem {
         super(building, ResourceCosts.Pillager.TICKS);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.PILLAGER_UNIT.get(), building.ownerName);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.PILLAGER_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = ResourceCosts.Pillager.FOOD;
         this.woodCost = ResourceCosts.Pillager.WOOD;
@@ -48,7 +48,7 @@ public class PillagerProdItem extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.startProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName),
+            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
                 FormattedCharSequence.forward("Pillager", Style.EMPTY.withBold(true)),
@@ -69,7 +69,7 @@ public class PillagerProdItem extends ProductionItem {
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName, first),
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, itemName, first),
             null,
             null
         );

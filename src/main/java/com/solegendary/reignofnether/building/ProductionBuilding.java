@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnitProd;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnitProd;
+import com.solegendary.reignofnether.unit.units.villagers.IronGolemProdItem;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerProdItem;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerProdItem;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnitProd;
@@ -60,16 +61,32 @@ public abstract class ProductionBuilding extends Building {
         return this.productionQueue.size() > 0;
     }
 
-    public void produceUnit(ServerLevel level, EntityType<? extends Unit> entityType, String ownerName) {
+    // start with the centre pos then go down and look at adjacent blocks until we reach a non-solid block
+    public BlockPos getIndoorSpawnPoint(ServerLevel level) {
+        BlockPos spawnPoint = BuildingUtils.getCentrePos(blocks);
+
+        while (level.getBlockState(spawnPoint.below()).isAir())
+            spawnPoint = spawnPoint.offset(0,-1,0);
+
+        return spawnPoint;
+    }
+
+    public void produceUnit(ServerLevel level, EntityType<? extends Unit> entityType, String ownerName, boolean spawnIndoors) {
         Entity entity = entityType.create(level);
         if (entity != null) {
             level.addFreshEntity(entity);
             ((Unit) entity).setOwnerName(ownerName);
             ((Unit) entity).onBuildingSpawn();
 
-            if (rallyPoint != null) {
-                // spawn unit at centre of the block
-                BlockPos spawnPoint = getClosestGroundPos(rallyPoint, spawnRadiusOffset);
+            BlockPos defaultRallyPoint = getMinCorner(this.blocks).offset(
+                    0.5f - spawnRadiusOffset,
+                    0.5f,
+                    0.5f - spawnRadiusOffset);
+
+            BlockPos rallyPoint = this.rallyPoint == null ? defaultRallyPoint : this.rallyPoint;
+
+            if (spawnIndoors) {
+                BlockPos spawnPoint = getIndoorSpawnPoint(level);
                 entity.moveTo(new Vec3(
                         spawnPoint.getX() + 0.5f,
                         spawnPoint.getY() + 0.5f,
@@ -81,7 +98,7 @@ public abstract class ProductionBuilding extends Building {
                             UnitAction.MOVE,
                             -1,
                             new int[] { entity.getId() },
-                            this.rallyPoint
+                            rallyPoint
                     );
                 });
             }
@@ -110,6 +127,7 @@ public abstract class ProductionBuilding extends Building {
                 case ZombieVillagerUnitProd.itemName -> prodItem = new ZombieVillagerUnitProd(building);
                 case VindicatorProdItem.itemName -> prodItem = new VindicatorProdItem(building);
                 case PillagerProdItem.itemName -> prodItem = new PillagerProdItem(building);
+                case IronGolemProdItem.itemName -> prodItem = new IronGolemProdItem(building);
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside
