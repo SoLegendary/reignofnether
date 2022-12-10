@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.pathfinder.Path;
@@ -29,7 +30,14 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     public boolean canContinueToUse() {
-        if (this.mob.getNavigation().isDone() || moveTarget == null) {
+
+        // PathNavigation seems to have a max length so restart it if we haven't actually reached the target yet
+        if (this.mob.getNavigation().isDone() &&
+            this.mob.getOnPos().distSqr(new Vec3i(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ())) > 1) {
+            this.start();
+            return true;
+        }
+        else if (this.mob.getNavigation().isDone() || moveTarget == null) {
             if (!persistent)
                 moveTarget = null;
             return false;

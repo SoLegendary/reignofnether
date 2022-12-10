@@ -126,7 +126,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, true, 1.0f, 0);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
         this.attackGoal = new UnitBowAttackGoal<>(this, attackCooldown, attackRange);
     }
