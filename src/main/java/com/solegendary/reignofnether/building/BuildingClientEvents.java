@@ -296,7 +296,7 @@ public class BuildingClientEvents {
                     MiscUtil.isRightClickDown(MC))
                     MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
                 else
-                    MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 0.5f);
+                    MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f);
             }
 
 
@@ -424,7 +424,7 @@ public class BuildingClientEvents {
             // set rally points
             if (!Keybindings.altMod.isDown()) {
                 for (Building selBuilding : selectedBuildings) {
-                    if (selBuilding instanceof ProductionBuilding selProdBuilding) {
+                    if (selBuilding instanceof ProductionBuilding selProdBuilding && getPlayerToBuildingRelationship(selBuilding) == Relationship.OWNED) {
                         BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();
                         selProdBuilding.setRallyPoint(rallyPoint);
                         BuildingServerboundPacket.setRallyPoint(

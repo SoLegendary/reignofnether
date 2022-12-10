@@ -14,9 +14,8 @@ TODO before playtesting:
     - Ranged unit damage is only based on their weapon
     - Melee unit damage is based on attribute + weapon
 
-TEST EVERYTHING!
-
 4. setup shockbyte server (~3gb?)
+
 
 
 TODO bugs/features:

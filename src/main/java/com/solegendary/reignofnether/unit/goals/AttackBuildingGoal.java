@@ -74,8 +74,7 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
     // only count as building if in range of the target - building is actioned in Building.tick()
     public boolean isAttacking() {
         if (buildingTarget != null && this.moveTarget != null)
-            if (BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED)
-                return Math.sqrt(moveTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) < ((AttackerUnit) mob).getAttackRange();
+            return Math.sqrt(moveTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) < ((AttackerUnit) mob).getAttackRange();
         return false;
     }
 
