@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnitProd;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnitProd;
@@ -76,7 +78,9 @@ public abstract class ProductionBuilding extends Building {
         if (entity != null) {
             level.addFreshEntity(entity);
             ((Unit) entity).setOwnerName(ownerName);
-            ((Unit) entity).onBuildingSpawn();
+
+            if (entity instanceof AttackerUnit)
+                ((AttackerUnit) entity).setupEquipmentAndUpgrades();
 
             BlockPos defaultRallyPoint = getMinCorner(this.blocks).offset(
                     0.5f - spawnRadiusOffset,
@@ -128,6 +132,8 @@ public abstract class ProductionBuilding extends Building {
                 case VindicatorProdItem.itemName -> prodItem = new VindicatorProdItem(building);
                 case PillagerProdItem.itemName -> prodItem = new PillagerProdItem(building);
                 case IronGolemProdItem.itemName -> prodItem = new IronGolemProdItem(building);
+
+                case ResearchVindicatorAxes.itemName -> prodItem = new ResearchVindicatorAxes(building);
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside

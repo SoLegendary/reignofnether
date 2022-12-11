@@ -1,24 +1,14 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
-import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.unit.Relationship;
-import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
-import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.util.Faction;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 
 // Defines method bodies for Units
@@ -93,8 +83,4 @@ public interface Unit {
     public void setFollowTarget(@Nullable LivingEntity target);
 
     public void initialiseGoals();
-
-    // do one-off stuff to set up the mob when spawned by buildings
-    // eg. equipment isn't provided automatically
-    default void onBuildingSpawn() { }
 }

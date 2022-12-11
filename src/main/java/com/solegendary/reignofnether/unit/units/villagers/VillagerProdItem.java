@@ -41,7 +41,7 @@ public class VillagerProdItem extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            "Villager",
+            VillagerProdItem.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
             hotkey,
@@ -51,7 +51,7 @@ public class VillagerProdItem extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward("Villager", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(VillagerProdItem.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Villager.FOOD, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("\uE003  " + ResourceCosts.Villager.POPULATION + "     \uE004 " + ResourceCosts.Villager.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
@@ -62,7 +62,7 @@ public class VillagerProdItem extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            "Villager",
+            VillagerProdItem.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
             (Keybinding) null,

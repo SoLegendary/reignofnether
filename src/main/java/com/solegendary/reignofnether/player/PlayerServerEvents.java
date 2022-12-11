@@ -36,11 +36,6 @@ public class PlayerServerEvents {
         System.out.println("Player logged in: " + evt.getEntity().getName().getString() + ", id: " + evt.getEntity().getId());
         ServerPlayer serverPlayer = (ServerPlayer) evt.getEntity();
         players.add((ServerPlayer) evt.getEntity());
-
-        //ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
-        //AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 100.0D, AttributeModifier.Operation.ADDITION);
-        //cbowStack.addAttributeModifier(.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
-        //evt.getEntity().setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
     }
 
     @SubscribeEvent

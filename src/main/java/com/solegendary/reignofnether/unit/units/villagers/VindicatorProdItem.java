@@ -41,7 +41,7 @@ public class VindicatorProdItem extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            "Vindicator",
+            VindicatorProdItem.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
             hotkey,
@@ -51,7 +51,7 @@ public class VindicatorProdItem extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward("Vindicator", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(VindicatorProdItem.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Vindicator.FOOD, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("\uE003  " + ResourceCosts.Vindicator.POPULATION + "     \uE004 " + ResourceCosts.Vindicator.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
@@ -62,7 +62,7 @@ public class VindicatorProdItem extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            "Vindicator",
+            VindicatorProdItem.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
             (Keybinding) null,

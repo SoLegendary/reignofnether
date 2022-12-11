@@ -335,10 +335,12 @@ public class HudClientEvents {
             }
             else if (hudSelBuildingOwned && hudSelectedBuilding instanceof ProductionBuilding selProdBuilding) {
                 for (Button productionButton : selProdBuilding.productionButtons) {
-                    productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
-                    productionButtons.add(productionButton);
-                    renderedButtons.add(productionButton);
-                    blitX += iconFrameSize;
+                    if (!productionButton.isHidden.get()) {
+                        productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                        productionButtons.add(productionButton);
+                        renderedButtons.add(productionButton);
+                        blitX += iconFrameSize;
+                    }
                 }
             }
         }

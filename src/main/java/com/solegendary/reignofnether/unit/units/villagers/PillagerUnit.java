@@ -86,7 +86,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 5.0f;
+    final static public float attackDamage = 6.0f;
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
@@ -119,11 +119,6 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
-
-        // need to do this outside the goal so it ticks down while not attacking
-        // only needed for attack goals created by reignofnether like RangedCrossbowAttackUnitGoal
-        //if (attackGoal != null)
-        //    attackGoal.tickCooldown();
     }
 
     public void resetBehaviours(Unit unit) {
@@ -150,7 +145,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     }
 
     @Override
-    public void onBuildingSpawn() {
+    public void setupEquipmentAndUpgrades() {
         ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
         this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
     }

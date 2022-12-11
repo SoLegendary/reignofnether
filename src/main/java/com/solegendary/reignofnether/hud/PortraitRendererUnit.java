@@ -186,7 +186,7 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sword.png")); // DAMAGE
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sparkler.png")); // ATTACK SPEED
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/bow.png")); // RANGE
-            statStrings.add(String.valueOf((int) attackerUnit.getAttackDamage()));
+            statStrings.add(String.valueOf((int) attackerUnit.getAttackDamage() + (int) attackerUnit.getWeaponDamageModifier()));
             statStrings.add(String.valueOf((int) (100 / attackerUnit.getAttackCooldown())));
             statStrings.add(String.valueOf((int) (attackerUnit.getAttackRange())));
         }

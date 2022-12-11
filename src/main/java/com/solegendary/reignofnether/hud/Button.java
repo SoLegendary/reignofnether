@@ -48,7 +48,7 @@ public class Button {
      * Predicate      x     -> boolean
      */
     public Supplier<Boolean> isSelected; // controls selected frame rendering
-    public Supplier<Boolean> isActive; // special highlighting for an on-state (eg. auto-cast/auto-producing)
+    public Supplier<Boolean> isHidden; // special highlighting for an on-state (eg. auto-cast/auto-producing)
     public Supplier<Boolean> isEnabled; // is the button allowed to be used right now? (eg. off cooldown)
     public Runnable onLeftClick;
     public Runnable onRightClick;
@@ -64,14 +64,14 @@ public class Button {
 
     // constructor for ability/action/production buttons
     public Button(String name, int iconSize, ResourceLocation rl, @Nullable Keybinding hotkey, Supplier<Boolean> isSelected,
-                  Supplier<Boolean> isActive, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
+                  Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
                   @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
         this.iconResource = rl;
         this.iconSize = iconSize;
         this.hotkey = hotkey;
         this.isSelected = isSelected;
-        this.isActive = isActive;
+        this.isHidden = isHidden;
         this.isEnabled = isEnabled;
         this.onLeftClick = onLeftClick;
         this.onRightClick = onRightClick;
@@ -80,14 +80,14 @@ public class Button {
 
     // constructor for unit selection buttons
     public Button(String name, int iconSize, ResourceLocation rl, LivingEntity entity, Supplier<Boolean> isSelected,
-                  Supplier<Boolean> isActive, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
+                  Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
                   @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
         this.iconResource = rl;
         this.iconSize = iconSize;
         this.entity = entity;
         this.isSelected = isSelected;
-        this.isActive = isActive;
+        this.isHidden = isHidden;
         this.isEnabled = isEnabled;
         this.onLeftClick = onLeftClick;
         this.onRightClick = onRightClick;
@@ -96,14 +96,14 @@ public class Button {
 
     // constructor for building selection buttons
     public Button(String name, int iconSize, ResourceLocation rl, Building building, Supplier<Boolean> isSelected,
-                  Supplier<Boolean> isActive, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
+                  Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
                   @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
         this.iconResource = rl;
         this.iconSize = iconSize;
         this.building = building;
         this.isSelected = isSelected;
-        this.isActive = isActive;
+        this.isHidden = isHidden;
         this.isEnabled = isEnabled;
         this.onLeftClick = onLeftClick;
         this.onRightClick = onRightClick;

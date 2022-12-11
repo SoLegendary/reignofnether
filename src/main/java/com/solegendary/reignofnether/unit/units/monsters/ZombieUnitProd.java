@@ -38,7 +38,7 @@ public class ZombieUnitProd extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            "Zombie",
+            ZombieUnitProd.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
             hotkey,
@@ -48,7 +48,7 @@ public class ZombieUnitProd extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward("Zombie", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(ZombieUnitProd.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Zombie.FOOD, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("\uE003  " + ResourceCosts.Zombie.POPULATION + "     \uE004 " + ResourceCosts.Zombie.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
@@ -59,7 +59,7 @@ public class ZombieUnitProd extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            "Zombie",
+            ZombieUnitProd.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
             (Keybinding) null,

@@ -25,6 +25,8 @@ TODO bugs/features:
 
 TODO bugs/features (backlog)
 
+0. When box selecting if you release on top of a preselected unit it will duplicate it in the selected list
+
 1. Arm animations and block cracking/particles
 2. Fix body rendering issues (to do with portrait head rendering)
 3. Minimap 90deg rotations

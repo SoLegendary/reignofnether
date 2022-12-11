@@ -80,7 +80,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 5.0f;
+    final static public float attackDamage = 4.0f;
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
@@ -144,7 +144,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     }
 
     @Override
-    public void onBuildingSpawn() {
+    public void setupEquipmentAndUpgrades() {
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
     }
 }

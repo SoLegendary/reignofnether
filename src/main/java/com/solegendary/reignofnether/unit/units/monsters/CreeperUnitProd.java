@@ -38,7 +38,7 @@ public class CreeperUnitProd extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            "Creeper",
+            CreeperUnitProd.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
             hotkey,
@@ -48,7 +48,7 @@ public class CreeperUnitProd extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward("Creeper", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(CreeperUnitProd.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Creeper.FOOD + "     \uE002  " + ResourceCosts.Creeper.ORE, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("\uE003  " + ResourceCosts.Creeper.POPULATION + "     \uE004 " + ResourceCosts.Creeper.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
@@ -60,7 +60,7 @@ public class CreeperUnitProd extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            "Creeper",
+            CreeperUnitProd.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
             (Keybinding) null,

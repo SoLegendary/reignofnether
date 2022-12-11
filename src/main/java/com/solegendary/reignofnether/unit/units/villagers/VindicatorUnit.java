@@ -1,6 +1,9 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.google.common.collect.Multimap;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
@@ -16,6 +19,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -23,6 +28,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -30,6 +36,7 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     // region
@@ -85,12 +92,12 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 3.0f;
+    final static public float attackDamage = 5.0f;
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 2.0f;
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
-    final static public int attackCooldown = 30;
+    final static public int attackCooldown = 50;
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -146,7 +153,30 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     }
 
     @Override
-    public void onBuildingSpawn() {
-        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
+    public void setupEquipmentAndUpgrades() {
+
+        // weapon is purely visual, damage is based solely on entity attribute ATTACK_DAMAGE
+        Item axe = Items.IRON_AXE;
+        int damageMod = 0;
+        if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchVindicatorAxes.itemName)) {
+            axe = Items.DIAMOND_AXE;
+            damageMod = 2;
+        }
+        ItemStack axeStack = new ItemStack(axe);
+        AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), damageMod, AttributeModifier.Operation.ADDITION);
+        axeStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+
+        this.setItemSlot(EquipmentSlot.MAINHAND, axeStack);
+    }
+
+    @Override
+    public double getWeaponDamageModifier() {
+        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+
+        if (!itemStack.isEmpty())
+            for(AttributeModifier attr : itemStack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE))
+                if (attr.getOperation() == AttributeModifier.Operation.ADDITION)
+                    return attr.getAmount();
+        return 0;
     }
 }

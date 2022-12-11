@@ -41,7 +41,7 @@ public class IronGolemProdItem extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            "Iron Golem",
+            IronGolemProdItem.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
                 hotkey,
@@ -51,7 +51,7 @@ public class IronGolemProdItem extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward("Iron Golem", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(IronGolemProdItem.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.IronGolem.FOOD + "  \uE002  " + ResourceCosts.IronGolem.ORE, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("\uE003  " + ResourceCosts.IronGolem.POPULATION + "     \uE004 " + ResourceCosts.IronGolem.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
@@ -62,7 +62,7 @@ public class IronGolemProdItem extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            "Iron Golem",
+            IronGolemProdItem.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
             (Keybinding) null,

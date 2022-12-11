@@ -118,4 +118,12 @@ public class ResourceCosts {
         public static final int ORE = 100;
         public static final int SUPPLY = 10;
     }
+
+
+    public static class ResearchVindicatorAxes {
+        public static final int FOOD = 0;
+        public static final int WOOD = 200;
+        public static final int ORE = 400;
+        public static final int TICKS = 100;
+    }
 }

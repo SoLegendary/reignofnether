@@ -15,10 +15,10 @@ public abstract class ProductionItem {
 
     public static String itemName;
 
-    public int foodCost;
-    public int woodCost;
-    public int oreCost;
-    public int popCost; // 0 for non-unit prodItems
+    public int foodCost = 0;
+    public int woodCost = 0;
+    public int oreCost = 0;
+    public int popCost = 0;
 
     public int ticksToProduce; // build time in ticks
     public int ticksLeft;
@@ -48,6 +48,7 @@ public abstract class ProductionItem {
                         (currentPop + popCost) <= popSupply);
         return false;
     }
+
     public boolean canAffordPopulation(String ownerName) {
         int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), ownerName);
         int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
@@ -57,6 +58,7 @@ public abstract class ProductionItem {
                 return (currentPop + popCost) <= popSupply;
         return false;
     }
+
     public boolean isBelowMaxPopulation(String ownerName) {
         int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), ownerName);
         int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
@@ -64,6 +66,16 @@ public abstract class ProductionItem {
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName))
                 return (currentPop + popCost) <= ResourceCosts.MAX_POPULATION;
+        return false;
+    }
+
+    // some items (eg. research) are enabled only if the item doesn't exist in any existing clientside queue
+    public static boolean itemIsBeingProduced(String itemName) {
+        for (Building building : BuildingClientEvents.getBuildings())
+            if (building instanceof ProductionBuilding prodBuilding)
+                for (ProductionItem prodItem : prodBuilding.productionQueue)
+                    if (prodItem.getItemName().equals(itemName))
+                        return true;
         return false;
     }
 

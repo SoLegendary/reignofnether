@@ -38,7 +38,7 @@ public class SkeletonUnitProd extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            "Skeleton",
+            SkeletonUnitProd.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png"),
             hotkey,
@@ -48,7 +48,7 @@ public class SkeletonUnitProd extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward("Skeleton", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(SkeletonUnitProd.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Skeleton.FOOD + "     \uE001  " + ResourceCosts.Skeleton.WOOD, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("\uE003  " + ResourceCosts.Skeleton.POPULATION + "     \uE004 " + ResourceCosts.Skeleton.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
@@ -59,7 +59,7 @@ public class SkeletonUnitProd extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            "Skeleton",
+            SkeletonUnitProd.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png"),
             (Keybinding) null,

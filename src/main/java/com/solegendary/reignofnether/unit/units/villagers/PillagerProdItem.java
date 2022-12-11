@@ -41,7 +41,7 @@ public class PillagerProdItem extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            "Pillager",
+            PillagerProdItem.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/pillager.png"),
             hotkey,
@@ -51,7 +51,7 @@ public class PillagerProdItem extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward("Pillager", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(PillagerProdItem.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Pillager.FOOD + "     \uE001  " + ResourceCosts.Pillager.WOOD, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("\uE003  " + ResourceCosts.Pillager.POPULATION + "     \uE004 " + ResourceCosts.Pillager.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
@@ -62,7 +62,7 @@ public class PillagerProdItem extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            "Pillager",
+            PillagerProdItem.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/pillager.png"),
             (Keybinding) null,
