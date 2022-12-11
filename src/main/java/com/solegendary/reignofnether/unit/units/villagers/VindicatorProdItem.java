@@ -9,6 +9,8 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
@@ -17,6 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class VindicatorProdItem extends ProductionItem {
@@ -40,6 +43,18 @@ public class VindicatorProdItem extends ProductionItem {
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
+
+        List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
+                FormattedCharSequence.forward(VindicatorProdItem.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Vindicator.FOOD, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Vindicator.POPULATION + "     \uE004 " + ResourceCosts.Vindicator.TICKS / 20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("A villager armed with an axe for melee combat.", Style.EMPTY)
+        ));
+        if (ResearchClient.hasResearch(ResearchVindicatorAxes.itemName)) {
+            tooltipLines.add(FormattedCharSequence.forward("", Style.EMPTY));
+            tooltipLines.add(FormattedCharSequence.forward("Upgraded with diamond axes that deal +2 damage", Style.EMPTY.withBold(true)));
+        }
         return new Button(
             VindicatorProdItem.itemName,
             14,
@@ -50,13 +65,7 @@ public class VindicatorProdItem extends ProductionItem {
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(
-                FormattedCharSequence.forward(VindicatorProdItem.itemName, Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Vindicator.FOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Vindicator.POPULATION + "     \uE004 " + ResourceCosts.Vindicator.TICKS/20 + "s", MyRenderer.iconStyle),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A villager armed with an axe for melee combat.", Style.EMPTY)
-            )
+            tooltipLines
         );
     }
 

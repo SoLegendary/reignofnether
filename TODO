@@ -10,31 +10,29 @@ TODO before playtesting:
     - buildings
     - resource gathering
 
-3. Fix unit damage to be based only on their attribute damage, currently:
-    - Ranged unit damage is only based on their weapon
-    - Melee unit damage is based on attribute + weapon
-
 4. setup shockbyte server (~3gb?)
 
 
 
 TODO bugs/features:
 
-1. Reduce size of initial foundations for some buildings that are low to the ground
+1. Husks (upgraded from Zombies at the lab)
+    - 20 -> 25hp, doesn't burn in sunlight
+2. Strays (upgraded from Skeletons at the lab)
+    - Fires slowing arrows
+
+3. Reduce size of initial foundations for some buildings that are low to the ground
 
 
 TODO bugs/features (backlog)
-
-0. When box selecting if you release on top of a preselected unit it will duplicate it in the selected list
 
 1. Arm animations and block cracking/particles
 2. Fix body rendering issues (to do with portrait head rendering)
 3. Minimap 90deg rotations
 4. Show unit outlines behind blocks
+5. Append extra text to production items for upgraded units
 
 TODO buildings/units (backlog)
-
-Upgrade production items
 
 Villager faction:
     - town centre (move villager units to this)

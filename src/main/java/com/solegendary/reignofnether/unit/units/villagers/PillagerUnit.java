@@ -1,6 +1,9 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
+import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
@@ -26,6 +29,7 @@ import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -91,7 +95,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 10.0F; // only used by ranged units or melee building attackers
-    final static public int attackCooldown = 45;
+    final static public int attackCooldown = 35;
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -147,6 +151,9 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     @Override
     public void setupEquipmentAndUpgrades() {
         ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
+        if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchPillagerCrossbows.itemName))
+            cbowStack.enchant(Enchantments.MULTISHOT, 1);
+
         this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
     }
 }

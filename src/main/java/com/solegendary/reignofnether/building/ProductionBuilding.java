@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
@@ -134,6 +135,7 @@ public abstract class ProductionBuilding extends Building {
                 case IronGolemProdItem.itemName -> prodItem = new IronGolemProdItem(building);
 
                 case ResearchVindicatorAxes.itemName -> prodItem = new ResearchVindicatorAxes(building);
+                case ResearchPillagerCrossbows.itemName -> prodItem = new ResearchPillagerCrossbows(building);
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside

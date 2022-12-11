@@ -126,4 +126,10 @@ public class ResourceCosts {
         public static final int ORE = 400;
         public static final int TICKS = 100;
     }
+    public static class ResearchPillagerCrossbows {
+        public static final int FOOD = 0;
+        public static final int WOOD = 500;
+        public static final int ORE = 250;
+        public static final int TICKS = 100;
+    }
 }

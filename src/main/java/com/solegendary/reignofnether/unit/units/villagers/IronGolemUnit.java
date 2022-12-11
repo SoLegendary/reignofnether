@@ -84,7 +84,7 @@ public class IronGolemUnit extends IronGolem implements com.solegendary.reignofn
     final static public float attackDamage = 10.0f;
     final static public float maxHealth = 50.0f;
     final static public float armorValue = 4.0f;
-    final static public float movementSpeed = 0.25f;
+    final static public float movementSpeed = 0.20f;
     final static public float attackRange = 3; // only used by ranged units or melee building attackers
     final static public int attackCooldown = 30;
     final static public float aggroRange = 10;

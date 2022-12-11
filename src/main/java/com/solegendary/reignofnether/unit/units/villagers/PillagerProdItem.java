@@ -9,6 +9,8 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
@@ -17,6 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PillagerProdItem extends ProductionItem {
@@ -39,7 +42,21 @@ public class PillagerProdItem extends ProductionItem {
         return PillagerProdItem.itemName;
     }
 
+
+
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
+        List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
+                FormattedCharSequence.forward(PillagerProdItem.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Pillager.FOOD + "     \uE001  " + ResourceCosts.Pillager.WOOD, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Pillager.POPULATION + "     \uE004 " + ResourceCosts.Pillager.TICKS/20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("A villager armed with a crossbow for ranged combat.", Style.EMPTY)
+        ));
+        if (ResearchClient.hasResearch(ResearchVindicatorAxes.itemName)) {
+            tooltipLines.add(FormattedCharSequence.forward("", Style.EMPTY));
+            tooltipLines.add(FormattedCharSequence.forward("Upgraded with multishot crossbows that fire triple arrows", Style.EMPTY.withBold(true)));
+        }
+
         return new Button(
             PillagerProdItem.itemName,
             14,
@@ -50,13 +67,7 @@ public class PillagerProdItem extends ProductionItem {
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(
-                FormattedCharSequence.forward(PillagerProdItem.itemName, Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Pillager.FOOD + "     \uE001  " + ResourceCosts.Pillager.WOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Pillager.POPULATION + "     \uE004 " + ResourceCosts.Pillager.TICKS/20 + "s", MyRenderer.iconStyle),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A villager armed with a crossbow for ranged combat.", Style.EMPTY)
-            )
+            tooltipLines
         );
     }
 

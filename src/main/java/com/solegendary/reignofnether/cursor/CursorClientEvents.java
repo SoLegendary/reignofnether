@@ -208,7 +208,9 @@ public class CursorClientEvents {
                     (int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y
             );
             for (LivingEntity entity : MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, LivingEntity.class, MC.level)) {
-                if (MyMath.isPointInsideRect3d(uvwp, entity.getBoundingBox().getCenter()) && entity.getId() != MC.player.getId())
+                if (MyMath.isPointInsideRect3d(uvwp, entity.getBoundingBox().getCenter()) &&
+                    entity.getId() != MC.player.getId() &&
+                    !UnitClientEvents.getPreselectedUnits().contains(entity))
                     UnitClientEvents.addPreselectedUnit(entity);
             }
         }
