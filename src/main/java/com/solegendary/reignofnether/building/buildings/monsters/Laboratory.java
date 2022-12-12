@@ -1,11 +1,14 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.ResourceCosts;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
@@ -45,6 +48,30 @@ public class Laboratory extends ProductionBuilding {
             this.productionButtons = Arrays.asList(
                 CreeperUnitProd.getStartButton(this, Keybindings.keyQ)
             );
+
+        // TODO require research and add the lightning rod after research completion
+        this.abilities.add(
+            new AbilityButton(
+                "Call Lightning",
+                14,
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_on.png"),
+                Keybindings.keyL,
+                () -> false,
+                () -> false, // requires research first
+                () -> true,
+                () -> CursorClientEvents.setLeftClickAction(UnitAction.CALL_LIGHTNING),
+                null,
+                List.of(
+                    FormattedCharSequence.forward("Call Lightning", Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward("\uE004  " + 100/20 + "s", MyRenderer.iconStyle),
+                    FormattedCharSequence.forward("", Style.EMPTY),
+                    FormattedCharSequence.forward("Summon a bolt of lightning at the targeted location.", Style.EMPTY),
+                    FormattedCharSequence.forward("Can be used to charge creepers and damage enemies.", Style.EMPTY)
+                ),
+                UnitAction.CALL_LIGHTNING,
+                100, 20, 0
+            )
+        );
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
@@ -69,6 +96,7 @@ public class Laboratory extends ProductionBuilding {
                         FormattedCharSequence.forward("A sinister lab that can research new technologies and", Style.EMPTY),
                         FormattedCharSequence.forward("produce creepers. Can be upgraded to have a lightning rod.", Style.EMPTY)
                 ),
+                null,
                 0,0,0
         );
     }

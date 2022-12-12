@@ -47,7 +47,7 @@ public class VindicatorProdItem extends ProductionItem {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
                 FormattedCharSequence.forward(VindicatorProdItem.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Vindicator.FOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Vindicator.POPULATION + "     \uE004 " + ResourceCosts.Vindicator.TICKS / 20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Vindicator.POPULATION + "     \uE004  " + ResourceCosts.Vindicator.TICKS / 20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A villager armed with an axe for melee combat.", Style.EMPTY)
         ));

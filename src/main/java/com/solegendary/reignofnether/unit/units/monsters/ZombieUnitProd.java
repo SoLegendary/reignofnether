@@ -50,7 +50,7 @@ public class ZombieUnitProd extends ProductionItem {
             List.of(
                 FormattedCharSequence.forward(ZombieUnitProd.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Zombie.FOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Zombie.POPULATION + "     \uE004 " + ResourceCosts.Zombie.TICKS/20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Zombie.POPULATION + "     \uE004  " + ResourceCosts.Zombie.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("An undead monster with a basic melee attack.", Style.EMPTY)
             )

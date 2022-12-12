@@ -63,6 +63,7 @@ public class PumpkinFarm extends Building {
                         FormattedCharSequence.forward("A pumpkin field that be can harvested to collect food.", Style.EMPTY),
                         FormattedCharSequence.forward("Pumpkins grow slowly but do not require replanting.", Style.EMPTY)
                 ),
+                null,
                 0,0,0
         );
     }

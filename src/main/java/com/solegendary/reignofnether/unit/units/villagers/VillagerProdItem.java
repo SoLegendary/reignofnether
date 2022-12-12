@@ -53,7 +53,7 @@ public class VillagerProdItem extends ProductionItem {
             List.of(
                 FormattedCharSequence.forward(VillagerProdItem.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Villager.FOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Villager.POPULATION + "     \uE004 " + ResourceCosts.Villager.TICKS/20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Villager.POPULATION + "     \uE004  " + ResourceCosts.Villager.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A worker unit that can construct or repair buildings and gather resources.", Style.EMPTY)
             )

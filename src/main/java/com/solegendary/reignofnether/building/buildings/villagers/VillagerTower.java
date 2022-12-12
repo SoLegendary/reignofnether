@@ -63,6 +63,7 @@ public class VillagerTower extends Building {
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("A lookout tower that can see into the distance.", Style.EMPTY)
             ),
+            null,
             0,0,0
         );
     }

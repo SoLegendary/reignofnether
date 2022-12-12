@@ -62,7 +62,7 @@ public class ResearchPillagerCrossbows extends ProductionItem {
                 List.of(
                         FormattedCharSequence.forward(ResearchPillagerCrossbows.itemName, Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.ResearchPillagerCrossbows.WOOD + "     \uE002  " + ResourceCosts.ResearchPillagerCrossbows.ORE, MyRenderer.iconStyle),
-                        FormattedCharSequence.forward("\uE004 " + ResourceCosts.ResearchPillagerCrossbows.TICKS/20 + "s", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("\uE004  " + ResourceCosts.ResearchPillagerCrossbows.TICKS/20 + "s", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Enchants the crossbows of all pillagers with multishot", Style.EMPTY)
                 )

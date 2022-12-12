@@ -333,12 +333,25 @@ public class HudClientEvents {
                 cancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
                 renderedButtons.add(cancelButton);
             }
-            else if (hudSelBuildingOwned && hudSelectedBuilding instanceof ProductionBuilding selProdBuilding) {
-                for (Button productionButton : selProdBuilding.productionButtons) {
-                    if (!productionButton.isHidden.get()) {
-                        productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
-                        productionButtons.add(productionButton);
-                        renderedButtons.add(productionButton);
+            else if (hudSelBuildingOwned) {
+
+                // production buttons on bottom row
+                if (hudSelectedBuilding instanceof ProductionBuilding selProdBuilding) {
+                    for (Button productionButton : selProdBuilding.productionButtons) {
+                        if (!productionButton.isHidden.get()) {
+                            productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                            productionButtons.add(productionButton);
+                            renderedButtons.add(productionButton);
+                            blitX += iconFrameSize;
+                        }
+                    }
+                }
+                blitY -= Button.iconFrameSize;
+                blitX = 0;
+                for (AbilityButton abilityButton : hudSelectedBuilding.getAbilities()) {
+                    if (!abilityButton.isHidden.get()) {
+                        abilityButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                        renderedButtons.add(abilityButton);
                         blitX += iconFrameSize;
                     }
                 }
@@ -374,7 +387,7 @@ public class HudClientEvents {
         }
 
         // ----------------------------------------------
-        // Unit icons to select tyoes and show healthbars
+        // Unit icons to select types and show healthbars
         // ----------------------------------------------
         blitXStart = blitX;
         blitY = screenHeight - iconFrameSize * 2 - 10;

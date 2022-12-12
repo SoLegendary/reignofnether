@@ -72,6 +72,7 @@ public class Barracks extends ProductionBuilding {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A training ground for Pillagers and Vindicators", Style.EMPTY)
                 ),
+                null,
                 0,0,0
         );
     }

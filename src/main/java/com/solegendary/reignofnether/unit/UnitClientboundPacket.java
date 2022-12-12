@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,7 +16,7 @@ import java.util.function.Supplier;
 
 public class UnitClientboundPacket {
 
-    private final UnitSyncAction action;
+    private final UnitSyncAction syncAction;
     private final int entityId;
     private final float health;
     private final double posX;
@@ -40,7 +41,7 @@ public class UnitClientboundPacket {
 
     // packet-handler functions
     public UnitClientboundPacket(
-        UnitSyncAction action,
+        UnitSyncAction syncAction,
         int unitId,
         float health,
         double posX,
@@ -48,7 +49,7 @@ public class UnitClientboundPacket {
         double posZ
     ) {
         // filter out non-owned entities so we can't control them
-        this.action = action;
+        this.syncAction = syncAction;
         this.entityId = unitId;
         this.health = health;
         this.posX = posX;
@@ -57,7 +58,7 @@ public class UnitClientboundPacket {
     }
 
     public UnitClientboundPacket(FriendlyByteBuf buffer) {
-        this.action = buffer.readEnum(UnitSyncAction.class);
+        this.syncAction = buffer.readEnum(UnitSyncAction.class);
         this.entityId = buffer.readInt();
         this.health = buffer.readFloat();
         this.posX = buffer.readDouble();
@@ -66,7 +67,7 @@ public class UnitClientboundPacket {
     }
 
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeEnum(this.action);
+        buffer.writeEnum(this.syncAction);
         buffer.writeInt(this.entityId);
         buffer.writeFloat(this.health);
         buffer.writeDouble(this.posX);
@@ -81,7 +82,7 @@ public class UnitClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> {
-                    switch (this.action) {
+                    switch (this.syncAction) {
                         case LEAVE_LEVEL -> UnitClientEvents.onEntityLeave(this.entityId);
                         case SYNC -> UnitClientEvents.syncUnitData(this.entityId, this.health, new Vec3(this.posX, this.posY, this.posZ));
                     }

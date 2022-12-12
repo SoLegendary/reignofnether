@@ -50,7 +50,7 @@ public class CreeperUnitProd extends ProductionItem {
             List.of(
                 FormattedCharSequence.forward(CreeperUnitProd.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Creeper.FOOD + "     \uE002  " + ResourceCosts.Creeper.ORE, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Creeper.POPULATION + "     \uE004 " + ResourceCosts.Creeper.TICKS/20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Creeper.POPULATION + "     \uE004  " + ResourceCosts.Creeper.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("An explosive monster that can blow up units", Style.EMPTY),
                 FormattedCharSequence.forward("and buildings alike. Has no regular attack.", Style.EMPTY)

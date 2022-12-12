@@ -53,7 +53,7 @@ public class ZombieVillagerUnitProd extends ProductionItem {
             List.of(
                 FormattedCharSequence.forward(ZombieVillagerUnitProd.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.ZombieVillager.FOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.ZombieVillager.POPULATION + "     \uE004 " + ResourceCosts.ZombieVillager.TICKS/20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.ZombieVillager.POPULATION + "     \uE004  " + ResourceCosts.ZombieVillager.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("An undead worker unit that can construct or repair buildings and gather resources.", Style.EMPTY)
             )

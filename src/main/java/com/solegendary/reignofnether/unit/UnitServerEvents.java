@@ -11,9 +11,11 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,6 +23,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.BowItem;
@@ -34,6 +37,8 @@ import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -74,7 +79,8 @@ public class UnitServerEvents {
             UnitAction action,
             int unitId,
             int[] unitIds,
-            BlockPos preselectedBlockPos
+            BlockPos preselectedBlockPos,
+            BlockPos selectedBuildingPos
     ) {
         unitActionQueue.add(
             new UnitActionItem(
@@ -82,7 +88,8 @@ public class UnitServerEvents {
                 action,
                 unitId,
                 unitIds,
-                preselectedBlockPos
+                preselectedBlockPos,
+                selectedBuildingPos
             )
         );
     }
@@ -206,5 +213,12 @@ public class UnitServerEvents {
                 ((Unit) entity).setOwnerName(closestPlayer.getName().getString());
             }
         }
+    }
+
+    // make creepers immune to lightning damage (but still get charged by them)
+    @SubscribeEvent
+    public static void onLightningStrike(LivingDamageEvent evt) {
+        if (evt.getEntity() instanceof Creeper && evt.getSource() == DamageSource.LIGHTNING_BOLT)
+            evt.setCanceled(true);
     }
 }

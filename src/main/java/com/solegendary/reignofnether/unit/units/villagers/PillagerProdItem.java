@@ -48,7 +48,7 @@ public class PillagerProdItem extends ProductionItem {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
                 FormattedCharSequence.forward(PillagerProdItem.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Pillager.FOOD + "     \uE001  " + ResourceCosts.Pillager.WOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Pillager.POPULATION + "     \uE004 " + ResourceCosts.Pillager.TICKS/20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Pillager.POPULATION + "     \uE004  " + ResourceCosts.Pillager.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A villager armed with a crossbow for ranged combat.", Style.EMPTY)
         ));

@@ -10,7 +10,7 @@ TODO before playtesting:
     - buildings
     - resource gathering
 
-4. setup shockbyte server (~3gb?)
+3. setup shockbyte server (~3gb?)
 
 
 
@@ -36,9 +36,15 @@ TODO buildings/units (backlog)
 
 Villager faction:
     - town centre (move villager units to this)
+        - Maybe just a Gazebo design?
     - tower (garrisons ranged units)
+    - Witch's hut
+        - Witch (ground AOE splash potion abilities, upgrade to give more potion effects)
 
 Undead faction:
     - haunted town centre (move zombie villager units to this)
     - laboratory lightning rod (cooldown ability to cast lightning to charge creepers and defend base)
     - obelisk (population + prevent daylight burn while near it)
+    - Spider lair
+        - Upgrade to cave spiders
+        - Upgrade to allow mounting spider jockeys

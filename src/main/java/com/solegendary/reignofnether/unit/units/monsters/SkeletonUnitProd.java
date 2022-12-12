@@ -50,7 +50,7 @@ public class SkeletonUnitProd extends ProductionItem {
             List.of(
                 FormattedCharSequence.forward(SkeletonUnitProd.itemName, Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE000  " + ResourceCosts.Skeleton.FOOD + "     \uE001  " + ResourceCosts.Skeleton.WOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Skeleton.POPULATION + "     \uE004 " + ResourceCosts.Skeleton.TICKS/20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Skeleton.POPULATION + "     \uE004  " + ResourceCosts.Skeleton.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("An undead soldier with a bow and arrows.", Style.EMPTY)
             )

@@ -73,6 +73,7 @@ public class Graveyard extends ProductionBuilding {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("An eerie field that can raise Zombies and Skeletons", Style.EMPTY)
                 ),
+                null,
                 0,0,0
         );
     }

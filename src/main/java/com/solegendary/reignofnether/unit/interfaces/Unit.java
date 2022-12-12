@@ -42,6 +42,9 @@ public interface Unit {
     public static void tick(Unit unit) {
         Mob unitMob = (Mob) unit;
 
+        for (AbilityButton ability : unit.getAbilities())
+            ability.tickCooldown();
+
         if (!unitMob.level.isClientSide) {
 
             // sync target variables between goals and Mob

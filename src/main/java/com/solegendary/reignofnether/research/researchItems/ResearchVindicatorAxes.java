@@ -59,7 +59,7 @@ public class ResearchVindicatorAxes extends ProductionItem {
                 List.of(
                         FormattedCharSequence.forward(ResearchVindicatorAxes.itemName, Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.ResearchVindicatorAxes.WOOD + "     \uE002  " + ResourceCosts.ResearchVindicatorAxes.ORE, MyRenderer.iconStyle),
-                        FormattedCharSequence.forward("\uE004 " + ResourceCosts.ResearchVindicatorAxes.TICKS/20 + "s", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("\uE004  " + ResourceCosts.ResearchVindicatorAxes.TICKS/20 + "s", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Upgrades the axes of all vindicators to diamond (+2 damage)", Style.EMPTY)
                 )

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
@@ -69,6 +70,12 @@ public abstract class Building {
     public int woodCost;
     public int oreCost;
     public int popSupply; // max population this building provides
+
+    protected final ArrayList<AbilityButton> abilities = new ArrayList<>();
+
+    public ArrayList<AbilityButton> getAbilities() {
+        return abilities;
+    }
 
     public Level getLevel() {
         return level;
@@ -319,8 +326,10 @@ public abstract class Building {
     }
 
     public void tick(Level tickLevel) {
-
         this.tickAge += 1;
+
+        for (AbilityButton ability : abilities)
+            ability.tickCooldown();
 
         for (BuildingBlock block : blocks) {
             BlockPos bp = block.getBlockPos();

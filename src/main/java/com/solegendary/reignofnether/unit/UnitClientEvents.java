@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.building.buildings.villagers.WheatFarm;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -18,6 +19,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -97,7 +99,8 @@ public class UnitClientEvents {
                     action,
                     preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
                     selectedUnits.stream().mapToInt(Entity::getId).toArray(),
-                    CursorClientEvents.getPreselectedBlockPos()
+                    CursorClientEvents.getPreselectedBlockPos(),
+                    HudClientEvents.hudSelectedBuilding != null ? HudClientEvents.hudSelectedBuilding.originPos : new BlockPos(0,0,0)
             );
             actionItem.action(MC.level);
 
@@ -106,7 +109,8 @@ public class UnitClientEvents {
                     action,
                     preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
                     selectedUnits.stream().mapToInt(Entity::getId).toArray(),
-                    CursorClientEvents.getPreselectedBlockPos()
+                    CursorClientEvents.getPreselectedBlockPos(),
+                    HudClientEvents.hudSelectedBuilding != null ? HudClientEvents.hudSelectedBuilding.originPos : new BlockPos(0,0,0)
             ));
         }
     }
@@ -231,8 +235,9 @@ public class UnitClientEvents {
             // move on left click
             else if (CursorClientEvents.getLeftClickAction() == UnitAction.MOVE)
                 resolveMoveAction();
-            else if (CursorClientEvents.getLeftClickAction() == UnitAction.BUILD_REPAIR)
-                sendUnitCommand(UnitAction.BUILD_REPAIR);
+            // resolve any other abilities not explicitly covered here
+            else if (CursorClientEvents.getLeftClickAction() != null)
+                sendUnitCommand(CursorClientEvents.getLeftClickAction());
 
             // left click -> select a single unit
             // if shift is held, deselect a unit or add it to the selected group

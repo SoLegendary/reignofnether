@@ -16,6 +16,8 @@ public enum UnitAction {
     FARM, // sets the villager's target gather resource
     TOGGLE_GATHER_TARGET, // cycle between gathering nothing, food, wood or ore
 
-    // special abilities
+    // special abilities - these can also be assigned to cursor actions
     EXPLODE,
+    CALL_LIGHTNING, // actually not from a unit, but we'll make an exception
+
 }

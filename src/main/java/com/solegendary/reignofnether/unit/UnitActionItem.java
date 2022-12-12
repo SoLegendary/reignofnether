@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.unit;
 
 import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceBlocks;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
@@ -11,6 +13,9 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
@@ -22,19 +27,22 @@ public class UnitActionItem {
     private final int unitId;
     private final int[] unitIds;
     private final BlockPos preselectedBlockPos;
+    private final BlockPos selectedBuildingPos;
 
     public UnitActionItem(
             String ownerName,
             UnitAction action,
             int unitId,
             int[] unitIds,
-            BlockPos preselectedBlockPos) {
+            BlockPos preselectedBlockPos,
+            BlockPos selectedBuildingPos) {
 
         this.ownerName = ownerName;
         this.action = action;
         this.unitId = unitId;
         this.unitIds = unitIds;
         this.preselectedBlockPos = preselectedBlockPos;
+        this.selectedBuildingPos = selectedBuildingPos;
     }
 
     public void resetBehaviours(Unit unit) {
@@ -137,6 +145,31 @@ public class UnitActionItem {
                     }
                 }
             }
+
+            // TODO: find which unit actually used the ability
+            // set ability cd on unit
+        }
+
+        Building actionableBuilding;
+        if (level.isClientSide())
+            actionableBuilding = BuildingUtils.findBuilding(BuildingClientEvents.getBuildings(), this.selectedBuildingPos);
+        else
+            actionableBuilding = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), this.selectedBuildingPos);
+
+        if (actionableBuilding != null) {
+            switch (action) {
+                case CALL_LIGHTNING -> {
+                    if (!level.isClientSide()) {
+                        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
+                        level.addFreshEntity(bolt);
+                        bolt.moveTo(preselectedBlockPos.getX(), preselectedBlockPos.getY(), preselectedBlockPos.getZ());
+                    }
+                    // TODO: call lightning to the top of the lab's lightning rod too
+                }
+            }
+            for (AbilityButton ability : actionableBuilding.getAbilities())
+                if (ability.action == action)
+                    ability.setCooldown();
         }
     }
 }

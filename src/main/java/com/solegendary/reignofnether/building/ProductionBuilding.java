@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -103,7 +104,8 @@ public abstract class ProductionBuilding extends Building {
                             UnitAction.MOVE,
                             -1,
                             new int[] { entity.getId() },
-                            rallyPoint
+                            rallyPoint,
+                            new BlockPos(0,0,0)
                     );
                 });
             }

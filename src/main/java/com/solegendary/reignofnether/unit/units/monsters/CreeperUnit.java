@@ -123,6 +123,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
                 List.of(
                     FormattedCharSequence.forward("Explode", Style.EMPTY)
                 ),
+                UnitAction.EXPLODE,
                 0, 0, 3
             ));
     }

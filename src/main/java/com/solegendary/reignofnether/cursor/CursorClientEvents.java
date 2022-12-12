@@ -68,7 +68,8 @@ public class CursorClientEvents {
         return leftClickAction;
     }
     public static void setLeftClickAction(UnitAction actionName) {
-        if (UnitClientEvents.getSelectedUnits().size() > 0)
+        if (UnitClientEvents.getSelectedUnits().size() > 0 ||
+            BuildingClientEvents.getSelectedBuildings().size() > 0)
             leftClickAction = actionName;
         else if (actionName == null)
             leftClickAction = null;
