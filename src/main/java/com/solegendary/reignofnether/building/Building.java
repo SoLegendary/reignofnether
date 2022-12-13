@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
@@ -31,8 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import static com.solegendary.reignofnether.building.BuildingUtils.getMaxCorner;
-import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
+import static com.solegendary.reignofnether.building.BuildingUtils.*;
 
 public abstract class Building {
 
@@ -87,6 +87,14 @@ public abstract class Building {
         this.originPos = originPos;
         this.rotation = rotation;
         this.ownerName = ownerName;
+    }
+
+    // fully repairs and rebuilds all the blocks in the building
+    // usually used when the structure changes (like when upgrading a building)
+    public void refreshBlocks() {
+        for (BuildingBlock block : blocks)
+            if (!block.isPlaced(level) && !block.getBlockState().isAir())
+                addToBlockPlaceQueue(block);
     }
 
     public void addToBlockPlaceQueue(BuildingBlock block) {
@@ -321,8 +329,11 @@ public abstract class Building {
         }
     }
 
-    public void onBuilt() {
-        isBuilt = true;
+    public boolean isAbilityOffCooldown(UnitAction action) {
+        for (AbilityButton ability : abilities)
+            if (ability.action == action && ability.cooldown <= 0)
+                return true;
+        return false;
     }
 
     public void tick(Level tickLevel) {
@@ -336,12 +347,11 @@ public abstract class Building {
             BlockState bs = block.getBlockState();
             BlockState bsWorld = tickLevel.getBlockState(bp);
         }
-        float blocksPercent = getBlocksPlacedPercent();
         float blocksPlaced = getBlocksPlaced();
         float blocksTotal = getBlocksTotal();
 
         if (blocksPlaced >= blocksTotal && !isBuilt)
-            onBuilt();
+            isBuilt = true;
 
         if (!tickLevel.isClientSide()) {
             ServerLevel serverLevel = (ServerLevel) tickLevel;

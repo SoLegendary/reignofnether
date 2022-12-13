@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
@@ -46,7 +47,8 @@ public class Laboratory extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                CreeperUnitProd.getStartButton(this, Keybindings.keyQ)
+                CreeperUnitProd.getStartButton(this, Keybindings.keyQ),
+                ResearchLabLightningRod.getStartButton(this, Keybindings.keyW)
             );
 
         // TODO require research and add the lightning rod after research completion
@@ -57,8 +59,8 @@ public class Laboratory extends ProductionBuilding {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_on.png"),
                 Keybindings.keyL,
                 () -> false,
-                () -> false, // requires research first
-                () -> true,
+                () -> !this.isUpgraded(),
+                () -> this.getLightningRodPos() != null,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.CALL_LIGHTNING),
                 null,
                 List.of(
@@ -72,6 +74,31 @@ public class Laboratory extends ProductionBuilding {
                 100, 20, 0
             )
         );
+    }
+
+    // return the lightning rod is built based on existing placed blocks
+    // returns null if it is not build or is damaged
+    public BlockPos getLightningRodPos() {
+        for (BuildingBlock block : blocks) {
+            if (this.getLevel().getBlockState(block.getBlockPos()).getBlock() == Blocks.LIGHTNING_ROD &&
+                this.getLevel().getBlockState(block.getBlockPos().below()).getBlock() == Blocks.WAXED_COPPER_BLOCK)
+                return block.getBlockPos();
+        }
+        return null;
+    }
+
+    // check that the lightning rod is built based on existing placed blocks
+    public boolean isUpgraded() {
+        for (BuildingBlock block : blocks)
+            if (block.getBlockState().getBlock() == Blocks.LIGHTNING_ROD)
+                return true;
+        return false;
+    }
+
+    public void changeStructure(String newStructureName) {
+        ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocks(newStructureName, this.getLevel());
+        this.blocks = getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation);
+        super.refreshBlocks();
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -138,6 +139,7 @@ public abstract class ProductionBuilding extends Building {
 
                 case ResearchVindicatorAxes.itemName -> prodItem = new ResearchVindicatorAxes(building);
                 case ResearchPillagerCrossbows.itemName -> prodItem = new ResearchPillagerCrossbows(building);
+                case ResearchLabLightningRod.itemName -> prodItem = new ResearchLabLightningRod(building);
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside

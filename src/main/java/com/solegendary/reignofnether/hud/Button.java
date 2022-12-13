@@ -166,8 +166,11 @@ public class Button {
                     0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
 
-        if (greyPercent > 0) {
+        if (greyPercent > 0 || !isEnabled.get()) {
             int greyHeightPx = Math.round(greyPercent * iconFrameSize);
+            if (!isEnabled.get())
+                greyHeightPx = iconFrameSize;
+
             GuiComponent.fill(poseStack, // x1,y1, x2,y2,
                     x, y + greyHeightPx,
                     x + iconFrameSize,

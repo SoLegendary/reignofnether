@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceBlocks;
 import com.solegendary.reignofnether.resources.ResourceName;
@@ -160,9 +161,17 @@ public class UnitActionItem {
             switch (action) {
                 case CALL_LIGHTNING -> {
                     if (!level.isClientSide()) {
-                        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
-                        level.addFreshEntity(bolt);
-                        bolt.moveTo(preselectedBlockPos.getX(), preselectedBlockPos.getY(), preselectedBlockPos.getZ());
+                        if (actionableBuilding instanceof Laboratory lab) {
+                            BlockPos rodPos = lab.getLightningRodPos();
+                            if (lab.isAbilityOffCooldown(UnitAction.CALL_LIGHTNING) && rodPos != null) {
+                                LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
+                                level.addFreshEntity(bolt);
+                                bolt.moveTo(preselectedBlockPos.getX(), preselectedBlockPos.getY(), preselectedBlockPos.getZ());
+                                LightningBolt bolt2 = EntityType.LIGHTNING_BOLT.create(level);
+                                level.addFreshEntity(bolt2);
+                                bolt2.moveTo(rodPos.getX(), rodPos.getY(), rodPos.getZ());
+                            }
+                        }
                     }
                     // TODO: call lightning to the top of the lab's lightning rod too
                 }

@@ -132,4 +132,10 @@ public class ResourceCosts {
         public static final int ORE = 250;
         public static final int TICKS = 100;
     }
+    public static class ResearchLabLightningRod {
+        public static final int FOOD = 0;
+        public static final int WOOD = 100;
+        public static final int ORE = 500;
+        public static final int TICKS = 100;
+    }
 }
