@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
+import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
@@ -36,7 +37,8 @@ import java.util.List;
 public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     // region
     public Faction getFaction() {return Faction.MONSTERS;}
-    public List<AbilityButton> getAbilities() {return abilities;};
+    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
+    public List<Ability> getAbilities() {return abilities;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
     public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
@@ -103,14 +105,15 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
     public AttackBuildingGoal attackBuildingGoal;
 
-    private final List<AbilityButton> abilities = new ArrayList<>();
+    private final List<AbilityButton> abilityButtons = new ArrayList<>();
+    private final List<Ability> abilities = new ArrayList<>();
 
     private boolean forceExplode = false;
 
     public CreeperUnit(EntityType<? extends Creeper> entityType, Level level) {
         super(entityType, level);
         if (level.isClientSide())
-            this.abilities.add(new AbilityButton(
+            this.abilityButtons.add(new AbilityButton(
                 "Explode",
                 14,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
@@ -123,8 +126,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
                 List.of(
                     FormattedCharSequence.forward("Explode", Style.EMPTY)
                 ),
-                UnitAction.EXPLODE,
-                0, 0, 3
+                null
             ));
     }
 

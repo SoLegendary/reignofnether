@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
+import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
@@ -45,39 +46,45 @@ public class Laboratory extends ProductionBuilding {
         this.oreCost = ResourceCosts.Laboratory.ORE;
         this.popSupply = ResourceCosts.Laboratory.SUPPLY;
 
-        if (level.isClientSide())
+        Ability callLightning = new Ability(
+            UnitAction.CALL_LIGHTNING,
+            100, 20, 0
+        );
+        this.abilities.add(callLightning);
+
+        if (level.isClientSide()) {
             this.productionButtons = Arrays.asList(
                 CreeperUnitProd.getStartButton(this, Keybindings.keyQ),
                 ResearchLabLightningRod.getStartButton(this, Keybindings.keyW)
             );
 
-        // TODO require research and add the lightning rod after research completion
-        this.abilities.add(
-            new AbilityButton(
-                "Call Lightning",
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_on.png"),
-                Keybindings.keyL,
-                () -> false,
-                () -> !this.isUpgraded(),
-                () -> this.getLightningRodPos() != null,
-                () -> CursorClientEvents.setLeftClickAction(UnitAction.CALL_LIGHTNING),
-                null,
-                List.of(
-                    FormattedCharSequence.forward("Call Lightning", Style.EMPTY.withBold(true)),
-                    FormattedCharSequence.forward("\uE004  " + 100/20 + "s", MyRenderer.iconStyle),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Summon a bolt of lightning at the targeted location.", Style.EMPTY),
-                    FormattedCharSequence.forward("Can be used to charge creepers and damage enemies.", Style.EMPTY)
-                ),
-                UnitAction.CALL_LIGHTNING,
-                100, 20, 0
-            )
-        );
+            this.abilityButtons.add(
+                new AbilityButton(
+                    "Call Lightning",
+                    14,
+                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_on.png"),
+                    Keybindings.keyL,
+                    () -> false,
+                    () -> !this.isUpgraded(),
+                    () -> this.getLightningRodPos() != null,
+                    () -> CursorClientEvents.setLeftClickAction(UnitAction.CALL_LIGHTNING),
+                    null,
+                    List.of(
+                        FormattedCharSequence.forward("Call Lightning", Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward("\uE004  " + 100/20 + "s", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.forward("Summon a bolt of lightning at the targeted location.", Style.EMPTY),
+                        FormattedCharSequence.forward("Can be used to charge creepers and damage enemies.", Style.EMPTY)
+                    ),
+                    callLightning
+                )
+            );
+        }
     }
 
     // return the lightning rod is built based on existing placed blocks
     // returns null if it is not build or is damaged
+    // also will return null if outside of render range, but shouldn't matter since it'd be out of ability range anyway
     public BlockPos getLightningRodPos() {
         for (BuildingBlock block : blocks) {
             if (this.getLevel().getBlockState(block.getBlockPos()).getBlock() == Blocks.LIGHTNING_ROD &&
@@ -123,8 +130,7 @@ public class Laboratory extends ProductionBuilding {
                         FormattedCharSequence.forward("A sinister lab that can research new technologies and", Style.EMPTY),
                         FormattedCharSequence.forward("produce creepers. Can be upgraded to have a lightning rod.", Style.EMPTY)
                 ),
-                null,
-                0,0,0
+                null
         );
     }
 }

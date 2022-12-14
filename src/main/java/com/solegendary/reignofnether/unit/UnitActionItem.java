@@ -14,7 +14,6 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
@@ -164,6 +163,7 @@ public class UnitActionItem {
                         if (actionableBuilding instanceof Laboratory lab) {
                             BlockPos rodPos = lab.getLightningRodPos();
                             if (lab.isAbilityOffCooldown(UnitAction.CALL_LIGHTNING) && rodPos != null) {
+                                // TODO: not rendering on server
                                 LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
                                 level.addFreshEntity(bolt);
                                 bolt.moveTo(preselectedBlockPos.getX(), preselectedBlockPos.getY(), preselectedBlockPos.getZ());
@@ -173,10 +173,9 @@ public class UnitActionItem {
                             }
                         }
                     }
-                    // TODO: call lightning to the top of the lab's lightning rod too
                 }
             }
-            for (AbilityButton ability : actionableBuilding.getAbilities())
+            for (Ability ability : actionableBuilding.getAbilities())
                 if (ability.action == action)
                     ability.setCooldown();
         }

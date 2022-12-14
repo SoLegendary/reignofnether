@@ -72,8 +72,7 @@ public class Blacksmith extends ProductionBuilding {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A smithy to forge military upgrades and iron golems", Style.EMPTY)
                 ),
-                null,
-                0,0,0
+                null
         );
     }
 }

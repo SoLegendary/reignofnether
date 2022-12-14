@@ -68,8 +68,7 @@ public class HauntedHouse extends ProductionBuilding {
                         FormattedCharSequence.forward("A spooky house that can produce zombie villagers.", Style.EMPTY),
                         FormattedCharSequence.forward("Supports " + ResourceCosts.HauntedHouse.SUPPLY + " population.", Style.EMPTY)
                 ),
-                null,
-                0,0,0
+                null
         );
     }
 }

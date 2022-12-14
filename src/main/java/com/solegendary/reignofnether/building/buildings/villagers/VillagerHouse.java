@@ -68,8 +68,7 @@ public class VillagerHouse extends ProductionBuilding {
                     FormattedCharSequence.forward("A simple house that can produce villagers.", Style.EMPTY),
                     FormattedCharSequence.forward("Supports " + ResourceCosts.VillagerHouse.SUPPLY + " population.", Style.EMPTY)
             ),
-            null,
-            0,0,0
+            null
         );
     }
 }

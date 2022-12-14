@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.goals.*;
+import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -29,7 +30,8 @@ import java.util.List;
 public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     // region
     public Faction getFaction() {return Faction.MONSTERS;}
-    public List<AbilityButton> getAbilities() {return abilities;};
+    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
+    public List<Ability> getAbilities() {return abilities;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
     public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
@@ -96,7 +98,8 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     public UnitBowAttackGoal<? extends LivingEntity> attackGoal;
     public AttackBuildingGoal attackBuildingGoal;
 
-    private static final List<AbilityButton> abilities = new ArrayList<>();
+    private final List<AbilityButton> abilityButtons = new ArrayList<>();
+    private final List<Ability> abilities = new ArrayList<>();
 
     public SkeletonUnit(EntityType<? extends Skeleton> entityType, Level level) {
         super(entityType, level);

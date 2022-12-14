@@ -63,8 +63,7 @@ public class WheatFarm extends Building {
                         FormattedCharSequence.forward("A wheat field that be can tilled to collect food.", Style.EMPTY),
                         FormattedCharSequence.forward("Workers will automatically use wood to replant seeds while working.", Style.EMPTY)
                 ),
-                null,
-                0,0,0
+                null
         );
     }
 }

@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
-import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
@@ -11,6 +10,7 @@ import com.solegendary.reignofnether.unit.goals.UnitCrossbowAttackGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -26,7 +26,6 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Pillager;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -39,7 +38,8 @@ import java.util.List;
 public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     // region
     public Faction getFaction() {return Faction.VILLAGERS;}
-    public List<AbilityButton> getAbilities() {return abilities;};
+    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
+    public List<Ability> getAbilities() {return abilities;}
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
     public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
@@ -106,7 +106,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public UnitCrossbowAttackGoal<? extends LivingEntity> attackGoal;
     public AttackBuildingGoal attackBuildingGoal;
 
-    private static final List<AbilityButton> abilities = new ArrayList<>();
+    private final List<AbilityButton> abilityButtons = new ArrayList<>();
+    private final List<Ability> abilities = new ArrayList<>();
 
     public PillagerUnit(EntityType<? extends Pillager> entityType, Level level) {
         super(entityType, level);

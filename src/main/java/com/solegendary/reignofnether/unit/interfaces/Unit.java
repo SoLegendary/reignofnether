@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.interfaces;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,7 +21,8 @@ public interface Unit {
 
     public Faction getFaction();
 
-    public List<AbilityButton> getAbilities();
+    public List<AbilityButton> getAbilityButtons();
+    public List<Ability> getAbilities();
 
     // note that attackGoal is specific to unit types
     public MoveToTargetBlockGoal getMoveGoal();
@@ -42,7 +44,7 @@ public interface Unit {
     public static void tick(Unit unit) {
         Mob unitMob = (Mob) unit;
 
-        for (AbilityButton ability : unit.getAbilities())
+        for (Ability ability : unit.getAbilities())
             ability.tickCooldown();
 
         if (!unitMob.level.isClientSide) {

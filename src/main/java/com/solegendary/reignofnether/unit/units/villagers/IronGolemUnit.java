@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -30,7 +31,8 @@ import java.util.List;
 public class IronGolemUnit extends IronGolem implements com.solegendary.reignofnether.unit.interfaces.Unit, AttackerUnit {
     // region
     public Faction getFaction() {return Faction.MONSTERS;}
-    public List<AbilityButton> getAbilities() {return abilities;};
+    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
+    public List<Ability> getAbilities() {return abilities;}
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
     public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
@@ -97,7 +99,8 @@ public class IronGolemUnit extends IronGolem implements com.solegendary.reignofn
     public MeleeAttackUnitGoal attackGoal;
     public AttackBuildingGoal attackBuildingGoal;
 
-    private static final List<AbilityButton> abilities = new ArrayList<>();
+    private static final List<AbilityButton> abilityButtons = new ArrayList<>();
+    private final List<Ability> abilities = new ArrayList<>();
 
     public IronGolemUnit(EntityType<? extends IronGolem> entityType, Level level) {
         super(entityType, level);

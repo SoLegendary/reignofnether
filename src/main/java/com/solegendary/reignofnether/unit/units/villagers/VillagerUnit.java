@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.building.buildings.villagers.Barracks;
 import com.solegendary.reignofnether.building.buildings.villagers.Blacksmith;
 import com.solegendary.reignofnether.building.buildings.villagers.WheatFarm;
-import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
 import com.solegendary.reignofnether.building.buildings.villagers.VillagerHouse;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -14,6 +13,7 @@ import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -40,8 +40,8 @@ import java.util.List;
 public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
     // region
     public Faction getFaction() {return Faction.VILLAGERS;}
-    public List<AbilityButton> getAbilities() {return abilities;};
-
+    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
+    public List<Ability> getAbilities() {return abilities;}
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
     public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
@@ -94,15 +94,16 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
     final static public float sightRange = 10f;
     final static public int popCost = ResourceCosts.Villager.POPULATION;
 
-    private final List<AbilityButton> abilities = new ArrayList<>();
+    private final List<AbilityButton> abilityButtons = new ArrayList<>();
+    private final List<Ability> abilities = new ArrayList<>();
 
     public VillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
         if (level.isClientSide()) {
-            this.abilities.add(VillagerHouse.getBuildButton(Keybindings.keyQ));
-            this.abilities.add(WheatFarm.getBuildButton(Keybindings.keyW));
-            this.abilities.add(Barracks.getBuildButton(Keybindings.keyE));
-            this.abilities.add(Blacksmith.getBuildButton(Keybindings.keyR));
+            this.abilityButtons.add(VillagerHouse.getBuildButton(Keybindings.keyQ));
+            this.abilityButtons.add(WheatFarm.getBuildButton(Keybindings.keyW));
+            this.abilityButtons.add(Barracks.getBuildButton(Keybindings.keyE));
+            this.abilityButtons.add(Blacksmith.getBuildButton(Keybindings.keyR));
         }
     }
 

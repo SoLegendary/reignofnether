@@ -12,7 +12,6 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -348,7 +347,7 @@ public class HudClientEvents {
                 }
                 blitY -= Button.iconFrameSize;
                 blitX = 0;
-                for (AbilityButton abilityButton : hudSelectedBuilding.getAbilities()) {
+                for (AbilityButton abilityButton : hudSelectedBuilding.getAbilityButtons()) {
                     if (!abilityButton.isHidden.get()) {
                         abilityButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                         renderedButtons.add(abilityButton);
@@ -511,7 +510,7 @@ public class HudClientEvents {
             blitY = screenHeight - (iconFrameSize * 2);
             for (LivingEntity unit : selUnits) {
                 if (getSimpleEntityName(unit).equals(getSimpleEntityName(hudSelectedEntity))) {
-                    for (AbilityButton abilityButton : ((Unit) unit).getAbilities()) {
+                    for (AbilityButton abilityButton : ((Unit) unit).getAbilityButtons()) {
                         abilityButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                         renderedButtons.add(abilityButton);
                         blitX += iconFrameSize;

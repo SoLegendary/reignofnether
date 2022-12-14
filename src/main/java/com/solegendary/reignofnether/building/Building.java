@@ -7,20 +7,17 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import net.minecraft.client.Minecraft;
+import com.solegendary.reignofnether.unit.Ability;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LevelEvent;
@@ -71,9 +68,13 @@ public abstract class Building {
     public int oreCost;
     public int popSupply; // max population this building provides
 
-    protected final ArrayList<AbilityButton> abilities = new ArrayList<>();
+    protected final ArrayList<AbilityButton> abilityButtons = new ArrayList<>();
+    protected final ArrayList<Ability> abilities = new ArrayList<>();
 
-    public ArrayList<AbilityButton> getAbilities() {
+    public ArrayList<AbilityButton> getAbilityButtons() {
+        return abilityButtons;
+    }
+    public ArrayList<Ability> getAbilities() {
         return abilities;
     }
 
@@ -330,7 +331,7 @@ public abstract class Building {
     }
 
     public boolean isAbilityOffCooldown(UnitAction action) {
-        for (AbilityButton ability : abilities)
+        for (Ability ability : abilities)
             if (ability.action == action && ability.cooldown <= 0)
                 return true;
         return false;
@@ -339,7 +340,7 @@ public abstract class Building {
     public void tick(Level tickLevel) {
         this.tickAge += 1;
 
-        for (AbilityButton ability : abilities)
+        for (Ability ability : abilities)
             ability.tickCooldown();
 
         for (BuildingBlock block : blocks) {
