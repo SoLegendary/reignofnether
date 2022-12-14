@@ -32,8 +32,10 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
         if (buildingTarget != null) {
             calcMoveTarget();
             if (buildingTarget.getBlocksPlaced() >= buildingTarget.getBlocksTotal()) {
-                if (buildingTarget.name.contains(" Farm") && mob instanceof WorkerUnit workerUnit)
+                if (buildingTarget.name.contains(" Farm") && mob instanceof WorkerUnit workerUnit) {
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetResourceName(ResourceName.FOOD);
+                    ((WorkerUnit) mob).getGatherResourceGoal().setTargetFarm(buildingTarget);
+                }
                 stopBuilding();
             }
             if (isBuilding()) {
