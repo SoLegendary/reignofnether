@@ -57,13 +57,15 @@ public class TopdownGuiClientEvents {
             evt.setCanceled(true);
     }
 
-    // prevent opening inventory with E
+    // prevent opening inventory with E or advancements with L
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
         if (OrthoviewClientEvents.isEnabled()) {
             if (evt.getKeyCode() == Keybindings.pause.key)
                 shouldPause = true;
             else if (evt.getKeyCode() == MC.options.keyInventory.getKey().getValue())
+                evt.setCanceled(true);
+            else if (evt.getKeyCode() == MC.options.keyAdvancements.getKey().getValue())
                 evt.setCanceled(true);
         }
     }

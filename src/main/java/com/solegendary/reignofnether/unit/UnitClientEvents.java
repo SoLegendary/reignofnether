@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
+import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
 import com.solegendary.reignofnether.building.buildings.villagers.WheatFarm;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -266,6 +267,8 @@ public class UnitClientEvents {
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (selectedUnits.size() > 0) {
+                Building preSelBuilding = BuildingClientEvents.getPreselectedBuilding();
+
                 // right click -> attack unfriendly unit
                 if (preselectedUnits.size() == 1 &&
                     !targetingSelf() &&
@@ -275,18 +278,18 @@ public class UnitClientEvents {
                 }
                 // right click -> attack unfriendly building
                 else if (HudClientEvents.hudSelectedEntity instanceof AttackerUnit &&
-                        (BuildingClientEvents.getPreselectedBuilding() != null)) {
+                        (preSelBuilding != null)) {
 
-                    if (BuildingClientEvents.getPlayerToBuildingRelationship(BuildingClientEvents.getPreselectedBuilding()) == Relationship.HOSTILE)
+                    if (BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.HOSTILE)
                         sendUnitCommand(UnitAction.ATTACK_BUILDING);
                     else
                         sendUnitCommand(UnitAction.MOVE);
                 }
                 // right click -> build or repair preselected building
                 else if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
-                        (BuildingClientEvents.getPreselectedBuilding() != null)) {
+                        (preSelBuilding != null)) {
 
-                    if (BuildingClientEvents.getPreselectedBuilding() instanceof WheatFarm)
+                    if (preSelBuilding.name.contains(" Farm") && preSelBuilding.isBuilt)
                         sendUnitCommand(UnitAction.FARM);
                     else
                         sendUnitCommand(UnitAction.BUILD_REPAIR);

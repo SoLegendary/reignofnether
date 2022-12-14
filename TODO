@@ -16,12 +16,14 @@ TODO before playtesting:
 
 TODO bugs/features:
 
-1. Husks (upgraded from Zombies at the lab)
+1. Reduce size of initial foundations for some buildings that are low to the ground
+
+2. Husks (upgraded from Zombies at the lab)
     - 20 -> 25hp, doesn't burn in sunlight
-2. Strays (upgraded from Skeletons at the lab)
+3. Strays (upgraded from Skeletons at the lab)
     - Fires slowing arrows
 
-3. Reduce size of initial foundations for some buildings that are low to the ground
+
 
 
 TODO bugs/features (backlog)
@@ -43,7 +45,7 @@ Villager faction:
 
 Undead faction:
     - haunted town centre (move zombie villager units to this)
-    - laboratory lightning rod (cooldown ability to cast lightning to charge creepers and defend base)
+        - Maybe a mausoleum design?
     - obelisk (population + prevent daylight burn while near it)
     - Spider lair
         - Upgrade to cave spiders

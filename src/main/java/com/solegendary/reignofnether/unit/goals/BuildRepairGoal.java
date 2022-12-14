@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
 import com.solegendary.reignofnether.building.buildings.villagers.WheatFarm;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -31,7 +32,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
         if (buildingTarget != null) {
             calcMoveTarget();
             if (buildingTarget.getBlocksPlaced() >= buildingTarget.getBlocksTotal()) {
-                if (buildingTarget instanceof WheatFarm && mob instanceof WorkerUnit workerUnit)
+                if (buildingTarget.name.contains(" Farm") && mob instanceof WorkerUnit workerUnit)
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetResourceName(ResourceName.FOOD);
                 stopBuilding();
             }

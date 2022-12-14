@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.ResourceCosts;
@@ -32,6 +33,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private BlockPos gatherTarget = null;
     private ResourceName targetResourceName = ResourceName.NONE; // if !None, will passively target blocks around it
     private ResourceBlock targetResourceBlock = null;
+    private Building targetFarm = null;
 
     // whenever we attempt to assign a block as a target it must pass this test
     private final Predicate<BlockPos> BLOCK_CONDITION = bp -> {
@@ -45,15 +47,19 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         if (!resBlock.blockStateTest.test(bs))
             return false;
 
+        // if the worker is farming, stick to only the assigned farm
+        if (targetFarm != null && !targetFarm.isPosInsideBuilding(bp))
+            return false;
+
         if (bs.getBlock() == Blocks.FARMLAND) {
             if (!bsAbove.isAir() || !canAffordReplant())
                 return false;
         }
-        // is not part of a building and
-        else if (BuildingUtils.isPosPartOfAnyBuilding(mob.level, bp, true))
+        // is not part of a building (unless farming)
+        else if (targetFarm == null && BuildingUtils.isPosPartOfAnyBuilding(mob.level, bp, true))
             return false;
 
-        // not covered by solid blocks and
+        // not covered by solid blocks
         boolean hasClearNeighbour = false;
         for (BlockPos adjBp : List.of(bp.north(), bp.south(), bp.east(), bp.west(), bp.above(), bp.below()))
             if (ResourceBlocks.CLEAR_MATERIALS.contains(mob.level.getBlockState(adjBp).getMaterial()))
@@ -194,6 +200,11 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         }
     }
 
+    // locks the worker to only gather from this specific building
+    public void setTargetFarm(Building building) {
+        this.targetFarm = building;
+    }
+
     // stop attempting to gather the current target but continue searching
     public void removeGatherTarget() {
         gatherTarget = null;
@@ -203,6 +214,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     // stop gathering and searching entirely
     public void stopGathering() {
+        targetFarm = null;
         removeGatherTarget();
         this.setTargetResourceName(ResourceName.NONE);
         super.stopMoving();

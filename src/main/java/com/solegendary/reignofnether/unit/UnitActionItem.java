@@ -141,6 +141,9 @@ public class UnitActionItem {
                         if (goal != null) {
                             goal.setTargetResourceName(ResourceName.FOOD);
                             goal.setMoveTarget(preselectedBlockPos);
+                            Building building = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), preselectedBlockPos);
+                            if (building.name.contains(" Farm"))
+                                goal.setTargetFarm(building);
                         }
                     }
                 }
@@ -163,13 +166,12 @@ public class UnitActionItem {
                         if (actionableBuilding instanceof Laboratory lab) {
                             BlockPos rodPos = lab.getLightningRodPos();
                             if (lab.isAbilityOffCooldown(UnitAction.CALL_LIGHTNING) && rodPos != null) {
-                                // TODO: not rendering on server
                                 LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
-                                level.addFreshEntity(bolt);
                                 bolt.moveTo(preselectedBlockPos.getX(), preselectedBlockPos.getY(), preselectedBlockPos.getZ());
+                                level.addFreshEntity(bolt);
                                 LightningBolt bolt2 = EntityType.LIGHTNING_BOLT.create(level);
-                                level.addFreshEntity(bolt2);
                                 bolt2.moveTo(rodPos.getX(), rodPos.getY(), rodPos.getZ());
+                                level.addFreshEntity(bolt2);
                             }
                         }
                     }
