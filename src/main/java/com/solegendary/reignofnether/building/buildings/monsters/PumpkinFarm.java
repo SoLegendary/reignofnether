@@ -38,6 +38,8 @@ public class PumpkinFarm extends Building {
         this.oreCost = ResourceCosts.PumpkinFarm.ORE;
         this.popSupply = ResourceCosts.PumpkinFarm.SUPPLY;
 
+        this.startingBlockTypes.add(Blocks.DARK_OAK_LOG);
+
         this.explodeChance = 0;
     }
 

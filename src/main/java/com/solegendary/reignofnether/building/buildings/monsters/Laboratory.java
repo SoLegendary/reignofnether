@@ -46,6 +46,9 @@ public class Laboratory extends ProductionBuilding {
         this.oreCost = ResourceCosts.Laboratory.ORE;
         this.popSupply = ResourceCosts.Laboratory.SUPPLY;
 
+        this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
+        this.startingBlockTypes.add(Blocks.BLACKSTONE);
+
         Ability callLightning = new Ability(
             UnitAction.CALL_LIGHTNING,
             100, 20, 0

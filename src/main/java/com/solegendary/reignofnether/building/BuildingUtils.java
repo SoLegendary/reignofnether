@@ -24,7 +24,6 @@ public class BuildingUtils {
         Building building = null;
         switch(buildingName) {
             case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation, ownerName);
-            case VillagerTower.buildingName -> building = new VillagerTower(level, pos, rotation, ownerName);
             case Graveyard.buildingName -> building = new Graveyard(level, pos, rotation, ownerName);
             case WheatFarm.buildingName -> building = new WheatFarm(level, pos, rotation, ownerName);
             case Laboratory.buildingName -> building = new Laboratory(level, pos, rotation, ownerName);

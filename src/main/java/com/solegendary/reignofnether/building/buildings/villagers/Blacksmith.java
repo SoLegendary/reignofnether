@@ -43,6 +43,9 @@ public class Blacksmith extends ProductionBuilding {
         this.oreCost = ResourceCosts.Blacksmith.ORE;
         this.popSupply = ResourceCosts.Blacksmith.SUPPLY;
 
+        this.startingBlockTypes.add(Blocks.OAK_PLANKS);
+        this.startingBlockTypes.add(Blocks.COBBLESTONE);
+
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
                 IronGolemProdItem.getStartButton(this, Keybindings.keyQ),

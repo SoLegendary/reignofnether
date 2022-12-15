@@ -40,6 +40,9 @@ public class HauntedHouse extends ProductionBuilding {
         this.oreCost = ResourceCosts.HauntedHouse.ORE;
         this.popSupply = ResourceCosts.HauntedHouse.SUPPLY;
 
+        this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
+        this.startingBlockTypes.add(Blocks.DARK_OAK_LOG);
+
         if (level.isClientSide())
             this.productionButtons = List.of(
                 ZombieVillagerUnitProd.getStartButton(this, Keybindings.keyQ)

@@ -64,12 +64,6 @@ public class ResourceCosts {
         public static final int TICKS = 100;
         public static final int POPULATION = 1;
     }
-    public static class VillagerTower {
-        public static final int FOOD = 0;
-        public static final int WOOD = 100;
-        public static final int ORE = 0;
-        public static final int SUPPLY = 0;
-    }
     public static class VillagerHouse {
         public static final int FOOD = 0;
         public static final int WOOD = 200;

@@ -55,8 +55,10 @@ public class BuildingServerEvents {
                 // place all blocks on the lowest y level
                 int minY = BuildingUtils.getMinCorner(building.blocks).getY();
                 for (BuildingBlock block : building.blocks)
-                    if (block.getBlockPos().getY() == minY)
+                    if (block.getBlockPos().getY() == minY &&
+                        building.startingBlockTypes.contains(block.getBlockState().getBlock()))
                         building.addToBlockPlaceQueue(block);
+
                 BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName);
                 ResourcesServerEvents.addSubtractResources(new Resources(
                     building.ownerName,

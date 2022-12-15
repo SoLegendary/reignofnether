@@ -42,6 +42,8 @@ public class Barracks extends ProductionBuilding {
         this.oreCost = ResourceCosts.Barracks.ORE;
         this.popSupply = ResourceCosts.Barracks.SUPPLY;
 
+        this.startingBlockTypes.add(Blocks.POLISHED_ANDESITE_STAIRS);
+
         this.explodeChance = 0.2f;
 
         if (level.isClientSide())

@@ -40,6 +40,10 @@ public class VillagerHouse extends ProductionBuilding {
         this.oreCost = ResourceCosts.VillagerHouse.ORE;
         this.popSupply = ResourceCosts.VillagerHouse.SUPPLY;
 
+        this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
+        this.startingBlockTypes.add(Blocks.OAK_PLANKS);
+        this.startingBlockTypes.add(Blocks.OAK_LOG);
+
         if (level.isClientSide())
             this.productionButtons = List.of(
                 VillagerProdItem.getStartButton(this, Keybindings.keyQ)

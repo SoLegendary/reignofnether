@@ -68,6 +68,10 @@ public abstract class Building {
     public int oreCost;
     public int popSupply; // max population this building provides
 
+    // blocks types that are placed automatically when the building is placed
+    // used to control size of initial foundations while keeping it symmetrical
+    public final ArrayList<Block> startingBlockTypes = new ArrayList<>();
+
     protected final ArrayList<AbilityButton> abilityButtons = new ArrayList<>();
     protected final ArrayList<Ability> abilities = new ArrayList<>();
 

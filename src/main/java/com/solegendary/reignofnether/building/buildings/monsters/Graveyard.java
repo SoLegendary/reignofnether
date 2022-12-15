@@ -43,6 +43,8 @@ public class Graveyard extends ProductionBuilding {
         this.oreCost = ResourceCosts.Graveyard.ORE;
         this.popSupply = ResourceCosts.Graveyard.SUPPLY;
 
+        this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICKS);
+
         this.explodeChance = 0.2f;
 
         if (level.isClientSide())

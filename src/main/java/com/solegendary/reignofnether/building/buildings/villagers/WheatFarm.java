@@ -38,6 +38,8 @@ public class WheatFarm extends Building {
         this.oreCost = ResourceCosts.WheatFarm.ORE;
         this.popSupply = ResourceCosts.WheatFarm.SUPPLY;
 
+        this.startingBlockTypes.add(Blocks.OAK_LOG);
+
         this.explodeChance = 0;
     }
 
