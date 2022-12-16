@@ -126,6 +126,9 @@ public class UnitServerEvents {
                 ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
                 ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
             }
+
+            if (entity instanceof AttackerUnit)
+                ((AttackerUnit) entity).setupEquipmentAndUpgrades();
         }
 
         // --------------------------- //

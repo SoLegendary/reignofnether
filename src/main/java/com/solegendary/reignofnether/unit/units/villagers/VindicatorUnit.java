@@ -75,7 +75,8 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return attackCooldown;}
+    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
+    public float getAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
@@ -93,11 +94,11 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     // endregion
 
     final static public float attackDamage = 5.0f;
+    final static public float attacksPerSecond = 0.5f;
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 2.0f;
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
-    final static public int attackCooldown = 50;
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -129,15 +130,10 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         AttackerUnit.tick(this);
     }
 
-    public void resetBehaviours() {
-        Unit.resetBehaviours(this);
-        AttackerUnit.resetBehaviours(this);
-    }
-
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.attackGoal = new MeleeAttackUnitGoal(this, attackCooldown, 1.0D, false);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
         this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
     }
 

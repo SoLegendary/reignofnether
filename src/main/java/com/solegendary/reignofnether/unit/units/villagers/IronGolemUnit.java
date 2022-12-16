@@ -66,7 +66,8 @@ public class IronGolemUnit extends IronGolem implements com.solegendary.reignofn
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return attackCooldown;}
+    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
+    public float getAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
@@ -83,12 +84,12 @@ public class IronGolemUnit extends IronGolem implements com.solegendary.reignofn
 
     // endregion
 
-    final static public float attackDamage = 10.0f;
+    final static public float attackDamage = 9.0f;
+    final static public float attacksPerSecond = 0.4f;
     final static public float maxHealth = 50.0f;
     final static public float armorValue = 4.0f;
     final static public float movementSpeed = 0.20f;
     final static public float attackRange = 3; // only used by ranged units or melee building attackers
-    final static public int attackCooldown = 30;
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -121,15 +122,10 @@ public class IronGolemUnit extends IronGolem implements com.solegendary.reignofn
         AttackerUnit.tick(this);
     }
 
-    public void resetBehaviours() {
-        com.solegendary.reignofnether.unit.interfaces.Unit.resetBehaviours(this);
-        AttackerUnit.resetBehaviours(this);
-    }
-
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.attackGoal = new MeleeAttackUnitGoal(this, attackCooldown, 1.0D, false);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
         this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
     }
 

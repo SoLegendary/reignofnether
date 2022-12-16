@@ -46,6 +46,7 @@ public class UnitActionItem {
     }
 
     public void resetBehaviours(Unit unit) {
+        unit.resetBehaviours();
         Unit.resetBehaviours(unit);
         if (unit instanceof WorkerUnit workerUnit)
             WorkerUnit.resetBehaviours(workerUnit);

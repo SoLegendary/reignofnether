@@ -21,6 +21,7 @@ public interface AttackerUnit {
 
     public boolean getWillRetaliate();
     public int getAttackCooldown();
+    public float getAttacksPerSecond();
     public float getAggroRange();
     public boolean getAggressiveWhenIdle();
     public float getAttackRange();
@@ -140,5 +141,4 @@ public interface AttackerUnit {
     default void setupEquipmentAndUpgrades() { }
 
     default double getWeaponDamageModifier() { return 0; }
-
 }

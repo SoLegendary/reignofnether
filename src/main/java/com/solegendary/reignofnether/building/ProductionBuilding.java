@@ -82,9 +82,6 @@ public abstract class ProductionBuilding extends Building {
             level.addFreshEntity(entity);
             ((Unit) entity).setOwnerName(ownerName);
 
-            if (entity instanceof AttackerUnit)
-                ((AttackerUnit) entity).setupEquipmentAndUpgrades();
-
             BlockPos defaultRallyPoint = getMinCorner(this.blocks).offset(
                     0.5f - spawnRadiusOffset,
                     0.5f,

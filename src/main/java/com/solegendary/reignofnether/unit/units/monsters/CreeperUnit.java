@@ -73,7 +73,8 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return attackCooldown;}
+    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
+    public float getAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
@@ -91,11 +92,11 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     // endregion
 
     final static public float attackDamage = 20.0f;
+    final static public float attacksPerSecond = 1f;
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
-    final static public int attackCooldown = 100; // not used by creepers anyway
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -155,16 +156,15 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
             this.setSwellDir(-1);
     }
 
+    @Override
     public void resetBehaviours() {
-        Unit.resetBehaviours(this);
-        AttackerUnit.resetBehaviours(this);
         forceExplode = false;
     }
 
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.attackGoal = new CreeperAttackUnitGoal(this, attackCooldown, 1.0f, false);
+        this.attackGoal = new CreeperAttackUnitGoal(this, getAttackCooldown(), 1.0f, false);
     }
 
     @Override

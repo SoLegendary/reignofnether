@@ -146,11 +146,6 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
         // TODO: run Player place block animations with arms shown when building
     }
 
-    public void resetBehaviours() {
-        Unit.resetBehaviours(this);
-        WorkerUnit.resetBehaviours(this);
-    }
-
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);

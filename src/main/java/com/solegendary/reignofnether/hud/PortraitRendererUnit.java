@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -187,7 +189,7 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sparkler.png")); // ATTACK SPEED
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/bow.png")); // RANGE
             statStrings.add(String.valueOf((int) attackerUnit.getAttackDamage() + (int) attackerUnit.getWeaponDamageModifier()));
-            statStrings.add(String.valueOf((int) (100 / attackerUnit.getAttackCooldown())));
+            statStrings.add(String.valueOf((float) attackerUnit.getAttacksPerSecond())); // attacks per second
             statStrings.add(String.valueOf((int) (attackerUnit.getAttackRange())));
         }
         textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"));

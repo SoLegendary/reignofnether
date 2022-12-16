@@ -77,6 +77,9 @@ public interface Unit {
         unit.setHoldPosition(false);
     }
 
+    // can be overridden in the Unit's class to do additional logic on a reset
+    public default void resetBehaviours() { }
+
     // this setter sets a Unit field and so can't be defaulted
     // move to a block ignoring all else until reaching it
     public default void setMoveTarget(@Nullable BlockPos bp) {

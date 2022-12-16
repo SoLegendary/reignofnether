@@ -65,7 +65,8 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return attackCooldown;}
+    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
+    public float getAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
@@ -83,11 +84,11 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     // endregion
 
     final static public float attackDamage = 4.0f;
+    final static public float attacksPerSecond = 0.5f;
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 10.0F; // only used by ranged units or melee building attackers
-    final static public int attackCooldown = 45;
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -123,15 +124,10 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
             attackGoal.tickCooldown();
     }
 
-    public void resetBehaviours(Unit unit) {
-        Unit.resetBehaviours(this);
-        AttackerUnit.resetBehaviours(this);
-    }
-
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
-        this.attackGoal = new UnitBowAttackGoal<>(this, attackCooldown, attackRange);
+        this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown(), attackRange);
     }
 
     @Override
