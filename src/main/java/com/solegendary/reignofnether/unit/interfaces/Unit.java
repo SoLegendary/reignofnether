@@ -97,9 +97,4 @@ public interface Unit {
     public void setFollowTarget(@Nullable LivingEntity target);
 
     public void initialiseGoals();
-
-    public static void forceChunk(ServerLevel level, LivingEntity entity) {
-        ChunkAccess chunk = level.getChunk(entity.getOnPos());
-        ForgeChunkManager.forceChunk(level, ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
-    }
 }

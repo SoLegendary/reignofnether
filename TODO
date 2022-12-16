@@ -1,8 +1,6 @@
 TODO before playtesting:
 
-1. Move forced chunks as entities move between them
-    - force chunks around buildings too
-    - remove forced chunks on dead entities and buildings
+1. Minimap position for clientside entities outside of render view not updated properly
 
 2. Implement proper build times
     - units

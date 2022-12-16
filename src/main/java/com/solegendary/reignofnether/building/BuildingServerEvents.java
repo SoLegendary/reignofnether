@@ -52,7 +52,7 @@ public class BuildingServerEvents {
 
             if (building.canAfford(ownerName)) {
                 buildings.add(building);
-                building.forceChunk();
+                building.forceChunk(true);
 
                 // place all blocks on the lowest y level
                 int minY = BuildingUtils.getMinCorner(building.blocks).getY();

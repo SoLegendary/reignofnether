@@ -292,6 +292,8 @@ public abstract class Building {
     // destroy all remaining blocks in a final big explosion
     // only explode a fraction of the blocks to avoid lag and sound spikes
     public void destroy(ServerLevel serverLevel) {
+        this.forceChunk(false);
+
         BuildingClientboundPacket.destroyBuilding(this.originPos);
 
         this.blocks.forEach((BuildingBlock block) -> {
@@ -344,11 +346,11 @@ public abstract class Building {
         return false;
     }
 
-    public void forceChunk() {
+    public void forceChunk(boolean add) {
         if (!level.isClientSide()) {
             BlockPos centreBp = BuildingUtils.getCentrePos(blocks);
             ChunkAccess chunk = level.getChunk(centreBp);
-            ForgeChunkManager.forceChunk((ServerLevel) level, ReignOfNether.MOD_ID, centreBp, chunk.getPos().x, chunk.getPos().z, true, true);
+            ForgeChunkManager.forceChunk((ServerLevel) level, ReignOfNether.MOD_ID, centreBp, chunk.getPos().x, chunk.getPos().z, add, true);
         }
     }
 

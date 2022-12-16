@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
@@ -55,6 +56,8 @@ public class UnitServerEvents {
     private static final ArrayList<UnitActionItem> unitActionQueue = new ArrayList<>();
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
+    private static final ArrayList<Pair<LivingEntity, ChunkAccess>> forcedUnitChunks = new ArrayList<>();
+
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
     }
@@ -109,19 +112,18 @@ public class UnitServerEvents {
     }
 
     @SubscribeEvent
-    public static void onEntityLeave(EntityLeaveLevelEvent evt) {
-        if (evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
-            allUnits.removeIf(e -> e.getId() == entity.getId());
-            UnitClientboundPacket.sendLeavePacket(entity);
-        }
-    }
-
-    @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
         if (evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
             allUnits.add(entity);
+
             if (entity instanceof AttackerUnit)
                 ((AttackerUnit) entity).setupEquipmentAndUpgrades();
+
+            if (entity instanceof Unit) {
+                ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
+                ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
+                forcedUnitChunks.add(new Pair<>(entity, chunk));
+            }
         }
         // --------------------------- //
         // Projectile damage balancing //
@@ -135,6 +137,20 @@ public class UnitServerEvents {
                     arrow.setBaseDamage(unit.getAttackDamage() - 2);
                 else if (lEntity.getItemBySlot(EquipmentSlot.MAINHAND).getItem() == Items.CROSSBOW)
                     arrow.setBaseDamage(unit.getAttackDamage() - 2.5);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityLeave(EntityLeaveLevelEvent evt) {
+        if (evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
+            allUnits.removeIf(e -> e.getId() == entity.getId());
+            UnitClientboundPacket.sendLeavePacket(entity);
+
+            if (entity instanceof Unit) {
+                ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
+                ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, false, true);
+                forcedUnitChunks.removeIf(p -> p.getFirst().getId() == entity.getId());
             }
         }
     }
@@ -173,8 +189,28 @@ public class UnitServerEvents {
         unitSyncTicks -= 1;
         if (unitSyncTicks <= 0) {
             unitSyncTicks = UNIT_SYNC_TICKS_MAX;
-            for (LivingEntity entity : allUnits)
+            for (LivingEntity entity : allUnits) {
                 UnitClientboundPacket.sendSyncPacket(entity);
+
+                // remove old chunk // add current chunk
+                boolean chunkNeedsUpdate = false;
+                ChunkAccess newChunk = evt.level.getChunk(entity.getOnPos());
+
+                for (Pair<LivingEntity, ChunkAccess> forcedChunk : forcedUnitChunks) {
+                    int id = forcedChunk.getFirst().getId();
+                    ChunkAccess chunk = forcedChunk.getSecond();
+                    if (id == entity.getId() && (chunk.getPos().x != newChunk.getPos().x || chunk.getPos().z != newChunk.getPos().z)) {
+                        ForgeChunkManager.forceChunk((ServerLevel) evt.level, ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, false, true);
+                        chunkNeedsUpdate = true;
+                    }
+                }
+                if (chunkNeedsUpdate) {
+                    forcedUnitChunks.removeIf(p -> p.getFirst().getId() == entity.getId());
+                    ForgeChunkManager.forceChunk((ServerLevel) evt.level, ReignOfNether.MOD_ID, entity, newChunk.getPos().x, newChunk.getPos().z, true, true);
+                    forcedUnitChunks.add(new Pair<>(entity, newChunk));
+                    System.out.println("Updated forced chunk for entity: " + entity.getId() + " at: " + newChunk.getPos().x + "," + newChunk.getPos().z);
+                }
+            }
         }
         for (UnitActionItem actionItem : unitActionQueue)
             actionItem.action(evt.level);
