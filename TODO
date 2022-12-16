@@ -1,9 +1,8 @@
 TODO before playtesting:
 
-1. keep chunks around buildings loaded and stop clientside removal of selected building
-    - need to force chunks and remove on building removal
-    - remove forced chunks on dead entities
-    - check that these are even needed?
+1. Move forced chunks as entities move between them
+    - force chunks around buildings too
+    - remove forced chunks on dead entities and buildings
 
 2. Implement proper build times
     - units
@@ -16,11 +15,9 @@ TODO before playtesting:
 
 TODO bugs/features:
 
-1. Reduce size of initial foundations for some buildings that are low to the ground
-
-2. Husks (upgraded from Zombies at the lab)
+1. Husks (upgraded from Zombies at the lab)
     - 20 -> 25hp, doesn't burn in sunlight
-3. Strays (upgraded from Skeletons at the lab)
+2. Strays (upgraded from Skeletons at the lab)
     - Fires slowing arrows
 
 

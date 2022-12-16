@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.resources.ResourceName;
@@ -23,6 +24,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.level.BlockEvent;
 
 import java.util.ArrayList;
@@ -339,6 +342,14 @@ public abstract class Building {
             if (ability.action == action && ability.cooldown <= 0)
                 return true;
         return false;
+    }
+
+    public void forceChunk() {
+        if (!level.isClientSide()) {
+            BlockPos centreBp = BuildingUtils.getCentrePos(blocks);
+            ChunkAccess chunk = level.getChunk(centreBp);
+            ForgeChunkManager.forceChunk((ServerLevel) level, ReignOfNether.MOD_ID, centreBp, chunk.getPos().x, chunk.getPos().z, true, true);
+        }
     }
 
     public void tick(Level tickLevel) {

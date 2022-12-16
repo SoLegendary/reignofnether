@@ -120,17 +120,9 @@ public class UnitServerEvents {
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
         if (evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
             allUnits.add(entity);
-
-            // TODO: remove this on leaving
-            if (entity instanceof Unit) {
-                ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
-                ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
-            }
-
             if (entity instanceof AttackerUnit)
                 ((AttackerUnit) entity).setupEquipmentAndUpgrades();
         }
-
         // --------------------------- //
         // Projectile damage balancing //
         // --------------------------- //

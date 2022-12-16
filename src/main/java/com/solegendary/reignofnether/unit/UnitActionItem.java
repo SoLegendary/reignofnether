@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
@@ -14,10 +15,14 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraftforge.common.world.ForgeChunkManager;
 
 import java.util.ArrayList;
 

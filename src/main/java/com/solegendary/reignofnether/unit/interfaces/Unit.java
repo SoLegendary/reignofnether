@@ -1,13 +1,19 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.ForcedChunksSavedData;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraftforge.common.world.ForgeChunkManager;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -91,4 +97,9 @@ public interface Unit {
     public void setFollowTarget(@Nullable LivingEntity target);
 
     public void initialiseGoals();
+
+    public static void forceChunk(ServerLevel level, LivingEntity entity) {
+        ChunkAccess chunk = level.getChunk(entity.getOnPos());
+        ForgeChunkManager.forceChunk(level, ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
+    }
 }
