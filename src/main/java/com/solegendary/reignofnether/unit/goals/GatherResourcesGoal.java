@@ -72,8 +72,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             if (entity instanceof Unit unit) {
                 if (unit instanceof WorkerUnit workerUnit && workerUnit.getGatherResourceGoal() != null && entity.getId() != this.mob.getId()) {
                     BlockPos otherUnitTarget = workerUnit.getGatherResourceGoal().getGatherTarget();
-                    if (otherUnitTarget != null && otherUnitTarget.equals(bp))
+                    if (otherUnitTarget != null && otherUnitTarget.equals(bp)) {
+                        System.out.println("Conflicting gather targets!");
                         return false;
+                    }
                 }
             }
         }
