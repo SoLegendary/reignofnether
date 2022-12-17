@@ -17,7 +17,7 @@ public class ResourcesServerEvents {
 
     public static final int STARTING_FOOD = 200;
     public static final int STARTING_WOOD = 200;
-    public static final int STARTING_ORE = 1000;
+    public static final int STARTING_ORE = 0;
 
     public static void addSubtractResources(Resources resourcesToAdd) {
         for (Resources resources : resourcesList) {
@@ -89,9 +89,6 @@ public class ResourcesServerEvents {
                     String playerName = words[1];
                     int amount = Integer.parseInt(words[2]);
                     String resourceName = words[3].toLowerCase();
-
-                    if (amount <= 0)
-                        return;
 
                     for (Player player : PlayerServerEvents.players) {
                         if (player.getName().getString().equals(playerName)) {
