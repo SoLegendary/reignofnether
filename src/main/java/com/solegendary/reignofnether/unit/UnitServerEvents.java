@@ -115,7 +115,6 @@ public class UnitServerEvents {
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
         if (evt.getEntity() instanceof Unit &&
             evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
-            System.out.println("Unit joined");
             allUnits.add(entity);
 
             if (entity instanceof AttackerUnit)
@@ -148,7 +147,7 @@ public class UnitServerEvents {
             !evt.getLevel().isClientSide) {
 
             if (allUnits.removeIf(e -> e.getId() == entity.getId()))
-                System.out.println("Entity removed!");
+                System.out.println("Unit removed!");
             UnitClientboundPacket.sendLeavePacket(entity);
 
             ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
