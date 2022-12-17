@@ -51,7 +51,7 @@ public class Laboratory extends ProductionBuilding {
 
         Ability callLightning = new Ability(
             UnitAction.CALL_LIGHTNING,
-            100, 20, 0
+            ResourceCosts.TICKS_PER_SECOND * 60, 20, 0
         );
         this.abilities.add(callLightning);
 

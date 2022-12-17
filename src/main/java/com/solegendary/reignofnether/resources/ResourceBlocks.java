@@ -98,7 +98,7 @@ public class ResourceBlocks {
             new ResourceBlock("Logs",
                     List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG),
                     100,
-                    25,
+                    15,
                     ResourceName.WOOD
             ),
             new ResourceBlock("Leaves",

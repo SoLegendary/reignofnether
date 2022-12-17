@@ -93,7 +93,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
     final static public float attackDamage = 20.0f;
     final static public float attacksPerSecond = 1f;
-    final static public float maxHealth = 20.0f;
+    final static public float maxHealth = 10.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
@@ -140,9 +140,9 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MOVEMENT_SPEED, VillagerUnit.movementSpeed)
-                .add(Attributes.MAX_HEALTH, VillagerUnit.maxHealth)
-                .add(Attributes.ARMOR, VillagerUnit.armorValue);
+                .add(Attributes.MOVEMENT_SPEED, CreeperUnit.movementSpeed)
+                .add(Attributes.MAX_HEALTH, CreeperUnit.maxHealth)
+                .add(Attributes.ARMOR, CreeperUnit.armorValue);
     }
 
     public void tick() {
