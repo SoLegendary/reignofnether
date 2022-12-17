@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.Ability;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -28,9 +29,9 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IronGolemUnit extends IronGolem implements com.solegendary.reignofnether.unit.interfaces.Unit, AttackerUnit {
+public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     // region
-    public Faction getFaction() {return Faction.MONSTERS;}
+    public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
     public List<Ability> getAbilities() {return abilities;}
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
@@ -71,8 +72,9 @@ public class IronGolemUnit extends IronGolem implements com.solegendary.reignofn
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
+    @Override
     public float getAttackDamage() {return attackDamage;}
+    public float getMovementSpeed() {return movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
     public float getSightRange() {return sightRange;}
@@ -118,7 +120,7 @@ public class IronGolemUnit extends IronGolem implements com.solegendary.reignofn
 
     public void tick() {
         super.tick();
-        com.solegendary.reignofnether.unit.interfaces.Unit.tick(this);
+        Unit.tick(this);
         AttackerUnit.tick(this);
     }
 

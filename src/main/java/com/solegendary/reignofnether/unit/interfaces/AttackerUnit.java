@@ -25,7 +25,7 @@ public interface AttackerUnit {
     public float getAggroRange();
     public boolean getAggressiveWhenIdle();
     public float getAttackRange();
-    public float getAttackDamage();
+    public default float getAttackDamage() { return 0f; };
     public BlockPos getAttackMoveTarget();
     public boolean canAttackBuildings();
 

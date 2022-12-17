@@ -30,15 +30,13 @@ Pillager ready-crossbow ability
 
 TODO bugs/features (backlog)
 
-0. Comodification in gatherResourcesGoal error
+0. IronGolem getAttackDamage() isn't recognised as implemented for some reason (clientside damage is shown as 0)
 
 1. Arm animations and block cracking/particles
-2. Fix body rendering issues (to do with portrait head rendering)
-3. Minimap 90deg rotations
-4. Show unit outlines behind blocks
-5. Append extra text to production items for upgraded units
+2. Show unit outlines behind blocks
+3. Append extra text to production items for upgraded units
 
-6. Apply required gamerules automatically:
+4. Apply required gamerules automatically:
     - /gamerule randomTickSpeed 100
     - /gamerule doDaylightCycle false
     - /time set 12600

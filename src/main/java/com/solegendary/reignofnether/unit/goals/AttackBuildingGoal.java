@@ -58,7 +58,6 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
                     if (new Random().nextDouble(1.0f) < damageFloat - damageFloor)
                         damageInt += 1;
                     buildingTarget.destroyRandomBlocks(damageInt);
-                    this.mob.playSound(SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR);
                 }
             }
         }
