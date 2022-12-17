@@ -251,5 +251,8 @@ public class UnitServerEvents {
     public static void onLightningStrike(LivingDamageEvent evt) {
         if (evt.getEntity() instanceof Creeper && evt.getSource() == DamageSource.LIGHTNING_BOLT)
             evt.setCanceled(true);
+
+        if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL || evt.getSource() == DamageSource.WITHER || evt.getSource() == DamageSource.IN_FIRE))
+            evt.setCanceled(true);
     }
 }

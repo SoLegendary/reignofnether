@@ -45,11 +45,14 @@ public abstract class ProductionItem {
                 return (resources.food >= foodCost &&
                         resources.wood >= woodCost &&
                         resources.ore >= oreCost &&
-                        (currentPop + popCost) <= popSupply);
+                        ((currentPop + popCost) <= popSupply || popCost == 0));
         return false;
     }
 
     public boolean canAffordPopulation(String ownerName) {
+        if (popCost == 0)
+            return true;
+
         int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), ownerName);
         int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
 
@@ -60,6 +63,9 @@ public abstract class ProductionItem {
     }
 
     public boolean isBelowMaxPopulation(String ownerName) {
+        if (popCost == 0)
+            return true;
+
         int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), ownerName);
         int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
 

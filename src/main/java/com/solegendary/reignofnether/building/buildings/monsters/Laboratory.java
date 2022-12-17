@@ -74,7 +74,7 @@ public class Laboratory extends ProductionBuilding {
                     null,
                     List.of(
                         FormattedCharSequence.forward("Call Lightning", Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE004  " + 100/20 + "s", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("\uE004  " + 60 + "s", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Summon a bolt of lightning at the targeted location.", Style.EMPTY),
                         FormattedCharSequence.forward("Can be used to charge creepers and damage enemies.", Style.EMPTY)
