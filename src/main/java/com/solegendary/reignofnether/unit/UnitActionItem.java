@@ -136,7 +136,8 @@ public class UnitActionItem {
                     // if the unit can't actually build/repair just treat this as a move action
                     if (unit instanceof WorkerUnit workerUnit) {
                         Building building = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), preselectedBlockPos);
-                        workerUnit.getBuildRepairGoal().setBuildingTarget(building);
+                        if (building != null)
+                            workerUnit.getBuildRepairGoal().setBuildingTarget(building);
                     }
                     else
                         unit.setMoveTarget(preselectedBlockPos);
@@ -148,7 +149,7 @@ public class UnitActionItem {
                             goal.setTargetResourceName(ResourceName.FOOD);
                             goal.setMoveTarget(preselectedBlockPos);
                             Building building = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), preselectedBlockPos);
-                            if (building.name.contains(" Farm"))
+                            if (building != null && building.name.contains(" Farm"))
                                 goal.setTargetFarm(building);
                         }
                     }
