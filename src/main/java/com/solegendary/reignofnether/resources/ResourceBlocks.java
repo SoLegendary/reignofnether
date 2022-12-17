@@ -115,25 +115,25 @@ public class ResourceBlocks {
     public static final List<ResourceBlock> ORE_BLOCKS = List.of(
             new ResourceBlock("Tier 1 Ores",
                     List.of(Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE, Blocks.NETHER_QUARTZ_ORE),
-                    100,
+                    TICKS_PER_SECOND * 12,
                     25,
                     ResourceName.ORE
             ),
             new ResourceBlock("Tier 2 Ores",
                     List.of(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.IRON_ORE, Blocks.LAPIS_ORE, Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.DEEPSLATE_LAPIS_ORE, Blocks.DEEPSLATE_REDSTONE_ORE, Blocks.NETHER_GOLD_ORE),
-                    100,
+                    TICKS_PER_SECOND * 12,
                     50,
                     ResourceName.ORE
             ),
             new ResourceBlock("Tier 3 Ores",
                     List.of(Blocks.GOLD_ORE, Blocks.EMERALD_ORE, Blocks.DEEPSLATE_GOLD_ORE, Blocks.DEEPSLATE_EMERALD_ORE),
-                    100,
+                    TICKS_PER_SECOND * 12,
                     200,
                     ResourceName.ORE
             ),
             new ResourceBlock("Tier 4 Ores",
                     List.of(Blocks.DIAMOND_ORE, Blocks.ANCIENT_DEBRIS, Blocks.DEEPSLATE_DIAMOND_ORE),
-                    100,
+                    TICKS_PER_SECOND * 12,
                     500,
                     ResourceName.ORE
             )
