@@ -215,7 +215,7 @@ public class UnitClientEvents {
             }
 
             // select all nearby units of the same type when the same unit is double-clicked
-            if (selectedUnits.size() == 1 && MC.level != null && !Keybindings.shiftMod.isDown() &&
+            else if (selectedUnits.size() == 1 && MC.level != null && !Keybindings.shiftMod.isDown() &&
                (System.currentTimeMillis() - lastLeftClickTime) < DOUBLE_CLICK_TIME_MS &&
                 preselectedUnits.size() > 0 && selectedUnits.contains(preselectedUnits.get(0))) {
 

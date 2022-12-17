@@ -13,6 +13,8 @@ import java.util.List;
 public class ResourceBlocks {
     public static final List<Material> CLEAR_MATERIALS = List.of(Material.WATER, Material.AIR, Material.GRASS);
 
+    public static final int TICKS_PER_SECOND = 20;
+
     public static ResourceBlock getResourceBlock(BlockPos bp, Level level) {
         Block block = level.getBlockState(bp).getBlock();
 
@@ -36,7 +38,7 @@ public class ResourceBlocks {
         return ResourceName.NONE;
     }
 
-    public static final int REPLANT_TICKS_MAX = 10;
+    public static final int REPLANT_TICKS_MAX = 20;
 
     public static final List<ResourceBlock> FOOD_BLOCKS = List.of(
             new ResourceBlock("Farmland",
@@ -48,63 +50,64 @@ public class ResourceBlocks {
             ),
             new ResourceBlock("Wheat",
                     List.of(Blocks.WHEAT),
-                    100,
+                    TICKS_PER_SECOND * 7,
                     15,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
             new ResourceBlock("Carrots",
                     List.of(Blocks.CARROTS),
-                    100,
+                    TICKS_PER_SECOND * 7,
                     15,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
             new ResourceBlock("Potatoes",
                     List.of(Blocks.POTATOES),
-                    100,
+                    TICKS_PER_SECOND * 7,
                     20,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
             new ResourceBlock("Beetroots",
                     List.of(Blocks.BEETROOTS),
-                    100,
+                    TICKS_PER_SECOND * 7,
                     10,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_3) == 3
             ),
             new ResourceBlock("Gourds",
                     List.of(Blocks.MELON, Blocks.PUMPKIN),
-                    100,
+                    TICKS_PER_SECOND * 7,
                     20,
                     ResourceName.FOOD
             ),
             new ResourceBlock("Mushrooms",
                     List.of(Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM),
                     50,
-                    30,
+                    20,
                     ResourceName.FOOD
             ),
             new ResourceBlock("Misc. Forageable",
                     List.of(Blocks.SUGAR_CANE, Blocks.SWEET_BERRY_BUSH),
                     50,
-                    30,
+                    20,
                     ResourceName.FOOD
             )
     );
 
     public static final List<ResourceBlock> WOOD_BLOCKS = List.of(
             new ResourceBlock("Logs",
-                    List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG),
-                    100,
-                    15,
+                    List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG,
+                            Blocks.OAK_WOOD, Blocks.BIRCH_WOOD, Blocks.ACACIA_WOOD, Blocks.DARK_OAK_WOOD, Blocks.JUNGLE_WOOD, Blocks.MANGROVE_WOOD, Blocks.SPRUCE_WOOD),
+                    TICKS_PER_SECOND * 10,
+                    10,
                     ResourceName.WOOD
             ),
             new ResourceBlock("Leaves",
                     List.of(Blocks.ACACIA_LEAVES, Blocks.AZALEA_LEAVES, Blocks.BIRCH_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES),
-                    4,
-                    1,
+                    5,
+                    0,
                     ResourceName.WOOD
             )
     );

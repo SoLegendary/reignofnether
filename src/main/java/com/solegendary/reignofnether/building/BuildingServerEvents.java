@@ -133,7 +133,7 @@ public class BuildingServerEvents {
         if (!evt.getLevel().isClientSide()) {
             for (Building building : buildings)
                 if (building.isPosPartOfBuilding(evt.getPos(), true))
-                    building.onBlockBreak(evt);
+                    building.onBlockBreak((ServerLevel) evt.getLevel(), evt.getPos(), true);
         }
     }
 

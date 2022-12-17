@@ -36,8 +36,8 @@ import static com.solegendary.reignofnether.building.BuildingUtils.*;
 
 public abstract class Building {
 
-    private final static int BASE_MS_PER_BUILD = 250; // time taken to build each block with 1 villager assigned;
-    public final float MELEE_DAMAGE_MULTIPLIER = 0.5f; // damage multiplier applied to melee attackers
+    private final static int BASE_MS_PER_BUILD = 50; // time taken to build each block with 1 villager assigned;
+    public final float MELEE_DAMAGE_MULTIPLIER = 0.25f; // damage multiplier applied to melee attackers
 
     public String name;
     public static String structureName;
@@ -274,8 +274,10 @@ public abstract class Building {
             return;
         ArrayList<BuildingBlock> placedBlocks = new ArrayList<>(blocks.stream().filter(b -> b.isPlaced(getLevel())).toList());
         Collections.shuffle(placedBlocks);
-        for (int i = 0; i < amount && i < placedBlocks.size(); i++)
+        for (int i = 0; i < amount && i < placedBlocks.size(); i++) {
             getLevel().destroyBlock(placedBlocks.get(i).getBlockPos(), false);
+            this.onBlockBreak((ServerLevel) getLevel(), placedBlocks.get(i).getBlockPos(), false);
+        }
     }
 
     public boolean shouldBeDestroyed() {
@@ -317,12 +319,8 @@ public abstract class Building {
     }
 
     // should only be run serverside
-    public void onBlockBreak(BlockEvent.BreakEvent evt) {
-        if (evt.getLevel().isClientSide())
-            return;
-
+    public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks) {
         unrepairedBlocksDestroyed += 1;
-        ServerLevel level = (ServerLevel) evt.getLevel();
 
         // when a player breaks a block that's part of the building:
         // - roll explodeChance to cause explosion effects and destroy more blocks
@@ -330,12 +328,12 @@ public abstract class Building {
         Random rand = new Random();
         if (rand.nextFloat(1.0f) < this.explodeChance) {
             level.explode(null, null, null,
-                    evt.getPos().getX(),
-                    evt.getPos().getY(),
-                    evt.getPos().getZ(),
-                    this.explodeRadius,
+                    pos.getX(),
+                    pos.getY(),
+                    pos.getZ(),
+                    breakBlocks ? this.explodeRadius : 1.0f,
                     this.getBlocksPlacedPercent() < this.fireThreshold, // fire
-                    Explosion.BlockInteraction.BREAK);
+                    breakBlocks ? Explosion.BlockInteraction.BREAK : Explosion.BlockInteraction.NONE);
         }
     }
 
