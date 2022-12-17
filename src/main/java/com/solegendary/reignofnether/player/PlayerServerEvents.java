@@ -28,7 +28,7 @@ import java.util.UUID;
 
 public class PlayerServerEvents {
 
-    private static final ArrayList<ServerPlayer> players = new ArrayList<>();
+    public static final ArrayList<ServerPlayer> players = new ArrayList<>();
     private static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
 
     @SubscribeEvent

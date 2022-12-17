@@ -1,17 +1,22 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ResourcesServerEvents {
 
     // tracks all players' resources
     public static ArrayList<Resources> resourcesList = new ArrayList<>();
 
-    public static final int STARTING_FOOD = 2000;
-    public static final int STARTING_WOOD = 2000;
+    public static final int STARTING_FOOD = 200;
+    public static final int STARTING_WOOD = 200;
     public static final int STARTING_ORE = 1000;
 
     public static void addSubtractResources(Resources resourcesToAdd) {
@@ -57,7 +62,6 @@ public class ResourcesServerEvents {
 
         String playerName = evt.getEntity().getName().getString();
 
-
         Resources playerResources = null;
         for (Resources resources : resourcesList)
             if (resources.ownerName.equals(playerName))
@@ -71,5 +75,40 @@ public class ResourcesServerEvents {
             resourcesList.add(playerResources);
         }
         ResourcesClientboundPacket.syncResources(resourcesList);
+    }
+
+    // commands for ops to give resources
+    @SubscribeEvent
+    public static void onPlayerChat(ServerChatEvent.Submitted evt) {
+
+        if (evt.getPlayer().hasPermissions(4)) {
+            String msg = evt.getMessage().getString();
+            String[] words = msg.split(" ");
+            if (words.length == 4 && words[0].equals("giveresources")) {
+                try {
+                    String playerName = words[1];
+                    int amount = Integer.parseInt(words[2]);
+                    String resourceName = words[3].toLowerCase();
+
+                    if (amount <= 0)
+                        return;
+
+                    for (Player player : PlayerServerEvents.players) {
+                        if (player.getName().getString().equals(playerName)) {
+                            switch (resourceName) {
+                                case "food" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, amount, 0, 0));
+                                case "wood" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, amount, 0));
+                                case "ore" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, 0, amount));
+                                case "all" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, amount, amount, amount));
+                            }
+                        }
+                    }
+                }
+                catch(NumberFormatException err) {
+                    System.out.println(err);
+                    return;
+                }
+            }
+        }
     }
 }
