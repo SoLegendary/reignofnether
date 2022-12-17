@@ -114,13 +114,13 @@ public class ResourceBlocks {
 
     public static final List<ResourceBlock> ORE_BLOCKS = List.of(
             new ResourceBlock("Tier 1 Ores",
-                    List.of(Blocks.COAL_ORE, Blocks.COPPER_ORE, Blocks.DEEPSLATE_COAL_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.NETHER_QUARTZ_ORE),
+                    List.of(Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE, Blocks.NETHER_QUARTZ_ORE),
                     100,
                     25,
                     ResourceName.ORE
             ),
             new ResourceBlock("Tier 2 Ores",
-                    List.of(Blocks.IRON_ORE, Blocks.LAPIS_ORE, Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.DEEPSLATE_LAPIS_ORE, Blocks.DEEPSLATE_REDSTONE_ORE, Blocks.NETHER_GOLD_ORE),
+                    List.of(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.IRON_ORE, Blocks.LAPIS_ORE, Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.DEEPSLATE_LAPIS_ORE, Blocks.DEEPSLATE_REDSTONE_ORE, Blocks.NETHER_GOLD_ORE),
                     100,
                     50,
                     ResourceName.ORE
