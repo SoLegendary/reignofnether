@@ -114,7 +114,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
 
     public void tick() {
         super.tick();
-        com.solegendary.reignofnether.unit.interfaces.Unit.tick(this);
+        Unit.tick(this);
         AttackerUnit.tick(this);
     }
 

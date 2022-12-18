@@ -72,7 +72,6 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
-    @Override
     public float getAttackDamage() {return attackDamage;}
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
