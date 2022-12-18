@@ -9,7 +9,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
 import com.solegendary.reignofnether.unit.Ability;
-import com.solegendary.reignofnether.unit.ResourceCosts;
+import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.abilities.CallLightningAbility;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
@@ -65,14 +65,14 @@ public class Laboratory extends ProductionBuilding {
                     14,
                     new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_on.png"),
                     Keybindings.keyL,
-                    () -> false,
+                    () -> CursorClientEvents.getLeftClickAction() == UnitAction.CALL_LIGHTNING,
                     () -> !this.isUpgraded(),
                     () -> this.getLightningRodPos() != null,
                     () -> CursorClientEvents.setLeftClickAction(UnitAction.CALL_LIGHTNING),
                     null,
                     List.of(
                         FormattedCharSequence.forward("Call Lightning", Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE004  " + 60 + "s", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("\uE004  " + callLightning.cooldownMax/20 + "s  \uE005  " + (int) callLightning.range, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Summon a bolt of lightning at the targeted location.", Style.EMPTY),
                         FormattedCharSequence.forward("Can be used to charge creepers and damage enemies.", Style.EMPTY)

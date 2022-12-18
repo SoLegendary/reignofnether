@@ -37,7 +37,7 @@ import static com.solegendary.reignofnether.building.BuildingUtils.*;
 
 public abstract class Building {
 
-    private final static int BASE_MS_PER_BUILD = 5; // time taken to build each block with 1 villager assigned; normally 50 in real games
+    private final static int BASE_MS_PER_BUILD = 50; // time taken to build each block with 1 villager assigned; normally 50 in real games
     public final float MELEE_DAMAGE_MULTIPLIER = 0.25f; // damage multiplier applied to melee attackers
 
     public String name;
@@ -328,7 +328,7 @@ public abstract class Building {
                     pos.getX(),
                     pos.getY(),
                     pos.getZ(),
-                    breakBlocks ? this.explodeRadius : 1.5f,
+                    breakBlocks ? this.explodeRadius : 2.0f,
                     this.getBlocksPlacedPercent() < this.fireThreshold, // fire
                     breakBlocks ? Explosion.BlockInteraction.BREAK : Explosion.BlockInteraction.NONE);
         }
@@ -336,7 +336,7 @@ public abstract class Building {
 
     public boolean isAbilityOffCooldown(UnitAction action) {
         for (Ability ability : abilities)
-            if (ability.action == action && ability.cooldown <= 0)
+            if (ability.action == action && ability.getCooldown() <= 0)
                 return true;
         return false;
     }

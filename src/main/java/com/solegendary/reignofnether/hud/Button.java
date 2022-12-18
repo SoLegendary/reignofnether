@@ -169,7 +169,7 @@ public class Button {
         if (greyPercent > 0 || !isEnabled.get()) {
             int greyHeightPx = Math.round(greyPercent * iconFrameSize);
             if (!isEnabled.get())
-                greyHeightPx = iconFrameSize;
+                greyHeightPx = 0;
 
             GuiComponent.fill(poseStack, // x1,y1, x2,y2,
                     x, y + greyHeightPx,

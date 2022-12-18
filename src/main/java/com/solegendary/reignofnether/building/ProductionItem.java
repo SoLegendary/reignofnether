@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
-import com.solegendary.reignofnether.unit.ResourceCosts;
+import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;

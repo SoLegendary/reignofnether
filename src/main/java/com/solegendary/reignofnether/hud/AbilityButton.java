@@ -30,7 +30,7 @@ public class AbilityButton extends Button {
 
         Runnable originalOnLeftClick = this.onLeftClick;
         this.onLeftClick = () -> {
-            if (this.ability != null && this.ability.cooldown > 0)
+            if (this.ability != null && this.ability.getCooldown() > 0)
                 HudClientEvents.showTemporaryMessage("This ability is still on cooldown");
             else
                 originalOnLeftClick.run();
@@ -40,7 +40,7 @@ public class AbilityButton extends Button {
     @Override
     public void render(PoseStack poseStack, int x, int y, int mouseX, int mouseY) {
         if (this.ability != null && ability.cooldownMax > 0)
-            this.greyPercent = 1.0f - ((float) ability.cooldown / (float) ability.cooldownMax);
+            this.greyPercent = 1.0f - ((float) ability.getCooldown() / (float) ability.cooldownMax);
         super.render(poseStack, x, y, mouseX, mouseY);
     }
 }

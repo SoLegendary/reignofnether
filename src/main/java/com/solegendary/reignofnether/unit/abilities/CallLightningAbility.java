@@ -3,13 +3,13 @@ package com.solegendary.reignofnether.unit.abilities;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.unit.Ability;
-import com.solegendary.reignofnether.unit.ResourceCosts;
+import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class CallLightningAbility extends Ability {
 
@@ -17,20 +17,31 @@ public class CallLightningAbility extends Ability {
         super(
             UnitAction.CALL_LIGHTNING,
             60 * ResourceCosts.TICKS_PER_SECOND,
-            20,
+            25,
             0
         );
     }
 
     @Override
-    public void use(Level level, Building buildingUsing, BlockPos targetedBp) {
+    public void use(Level level, Building buildingUsing, BlockPos targetBp) {
 
         if (!level.isClientSide() && buildingUsing instanceof Laboratory lab) {
             BlockPos rodPos = lab.getLightningRodPos();
+
             if (lab.isAbilityOffCooldown(UnitAction.CALL_LIGHTNING) && rodPos != null) {
+                BlockPos limitedBp = getXZRangeLimitedBlockPos(rodPos, targetBp);
+                // getXZRangeLimitedBlockPos' Y value is always the same as rodPos, but we want the first sky-exposed block
+                int y = level.getHeight();
+                BlockState bs;
+                do {
+                    bs = level.getBlockState(new BlockPos(limitedBp.getX(), y, limitedBp.getZ()));
+                    y -= 1;
+                } while(bs.isAir() && y > 0);
+                limitedBp = new BlockPos(limitedBp.getX(), y, limitedBp.getZ());
+
                 LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
                 if (bolt != null) {
-                    bolt.moveTo(targetedBp.getX(), targetedBp.getY(), targetedBp.getZ());
+                    bolt.moveTo(limitedBp.getX(), limitedBp.getY(), limitedBp.getZ());
                     level.addFreshEntity(bolt);
                 }
                 LightningBolt bolt2 = EntityType.LIGHTNING_BOLT.create(level);
@@ -40,6 +51,6 @@ public class CallLightningAbility extends Ability {
                 }
             }
         }
-        this.setCooldown();
+        this.setToMaxCooldown();
     }
 }
