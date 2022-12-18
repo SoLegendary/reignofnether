@@ -4,16 +4,11 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.PathfinderMob;
 
-import javax.annotation.Nullable;
 import java.util.Random;
 
 // Move towards a building to attack it
@@ -52,7 +47,7 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
                 if (ticksToNextBlockBreak <= 0) {
                     AttackerUnit unit = (AttackerUnit) mob;
                     ticksToNextBlockBreak = unit.getAttackCooldown();
-                    double damageFloat = unit.getAttackDamage() * buildingTarget.MELEE_DAMAGE_MULTIPLIER;
+                    double damageFloat = unit.getUnitAttackDamage() * buildingTarget.MELEE_DAMAGE_MULTIPLIER;
                     double damageFloor = Math.floor(damageFloat);
                     int damageInt = (int) damageFloor;
                     if (new Random().nextDouble(1.0f) < damageFloat - damageFloor)

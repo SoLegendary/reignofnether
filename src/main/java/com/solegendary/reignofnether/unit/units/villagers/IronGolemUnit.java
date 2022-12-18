@@ -24,6 +24,7 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
+import org.spongepowered.asm.mixin.Implements;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
-    public float getAttackDamage() {return attackDamage;}
+    public float getUnitAttackDamage() {return attackDamage;}
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}

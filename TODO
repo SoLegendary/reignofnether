@@ -30,8 +30,6 @@ Pillager ready-crossbow ability
 
 TODO bugs/features (backlog)
 
-0. IronGolem getAttackDamage() isn't recognised as implemented for some reason (clientside damage is shown as 0)
-
 1. Arm animations and block cracking/particles
 2. Show unit outlines behind blocks
 3. Append extra text to production items for upgraded units
