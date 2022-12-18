@@ -10,10 +10,6 @@ TODO bugs/features:
 
 Chat while in orthoview
 
-Balance fire damage on units (too fast for standing in fire due to
-
-Wither roses in graveyards kill your units
-
 Ability range indicators and enforcement
 
 Include pillager crossbow charge time in their attacks per second display stat
@@ -32,7 +28,6 @@ TODO bugs/features (backlog)
 
 1. Arm animations and block cracking/particles
 2. Show unit outlines behind blocks
-3. Append extra text to production items for upgraded units
 
 4. Apply required gamerules automatically:
     - /gamerule randomTickSpeed 100

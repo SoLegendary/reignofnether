@@ -243,7 +243,7 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof Creeper && evt.getSource() == DamageSource.LIGHTNING_BOLT)
             evt.setCanceled(true);
 
-        if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL || evt.getSource() == DamageSource.WITHER || evt.getSource() == DamageSource.IN_FIRE))
+        if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL || evt.getSource() == DamageSource.IN_FIRE))
             evt.setCanceled(true);
     }
 }

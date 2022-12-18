@@ -29,8 +29,8 @@ import java.util.ArrayList;
 public class UnitActionItem {
     private final String ownerName;
     private final UnitAction action;
-    private final int unitId;
-    private final int[] unitIds;
+    private final int unitId; // preselected unit (usually the target)
+    private final int[] unitIds; // selected unit(s)
     private final BlockPos preselectedBlockPos;
     private final BlockPos selectedBuildingPos;
 
@@ -155,10 +155,10 @@ public class UnitActionItem {
                     }
                 }
             }
-
             // TODO: find which unit actually used the ability
             // set ability cd on unit
         }
+
 
         Building actionableBuilding;
         if (level.isClientSide())
@@ -167,26 +167,9 @@ public class UnitActionItem {
             actionableBuilding = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), this.selectedBuildingPos);
 
         if (actionableBuilding != null) {
-            switch (action) {
-                case CALL_LIGHTNING -> {
-                    if (!level.isClientSide()) {
-                        if (actionableBuilding instanceof Laboratory lab) {
-                            BlockPos rodPos = lab.getLightningRodPos();
-                            if (lab.isAbilityOffCooldown(UnitAction.CALL_LIGHTNING) && rodPos != null) {
-                                LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
-                                bolt.moveTo(preselectedBlockPos.getX(), preselectedBlockPos.getY(), preselectedBlockPos.getZ());
-                                level.addFreshEntity(bolt);
-                                LightningBolt bolt2 = EntityType.LIGHTNING_BOLT.create(level);
-                                bolt2.moveTo(rodPos.getX(), rodPos.getY(), rodPos.getZ());
-                                level.addFreshEntity(bolt2);
-                            }
-                        }
-                    }
-                }
-            }
             for (Ability ability : actionableBuilding.getAbilities())
                 if (ability.action == action)
-                    ability.setCooldown();
+                    ability.use(level, actionableBuilding, preselectedBlockPos);
         }
     }
 }

@@ -1,5 +1,11 @@
 package com.solegendary.reignofnether.unit;
 
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+
 public class Ability {
     public final UnitAction action; // null for worker building production items (handled specially in BuildingClientEvents)
     public final int cooldownMax;
@@ -21,5 +27,13 @@ public class Ability {
 
     public void setCooldown() {
         this.cooldown = cooldownMax;
+    }
+
+    public void use(Level level, Unit unitUsing, BlockPos targetedBp) { }
+
+    public void use(Level level, Building buildingUsing, BlockPos targetedBp) { }
+
+    public BlockPos getRangeLimitedBlockPos(BlockPos originPos, BlockPos targetPos) {
+        return targetPos;
     }
 }

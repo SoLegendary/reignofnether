@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchLabLightning
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.abilities.CallLightningAbility;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
@@ -49,10 +50,7 @@ public class Laboratory extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.BLACKSTONE);
 
-        Ability callLightning = new Ability(
-            UnitAction.CALL_LIGHTNING,
-            ResourceCosts.TICKS_PER_SECOND * 60, 20, 0
-        );
+        Ability callLightning = new CallLightningAbility();
         this.abilities.add(callLightning);
 
         if (level.isClientSide()) {

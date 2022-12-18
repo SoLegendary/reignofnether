@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.UnitActionItem;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -36,7 +37,7 @@ import static com.solegendary.reignofnether.building.BuildingUtils.*;
 
 public abstract class Building {
 
-    private final static int BASE_MS_PER_BUILD = 50; // time taken to build each block with 1 villager assigned;
+    private final static int BASE_MS_PER_BUILD = 5; // time taken to build each block with 1 villager assigned; normally 50 in real games
     public final float MELEE_DAMAGE_MULTIPLIER = 0.25f; // damage multiplier applied to melee attackers
 
     public String name;
@@ -81,13 +82,9 @@ public abstract class Building {
     public ArrayList<AbilityButton> getAbilityButtons() {
         return abilityButtons;
     }
-    public ArrayList<Ability> getAbilities() {
-        return abilities;
-    }
+    public ArrayList<Ability> getAbilities() { return abilities; }
 
-    public Level getLevel() {
-        return level;
-    }
+    public Level getLevel() { return level; }
     public void setLevel(Level level) { this.level = level; }
 
     public Building(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
@@ -331,7 +328,7 @@ public abstract class Building {
                     pos.getX(),
                     pos.getY(),
                     pos.getZ(),
-                    breakBlocks ? this.explodeRadius : 1.0f,
+                    breakBlocks ? this.explodeRadius : 1.5f,
                     this.getBlocksPlacedPercent() < this.fireThreshold, // fire
                     breakBlocks ? Explosion.BlockInteraction.BREAK : Explosion.BlockInteraction.NONE);
         }
