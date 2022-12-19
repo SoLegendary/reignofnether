@@ -54,7 +54,7 @@ public class WheatFarm extends Building {
                 new ResourceLocation("minecraft", "textures/block/hay_block_side.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == WheatFarm.class,
-                () -> false,
+                () -> BuildingClientEvents.hasBuilding(TownCentre.buildingName),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(WheatFarm.class),
                 null,
@@ -63,7 +63,7 @@ public class WheatFarm extends Building {
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.WheatFarm.WOOD + "  +  5  per  crop  planted", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A wheat field that be can tilled to collect food.", Style.EMPTY),
-                        FormattedCharSequence.forward("Workers will automatically use wood to replant seeds while working.", Style.EMPTY)
+                        FormattedCharSequence.forward("Workers automatically use wood to replant seeds while working.", Style.EMPTY)
                 ),
                 null
         );

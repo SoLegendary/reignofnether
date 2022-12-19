@@ -108,6 +108,14 @@ public class BuildingServerEvents {
             return Relationship.HOSTILE;
     }
 
+    // does the player own one of these buildings?
+    public static boolean playerHasBuilding(String playerName, String buildingName) {
+        for (Building building : buildings)
+            if (building.name.equals(buildingName) && building.ownerName.equals(playerName))
+                return true;
+        return false;
+    }
+
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         for (Building building : buildings)

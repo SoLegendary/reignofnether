@@ -64,7 +64,7 @@ public class Graveyard extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/mossy_stone_bricks.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Graveyard.class,
-                () -> false,
+                () -> BuildingClientEvents.hasBuilding(Mausoleum.buildingName),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(Graveyard.class),
                 null,

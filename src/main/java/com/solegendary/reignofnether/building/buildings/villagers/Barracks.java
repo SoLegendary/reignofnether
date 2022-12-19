@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -64,7 +65,7 @@ public class Barracks extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/fletching_table_front.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Barracks.class,
-                () -> false,
+                () -> BuildingClientEvents.hasBuilding(TownCentre.buildingName),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(Barracks.class),
                 null,

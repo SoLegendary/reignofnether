@@ -1,9 +1,6 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
-import com.solegendary.reignofnether.building.buildings.villagers.Barracks;
-import com.solegendary.reignofnether.building.buildings.villagers.Blacksmith;
-import com.solegendary.reignofnether.building.buildings.villagers.WheatFarm;
-import com.solegendary.reignofnether.building.buildings.villagers.VillagerHouse;
+import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -100,10 +97,11 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
     public VillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
         if (level.isClientSide()) {
-            this.abilityButtons.add(VillagerHouse.getBuildButton(Keybindings.keyQ));
-            this.abilityButtons.add(WheatFarm.getBuildButton(Keybindings.keyW));
-            this.abilityButtons.add(Barracks.getBuildButton(Keybindings.keyE));
-            this.abilityButtons.add(Blacksmith.getBuildButton(Keybindings.keyR));
+            this.abilityButtons.add(TownCentre.getBuildButton(Keybindings.keyQ));
+            this.abilityButtons.add(VillagerHouse.getBuildButton(Keybindings.keyW));
+            this.abilityButtons.add(WheatFarm.getBuildButton(Keybindings.keyE));
+            this.abilityButtons.add(Barracks.getBuildButton(Keybindings.keyR));
+            this.abilityButtons.add(Blacksmith.getBuildButton(Keybindings.keyT));
         }
     }
 

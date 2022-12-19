@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnitProd;
@@ -42,11 +43,6 @@ public class HauntedHouse extends ProductionBuilding {
 
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.DARK_OAK_LOG);
-
-        if (level.isClientSide())
-            this.productionButtons = List.of(
-                ZombieVillagerUnitProd.getStartButton(this, Keybindings.keyQ)
-            );
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
@@ -60,7 +56,7 @@ public class HauntedHouse extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/dark_oak_log.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == HauntedHouse.class,
-                () -> false,
+                () -> BuildingClientEvents.hasBuilding(Mausoleum.buildingName),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(HauntedHouse.class),
                 null,
@@ -68,7 +64,7 @@ public class HauntedHouse extends ProductionBuilding {
                         FormattedCharSequence.forward(HauntedHouse.buildingName, Style.EMPTY),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.HauntedHouse.WOOD, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A spooky house that can produce zombie villagers.", Style.EMPTY),
+                        FormattedCharSequence.forward("A spooky house that provides population supply. ", Style.EMPTY),
                         FormattedCharSequence.forward("Supports " + ResourceCosts.HauntedHouse.SUPPLY + " population.", Style.EMPTY)
                 ),
                 null

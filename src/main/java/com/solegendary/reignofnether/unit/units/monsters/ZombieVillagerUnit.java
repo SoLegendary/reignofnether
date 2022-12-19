@@ -1,9 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
-import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
-import com.solegendary.reignofnether.building.buildings.monsters.HauntedHouse;
-import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
-import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
+import com.solegendary.reignofnether.building.buildings.monsters.*;
+import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -101,10 +99,11 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
     public ZombieVillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
         if (level.isClientSide()) {
-            this.abilityButtons.add(HauntedHouse.getBuildButton(Keybindings.keyQ));
-            this.abilityButtons.add(PumpkinFarm.getBuildButton(Keybindings.keyW));
-            this.abilityButtons.add(Graveyard.getBuildButton(Keybindings.keyE));
-            this.abilityButtons.add(Laboratory.getBuildButton(Keybindings.keyR));
+            this.abilityButtons.add(Mausoleum.getBuildButton(Keybindings.keyQ));
+            this.abilityButtons.add(HauntedHouse.getBuildButton(Keybindings.keyW));
+            this.abilityButtons.add(PumpkinFarm.getBuildButton(Keybindings.keyE));
+            this.abilityButtons.add(Graveyard.getBuildButton(Keybindings.keyR));
+            this.abilityButtons.add(Laboratory.getBuildButton(Keybindings.keyT));
         }
     }
 

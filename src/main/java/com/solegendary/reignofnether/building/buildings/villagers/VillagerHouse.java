@@ -43,11 +43,6 @@ public class VillagerHouse extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.OAK_PLANKS);
         this.startingBlockTypes.add(Blocks.OAK_LOG);
-
-        if (level.isClientSide())
-            this.productionButtons = List.of(
-                VillagerProdItem.getStartButton(this, Keybindings.keyQ)
-            );
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
@@ -61,7 +56,7 @@ public class VillagerHouse extends ProductionBuilding {
             new ResourceLocation("minecraft", "textures/block/oak_log.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == VillagerHouse.class,
-            () -> false,
+            () -> BuildingClientEvents.hasBuilding(TownCentre.buildingName),
             () -> true,
             () -> BuildingClientEvents.setBuildingToPlace(VillagerHouse.class),
             null,
@@ -69,7 +64,7 @@ public class VillagerHouse extends ProductionBuilding {
                     FormattedCharSequence.forward(VillagerHouse.buildingName, Style.EMPTY),
                     FormattedCharSequence.forward("\uE001  " + ResourceCosts.VillagerHouse.WOOD, MyRenderer.iconStyle),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("A simple house that can produce villagers.", Style.EMPTY),
+                    FormattedCharSequence.forward("A simple house that provides population supply.", Style.EMPTY),
                     FormattedCharSequence.forward("Supports " + ResourceCosts.VillagerHouse.SUPPLY + " population.", Style.EMPTY)
             ),
             null

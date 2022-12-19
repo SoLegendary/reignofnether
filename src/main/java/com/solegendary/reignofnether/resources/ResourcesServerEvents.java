@@ -15,9 +15,9 @@ public class ResourcesServerEvents {
     // tracks all players' resources
     public static ArrayList<Resources> resourcesList = new ArrayList<>();
 
-    public static final int STARTING_FOOD = 200;
-    public static final int STARTING_WOOD = 200;
-    public static final int STARTING_ORE = 200;
+    public static final int STARTING_FOOD = 1000;
+    public static final int STARTING_WOOD = 1000;
+    public static final int STARTING_ORE = 1000;
 
     public static void addSubtractResources(Resources resourcesToAdd) {
         for (Resources resources : resourcesList) {

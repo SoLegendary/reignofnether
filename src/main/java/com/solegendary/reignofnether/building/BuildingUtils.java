@@ -2,11 +2,8 @@ package com.solegendary.reignofnether.building;
 
 // class for static building functions
 
-import com.solegendary.reignofnether.building.buildings.monsters.HauntedHouse;
-import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
-import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
+import com.solegendary.reignofnether.building.buildings.monsters.*;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
-import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
@@ -31,6 +28,8 @@ public class BuildingUtils {
             case PumpkinFarm.buildingName -> building = new PumpkinFarm(level, pos, rotation, ownerName);
             case HauntedHouse.buildingName -> building = new HauntedHouse(level, pos, rotation, ownerName);
             case Blacksmith.buildingName -> building = new Blacksmith(level, pos, rotation, ownerName);
+            case TownCentre.buildingName -> building = new TownCentre(level, pos, rotation, ownerName);
+            case Mausoleum.buildingName -> building = new Mausoleum(level, pos, rotation, ownerName);
         }
         if (building != null)
             building.setLevel(level);

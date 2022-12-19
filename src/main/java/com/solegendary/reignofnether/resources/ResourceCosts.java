@@ -65,15 +65,27 @@ public class ResourceCosts {
         public static final int TICKS = TICKS_PER_SECOND * 30;
         public static final int POPULATION = 2;
     }
+    public static class TownCentre {
+        public static final int FOOD = 0;
+        public static final int WOOD = 300;
+        public static final int ORE = 150;
+        public static final int SUPPLY = 10;
+    }
+    public static class Mausoleum {
+        public static final int FOOD = 0;
+        public static final int WOOD = 300;
+        public static final int ORE = 150;
+        public static final int SUPPLY = 10;
+    }
     public static class VillagerHouse {
         public static final int FOOD = 0;
-        public static final int WOOD = 200;
-        public static final int ORE = 0;
+        public static final int WOOD = 100;
+        public static final int ORE = 100;
         public static final int SUPPLY = 10;
     }
     public static class HauntedHouse {
         public static final int FOOD = 0;
-        public static final int WOOD = 200;
+        public static final int WOOD = 100;
         public static final int ORE = 0;
         public static final int SUPPLY = 10;
     }

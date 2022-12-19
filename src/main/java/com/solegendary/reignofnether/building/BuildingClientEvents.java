@@ -505,4 +505,13 @@ public class BuildingClientEvents {
         else
             return Relationship.HOSTILE;
     }
+
+    // does the player own one of these buildings?
+    public static boolean hasBuilding(String buildingName) {
+        for (Building building : buildings)
+            if (building.name.equals(buildingName) && MC.player != null &&
+                building.ownerName.equals(MC.player.getName().getString()))
+                return true;
+        return false;
+    }
 }
