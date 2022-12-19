@@ -19,7 +19,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class VillagerHouse extends ProductionBuilding {
+public class VillagerHouse extends Building {
 
     public final static String buildingName = "Villager House";
     public final static String structureName = "villager_house";
@@ -30,7 +30,6 @@ public class VillagerHouse extends ProductionBuilding {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.OAK_LOG;
-        this.spawnRadiusOffset = 1;
         this.icon = new ResourceLocation("minecraft", "textures/block/oak_log.png");
 
         this.foodCost = ResourceCosts.VillagerHouse.FOOD;
@@ -63,6 +62,7 @@ public class VillagerHouse extends ProductionBuilding {
                     FormattedCharSequence.forward("\uE001  " + ResourceCosts.VillagerHouse.WOOD, MyRenderer.iconStyle),
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("A simple house that provides population supply.", Style.EMPTY),
+                    FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("Supports " + ResourceCosts.VillagerHouse.SUPPLY + " population.", Style.EMPTY)
             ),
             null

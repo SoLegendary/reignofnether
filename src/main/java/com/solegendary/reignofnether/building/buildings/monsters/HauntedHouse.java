@@ -19,7 +19,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class HauntedHouse extends ProductionBuilding {
+public class HauntedHouse extends Building {
 
     public final static String buildingName = "Haunted House";
     public final static String structureName = "haunted_house";
@@ -30,7 +30,6 @@ public class HauntedHouse extends ProductionBuilding {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.DARK_OAK_LOG;
-        this.spawnRadiusOffset = 1;
         this.icon = new ResourceLocation("minecraft", "textures/block/dark_oak_log.png");
 
         this.foodCost = ResourceCosts.HauntedHouse.FOOD;
@@ -48,23 +47,24 @@ public class HauntedHouse extends ProductionBuilding {
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
-                HauntedHouse.buildingName,
-                Button.itemIconSize,
-                new ResourceLocation("minecraft", "textures/block/dark_oak_log.png"),
-                hotkey,
-                () -> BuildingClientEvents.getBuildingToPlace() == HauntedHouse.class,
-                () -> !BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName),
-                () -> true,
-                () -> BuildingClientEvents.setBuildingToPlace(HauntedHouse.class),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(HauntedHouse.buildingName, Style.EMPTY),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.HauntedHouse.WOOD, MyRenderer.iconStyle),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A spooky house that provides population supply. ", Style.EMPTY),
-                        FormattedCharSequence.forward("Supports " + ResourceCosts.HauntedHouse.SUPPLY + " population.", Style.EMPTY)
-                ),
-                null
+            HauntedHouse.buildingName,
+            Button.itemIconSize,
+            new ResourceLocation("minecraft", "textures/block/dark_oak_log.png"),
+            hotkey,
+            () -> BuildingClientEvents.getBuildingToPlace() == HauntedHouse.class,
+            () -> !BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName),
+            () -> true,
+            () -> BuildingClientEvents.setBuildingToPlace(HauntedHouse.class),
+            null,
+            List.of(
+                    FormattedCharSequence.forward(HauntedHouse.buildingName, Style.EMPTY),
+                    FormattedCharSequence.forward("\uE001  " + ResourceCosts.HauntedHouse.WOOD, MyRenderer.iconStyle),
+                    FormattedCharSequence.forward("", Style.EMPTY),
+                    FormattedCharSequence.forward("A spooky house that provides population supply. ", Style.EMPTY),
+                    FormattedCharSequence.forward("", Style.EMPTY),
+                    FormattedCharSequence.forward("Supports " + ResourceCosts.HauntedHouse.SUPPLY + " population.", Style.EMPTY)
+            ),
+            null
         );
     }
 }
