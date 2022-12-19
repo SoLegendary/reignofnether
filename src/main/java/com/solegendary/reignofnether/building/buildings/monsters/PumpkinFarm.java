@@ -54,7 +54,7 @@ public class PumpkinFarm extends Building {
                 new ResourceLocation("minecraft", "textures/block/pumpkin_side.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == PumpkinFarm.class,
-                () -> BuildingClientEvents.hasBuilding(Mausoleum.buildingName),
+                () -> !BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(PumpkinFarm.class),
                 null,

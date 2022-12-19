@@ -507,9 +507,9 @@ public class BuildingClientEvents {
     }
 
     // does the player own one of these buildings?
-    public static boolean hasBuilding(String buildingName) {
+    public static boolean hasFinishedBuilding(String buildingName) {
         for (Building building : buildings)
-            if (building.name.equals(buildingName) && MC.player != null &&
+            if (building.name.equals(buildingName) && building.isBuilt && MC.player != null &&
                 building.ownerName.equals(MC.player.getName().getString()))
                 return true;
         return false;

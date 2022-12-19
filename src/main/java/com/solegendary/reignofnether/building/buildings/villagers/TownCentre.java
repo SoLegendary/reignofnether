@@ -31,9 +31,9 @@ public class TownCentre extends ProductionBuilding {
         this.name = buildingName;
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
-        this.portraitBlock = Blocks.POLISHED_ANDESITE;
+        this.portraitBlock = Blocks.POLISHED_GRANITE;
         this.spawnRadiusOffset = 1;
-        this.icon = new ResourceLocation("minecraft", "textures/block/oak_log.png");
+        this.icon = new ResourceLocation("minecraft", "textures/block/polished_granite.png");
 
         this.foodCost = ResourceCosts.TownCentre.FOOD;
         this.woodCost = ResourceCosts.TownCentre.WOOD;
@@ -58,7 +58,7 @@ public class TownCentre extends ProductionBuilding {
         return new AbilityButton(
                 TownCentre.buildingName,
                 Button.itemIconSize,
-                new ResourceLocation("minecraft", "textures/block/polished_andesite.png"),
+                new ResourceLocation("minecraft", "textures/block/polished_granite.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == TownCentre.class,
                 () -> false,
@@ -71,6 +71,7 @@ public class TownCentre extends ProductionBuilding {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A gazebo at the centre of your village that produces villagers.", Style.EMPTY),
                         FormattedCharSequence.forward("Is required to build all other buildings.", Style.EMPTY),
+                        FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Supports " + ResourceCosts.TownCentre.SUPPLY + " population.", Style.EMPTY)
                 ),
                 null

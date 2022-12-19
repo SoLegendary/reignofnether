@@ -120,7 +120,7 @@ public class Laboratory extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/brewing_stand.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Laboratory.class,
-                () -> BuildingClientEvents.hasBuilding(Mausoleum.buildingName),
+                () -> !BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(Laboratory.class),
                 null,

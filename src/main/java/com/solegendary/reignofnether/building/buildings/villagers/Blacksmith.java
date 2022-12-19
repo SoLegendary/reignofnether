@@ -65,7 +65,7 @@ public class Blacksmith extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/smithing_table_front.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Blacksmith.class,
-                () -> BuildingClientEvents.hasBuilding(TownCentre.buildingName),
+                () -> !BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(Blacksmith.class),
                 null,

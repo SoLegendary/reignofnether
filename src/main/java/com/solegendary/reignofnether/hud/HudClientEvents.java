@@ -511,9 +511,11 @@ public class HudClientEvents {
             for (LivingEntity unit : selUnits) {
                 if (getSimpleEntityName(unit).equals(getSimpleEntityName(hudSelectedEntity))) {
                     for (AbilityButton abilityButton : ((Unit) unit).getAbilityButtons()) {
-                        abilityButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
-                        renderedButtons.add(abilityButton);
-                        blitX += iconFrameSize;
+                        if (!abilityButton.isHidden.get()) {
+                            abilityButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                            renderedButtons.add(abilityButton);
+                            blitX += iconFrameSize;
+                        }
                     }
                     break;
                 }

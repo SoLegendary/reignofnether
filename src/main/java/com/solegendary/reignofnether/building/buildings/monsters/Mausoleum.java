@@ -33,7 +33,7 @@ public class Mausoleum extends ProductionBuilding {
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.DEEPSLATE_TILES;
         this.spawnRadiusOffset = 1;
-        this.icon = new ResourceLocation("minecraft", "textures/block/chiseled_stone_bricks.png");
+        this.icon = new ResourceLocation("minecraft", "textures/block/deepslate_tiles.png");
 
         this.foodCost = ResourceCosts.Mausoleum.FOOD;
         this.woodCost = ResourceCosts.Mausoleum.WOOD;
@@ -72,6 +72,7 @@ public class Mausoleum extends ProductionBuilding {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A tomb of the dead that produces zombie villagers.", Style.EMPTY),
                         FormattedCharSequence.forward("Is required to build all other buildings.", Style.EMPTY),
+                        FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Supports " + ResourceCosts.Mausoleum.SUPPLY + " population.", Style.EMPTY)
                 ),
                 null

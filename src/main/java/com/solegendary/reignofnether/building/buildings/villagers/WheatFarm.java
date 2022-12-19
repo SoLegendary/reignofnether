@@ -54,7 +54,7 @@ public class WheatFarm extends Building {
                 new ResourceLocation("minecraft", "textures/block/hay_block_side.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == WheatFarm.class,
-                () -> BuildingClientEvents.hasBuilding(TownCentre.buildingName),
+                () -> !BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(WheatFarm.class),
                 null,

@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnitProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -56,7 +53,7 @@ public class HauntedHouse extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/dark_oak_log.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == HauntedHouse.class,
-                () -> BuildingClientEvents.hasBuilding(Mausoleum.buildingName),
+                () -> !BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(HauntedHouse.class),
                 null,
