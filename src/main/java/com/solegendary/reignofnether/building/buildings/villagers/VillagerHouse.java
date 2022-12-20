@@ -36,6 +36,7 @@ public class VillagerHouse extends Building {
         this.woodCost = ResourceCosts.VillagerHouse.WOOD;
         this.oreCost = ResourceCosts.VillagerHouse.ORE;
         this.popSupply = ResourceCosts.VillagerHouse.SUPPLY;
+        this.buildTimeModifier = 0.8f;
 
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.OAK_PLANKS);

@@ -36,6 +36,7 @@ public class HauntedHouse extends Building {
         this.woodCost = ResourceCosts.HauntedHouse.WOOD;
         this.oreCost = ResourceCosts.HauntedHouse.ORE;
         this.popSupply = ResourceCosts.HauntedHouse.SUPPLY;
+        this.buildTimeModifier = 0.8f;
 
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.DARK_OAK_LOG);

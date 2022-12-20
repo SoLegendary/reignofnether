@@ -45,7 +45,7 @@ public abstract class ProductionBuilding extends Building {
 
     // spawn point relative to building origin to spawn units
     private BlockPos rallyPoint;
-    protected int spawnRadiusOffset = 0;
+    protected int spawnRadiusOffset = 1;
 
     public ProductionBuilding(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName);

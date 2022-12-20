@@ -32,13 +32,13 @@ public class TownCentre extends ProductionBuilding {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.POLISHED_GRANITE;
-        this.spawnRadiusOffset = 1;
         this.icon = new ResourceLocation("minecraft", "textures/block/polished_granite.png");
 
         this.foodCost = ResourceCosts.TownCentre.FOOD;
         this.woodCost = ResourceCosts.TownCentre.WOOD;
         this.oreCost = ResourceCosts.TownCentre.ORE;
         this.popSupply = ResourceCosts.TownCentre.SUPPLY;
+        this.buildTimeModifier = 0.8f;
 
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);
         this.startingBlockTypes.add(Blocks.GRASS_BLOCK);

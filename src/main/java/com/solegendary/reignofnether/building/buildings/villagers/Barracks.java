@@ -34,7 +34,6 @@ public class Barracks extends ProductionBuilding {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.FLETCHING_TABLE;
-        this.spawnRadiusOffset = 1;
         this.icon = new ResourceLocation("minecraft", "textures/block/fletching_table_front.png");
 
         this.foodCost = ResourceCosts.Barracks.FOOD;

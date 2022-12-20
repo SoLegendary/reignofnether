@@ -1,21 +1,17 @@
-TODO before playtesting:
-
-1. Minimap position for clientside entities outside of render view not updated properly
-
-2. setup shockbyte server (~3gb?)
-
-
 
 TODO bugs/features:
 
 massive lag on server when assigning villagers to farms for some reason
     - probably need to optimise the search algorithm
 
+Normalise building times (but keep repairs at a constant rate)
+    - or at least add building-specific speed modifiers
+
 java.lang.ClassCastException: class com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit cannot be cast to class com.solegendary.reignofnether.unit.units.villagers.VillagerUnit (com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit and com.solegendary.reignofnether.unit.units.villagers.VillagerUnit are in module reignofnether@1.0 of loader 'TRANSFORMER' @58fa5769)
 	at com.solegendary.reignofnether.unit.units.modelling.VillagerUnitRenderer$1.m_6494_(VillagerUnitRenderer.java:22) ~[reignofnether-1.0.jar%23146!/:1.0] {re:classloading}
 
 
-3. Apply required gamerules and terrain generation automatically:
+Apply required gamerules and terrain generation automatically:
     https://minecraft.fandom.com/wiki/Custom
     - /gamerule randomTickSpeed 100
     - /gamerule doDaylightCycle false
@@ -24,6 +20,7 @@ java.lang.ClassCastException: class com.solegendary.reignofnether.unit.units.mon
     - reduced overall height (low weirdness?)
     - remove unwanted biomes: ocean, mesa, extreme hills, jungle
 
+Minimap position for clientside entities outside of render view not updated properly
 
 
 TODO bugs/features (backlog)

@@ -35,13 +35,13 @@ public class Blacksmith extends ProductionBuilding {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.SMITHING_TABLE;
-        this.spawnRadiusOffset = 1;
         this.icon = new ResourceLocation("minecraft", "textures/block/smithing_table_front.png");
 
         this.foodCost = ResourceCosts.Blacksmith.FOOD;
         this.woodCost = ResourceCosts.Blacksmith.WOOD;
         this.oreCost = ResourceCosts.Blacksmith.ORE;
         this.popSupply = ResourceCosts.Blacksmith.SUPPLY;
+        this.buildTimeModifier = 0.85f;
 
         this.startingBlockTypes.add(Blocks.OAK_PLANKS);
         this.startingBlockTypes.add(Blocks.COBBLESTONE);

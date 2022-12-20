@@ -34,7 +34,6 @@ public class Graveyard extends ProductionBuilding {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.MOSSY_STONE_BRICKS;
-        this.spawnRadiusOffset = 1;
         this.icon = new ResourceLocation("minecraft", "textures/block/mossy_stone_bricks.png");
 
         this.foodCost = ResourceCosts.Graveyard.FOOD;

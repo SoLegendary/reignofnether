@@ -39,13 +39,13 @@ public class Laboratory extends ProductionBuilding {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.BREWING_STAND;
-        this.spawnRadiusOffset = 1;
         this.icon = new ResourceLocation("minecraft", "textures/block/brewing_stand.png");
 
         this.foodCost = ResourceCosts.Laboratory.FOOD;
         this.woodCost = ResourceCosts.Laboratory.WOOD;
         this.oreCost = ResourceCosts.Laboratory.ORE;
         this.popSupply = ResourceCosts.Laboratory.SUPPLY;
+        this.buildTimeModifier = 0.85f;
 
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.BLACKSTONE);

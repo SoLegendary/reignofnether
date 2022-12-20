@@ -57,6 +57,7 @@ public abstract class Building {
     protected float explodeChance = 0.3f;
     protected float explodeRadius = 2.0f;
     protected float fireThreshold = 0.75f; // if building has less %hp than this, explosions caused can make fires
+    protected float buildTimeModifier = 1.0f; // only affects non-built buildings, not repair times
     protected int unrepairedBlocksDestroyed = 0; // ticks up on a block being destroyed, ticks down on a block being built
 
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
@@ -373,6 +374,9 @@ public abstract class Building {
             // place a block if the tick has run down
             if (blocksPlaced < blocksTotal && builderCount > 0) {
                 int msPerBuild = (3 * BASE_MS_PER_BUILD) / (builderCount + 2);
+                if (!isBuilt)
+                    msPerBuild *= buildTimeModifier;
+
                 if (msToNextBuild > msPerBuild)
                     msToNextBuild = msPerBuild;
 

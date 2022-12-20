@@ -32,13 +32,13 @@ public class Mausoleum extends ProductionBuilding {
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.DEEPSLATE_TILES;
-        this.spawnRadiusOffset = 1;
         this.icon = new ResourceLocation("minecraft", "textures/block/deepslate_tiles.png");
 
         this.foodCost = ResourceCosts.Mausoleum.FOOD;
         this.woodCost = ResourceCosts.Mausoleum.WOOD;
         this.oreCost = ResourceCosts.Mausoleum.ORE;
         this.popSupply = ResourceCosts.Mausoleum.SUPPLY;
+        this.buildTimeModifier = 0.66f;
 
         this.startingBlockTypes.add(Blocks.STONE);
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);
