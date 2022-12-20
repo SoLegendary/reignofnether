@@ -25,6 +25,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -187,7 +188,8 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sparkler.png")); // ATTACK SPEED
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/bow.png")); // RANGE
             statStrings.add(String.valueOf((int) attackerUnit.getUnitAttackDamage() + (int) attackerUnit.getWeaponDamageModifier()));
-            statStrings.add(String.valueOf((float) attackerUnit.getAttacksPerSecond())); // attacks per second
+            DecimalFormat df = new DecimalFormat("###.##");
+            statStrings.add(String.valueOf(df.format(attackerUnit.getAttacksPerSecond()))); // attacks per second
             statStrings.add(String.valueOf((int) (attackerUnit.getAttackRange())));
         }
         textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"));

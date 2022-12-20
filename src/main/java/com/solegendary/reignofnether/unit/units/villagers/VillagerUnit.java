@@ -105,6 +105,9 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
         }
     }
 
+    @Override
+    public boolean removeWhenFarAway(double d) { return false; }
+
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MOVEMENT_SPEED, VillagerUnit.movementSpeed)

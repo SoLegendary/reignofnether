@@ -240,7 +240,7 @@ public class UnitServerEvents {
     // make creepers immune to lightning damage (but still get charged by them)
     @SubscribeEvent
     public static void onLightningStrike(LivingDamageEvent evt) {
-        if (evt.getEntity() instanceof Creeper && evt.getSource() == DamageSource.LIGHTNING_BOLT)
+        if (evt.getEntity() instanceof Creeper && (evt.getSource() == DamageSource.LIGHTNING_BOLT || evt.getSource() == DamageSource.ON_FIRE))
             evt.setCanceled(true);
 
         if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL || evt.getSource() == DamageSource.IN_FIRE))

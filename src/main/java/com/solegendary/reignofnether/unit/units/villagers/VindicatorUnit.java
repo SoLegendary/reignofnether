@@ -39,7 +39,7 @@ import java.util.UUID;
 
 public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     // region
-    public Faction getFaction() {return Faction.MONSTERS;}
+    public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
     public List<Ability> getAbilities() {return abilities;}
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
@@ -115,6 +115,9 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     public VindicatorUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
     }
+
+    @Override
+    public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()

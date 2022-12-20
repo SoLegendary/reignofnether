@@ -74,7 +74,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
     public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttacksPerSecond() {return 20f / (getAttackCooldown() + 25);} // crossbow charge time is 25 ticks
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
     public float getAttackRange() {return attackRange;}
@@ -113,6 +113,9 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public PillagerUnit(EntityType<? extends Pillager> entityType, Level level) {
         super(entityType, level);
     }
+
+    @Override
+    public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()

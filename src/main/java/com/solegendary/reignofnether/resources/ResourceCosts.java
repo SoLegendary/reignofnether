@@ -5,7 +5,7 @@ package com.solegendary.reignofnether.resources;
 // and we can't declare static getters in the Unit interface
 public class ResourceCosts {
 
-    public static final int REPLANT_WOOD_COST = 5;
+    public static final int REPLANT_WOOD_COST = 3;
     public static final int MAX_POPULATION = 100; // max possible pop you can have regardless of buildings
     public static final int TICKS_PER_SECOND = 20;
 
@@ -24,8 +24,8 @@ public class ResourceCosts {
         public static final int POPULATION = 2;
     }
     public static class Skeleton {
-        public static final int FOOD = 60;
-        public static final int WOOD = 40;
+        public static final int FOOD = 70;
+        public static final int WOOD = 50;
         public static final int ORE = 0;
         public static final int TICKS = TICKS_PER_SECOND * 20;
         public static final int POPULATION = 1;
@@ -45,9 +45,9 @@ public class ResourceCosts {
         public static final int POPULATION = 1;
     }
     public static class IronGolem {
-        public static final int FOOD = 100;
+        public static final int FOOD = 0;
         public static final int WOOD = 0;
-        public static final int ORE = 300;
+        public static final int ORE = 250;
         public static final int TICKS = TICKS_PER_SECOND * 50;
         public static final int POPULATION = 6;
     }

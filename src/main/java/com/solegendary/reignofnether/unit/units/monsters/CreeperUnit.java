@@ -130,6 +130,9 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
             ));
     }
 
+    @Override
+    public boolean removeWhenFarAway(double d) { return false; }
+
     public boolean canExplodeOnTarget() {
         LivingEntity target = this.getTarget();
         if (target != null && target.position().distanceTo(this.position()) <= 2f)

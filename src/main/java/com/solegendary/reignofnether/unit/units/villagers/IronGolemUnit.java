@@ -108,6 +108,9 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
         super(entityType, level);
     }
 
+    @Override
+    public boolean removeWhenFarAway(double d) { return false; }
+
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MOVEMENT_SPEED, IronGolemUnit.movementSpeed)

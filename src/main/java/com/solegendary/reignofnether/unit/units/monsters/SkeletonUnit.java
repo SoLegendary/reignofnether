@@ -84,7 +84,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     // endregion
 
     final static public float attackDamage = 4.0f;
-    final static public float attacksPerSecond = 0.4f;
+    final static public float attacksPerSecond = 0.3f;
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
@@ -105,6 +105,9 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     public SkeletonUnit(EntityType<? extends Skeleton> entityType, Level level) {
         super(entityType, level);
     }
+
+    @Override
+    public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()

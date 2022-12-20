@@ -51,21 +51,21 @@ public class ResourceBlocks {
             new ResourceBlock("Wheat",
                     List.of(Blocks.WHEAT),
                     TICKS_PER_SECOND * 7,
-                    15,
+                    10,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
             new ResourceBlock("Carrots",
                     List.of(Blocks.CARROTS),
                     TICKS_PER_SECOND * 7,
-                    15,
+                    14,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
             new ResourceBlock("Potatoes",
                     List.of(Blocks.POTATOES),
                     TICKS_PER_SECOND * 7,
-                    20,
+                    18,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
@@ -78,19 +78,19 @@ public class ResourceBlocks {
             ),
             new ResourceBlock("Gourds",
                     List.of(Blocks.MELON, Blocks.PUMPKIN),
-                    TICKS_PER_SECOND * 7,
-                    20,
+                    TICKS_PER_SECOND * 10,
+                    10,
                     ResourceName.FOOD
             ),
             new ResourceBlock("Mushrooms",
                     List.of(Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM),
-                    50,
+                    TICKS_PER_SECOND * 5,
                     20,
                     ResourceName.FOOD
             ),
             new ResourceBlock("Misc. Forageable",
                     List.of(Blocks.SUGAR_CANE, Blocks.SWEET_BERRY_BUSH),
-                    50,
+                    TICKS_PER_SECOND * 5,
                     20,
                     ResourceName.FOOD
             )

@@ -56,7 +56,8 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     public boolean isBuilding() {
         if (buildingTarget != null && this.moveTarget != null)
             if (BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED)
-                return Math.sqrt(moveTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) < 2;
+                return buildingTarget.isPosInsideBuilding(mob.getOnPos()) ||
+                        Math.sqrt(moveTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) < 2;
         return false;
     }
 

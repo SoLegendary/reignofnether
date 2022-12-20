@@ -109,4 +109,18 @@ public class BuildingUtils {
                 return true;
         return false;
     }
+
+    // returns whether the given pos is part of ANY building in the level
+    public static boolean isPosInsideAnyBuilding(Level level, BlockPos bp) {
+        List<Building> buildings;
+        if (level.isClientSide())
+            buildings = BuildingClientEvents.getBuildings();
+        else
+            buildings = BuildingServerEvents.getBuildings();
+
+        for (Building building : buildings)
+            if (building.isPosInsideBuilding(bp))
+                return true;
+        return false;
+    }
 }

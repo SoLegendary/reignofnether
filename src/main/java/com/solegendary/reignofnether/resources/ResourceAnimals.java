@@ -16,9 +16,9 @@ public class ResourceAnimals {
     // babies are worth half the food value
     public static final List<ResourceAnimal> animals = List.of(
             new ResourceAnimal(100, "Panda"),
-            new ResourceAnimal(100, "Sheep"),
-            new ResourceAnimal(100, "Cow"),
-            new ResourceAnimal(100, "Pig"),
+            new ResourceAnimal(75, "Sheep"),
+            new ResourceAnimal(75, "Cow"),
+            new ResourceAnimal(75, "Pig"),
             new ResourceAnimal(50, "Chicken"),
 
             new ResourceAnimal(50, "Llama"),

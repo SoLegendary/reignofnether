@@ -8,17 +8,21 @@ TODO before playtesting:
 
 TODO bugs/features:
 
-Chat while in orthoview
+massive lag on server when assigning villagers to farms for some reason
+    - probably need to optimise the search algorithm
 
-Include pillager crossbow charge time in their attacks per second display stat
+java.lang.ClassCastException: class com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit cannot be cast to class com.solegendary.reignofnether.unit.units.villagers.VillagerUnit (com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit and com.solegendary.reignofnether.unit.units.villagers.VillagerUnit are in module reignofnether@1.0 of loader 'TRANSFORMER' @58fa5769)
+	at com.solegendary.reignofnether.unit.units.modelling.VillagerUnitRenderer$1.m_6494_(VillagerUnitRenderer.java:22) ~[reignofnether-1.0.jar%23146!/:1.0] {re:classloading}
 
-Pillager ready-crossbow ability
 
-1. Husks (upgraded from Zombies at the lab)
-    - 20 -> 25hp, doesn't burn in sunlight
-2. Strays (upgraded from Skeletons at the lab)
-    - Fires slowing arrows
-
+3. Apply required gamerules and terrain generation automatically:
+    https://minecraft.fandom.com/wiki/Custom
+    - /gamerule randomTickSpeed 100
+    - /gamerule doDaylightCycle false
+    - /time set 12600
+    - increased surface deposits of ore, and/or increased windswept hills biomes
+    - reduced overall height (low weirdness?)
+    - remove unwanted biomes: ocean, mesa, extreme hills, jungle
 
 
 
@@ -26,25 +30,22 @@ TODO bugs/features (backlog)
 
 1. Arm animations and block cracking/particles
 2. Show unit outlines behind blocks
+3. Chat while in orthoview
 
-4. Apply required gamerules automatically:
-    - /gamerule randomTickSpeed 100
-    - /gamerule doDaylightCycle false
-    - /time set 12600
 
 TODO buildings/units (backlog)
 
-Villager faction:
-    - town centre (move villager units to this)
-        - Maybe just a Gazebo design?
+Villager faction
     - tower (garrisons ranged units)
     - Witch's hut
         - Witch (ground AOE splash potion abilities, upgrade to give more potion effects)
 
-Undead faction:
-    - haunted town centre (move zombie villager units to this)
-        - Maybe a mausoleum design?
+Undead faction
     - obelisk (population + prevent daylight burn while near it)
     - Spider lair
         - Upgrade to cave spiders
         - Upgrade to allow mounting spider jockeys
+    - Husks (upgraded from Zombies at the lab)
+        - 20 -> 25hp, doesn't burn in sunlight
+    - Strays (upgraded from Skeletons at the lab)
+        - Fires slowing arrows
