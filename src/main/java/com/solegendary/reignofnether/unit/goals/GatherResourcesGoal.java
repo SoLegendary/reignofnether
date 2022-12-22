@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 // Move towards the nearest open resource blocks and start gathering them
@@ -110,14 +111,15 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                     }
                 }
                 else {
-                    gatherTarget = MiscUtil.findNearestBlock(
-                            mob.level,
-                            new Vec3i(
+                    Optional<BlockPos> bpOpt = BlockPos.findClosestMatch(
+                            new BlockPos(
                                     mob.getEyePosition().x,
                                     mob.getEyePosition().y,
                                     mob.getEyePosition().z
-                            ), REACH_RANGE,
+                            ), REACH_RANGE, REACH_RANGE,
                             BLOCK_CONDITION);
+
+                    bpOpt.ifPresent(blockPos -> gatherTarget = blockPos);
                 }
                 searchCdTicksLeft = MAX_SEARCH_CD_TICKS;
             }

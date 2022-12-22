@@ -304,6 +304,28 @@ public class UnitClientEvents {
         CursorClientEvents.setLeftClickAction(null);
     }
 
+    // TODO: DEBUGGING STUFF
+    static int stageEventIndex = 0;
+    static List<RenderLevelStageEvent.Stage> stageEvents = List.of(
+            RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS,
+            RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS,
+            RenderLevelStageEvent.Stage.AFTER_SKY,
+            RenderLevelStageEvent.Stage.AFTER_PARTICLES,
+            RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS,
+            RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS,
+            RenderLevelStageEvent.Stage.AFTER_WEATHER
+    );
+
+    @SubscribeEvent
+    public static void onClick(ScreenEvent.MouseButtonReleased.Pre evt) {
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            stageEventIndex += 1;
+            if (stageEventIndex == stageEvents.size())
+                stageEventIndex = 0;
+            System.out.println(stageEvents.get(stageEventIndex));
+        }
+    }
+
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)

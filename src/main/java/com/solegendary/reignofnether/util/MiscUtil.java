@@ -25,30 +25,6 @@ import java.util.function.Predicate;
 
 public class MiscUtil {
 
-    // search outward and return the first block of the type in the blocks list that matches the predicate
-    public static BlockPos findNearestBlock(Level level, Vec3i originPos, int dist, Predicate<BlockPos> condition) {
-        ArrayList<Vec3i> checkedBlocks = new ArrayList<>();
-
-        for (int d = 0; d <= dist; d++)
-            for (int x = -dist; x <= dist; x++)
-                for (int y = -dist; y <= dist; y++)
-                    for (int z = -dist; z <= dist; z++) {
-                        Vec3i pos = new Vec3i(
-                            originPos.getX() + x,
-                            originPos.getY() + y,
-                            originPos.getZ() + z
-                        );
-                        if (!checkedBlocks.contains(pos)) {
-                            checkedBlocks.add(pos);
-                            BlockPos bp = new BlockPos(pos.getX(), pos.getY(), pos.getZ());
-                            Block block = level.getBlockState(bp).getBlock();
-                            if (condition.test(bp))
-                                return bp;
-                        }
-                    }
-        return null;
-    }
-
     public static ArrayList<BlockPos> findAdjacentBlocks(Level level, BlockPos originPos, Predicate<BlockPos> condition) {
         ArrayList<BlockPos> adjBps = new ArrayList<>();
         ArrayList<BlockPos> retBps = new ArrayList<>();

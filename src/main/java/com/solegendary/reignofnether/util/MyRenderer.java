@@ -167,7 +167,7 @@ public class MyRenderer {
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
         double d2 = camEntity.getZ();
 
-        RenderSystem.depthMask(false); // disable showing lines through blocks
+        RenderSystem.depthMask(true); // disable showing lines through blocks
 
         matrixStack.pushPose();
         matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
