@@ -71,9 +71,9 @@ public class PlayerServerEvents {
             MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
             MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
             NetworkHooks.openScreen(serverPlayer, namedProvider);
-            serverPlayer.setGameMode(GameType.SPECTATOR);
-            //serverPlayer.noPhysics = true; // only needed if in creative mode
-            //serverPlayer.getAbilities().flying = true;
+            serverPlayer.setGameMode(GameType.CREATIVE); // could use spectator, but makes rendering less reliable
+            serverPlayer.noPhysics = true; // only needed if in creative mode
+            serverPlayer.getAbilities().flying = true;
             serverPlayer.onUpdateAbilities();
         }
         else {
@@ -84,7 +84,7 @@ public class PlayerServerEvents {
     public static void closeTopdownGui(int playerId) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
         serverPlayer.setGameMode(GameType.CREATIVE);
-        //serverPlayer.noPhysics = false;
+        serverPlayer.noPhysics = false;
     }
 
     public static void movePlayer(int playerId, double x, double y, double z) {

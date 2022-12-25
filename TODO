@@ -15,15 +15,13 @@ Apply required gamerules and terrain generation automatically:
 
 Minimap position for clientside entities outside of render view not updated properly
 
-Solution for showing units behind blocks
-
-
 
 TODO bugs/features (backlog)
 
 1. Arm animations and block cracking/particles
-2. Show unit outlines behind blocks
-3. Chat while in orthoview
+2. Chat while in orthoview
+3. Worker resource inventories and dropoffs
+    - floating text for resource dropoffs
 
 
 TODO buildings/units (backlog)

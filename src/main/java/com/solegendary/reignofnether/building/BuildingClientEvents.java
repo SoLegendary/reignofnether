@@ -303,9 +303,9 @@ public class BuildingClientEvents {
                 totalPopulationSupply += building.popSupply;
 
             switch (buildingRs) {
-                case OWNED -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), aabb, 0.3f, 1.0f, 0.3f, 0.2f);
-                case FRIENDLY -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), aabb, 0.3f, 0.3f, 1.0f, 0.2f);
-                case HOSTILE -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), aabb, 1.0f, 0.3f, 0.3f, 0.2f);
+                case OWNED -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 1.0f, 0.3f, 0.2f);
+                case FRIENDLY -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 0.3f, 1.0f, 0.2f);
+                case HOSTILE -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 1.0f, 0.3f, 0.3f, 0.2f);
             }
         }
 

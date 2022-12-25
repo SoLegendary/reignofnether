@@ -6,8 +6,8 @@ import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.RectZone;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -33,16 +33,16 @@ public class MyRenderer {
         drawLineBox(matrixStack, aabb, 1.0f,1.0f,1.0f, a);
     }
 
-    public static void drawEntityOutline(PoseStack matrixStack, Entity entity, float a) {
+    public static void drawEntityBox(PoseStack matrixStack, Entity entity, float a) {
         drawLineBox(matrixStack, entity.getBoundingBox(), 1.0f,1.0f,1.0f, a);
     }
 
-    public static void drawEntityOutline(PoseStack matrixStack, Entity entity, float r, float g, float b, float a) {
+    public static void drawEntityBox(PoseStack matrixStack, Entity entity, float r, float g, float b, float a) {
         drawLineBox(matrixStack, entity.getBoundingBox(), r, g, b, a);
     }
 
     // like drawEntityOutline but only the bottom square
-    public static void drawOutlineBottom(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
+    public static void drawBoxBottom(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
         aabb = aabb.setMaxY(aabb.minY);
         drawLineBox(matrixStack, aabb, r, g, b, a);
     }
@@ -53,12 +53,108 @@ public class MyRenderer {
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
         double d2 = camEntity.getZ();
 
-        RenderSystem.depthMask(false); // disable showing lines through blocks
         VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.lines());
 
         matrixStack.pushPose();
         matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
         LevelRenderer.renderLineBox(matrixStack, vertexConsumer, aabb, r, g, b, a);
+        matrixStack.popPose();
+    }
+
+    // draws an AABB but only the lines required to outline an entity from the perspective of the player in orthoview
+    public static void drawLineBoxOutlineOnly(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
+        Entity camEntity = MC.getCameraEntity();
+        double d0 = camEntity.getX();
+        double d1 = camEntity.getY() + camEntity.getEyeHeight();
+        double d2 = camEntity.getZ();
+
+        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.lines());
+
+        matrixStack.pushPose();
+        matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
+        
+        Matrix4f matrix4f = matrixStack.last().pose();
+        Matrix3f matrix3f = matrixStack.last().normal();
+        float minX = (float)aabb.minX;
+        float minY = (float)aabb.minY;
+        float minZ = (float)aabb.minZ;
+        float maxX = (float)aabb.maxX;
+        float maxY = (float)aabb.maxY;
+        float maxZ = (float)aabb.maxZ;
+
+        float rotX = OrthoviewClientEvents.getCamRotX();
+        // convert angle to +-180deg (orthoView uses +- 360)
+        if (rotX <= 180)
+            rotX += 360;
+        if (rotX > 180)
+            rotX -= 360;
+
+        // hide the lines that meet at the two points furthest and closest from the player
+
+        if (rotX > -180 && rotX <= -90) {
+            // closest: minX, maxY, maxZ
+            // furthest: maxX, minY, minZ
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, g, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, g, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        }
+        else if (rotX > 90 && rotX <= 180) {
+            // closest: maxX, maxY, maxZ
+            // furthest: minX, minY, minZ
+            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+        }
+        else if (rotX > 0 && rotX <= 90) {
+            // closest: maxX, maxY, minZ
+            // furthest: minX, minY, maxZ
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, g, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, g, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, g, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, g, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        }
+        else if (rotX > -90 && rotX <= 0) {
+            // closest: minX, maxY, minZ
+            // furthest: maxX, minY, maxZ
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, g, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, g, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        }
         matrixStack.popPose();
     }
 
@@ -81,6 +177,7 @@ public class MyRenderer {
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
         double d2 = camEntity.getZ();
 
+        RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false); // disable showing lines through blocks
 
         matrixStack.pushPose();
@@ -167,7 +264,8 @@ public class MyRenderer {
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
         double d2 = camEntity.getZ();
 
-        RenderSystem.depthMask(true); // disable showing lines through blocks
+        RenderSystem.disableDepthTest(); // enable showing lines through blocks
+        RenderSystem.depthMask(false);
 
         matrixStack.pushPose();
         matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
@@ -187,11 +285,13 @@ public class MyRenderer {
                 endPos.getY() + 1.1f,
                 endPos.getZ() + 0.5f
         );
+
         // draw two lines on inverse normals so they're visible from any angle
         vertexConsumer.vertex(matrix4f, startVec.x(), startVec.y(), startVec.z()).color(r, g, b, a).normal(matrix3f, 1.0f, 0,0).endVertex();
         vertexConsumer.vertex(matrix4f,   endVec.x(),   endVec.y(),   endVec.z()).color(r, g, b, a).normal(matrix3f, 1.0f, 0,0).endVertex();
         vertexConsumer.vertex(matrix4f, startVec.x(), startVec.y(), startVec.z()).color(r, g, b, a).normal(matrix3f, 0, 0,1.0f).endVertex();
         vertexConsumer.vertex(matrix4f,   endVec.x(),   endVec.y(),   endVec.z()).color(r, g, b, a).normal(matrix3f, 0, 0,1.0f).endVertex();
+
         matrixStack.popPose();
     }
 

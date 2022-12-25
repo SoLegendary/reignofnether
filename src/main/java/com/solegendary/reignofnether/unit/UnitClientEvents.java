@@ -5,10 +5,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
-import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
-import com.solegendary.reignofnether.building.buildings.villagers.WheatFarm;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -215,23 +212,25 @@ public class UnitClientEvents {
             }
 
             // select all nearby units of the same type when the same unit is double-clicked
+            // only works for owned units
             else if (selectedUnits.size() == 1 && MC.level != null && !Keybindings.shiftMod.isDown() &&
                (System.currentTimeMillis() - lastLeftClickTime) < DOUBLE_CLICK_TIME_MS &&
                 preselectedUnits.size() > 0 && selectedUnits.contains(preselectedUnits.get(0))) {
 
                 lastLeftClickTime = 0;
-                Entity selectedUnit = selectedUnits.get(0);
-                List<? extends Entity> nearbyEntities = MiscUtil.getEntitiesWithinRange(
+                LivingEntity selectedUnit = selectedUnits.get(0);
+                List<? extends LivingEntity> nearbyEntities = MiscUtil.getEntitiesWithinRange(
                         new Vector3d(selectedUnit.position().x, selectedUnit.position().y, selectedUnit.position().z),
                         OrthoviewClientEvents.getZoom(),
                         selectedUnits.get(0).getClass(),
                         MC.level
                 );
-                setSelectedUnits(new ArrayList<>());
-                for (Entity entity : nearbyEntities)
-                    if (getPlayerToEntityRelationship((LivingEntity) entity) == Relationship.OWNED)
-                        addSelectedUnit((LivingEntity) entity);
-
+                if (getPlayerToEntityRelationship(selectedUnit) == Relationship.OWNED) {
+                    setSelectedUnits(new ArrayList<>());
+                    for (LivingEntity entity : nearbyEntities)
+                        if (getPlayerToEntityRelationship(entity) == Relationship.OWNED)
+                            addSelectedUnit(entity);
+                }
             }
             // move on left click
             else if (CursorClientEvents.getLeftClickAction() == UnitAction.MOVE)
@@ -304,32 +303,8 @@ public class UnitClientEvents {
         CursorClientEvents.setLeftClickAction(null);
     }
 
-    // TODO: DEBUGGING STUFF
-    static int stageEventIndex = 0;
-    static List<RenderLevelStageEvent.Stage> stageEvents = List.of(
-            RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS,
-            RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS,
-            RenderLevelStageEvent.Stage.AFTER_SKY,
-            RenderLevelStageEvent.Stage.AFTER_PARTICLES,
-            RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS,
-            RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS,
-            RenderLevelStageEvent.Stage.AFTER_WEATHER
-    );
-
-    @SubscribeEvent
-    public static void onClick(ScreenEvent.MouseButtonReleased.Pre evt) {
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-            stageEventIndex += 1;
-            if (stageEventIndex == stageEvents.size())
-                stageEventIndex = 0;
-            System.out.println(stageEvents.get(stageEventIndex));
-        }
-    }
-
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
-        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
-            return;
         if (MC.level == null)
             return;
 
@@ -337,36 +312,40 @@ public class UnitClientEvents {
          *  TODO: make these visible to 1st-person players but currently had a visual glitch
          *  doesnt align to camera very well, sometimes sinks below ground and too thin
          */
-
-        for (LivingEntity entity : allUnits) {
-            Relationship unitRs = getPlayerToEntityRelationship(entity);
-
-            // always-shown highlights to indicate unit relationships
-            switch (unitRs) {
-                case OWNED -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 1.0f, 0.3f, 0.2f);
-                case FRIENDLY -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 0.3f, 1.0f, 0.2f);
-                case HOSTILE -> MyRenderer.drawOutlineBottom(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 0.3f, 0.3f, 0.2f);
+        if ((OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) ||
+            (!OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)) {
+            for (LivingEntity entity : allUnits) {
+                Relationship unitRs = getPlayerToEntityRelationship(entity);
+                // always-shown highlights to indicate unit relationships
+                switch (unitRs) {
+                    case OWNED -> MyRenderer.drawBoxBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 1.0f, 0.3f, 0.2f);
+                    case FRIENDLY -> MyRenderer.drawBoxBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 0.3f, 1.0f, 0.2f);
+                    case HOSTILE -> MyRenderer.drawBoxBottom(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 0.3f, 0.3f, 0.2f);
+                }
             }
         }
-        ArrayList<LivingEntity> selectedUnits = getSelectedUnits();
-        ArrayList<LivingEntity> preselectedUnits = getPreselectedUnits();
 
-        Set<Entity> unitsToDraw = new HashSet<>();
-        unitsToDraw.addAll(selectedUnits);
-        unitsToDraw.addAll(preselectedUnits);
+        if (OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+            ArrayList<LivingEntity> selectedUnits = getSelectedUnits();
+            ArrayList<LivingEntity> preselectedUnits = getPreselectedUnits();
 
-        // draw outlines on all (pre)selected units but only draw once per unit based on conditions
-        // don't render preselection outlines if mousing over HUD
-        if (OrthoviewClientEvents.isEnabled()) {
-            for (Entity entity : unitsToDraw) {
-                if (preselectedUnits.contains(entity) &&
-                        isLeftClickAttack() &&
-                        !targetingSelf() && !HudClientEvents.isMouseOverAnyButtonOrHud())
-                    MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f, 0.3f, 0.3f, 1.0f);
-                else if (selectedUnits.contains(entity))
-                    MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, 1.0f);
-                else if (preselectedUnits.contains(entity) && !HudClientEvents.isMouseOverAnyButtonOrHud())
-                    MyRenderer.drawEntityOutline(evt.getPoseStack(), entity, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f);
+            Set<Entity> unitsToDraw = new HashSet<>();
+            unitsToDraw.addAll(selectedUnits);
+            unitsToDraw.addAll(preselectedUnits);
+
+            // draw outlines on all (pre)selected units but only draw once per unit based on conditions
+            // don't render preselection outlines if mousing over HUD
+            if (OrthoviewClientEvents.isEnabled()) {
+                for (Entity entity : unitsToDraw) {
+                    if (preselectedUnits.contains(entity) &&
+                            isLeftClickAttack() &&
+                            !targetingSelf() && !HudClientEvents.isMouseOverAnyButtonOrHud())
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 0.3f, 0.3f, 1.0f);
+                    else if (selectedUnits.contains(entity))
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 1.0f, 1.0f, 1.0f);
+                    else if (preselectedUnits.contains(entity) && !HudClientEvents.isMouseOverAnyButtonOrHud())
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(),1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f);
+                }
             }
         }
     }

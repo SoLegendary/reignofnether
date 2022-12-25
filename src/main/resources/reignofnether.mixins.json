@@ -6,7 +6,8 @@
   "mixins": [
     "TopdownGuiMixin",
     "FrustumMixin",
-    "OrthoViewMixin"
+    "OrthoViewMixin",
+    "RenderTypeMixin"
   ],
   "minVersion": "0.8"
 }

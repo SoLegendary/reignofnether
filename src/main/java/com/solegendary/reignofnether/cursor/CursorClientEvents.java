@@ -276,22 +276,23 @@ public class CursorClientEvents {
 
             // enact box selection, excluding non-unit mobs
             // for single-click selection, see UnitClientEvents
-            // except if attack-moving or nothing is preselected (to prevent deselection)
+            // except if attack-moving or no owned units are preselected (to prevent deselection)
             ArrayList<LivingEntity> preselectedUnit = UnitClientEvents.getPreselectedUnits();
             if (preselectedUnit.size() > 0 && !cursorLeftClickDownPos.equals(cursorLeftClickDragPos)) {
 
-                // remove all non-owned entities
-                int nonOwnedEntities = 0;
+                // only act if there is at least 1 owned entity so we don't deselect things by box selecting only non-owned entities
+                int ownedEntities = 0;
                 for (LivingEntity unit : preselectedUnit)
                     if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
-                        nonOwnedEntities += 1;
+                        ownedEntities += 1;
 
-                if (!Keybindings.shiftMod.isDown() || nonOwnedEntities > 0)
+                if (ownedEntities > 0) {
                     UnitClientEvents.setSelectedUnits(new ArrayList<>());
-                for (LivingEntity unit : preselectedUnit) {
-                    if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
-                        UnitClientEvents.addSelectedUnit(unit);
+                    for (LivingEntity unit : preselectedUnit)
+                        if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
+                            UnitClientEvents.addSelectedUnit(unit);
                 }
+
             }
             cursorLeftClickDownPos = new Vec2(-1,-1);
             cursorLeftClickDragPos = new Vec2(-1,-1);
