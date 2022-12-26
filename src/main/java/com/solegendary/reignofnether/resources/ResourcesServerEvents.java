@@ -1,14 +1,12 @@
 package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.player.PlayerServerEvents;
-import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ResourcesServerEvents {
 

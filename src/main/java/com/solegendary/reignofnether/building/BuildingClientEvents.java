@@ -436,6 +436,13 @@ public class BuildingClientEvents {
     }
 
     @SubscribeEvent
+    public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE)
+            if (HudClientEvents.hudSelectedBuilding != null)
+                BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(HudClientEvents.hudSelectedBuilding.getBlocks()));
+    }
+
+    @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (!replacedTexture) {
             replaceOverlayTexture();

@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
@@ -31,13 +32,7 @@ public class CallLightningAbility extends Ability {
             if (lab.isAbilityOffCooldown(UnitAction.CALL_LIGHTNING) && rodPos != null) {
                 BlockPos limitedBp = getXZRangeLimitedBlockPos(rodPos, targetBp);
                 // getXZRangeLimitedBlockPos' Y value is always the same as rodPos, but we want the first sky-exposed block
-                int y = level.getHeight();
-                BlockState bs;
-                do {
-                    bs = level.getBlockState(new BlockPos(limitedBp.getX(), y, limitedBp.getZ()));
-                    y -= 1;
-                } while(bs.isAir() && y > 0);
-                limitedBp = new BlockPos(limitedBp.getX(), y, limitedBp.getZ());
+                limitedBp = MiscUtil.getHighestSolidBlock(level, limitedBp);
 
                 LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
                 if (bolt != null) {

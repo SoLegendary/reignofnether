@@ -6,7 +6,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.resources.ResourceBlocks;
+import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -418,7 +418,7 @@ public class CursorClientEvents {
                 // if we have a worker selected then include resource blocks that would otherwise be ignored like plants
                 boolean isBlockSelectableResource = false;
                 if (HudClientEvents.hudSelectedEntity instanceof Unit workerUnit)
-                    isBlockSelectableResource = ResourceBlocks.getResourceBlock(block, MC.level) != null;
+                    isBlockSelectableResource = ResourceSources.getFromBlockPos(block, MC.level) != null;
 
                 if ((MC.level.getBlockState(block).getMaterial().isSolidBlocking() || isBlockSelectableResource) &&
                     MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, lookVector, new AABB(block)) &&

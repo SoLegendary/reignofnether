@@ -1,28 +1,20 @@
 package com.solegendary.reignofnether.unit;
 
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
-import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.resources.ResourceBlocks;
+import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
+import com.solegendary.reignofnether.unit.goals.ReturnResourcesGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraftforge.common.world.ForgeChunkManager;
 
 import java.util.ArrayList;
 
@@ -96,7 +88,7 @@ public class UnitActionItem {
                     unit.setHoldPosition(true);
                 }
                 case MOVE -> {
-                    ResourceName resName = ResourceBlocks.getResourceBlockName(preselectedBlockPos, level);
+                    ResourceName resName = ResourceSources.getBlockResourceName(preselectedBlockPos, level);
                     if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE) {
                         workerUnit.getGatherResourceGoal().setTargetResourceName(resName);
                         workerUnit.getGatherResourceGoal().setMoveTarget(preselectedBlockPos);
@@ -153,6 +145,12 @@ public class UnitActionItem {
                                 goal.setTargetFarm(building);
                         }
                     }
+                }
+                case RETURN_RESOURCES -> {
+                    ReturnResourcesGoal returnResourcesGoal = unit.getReturnResourcesGoal();
+                    Building building = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), preselectedBlockPos);
+                    if (returnResourcesGoal != null && building != null)
+                        returnResourcesGoal.setBuildingTarget(building);
                 }
             }
             // TODO: find which unit actually used the ability

@@ -5,10 +5,7 @@ import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
-import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
-import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
-import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.Ability;
@@ -29,6 +26,8 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -42,15 +41,18 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;}
     public List<Ability> getAbilities() {return abilities;}
+    public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
     public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
     public GatherResourcesGoal getGatherResourceGoal() {return gatherResourcesGoal;}
+    public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
     public BuildRepairGoal buildRepairGoal;
     public GatherResourcesGoal gatherResourcesGoal;
+    public ReturnResourcesGoal returnResourcesGoal;
 
     public LivingEntity getFollowTarget() { return followTarget; }
     public boolean getHoldPosition() { return holdPosition; }
@@ -96,9 +98,11 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
+    private final List<ItemStack> items = new ArrayList<>();
 
     public ZombieVillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
+
         if (level.isClientSide()) {
             this.abilityButtons.add(Mausoleum.getBuildButton(Keybindings.keyQ));
             this.abilityButtons.add(HauntedHouse.getBuildButton(Keybindings.keyW));
@@ -142,6 +146,8 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
 
 
     public void tick() {
+        this.setCanPickUpLoot(true);
+
         super.tick();
         Unit.tick(this);
         WorkerUnit.tick(this);
@@ -154,6 +160,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.buildRepairGoal = new BuildRepairGoal(this, 1.0f);
         this.gatherResourcesGoal = new GatherResourcesGoal(this, 1.0f);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
     }
 
     @Override
@@ -164,6 +171,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
         this.goalSelector.addGoal(2, moveGoal);
         this.goalSelector.addGoal(3, buildRepairGoal);
         this.goalSelector.addGoal(3, gatherResourcesGoal);
+        this.goalSelector.addGoal(3, returnResourcesGoal);
         this.targetSelector.addGoal(3, targetGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }

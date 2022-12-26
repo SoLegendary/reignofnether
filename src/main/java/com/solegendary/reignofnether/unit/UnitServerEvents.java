@@ -4,24 +4,18 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.resources.ResourceAnimal;
-import com.solegendary.reignofnether.resources.ResourceAnimals;
-import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -136,8 +130,7 @@ public class UnitServerEvents {
             evt.getEntity() instanceof LivingEntity entity &&
             !evt.getLevel().isClientSide) {
 
-            if (allUnits.removeIf(e -> e.getId() == entity.getId()))
-                System.out.println("Unit removed!");
+            allUnits.removeIf(e -> e.getId() == entity.getId());
             UnitClientboundPacket.sendLeavePacket(entity);
 
             ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
@@ -146,27 +139,13 @@ public class UnitServerEvents {
         }
     }
 
-    // award food to killer of wild animal mobs
     @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent evt) {
-        if (evt.getEntity() instanceof Animal animal && !(evt.getEntity() instanceof Unit)) {
-            for (ResourceAnimal resAnimal : ResourceAnimals.animals) {
-                if (resAnimal.animalName.equals(animal.getName().getString())) {
-                    Entity entity = evt.getSource().getEntity();
-                    if (entity instanceof Unit unit)
-                        ResourcesServerEvents.addSubtractResources(new Resources(
-                            unit.getOwnerName(),
-                            animal.isBaby() ? resAnimal.foodValue / 2 : resAnimal.foodValue,
-                            0,0
-                        ));
-                    else if (entity instanceof Player player)
-                        ResourcesServerEvents.addSubtractResources(new Resources(
-                            player.getName().getString(),
-                            animal.isBaby() ? resAnimal.foodValue / 2 : resAnimal.foodValue,
-                            0,0
-                        ));
-                }
-            }
+        // drop all resources held
+        if (evt.getEntity() instanceof Unit unit) {
+            List<ItemStack> itemStacks = unit.getItems();
+            for (ItemStack itemStack : itemStacks)
+                evt.getEntity().spawnAtLocation(itemStack);
         }
     }
 
@@ -181,7 +160,7 @@ public class UnitServerEvents {
         if (unitSyncTicks <= 0) {
             unitSyncTicks = UNIT_SYNC_TICKS_MAX;
             for (LivingEntity entity : allUnits) {
-                UnitClientboundPacket.sendSyncPacket(entity);
+                UnitClientboundPacket.sendSyncStatsPacket(entity);
 
                 // remove old chunk // add current chunk
                 boolean chunkNeedsUpdate = false;

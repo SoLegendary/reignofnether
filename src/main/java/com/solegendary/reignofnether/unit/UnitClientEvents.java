@@ -11,16 +11,21 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.resources.ResourceSources;
+import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -133,16 +138,33 @@ public class UnitClientEvents {
 
     /**
      * Update data on a unit from serverside, mainly to ensure unit HUD data is up-to-date
-     * Only try to update SELECTED clientside entities that are out of view range
+     * Only try to update health and pos if out of view
      */
-    public static void syncUnitData(int entityId, float health, Vec3 pos) {
-        for(LivingEntity entity : selectedUnits) {
-            if (entity.getId() == entityId && MC.level != null && MC.level.getEntity(entityId) == null) {
-                entity.setHealth(health);
-                entity.setPos(pos);
+    public static void syncUnitStats(int entityId, float health, Vec3 pos) {
+        for(LivingEntity entity : allUnits) {
+            if (entity.getId() == entityId && MC.level != null) {
+                boolean isLoadedClientside = MC.level.getEntity(entityId) != null;
+                if (!isLoadedClientside) {
+                    entity.setHealth(health);
+                    entity.setPos(pos);
+                }
             }
         }
     }
+
+    public static void syncUnitResources(int entityId, Resources res) {
+        for(LivingEntity entity : allUnits) {
+            if (entity.getId() == entityId && MC.level != null) {
+                if (entity instanceof Unit unit) {
+                    unit.getItems().clear();
+                    unit.getItems().add(new ItemStack(Items.SUGAR, res.food));
+                    unit.getItems().add(new ItemStack(Items.STICK, res.wood));
+                    unit.getItems().add(new ItemStack(Items.STONE, res.ore));
+                }
+            }
+        }
+    }
+
     // SINGLEPLAYER ONLY - client log out: remove all entities so we don't duplicate on logging back in
     @SubscribeEvent
     public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
@@ -284,9 +306,16 @@ public class UnitClientEvents {
                     else
                         sendUnitCommand(UnitAction.MOVE);
                 }
+                // right click -> return resources
+                else if (HudClientEvents.hudSelectedEntity instanceof Unit unit &&
+                        unit.getReturnResourcesGoal() != null &&
+                        ResourceSources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0 &&
+                        preSelBuilding != null && BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED) {
+                    sendUnitCommand(UnitAction.RETURN_RESOURCES);
+                }
                 // right click -> build or repair preselected building
                 else if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
-                        (preSelBuilding != null)) {
+                        preSelBuilding != null && BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED) {
 
                     if (preSelBuilding.name.contains(" Farm") && preSelBuilding.isBuilt)
                         sendUnitCommand(UnitAction.FARM);

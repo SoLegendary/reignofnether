@@ -25,6 +25,10 @@ public class Resources {
         this.ore = ore;
     }
 
+    public int getTotalValue() {
+        return this.food + this.foodToAdd + this.wood + this.woodToAdd + this.ore + this.oreToAdd;
+    }
+
     // usually used clientside
     public void changeOverTime(int food, int wood, int ore) {
         this.foodToAdd += food;

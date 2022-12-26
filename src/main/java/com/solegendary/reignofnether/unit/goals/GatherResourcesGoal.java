@@ -36,14 +36,14 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private final ArrayList<BlockPos> todoGatherTargets = new ArrayList<>();
     private BlockPos gatherTarget = null;
     private ResourceName targetResourceName = ResourceName.NONE; // if !None, will passively target blocks around it
-    private ResourceBlock targetResourceBlock = null;
+    private ResourceSource targetResourceBlock = null;
     private Building targetFarm = null;
 
     // whenever we attempt to assign a block as a target it must pass this test
     private final Predicate<BlockPos> BLOCK_CONDITION = bp -> {
         BlockState bs = mob.level.getBlockState(bp);
         BlockState bsAbove = mob.level.getBlockState(bp.above());
-        ResourceBlock resBlock = ResourceBlocks.getResourceBlock(bp, mob.level);
+        ResourceSource resBlock = ResourceSources.getFromBlockPos(bp, mob.level);
 
         // is a valid resource block and meets the target ResourceBlock's blockstate condition
         if (resBlock == null || resBlock.resourceName != targetResourceName)
@@ -66,7 +66,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         // not covered by solid blocks
         boolean hasClearNeighbour = false;
         for (BlockPos adjBp : List.of(bp.north(), bp.south(), bp.east(), bp.west(), bp.above(), bp.below()))
-            if (ResourceBlocks.CLEAR_MATERIALS.contains(mob.level.getBlockState(adjBp).getMaterial()))
+            if (ResourceSources.CLEAR_MATERIALS.contains(mob.level.getBlockState(adjBp).getMaterial()))
                 hasClearNeighbour = true;
         if (!hasClearNeighbour)
             return false;
@@ -124,7 +124,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 searchCdTicksLeft = MAX_SEARCH_CD_TICKS;
             }
             if (gatherTarget != null)
-                targetResourceBlock = ResourceBlocks.getResourceBlock(gatherTarget, mob.level);
+                targetResourceBlock = ResourceSources.getFromBlockPos(gatherTarget, mob.level);
         }
 
         if (gatherTarget != null) {
@@ -143,7 +143,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                     // replant crops on empty farmland
                     if (mob.level.getBlockState(gatherTarget).getBlock() == Blocks.FARMLAND) {
                         gatherTicksLeft -= 1;
-                        gatherTicksLeft = Math.min(gatherTicksLeft, ResourceBlocks.REPLANT_TICKS_MAX);
+                        gatherTicksLeft = Math.min(gatherTicksLeft, ResourceSources.REPLANT_TICKS_MAX);
                         if (gatherTicksLeft <= 0) {
                             gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
 
@@ -159,7 +159,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         gatherTicksLeft = Math.min(gatherTicksLeft, targetResourceBlock.ticksToGather);
                         if (gatherTicksLeft <= 0) {
                             gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
-                            ResourceName resourceBlockType = ResourceBlocks.getResourceBlockName(this.gatherTarget, mob.level);
+                            ResourceName resourceBlockType = ResourceSources.getBlockResourceName(this.gatherTarget, mob.level);
                             if (mob.level.destroyBlock(gatherTarget, false)) {
 
                                 // prioritise gathering adjacent targets first
@@ -192,7 +192,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     // only count as gathering if in range of the target
     public boolean isGathering() {
         if (this.gatherTarget != null && this.targetResourceBlock != null &&
-            ResourceBlocks.getResourceBlockName(this.gatherTarget, mob.level) != ResourceName.NONE)
+            ResourceSources.getBlockResourceName(this.gatherTarget, mob.level) != ResourceName.NONE)
             return isBlockInRange(gatherTarget);
         return false;
     }
@@ -214,7 +214,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         super.setMoveTarget(bp);
         if (BLOCK_CONDITION.test(bp)) {
             this.gatherTarget = bp;
-            this.targetResourceBlock = ResourceBlocks.getResourceBlock(gatherTarget, this.mob.level);
+            this.targetResourceBlock = ResourceSources.getFromBlockPos(gatherTarget, this.mob.level);
         }
     }
 

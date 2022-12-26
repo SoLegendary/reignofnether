@@ -13,15 +13,16 @@ Apply required gamerules and terrain generation automatically:
     - reduced overall height (low weirdness?)
     - remove unwanted biomes: ocean, mesa, extreme hills, jungle
 
-Minimap position for clientside entities outside of render view not updated properly
-
 
 TODO bugs/features (backlog)
 
 1. Arm animations and block cracking/particles
 2. Chat while in orthoview
 3. Worker resource inventories and dropoffs
-    - floating text for resource dropoffs
+    - goal AI for returning resources automatically
+    - max resources held
+    - stockpile building for both factions
+    - fix workers trying to return to non-built building instead of building it
 
 
 TODO buildings/units (backlog)

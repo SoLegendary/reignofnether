@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -24,6 +25,17 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class MiscUtil {
+
+    public static BlockPos getHighestSolidBlock(Level level, BlockPos blockPos) {
+        int y = level.getHeight();
+        BlockState bs;
+        do {
+            bs = level.getBlockState(new BlockPos(blockPos.getX(), y, blockPos.getZ()));
+            y -= 1;
+        } while(bs.isAir() && y > 0);
+
+        return new BlockPos(blockPos.getX(), y, blockPos.getZ());
+    }
 
     public static ArrayList<BlockPos> findAdjacentBlocks(Level level, BlockPos originPos, Predicate<BlockPos> condition) {
         ArrayList<BlockPos> adjBps = new ArrayList<>();

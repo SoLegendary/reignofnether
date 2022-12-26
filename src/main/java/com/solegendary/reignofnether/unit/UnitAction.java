@@ -15,6 +15,7 @@ public enum UnitAction {
     BUILD_REPAIR, // build or repair the building at the targeted blockPos
     FARM, // sets the villager's target gather resource
     TOGGLE_GATHER_TARGET, // cycle between gathering nothing, food, wood or ore
+    RETURN_RESOURCES, // drops off resources to the building
 
     // special abilities - these can also be assigned to cursor actions
     EXPLODE,

@@ -4,8 +4,10 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
@@ -53,7 +55,6 @@ public class OrthoviewClientEvents {
     private static float mouseLeftDownX = 0;
     private static float mouseLeftDownY = 0;
 
-    private static double prevPlayerY = 64;
     private static final double setPlayerY = 85;
 
     public static boolean isEnabled() {
@@ -104,19 +105,22 @@ public class OrthoviewClientEvents {
     public static void toggleEnable() {
         enabled = !enabled;
 
-
-
         if (enabled) {
             PlayerServerboundPacket.enableOrthoview();
             MinimapClientEvents.setMapCentre(MC.player.getX(), MC.player.getZ());
-            prevPlayerY = MC.player.getY();
             PlayerServerboundPacket.teleportPlayer(MC.player.getX(), setPlayerY, MC.player.getZ());
             TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
         }
         else {
             PlayerServerboundPacket.disableOrthoview();
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
-            PlayerServerboundPacket.teleportPlayer(MC.player.getX(), prevPlayerY, MC.player.getZ());
+            if (!MC.level.getBlockState(MC.player.getOnPos()).isAir()) {
+                BlockPos tp = MiscUtil.getHighestSolidBlock(MC.level, MC.player.getOnPos());
+                PlayerServerboundPacket.teleportPlayer((double) tp.getX(), (double) tp.getY() + 2, (double) tp.getZ());
+            }
+            else {
+                PlayerServerboundPacket.teleportPlayer(MC.player.getX(), MC.player.getY(), MC.player.getZ());
+            }
         }
     }
 

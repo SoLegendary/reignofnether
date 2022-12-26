@@ -23,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.Event;
@@ -377,12 +378,20 @@ public class HudClientEvents {
 
             blitX += portraitRendererUnit.frameWidth;
 
-            if (hudSelectedEntity instanceof Unit)
+            if (hudSelectedEntity instanceof Unit) {
                 hudZones.add(portraitRendererUnit.renderStats(
                         evt.getPoseStack(), nameCap,
                         blitX, blitY, (Unit) hudSelectedEntity));
 
-            blitX += portraitRendererUnit.frameWidth;
+                blitX += portraitRendererUnit.statsWidth;
+
+                if (hudSelectedEntity instanceof Mob mob && mob.canPickUpLoot()) {
+                    hudZones.add(portraitRendererUnit.renderResourcesHeld(
+                            evt.getPoseStack(), nameCap,
+                            blitX, blitY, (Unit) hudSelectedEntity));
+                }
+            }
+            blitX += portraitRendererUnit.statsWidth + 10;
         }
 
         // ----------------------------------------------
@@ -712,8 +721,8 @@ public class HudClientEvents {
 
     @SubscribeEvent
     public static void onRenderNamePlate(RenderNameTagEvent evt) {
-        if (OrthoviewClientEvents.isEnabled())
-            evt.setResult(Event.Result.DENY);
+        //if (OrthoviewClientEvents.isEnabled())
+        //    evt.setResult(Event.Result.DENY);
     }
 
     // MANAGE CONTROL GROUPS

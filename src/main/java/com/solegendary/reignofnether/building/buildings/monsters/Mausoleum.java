@@ -39,6 +39,7 @@ public class Mausoleum extends ProductionBuilding {
         this.oreCost = ResourceCosts.Mausoleum.ORE;
         this.popSupply = ResourceCosts.Mausoleum.SUPPLY;
         this.buildTimeModifier = 0.66f;
+        this.canAcceptResources = true;
 
         this.startingBlockTypes.add(Blocks.STONE);
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);

@@ -6,6 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.resources.ResourceSources;
+import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -37,6 +39,9 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
 
     public final int frameWidth = 60;
     public final int frameHeight = 60;
+
+    public final int statsWidth = 42;
+    public final int statsHeight = 60;
 
     private final int headSize = 46;
     private final int headOffsetX = 31;
@@ -170,10 +175,9 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
     }
 
     public RectZone renderStats(PoseStack poseStack, String name, int x, int y, Unit unit) {
-        int width2 = 43;
         MyRenderer.renderFrameWithBg(poseStack, x, y,
-                width2,
-                frameHeight,
+                statsWidth,
+                statsHeight,
                 0xA0000000);
 
         int blitXIcon = x + 6;
@@ -209,7 +213,42 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
             GuiComponent.drawString(poseStack, Minecraft.getInstance().font, statStrings.get(i), blitXIcon + 13, blitYIcon, 0xFFFFFF);
             blitYIcon += 10;
         }
-        return RectZone.getZoneByLW(x, y, width2, frameHeight);
+        return RectZone.getZoneByLW(x, y, statsWidth, statsHeight);
+    }
+
+    public RectZone renderResourcesHeld(PoseStack poseStack, String name, int x, int y, Unit unit) {
+        MyRenderer.renderFrameWithBg(poseStack, x, y,
+                statsWidth,
+                statsHeight,
+                0xA0000000);
+
+        int blitXIcon = x + 6;
+        int blitYIcon = y + 7;
+
+        // prep strings/icons to render
+        List<ResourceLocation> textureStatIcons = List.of(
+            new ResourceLocation("reignofnether", "textures/icons/items/wheat.png"),
+            new ResourceLocation("reignofnether", "textures/icons/items/wood.png"),
+            new ResourceLocation("reignofnether", "textures/icons/items/iron_ore.png")
+        );
+        Resources resources = ResourceSources.getTotalResourcesFromItems(unit.getItems());
+
+        List<String> statStrings = List.of(
+            String.valueOf(resources.food),
+            String.valueOf(resources.wood),
+            String.valueOf(resources.ore)
+        );
+        // render based on prepped strings/icons
+        for (int i = 0; i < statStrings.size(); i++) {
+            MyRenderer.renderIcon(
+                    poseStack,
+                    textureStatIcons.get(i),
+                    blitXIcon, blitYIcon, 8
+            );
+            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, statStrings.get(i), blitXIcon + 12, blitYIcon, 0xFFFFFF);
+            blitYIcon += 10;
+        }
+        return RectZone.getZoneByLW(x, y, statsWidth, statsHeight);
     }
 
     private void setNonHeadModelVisibility(Model model, boolean visibility) {

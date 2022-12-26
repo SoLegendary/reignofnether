@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -17,8 +18,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -32,13 +35,16 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
     public List<Ability> getAbilities() {return abilities;};
+    public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
     public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
     public Goal getAttackGoal() {return attackGoal;}
+    public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
+    public ReturnResourcesGoal returnResourcesGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -101,6 +107,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
+    private final List<ItemStack> items = new ArrayList<>();
 
     public SkeletonUnit(EntityType<? extends Skeleton> entityType, Level level) {
         super(entityType, level);
@@ -117,6 +124,8 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     }
 
     public void tick() {
+        this.setCanPickUpLoot(true);
+
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
@@ -131,6 +140,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
         this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown(), attackRange);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
     }
 
     @Override
@@ -140,9 +150,9 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, moveGoal);
         this.goalSelector.addGoal(3, attackGoal);
+        this.goalSelector.addGoal(3, returnResourcesGoal);
         this.targetSelector.addGoal(3, targetGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
-
     }
 
     @Override

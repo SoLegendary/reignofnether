@@ -39,6 +39,7 @@ public class TownCentre extends ProductionBuilding {
         this.oreCost = ResourceCosts.TownCentre.ORE;
         this.popSupply = ResourceCosts.TownCentre.SUPPLY;
         this.buildTimeModifier = 0.8f;
+        this.canAcceptResources = true;
 
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);
         this.startingBlockTypes.add(Blocks.GRASS_BLOCK);

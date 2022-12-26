@@ -1,19 +1,21 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.resources.ResourceSource;
+import com.solegendary.reignofnether.resources.ResourceSources;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
+import com.solegendary.reignofnether.unit.UnitClientboundPacket;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
+import com.solegendary.reignofnether.unit.goals.ReturnResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.ForcedChunksSavedData;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraftforge.common.world.ForgeChunkManager;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -29,10 +31,12 @@ public interface Unit {
 
     public List<AbilityButton> getAbilityButtons();
     public List<Ability> getAbilities();
+    public List<ItemStack> getItems();
 
     // note that attackGoal is specific to unit types
     public MoveToTargetBlockGoal getMoveGoal();
     public SelectedTargetGoal<?> getTargetGoal();
+    public ReturnResourcesGoal getReturnResourcesGoal();
 
     public float getMovementSpeed();
     public float getUnitMaxHealth();
@@ -54,6 +58,23 @@ public interface Unit {
             ability.tickCooldown();
 
         if (!unitMob.level.isClientSide) {
+
+            if (unitMob.canPickUpLoot()) {
+                for (ItemEntity itementity : unitMob.level.getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1,0,1))) {
+                    if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive()) {
+
+                        ItemStack itemstack = itementity.getItem();
+                        ResourceSource resBlock = ResourceSources.getFromItem(itemstack.getItem());
+                        if (resBlock != null) {
+                            unitMob.onItemPickup(itementity);
+                            unitMob.take(itementity, itemstack.getCount());
+                            itementity.discard();
+                            unit.getItems().add(itemstack);
+                            UnitClientboundPacket.sendSyncResourcesPacket(unitMob);
+                        }
+                    }
+                }
+            }
 
             // sync target variables between goals and Mob
             if (unit.getTargetGoal().getTarget() == null || !unit.getTargetGoal().getTarget().isAlive() ||
@@ -79,6 +100,8 @@ public interface Unit {
     public static void resetBehaviours(Unit unit) {
         unit.getTargetGoal().setTarget(null);
         unit.getMoveGoal().stopMoving();
+        if (unit.getReturnResourcesGoal() != null)
+            unit.getReturnResourcesGoal().stopReturning();
         unit.setFollowTarget(null);
         unit.setHoldPosition(false);
     }

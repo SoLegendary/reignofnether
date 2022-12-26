@@ -4,10 +4,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
-import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
-import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
-import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
+import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.Ability;
@@ -42,13 +39,16 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
     public List<Ability> getAbilities() {return abilities;}
+    public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
     public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
     public Goal getAttackGoal() {return attackGoal;}
+    public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
+    public ReturnResourcesGoal returnResourcesGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -111,6 +111,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
+    private final List<ItemStack> items = new ArrayList<>();
 
     public VindicatorUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
@@ -128,6 +129,8 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     }
 
     public void tick() {
+        this.setCanPickUpLoot(true);
+
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
@@ -138,6 +141,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
         this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
     }
 
     @Override
@@ -148,13 +152,13 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         this.goalSelector.addGoal(2, moveGoal);
         this.goalSelector.addGoal(3, attackGoal);
         this.goalSelector.addGoal(3, attackBuildingGoal);
+        this.goalSelector.addGoal(3, returnResourcesGoal);
         this.targetSelector.addGoal(3, targetGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }
 
     @Override
     public void setupEquipmentAndUpgrades() {
-
         // weapon is purely visual, damage is based solely on entity attribute ATTACK_DAMAGE
         Item axe = Items.IRON_AXE;
         int damageMod = 0;

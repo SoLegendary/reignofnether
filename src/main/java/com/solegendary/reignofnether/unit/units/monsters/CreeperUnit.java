@@ -27,6 +27,8 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -38,14 +40,17 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
     public List<Ability> getAbilities() {return abilities;};
+    public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
     public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
     public Goal getAttackGoal() {return attackGoal;}
+    public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
     public CreeperAttackUnitGoal attackGoal;
+    public ReturnResourcesGoal returnResourcesGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -107,11 +112,13 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
+    private final List<ItemStack> items = new ArrayList<>();
 
     private boolean forceExplode = false;
 
     public CreeperUnit(EntityType<? extends Creeper> entityType, Level level) {
         super(entityType, level);
+
         if (level.isClientSide())
             this.abilityButtons.add(new AbilityButton(
                 "Explode",
@@ -148,6 +155,8 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     }
 
     public void tick() {
+        this.setCanPickUpLoot(false);
+
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);

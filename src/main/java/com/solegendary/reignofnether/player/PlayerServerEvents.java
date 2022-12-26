@@ -1,27 +1,19 @@
 package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
+import com.solegendary.reignofnether.unit.UnitClientboundPacket;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.MenuConstructor;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
-import org.w3c.dom.Attr;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 // this class tracks all available players so that any serverside functions that need to affect the player can be
 // performed here by sending a client->server packet containing MC.player.getId()
@@ -29,13 +21,16 @@ import java.util.UUID;
 public class PlayerServerEvents {
 
     public static final ArrayList<ServerPlayer> players = new ArrayList<>();
-    private static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
+    public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         System.out.println("Player logged in: " + evt.getEntity().getName().getString() + ", id: " + evt.getEntity().getId());
         ServerPlayer serverPlayer = (ServerPlayer) evt.getEntity();
         players.add((ServerPlayer) evt.getEntity());
+
+        for (LivingEntity entity : UnitServerEvents.getAllUnits())
+            UnitClientboundPacket.sendSyncResourcesPacket(entity);
     }
 
     @SubscribeEvent
@@ -72,9 +67,6 @@ public class PlayerServerEvents {
             MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
             NetworkHooks.openScreen(serverPlayer, namedProvider);
             serverPlayer.setGameMode(GameType.CREATIVE); // could use spectator, but makes rendering less reliable
-            serverPlayer.noPhysics = true; // only needed if in creative mode
-            serverPlayer.getAbilities().flying = true;
-            serverPlayer.onUpdateAbilities();
         }
         else {
             System.out.println("serverPlayer is null, cannot open topdown gui");
@@ -84,7 +76,6 @@ public class PlayerServerEvents {
     public static void closeTopdownGui(int playerId) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
         serverPlayer.setGameMode(GameType.CREATIVE);
-        serverPlayer.noPhysics = false;
     }
 
     public static void movePlayer(int playerId, double x, double y, double z) {
