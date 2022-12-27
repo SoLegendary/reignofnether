@@ -85,9 +85,10 @@ public interface AttackerUnit {
                 Relationship rs = UnitServerEvents.getUnitToEntityRelationship(unit, lastDSEntity);
 
                 if (lastDSEntity instanceof PathfinderMob &&
-                        (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE) &&
-                        !unit.hasLivingTarget())
+                    (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE)) {
                     attackerUnit.setAttackTarget((PathfinderMob) lastDSEntity);
+                }
+
             }
             // enact aggression when idle
             if (attackerUnit.isIdle() && attackerUnit.getAggressiveWhenIdle())
