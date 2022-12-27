@@ -1,11 +1,9 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.resources.ResourceSource;
-import com.solegendary.reignofnether.resources.ResourceSources;
-import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
+import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.UnitClientboundPacket;
+import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.goals.ReturnResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
@@ -61,18 +59,25 @@ public interface Unit {
         if (!unitMob.level.isClientSide) {
 
             int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
-            if (unitMob.canPickUpLoot() && !Unit.atMaxResources(unit)) {
+            if (unitMob.canPickUpLoot()) {
                 for (ItemEntity itementity : unitMob.level.getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1,0,1))) {
                     if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive()) {
 
-                        ItemStack itemstack = itementity.getItem();
-                        ResourceSource resBlock = ResourceSources.getFromItem(itemstack.getItem());
-                        if (resBlock != null) {
-                            unitMob.onItemPickup(itementity);
-                            unitMob.take(itementity, itemstack.getCount());
-                            itementity.discard();
-                            unit.getItems().add(itemstack);
-                            UnitClientboundPacket.sendSyncResourcesPacket(unitMob);
+                        if (!Unit.atMaxResources(unit)) {
+                            ItemStack itemstack = itementity.getItem();
+                            ResourceSource resBlock = ResourceSources.getFromItem(itemstack.getItem());
+                            if (resBlock != null) {
+                                unitMob.onItemPickup(itementity);
+                                unitMob.take(itementity, itemstack.getCount());
+                                itementity.discard();
+                                unit.getItems().add(itemstack);
+                                UnitClientboundPacket.sendSyncResourcesPacket(unitMob);
+                            }
+                            if (Unit.atMaxResources(unit) && unit instanceof WorkerUnit workerUnit) {
+                                GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
+                                if (goal != null && goal.getTargetResourceName() != ResourceName.NONE)
+                                    goal.saveAndReturnResources();
+                            }
                         }
                     }
                 }

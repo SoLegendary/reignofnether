@@ -299,12 +299,9 @@ public class UnitClientEvents {
                 }
                 // right click -> attack unfriendly building
                 else if (HudClientEvents.hudSelectedEntity instanceof AttackerUnit &&
-                        (preSelBuilding != null)) {
-
-                    if (BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.HOSTILE)
-                        sendUnitCommand(UnitAction.ATTACK_BUILDING);
-                    else
-                        sendUnitCommand(UnitAction.MOVE);
+                        (preSelBuilding != null) &&
+                        BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.HOSTILE) {
+                    sendUnitCommand(UnitAction.ATTACK_BUILDING);
                 }
                 // right click -> return resources
                 else if (HudClientEvents.hudSelectedEntity instanceof Unit unit &&
@@ -323,7 +320,6 @@ public class UnitClientEvents {
                     else
                         sendUnitCommand(UnitAction.BUILD_REPAIR);
                 }
-
                 // right click -> follow friendly unit or go to preselected blockPos
                 else
                     resolveMoveAction();

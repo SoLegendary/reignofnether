@@ -71,7 +71,7 @@ public class ResourceSources {
             new ResourceSource("Wheat",
                     List.of(Blocks.WHEAT),
                     List.of(Items.WHEAT),
-                    TICKS_PER_SECOND * 7,
+                    TICKS_PER_SECOND * 1,
                     10,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7

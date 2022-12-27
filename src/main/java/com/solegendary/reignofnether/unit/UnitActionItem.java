@@ -17,6 +17,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class UnitActionItem {
     private final String ownerName;
@@ -147,37 +148,32 @@ public class UnitActionItem {
                     }
                 }
                 case RETURN_RESOURCES -> {
+                    if (unit instanceof WorkerUnit workerUnit) { // if we manually did this, ignore automated return to gather
+                        GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
+                        if (goal != null)
+                            goal.deleteSavedState();
+                    }
                     ReturnResourcesGoal returnResourcesGoal = unit.getReturnResourcesGoal();
                     Building building = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), preselectedBlockPos);
                     if (returnResourcesGoal != null && building != null)
                         returnResourcesGoal.setBuildingTarget(building);
                 }
                 case RETURN_RESOURCES_TO_CLOSEST -> {
-                    if (!level.isClientSide()) {
-                        ReturnResourcesGoal returnResourcesGoal = unit.getReturnResourcesGoal();
-
-                        BlockPos pos = ((LivingEntity) unit).getOnPos();
-                        Building closestBuilding = null;
-                        double closestDist = 9999;
-                        for (Building building : BuildingServerEvents.getBuildings()) {
-                            if (building.ownerName.equals(unit.getOwnerName()) && building.canAcceptResources && building.isBuilt) {
-                                BlockPos bp = building.getClosestGroundPos(pos, 1);
-                                double dist = bp.distSqr(pos);
-                                if (bp.distSqr(pos) < closestDist) {
-                                    closestBuilding = building;
-                                    closestDist = dist;
-                                }
-                            }
-                        }
-                        if (returnResourcesGoal != null && closestBuilding != null)
-                            returnResourcesGoal.setBuildingTarget(closestBuilding);
+                    if (unit instanceof WorkerUnit workerUnit) { // if we manually did this, ignore automated return to gather
+                        GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
+                        if (goal != null)
+                            goal.deleteSavedState();
                     }
+                    ReturnResourcesGoal returnResourcesGoal = unit.getReturnResourcesGoal();
+                    if (returnResourcesGoal != null)
+                        returnResourcesGoal.returnToClosestBuilding();
                 }
             }
             // TODO: find which unit actually used the ability
             // set ability cd on unit
         }
-
+        if (this.selectedBuildingPos.equals(new BlockPos(0, 0, 0)))
+            return;
 
         Building actionableBuilding;
         if (level.isClientSide())

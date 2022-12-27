@@ -19,9 +19,8 @@ TODO bugs/features (backlog)
 1. Arm animations and block cracking/particles
 2. Chat while in orthoview
 3. Worker resource inventories and dropoffs
-    - temp warning for trying to gather while at max resources held?
-    - goal AI for returning resources automatically
     - stockpile building for both factions
+    - test on remote server
 
 4. Autoretaliate should switch targets when hit by a different enemy
 

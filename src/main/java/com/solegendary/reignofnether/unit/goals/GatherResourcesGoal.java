@@ -5,6 +5,8 @@ import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.UnitActionItem;
 import com.solegendary.reignofnether.unit.UnitClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -40,6 +42,13 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private ResourceName targetResourceName = ResourceName.NONE; // if !None, will passively target blocks around it
     private ResourceSource targetResourceSource = null;
     private Building targetFarm = null;
+
+    // saved copies of the above so we can later return to
+    private final ArrayList<BlockPos> todoGatherTargetsSaved = new ArrayList<>();
+    private BlockPos gatherTargetSaved = null;
+    private ResourceName targetResourceNameSaved = ResourceName.NONE;
+    private ResourceSource targetResourceSourceSaved = null;
+    private Building targetFarmSaved = null;
 
     // whenever we attempt to assign a block as a target it must pass this test
     private final Predicate<BlockPos> BLOCK_CONDITION = bp -> {
@@ -180,14 +189,60 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                                         resourceName.equals(ResourceName.WOOD) ? targetResourceSource.resourceValue : 0,
                                         resourceName.equals(ResourceName.ORE) ? targetResourceSource.resourceValue : 0
                                 ));*/
-                                ((Unit) mob).getItems().add(new ItemStack(targetResourceSource.items.get(0)));
+                                Unit unit = (Unit) mob;
+                                unit.getItems().add(new ItemStack(targetResourceSource.items.get(0)));
                                 UnitClientboundPacket.sendSyncResourcesPacket(mob);
+
+                                // if at max resources, go to drop off automatically, then return to this gather goal
+                                if (Unit.atMaxResources(unit))
+                                    saveAndReturnResources();
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    public void saveAndReturnResources() {
+        Unit unit = (Unit) mob;
+        if (unit.getReturnResourcesGoal() != null) {
+            this.saveState();
+            unit.resetBehaviours();
+            WorkerUnit.resetBehaviours((WorkerUnit) unit);
+            unit.getReturnResourcesGoal().returnToClosestBuilding();
+        }
+    }
+
+    private void saveState() {
+        todoGatherTargetsSaved.clear();
+        todoGatherTargetsSaved.addAll(todoGatherTargets);
+        gatherTargetSaved = gatherTarget;
+        targetResourceNameSaved = targetResourceName;
+        targetResourceSourceSaved = targetResourceSource;
+        targetFarmSaved = targetFarm;
+    }
+    public void loadState() {
+        todoGatherTargets.clear();
+        todoGatherTargets.addAll(todoGatherTargetsSaved);
+        gatherTarget = gatherTargetSaved;
+        targetResourceName = targetResourceNameSaved;
+        targetResourceSource = targetResourceSourceSaved;
+        targetFarm = targetFarmSaved;
+    }
+    public boolean hasSavedData() {
+        return todoGatherTargetsSaved.size() > 0 ||
+                gatherTargetSaved != null ||
+                targetResourceNameSaved != ResourceName.NONE ||
+                targetResourceSourceSaved != null ||
+                targetFarmSaved != null;
+    }
+    public void deleteSavedState() {
+        todoGatherTargetsSaved.clear();
+        gatherTargetSaved = null;
+        targetResourceNameSaved = ResourceName.NONE;
+        targetResourceSourceSaved = null;
+        targetFarmSaved = null;
     }
 
     private boolean isBlockInRange(BlockPos target) {
@@ -236,8 +291,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         searchCdTicksLeft = 0;
     }
 
-    // stop gathering and searching entirely
+    // stop gathering and searching entirely, and remove saved data for
     public void stopGathering() {
+        todoGatherTargets.clear();
         targetFarm = null;
         removeGatherTarget();
         this.setTargetResourceName(ResourceName.NONE);

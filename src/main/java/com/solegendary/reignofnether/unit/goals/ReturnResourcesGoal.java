@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import javax.annotation.Nullable;
 
@@ -24,6 +25,7 @@ import javax.annotation.Nullable;
 public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
 
     private Building buildingTarget;
+
 
     public ReturnResourcesGoal(PathfinderMob mob, double speedModifier) {
         super(mob, true, speedModifier, 0);
@@ -41,6 +43,16 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
                     unit.getItems().clear();
                     UnitClientEvents.syncUnitResources(this.mob.getId(), new Resources("", 0,0,0));
                     this.stopReturning();
+
+                    if (this.mob instanceof WorkerUnit worker) {
+                        unit.resetBehaviours();
+                        WorkerUnit.resetBehaviours((WorkerUnit) unit);
+                        GatherResourcesGoal goal = worker.getGatherResourceGoal();
+                        if (goal != null && goal.hasSavedData()) {
+                            goal.loadState();
+                            goal.deleteSavedState();
+                        }
+                    }
                 }
             }
         }
@@ -61,6 +73,27 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
                 return buildingTarget.isPosInsideBuilding(mob.getOnPos()) ||
                         Math.sqrt(moveTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) < 2;
         return false;
+    }
+
+    public void returnToClosestBuilding() {
+        if (this.mob.level.isClientSide())
+            return;
+
+        BlockPos pos = mob.getOnPos();
+        Building closestBuilding = null;
+        double closestDist = 9999;
+        for (Building building : BuildingServerEvents.getBuildings()) {
+            if (building.ownerName.equals(((Unit) mob).getOwnerName()) && building.canAcceptResources && building.isBuilt) {
+                BlockPos bp = building.getClosestGroundPos(pos, 1);
+                double dist = bp.distSqr(pos);
+                if (bp.distSqr(pos) < closestDist) {
+                    closestBuilding = building;
+                    closestDist = dist;
+                }
+            }
+        }
+        if (closestBuilding != null)
+            this.setBuildingTarget(closestBuilding);
     }
 
     public void setBuildingTarget(@Nullable Building target) {
