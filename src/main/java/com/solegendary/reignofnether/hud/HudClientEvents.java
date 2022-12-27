@@ -6,9 +6,11 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -33,6 +35,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.*;
 
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getPlayerToEntityRelationship;
+import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
 
 public class HudClientEvents {
 
@@ -378,17 +381,37 @@ public class HudClientEvents {
 
             blitX += portraitRendererUnit.frameWidth;
 
-            if (hudSelectedEntity instanceof Unit) {
+            if (hudSelectedEntity instanceof Unit unit) {
                 hudZones.add(portraitRendererUnit.renderStats(
                         evt.getPoseStack(), nameCap,
-                        blitX, blitY, (Unit) hudSelectedEntity));
+                        blitX, blitY, unit));
 
                 blitX += portraitRendererUnit.statsWidth;
 
-                if (hudSelectedEntity instanceof Mob mob && mob.canPickUpLoot()) {
+                int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
+
+                if (hudSelectedEntity instanceof Mob mob && mob.canPickUpLoot() && totalRes > 0) {
                     hudZones.add(portraitRendererUnit.renderResourcesHeld(
                             evt.getPoseStack(), nameCap,
-                            blitX, blitY, (Unit) hudSelectedEntity));
+                            blitX, blitY, unit));
+
+                    // return button
+                    if (getPlayerToEntityRelationship(hudSelectedEntity) == Relationship.OWNED) {
+                        Button returnButton = new Button(
+                                "Return resources",
+                                Button.itemIconSize,
+                                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
+                                Keybindings.keyD,
+                                () -> unit.getReturnResourcesGoal().getBuildingTarget() != null,
+                                () -> false,
+                                () -> true,
+                                () -> sendUnitCommand(UnitAction.RETURN_RESOURCES_TO_CLOSEST),
+                                null,
+                                List.of(FormattedCharSequence.forward("Drop off resources", Style.EMPTY))
+                        );
+                        returnButton.render(evt.getPoseStack(), blitX + 10, blitY + 38, mouseX, mouseY);
+                        renderedButtons.add(returnButton);
+                    }
                 }
             }
             blitX += portraitRendererUnit.statsWidth + 10;

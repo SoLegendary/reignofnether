@@ -1,5 +1,10 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
+
 // RTS resources used for buildings, units, etc.
 // usually tied to a ServerPlayer's NBT data so it is retained between relogs and server restarts
 // but with a clientside copy too for the HUD
@@ -64,4 +69,22 @@ public class Resources {
 
         return (int) Math.signum(totalToAdd) * retVal;
     }
+
+    public static Resources getTotalResourcesFromItems(List<ItemStack> itemStacks) {
+        Resources resources = new Resources("", 0,0,0);
+        for (ItemStack itemStack : itemStacks) {
+            ResourceSource resBlock = ResourceSources.getFromItem(itemStack.getItem());
+            if (resBlock != null) {
+                int value = resBlock.resourceValue * itemStack.getCount();
+                switch (resBlock.resourceName) {
+                    case FOOD -> resources.changeInstantly(value, 0, 0);
+                    case WOOD -> resources.changeInstantly(0, value, 0);
+                    case ORE -> resources.changeInstantly(0, 0, value);
+                }
+            }
+        }
+        return resources;
+    }
+
+
 }

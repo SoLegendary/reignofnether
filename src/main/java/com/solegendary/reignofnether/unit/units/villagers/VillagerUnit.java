@@ -44,6 +44,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
     public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
     public GatherResourcesGoal getGatherResourceGoal() {return gatherResourcesGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
+    public int getMaxResources() {return maxResources;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
@@ -92,6 +93,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
     final static public float movementSpeed = 0.25f;
     final static public float sightRange = 10f;
     final static public int popCost = ResourceCosts.Villager.POPULATION;
+    final static public int maxResources = 100;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();

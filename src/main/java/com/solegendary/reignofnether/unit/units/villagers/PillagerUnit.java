@@ -44,6 +44,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
     public Goal getAttackGoal() {return attackGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
+    public int getMaxResources() {return maxResources;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
@@ -104,6 +105,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.Pillager.POPULATION;
     final static public boolean canAttackBuildings = false;
+    final static public int maxResources = 100;
 
     public UnitCrossbowAttackGoal<? extends LivingEntity> attackGoal;
     public AttackBuildingGoal attackBuildingGoal;

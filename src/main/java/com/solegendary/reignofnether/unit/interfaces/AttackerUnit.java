@@ -75,9 +75,11 @@ public interface AttackerUnit {
                     AttackerUnit.resetBehaviours(attackerUnit);
             }
 
-            // retaliate against a mob that damaged us UNLESS already on a move or follow command
-            if (unitMob.getLastDamageSource() != null && attackerUnit.getWillRetaliate() &&
-                    unit.getMoveGoal().getMoveTarget() == null && unit.getFollowTarget() == null) {
+            // retaliate against a mob that damaged us UNLESS already on a move or follow command (unless holding position)
+            if (unitMob.getLastDamageSource() != null &&
+                    attackerUnit.getWillRetaliate() &&
+                    (unit.getMoveGoal().getMoveTarget() == null || unit.getHoldPosition()) &&
+                    unit.getFollowTarget() == null) {
 
                 Entity lastDSEntity = unitMob.getLastDamageSource().getEntity();
                 Relationship rs = UnitServerEvents.getUnitToEntityRelationship(unit, lastDSEntity);

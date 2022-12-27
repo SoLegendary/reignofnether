@@ -47,7 +47,7 @@ public class UnitClientboundPacket {
     public static void sendSyncResourcesPacket(LivingEntity entity) {
         Resources res = new Resources("", 0,0,0);
         if (entity instanceof Unit unit)
-            res = ResourceSources.getTotalResourcesFromItems(unit.getItems());
+            res = Resources.getTotalResourcesFromItems(unit.getItems());
 
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitClientboundPacket(UnitSyncAction.SYNC_RESOURCES,

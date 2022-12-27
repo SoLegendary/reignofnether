@@ -16,6 +16,7 @@ public enum UnitAction {
     FARM, // sets the villager's target gather resource
     TOGGLE_GATHER_TARGET, // cycle between gathering nothing, food, wood or ore
     RETURN_RESOURCES, // drops off resources to the building
+    RETURN_RESOURCES_TO_CLOSEST, // drops off resources to the nearest building that accepts resources
 
     // special abilities - these can also be assigned to cursor actions
     EXPLODE,

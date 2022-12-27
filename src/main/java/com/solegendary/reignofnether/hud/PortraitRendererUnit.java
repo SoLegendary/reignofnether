@@ -5,9 +5,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -22,7 +25,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -30,6 +35,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
 
 // Renders a Unit's portrait including its animated head, name, healthbar, list of stats and UI frames for these
 
@@ -62,12 +69,9 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
     private final int lookRangeY = 40;
 
 
-
-
     public PortraitRendererUnit(R renderer) {
         this.renderer = renderer;
     }
-
 
     public void randomiseAnimation(Boolean randomisePos) {
         if (randomisePos) {
@@ -217,6 +221,9 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
     }
 
     public RectZone renderResourcesHeld(PoseStack poseStack, String name, int x, int y, Unit unit) {
+
+        int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
+
         MyRenderer.renderFrameWithBg(poseStack, x, y,
                 statsWidth,
                 statsHeight,
@@ -231,23 +238,30 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
             new ResourceLocation("reignofnether", "textures/icons/items/wood.png"),
             new ResourceLocation("reignofnether", "textures/icons/items/iron_ore.png")
         );
-        Resources resources = ResourceSources.getTotalResourcesFromItems(unit.getItems());
+        Resources resources = Resources.getTotalResourcesFromItems(unit.getItems());
 
         List<String> statStrings = List.of(
             String.valueOf(resources.food),
             String.valueOf(resources.wood),
             String.valueOf(resources.ore)
         );
+
         // render based on prepped strings/icons
         for (int i = 0; i < statStrings.size(); i++) {
-            MyRenderer.renderIcon(
-                    poseStack,
-                    textureStatIcons.get(i),
-                    blitXIcon, blitYIcon, 8
-            );
-            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, statStrings.get(i), blitXIcon + 12, blitYIcon, 0xFFFFFF);
-            blitYIcon += 10;
+
+            if (!statStrings.get(i).equals("0")) {
+                MyRenderer.renderIcon(
+                        poseStack,
+                        textureStatIcons.get(i),
+                        blitXIcon, blitYIcon, 8
+                );
+                GuiComponent.drawString(poseStack, Minecraft.getInstance().font, statStrings.get(i), blitXIcon + 12, blitYIcon,
+                        Unit.atMaxResources(unit) ? 0xFF2525 : 0xFFFFFF);
+                blitYIcon += 10;
+            }
         }
+
+
         return RectZone.getZoneByLW(x, y, statsWidth, statsHeight);
     }
 

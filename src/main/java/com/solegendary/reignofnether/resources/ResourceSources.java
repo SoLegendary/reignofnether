@@ -20,10 +20,10 @@ public class ResourceSources {
     public static ResourceSource getFromBlockPos(BlockPos bp, Level level) {
         Block block = level.getBlockState(bp).getBlock();
 
-        for (List<ResourceSource> resourceBlocks : List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS))
-            for (ResourceSource resourceBlock : resourceBlocks)
-                if (resourceBlock.validBlocks.contains(block))
-                    return resourceBlock;
+        for (List<ResourceSource> resourceSources : List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS))
+            for (ResourceSource resourceSource : resourceSources)
+                if (resourceSource.validBlocks.contains(block))
+                    return resourceSource;
         return null;
     }
 
@@ -43,27 +43,11 @@ public class ResourceSources {
     // is the given item an item that is worth resources?
     // used for unit item pickups and player resource deposits
     public static ResourceSource getFromItem(Item item) {
-        for (List<ResourceSource> resourceBlocks : List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS))
-            for (ResourceSource resourceBlock : resourceBlocks)
-                if (resourceBlock.items.contains(item))
-                    return resourceBlock;
+        for (List<ResourceSource> resourceSources : List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS))
+            for (ResourceSource resourceSource : resourceSources)
+                if (resourceSource.items.contains(item))
+                    return resourceSource;
         return null;
-    }
-
-    public static Resources getTotalResourcesFromItems(List<ItemStack> itemStacks) {
-        Resources resources = new Resources("", 0,0,0);
-        for (ItemStack itemStack : itemStacks) {
-            ResourceSource resBlock = getFromItem(itemStack.getItem());
-            if (resBlock != null) {
-                int value = resBlock.resourceValue * itemStack.getCount();
-                switch (resBlock.resourceName) {
-                    case FOOD -> resources.changeInstantly(value, 0, 0);
-                    case WOOD -> resources.changeInstantly(0, value, 0);
-                    case ORE -> resources.changeInstantly(0, 0, value);
-                }
-            }
-        }
-        return resources;
     }
 
     public static final int REPLANT_TICKS_MAX = 20;
@@ -176,6 +160,13 @@ public class ResourceSources {
                     List.of(Items.STICK),
                     0,
                     1,
+                    ResourceName.WOOD
+            ),
+            new ResourceSource("Saplings", // item only
+                    List.of(),
+                    List.of(Items.ACACIA_SAPLING, Items.SPRUCE_SAPLING, Items.BIRCH_SAPLING, Items.OAK_SAPLING, Items.OAK_SAPLING, Items.DARK_OAK_SAPLING, Items.JUNGLE_SAPLING),
+                    0,
+                    5,
                     ResourceName.WOOD
             ),
             new ResourceSource("Planks",

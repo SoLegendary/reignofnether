@@ -34,7 +34,7 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
             calcMoveTarget();
             if (canDropOff() && this.mob instanceof Unit unit) {
                 if (!this.mob.level.isClientSide()) {
-                    Resources res = ResourceSources.getTotalResourcesFromItems(unit.getItems());
+                    Resources res = Resources.getTotalResourcesFromItems(unit.getItems());
                     res.ownerName = unit.getOwnerName();
                     ResourcesServerEvents.addSubtractResources(res);
                     ResourcesClientboundPacket.showFloatingText(res, this.moveTarget);

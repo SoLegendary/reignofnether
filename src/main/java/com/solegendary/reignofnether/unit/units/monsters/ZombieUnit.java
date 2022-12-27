@@ -37,6 +37,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
     public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
     public Goal getAttackGoal() {return attackGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
+    public int getMaxResources() {return maxResources;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
@@ -97,6 +98,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.Zombie.POPULATION;
     final static public boolean canAttackBuildings = true;
+    final static public int maxResources = 100;
 
     public MeleeAttackUnitGoal attackGoal;
     public AttackBuildingGoal attackBuildingGoal;

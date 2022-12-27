@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import java.util.EnumSet;
+
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.LivingEntity;
@@ -84,7 +86,7 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
 
             double d0 = this.mob.distanceToSqr(target);
             boolean flag2 = (d0 > (double)this.attackRadiusSqr || this.seeTime < 5) && this.attackCooldown == 0;
-            if (flag2) {
+            if (flag2 && !((Unit) this.mob).getHoldPosition()) {
                 this.mob.getNavigation().moveTo(target, 1.0f);
             } else {
                 this.mob.getNavigation().stop();

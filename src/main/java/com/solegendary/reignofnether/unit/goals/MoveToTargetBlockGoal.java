@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.PathfinderMob;
@@ -40,7 +41,7 @@ public class MoveToTargetBlockGoal extends Goal {
         else if (moveTarget == null)
             return false;
         else if (this.mob.getNavigation().isDone()) {
-            if (!persistent)
+            if (!persistent && !((Unit) this.mob).getHoldPosition())
                 moveTarget = null;
             return false;
         }

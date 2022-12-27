@@ -32,6 +32,7 @@ public interface Unit {
     public List<AbilityButton> getAbilityButtons();
     public List<Ability> getAbilities();
     public List<ItemStack> getItems();
+    public int getMaxResources();
 
     // note that attackGoal is specific to unit types
     public MoveToTargetBlockGoal getMoveGoal();
@@ -59,7 +60,8 @@ public interface Unit {
 
         if (!unitMob.level.isClientSide) {
 
-            if (unitMob.canPickUpLoot()) {
+            int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
+            if (unitMob.canPickUpLoot() && !Unit.atMaxResources(unit)) {
                 for (ItemEntity itementity : unitMob.level.getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1,0,1))) {
                     if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive()) {
 
@@ -90,6 +92,10 @@ public interface Unit {
             if (unit.getFollowTarget() != null)
                 unit.setMoveTarget(unit.getFollowTarget().blockPosition());
         }
+    }
+
+    public static boolean atMaxResources(Unit unit) {
+        return Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() >= unit.getMaxResources();
     }
 
     public default boolean hasLivingTarget() {

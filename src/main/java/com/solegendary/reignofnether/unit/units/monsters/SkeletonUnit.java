@@ -41,6 +41,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
     public Goal getAttackGoal() {return attackGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
+    public int getMaxResources() {return maxResources;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
@@ -101,6 +102,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.Skeleton.POPULATION;
     final static public boolean canAttackBuildings = false;
+    final static public int maxResources = 100;
 
     public UnitBowAttackGoal<? extends LivingEntity> attackGoal;
     public AttackBuildingGoal attackBuildingGoal;

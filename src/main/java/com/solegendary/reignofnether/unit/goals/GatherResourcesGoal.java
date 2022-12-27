@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.UnitClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -13,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -28,7 +30,7 @@ import java.util.function.Predicate;
 public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     private static final int REACH_RANGE = 5;
-    private static final int DEFAULT_MAX_GATHER_TICKS = 100; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceBlock targeted
+    private static final int DEFAULT_MAX_GATHER_TICKS = 100; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
     private int gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
     private static final int MAX_SEARCH_CD_TICKS = 20; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
     private int searchCdTicksLeft = 0;
@@ -36,7 +38,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private final ArrayList<BlockPos> todoGatherTargets = new ArrayList<>();
     private BlockPos gatherTarget = null;
     private ResourceName targetResourceName = ResourceName.NONE; // if !None, will passively target blocks around it
-    private ResourceSource targetResourceBlock = null;
+    private ResourceSource targetResourceSource = null;
     private Building targetFarm = null;
 
     // whenever we attempt to assign a block as a target it must pass this test
@@ -45,7 +47,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         BlockState bsAbove = mob.level.getBlockState(bp.above());
         ResourceSource resBlock = ResourceSources.getFromBlockPos(bp, mob.level);
 
-        // is a valid resource block and meets the target ResourceBlock's blockstate condition
+        // is a valid resource block and meets the target ResourceSource's blockstate condition
         if (resBlock == null || resBlock.resourceName != targetResourceName)
             return false;
         if (!resBlock.blockStateTest.test(bs))
@@ -124,7 +126,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 searchCdTicksLeft = MAX_SEARCH_CD_TICKS;
             }
             if (gatherTarget != null)
-                targetResourceBlock = ResourceSources.getFromBlockPos(gatherTarget, mob.level);
+                targetResourceSource = ResourceSources.getFromBlockPos(gatherTarget, mob.level);
         }
 
         if (gatherTarget != null) {
@@ -156,10 +158,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                     }
                     else {
                         gatherTicksLeft -= 1;
-                        gatherTicksLeft = Math.min(gatherTicksLeft, targetResourceBlock.ticksToGather);
+                        gatherTicksLeft = Math.min(gatherTicksLeft, targetResourceSource.ticksToGather);
                         if (gatherTicksLeft <= 0) {
                             gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
-                            ResourceName resourceBlockType = ResourceSources.getBlockResourceName(this.gatherTarget, mob.level);
+                            ResourceName resourceName = ResourceSources.getBlockResourceName(this.gatherTarget, mob.level);
                             if (mob.level.destroyBlock(gatherTarget, false)) {
 
                                 // prioritise gathering adjacent targets first
@@ -171,12 +173,15 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                                 );
                                 todoGatherTargets.addAll(adjTarget);
 
+                                /*
                                 ResourcesServerEvents.addSubtractResources(new Resources(
                                         ((Unit) mob).getOwnerName(),
-                                        resourceBlockType.equals(ResourceName.FOOD) ? targetResourceBlock.resourceValue : 0,
-                                        resourceBlockType.equals(ResourceName.WOOD) ? targetResourceBlock.resourceValue : 0,
-                                        resourceBlockType.equals(ResourceName.ORE) ? targetResourceBlock.resourceValue : 0
-                                ));
+                                        resourceName.equals(ResourceName.FOOD) ? targetResourceSource.resourceValue : 0,
+                                        resourceName.equals(ResourceName.WOOD) ? targetResourceSource.resourceValue : 0,
+                                        resourceName.equals(ResourceName.ORE) ? targetResourceSource.resourceValue : 0
+                                ));*/
+                                ((Unit) mob).getItems().add(new ItemStack(targetResourceSource.items.get(0)));
+                                UnitClientboundPacket.sendSyncResourcesPacket(mob);
                             }
                         }
                     }
@@ -191,7 +196,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     // only count as gathering if in range of the target
     public boolean isGathering() {
-        if (this.gatherTarget != null && this.targetResourceBlock != null &&
+        if (!Unit.atMaxResources((Unit) mob) && this.gatherTarget != null && this.targetResourceSource != null &&
             ResourceSources.getBlockResourceName(this.gatherTarget, mob.level) != ResourceName.NONE)
             return isBlockInRange(gatherTarget);
         return false;
@@ -214,7 +219,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         super.setMoveTarget(bp);
         if (BLOCK_CONDITION.test(bp)) {
             this.gatherTarget = bp;
-            this.targetResourceBlock = ResourceSources.getFromBlockPos(gatherTarget, this.mob.level);
+            this.targetResourceSource = ResourceSources.getFromBlockPos(gatherTarget, this.mob.level);
         }
     }
 
@@ -226,7 +231,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     // stop attempting to gather the current target but continue searching
     public void removeGatherTarget() {
         gatherTarget = null;
-        targetResourceBlock = null;
+        targetResourceSource = null;
         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
         searchCdTicksLeft = 0;
     }

@@ -309,8 +309,9 @@ public class UnitClientEvents {
                 // right click -> return resources
                 else if (HudClientEvents.hudSelectedEntity instanceof Unit unit &&
                         unit.getReturnResourcesGoal() != null &&
-                        ResourceSources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0 &&
-                        preSelBuilding != null && BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED) {
+                        Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0 &&
+                        preSelBuilding != null && preSelBuilding.canAcceptResources && preSelBuilding.isBuilt &&
+                        BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED) {
                     sendUnitCommand(UnitAction.RETURN_RESOURCES);
                 }
                 // right click -> build or repair preselected building

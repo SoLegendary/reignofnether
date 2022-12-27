@@ -152,6 +152,27 @@ public class UnitActionItem {
                     if (returnResourcesGoal != null && building != null)
                         returnResourcesGoal.setBuildingTarget(building);
                 }
+                case RETURN_RESOURCES_TO_CLOSEST -> {
+                    if (!level.isClientSide()) {
+                        ReturnResourcesGoal returnResourcesGoal = unit.getReturnResourcesGoal();
+
+                        BlockPos pos = ((LivingEntity) unit).getOnPos();
+                        Building closestBuilding = null;
+                        double closestDist = 9999;
+                        for (Building building : BuildingServerEvents.getBuildings()) {
+                            if (building.ownerName.equals(unit.getOwnerName()) && building.canAcceptResources && building.isBuilt) {
+                                BlockPos bp = building.getClosestGroundPos(pos, 1);
+                                double dist = bp.distSqr(pos);
+                                if (bp.distSqr(pos) < closestDist) {
+                                    closestBuilding = building;
+                                    closestDist = dist;
+                                }
+                            }
+                        }
+                        if (returnResourcesGoal != null && closestBuilding != null)
+                            returnResourcesGoal.setBuildingTarget(closestBuilding);
+                    }
+                }
             }
             // TODO: find which unit actually used the ability
             // set ability cd on unit

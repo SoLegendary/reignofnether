@@ -153,7 +153,6 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
             this.mob.swing(InteractionHand.MAIN_HAND);
             this.mob.doHurtTarget(p_25557_);
         }
-
     }
 
     protected void resetAttackCooldown() {

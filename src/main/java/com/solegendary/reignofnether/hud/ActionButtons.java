@@ -6,9 +6,11 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.List;
 
@@ -70,7 +72,10 @@ public class ActionButtons {
         Button.itemIconSize,
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chestplate.png"),
         Keybindings.hold,
-        () -> false, // TODO: if all selected units are holding position (but would need to get this from server?)
+        () -> {
+            LivingEntity entity = HudClientEvents.hudSelectedEntity;
+            return entity instanceof Unit unit && unit.getHoldPosition();
+        },
         () -> false,
         () -> true,
         () -> sendUnitCommand(UnitAction.HOLD),
