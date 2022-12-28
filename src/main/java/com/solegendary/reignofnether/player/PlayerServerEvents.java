@@ -1,14 +1,19 @@
 package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
+import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.level.GameType;
+import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
@@ -38,6 +43,40 @@ public class PlayerServerEvents {
         int id = evt.getEntity().getId();
         System.out.println("Player logged out: " + evt.getEntity().getName().getString() + ", id: " + id);
         players.removeIf(player -> player.getId() == id);
+    }
+
+    // commands for ops to give resources
+    @SubscribeEvent
+    public static void onPlayerChat(ServerChatEvent.Submitted evt) {
+
+        if (evt.getPlayer().hasPermissions(4)) {
+            String msg = evt.getMessage().getString();
+            String[] words = msg.split(" ");
+            String playerName = evt.getPlayer().getName().getString();
+
+            if (words.length == 2 && words[0].equalsIgnoreCase("greedisgood")) {
+                try {
+                    int amount = Integer.parseInt(words[1]);
+                    ResourcesServerEvents.addSubtractResources(new Resources(playerName, amount, amount, amount));
+                }
+                catch(NumberFormatException err) {
+                    System.out.println(err);
+                }
+            }
+            if (words.length == 1 && words[0].equalsIgnoreCase("warpten")) {
+                if (ResearchServer.playerHasCheat(playerName, "warpten"))
+                    ResearchServer.removeCheat(playerName, "warpten");
+                else
+                    ResearchServer.addCheat(playerName, "warpten");
+            }
+            // TODO: invincibility and infinite damage
+            if (words.length == 1 && words[0].equalsIgnoreCase("whosyourdaddy")) {
+                if (ResearchServer.playerHasCheat(playerName, "whosyourdaddy"))
+                    ResearchServer.removeCheat(playerName, "whosyourdaddy");
+                else
+                    ResearchServer.addCheat(playerName, "whosyourdaddy");
+            }
+        }
     }
 
     public static void enableOrthoview(int id) {

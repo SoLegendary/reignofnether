@@ -72,7 +72,7 @@ public class Mausoleum extends ProductionBuilding {
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.Mausoleum.WOOD + "  \uE002  " + ResourceCosts.Mausoleum.ORE, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A tomb of the dead that produces zombie villagers.", Style.EMPTY),
-                        FormattedCharSequence.forward("Is required to build all other buildings.", Style.EMPTY),
+                        FormattedCharSequence.forward("Is required to build most other buildings.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Supports " + ResourceCosts.Mausoleum.SUPPLY + " population.", Style.EMPTY)
                 ),

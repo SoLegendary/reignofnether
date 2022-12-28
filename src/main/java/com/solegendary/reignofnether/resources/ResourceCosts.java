@@ -48,7 +48,7 @@ public class ResourceCosts {
         public static final int FOOD = 0;
         public static final int WOOD = 0;
         public static final int ORE = 250;
-        public static final int TICKS = TICKS_PER_SECOND * 50;
+        public static final int TICKS = TICKS_PER_SECOND * 45;
         public static final int POPULATION = 6;
     }
     public static class Pillager {
@@ -137,24 +137,24 @@ public class ResourceCosts {
         public static final int FOOD = 0;
         public static final int WOOD = 200;
         public static final int ORE = 400;
-        public static final int TICKS = TICKS_PER_SECOND * 12;
+        public static final int TICKS = TICKS_PER_SECOND * 120;
     }
     public static class ResearchPillagerCrossbows {
         public static final int FOOD = 0;
         public static final int WOOD = 500;
         public static final int ORE = 250;
-        public static final int TICKS = TICKS_PER_SECOND * 12;
+        public static final int TICKS = TICKS_PER_SECOND * 120;
     }
     public static class ResearchLabLightningRod {
         public static final int FOOD = 0;
         public static final int WOOD = 100;
         public static final int ORE = 500;
-        public static final int TICKS = TICKS_PER_SECOND * 12;
+        public static final int TICKS = TICKS_PER_SECOND * 120;
     }
     public static class ResearchResourceCapacity {
         public static final int FOOD = 200;
         public static final int WOOD = 200;
         public static final int ORE = 0;
-        public static final int TICKS = TICKS_PER_SECOND * 9;
+        public static final int TICKS = TICKS_PER_SECOND * 90;
     }
 }

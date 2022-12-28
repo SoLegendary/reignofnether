@@ -71,7 +71,7 @@ public class TownCentre extends ProductionBuilding {
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.TownCentre.WOOD + "  \uE002  " + ResourceCosts.TownCentre.ORE, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A gazebo at the centre of your village that produces villagers.", Style.EMPTY),
-                        FormattedCharSequence.forward("Is required to build all other buildings.", Style.EMPTY),
+                        FormattedCharSequence.forward("Is required to build most other buildings.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Supports " + ResourceCosts.TownCentre.SUPPLY + " population.", Style.EMPTY)
                 ),

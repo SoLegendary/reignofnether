@@ -50,7 +50,7 @@ public class IronGolemProdItem extends ProductionItem {
             null,
             List.of(
                 FormattedCharSequence.forward(IronGolemProdItem.itemName, Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.IronGolem.FOOD + "  \uE002  " + ResourceCosts.IronGolem.ORE, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE002  " + ResourceCosts.IronGolem.ORE, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("\uE003  " + ResourceCosts.IronGolem.POPULATION + "     \uE004  " + ResourceCosts.IronGolem.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A hulking golem of metal with a powerful melee attack and high armour.", Style.EMPTY)

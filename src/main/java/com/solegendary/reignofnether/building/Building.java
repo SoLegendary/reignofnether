@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
@@ -37,7 +38,7 @@ import static com.solegendary.reignofnether.building.BuildingUtils.*;
 
 public abstract class Building {
 
-    private final static int BASE_MS_PER_BUILD = 50; // time taken to build each block with 1 villager assigned; normally 500ms in real games
+    private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned; normally 500ms in real games
     public final float MELEE_DAMAGE_MULTIPLIER = 0.25f; // damage multiplier applied to melee attackers
 
     public String name;
@@ -380,7 +381,11 @@ public abstract class Building {
                 if (msToNextBuild > msPerBuild)
                     msToNextBuild = msPerBuild;
 
-                msToNextBuild -= 50;
+                if (ResearchServer.playerHasCheat(this.ownerName, "warpten"))
+                    msToNextBuild -= 500;
+                else
+                    msToNextBuild -= 50;
+
                 if (msToNextBuild <= 0) {
                     msToNextBuild = msPerBuild;
                     extinguishRandomFire(serverLevel);

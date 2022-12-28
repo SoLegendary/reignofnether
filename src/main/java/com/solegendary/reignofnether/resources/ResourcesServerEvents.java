@@ -74,36 +74,4 @@ public class ResourcesServerEvents {
         }
         ResourcesClientboundPacket.syncResources(resourcesList);
     }
-
-    // commands for ops to give resources
-    @SubscribeEvent
-    public static void onPlayerChat(ServerChatEvent.Submitted evt) {
-
-        if (evt.getPlayer().hasPermissions(4)) {
-            String msg = evt.getMessage().getString();
-            String[] words = msg.split(" ");
-            if (words.length == 4 && words[0].equals("giveresources")) {
-                try {
-                    String playerName = words[1];
-                    int amount = Integer.parseInt(words[2]);
-                    String resourceName = words[3].toLowerCase();
-
-                    for (Player player : PlayerServerEvents.players) {
-                        if (player.getName().getString().equals(playerName)) {
-                            switch (resourceName) {
-                                case "food" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, amount, 0, 0));
-                                case "wood" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, amount, 0));
-                                case "ore" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, 0, amount));
-                                case "all" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, amount, amount, amount));
-                            }
-                        }
-                    }
-                }
-                catch(NumberFormatException err) {
-                    System.out.println(err);
-                    return;
-                }
-            }
-        }
-    }
 }
