@@ -145,8 +145,10 @@ public class ResourcesClientEvents {
                 );
                 poseStack.mulPose(Vector3f.YP.rotationDegrees(-camera.getYRot()));
                 poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
-                float zoom = OrthoviewClientEvents.getZoom();
-                poseStack.scale(-0.075F, -0.075F, 0.075F);
+                if (OrthoviewClientEvents.isEnabled())
+                    poseStack.scale(-0.075F, -0.075F, 0.075F);
+                else
+                    poseStack.scale(-0.05F, -0.05F, 0.05F);
                 Font font = MC.font;
                 float f2 = (float)(-font.width(component) / 2);
                 float f1 = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);

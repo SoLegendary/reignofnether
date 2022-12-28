@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -508,8 +509,11 @@ public class BuildingClientEvents {
 
         // sync the goal so we can display the correct animations
         Entity entity = HudClientEvents.hudSelectedEntity;
-        if (entity instanceof WorkerUnit workerUnit)
+        if (entity instanceof WorkerUnit workerUnit) {
+            ((Unit) entity).resetBehaviours();
             workerUnit.getBuildRepairGoal().setBuildingTarget(newBuilding);
+        }
+
     }
 
     public static void destroyBuilding(BlockPos pos) {

@@ -91,13 +91,15 @@ public class Stockpile extends ProductionBuilding {
     // collect items placed manually inside the chests by players
     public void checkAndConsumeChestItems() {
         if (!this.getLevel().isClientSide()) {
+            BlockPos textPos = null;
+            int food = 0;
+            int wood = 0;
+            int ore = 0;
+
             for (BuildingBlock block : blocks) {
                 if (block.getBlockState().getBlock() == Blocks.CHEST) {
                     BlockEntity blockEntity = this.getLevel().getBlockEntity(block.getBlockPos());
                     if (blockEntity instanceof ChestBlockEntity chest) {
-                        int food = 0;
-                        int wood = 0;
-                        int ore = 0;
 
                         for (int i = 0; i < chest.items.size(); i++) {
                             ResourceSource resource = ResourceSources.getFromItem(chest.getItem(i).getItem());
@@ -107,13 +109,17 @@ public class Stockpile extends ProductionBuilding {
                                 wood += resource.resourceName == ResourceName.WOOD ? resource.resourceValue * numItems : 0;
                                 ore += resource.resourceName == ResourceName.ORE ? resource.resourceValue * numItems : 0;
                                 chest.removeItem(i, numItems);
-                                System.out.println(resource.name);
+                                textPos = block.getBlockPos().offset(0,-2,0);
                             }
                         }
-                        if (food > 0 || wood > 0 || ore > 0)
-                            ResourcesServerEvents.addSubtractResources(new Resources(this.ownerName, food, wood, ore));
+
                     }
                 }
+            }
+            if (food > 0 || wood > 0 || ore > 0) {
+                Resources res = new Resources(this.ownerName, food, wood, ore);
+                ResourcesServerEvents.addSubtractResources(res);
+                ResourcesClientboundPacket.showFloatingText(res, textPos);
             }
         }
     }
