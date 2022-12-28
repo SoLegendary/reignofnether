@@ -54,7 +54,11 @@ public class UnitClientEvents {
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
     }
-    public static void addPreselectedUnit(LivingEntity unit) { preselectedUnits.add(unit); }
+    public static void addPreselectedUnit(LivingEntity unit) {
+        if (unit instanceof Player player && (player.isSpectator() || player.isCreative()))
+            return;
+        preselectedUnits.add(unit);
+    }
 
     public static void setPreselectedUnits(ArrayList<LivingEntity> units) {
         preselectedUnits.clear();
@@ -201,7 +205,8 @@ public class UnitClientEvents {
             allUnits.removeIf(e -> e.getId() == entity.getId());
             allUnits.add((LivingEntity) entity);
 
-            unit.initialiseGoals(); // for clientside data tracking
+            unit.initialiseGoals(); // for clientside data tracking - server automatically does this via registerGoals();
+            unit.setupEquipmentAndUpgradesClient();
         }
     }
 

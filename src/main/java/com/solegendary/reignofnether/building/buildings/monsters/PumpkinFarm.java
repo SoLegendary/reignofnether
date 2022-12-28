@@ -60,7 +60,7 @@ public class PumpkinFarm extends Building {
                 null,
                 List.of(
                         FormattedCharSequence.forward(PumpkinFarm.buildingName, Style.EMPTY),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.PumpkinFarm.WOOD + "  +  5  per  crop  planted", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.PumpkinFarm.WOOD + "  +  " + ResourceCosts.REPLANT_WOOD_COST + "  per  crop  planted", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A pumpkin field that be can harvested to collect food.", Style.EMPTY),
                         FormattedCharSequence.forward("Pumpkins are slower to gather but do not require replanting.", Style.EMPTY)

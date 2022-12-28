@@ -31,7 +31,7 @@ public class ResearchVindicatorAxes extends ProductionItem {
                 ResearchServer.addResearch(this.building.ownerName, ResearchVindicatorAxes.itemName);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())
                     if (unit instanceof VindicatorUnit vUnit)
-                        vUnit.setupEquipmentAndUpgrades();
+                        vUnit.setupEquipmentAndUpgradesServer();
             }
         };
         this.foodCost = ResourceCosts.ResearchVindicatorAxes.FOOD;
@@ -48,6 +48,7 @@ public class ResearchVindicatorAxes extends ProductionItem {
                 ResearchVindicatorAxes.itemName,
                 14,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/diamond_axe.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
                 () -> ProductionItem.itemIsBeingProduced(ResearchVindicatorAxes.itemName) ||

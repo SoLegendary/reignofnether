@@ -124,7 +124,7 @@ public class ResourcesClientEvents {
     // Render floating text for dropped-off resources
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
-        if (!OrthoviewClientEvents.isEnabled() || evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
             return;
 
         for (FloatingText floatingText : floatingTexts) {

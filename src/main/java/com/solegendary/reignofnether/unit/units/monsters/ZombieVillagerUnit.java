@@ -1,9 +1,14 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.building.buildings.monsters.*;
+import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
+import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -28,6 +33,7 @@ import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -96,7 +102,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
     final static public float movementSpeed = 0.25f;
     final static public float sightRange = 10f;
     final static public int popCost = ResourceCosts.ZombieVillager.POPULATION;
-    final static public int maxResources = 100;
+    public int maxResources = 100;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -108,9 +114,10 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
         if (level.isClientSide()) {
             this.abilityButtons.add(Mausoleum.getBuildButton(Keybindings.keyQ));
             this.abilityButtons.add(HauntedHouse.getBuildButton(Keybindings.keyW));
-            this.abilityButtons.add(PumpkinFarm.getBuildButton(Keybindings.keyE));
-            this.abilityButtons.add(Graveyard.getBuildButton(Keybindings.keyR));
-            this.abilityButtons.add(Laboratory.getBuildButton(Keybindings.keyT));
+            this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyE));
+            this.abilityButtons.add(PumpkinFarm.getBuildButton(Keybindings.keyR));
+            this.abilityButtons.add(Graveyard.getBuildButton(Keybindings.keyT));
+            this.abilityButtons.add(Laboratory.getBuildButton(Keybindings.keyY));
         }
     }
 
@@ -176,5 +183,17 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
         this.goalSelector.addGoal(3, returnResourcesGoal);
         this.targetSelector.addGoal(3, targetGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+    }
+
+    @Override
+    public void setupEquipmentAndUpgradesClient() {
+        if (ResearchClient.hasResearch(ResearchResourceCapacity.itemName))
+            this.maxResources = 150;
+    }
+
+    @Override
+    public void setupEquipmentAndUpgradesServer() {
+        if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchResourceCapacity.itemName))
+            this.maxResources = 150;
     }
 }

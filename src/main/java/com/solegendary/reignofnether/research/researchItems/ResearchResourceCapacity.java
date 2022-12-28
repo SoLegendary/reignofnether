@@ -10,7 +10,10 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
@@ -21,59 +24,63 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class ResearchPillagerCrossbows extends ProductionItem {
+public class ResearchResourceCapacity extends ProductionItem {
 
-    public final static String itemName = "Multishot Crossbows";
+    public final static String itemName = "Worker Carry Bags";
 
-    public ResearchPillagerCrossbows(ProductionBuilding building) {
-        super(building, ResourceCosts.ResearchPillagerCrossbows.TICKS);
+    public ResearchResourceCapacity(ProductionBuilding building) {
+        super(building, ResourceCosts.ResearchResourceCapacity.TICKS);
         this.onComplete = (Level level) -> {
-            if (level.isClientSide())
-                ResearchClient.addResearch(ResearchPillagerCrossbows.itemName);
+            if (level.isClientSide()) {
+                ResearchClient.addResearch(ResearchResourceCapacity.itemName);
+                for (LivingEntity unit : UnitClientEvents.getAllUnits())
+                    if (unit instanceof WorkerUnit)
+                        ((Unit) unit).setupEquipmentAndUpgradesClient();
+            }
             else {
-                ResearchServer.addResearch(this.building.ownerName, ResearchPillagerCrossbows.itemName);
+                ResearchServer.addResearch(this.building.ownerName, ResearchResourceCapacity.itemName);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())
-                    if (unit instanceof PillagerUnit pUnit)
-                        pUnit.setupEquipmentAndUpgradesServer();
+                    if (unit instanceof WorkerUnit)
+                        ((Unit) unit).setupEquipmentAndUpgradesServer();
             }
         };
-        this.foodCost = ResourceCosts.ResearchPillagerCrossbows.FOOD;
-        this.woodCost = ResourceCosts.ResearchPillagerCrossbows.WOOD;
-        this.oreCost = ResourceCosts.ResearchPillagerCrossbows.ORE;
+        this.foodCost = ResourceCosts.ResearchResourceCapacity.FOOD;
+        this.woodCost = ResourceCosts.ResearchResourceCapacity.WOOD;
+        this.oreCost = ResourceCosts.ResearchResourceCapacity.ORE;
     }
 
     public String getItemName() {
-        return ResearchPillagerCrossbows.itemName;
+        return ResearchResourceCapacity.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-                ResearchPillagerCrossbows.itemName,
+                ResearchResourceCapacity.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/crossbow.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchPillagerCrossbows.itemName) ||
-                        ResearchClient.hasResearch(ResearchPillagerCrossbows.itemName),
+                () -> ProductionItem.itemIsBeingProduced(ResearchResourceCapacity.itemName) ||
+                        ResearchClient.hasResearch(ResearchResourceCapacity.itemName),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(ResearchPillagerCrossbows.itemName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.ResearchPillagerCrossbows.WOOD + "     \uE002  " + ResourceCosts.ResearchPillagerCrossbows.ORE, MyRenderer.iconStyle),
-                        FormattedCharSequence.forward("\uE004  " + ResourceCosts.ResearchPillagerCrossbows.TICKS/20 + "s", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward(ResearchResourceCapacity.itemName, Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward("\uE000  " + ResourceCosts.ResearchResourceCapacity.FOOD + "     \uE001  " + ResourceCosts.ResearchResourceCapacity.WOOD, MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("\uE004  " + ResourceCosts.ResearchResourceCapacity.TICKS/20 + "s", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Enchants the crossbows of all pillagers with multishot", Style.EMPTY)
+                        FormattedCharSequence.forward("Raises the resource capacity of workers from 100 to 150", Style.EMPTY)
                 )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-                ResearchPillagerCrossbows.itemName,
+                ResearchResourceCapacity.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/crossbow.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,

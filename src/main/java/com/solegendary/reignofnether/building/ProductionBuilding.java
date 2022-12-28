@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
+import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
@@ -45,6 +46,7 @@ public abstract class ProductionBuilding extends Building {
 
     // spawn point relative to building origin to spawn units
     private BlockPos rallyPoint;
+    public boolean canSetRallyPoint = true;
     protected int spawnRadiusOffset = 1;
 
     public ProductionBuilding(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
@@ -56,6 +58,8 @@ public abstract class ProductionBuilding extends Building {
     }
 
     public void setRallyPoint(BlockPos rallyPoint) {
+        if (!canSetRallyPoint)
+            return;
         if (isPosInsideBuilding(rallyPoint))
             this.rallyPoint = null;
         else
@@ -137,6 +141,7 @@ public abstract class ProductionBuilding extends Building {
                 case ResearchVindicatorAxes.itemName -> prodItem = new ResearchVindicatorAxes(building);
                 case ResearchPillagerCrossbows.itemName -> prodItem = new ResearchPillagerCrossbows(building);
                 case ResearchLabLightningRod.itemName -> prodItem = new ResearchLabLightningRod(building);
+                case ResearchResourceCapacity.itemName -> prodItem = new ResearchResourceCapacity(building);
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside

@@ -106,7 +106,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.Vindicator.POPULATION;
     final static public boolean canAttackBuildings = true;
-    final static public int maxResources = 100;
+    public int maxResources = 100;
 
     public MeleeAttackUnitGoal attackGoal;
     public AttackBuildingGoal attackBuildingGoal;
@@ -160,7 +160,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     }
 
     @Override
-    public void setupEquipmentAndUpgrades() {
+    public void setupEquipmentAndUpgradesServer() {
         // weapon is purely visual, damage is based solely on entity attribute ATTACK_DAMAGE
         Item axe = Items.IRON_AXE;
         int damageMod = 0;

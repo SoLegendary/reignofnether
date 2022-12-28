@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 // class for static building functions
 
 import com.solegendary.reignofnether.building.buildings.monsters.*;
+import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -20,6 +21,7 @@ public class BuildingUtils {
     public static Building getNewBuilding(String buildingName, Level level, BlockPos pos, Rotation rotation, String ownerName) {
         Building building = null;
         switch(buildingName) {
+            case Stockpile.buildingName -> building = new Stockpile(level, pos, rotation, ownerName);
             case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation, ownerName);
             case Graveyard.buildingName -> building = new Graveyard(level, pos, rotation, ownerName);
             case WheatFarm.buildingName -> building = new WheatFarm(level, pos, rotation, ownerName);

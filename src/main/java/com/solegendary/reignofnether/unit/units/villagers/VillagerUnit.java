@@ -1,14 +1,20 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
+import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -17,6 +23,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -25,6 +32,8 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -93,7 +102,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
     final static public float movementSpeed = 0.25f;
     final static public float sightRange = 10f;
     final static public int popCost = ResourceCosts.Villager.POPULATION;
-    final static public int maxResources = 100;
+    public int maxResources = 100;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -105,9 +114,10 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
         if (level.isClientSide()) {
             this.abilityButtons.add(TownCentre.getBuildButton(Keybindings.keyQ));
             this.abilityButtons.add(VillagerHouse.getBuildButton(Keybindings.keyW));
-            this.abilityButtons.add(WheatFarm.getBuildButton(Keybindings.keyE));
-            this.abilityButtons.add(Barracks.getBuildButton(Keybindings.keyR));
-            this.abilityButtons.add(Blacksmith.getBuildButton(Keybindings.keyT));
+            this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyE));
+            this.abilityButtons.add(WheatFarm.getBuildButton(Keybindings.keyR));
+            this.abilityButtons.add(Barracks.getBuildButton(Keybindings.keyT));
+            this.abilityButtons.add(Blacksmith.getBuildButton(Keybindings.keyY));
         }
     }
 
@@ -173,5 +183,17 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
         this.goalSelector.addGoal(3, returnResourcesGoal);
         this.targetSelector.addGoal(3, targetGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+    }
+
+    @Override
+    public void setupEquipmentAndUpgradesClient() {
+        if (ResearchClient.hasResearch(ResearchResourceCapacity.itemName))
+            this.maxResources = 150;
+    }
+
+    @Override
+    public void setupEquipmentAndUpgradesServer() {
+        if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchResourceCapacity.itemName))
+            this.maxResources = 150;
     }
 }

@@ -139,9 +139,5 @@ public interface AttackerUnit {
         return false;
     }
 
-    // weapons aren't provided automatically when spawned by custom code
-    // also recalculate stats based on upgrades
-    default void setupEquipmentAndUpgrades() { }
-
     default double getWeaponDamageModifier() { return 0; }
 }

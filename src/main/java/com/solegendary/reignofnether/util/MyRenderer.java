@@ -343,7 +343,7 @@ public class MyRenderer {
         return RectZone.getZoneByLW(x, y, width, height);
     }
 
-    public static RectZone renderIconFrameWithBg(PoseStack poseStack, int x, int y, int size, int bg) {
+    public static RectZone renderIconFrameWithBg(PoseStack poseStack, ResourceLocation frameRl, int x, int y, int size, int bg) {
         //transparent background
         GuiComponent.fill(poseStack, // x1,y1, x2,y2,
                 x, y,
@@ -352,8 +352,7 @@ public class MyRenderer {
                 bg); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
 
         // icon frame
-        ResourceLocation iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
-        RenderSystem.setShaderTexture(0, iconFrameResource);
+        RenderSystem.setShaderTexture(0, frameRl);
         GuiComponent.blit(poseStack,
                 x, y, 0,
                 0,0, // where on texture to start drawing from

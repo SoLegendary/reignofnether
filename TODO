@@ -16,10 +16,11 @@ Apply required gamerules and terrain generation automatically:
 
 TODO bugs/features (backlog)
 
-1. Arm animations and block cracking/particles
-2. Chat while in orthoview
+1. Arm animations while attacking buildings and gathering resources
+2. Block cracking/particles while gathering resources
 3. Worker resource inventories and dropoffs
     - stockpile building for both factions
+        - accept players placing items inside chests
     - test on remote server
 
 

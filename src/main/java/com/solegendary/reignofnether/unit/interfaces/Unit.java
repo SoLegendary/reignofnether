@@ -14,6 +14,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -67,10 +68,15 @@ public interface Unit {
                             ItemStack itemstack = itementity.getItem();
                             ResourceSource resBlock = ResourceSources.getFromItem(itemstack.getItem());
                             if (resBlock != null) {
-                                unitMob.onItemPickup(itementity);
-                                unitMob.take(itementity, itemstack.getCount());
-                                itementity.discard();
-                                unit.getItems().add(itemstack);
+                                while (!Unit.atMaxResources(unit) && itemstack.getCount() > 0) {
+                                    unitMob.onItemPickup(itementity);
+                                    unitMob.take(itementity, 1);
+                                    itemstack.setCount(itemstack.getCount() - 1);
+                                    unit.getItems().add(new ItemStack(itemstack.getItem(), 1));
+                                }
+                                if (itemstack.getCount() <= 0)
+                                    itementity.discard();
+
                                 UnitClientboundPacket.sendSyncResourcesPacket(unitMob);
                             }
                             if (Unit.atMaxResources(unit) && unit instanceof WorkerUnit workerUnit) {
@@ -131,4 +137,11 @@ public interface Unit {
     public void setFollowTarget(@Nullable LivingEntity target);
 
     public void initialiseGoals();
+
+    // weapons aren't provided automatically when spawned by custom code
+    // also recalculate stats based on upgrades
+    default void setupEquipmentAndUpgradesServer() { }
+
+    // equipment only needs to be done serverside, but mod-specific fields need to be done clientside too
+    default void setupEquipmentAndUpgradesClient() { }
 }

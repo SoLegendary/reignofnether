@@ -41,6 +41,7 @@ public class ResearchLabLightningRod extends ProductionItem {
                 ResearchLabLightningRod.itemName,
                 14,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_off.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
                 () -> ProductionItem.itemIsBeingProduced(ResearchLabLightningRod.itemName) ||

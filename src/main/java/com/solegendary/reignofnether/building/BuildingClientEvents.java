@@ -24,6 +24,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
@@ -149,13 +150,14 @@ public class BuildingClientEvents {
                     bp.getY() - cam.getY() - 0.6,
                     bp.getZ() - cam.getZ());
 
-            // show red overlay if invalid, else show green
             renderer.renderSingleBlock(
                     bs, matrix,
                     MC.renderBuffers().crumblingBufferSource(), // don't render over other stuff
                     15728880,
                     // red if invalid, else green
-                    valid ? OverlayTexture.pack(0,0) : OverlayTexture.pack(0,3));
+                    valid ? OverlayTexture.pack(0,0) : OverlayTexture.pack(0,3),
+                    net.minecraftforge.client.model.data.ModelData.EMPTY, null
+            );
 
             matrix.popPose();
 

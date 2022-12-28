@@ -36,6 +36,7 @@ public class Button {
     public static int iconFrameSelectedSize = 24;
 
     public ResourceLocation iconResource;
+    public ResourceLocation frameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
 
     public Keybinding hotkey = null; // for action/ability buttons
     public LivingEntity entity = null; // for selected unit buttons
@@ -63,11 +64,28 @@ public class Button {
     Minecraft MC = Minecraft.getInstance();
 
     // constructor for ability/action/production buttons
-    public Button(String name, int iconSize, ResourceLocation rl, @Nullable Keybinding hotkey, Supplier<Boolean> isSelected,
+    public Button(String name, int iconSize, ResourceLocation iconRl, @Nullable Keybinding hotkey, Supplier<Boolean> isSelected,
                   Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
                   @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
-        this.iconResource = rl;
+        this.iconResource = iconRl;
+        this.iconSize = iconSize;
+        this.hotkey = hotkey;
+        this.isSelected = isSelected;
+        this.isHidden = isHidden;
+        this.isEnabled = isEnabled;
+        this.onLeftClick = onLeftClick;
+        this.onRightClick = onRightClick;
+        this.tooltipLines = tooltipLines;
+    }
+
+    // constructor for ability/action/production buttons with non-default frame
+    public Button(String name, int iconSize, ResourceLocation iconRl, ResourceLocation frameRl, @Nullable Keybinding hotkey, Supplier<Boolean> isSelected,
+                  Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
+                  @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
+        this.name = name;
+        this.iconResource = iconRl;
+        this.frameResource = frameRl;
         this.iconSize = iconSize;
         this.hotkey = hotkey;
         this.isSelected = isSelected;
@@ -79,11 +97,11 @@ public class Button {
     }
 
     // constructor for unit selection buttons
-    public Button(String name, int iconSize, ResourceLocation rl, LivingEntity entity, Supplier<Boolean> isSelected,
+    public Button(String name, int iconSize, ResourceLocation iconRl, LivingEntity entity, Supplier<Boolean> isSelected,
                   Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
                   @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
-        this.iconResource = rl;
+        this.iconResource = iconRl;
         this.iconSize = iconSize;
         this.entity = entity;
         this.isSelected = isSelected;
@@ -95,11 +113,11 @@ public class Button {
     }
 
     // constructor for building selection buttons
-    public Button(String name, int iconSize, ResourceLocation rl, Building building, Supplier<Boolean> isSelected,
+    public Button(String name, int iconSize, ResourceLocation iconRl, Building building, Supplier<Boolean> isSelected,
                   Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
                   @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
         this.name = name;
-        this.iconResource = rl;
+        this.iconResource = iconRl;
         this.iconSize = iconSize;
         this.building = building;
         this.isSelected = isSelected;
@@ -126,7 +144,7 @@ public class Button {
     public void render(PoseStack poseStack, int x, int y, int mouseX, int mouseY) {
         this.x = x;
         this.y = y;
-        MyRenderer.renderIconFrameWithBg(poseStack, x, y, iconFrameSize, 0x64000000);
+        MyRenderer.renderIconFrameWithBg(poseStack, this.frameResource, x, y, iconFrameSize, 0x64000000);
 
         // item/unit icon
         MyRenderer.renderIcon(

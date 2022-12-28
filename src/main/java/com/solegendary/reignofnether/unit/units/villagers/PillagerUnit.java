@@ -105,7 +105,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.Pillager.POPULATION;
     final static public boolean canAttackBuildings = false;
-    final static public int maxResources = 100;
+    public int maxResources = 100;
 
     public UnitCrossbowAttackGoal<? extends LivingEntity> attackGoal;
     public AttackBuildingGoal attackBuildingGoal;
@@ -157,7 +157,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     }
 
     @Override
-    public void setupEquipmentAndUpgrades() {
+    public void setupEquipmentAndUpgradesServer() {
         ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
         if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchPillagerCrossbows.itemName))
             cbowStack.enchant(Enchantments.MULTISHOT, 1);

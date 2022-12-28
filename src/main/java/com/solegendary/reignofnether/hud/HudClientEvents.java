@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -28,7 +27,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -43,8 +41,9 @@ public class HudClientEvents {
 
     private static String tempMsg = "";
     private static int tempMsgTicksLeft = 0;
-    private static final int tempMsgTicksFade = 50; // ticks left when the msg starts to fade
-    private static final int tempMsgTicksMax = 150; // ticks to show the msg for
+    private static final int TEMP_MSG_TICKS_FADE = 50; // ticks left when the msg starts to fade
+    private static final int TEMP_MSG_TICKS_MAX = 150; // ticks to show the msg for
+    private static final int MAX_BUTTONS_PER_ROW = 5;
 
     private static final ArrayList<Button> genericActionButtonsWorker = new ArrayList<>(Arrays.asList(
             ActionButtons.BUILD_REPAIR,
@@ -102,7 +101,7 @@ public class HudClientEvents {
     }
 
     public static void showTemporaryMessage(String msg) {
-        tempMsgTicksLeft = tempMsgTicksMax;
+        tempMsgTicksLeft = TEMP_MSG_TICKS_MAX;
         tempMsg = msg;
     }
 
@@ -214,7 +213,7 @@ public class HudClientEvents {
                     if (buttonsRendered >= (buttonsPerRow * 2) - 1 &&
                         selBuildings.size() > (buttonsPerRow * 2)) {
                         int numExtraBuildings = selBuildings.size() - (buttonsPerRow * 2) + 1;
-                        RectZone plusBuildingsZone = MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, iconBgColour);
+                        RectZone plusBuildingsZone = MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), buildingButton.frameResource, blitX, blitY, iconFrameSize, iconBgColour);
                         GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraBuildings,
                                 blitX + iconFrameSize/2, blitY + 8, 0xFFFFFF);
 
@@ -297,7 +296,7 @@ public class HudClientEvents {
                                 productionButtons.size() > (buttonsPerRow + 1))
                         {
                             int numExtraItems = productionButtons.size() - buttonsPerRow;
-                            MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY + iconFrameSize, iconFrameSize, iconBgColour);
+                            MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), prodButton.frameResource, blitX, blitY + iconFrameSize, iconFrameSize, iconBgColour);
                             GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraItems,
                                     blitX + iconFrameSize/2, blitY + iconFrameSize + 8, 0xFFFFFF);
                             break;
@@ -465,7 +464,7 @@ public class HudClientEvents {
                 if (buttonsRendered >= (buttonsPerRow * 2) - 1 &&
                         selUnits.size() > (buttonsPerRow * 2)) {
                     int numExtraUnits = selUnits.size() - (buttonsPerRow * 2) + 1;
-                    RectZone plusUnitsZone = MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, iconBgColour);
+                    RectZone plusUnitsZone = MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), unitButton.frameResource, blitX, blitY, iconFrameSize, iconBgColour);
                     GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, "+" + numExtraUnits,
                             blitX + iconFrameSize/2, blitY + 8, 0xFFFFFF);
 
@@ -540,13 +539,27 @@ public class HudClientEvents {
             }
             blitX = 0;
             blitY = screenHeight - (iconFrameSize * 2);
+
+            // includes worker building buttons
             for (LivingEntity unit : selUnits) {
                 if (getSimpleEntityName(unit).equals(getSimpleEntityName(hudSelectedEntity))) {
-                    for (AbilityButton abilityButton : ((Unit) unit).getAbilityButtons()) {
+                    List<AbilityButton> abilityButtons = ((Unit) unit).getAbilityButtons();
+
+                    int shownAbilities = abilityButtons.stream().filter(b -> !b.isHidden.get()).toList().size();
+                    int rowsUp = (int) Math.floor((float) shownAbilities / MAX_BUTTONS_PER_ROW);
+                    blitY -= iconFrameSize * rowsUp;
+
+                    int i = 0;
+                    for (AbilityButton abilityButton : abilityButtons) {
                         if (!abilityButton.isHidden.get()) {
+                            i += 1;
                             abilityButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                             renderedButtons.add(abilityButton);
                             blitX += iconFrameSize;
+                            if (i % MAX_BUTTONS_PER_ROW == 0) {
+                                blitX = 0;
+                                blitY += iconFrameSize;
+                            }
                         }
                     }
                     break;
@@ -588,7 +601,11 @@ public class HudClientEvents {
                         49,
                         iconFrameSize,
                         frameBgColour));
-                hudZones.add(MyRenderer.renderIconFrameWithBg(evt.getPoseStack(), blitX, blitY, iconFrameSize, iconBgColour));
+
+                hudZones.add(MyRenderer.renderIconFrameWithBg(evt.getPoseStack(),
+                        new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                        blitX, blitY, iconFrameSize, iconBgColour));
+
                 MyRenderer.renderIcon(evt.getPoseStack(),
                         new ResourceLocation(ReignOfNether.MOD_ID, rlPath),
                         blitX+4, blitY+4, iconSize
@@ -603,8 +620,8 @@ public class HudClientEvents {
         // Temporary warning messages
         // --------------------------
         if (tempMsgTicksLeft > 0 && tempMsg.length() > 0) {
-            int ticksUnderFade = Math.min(tempMsgTicksLeft, tempMsgTicksFade);
-            int alpha = (int) (0xFF * ((float) ticksUnderFade / (float) tempMsgTicksFade));
+            int ticksUnderFade = Math.min(tempMsgTicksLeft, TEMP_MSG_TICKS_FADE);
+            int alpha = (int) (0xFF * ((float) ticksUnderFade / (float) TEMP_MSG_TICKS_FADE));
 
             GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font,
                 tempMsg,

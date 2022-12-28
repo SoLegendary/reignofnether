@@ -102,7 +102,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.Skeleton.POPULATION;
     final static public boolean canAttackBuildings = false;
-    final static public int maxResources = 100;
+    public int maxResources = 100;
 
     public UnitBowAttackGoal<? extends LivingEntity> attackGoal;
     public AttackBuildingGoal attackBuildingGoal;
@@ -158,7 +158,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     }
 
     @Override
-    public void setupEquipmentAndUpgrades() {
+    public void setupEquipmentAndUpgradesServer() {
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
     }
 }

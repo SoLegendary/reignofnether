@@ -4,10 +4,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.resources.*;
-import com.solegendary.reignofnether.unit.Relationship;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.unit.UnitServerboundPacket;
+import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
@@ -41,7 +38,7 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
                     ResourcesServerEvents.addSubtractResources(res);
                     ResourcesClientboundPacket.showFloatingText(res, this.moveTarget);
                     unit.getItems().clear();
-                    UnitClientEvents.syncUnitResources(this.mob.getId(), new Resources("", 0,0,0));
+                    UnitClientboundPacket.sendSyncResourcesPacket(this.mob);
                     this.stopReturning();
 
                     if (this.mob instanceof WorkerUnit worker) {

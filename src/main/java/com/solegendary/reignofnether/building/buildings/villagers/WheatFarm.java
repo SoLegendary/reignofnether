@@ -60,7 +60,7 @@ public class WheatFarm extends Building {
                 null,
                 List.of(
                         FormattedCharSequence.forward(WheatFarm.buildingName, Style.EMPTY),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.WheatFarm.WOOD + "  +  5  per  crop  planted", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.WheatFarm.WOOD + "  +  " + ResourceCosts.REPLANT_WOOD_COST + "  per  crop  planted", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A wheat field that be can tilled to collect food.", Style.EMPTY),
                         FormattedCharSequence.forward("Workers automatically use wood to replant seeds while working.", Style.EMPTY)
