@@ -10,17 +10,23 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
 import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
-import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +37,9 @@ public class Stockpile extends ProductionBuilding {
 
     public final static String buildingName = "Stockpile";
     public final static String structureName = "stockpile";
+
+    private final int CHEST_CHECK_TICKS_MAX = 20;
+    private int chestCheckTicks = CHEST_CHECK_TICKS_MAX;
 
     public Stockpile(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName);
@@ -67,8 +76,8 @@ public class Stockpile extends ProductionBuilding {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/chest.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Stockpile.class,
-                () -> !BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) &&
-                      !BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName),
+                () -> false,//!BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) &&
+                      //!BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(Stockpile.class),
                 null,
@@ -80,5 +89,45 @@ public class Stockpile extends ProductionBuilding {
                 ),
                 null
         );
+    }
+
+    // collect items placed manually inside the chests by players
+    @Override
+    public void tick(Level tickLevel) {
+        super.tick(tickLevel);
+
+        if (!tickLevel.isClientSide()) {
+            chestCheckTicks -= 1;
+            if (chestCheckTicks >= 0)
+                return;
+            else
+                chestCheckTicks = CHEST_CHECK_TICKS_MAX;
+
+            for (BuildingBlock block : blocks) {
+                BlockState bs = tickLevel.getBlockState(block.getBlockPos());
+                if (bs.getBlock() == Blocks.CHEST) {
+                    BlockEntity blockEntity = tickLevel.getBlockEntity(block.getBlockPos());
+                    if (blockEntity instanceof ChestBlockEntity chest) {
+                        int food = 0;
+                        int wood = 0;
+                        int ore = 0;
+
+                        for (int i = 0; i < chest.items.size(); i++) {
+                            ResourceSource resource = ResourceSources.getFromItem(chest.getItem(i).getItem());
+                            if (resource != null) {
+                                int numItems = chest.getItem(i).getCount();
+                                food += resource.resourceName == ResourceName.FOOD ? resource.resourceValue * numItems: 0;
+                                wood += resource.resourceName == ResourceName.WOOD ? resource.resourceValue * numItems : 0;
+                                ore += resource.resourceName == ResourceName.ORE ? resource.resourceValue * numItems : 0;
+                                chest.removeItem(i, numItems);
+                                System.out.println(resource.name);
+                            }
+                        }
+                        if (food > 0 || wood > 0 || ore > 0)
+                            ResourcesServerEvents.addSubtractResources(new Resources(this.ownerName, food, wood, ore));
+                    }
+                }
+            }
+        }
     }
 }

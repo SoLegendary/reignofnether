@@ -30,13 +30,14 @@ public class ClientEventRegistrar {
     public void registerClientEvents() {
         vanillaEventBus.register(OrthoviewClientEvents.class);
         vanillaEventBus.register(TopdownGuiClientEvents.class);
+        vanillaEventBus.register(BuildingClientEvents.class); // being first fixes a bug with drawBuildingToPlace()
         vanillaEventBus.register(UnitClientEvents.class);
         vanillaEventBus.register(HealthBarClientEvents.class);
         vanillaEventBus.register(HudClientEvents.class); // ensure this is first so cursor is rendered above hud
         vanillaEventBus.register(CursorClientEvents.class);
         vanillaEventBus.register(MinimapClientEvents.class);
         vanillaEventBus.register(FogOfWarClientEvents.class);
-        vanillaEventBus.register(BuildingClientEvents.class);
+
         vanillaEventBus.register(ResourcesClientEvents.class);
 
         // to allow singleplayer integrated server to work
