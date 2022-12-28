@@ -113,8 +113,8 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
 
         if (level.isClientSide()) {
             this.abilityButtons.add(Mausoleum.getBuildButton(Keybindings.keyQ));
-            this.abilityButtons.add(HauntedHouse.getBuildButton(Keybindings.keyW));
-            this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyE));
+            this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyW));
+            this.abilityButtons.add(HauntedHouse.getBuildButton(Keybindings.keyE));
             this.abilityButtons.add(PumpkinFarm.getBuildButton(Keybindings.keyR));
             this.abilityButtons.add(Graveyard.getBuildButton(Keybindings.keyT));
             this.abilityButtons.add(Laboratory.getBuildButton(Keybindings.keyY));

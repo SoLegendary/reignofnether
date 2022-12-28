@@ -63,6 +63,22 @@ public class MinimapClientEvents {
 
     public static void updateMapTexture()
     {
+        // if camera is off the map, start panning the centre of the map
+        double xCam = MC.player.getX();
+        double zCam = MC.player.getZ();
+        double xDiff1 = xCam - (xc_world + WORLD_RADIUS);
+        if (xDiff1 > 0)
+            xc_world += xDiff1;
+        double zDiff1 = zCam - (zc_world + WORLD_RADIUS);
+        if (zDiff1 > 0)
+            zc_world += zDiff1;
+        double xDiff2 = xCam - (xc_world - WORLD_RADIUS);
+        if (xDiff2 < 0)
+            xc_world += xDiff2;
+        double zDiff2 = zCam - (zc_world - WORLD_RADIUS);
+        if (zDiff2 < 0)
+            zc_world += zDiff2;
+
         NativeImage pixels = MAP_TEXTURE.getPixels();
         if (pixels != null)
         {

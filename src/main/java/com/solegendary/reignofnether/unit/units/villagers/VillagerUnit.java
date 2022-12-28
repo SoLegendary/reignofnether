@@ -113,8 +113,8 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
 
         if (level.isClientSide()) {
             this.abilityButtons.add(TownCentre.getBuildButton(Keybindings.keyQ));
-            this.abilityButtons.add(VillagerHouse.getBuildButton(Keybindings.keyW));
-            this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyE));
+            this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyW));
+            this.abilityButtons.add(VillagerHouse.getBuildButton(Keybindings.keyE));
             this.abilityButtons.add(WheatFarm.getBuildButton(Keybindings.keyR));
             this.abilityButtons.add(Barracks.getBuildButton(Keybindings.keyT));
             this.abilityButtons.add(Blacksmith.getBuildButton(Keybindings.keyY));
