@@ -8,5 +8,6 @@ public enum BuildingAction {
     SET_RALLY_POINT,
     START_PRODUCTION, // start ProductionItem
     CANCEL_PRODUCTION, // remove ProductionItem from front of queue
-    CANCEL_BACK_PRODUCTION // remove ProductionItem from back of queue
+    CANCEL_BACK_PRODUCTION, // remove ProductionItem from back of queue
+    CHECK_STOCKPILE_CHEST // check stockpile chests for resources to consume
 }

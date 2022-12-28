@@ -38,9 +38,6 @@ public class Stockpile extends ProductionBuilding {
     public final static String buildingName = "Stockpile";
     public final static String structureName = "stockpile";
 
-    private final int CHEST_CHECK_TICKS_MAX = 20;
-    private int chestCheckTicks = CHEST_CHECK_TICKS_MAX;
-
     public Stockpile(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName);
         this.name = buildingName;
@@ -92,21 +89,11 @@ public class Stockpile extends ProductionBuilding {
     }
 
     // collect items placed manually inside the chests by players
-    @Override
-    public void tick(Level tickLevel) {
-        super.tick(tickLevel);
-
-        if (!tickLevel.isClientSide()) {
-            chestCheckTicks -= 1;
-            if (chestCheckTicks >= 0)
-                return;
-            else
-                chestCheckTicks = CHEST_CHECK_TICKS_MAX;
-
+    public void checkAndConsumeChestItems() {
+        if (!this.getLevel().isClientSide()) {
             for (BuildingBlock block : blocks) {
-                BlockState bs = tickLevel.getBlockState(block.getBlockPos());
-                if (bs.getBlock() == Blocks.CHEST) {
-                    BlockEntity blockEntity = tickLevel.getBlockEntity(block.getBlockPos());
+                if (block.getBlockState().getBlock() == Blocks.CHEST) {
+                    BlockEntity blockEntity = this.getLevel().getBlockEntity(block.getBlockPos());
                     if (blockEntity instanceof ChestBlockEntity chest) {
                         int food = 0;
                         int wood = 0;

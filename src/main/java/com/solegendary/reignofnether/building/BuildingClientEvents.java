@@ -22,6 +22,9 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -29,6 +32,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -457,6 +461,16 @@ public class BuildingClientEvents {
             // cleanup destroyed buildings
             selectedBuildings.removeIf(Building::shouldBeDestroyed);
             buildings.removeIf(Building::shouldBeDestroyed);
+        }
+    }
+
+    // on closing a chest screen check that it could be a stockpile chest so they can be consumed for resources
+    @SubscribeEvent
+    public static void onScreenClose(ScreenEvent.Closing evt) {
+        String screenName = evt.getScreen().getTitle().getString();
+        if ((screenName.equals("Chest") || screenName.equals("Large Chest")) && MC.level != null && MC.player != null) {
+            BlockPos bp = Item.getPlayerPOVHitResult(MC.level, MC.player, ClipContext.Fluid.NONE).getBlockPos();
+            BuildingServerboundPacket.checkStockpileChests(bp);
         }
     }
 

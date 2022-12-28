@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -45,6 +46,11 @@ public class BuildingServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
                 itemName, buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
+    }
+    public static void checkStockpileChests(BlockPos chestPos) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.CHECK_STOCKPILE_CHEST,
+                "", chestPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
     }
 
 
@@ -111,6 +117,10 @@ public class BuildingServerboundPacket {
                     boolean prodSuccess = ProductionBuilding.cancelProductionItem(((ProductionBuilding) building), this.itemName, this.buildingPos, false);
                     if (prodSuccess)
                         BuildingClientboundPacket.cancelProduction(buildingPos, itemName, false);
+                }
+                case CHECK_STOCKPILE_CHEST -> {
+                    if (building instanceof Stockpile stockpile)
+                        stockpile.checkAndConsumeChestItems();
                 }
             }
             success.set(true);
