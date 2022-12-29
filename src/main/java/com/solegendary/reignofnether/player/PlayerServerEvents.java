@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
+import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
@@ -64,18 +65,23 @@ public class PlayerServerEvents {
                 }
             }
             if (words.length == 1 && words[0].equalsIgnoreCase("warpten")) {
-                if (ResearchServer.playerHasCheat(playerName, "warpten"))
+                if (ResearchServer.playerHasCheat(playerName, "warpten")) {
                     ResearchServer.removeCheat(playerName, "warpten");
-                else
+                    ResearchClientboundPacket.removeCheat(playerName, "warpten");
+                }
+                else {
                     ResearchServer.addCheat(playerName, "warpten");
+                    ResearchClientboundPacket.addCheat(playerName, "warpten");
+                }
             }
             // TODO: invincibility and infinite damage
+            /*
             if (words.length == 1 && words[0].equalsIgnoreCase("whosyourdaddy")) {
                 if (ResearchServer.playerHasCheat(playerName, "whosyourdaddy"))
                     ResearchServer.removeCheat(playerName, "whosyourdaddy");
                 else
                     ResearchServer.addCheat(playerName, "whosyourdaddy");
-            }
+            }*/
         }
     }
 

@@ -71,8 +71,8 @@ public interface Unit {
                                 while (!Unit.atMaxResources(unit) && itemstack.getCount() > 0) {
                                     unitMob.onItemPickup(itementity);
                                     unitMob.take(itementity, 1);
-                                    itemstack.setCount(itemstack.getCount() - 1);
                                     unit.getItems().add(new ItemStack(itemstack.getItem(), 1));
+                                    itemstack.setCount(itemstack.getCount() - 1);
                                 }
                                 if (itemstack.getCount() <= 0)
                                     itementity.discard();

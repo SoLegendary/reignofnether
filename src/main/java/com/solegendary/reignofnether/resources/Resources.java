@@ -73,10 +73,10 @@ public class Resources {
     public static Resources getTotalResourcesFromItems(List<ItemStack> itemStacks) {
         Resources resources = new Resources("", 0,0,0);
         for (ItemStack itemStack : itemStacks) {
-            ResourceSource resBlock = ResourceSources.getFromItem(itemStack.getItem());
-            if (resBlock != null) {
-                int value = resBlock.resourceValue * itemStack.getCount();
-                switch (resBlock.resourceName) {
+            ResourceSource source = ResourceSources.getFromItem(itemStack.getItem());
+            if (source != null) {
+                int value = source.resourceValue * itemStack.getCount();
+                switch (source.resourceName) {
                     case FOOD -> resources.changeInstantly(value, 0, 0);
                     case WOOD -> resources.changeInstantly(0, value, 0);
                     case ORE -> resources.changeInstantly(0, 0, value);
