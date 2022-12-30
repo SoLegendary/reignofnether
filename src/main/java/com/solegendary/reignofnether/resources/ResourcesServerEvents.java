@@ -38,6 +38,9 @@ public class ResourcesServerEvents {
     }
 
     public static boolean canAfford(String ownerName, ResourceName resourceName, int cost) {
+        if (cost <= 0)
+            return true;
+
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName)) {
                 switch(resourceName) {

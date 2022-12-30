@@ -28,6 +28,7 @@ public abstract class PlayerMixin {
         for (ServerPlayer serverPlayer : PlayerServerEvents.orthoviewPlayers) {
             if (serverPlayer.getId() == this.getId() && !this.noPhysics) {
                 this.noPhysics = true;
+                System.out.println("No physics enabled for: " + serverPlayer.getName().getString());
                 Entity entity = this.level.getEntity(this.getId());
                 if (entity instanceof Player player) {
                     if (!player.getAbilities().flying) {

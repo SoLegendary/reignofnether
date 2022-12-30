@@ -100,16 +100,6 @@ public abstract class ProductionBuilding extends Building {
                         spawnPoint.getY() + 0.5f,
                         spawnPoint.getZ() + 0.5f
                 ));
-                CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
-                    UnitServerEvents.addActionItem(
-                            this.ownerName,
-                            UnitAction.MOVE,
-                            -1,
-                            new int[] { entity.getId() },
-                            rallyPoint,
-                            new BlockPos(0,0,0)
-                    );
-                });
             }
             else {
                 BlockPos spawnPoint = getMinCorner(this.blocks);
@@ -119,6 +109,16 @@ public abstract class ProductionBuilding extends Building {
                         spawnPoint.getZ() + 0.5f - spawnRadiusOffset
                 ));
             }
+            CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
+                UnitServerEvents.addActionItem(
+                        this.ownerName,
+                        UnitAction.MOVE,
+                        -1,
+                        new int[] { entity.getId() },
+                        rallyPoint,
+                        new BlockPos(0,0,0)
+                );
+            });
         }
     }
 

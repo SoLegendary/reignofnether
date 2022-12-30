@@ -103,6 +103,9 @@ public class OrthoviewClientEvents {
     }
 
     public static void toggleEnable() {
+        if (MC.level == null || MC.player == null)
+            return;
+
         enabled = !enabled;
 
         if (enabled) {
