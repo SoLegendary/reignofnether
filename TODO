@@ -13,7 +13,7 @@ Apply required gamerules and terrain generation automatically:
     - reduced overall height (low weirdness?)
     - remove unwanted biomes: ocean, mesa, extreme hills, jungle
 
-- Can't noclip on remote server in orthoview
+- Can't noclip on remote server in orthoview when in creative
 - workers still not resetting movement before building (only on remote server?)
 
 

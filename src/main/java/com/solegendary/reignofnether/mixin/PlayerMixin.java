@@ -24,7 +24,9 @@ public abstract class PlayerMixin {
     )
     // noclip for orthoview players
     // tick() naturally reverses all of this so no need for reversing it here when leaving orthoView
+    // only needed if orthoview players are in CREATIVE mode
     private void tick(CallbackInfo ci) {
+        /*
         for (ServerPlayer serverPlayer : PlayerServerEvents.orthoviewPlayers) {
             if (serverPlayer.getId() == this.getId() && !this.noPhysics) {
                 this.noPhysics = true;
@@ -37,6 +39,6 @@ public abstract class PlayerMixin {
                     }
                 }
             }
-        }
+        }*/
     }
 }
