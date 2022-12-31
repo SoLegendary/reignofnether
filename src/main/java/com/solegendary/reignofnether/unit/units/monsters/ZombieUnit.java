@@ -90,12 +90,12 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
     final static public float attacksPerSecond = 0.6f;
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 2.0f;
-    final static public float movementSpeed = 0.25f;
+    final static public float movementSpeed = 0.27f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
-    final static public boolean aggressiveWhenIdle = false;
+    final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.Zombie.POPULATION;
     final static public boolean canAttackBuildings = true;
     public int maxResources = 100;
@@ -143,12 +143,13 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
     protected void registerGoals() {
         initialiseGoals();
 
+        // movegoal must be lower priority than attacks so that attack-moving works correctly
         this.goalSelector.addGoal(1, new FloatGoal(this));
-        this.goalSelector.addGoal(2, moveGoal);
-        this.goalSelector.addGoal(3, attackGoal);
-        this.goalSelector.addGoal(3, attackBuildingGoal);
-        this.goalSelector.addGoal(3, returnResourcesGoal);
-        this.targetSelector.addGoal(3, targetGoal);
+        this.goalSelector.addGoal(2, attackGoal);
+        this.goalSelector.addGoal(2, attackBuildingGoal);
+        this.goalSelector.addGoal(2, returnResourcesGoal);
+        this.targetSelector.addGoal(2, targetGoal);
+        this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }
 }

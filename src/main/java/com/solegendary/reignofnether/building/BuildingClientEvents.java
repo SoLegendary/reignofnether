@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.UnitServerboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -444,9 +445,11 @@ public class BuildingClientEvents {
 
     @SubscribeEvent
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE)
-            if (HudClientEvents.hudSelectedBuilding != null)
-                BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(HudClientEvents.hudSelectedBuilding.getBlocks()));
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
+            Building building = HudClientEvents.hudSelectedBuilding;
+            if (building != null && getPlayerToBuildingRelationship(building) == Relationship.OWNED)
+                BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(building.getBlocks()));
+        }
     }
 
     @SubscribeEvent

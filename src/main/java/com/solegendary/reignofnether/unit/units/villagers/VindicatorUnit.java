@@ -103,7 +103,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
-    final static public boolean aggressiveWhenIdle = false;
+    final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.Vindicator.POPULATION;
     final static public boolean canAttackBuildings = true;
     public int maxResources = 100;
@@ -151,11 +151,11 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         initialiseGoals();
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
-        this.goalSelector.addGoal(2, moveGoal);
-        this.goalSelector.addGoal(3, attackGoal);
-        this.goalSelector.addGoal(3, attackBuildingGoal);
-        this.goalSelector.addGoal(3, returnResourcesGoal);
-        this.targetSelector.addGoal(3, targetGoal);
+        this.goalSelector.addGoal(2, attackGoal);
+        this.goalSelector.addGoal(2, attackBuildingGoal);
+        this.goalSelector.addGoal(2, returnResourcesGoal);
+        this.targetSelector.addGoal(2, targetGoal);
+        this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }
 

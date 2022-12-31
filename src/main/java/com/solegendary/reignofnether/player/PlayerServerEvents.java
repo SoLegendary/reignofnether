@@ -74,6 +74,16 @@ public class PlayerServerEvents {
                     ResearchClientboundPacket.addCheat(playerName, "warpten");
                 }
             }
+            if (words.length == 1 && words[0].equalsIgnoreCase("operationcwal")) {
+                if (ResearchServer.playerHasCheat(playerName, "operationcwal")) {
+                    ResearchServer.removeCheat(playerName, "operationcwal");
+                    ResearchClientboundPacket.removeCheat(playerName, "operationcwal");
+                }
+                else {
+                    ResearchServer.addCheat(playerName, "operationcwal");
+                    ResearchClientboundPacket.addCheat(playerName, "operationcwal");
+                }
+            }
             // TODO: invincibility and infinite damage
             /*
             if (words.length == 1 && words[0].equalsIgnoreCase("whosyourdaddy")) {

@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.ProductionBuilding;
-import com.solegendary.reignofnether.building.ProductionItem;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -343,8 +340,12 @@ public class UnitClientEvents {
          *  TODO: make these visible to 1st-person players but currently had a visual glitch
          *  doesnt align to camera very well, sometimes sinks below ground and too thin
          */
-        if ((OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) ||
-            (!OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)) {
+        // conditions if orthoview uses creative mode
+        //if ((OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) ||
+        //    (!OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS))
+
+        if (evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+        {
             for (LivingEntity entity : allUnits) {
                 Relationship unitRs = getPlayerToEntityRelationship(entity);
                 // always-shown highlights to indicate unit relationships
@@ -378,6 +379,15 @@ public class UnitClientEvents {
                         MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(),1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f);
                 }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
+            LivingEntity entity = HudClientEvents.hudSelectedEntity;
+            if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED)
+                sendUnitCommand(UnitAction.DELETE);
         }
     }
 

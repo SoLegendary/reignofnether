@@ -18,13 +18,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -82,14 +86,22 @@ public class UnitServerEvents {
 
     // similar to UnitClientEvents getUnitRelationship: given a Unit and Entity, what is the relationship between them
     public static Relationship getUnitToEntityRelationship(Unit unit, Entity entity) {
-        if (!(entity instanceof Unit))
+        String ownerName1 = unit.getOwnerName();
+        String ownerName2 = "";
+
+        if (entity instanceof Player player)
+            ownerName2 = player.getName().getString();
+        else if (entity instanceof Unit)
+            ownerName2 = ((Unit) entity).getOwnerName();
+        else
             return Relationship.NEUTRAL;
 
-        String ownerName1 = unit.getOwnerName();
-        String ownerName2 = ((Unit) entity).getOwnerName();
-
-        if (ownerName1.equals(ownerName2))
-            return Relationship.OWNED;
+        if (ownerName1.equals(ownerName2)) {
+            if (entity instanceof Player)
+                return Relationship.OWNED;
+            else
+                return Relationship.FRIENDLY;
+        }
         else
             return Relationship.HOSTILE;
     }
@@ -216,11 +228,40 @@ public class UnitServerEvents {
 
     // make creepers immune to lightning damage (but still get charged by them)
     @SubscribeEvent
-    public static void onLightningStrike(LivingDamageEvent evt) {
+    public static void onEntityDamaged(LivingDamageEvent evt) {
         if (evt.getEntity() instanceof Creeper && (evt.getSource() == DamageSource.LIGHTNING_BOLT || evt.getSource() == DamageSource.ON_FIRE))
             evt.setCanceled(true);
 
         if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL || evt.getSource() == DamageSource.IN_FIRE))
             evt.setCanceled(true);
+
+        // nerf lightning damage
+        if (evt.getSource() == DamageSource.LIGHTNING_BOLT) {
+            evt.setAmount(evt.getAmount() / 2);
+        }
+
+        // prevent friendly fire damage from ranged units (unless specifically targeted)
+        if (evt.getSource().isProjectile() && evt.getSource().getEntity() instanceof Unit unit)
+            if (getUnitToEntityRelationship(unit, evt.getEntity()) == Relationship.FRIENDLY && unit.getTargetGoal().getTarget() != evt.getEntity())
+                evt.setCanceled(true);
+    }
+
+    //@SubscribeEvent
+    //public static void onLivingKnockback(LivingKnockBackEvent evt) {
+
+    //}
+
+    // prevent friendly fire from ranged units (unless specifically targeted)
+    // (just allows piercing, damage is cancelled in LivingDamageEvent)
+    @SubscribeEvent
+    public static void onProjectileHit(ProjectileImpactEvent evt) {
+        Entity owner = evt.getProjectile().getOwner();
+        Entity hit = null;
+        if (evt.getRayTraceResult().getType() == HitResult.Type.ENTITY)
+            hit = ((EntityHitResult) evt.getRayTraceResult()).getEntity();
+
+        if (owner instanceof Unit unit && hit != null)
+            if (getUnitToEntityRelationship(unit, hit) == Relationship.FRIENDLY && unit.getTargetGoal().getTarget() != hit)
+                evt.setCanceled(true);
     }
 }

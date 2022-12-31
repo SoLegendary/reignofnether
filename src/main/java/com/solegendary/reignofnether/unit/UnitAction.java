@@ -17,6 +17,7 @@ public enum UnitAction {
     TOGGLE_GATHER_TARGET, // cycle between gathering nothing, food, wood or ore
     RETURN_RESOURCES, // drops off resources to the building
     RETURN_RESOURCES_TO_CLOSEST, // drops off resources to the nearest building that accepts resources
+    DELETE, // instantly kills this unit
 
     // special abilities - these can also be assigned to cursor actions
     EXPLODE,

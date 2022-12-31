@@ -3,6 +3,8 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -34,8 +36,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private static final int REACH_RANGE = 5;
     private static final int DEFAULT_MAX_GATHER_TICKS = 100; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
     private int gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
-    private static final int MAX_SEARCH_CD_TICKS = 20; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
+    private static final int MAX_SEARCH_CD_TICKS = 40; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
     private int searchCdTicksLeft = 0;
+    private int failedSearches = 0; // number of times we've failed to search for a new block - as this increases slow down or stop searching entirely to prevent lag
 
     private final ArrayList<BlockPos> todoGatherTargets = new ArrayList<>();
     private BlockPos gatherTarget = null;
@@ -121,7 +124,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         }
                     }
                 }
-                else {
+                else if (!this.mob.level.isClientSide()) {
                     Optional<BlockPos> bpOpt = BlockPos.findClosestMatch(
                             new BlockPos(
                                     mob.getEyePosition().x,
@@ -130,9 +133,17 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                             ), REACH_RANGE, REACH_RANGE,
                             BLOCK_CONDITION);
 
-                    bpOpt.ifPresent(blockPos -> gatherTarget = blockPos);
+                    bpOpt.ifPresentOrElse(
+                        blockPos -> {
+                            gatherTarget = blockPos;
+                            failedSearches = 0;
+                        },
+                        () -> failedSearches += 1
+                    );
+                    failedSearches += 1;
+                    System.out.println("failedSearches: " + failedSearches);
                 }
-                searchCdTicksLeft = MAX_SEARCH_CD_TICKS;
+                searchCdTicksLeft = MAX_SEARCH_CD_TICKS * Math.min(3, Math.max(1, failedSearches));
             }
             if (gatherTarget != null)
                 targetResourceSource = ResourceSources.getFromBlockPos(gatherTarget, mob.level);
@@ -166,7 +177,12 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         }
                     }
                     else {
-                        gatherTicksLeft -= 1;
+                        if ((this.mob.level.isClientSide() && ResearchClient.hasCheat("operationcwal")) ||
+                            (!this.mob.level.isClientSide() && ResearchServer.playerHasCheat(((Unit) mob).getOwnerName(), "operationcwal")))
+                            this.gatherTicksLeft -= 10;
+                        else
+                            this.gatherTicksLeft -= 1;
+
                         gatherTicksLeft = Math.min(gatherTicksLeft, targetResourceSource.ticksToGather);
                         if (gatherTicksLeft <= 0) {
                             gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
@@ -182,13 +198,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                                 );
                                 todoGatherTargets.addAll(adjTarget);
 
-                                /*
-                                ResourcesServerEvents.addSubtractResources(new Resources(
-                                        ((Unit) mob).getOwnerName(),
-                                        resourceName.equals(ResourceName.FOOD) ? targetResourceSource.resourceValue : 0,
-                                        resourceName.equals(ResourceName.WOOD) ? targetResourceSource.resourceValue : 0,
-                                        resourceName.equals(ResourceName.ORE) ? targetResourceSource.resourceValue : 0
-                                ));*/
                                 Unit unit = (Unit) mob;
                                 unit.getItems().add(new ItemStack(targetResourceSource.items.get(0)));
                                 UnitClientboundPacket.sendSyncResourcesPacket(mob);

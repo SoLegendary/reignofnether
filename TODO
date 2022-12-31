@@ -12,15 +12,20 @@ Apply required gamerules and terrain generation automatically:
     - increased surface deposits of ore, and/or increased windswept hills biomes
     - reduced overall height (low weirdness?)
     - remove unwanted biomes: ocean, mesa, extreme hills, jungle
+    - no caves
 
-- Can't noclip on remote server in orthoview when in creative
-- workers still not resetting movement before building (only on remote server?)
+- still lagging massively on worker gathering
 
 
 TODO bugs/features (backlog)
 
+- iron golem crash while selected (see kims crash report)
+- Can't noclip on remote server in orthoview when in creative
+- improve worker search algorithm on returning to gather after dropoffs
+
 1. Arm animations while attacking buildings and gathering resources
 2. Block cracking/particles while gathering resources
+
 
 TODO buildings/units (backlog)
 

@@ -98,9 +98,9 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
     final static public float attackDamage = 20.0f;
     final static public float attacksPerSecond = 1f;
-    final static public float maxHealth = 10.0f;
+    final static public float maxHealth = 15.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.25f;
+    final static public float movementSpeed = 0.30f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
@@ -186,9 +186,9 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
+        this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
-        this.targetSelector.addGoal(4, targetGoal);
-        this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }
 
     public void explode() {

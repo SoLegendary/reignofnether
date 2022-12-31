@@ -177,11 +177,11 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
         initialiseGoals();
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
-        this.goalSelector.addGoal(2, moveGoal);
-        this.goalSelector.addGoal(3, buildRepairGoal);
-        this.goalSelector.addGoal(3, gatherResourcesGoal);
-        this.goalSelector.addGoal(3, returnResourcesGoal);
-        this.targetSelector.addGoal(3, targetGoal);
+        this.goalSelector.addGoal(2, buildRepairGoal);
+        this.goalSelector.addGoal(2, gatherResourcesGoal);
+        this.goalSelector.addGoal(2, returnResourcesGoal);
+        this.targetSelector.addGoal(2, targetGoal);
+        this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }
 

@@ -39,7 +39,7 @@ import static com.solegendary.reignofnether.building.BuildingUtils.*;
 public abstract class Building {
 
     private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned; normally 500ms in real games
-    public final float MELEE_DAMAGE_MULTIPLIER = 0.25f; // damage multiplier applied to melee attackers
+    public final float MELEE_DAMAGE_MULTIPLIER = 0.35f; // damage multiplier applied to melee attackers
 
     public String name;
     public static String structureName;

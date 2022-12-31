@@ -99,7 +99,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
 
     final static public float maxHealth = 10.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.25f;
+    final static public float movementSpeed = 0.27f;
     final static public float sightRange = 10f;
     final static public int popCost = ResourceCosts.Villager.POPULATION;
     public int maxResources = 100;
@@ -177,11 +177,11 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
         initialiseGoals();
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
-        this.goalSelector.addGoal(2, moveGoal);
-        this.goalSelector.addGoal(3, buildRepairGoal);
-        this.goalSelector.addGoal(3, gatherResourcesGoal);
-        this.goalSelector.addGoal(3, returnResourcesGoal);
-        this.targetSelector.addGoal(3, targetGoal);
+        this.goalSelector.addGoal(2, buildRepairGoal);
+        this.goalSelector.addGoal(2, gatherResourcesGoal);
+        this.goalSelector.addGoal(2, returnResourcesGoal);
+        this.targetSelector.addGoal(2, targetGoal);
+        this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }
 

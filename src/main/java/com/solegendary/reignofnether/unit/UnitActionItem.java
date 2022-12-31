@@ -168,6 +168,9 @@ public class UnitActionItem {
                     if (returnResourcesGoal != null)
                         returnResourcesGoal.returnToClosestBuilding();
                 }
+                case DELETE -> {
+                    ((LivingEntity) unit).kill();
+                }
             }
             // TODO: find which unit actually used the ability
             // set ability cd on unit
