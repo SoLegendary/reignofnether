@@ -99,7 +99,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
 
     final static public float maxHealth = 10.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.27f;
+    final static public float movementSpeed = 0.25f;
     final static public float sightRange = 10f;
     final static public int popCost = ResourceCosts.Villager.POPULATION;
     public int maxResources = 100;

@@ -6,7 +6,7 @@ java.lang.ClassCastException: class com.solegendary.reignofnether.unit.units.mon
 
 Apply required gamerules and terrain generation automatically:
     https://minecraft.fandom.com/wiki/Custom
-    - /gamerule randomTickSpeed 100
+    - /gamerule randomTickSpeed 12
     - /gamerule doDaylightCycle false
     - /time set 12600
     - increased surface deposits of ore, and/or increased windswept hills biomes
@@ -15,6 +15,7 @@ Apply required gamerules and terrain generation automatically:
     - no caves
 
 - still lagging massively on worker gathering
+    - mainly caused by gathering trees
 
 
 TODO bugs/features (backlog)

@@ -34,11 +34,14 @@ import java.util.function.Predicate;
 public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     private static final int REACH_RANGE = 5;
-    private static final int DEFAULT_MAX_GATHER_TICKS = 100; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
+    private static final int REACH_RANGE_SQR = 25;
+    private static final int DEFAULT_MAX_GATHER_TICKS = 300; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
     private int gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
     private static final int MAX_SEARCH_CD_TICKS = 40; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
     private int searchCdTicksLeft = 0;
     private int failedSearches = 0; // number of times we've failed to search for a new block - as this increases slow down or stop searching entirely to prevent lag
+    private static final int TICK_CD = 5; // only tick down gather time once this many ticks to reduce processing requirements
+    private int cdTicksLeft = TICK_CD;
 
     private final ArrayList<BlockPos> todoGatherTargets = new ArrayList<>();
     private BlockPos gatherTarget = null;
@@ -85,6 +88,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         if (!hasClearNeighbour)
             return false;
 
+        // TODO: change to nearby workers?
         // not targeted by another worker
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
             if (entity instanceof Unit unit) {
@@ -106,9 +110,17 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     // move towards the targeted block and start gathering it
     public void tick() {
+        if (this.mob.level.isClientSide())
+            return;
+
+        cdTicksLeft -= 1;
+        if (cdTicksLeft <= 0)
+            cdTicksLeft = TICK_CD;
+        else
+            return;
 
         if (gatherTarget == null && targetResourceName != ResourceName.NONE) {
-            searchCdTicksLeft -= 1;
+            searchCdTicksLeft -= TICK_CD;
 
             // prioritise gathering adjacent targets first
             todoGatherTargets.removeIf(bp -> !BLOCK_CONDITION.test(bp) || !isBlockInRange(bp));
@@ -124,7 +136,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         }
                     }
                 }
-                else if (!this.mob.level.isClientSide()) {
+                else {
                     Optional<BlockPos> bpOpt = BlockPos.findClosestMatch(
                             new BlockPos(
                                     mob.getEyePosition().x,
@@ -140,8 +152,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         },
                         () -> failedSearches += 1
                     );
-                    failedSearches += 1;
-                    System.out.println("failedSearches: " + failedSearches);
                 }
                 searchCdTicksLeft = MAX_SEARCH_CD_TICKS * Math.min(3, Math.max(1, failedSearches));
             }
@@ -160,52 +170,48 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
             if (isGathering()) {
                 mob.getLookControl().setLookAt(gatherTarget.getX(), gatherTarget.getY(), gatherTarget.getZ());
-                if (!mob.level.isClientSide())
-                {
-                    // replant crops on empty farmland
-                    if (mob.level.getBlockState(gatherTarget).getBlock() == Blocks.FARMLAND) {
-                        gatherTicksLeft -= 1;
-                        gatherTicksLeft = Math.min(gatherTicksLeft, ResourceSources.REPLANT_TICKS_MAX);
-                        if (gatherTicksLeft <= 0) {
-                            gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
+                // replant crops on empty farmland
+                if (mob.level.getBlockState(gatherTarget).getBlock() == Blocks.FARMLAND) {
+                    gatherTicksLeft -= TICK_CD;
+                    gatherTicksLeft = Math.min(gatherTicksLeft, ResourceSources.REPLANT_TICKS_MAX);
+                    if (gatherTicksLeft <= 0) {
+                        gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
 
-                            if (canAffordReplant()) {
-                                ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -ResourceCosts.REPLANT_WOOD_COST, 0));
-                                mob.level.setBlockAndUpdate(gatherTarget.above(), ((WorkerUnit) mob).getReplantBlockState());
-                                removeGatherTarget();
-                            }
+                        if (canAffordReplant()) {
+                            ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -ResourceCosts.REPLANT_WOOD_COST, 0));
+                            mob.level.setBlockAndUpdate(gatherTarget.above(), ((WorkerUnit) mob).getReplantBlockState());
+                            removeGatherTarget();
                         }
                     }
-                    else {
-                        if ((this.mob.level.isClientSide() && ResearchClient.hasCheat("operationcwal")) ||
-                            (!this.mob.level.isClientSide() && ResearchServer.playerHasCheat(((Unit) mob).getOwnerName(), "operationcwal")))
-                            this.gatherTicksLeft -= 10;
-                        else
-                            this.gatherTicksLeft -= 1;
+                }
+                else {
+                    if (ResearchServer.playerHasCheat(((Unit) mob).getOwnerName(), "operationcwal"))
+                        this.gatherTicksLeft -= TICK_CD * 10;
+                    else
+                        this.gatherTicksLeft -= TICK_CD;
 
-                        gatherTicksLeft = Math.min(gatherTicksLeft, targetResourceSource.ticksToGather);
-                        if (gatherTicksLeft <= 0) {
-                            gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
-                            ResourceName resourceName = ResourceSources.getBlockResourceName(this.gatherTarget, mob.level);
-                            if (mob.level.destroyBlock(gatherTarget, false)) {
+                    gatherTicksLeft = Math.min(gatherTicksLeft, targetResourceSource.ticksToGather);
+                    if (gatherTicksLeft <= 0) {
+                        gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
+                        ResourceName resourceName = ResourceSources.getBlockResourceName(this.gatherTarget, mob.level);
+                        if (mob.level.destroyBlock(gatherTarget, false)) {
 
-                                // prioritise gathering adjacent targets first
-                                todoGatherTargets.remove(gatherTarget);
-                                ArrayList<BlockPos> adjTarget = MiscUtil.findAdjacentBlocks(
-                                    mob.level,
-                                    gatherTarget,
-                                    BLOCK_CONDITION
-                                );
-                                todoGatherTargets.addAll(adjTarget);
+                            // prioritise gathering adjacent targets first
+                            todoGatherTargets.remove(gatherTarget);
+                            ArrayList<BlockPos> adjTarget = MiscUtil.findAdjacentBlocks(
+                                mob.level,
+                                gatherTarget,
+                                BLOCK_CONDITION
+                            );
+                            todoGatherTargets.addAll(adjTarget);
 
-                                Unit unit = (Unit) mob;
-                                unit.getItems().add(new ItemStack(targetResourceSource.items.get(0)));
-                                UnitClientboundPacket.sendSyncResourcesPacket(mob);
+                            Unit unit = (Unit) mob;
+                            unit.getItems().add(new ItemStack(targetResourceSource.items.get(0)));
+                            UnitClientboundPacket.sendSyncResourcesPacket(mob);
 
-                                // if at max resources, go to drop off automatically, then return to this gather goal
-                                if (Unit.atMaxResources(unit))
-                                    saveAndReturnResources();
-                            }
+                            // if at max resources, go to drop off automatically, then return to this gather goal
+                            if (Unit.atMaxResources(unit))
+                                saveAndReturnResources();
                         }
                     }
                 }
@@ -255,7 +261,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     private boolean isBlockInRange(BlockPos target) {
-        return Math.sqrt(target.distSqr(new Vec3i(mob.getX(), mob.getEyeY(), mob.getZ()))) <= REACH_RANGE;
+        return target.distSqr(new Vec3i(mob.getX(), mob.getEyeY(), mob.getZ())) <= REACH_RANGE_SQR;
     }
 
     // only count as gathering if in range of the target

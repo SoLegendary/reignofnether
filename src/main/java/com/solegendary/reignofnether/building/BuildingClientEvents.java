@@ -3,6 +3,8 @@ package com.solegendary.reignofnether.building;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
+import com.solegendary.reignofnether.building.buildings.villagers.WheatFarm;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -233,8 +235,12 @@ public class BuildingClientEvents {
                 }
             }
         }
+        float minBlocksBelow = 0.9f;
+        if (buildingToPlace == WheatFarm.class || buildingToPlace == PumpkinFarm.class)
+            minBlocksBelow = 1.0f;
+
         if (blocksBelow <= 0) return false; // avoid division by 0
-        return ((float) solidBlocksBelow / (float) blocksBelow) < 0.9f;
+        return ((float) solidBlocksBelow / (float) blocksBelow) < minBlocksBelow;
     }
 
     // disallow the building borders from overlapping any other's, even if they don't collide physical blocks

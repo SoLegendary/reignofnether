@@ -2,8 +2,12 @@ package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -76,5 +80,11 @@ public class ResourcesServerEvents {
             resourcesList.add(playerResources);
         }
         ResourcesClientboundPacket.syncResources(resourcesList);
+    }
+
+    // speed up crop growth without having to increase gamerule randomTickSpeed (as that causes more lag)
+    @SubscribeEvent
+    public static void onCropGrow(BlockEvent.CropGrowEvent.Pre evt) {
+        evt.setResult(Event.Result.ALLOW);
     }
 }
