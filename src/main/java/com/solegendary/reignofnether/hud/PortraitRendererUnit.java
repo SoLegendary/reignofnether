@@ -31,6 +31,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitComman
 
 // Renders a Unit's portrait including its animated head, name, healthbar, list of stats and UI frames for these
 
-class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R extends LivingEntityRenderer<T, M>> {
+public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R extends LivingEntityRenderer<T, M>> {
     public R renderer;
     public Model model;
 
@@ -119,14 +120,16 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
     // - unit name
     // Must be called from DrawScreenEvent
     public RectZone render(PoseStack poseStack, String name, int x, int y, LivingEntity entity) {
-        // draw name
-        GuiComponent.drawString(
-                poseStack, Minecraft.getInstance().font,
-                name,
-                x+4,y-9,
-                0xFFFFFFFF
-        );
 
+        // draw name (unless a player, since their nametag will be rendered anyway)
+        if (!(entity instanceof Player)) {
+            GuiComponent.drawString(
+                    poseStack, Minecraft.getInstance().font,
+                    name,
+                    x+4,y-9,
+                    0xFFFFFFFF
+            );
+        }
         int bgCol = 0x0;
         switch (UnitClientEvents.getPlayerToEntityRelationship(entity)) {
             case OWNED    -> bgCol = 0x90000000;
@@ -145,7 +148,7 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
         int drawY = y + (int) (entity.getEyeHeight() / standardEyeHeight * headOffsetY);
 
         // hide all model parts except the head
-        setNonHeadModelVisibility(this.model, false);
+        setNonHeadModelVisibility(false);
         List<RenderLayer<T, M>> layers = null;
         if (renderer != null) {
             layers = renderer.layers;
@@ -155,7 +158,7 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
         drawEntityOnScreen(poseStack, entity, drawX, drawY, headSize);
         if (renderer != null && layers != null)
             renderer.layers = layers;
-        setNonHeadModelVisibility(this.model, true);
+        setNonHeadModelVisibility(true);
 
         // draw health bar and write min/max hp
         HealthBarClientEvents.renderForEntity(poseStack, entity,
@@ -265,9 +268,20 @@ class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R e
         return RectZone.getZoneByLW(x, y, statsWidth, statsHeight);
     }
 
-    private void setNonHeadModelVisibility(Model model, boolean visibility) {
+    public void setNonHeadModelVisibility(boolean visibility) {
 
-        if (model instanceof HumanoidModel) {
+        if (model instanceof PlayerModel) { // TODO: doesn't work
+            ((PlayerModel<?>) model).leftSleeve.visible = visibility;
+            ((PlayerModel<?>) model).rightSleeve.visible = visibility;
+            ((PlayerModel<?>) model).rightArm.visible = visibility;
+            ((PlayerModel<?>) model).leftArm.visible = visibility;
+            ((PlayerModel<?>) model).rightLeg.visible = visibility;
+            ((PlayerModel<?>) model).leftLeg.visible = visibility;
+            ((PlayerModel<?>) model).jacket.visible = visibility;
+            ((PlayerModel<?>) model).leftPants.visible = visibility;
+            ((PlayerModel<?>) model).rightPants.visible = visibility;
+        }
+        else if (model instanceof HumanoidModel) {
             ((HumanoidModel<?>) model).hat.visible = visibility;
             ((HumanoidModel<?>) model).body.visible = visibility;
             ((HumanoidModel<?>) model).rightArm.visible = visibility;

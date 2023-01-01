@@ -15,8 +15,7 @@ Apply required gamerules and terrain generation automatically:
     - no caves
 
 - still lagging massively on worker gathering
-    - mainly caused by gathering trees
-
+    - mainly caused by gathering trees (probably due to leaves?)
 
 TODO bugs/features (backlog)
 

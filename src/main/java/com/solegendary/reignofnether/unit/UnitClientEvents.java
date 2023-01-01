@@ -166,9 +166,15 @@ public class UnitClientEvents {
         }
     }
 
-    // SINGLEPLAYER ONLY - client log out: remove all entities so we don't duplicate on logging back in
+
     @SubscribeEvent
     public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
+        // set the whole model visible again if it leaves while selected, or else we get a bug where only the head shows until reselected
+        if (evt.getEntity() == HudClientEvents.hudSelectedEntity)
+            if (HudClientEvents.portraitRendererUnit != null)
+                HudClientEvents.portraitRendererUnit.setNonHeadModelVisibility(true);
+
+        // SINGLEPLAYER ONLY - client log out: remove all entities so we don't duplicate on logging back in
         if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
             selectedUnits.clear();
             preselectedUnits.clear();

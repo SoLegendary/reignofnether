@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -198,12 +199,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
                             // prioritise gathering adjacent targets first
                             todoGatherTargets.remove(gatherTarget);
-                            ArrayList<BlockPos> adjTarget = MiscUtil.findAdjacentBlocks(
-                                mob.level,
-                                gatherTarget,
-                                BLOCK_CONDITION
-                            );
-                            todoGatherTargets.addAll(adjTarget);
+
+                            for (BlockPos adjBlock : BlockPos.withinManhattan(gatherTarget, 1, 1, 1))
+                                if (BLOCK_CONDITION.test(adjBlock))
+                                    todoGatherTargets.add(adjBlock);
 
                             Unit unit = (Unit) mob;
                             unit.getItems().add(new ItemStack(targetResourceSource.items.get(0)));

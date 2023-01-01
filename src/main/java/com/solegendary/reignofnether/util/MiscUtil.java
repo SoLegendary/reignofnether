@@ -41,24 +41,6 @@ public class MiscUtil {
         return new BlockPos(blockPos.getX(), y, blockPos.getZ());
     }
 
-    public static ArrayList<BlockPos> findAdjacentBlocks(Level level, BlockPos originPos, Predicate<BlockPos> condition) {
-        ArrayList<BlockPos> adjBps = new ArrayList<>();
-        ArrayList<BlockPos> retBps = new ArrayList<>();
-
-        adjBps.add(originPos.above());
-        adjBps.add(originPos.below());
-        adjBps.add(originPos.north());
-        adjBps.add(originPos.south());
-        adjBps.add(originPos.east());
-        adjBps.add(originPos.west());
-
-        Collections.shuffle(adjBps);
-        for (BlockPos bp : adjBps)
-            if (condition.test(bp))
-                retBps.add(bp);
-        return retBps;
-    }
-
     public static boolean listContainsObjectValue(List<Object> objs, String obj){
         return objs.stream().anyMatch(o -> o.equals(obj));
     }

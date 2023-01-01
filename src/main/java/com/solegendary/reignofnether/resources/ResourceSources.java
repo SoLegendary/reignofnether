@@ -50,7 +50,7 @@ public class ResourceSources {
         return null;
     }
 
-    public static final int REPLANT_TICKS_MAX = 20;
+    public static final int REPLANT_TICKS_MAX = 10;
 
     public static final List<ResourceSource> FOOD_BLOCKS = List.of(
             new ResourceSource("Sugar", // item only
