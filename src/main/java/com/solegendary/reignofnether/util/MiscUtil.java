@@ -78,6 +78,24 @@ public class MiscUtil {
         );
     }
 
+    public static ArrayList<BlockPos> findAdjacentBlocks(BlockPos originPos, Predicate<BlockPos> condition) {
+        ArrayList<BlockPos> adjBps = new ArrayList<>();
+        ArrayList<BlockPos> retBps = new ArrayList<>();
+
+        adjBps.add(originPos.above());
+        adjBps.add(originPos.below());
+        adjBps.add(originPos.north());
+        adjBps.add(originPos.south());
+        adjBps.add(originPos.east());
+        adjBps.add(originPos.west());
+
+        Collections.shuffle(adjBps);
+        for (BlockPos bp : adjBps)
+            if (condition.test(bp))
+                retBps.add(bp);
+        return retBps;
+    }
+
     public static <T extends Entity> List<T> getEntitiesWithinRange(Vector3d pos, float range, Class<T> entityType, Level level) {
         AABB aabb = new AABB(
                 pos.x - range,

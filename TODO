@@ -14,7 +14,7 @@ Apply required gamerules and terrain generation automatically:
     - remove unwanted biomes: ocean, mesa, extreme hills, jungle
     - no caves
 
-- still lagging massively on worker gathering
+- keep trying to reduce processing time on gathering
     - mainly caused by gathering trees (probably due to leaves?)
 
 TODO bugs/features (backlog)

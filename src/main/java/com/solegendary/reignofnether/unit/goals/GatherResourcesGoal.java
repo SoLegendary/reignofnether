@@ -3,12 +3,9 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.UnitActionItem;
 import com.solegendary.reignofnether.unit.UnitClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -18,9 +15,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -41,8 +41,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private static final int MAX_SEARCH_CD_TICKS = 40; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
     private int searchCdTicksLeft = 0;
     private int failedSearches = 0; // number of times we've failed to search for a new block - as this increases slow down or stop searching entirely to prevent lag
+    private static final int MAX_FAILED_SEARCHES = 3;
     private static final int TICK_CD = 5; // only tick down gather time once this many ticks to reduce processing requirements
     private int cdTicksLeft = TICK_CD;
+    private BlockPos altSearchPos = null; // block search origin that may be used instead of the mob position
 
     private final ArrayList<BlockPos> todoGatherTargets = new ArrayList<>();
     private BlockPos gatherTarget = null;
@@ -89,13 +91,14 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         if (!hasClearNeighbour)
             return false;
 
-        // TODO: change to nearby workers?
-        // not targeted by another worker
-        for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
+        // not targeted by another nearby worker
+        AABB aabb = AABB.ofSize(this.mob.position(), REACH_RANGE * 2,REACH_RANGE * 2,REACH_RANGE * 2);
+        for (LivingEntity entity : this.mob.level.getNearbyEntities(LivingEntity.class, TargetingConditions.forNonCombat(), this.mob, aabb)) {
             if (entity instanceof Unit unit) {
                 if (unit instanceof WorkerUnit workerUnit && workerUnit.getGatherResourceGoal() != null && entity.getId() != this.mob.getId()) {
                     BlockPos otherUnitTarget = workerUnit.getGatherResourceGoal().getGatherTarget();
                     if (otherUnitTarget != null && otherUnitTarget.equals(bp)) {
+                        altSearchPos = bp;
                         return false;
                     }
                 }
@@ -124,7 +127,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             searchCdTicksLeft -= TICK_CD;
 
             // prioritise gathering adjacent targets first
-            todoGatherTargets.removeIf(bp -> !BLOCK_CONDITION.test(bp) || !isBlockInRange(bp));
+            todoGatherTargets.removeIf(bp -> !BLOCK_CONDITION.test(bp));
             if (todoGatherTargets.size() > 0)
                 gatherTarget = todoGatherTargets.get(0);
 
@@ -138,23 +141,40 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                     }
                 }
                 else {
-                    Optional<BlockPos> bpOpt = BlockPos.findClosestMatch(
-                            new BlockPos(
-                                    mob.getEyePosition().x,
-                                    mob.getEyePosition().y,
-                                    mob.getEyePosition().z
-                            ), REACH_RANGE, REACH_RANGE,
+                    Optional<BlockPos> bpOpt;
+                    if (altSearchPos != null) {
+                        bpOpt = BlockPos.findClosestMatch(
+                                altSearchPos, REACH_RANGE/2, REACH_RANGE/2,
                             BLOCK_CONDITION);
+                        altSearchPos = null;
+                    }
+                    else {
+                        // increase search range until we've maxed out (so we can
+                        int range = REACH_RANGE * (failedSearches + 1);
+                        if (failedSearches == MAX_FAILED_SEARCHES)
+                            range = REACH_RANGE;
+
+                        bpOpt = BlockPos.findClosestMatch(
+                            new BlockPos(
+                                mob.getEyePosition().x,
+                                mob.getEyePosition().y,
+                                mob.getEyePosition().z
+                            ), range, range,
+                            BLOCK_CONDITION);
+                    }
 
                     bpOpt.ifPresentOrElse(
                         blockPos -> {
                             gatherTarget = blockPos;
                             failedSearches = 0;
                         },
-                        () -> failedSearches += 1
+                        () -> {
+                            if (failedSearches < MAX_FAILED_SEARCHES)
+                                failedSearches += 1;
+                        }
                     );
                 }
-                searchCdTicksLeft = MAX_SEARCH_CD_TICKS * Math.min(3, Math.max(1, failedSearches));
+                searchCdTicksLeft = MAX_SEARCH_CD_TICKS * (failedSearches + 1);
             }
             if (gatherTarget != null)
                 targetResourceSource = ResourceSources.getFromBlockPos(gatherTarget, mob.level);
@@ -199,10 +219,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
                             // prioritise gathering adjacent targets first
                             todoGatherTargets.remove(gatherTarget);
-
-                            for (BlockPos adjBlock : BlockPos.withinManhattan(gatherTarget, 1, 1, 1))
-                                if (BLOCK_CONDITION.test(adjBlock))
-                                    todoGatherTargets.add(adjBlock);
+                            for (BlockPos pos : MiscUtil.findAdjacentBlocks(gatherTarget, BLOCK_CONDITION))
+                                if (!todoGatherTargets.contains(pos))
+                                    todoGatherTargets.add(pos);
 
                             Unit unit = (Unit) mob;
                             unit.getItems().add(new ItemStack(targetResourceSource.items.get(0)));
