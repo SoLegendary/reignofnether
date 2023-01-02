@@ -13,7 +13,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -46,14 +48,43 @@ public class BuildingServerEvents {
                 buildings.add(building);
                 building.forceChunk(true);
 
-                // place all blocks on the lowest y level
                 int minY = BuildingUtils.getMinCorner(building.blocks).getY();
-                for (BuildingBlock block : building.blocks)
-                    if (block.getBlockPos().getY() == minY &&
-                        building.startingBlockTypes.contains(block.getBlockState().getBlock()))
-                        building.addToBlockPlaceQueue(block);
 
-                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName);
+                for (BuildingBlock block : building.blocks) {
+                    // place scaffolding underneath all solid blocks that don't have support
+                    if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir()) {
+                        int yBelow = 0;
+                        boolean tooDeep = false;
+                        BlockState bsBelow;
+                        do {
+                            yBelow -= 1;
+                            bsBelow = serverLevel.getBlockState(block.getBlockPos().offset(0, yBelow, 0));
+                            if (yBelow < -5)
+                                tooDeep = true;
+                        }
+                        while (!bsBelow.getMaterial().isSolidBlocking());
+                        yBelow += 1;
+
+                        if (!tooDeep) {
+                            while (yBelow < 0) {
+                                BlockPos bp = block.getBlockPos().offset(0, yBelow, 0);
+                                BuildingBlock scaffold = new BuildingBlock(bp, Blocks.SCAFFOLDING.defaultBlockState());
+                                building.getScaffoldBlocks().add(scaffold);
+                                building.addToBlockPlaceQueue(scaffold);
+                                yBelow += 1;
+                            }
+                        }
+                    }
+                }
+
+                for (BuildingBlock block : building.blocks) {
+                    // place all blocks on the lowest y level
+                    if (block.getBlockPos().getY() == minY &&
+                            building.startingBlockTypes.contains(block.getBlockState().getBlock()))
+                        building.addToBlockPlaceQueue(block);
+                }
+
+                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName, building.blockPlaceQueue.size());
                 ResourcesServerEvents.addSubtractResources(new Resources(
                     building.ownerName,
                     -building.foodCost,
@@ -125,7 +156,8 @@ public class BuildingServerEvents {
                 building.originPos,
                 building.name,
                 building.rotation,
-                building.ownerName
+                building.ownerName,
+                building.blockPlaceQueue.size()
             );
     }
 

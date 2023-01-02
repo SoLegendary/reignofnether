@@ -3,8 +3,6 @@ package com.solegendary.reignofnether.building;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
-import com.solegendary.reignofnether.building.buildings.villagers.WheatFarm;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -12,7 +10,6 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.unit.UnitServerboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -26,7 +23,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -36,7 +32,6 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -235,9 +230,7 @@ public class BuildingClientEvents {
                 }
             }
         }
-        float minBlocksBelow = 0.9f;
-        if (buildingToPlace == WheatFarm.class || buildingToPlace == PumpkinFarm.class)
-            minBlocksBelow = 1.0f;
+        float minBlocksBelow = 0.75f;
 
         if (blocksBelow <= 0) return false; // avoid division by 0
         return ((float) solidBlocksBelow / (float) blocksBelow) < minBlocksBelow;
@@ -381,7 +374,8 @@ public class BuildingClientEvents {
 
                 BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
                         builderIds.stream().mapToInt(i -> i).toArray());
-                setBuildingToPlace(null);
+                if (!Keybindings.shiftMod.isDown())
+                    setBuildingToPlace(null);
             }
             // equivalent of UnitClientEvents.onMouseClick()
             else if (buildingToPlace == null) {
@@ -453,9 +447,18 @@ public class BuildingClientEvents {
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
             Building building = HudClientEvents.hudSelectedBuilding;
-            if (building != null && getPlayerToBuildingRelationship(building) == Relationship.OWNED)
+            if (building != null && building.isBuilt && getPlayerToBuildingRelationship(building) == Relationship.OWNED) {
+                HudClientEvents.hudSelectedBuilding = null;
                 BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(building.getBlocks()));
+            }
         }
+    }
+
+    @SubscribeEvent
+    public static void onButtonPress(ScreenEvent.KeyReleased.Post evt) {
+        if (MC.level != null && MC.player != null)
+            if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT_SHIFT)
+                setBuildingToPlace(null);
     }
 
     @SubscribeEvent
@@ -470,7 +473,8 @@ public class BuildingClientEvents {
 
             // cleanup destroyed buildings
             selectedBuildings.removeIf(Building::shouldBeDestroyed);
-            buildings.removeIf(Building::shouldBeDestroyed);
+            if (buildings.removeIf(Building::shouldBeDestroyed))
+                System.out.println("removed client building");
         }
     }
 
@@ -498,12 +502,18 @@ public class BuildingClientEvents {
     }
 
     // place a building clientside that has already been registered on serverside
-    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName) {
+    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int numBlocksToPlace) {
         for (Building building : buildings)
             if (BuildingUtils.isPosPartOfAnyBuilding(MC.level, pos, false))
                 return; // building already exists clientside
 
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName);
+
+        // add a bunch of dummy blocks so clients know not to remove buildings before the first blocks get placed
+        while (numBlocksToPlace > 0) {
+            newBuilding.addToBlockPlaceQueue(new BuildingBlock(new BlockPos(0,0,0), Blocks.AIR.defaultBlockState()));
+            numBlocksToPlace -= 1;
+        }
 
         if (newBuilding != null) {
             boolean buildingExists = false;
@@ -522,7 +532,6 @@ public class BuildingClientEvents {
             ((Unit) entity).resetBehaviours();
             workerUnit.getBuildRepairGoal().setBuildingTarget(newBuilding);
         }
-
     }
 
     public static void destroyBuilding(BlockPos pos) {

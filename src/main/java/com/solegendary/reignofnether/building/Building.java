@@ -9,7 +9,6 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.UnitActionItem;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -28,7 +27,6 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.common.world.ForgeChunkManager;
-import net.minecraftforge.event.level.BlockEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,6 +59,7 @@ public abstract class Building {
     protected float buildTimeModifier = 1.0f; // only affects non-built buildings, not repair times
     protected int unrepairedBlocksDestroyed = 0; // ticks up on a block being destroyed, ticks down on a block being built
 
+    protected ArrayList<BuildingBlock> scaffoldBlocks = new ArrayList<>();
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
     protected ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
     public String ownerName;
@@ -122,6 +121,9 @@ public abstract class Building {
 
     public ArrayList<BuildingBlock> getBlocks() {
         return blocks;
+    }
+    public ArrayList<BuildingBlock> getScaffoldBlocks() {
+        return scaffoldBlocks;
     }
 
     public static Button getBuildButton() { return null; }
@@ -280,9 +282,8 @@ public abstract class Building {
     }
 
     public boolean shouldBeDestroyed() {
-        if (tickAge < 10)
-            return false;
-        if (getBlocksPlaced() <= 0)
+        // allow some time for scaffolding and the first few blocks to be placed first before checking
+        if (getBlocksPlaced() <= 0 && blockPlaceQueue.size() == 0)
             return true;
         if (isBuilt)
             return getBlocksPlacedPercent() <= this.minBlocksPercent;
@@ -314,6 +315,11 @@ public abstract class Building {
                         Explosion.BlockInteraction.BREAK);
             }
             serverLevel.destroyBlock(block.getBlockPos(), false);
+        });
+
+        this.scaffoldBlocks.forEach((BuildingBlock block) -> {
+            if (serverLevel.getBlockState(block.getBlockPos()).getBlock() == Blocks.SCAFFOLDING)
+                serverLevel.destroyBlock(block.getBlockPos(), false);
         });
     }
 
@@ -368,7 +374,11 @@ public abstract class Building {
         if (blocksPlaced >= blocksTotal && !isBuilt)
             isBuilt = true;
 
-        if (!tickLevel.isClientSide()) {
+        if (tickLevel.isClientSide()) {
+            if (blockPlaceQueue.size() > 0)
+                blockPlaceQueue.remove(0);
+        }
+        else {
             ServerLevel serverLevel = (ServerLevel) tickLevel;
             int builderCount = getBuilders(serverLevel).size();
 

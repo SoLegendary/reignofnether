@@ -319,7 +319,7 @@ public class HudClientEvents {
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
 
-            if (hudSelBuildingOwned && !hudSelectedBuilding.isBuilt) {
+            if (hudSelectedBuilding != null && hudSelBuildingOwned && !hudSelectedBuilding.isBuilt) {
                 Button cancelButton = new Button(
                         "Cancel",
                         iconSize,
@@ -328,7 +328,10 @@ public class HudClientEvents {
                         () -> false,
                         () -> false,
                         () -> true,
-                        () -> BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(hudSelectedBuilding.getBlocks())),
+                        () -> {
+                            BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(hudSelectedBuilding.getBlocks()));
+                            HudClientEvents.hudSelectedBuilding = null;
+                        },
                         null,
                         List.of(FormattedCharSequence.forward("Cancel", Style.EMPTY))
                 );

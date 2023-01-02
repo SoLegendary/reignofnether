@@ -1,16 +1,22 @@
 package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class ResourcesServerEvents {
 
@@ -82,9 +88,28 @@ public class ResourcesServerEvents {
         ResourcesClientboundPacket.syncResources(resourcesList);
     }
 
+    private static final Random random = new Random();
+
     // speed up crop growth without having to increase gamerule randomTickSpeed (as that causes more lag)
     @SubscribeEvent
     public static void onCropGrow(BlockEvent.CropGrowEvent.Pre evt) {
-        evt.setResult(Event.Result.ALLOW);
+        BlockState blockState = evt.getLevel().getBlockState(evt.getPos());
+        Block block = blockState.getBlock();
+        if (block instanceof BeetrootBlock) {
+            evt.setResult(Event.Result.ALLOW);
+        }
+        // always allow growth of gourd blocks
+        else if (block instanceof StemBlock && blockState.getValue(BlockStateProperties.AGE_7) == 7) {
+            evt.setResult(Event.Result.ALLOW);
+        }
+        // prevent natural growth, use our algorithm instead
+        else if (block instanceof CropBlock || block instanceof StemBlock) {
+            int newAge = blockState.getValue(BlockStateProperties.AGE_7) + (random.nextFloat() > 0.6f ? 1 : 2);
+            if (newAge > 7)
+                newAge = 7;
+            BlockState grownState = block.defaultBlockState().setValue(BlockStateProperties.AGE_7, newAge);
+            evt.getLevel().setBlock(evt.getPos(), grownState, 2);
+            evt.setResult(Event.Result.DENY);
+        }
     }
 }

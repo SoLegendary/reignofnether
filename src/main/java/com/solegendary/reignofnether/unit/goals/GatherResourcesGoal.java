@@ -149,7 +149,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         altSearchPos = null;
                     }
                     else {
-                        // increase search range until we've maxed out (so we can
+                        // increase search range until we've maxed out (to prevent idle workers using up too much CPU)
                         int range = REACH_RANGE * (failedSearches + 1);
                         if (failedSearches == MAX_FAILED_SEARCHES)
                             range = REACH_RANGE;
@@ -181,7 +181,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         }
 
         if (gatherTarget != null) {
-            this.setMoveTarget(gatherTarget);
 
             // if the block is no longer valid (destroyed or somehow badly targeted)
             if (!BLOCK_CONDITION.test(this.gatherTarget))

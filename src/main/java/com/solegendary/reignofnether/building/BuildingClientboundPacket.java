@@ -23,42 +23,45 @@ public class BuildingClientboundPacket {
     public Rotation rotation;
     public String ownerName;
     public int blocksPlaced; // for syncing out-of-view clientside buildings
+    public int numQueuedBlocks; // used for delaying destroy checks clientside
 
-    public static void placeBuilding(BlockPos buildingPos, String itemName, Rotation rotation, String ownerName) {
+    public static void placeBuilding(BlockPos buildingPos, String itemName, Rotation rotation, String ownerName, int numQueuedBlocks) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new BuildingClientboundPacket(BuildingAction.PLACE,
-                    itemName, buildingPos, rotation, ownerName, 0));
+                    itemName, buildingPos, rotation, ownerName, 0, numQueuedBlocks));
     }
     public static void destroyBuilding(BlockPos buildingPos) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new BuildingClientboundPacket(BuildingAction.DESTROY,
-                        "", buildingPos, Rotation.NONE, "", 0));
+                        "", buildingPos, Rotation.NONE, "", 0, 0));
     }
     public static void syncBuilding(BlockPos buildingPos, int blocksPlaced) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new BuildingClientboundPacket(BuildingAction.SYNC_BLOCKS,
-                        "", buildingPos, Rotation.NONE, "", blocksPlaced));
+                        "", buildingPos, Rotation.NONE, "", blocksPlaced, 0));
     }
     public static void startProduction(BlockPos buildingPos, String itemName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new BuildingClientboundPacket(
             BuildingAction.START_PRODUCTION,
-            itemName, buildingPos, Rotation.NONE, "", 0));
+            itemName, buildingPos, Rotation.NONE, "", 0, 0));
     }
     public static void cancelProduction(BlockPos buildingPos, String itemName, boolean frontItem) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new BuildingClientboundPacket(
             frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
-            itemName, buildingPos, Rotation.NONE, "", 0));
+            itemName, buildingPos, Rotation.NONE, "", 0, 0));
     }
 
-    public BuildingClientboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, Rotation rotation, String ownerName, int blocksPlaced) {
+    public BuildingClientboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, Rotation rotation,
+                                     String ownerName, int blocksPlaced, int numQueuedBlocks) {
         this.action = action;
         this.itemName = itemName;
         this.buildingPos = buildingPos;
         this.rotation = rotation;
         this.ownerName = ownerName;
         this.blocksPlaced = blocksPlaced;
+        this.numQueuedBlocks = numQueuedBlocks;
     }
 
     public BuildingClientboundPacket(FriendlyByteBuf buffer) {
@@ -68,6 +71,7 @@ public class BuildingClientboundPacket {
         this.rotation = buffer.readEnum(Rotation.class);
         this.ownerName = buffer.readUtf();
         this.blocksPlaced = buffer.readInt();
+        this.numQueuedBlocks = buffer.readInt();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -77,6 +81,7 @@ public class BuildingClientboundPacket {
         buffer.writeEnum(this.rotation);
         buffer.writeUtf(this.ownerName);
         buffer.writeInt(this.blocksPlaced);
+        buffer.writeInt(this.numQueuedBlocks);
     }
 
     // server-side packet-consuming functions
@@ -93,7 +98,7 @@ public class BuildingClientboundPacket {
                         return;
                 }
                 switch (action) {
-                    case PLACE -> BuildingClientEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName);
+                    case PLACE -> BuildingClientEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.numQueuedBlocks);
                     case DESTROY -> BuildingClientEvents.destroyBuilding(this.buildingPos);
                     case SYNC_BLOCKS -> BuildingClientEvents.syncBuildingBlocks(building, this.blocksPlaced);
                     case START_PRODUCTION -> {
