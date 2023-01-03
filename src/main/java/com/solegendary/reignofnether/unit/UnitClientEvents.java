@@ -8,7 +8,6 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.ResourceName;
-import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -16,7 +15,6 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -77,6 +75,16 @@ public class UnitClientEvents {
 
     private static boolean isLeftClickAttack() {
         return CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK;
+    }
+
+    public static ArrayList<LivingEntity> getOwnedIdleWorkers() {
+        ArrayList<LivingEntity> idleWorkers = new ArrayList<>();
+        for (LivingEntity entity : allUnits)
+            if (entity instanceof WorkerUnit workerUnit &&
+                getPlayerToEntityRelationship(entity) == Relationship.OWNED &&
+                WorkerUnit.isIdle(workerUnit))
+                idleWorkers.add(entity);
+        return idleWorkers;
     }
 
     public static int getCurrentPopulation() {

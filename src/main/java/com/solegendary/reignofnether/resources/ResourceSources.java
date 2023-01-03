@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.resources;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -13,7 +12,7 @@ import net.minecraft.world.level.material.Material;
 import java.util.List;
 
 public class ResourceSources {
-    public static final List<Material> CLEAR_MATERIALS = List.of(Material.WATER, Material.AIR, Material.GRASS);
+    public static final List<Material> CLEAR_MATERIALS = List.of(Material.WATER, Material.AIR, Material.GRASS, Material.LEAVES);
 
     public static final int TICKS_PER_SECOND = 20;
 
@@ -71,7 +70,7 @@ public class ResourceSources {
             new ResourceSource("Wheat",
                     List.of(Blocks.WHEAT),
                     List.of(Items.WHEAT),
-                    TICKS_PER_SECOND * 7,
+                    TICKS_PER_SECOND * 4,
                     10,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
@@ -79,7 +78,7 @@ public class ResourceSources {
             new ResourceSource("Carrots",
                     List.of(Blocks.CARROTS),
                     List.of(Items.CARROT),
-                    TICKS_PER_SECOND * 7,
+                    TICKS_PER_SECOND * 4,
                     14,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
@@ -87,7 +86,7 @@ public class ResourceSources {
             new ResourceSource("Potatoes",
                     List.of(Blocks.POTATOES),
                     List.of(Items.POTATO, Items.BAKED_POTATO),
-                    TICKS_PER_SECOND * 7,
+                    TICKS_PER_SECOND * 4,
                     18,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
@@ -95,7 +94,7 @@ public class ResourceSources {
             new ResourceSource("Beetroots",
                     List.of(Blocks.BEETROOTS),
                     List.of(Items.BEETROOT),
-                    TICKS_PER_SECOND * 7,
+                    TICKS_PER_SECOND * 4,
                     10,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_3) == 3
@@ -103,7 +102,7 @@ public class ResourceSources {
             new ResourceSource("Gourds",
                     List.of(Blocks.MELON, Blocks.PUMPKIN),
                     List.of(Items.MELON, Items.PUMPKIN),
-                    TICKS_PER_SECOND * 8,
+                    TICKS_PER_SECOND * 5,
                     10,
                     ResourceName.FOOD
             ),
@@ -173,7 +172,7 @@ public class ResourceSources {
                     List.of(Blocks.OAK_PLANKS, Blocks.BIRCH_PLANKS, Blocks.ACACIA_PLANKS, Blocks.DARK_OAK_PLANKS, Blocks.JUNGLE_PLANKS, Blocks.MANGROVE_PLANKS, Blocks.SPRUCE_PLANKS),
                     List.of(Items.OAK_PLANKS, Items.BIRCH_PLANKS, Items.ACACIA_PLANKS, Items.DARK_OAK_PLANKS, Items.JUNGLE_PLANKS, Items.MANGROVE_PLANKS, Items.SPRUCE_PLANKS),
                     TICKS_PER_SECOND * 2,
-                    2,
+                    3,
                     ResourceName.WOOD
             ),
             new ResourceSource("Logs",
@@ -186,7 +185,7 @@ public class ResourceSources {
                             Items.OAK_WOOD, Items.BIRCH_WOOD, Items.ACACIA_WOOD, Items.DARK_OAK_WOOD, Items.JUNGLE_WOOD, Items.MANGROVE_WOOD, Items.SPRUCE_WOOD,
                             Items.STRIPPED_OAK_WOOD, Items.STRIPPED_BIRCH_WOOD, Items.STRIPPED_ACACIA_WOOD, Items.STRIPPED_DARK_OAK_WOOD, Items.STRIPPED_JUNGLE_WOOD, Items.STRIPPED_MANGROVE_WOOD, Items.STRIPPED_SPRUCE_WOOD),
                     TICKS_PER_SECOND * 9,
-                    10,
+                    15,
                     ResourceName.WOOD
             ),
             new ResourceSource("Leaves",

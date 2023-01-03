@@ -8,15 +8,12 @@ import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,7 +21,6 @@ import net.minecraft.world.phys.AABB;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -35,15 +31,16 @@ import java.util.function.Predicate;
 public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     private static final int REACH_RANGE = 5;
-    private static final int REACH_RANGE_SQR = 25;
     private static final int DEFAULT_MAX_GATHER_TICKS = 300; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
     private int gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
     private static final int MAX_SEARCH_CD_TICKS = 40; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
     private int searchCdTicksLeft = 0;
     private int failedSearches = 0; // number of times we've failed to search for a new block - as this increases slow down or stop searching entirely to prevent lag
     private static final int MAX_FAILED_SEARCHES = 3;
-    private static final int TICK_CD = 5; // only tick down gather time once this many ticks to reduce processing requirements
+    private static final int TICK_CD = 10; // only tick down gather time once this many ticks to reduce processing requirements
     private int cdTicksLeft = TICK_CD;
+    public static final int IDLE_TIMEOUT = 100; // if we reach this time without progressing a gather tick while having navigation done, then switch a new target
+    public int idleTicks = 0; // only increments serverside
     private BlockPos altSearchPos = null; // block search origin that may be used instead of the mob position
 
     private final ArrayList<BlockPos> todoGatherTargets = new ArrayList<>();
@@ -66,7 +63,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         ResourceSource resBlock = ResourceSources.getFromBlockPos(bp, mob.level);
 
         // is a valid resource block and meets the target ResourceSource's blockstate condition
-        if (resBlock == null || resBlock.resourceName != targetResourceName)
+        if (resBlock == null || resBlock.resourceName != targetResourceName || resBlock.name.equals("Leaves"))
             return false;
         if (!resBlock.blockStateTest.test(bs))
             return false;
@@ -127,9 +124,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             searchCdTicksLeft -= TICK_CD;
 
             // prioritise gathering adjacent targets first
-            todoGatherTargets.removeIf(bp -> !BLOCK_CONDITION.test(bp));
-            if (todoGatherTargets.size() > 0)
-                gatherTarget = todoGatherTargets.get(0);
+            for (BlockPos todoBp : todoGatherTargets)
+                if (BLOCK_CONDITION.test(todoBp))
+                    gatherTarget = todoGatherTargets.get(0);
 
             if (gatherTarget == null && searchCdTicksLeft <= 0) {
                 if (targetFarm != null) {
@@ -188,6 +185,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             else // keep persistently moving towards the target
                 this.setMoveTarget(gatherTarget);
 
+
+
             if (isGathering()) {
                 mob.getLookControl().setLookAt(gatherTarget.getX(), gatherTarget.getY(), gatherTarget.getZ());
                 // replant crops on empty farmland
@@ -224,14 +223,23 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
                             Unit unit = (Unit) mob;
                             unit.getItems().add(new ItemStack(targetResourceSource.items.get(0)));
-                            UnitClientboundPacket.sendSyncResourcesPacket(mob);
+                            UnitClientboundPacket.sendSyncResourcesPacket(unit);
 
                             // if at max resources, go to drop off automatically, then return to this gather goal
                             if (Unit.atMaxResources(unit))
                                 saveAndReturnResources();
+
+                            removeGatherTarget();
                         }
                     }
                 }
+            }
+            else {
+                // track how long we've been
+                if (mob.getNavigation().isDone())
+                    idleTicks += TICK_CD;
+                if (idleTicks >= IDLE_TIMEOUT)
+                    this.removeGatherTarget();
             }
         }
     }
@@ -278,7 +286,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     private boolean isBlockInRange(BlockPos target) {
-        return target.distSqr(new Vec3i(mob.getX(), mob.getEyeY(), mob.getZ())) <= REACH_RANGE_SQR;
+        int reachRangeBonus = Math.min(5, idleTicks / TICK_CD);
+        return target.distToCenterSqr(mob.getX(), mob.getEyeY(), mob.getZ()) <= Math.pow(REACH_RANGE + reachRangeBonus, 2);
     }
 
     // only count as gathering if in range of the target
@@ -321,6 +330,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         targetResourceSource = null;
         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
         searchCdTicksLeft = 0;
+        idleTicks = 0;
     }
 
     // stop gathering and searching entirely, and remove saved data for

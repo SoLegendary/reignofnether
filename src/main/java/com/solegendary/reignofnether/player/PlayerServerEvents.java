@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
@@ -36,7 +37,8 @@ public class PlayerServerEvents {
         players.add((ServerPlayer) evt.getEntity());
 
         for (LivingEntity entity : UnitServerEvents.getAllUnits())
-            UnitClientboundPacket.sendSyncResourcesPacket(entity);
+            if (entity instanceof Unit unit)
+                UnitClientboundPacket.sendSyncResourcesPacket(unit);
     }
 
     @SubscribeEvent

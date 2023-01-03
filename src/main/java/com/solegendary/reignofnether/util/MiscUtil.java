@@ -11,6 +11,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -77,6 +78,16 @@ public class MiscUtil {
                 MC.player.zo - XZRotated.y
         );
     }
+
+    // distance to dropoff point but with more lenient Y range
+    public static boolean isMobInRangeOfPos(BlockPos pos, LivingEntity mob, float range) {
+        Vec2 pos2d = new Vec2(pos.getX() + 0.5f, pos.getZ() + 0.5f);
+        Vec2 mob2d = new Vec2((float) mob.getX(), (float) mob.getZ());
+
+        return pos.distToCenterSqr(mob.getX(), mob.getY(), mob.getZ()) < range * range ||
+                (pos2d.distanceToSqr(mob2d) < range * range && (pos.getY() - mob.getY()) < 16);
+    }
+
 
     public static ArrayList<BlockPos> findAdjacentBlocks(BlockPos originPos, Predicate<BlockPos> condition) {
         ArrayList<BlockPos> adjBps = new ArrayList<>();

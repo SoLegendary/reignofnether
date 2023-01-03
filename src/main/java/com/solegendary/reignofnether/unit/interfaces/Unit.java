@@ -77,7 +77,7 @@ public interface Unit {
                                 if (itemstack.getCount() <= 0)
                                     itementity.discard();
 
-                                UnitClientboundPacket.sendSyncResourcesPacket(unitMob);
+                                UnitClientboundPacket.sendSyncResourcesPacket(unit);
                             }
                             if (Unit.atMaxResources(unit) && unit instanceof WorkerUnit workerUnit) {
                                 GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();

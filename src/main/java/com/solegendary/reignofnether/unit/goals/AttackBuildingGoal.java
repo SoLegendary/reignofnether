@@ -5,8 +5,8 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.PathfinderMob;
 
 import java.util.Random;
@@ -68,7 +68,7 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
     // only count as building if in range of the target - building is actioned in Building.tick()
     public boolean isAttacking() {
         if (buildingTarget != null && this.moveTarget != null)
-            return Math.sqrt(moveTarget.distSqr(new Vec3i(mob.getX(), mob.getY(), mob.getZ()))) < ((AttackerUnit) mob).getAttackRange();
+            return MiscUtil.isMobInRangeOfPos(moveTarget, mob, 2);
         return false;
     }
 

@@ -32,8 +32,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
-import static com.solegendary.reignofnether.unit.UnitClientEvents.getPlayerToEntityRelationship;
-import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
+import static com.solegendary.reignofnether.unit.UnitClientEvents.*;
 
 public class HudClientEvents {
 
@@ -44,6 +43,8 @@ public class HudClientEvents {
     private static final int TEMP_MSG_TICKS_FADE = 50; // ticks left when the msg starts to fade
     private static final int TEMP_MSG_TICKS_MAX = 150; // ticks to show the msg for
     private static final int MAX_BUTTONS_PER_ROW = 5;
+
+    private static int idleWorkerIndex = 0;
 
     private static final ArrayList<Button> genericActionButtonsWorker = new ArrayList<>(Arrays.asList(
             ActionButtons.BUILD_REPAIR,
@@ -638,7 +639,6 @@ public class HudClientEvents {
         // ---------------------
         // Control group buttons
         // ---------------------
-
         blitX = 100;
         // clean up untracked entities/buildings from control groups
         for (ControlGroup controlGroup : controlGroups) {
@@ -651,6 +651,36 @@ public class HudClientEvents {
                 blitX += iconFrameSize;
             }
         }
+
+        // -------------------
+        // Idle workers button
+        // -------------------
+        ArrayList<LivingEntity> idleWorkers = UnitClientEvents.getOwnedIdleWorkers();
+        if (idleWorkers.size() > 0) {
+            Button idleButton = new Button(
+                "Idle workers",
+                iconSize,
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
+                Keybindings.keyK,
+                () -> false,
+                () -> false,
+                () -> true,
+                () -> {
+                    if (idleWorkerIndex >= idleWorkers.size())
+                        idleWorkerIndex = 0;
+                    setSelectedUnits(new ArrayList<>());
+                    LivingEntity worker = idleWorkers.get(idleWorkerIndex);
+                    addSelectedUnit(worker);
+                    OrthoviewClientEvents.centreCameraOnPos(worker.getX(), worker.getZ());
+                    idleWorkerIndex += 1;
+                },
+                null,
+                List.of(FormattedCharSequence.forward("Idle workers: " + idleWorkers.size(), Style.EMPTY)));
+
+            idleButton.render(evt.getPoseStack(), screenWidth - iconFrameSize, screenHeight - 200,  mouseX, mouseY);
+            renderedButtons.add(idleButton);
+        }
+
 
         // ------------------------------------------------------
         // Button tooltips (has to be rendered last to be on top)

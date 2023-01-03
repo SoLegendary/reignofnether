@@ -1,9 +1,6 @@
 
 TODO bugs/features:
 
-java.lang.ClassCastException: class com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit cannot be cast to class com.solegendary.reignofnether.unit.units.villagers.VillagerUnit (com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit and com.solegendary.reignofnether.unit.units.villagers.VillagerUnit are in module reignofnether@1.0 of loader 'TRANSFORMER' @58fa5769)
-	at com.solegendary.reignofnether.unit.units.modelling.VillagerUnitRenderer$1.m_6494_(VillagerUnitRenderer.java:22) ~[reignofnether-1.0.jar%23146!/:1.0] {re:classloading}
-
 Apply required gamerules and terrain generation automatically:
     https://minecraft.fandom.com/wiki/Custom
     - /gamerule randomTickSpeed 12
@@ -14,16 +11,12 @@ Apply required gamerules and terrain generation automatically:
     - remove unwanted biomes: ocean, mesa, extreme hills, jungle
     - no caves
 
-- shift queue building construction
+- rapidly switching control groups while right click moving will cause crash
 
-- keep trying to reduce processing time on gathering
-    - mainly caused by gathering trees (probably due to leaves?)
 
 TODO bugs/features (backlog)
 
-- iron golem crash while selected (see kims crash report)
 - Can't noclip on remote server in orthoview when in creative
-- improve worker search algorithm on returning to gather after dropoffs
 
 1. Arm animations while attacking buildings and gathering resources
 2. Block cracking/particles while gathering resources

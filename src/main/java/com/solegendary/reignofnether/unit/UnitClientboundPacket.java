@@ -44,14 +44,11 @@ public class UnitClientboundPacket {
         );
     }
 
-    public static void sendSyncResourcesPacket(LivingEntity entity) {
-        Resources res = new Resources("", 0,0,0);
-        if (entity instanceof Unit unit)
-            res = Resources.getTotalResourcesFromItems(unit.getItems());
-
+    public static void sendSyncResourcesPacket(Unit unit) {
+        Resources res = Resources.getTotalResourcesFromItems(unit.getItems());
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitClientboundPacket(UnitSyncAction.SYNC_RESOURCES,
-                        entity.getId(), 0,0,0,0,
+                        ((LivingEntity) unit).getId(), 0,0,0,0,
                         res.food, res.wood, res.ore)
         );
     }
