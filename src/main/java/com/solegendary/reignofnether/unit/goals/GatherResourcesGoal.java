@@ -37,7 +37,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private int searchCdTicksLeft = 0;
     private int failedSearches = 0; // number of times we've failed to search for a new block - as this increases slow down or stop searching entirely to prevent lag
     private static final int MAX_FAILED_SEARCHES = 3;
-    private static final int TICK_CD = 10; // only tick down gather time once this many ticks to reduce processing requirements
+    private static final int TICK_CD = 20; // only tick down gather time once this many ticks to reduce processing requirements
     private int cdTicksLeft = TICK_CD;
     public static final int IDLE_TIMEOUT = 100; // if we reach this time without progressing a gather tick while having navigation done, then switch a new target
     public int idleTicks = 0; // only increments serverside
@@ -184,8 +184,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 removeGatherTarget();
             else // keep persistently moving towards the target
                 this.setMoveTarget(gatherTarget);
-
-
 
             if (isGathering()) {
                 mob.getLookControl().setLookAt(gatherTarget.getX(), gatherTarget.getY(), gatherTarget.getZ());

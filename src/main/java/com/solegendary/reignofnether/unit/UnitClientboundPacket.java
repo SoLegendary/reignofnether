@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
@@ -26,21 +27,26 @@ public class UnitClientboundPacket {
     private final int food;
     private final int wood;
     private final int ore;
+    private final boolean idle;
 
     public static void sendLeavePacket(LivingEntity entity) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitClientboundPacket(UnitSyncAction.LEAVE_LEVEL,
-                entity.getId(),0,0,0,0,0,0,0)
+                entity.getId(),0,0,0,0,0,0,0, false)
         );
     }
 
     public static void sendSyncStatsPacket(LivingEntity entity) {
+        boolean isIdle = false;
+        if (entity instanceof WorkerUnit worker)
+            isIdle = WorkerUnit.isIdle(worker);
+
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitClientboundPacket(UnitSyncAction.SYNC_STATS,
                         entity.getId(),
                         entity.getHealth(),
                         entity.getX(), entity.getY(), entity.getZ(),
-                        0,0,0)
+                        0,0,0, isIdle)
         );
     }
 
@@ -49,7 +55,7 @@ public class UnitClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitClientboundPacket(UnitSyncAction.SYNC_RESOURCES,
                         ((LivingEntity) unit).getId(), 0,0,0,0,
-                        res.food, res.wood, res.ore)
+                        res.food, res.wood, res.ore, false)
         );
     }
 
@@ -63,7 +69,8 @@ public class UnitClientboundPacket {
         double posZ,
         int food,
         int wood,
-        int ore
+        int ore,
+        boolean idle
     ) {
         // filter out non-owned entities so we can't control them
         this.syncAction = syncAction;
@@ -75,6 +82,7 @@ public class UnitClientboundPacket {
         this.food = food;
         this.wood = wood;
         this.ore = ore;
+        this.idle = idle;
     }
 
     public UnitClientboundPacket(FriendlyByteBuf buffer) {
@@ -87,6 +95,7 @@ public class UnitClientboundPacket {
         this.food = buffer.readInt();
         this.wood = buffer.readInt();
         this.ore = buffer.readInt();
+        this.idle = buffer.readBoolean();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -99,6 +108,7 @@ public class UnitClientboundPacket {
         buffer.writeInt(this.food);
         buffer.writeInt(this.wood);
         buffer.writeInt(this.ore);
+        buffer.writeBoolean(this.idle);
     }
 
     // client-side packet-consuming functions
@@ -113,7 +123,8 @@ public class UnitClientboundPacket {
                         case SYNC_STATS -> UnitClientEvents.syncUnitStats(
                                 this.entityId,
                                 this.health,
-                                new Vec3(this.posX, this.posY, this.posZ));
+                                new Vec3(this.posX, this.posY, this.posZ),
+                                this.idle);
                         case SYNC_RESOURCES -> UnitClientEvents.syncUnitResources(
                                 this.entityId,
                                 new Resources("", this.food, this.wood, this.ore));

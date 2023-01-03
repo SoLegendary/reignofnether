@@ -18,6 +18,8 @@ public interface WorkerUnit {
     public BuildRepairGoal getBuildRepairGoal();
     public GatherResourcesGoal getGatherResourceGoal();
     public BlockState getReplantBlockState();
+    public boolean isIdle();
+    public void setIdle(boolean idle);
 
     public static void tick(WorkerUnit unit) {
         BuildRepairGoal buildRepairGoal = unit.getBuildRepairGoal();
@@ -33,18 +35,15 @@ public interface WorkerUnit {
         unit.getGatherResourceGoal().stopGathering();
     }
 
+    // only properly works serverside - clientside requires packet updates
     public static boolean isIdle(WorkerUnit unit) {
         GatherResourcesGoal resGoal = unit.getGatherResourceGoal();
 
-        BlockPos bp = ((Unit) unit).getMoveGoal().getMoveTarget();
-        BlockPos onBp = ((LivingEntity) unit).getOnPos();
-        double dist = bp == null ? 0 : bp.distToCenterSqr(onBp.getX() + 0.5f, onBp.getY() + 0.5f, onBp.getZ() + 0.5f);
-        boolean isStationary = dist < 1.5f && resGoal.getMoveTarget() == null;
-
-        boolean isGathering = resGoal.getGatherTarget() != null;
-        boolean isReturning = ((Unit) unit).getReturnResourcesGoal().getBuildingTarget() != null;
+        boolean isMoving = !((PathfinderMob) unit).getNavigation().isDone();
+        boolean isGathering = resGoal.getGatherTarget() != null && resGoal.idleTicks < GatherResourcesGoal.IDLE_TIMEOUT;
+        //boolean isReturning = ((Unit) unit).getReturnResourcesGoal().getBuildingTarget() != null;
         boolean isBuilding = unit.getBuildRepairGoal().getBuildingTarget() != null;
 
-        return isStationary && !isGathering && !isReturning && !isBuilding;
+        return !isMoving && !isGathering && !isBuilding;
     }
 }

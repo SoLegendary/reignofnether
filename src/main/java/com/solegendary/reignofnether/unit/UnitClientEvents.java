@@ -82,7 +82,7 @@ public class UnitClientEvents {
         for (LivingEntity entity : allUnits)
             if (entity instanceof WorkerUnit workerUnit &&
                 getPlayerToEntityRelationship(entity) == Relationship.OWNED &&
-                WorkerUnit.isIdle(workerUnit))
+                workerUnit.isIdle())
                 idleWorkers.add(entity);
         return idleWorkers;
     }
@@ -149,7 +149,7 @@ public class UnitClientEvents {
      * Update data on a unit from serverside, mainly to ensure unit HUD data is up-to-date
      * Only try to update health and pos if out of view
      */
-    public static void syncUnitStats(int entityId, float health, Vec3 pos) {
+    public static void syncUnitStats(int entityId, float health, Vec3 pos, boolean idle) {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 boolean isLoadedClientside = MC.level.getEntity(entityId) != null;
@@ -158,6 +158,8 @@ public class UnitClientEvents {
                     entity.setPos(pos);
                 }
             }
+            if (entity instanceof WorkerUnit workerUnit)
+                workerUnit.setIdle(idle);
         }
     }
 

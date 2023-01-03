@@ -230,7 +230,7 @@ public class BuildingClientEvents {
                 }
             }
         }
-        float minBlocksBelow = 0.75f;
+        float minBlocksBelow = 0.7f;
 
         if (blocksBelow <= 0) return false; // avoid division by 0
         return ((float) solidBlocksBelow / (float) blocksBelow) < minBlocksBelow;
