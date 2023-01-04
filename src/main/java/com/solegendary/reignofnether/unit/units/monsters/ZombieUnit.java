@@ -1,5 +1,9 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -7,6 +11,8 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -21,10 +27,13 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
     // region
@@ -123,12 +132,26 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE, 0); // needs to be added for parent to work
     }
 
+    private final ObjectArrayList<AABB> renderChunksInFrustum = new ObjectArrayList<>(10000);
+
     public void tick() {
         this.setCanPickUpLoot(true);
 
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+
+        Predicate<Building> condition = (b) -> {
+            BlockPos bp = BuildingUtils.getCentrePos(b.getBlocks());
+            Vec3 buildingPos = new Vec3(bp.getX(), bp.getY(), bp.getZ());
+            return b.name.equals(Mausoleum.buildingName) &&
+                this.position().distanceToSqr(buildingPos) < Math.pow(Mausoleum.sunScreenDist, 2);
+        };
+        if (!this.level.isClientSide() && this.isOnFire()) {
+            Building mausoleumInRange = BuildingUtils.findClosestBuilding(BuildingServerEvents.getBuildings(), this.position(), condition);
+            if (mausoleumInRange != null)
+                this.setRemainingFireTicks(0);
+        }
     }
 
     public void initialiseGoals() {

@@ -11,12 +11,16 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
 import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -26,10 +30,12 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
@@ -37,6 +43,8 @@ public class Stockpile extends ProductionBuilding {
 
     public final static String buildingName = "Stockpile";
     public final static String structureName = "stockpile";
+
+    public ResourceName mostAbundantNearbyResource = ResourceName.NONE;
 
     public Stockpile(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName);
@@ -54,6 +62,8 @@ public class Stockpile extends ProductionBuilding {
         this.canSetRallyPoint = false;
 
         this.startingBlockTypes.add(Blocks.OAK_LOG);
+
+        this.findMostAbundantNearbyResource();
 
         if (level.isClientSide()) {
             this.productionButtons = Arrays.asList(
@@ -86,6 +96,56 @@ public class Stockpile extends ProductionBuilding {
                 ),
                 null
         );
+    }
+
+    public void findMostAbundantNearbyResource() {
+
+        int nearbyFoodBlocks = 0;
+        int nearbyWoodBlocks = 0;
+        int nearbyOreBlocks = 0;
+
+        for (ResourceName resourceName : List.of(ResourceName.FOOD, ResourceName.WOOD, ResourceName.ORE)) {
+
+            Predicate<BlockPos> BLOCK_CONDITION = bp -> {
+                BlockState bs = getLevel().getBlockState(bp);
+                BlockState bsAbove = getLevel().getBlockState(bp.above());
+                ResourceSource resBlock = ResourceSources.getFromBlockPos(bp, getLevel());
+
+                // is a valid resource block and meets the target ResourceSource's blockstate condition
+                if (resBlock == null || resBlock.resourceName != resourceName || resBlock.name.equals("Leaves") || resBlock.name.equals("Farmland"))
+                    return false;
+                if (!resBlock.blockStateTest.test(bs))
+                    return false;
+
+                    // is not part of a building (unless farming)
+                else if (BuildingUtils.isPosInsideAnyBuilding(getLevel(), bp))
+                    return false;
+
+                // not covered by solid blocks
+                boolean hasClearNeighbour = false;
+                for (BlockPos adjBp : List.of(bp.north(), bp.south(), bp.east(), bp.west(), bp.above(), bp.below()))
+                    if (ResourceSources.CLEAR_MATERIALS.contains(getLevel().getBlockState(adjBp).getMaterial()))
+                        hasClearNeighbour = true;
+                if (!hasClearNeighbour)
+                    return false;
+
+                return true;
+            };
+
+            for (BlockPos bp : BlockPos.withinManhattan(BuildingUtils.getCentrePos(blocks), 10, 5, 10))
+                if (BLOCK_CONDITION.test(bp))
+                    switch(resourceName) {
+                        case FOOD -> nearbyFoodBlocks += 1;
+                        case WOOD -> nearbyWoodBlocks += 1;
+                        case ORE -> nearbyOreBlocks += 1;
+                    }
+        }
+        if (nearbyFoodBlocks > 0 && nearbyFoodBlocks >= nearbyWoodBlocks && nearbyFoodBlocks >= nearbyOreBlocks)
+            this.mostAbundantNearbyResource = ResourceName.FOOD;
+        if (nearbyWoodBlocks > 0 && nearbyWoodBlocks >= nearbyFoodBlocks && nearbyWoodBlocks >= nearbyOreBlocks)
+            this.mostAbundantNearbyResource = ResourceName.WOOD;
+        if (nearbyOreBlocks > 0 && nearbyOreBlocks >= nearbyFoodBlocks && nearbyOreBlocks >= nearbyWoodBlocks)
+            this.mostAbundantNearbyResource = ResourceName.ORE;
     }
 
     // collect items placed manually inside the chests by players

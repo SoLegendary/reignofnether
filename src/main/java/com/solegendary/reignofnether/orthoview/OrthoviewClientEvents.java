@@ -30,6 +30,7 @@ import static net.minecraft.util.Mth.sign;
  */
 public class OrthoviewClientEvents {
 
+    public static int enabledCount = 0;
     public static boolean enabled = false;
     private static boolean cameraMovingByMouse = false; // excludes edgepanning
 
@@ -109,6 +110,7 @@ public class OrthoviewClientEvents {
         enabled = !enabled;
 
         if (enabled) {
+            enabledCount += 1;
             PlayerServerboundPacket.enableOrthoview();
             MinimapClientEvents.setMapCentre(MC.player.getX(), MC.player.getZ());
             PlayerServerboundPacket.teleportPlayer(MC.player.getX(), setPlayerY, MC.player.getZ());

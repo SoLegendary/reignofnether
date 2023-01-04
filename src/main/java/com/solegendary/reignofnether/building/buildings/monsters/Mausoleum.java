@@ -25,6 +25,7 @@ public class Mausoleum extends ProductionBuilding {
 
     public final static String buildingName = "Mausoleum";
     public final static String structureName = "mausoleum";
+    public final static int sunScreenDist = 30;
 
     public Mausoleum(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName);

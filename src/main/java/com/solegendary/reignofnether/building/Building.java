@@ -357,6 +357,10 @@ public abstract class Building {
         }
     }
 
+    public void onBuilt() {
+        isBuilt = true;
+    }
+
     public void tick(Level tickLevel) {
         this.tickAge += 1;
 
@@ -372,7 +376,7 @@ public abstract class Building {
         float blocksTotal = getBlocksTotal();
 
         if (blocksPlaced >= blocksTotal && !isBuilt)
-            isBuilt = true;
+            this.onBuilt();
 
         if (tickLevel.isClientSide()) {
             if (blockPlaceQueue.size() > 0)

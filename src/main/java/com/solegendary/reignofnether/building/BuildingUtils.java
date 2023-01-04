@@ -10,10 +10,12 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class BuildingUtils {
 
@@ -124,5 +126,22 @@ public class BuildingUtils {
             if (building.isPosInsideBuilding(bp))
                 return true;
         return false;
+    }
+
+    public static Building findClosestBuilding(ArrayList<Building> buildings, Vec3 pos, Predicate<Building> condition) {
+        double closestDist = 9999;
+        Building closestBuilding = null;
+        for (Building building : buildings) {
+            if (condition.test(building)) {
+                BlockPos bp = BuildingUtils.getCentrePos(building.getBlocks());
+                Vec3 bpVec3 = new Vec3(bp.getX(), bp.getY(), bp.getZ());
+                double dist = bpVec3.distanceToSqr(pos);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestBuilding = building;
+                }
+            }
+        }
+        return closestBuilding;
     }
 }

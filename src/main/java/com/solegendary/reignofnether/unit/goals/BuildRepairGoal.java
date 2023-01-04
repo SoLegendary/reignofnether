@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -33,6 +34,10 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
                 if (buildingTarget.name.contains(" Farm") && mob instanceof WorkerUnit workerUnit) {
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetResourceName(ResourceName.FOOD);
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetFarm(buildingTarget);
+                }
+                // look for the nearest resource to gather after completing a stockpile
+                if (buildingTarget instanceof Stockpile stockpile && !buildingTarget.isBuilt && mob instanceof WorkerUnit workerUnit) {
+                    ((WorkerUnit) mob).getGatherResourceGoal().setTargetResourceName(stockpile.mostAbundantNearbyResource);
                 }
                 stopBuilding();
             }
