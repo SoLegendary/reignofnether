@@ -246,11 +246,6 @@ public class UnitServerEvents {
                 evt.setCanceled(true);
     }
 
-    //@SubscribeEvent
-    //public static void onLivingKnockback(LivingKnockBackEvent evt) {
-
-    //}
-
     // prevent friendly fire from ranged units (unless specifically targeted)
     // (just allows piercing, damage is cancelled in LivingDamageEvent)
     @SubscribeEvent
