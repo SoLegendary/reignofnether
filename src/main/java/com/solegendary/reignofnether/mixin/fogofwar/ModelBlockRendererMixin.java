@@ -1,52 +1,51 @@
 package com.solegendary.reignofnether.mixin.fogofwar;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
-import it.unimi.dsi.fastutil.longs.Long2FloatLinkedOpenHashMap;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ModelBlockRenderer.Cache.class)
+import javax.annotation.Nullable;
+import java.util.BitSet;
+import java.util.List;
+
+// brightness shading for blocks excluding liquids and flat flace blocks (like tall grass)
+
+@Mixin(ModelBlockRenderer.class)
 public abstract class ModelBlockRendererMixin {
 
-    @Shadow private boolean enabled;
-    @Final @Shadow private Long2FloatLinkedOpenHashMap brightnessCache;
+    @Shadow private void calculateShape(BlockAndTintGetter pLevel, BlockState pState, BlockPos pPos, int[] pVertices, Direction pDirection, @Nullable float[] pShape, BitSet pShapeFlags) {}
+    @Shadow private void putQuadData(BlockAndTintGetter pLevel, BlockState pState, BlockPos pPos, VertexConsumer pConsumer, PoseStack.Pose pPose, BakedQuad pQuad, float pBrightness0, float pBrightness1, float pBrightness2, float pBrightness3, int pLightmap0, int pLightmap1, int pLightmap2, int pLightmap3, int pPackedOverlay) {}
 
     @Inject(
-            method = "getShadeBrightness",
-            at = @At("HEAD"),
-            cancellable = true
+        method = "renderModelFaceFlat",
+        at = @At("HEAD"),
+        cancellable = true
     )
-    public void getShadeBrightness(BlockState pState, BlockAndTintGetter pLevel, BlockPos pPos, CallbackInfoReturnable<Float> cir) {
-        cir.cancel();
+    private void renderModelFaceFlat(BlockAndTintGetter pLevel, BlockState pState, BlockPos pPos, int pPackedLight, int pPackedOverlay, boolean pRepackLight,
+                                     PoseStack pPoseStack, VertexConsumer pConsumer, List<BakedQuad> pQuads, BitSet pShapeFlags, CallbackInfo ci) {
+        ci.cancel();
 
-        float brightnessMulti = FogOfWarClientEvents.brightnessMulti;
-
-        long i = pPos.asLong();
-        if (this.enabled) {
-            float f = this.brightnessCache.get(i);
-            if (!Float.isNaN(f)) {
-                cir.setReturnValue(f);
-            }
-        }
-
-        float f1 = pState.getShadeBrightness(pLevel, pPos);
-        if (this.enabled) {
-            if (this.brightnessCache.size() == 100) {
-                this.brightnessCache.removeFirstFloat();
+        for(BakedQuad bakedquad : pQuads) {
+            if (pRepackLight) {
+                this.calculateShape(pLevel, pState, pPos, bakedquad.getVertices(), bakedquad.getDirection(), null, pShapeFlags);
+                BlockPos blockpos = pShapeFlags.get(0) ? pPos.relative(bakedquad.getDirection()) : pPos;
+                pPackedLight = LevelRenderer.getLightColor(pLevel, pState, blockpos);
             }
 
-            this.brightnessCache.put(i, f1 * brightnessMulti);
+            float f = pLevel.getShade(bakedquad.getDirection(), bakedquad.isShade()) * FogOfWarClientEvents.getPosBrightness(pPos);
+            this.putQuadData(pLevel, pState, pPos, pConsumer, pPoseStack.last(), bakedquad, f, f, f, f, pPackedLight, pPackedLight, pPackedLight, pPackedLight, pPackedOverlay);
         }
-
-        // TODO: need to mark chunks as dirty to actually update their brightness
-        cir.setReturnValue(f1 * brightnessMulti);
     }
 }

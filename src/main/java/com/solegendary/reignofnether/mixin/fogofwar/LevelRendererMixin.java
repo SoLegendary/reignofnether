@@ -44,6 +44,9 @@ public abstract class LevelRendererMixin {
     @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
     @Final @Shadow private Minecraft minecraft;
 
+    // any chunkInfo objects added to renderChunksInFrustum will be rendered
+    // we can collect old chunk data here to render them in their past state
+
     @Inject(
         method = "applyFrustum(Lnet/minecraft/client/renderer/culling/Frustum;)V",
         at = @At("HEAD"),
@@ -53,7 +56,6 @@ public abstract class LevelRendererMixin {
         if (OrthoviewClientEvents.enabledCount <= 0)
             return;
 
-        /*
         ci.cancel();
 
         if (!Minecraft.getInstance().isSameThread()) {
@@ -64,30 +66,26 @@ public abstract class LevelRendererMixin {
 
             LinkedHashSet<LevelRenderer.RenderChunkInfo> renderChunkInfos = (this.renderChunkStorage.get()).renderChunks;
 
+            FogOfWarClientEvents.brightChunks.clear();
+
             for(LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos) {
                 if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox())) {
 
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
-
                         Vec3 centre = chunkInfo.chunk.bb.getCenter();
                         Vec2 centre2d = new Vec2((float) centre.x(), (float) centre.z());
                         Vec2 entity2d = new Vec2((float) entity.getX(), (float) entity.getZ());
 
-                        if (entity2d.distanceToSqr(centre2d) < 900) {
-                            this.renderChunksInFrustum.add(chunkInfo);
-                            if (FogOfWarClientEvents.oldChunks.size() < 10)
-                                FogOfWarClientEvents.oldChunks.add(chunkInfo);
+                        if (entity2d.distanceToSqr(centre2d) < 2500) {
+                            FogOfWarClientEvents.brightChunks.add(chunkInfo);
                             break;
                         }
                     }
+                    this.renderChunksInFrustum.add(chunkInfo);
                 }
             }
-            //for (LevelRenderer.RenderChunkInfo oldChunk : FogOfWarClientEvents.oldChunks)
-            //    this.renderChunksInFrustum.add(oldChunk);
-
             this.minecraft.getProfiler().pop();
         }
-         */
     }
 
 
@@ -112,9 +110,6 @@ public abstract class LevelRendererMixin {
         List<ChunkRenderDispatcher.RenderChunk> list = Lists.newArrayList();
 
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
-
-            if (FogOfWarClientEvents.oldChunks.contains(chunkInfo))
-                continue;
 
             ChunkRenderDispatcher.RenderChunk renderChunk = chunkInfo.chunk;
             ChunkPos chunkpos = new ChunkPos(renderChunk.getOrigin());
@@ -163,34 +158,5 @@ public abstract class LevelRendererMixin {
             return;
 
         needsFrustumUpdate.set(true);
-    }
-
-
-    @Inject(
-        method = "getLightColor(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;)I",
-        at = @At("HEAD"),
-        cancellable = true
-    )
-    private static void getLightColor(BlockAndTintGetter pLevel, BlockState pState, BlockPos pPos, CallbackInfoReturnable<Integer> cir) {
-        if (OrthoviewClientEvents.enabledCount <= 0)
-            return;
-
-        /*
-        int light = 0;
-
-        if (pState.emissiveRendering(pLevel, pPos)) {
-            light = 15728880;
-        } else {
-            int i = pLevel.getBrightness(LightLayer.SKY, pPos);
-            int j = pLevel.getBrightness(LightLayer.BLOCK, pPos);
-            int k = pState.getLightEmission(pLevel, pPos);
-            if (j < k) {
-                j = k;
-            }
-            light = i << 20 | j << 4;
-        }
-
-        cir.setReturnValue(light);
-         */
     }
 }
