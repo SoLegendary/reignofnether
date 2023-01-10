@@ -19,6 +19,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
@@ -32,7 +33,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -53,8 +56,8 @@ public abstract class LevelRendererMixin {
         cancellable = true
     )
     private void applyFrustum(Frustum pFrustum, CallbackInfo ci) {
-        if (OrthoviewClientEvents.enabledCount <= 0)
-            return;
+        //if (OrthoviewClientEvents.enabledCount <= 0)
+        //    return;
 
         ci.cancel();
 
@@ -66,24 +69,50 @@ public abstract class LevelRendererMixin {
 
             LinkedHashSet<LevelRenderer.RenderChunkInfo> renderChunkInfos = (this.renderChunkStorage.get()).renderChunks;
 
-            FogOfWarClientEvents.brightChunks.clear();
+            Set<ChunkRenderDispatcher.RenderChunk> oldBrightChunks = FogOfWarClientEvents.brightChunks;
+            Set<ChunkRenderDispatcher.RenderChunk> newBrightChunks = ConcurrentHashMap.newKeySet();
 
-            for(LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos) {
+            for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos) {
                 if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox())) {
+                    this.renderChunksInFrustum.add(chunkInfo);
 
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
                         Vec3 centre = chunkInfo.chunk.bb.getCenter();
                         Vec2 centre2d = new Vec2((float) centre.x(), (float) centre.z());
                         Vec2 entity2d = new Vec2((float) entity.getX(), (float) entity.getZ());
 
-                        if (entity2d.distanceToSqr(centre2d) < 2500) {
-                            FogOfWarClientEvents.brightChunks.add(chunkInfo);
+                        if (entity2d.distanceToSqr(centre2d) < 900) {
+                            newBrightChunks.add(chunkInfo.chunk);
+                            FogOfWarClientEvents.semiDarkChunks.add(chunkInfo.chunk);
                             break;
                         }
                     }
-                    this.renderChunksInFrustum.add(chunkInfo);
                 }
             }
+
+            if (!newBrightChunks.equals(oldBrightChunks)) {
+                // chunks just added to brightChunks
+                Set<ChunkRenderDispatcher.RenderChunk> diff1 = ConcurrentHashMap.newKeySet();
+                diff1.addAll(newBrightChunks);
+                diff1.removeAll(oldBrightChunks);
+
+                // chunks just removed from brightChunks
+                Set<ChunkRenderDispatcher.RenderChunk> diff2 = ConcurrentHashMap.newKeySet();
+                diff2.addAll(oldBrightChunks);
+                diff2.removeAll(newBrightChunks);
+
+                // symmetric difference (ie. items that appear in only one of the sets and not both)
+                diff1.addAll(diff2);
+                diff1.forEach(c -> {
+                    c.setDirty(true);
+                    c.playerChanged = true;
+                });
+
+                FogOfWarClientEvents.brightChunks.clear();
+                FogOfWarClientEvents.brightChunks.addAll(newBrightChunks);
+            }
+
+
             this.minecraft.getProfiler().pop();
         }
     }
