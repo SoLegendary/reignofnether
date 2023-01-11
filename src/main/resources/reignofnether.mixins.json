@@ -12,6 +12,8 @@
     ],
     "minVersion": "0.8",
     "client": [
+        "fogofwar.ChunkRenderDispatcherMixin",
+        "fogofwar.ClientLevelMixin",
         "fogofwar.LevelRendererMixin",
         "fogofwar.LiquidBlockRendererMixin",
         "fogofwar.ModelBlockRendererCacheMixin",
