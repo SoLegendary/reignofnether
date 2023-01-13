@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.mixin.fogofwar;
 
 import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Camera;
@@ -17,8 +19,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +41,8 @@ public abstract class LevelRendererMixin {
     @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
     @Final @Shadow private Minecraft minecraft;
 
+    private static final int CHUNK_VIEW_DIST = 1;
+
     // any chunkInfo objects added to renderChunksInFrustum will be rendered
     // we can collect old chunk data here to render them in their past state
 
@@ -49,8 +52,8 @@ public abstract class LevelRendererMixin {
         cancellable = true
     )
     private void applyFrustum(Frustum pFrustum, CallbackInfo ci) {
-        //if (OrthoviewClientEvents.enabledCount <= 0)
-        //    return;
+        if (this.minecraft.level == null)
+            return;
 
         ci.cancel();
 
@@ -69,12 +72,15 @@ public abstract class LevelRendererMixin {
                 if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox())) {
                     this.renderChunksInFrustum.add(chunkInfo);
 
-                    for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
-                        Vec3 centre = chunkInfo.chunk.bb.getCenter();
-                        Vec2 centre2d = new Vec2((float) centre.x(), (float) centre.z());
-                        Vec2 entity2d = new Vec2((float) entity.getX(), (float) entity.getZ());
+                    ChunkPos chunkPos1 = this.minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
 
-                        if (entity2d.distanceToSqr(centre2d) < 900) {
+                    for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+                        if (UnitClientEvents.getPlayerToEntityRelationship(entity) != Relationship.OWNED)
+                            continue;
+
+                        ChunkPos chunkPos2 = this.minecraft.level.getChunk(entity.getOnPos()).getPos();
+
+                        if (chunkPos1.getChessboardDistance(chunkPos2) <= CHUNK_VIEW_DIST) {
                             newBrightChunks.add(chunkInfo);
                             this.renderChunksInFrustum.add(chunkInfo);
                             break;
@@ -83,10 +89,10 @@ public abstract class LevelRendererMixin {
                 }
             }
 
-            List<AABB> exploredAABBs = FogOfWarClientEvents.exploredChunks.stream().map((c) -> c.chunk.bb).toList();
+            List<AABB> exploredAABBs = FogOfWarClientEvents.exploredChunks.stream().map(p -> p.getFirst().chunk.bb).toList();
             for (LevelRenderer.RenderChunkInfo chunkInfo : newBrightChunks)
                 if (!exploredAABBs.contains(chunkInfo.chunk.bb)) {
-                    FogOfWarClientEvents.exploredChunks.add(chunkInfo);
+                    FogOfWarClientEvents.exploredChunks.add(new Pair<>(chunkInfo, 1));
                     System.out.println("added chunkInfo " + FogOfWarClientEvents.exploredChunks.size());
                 }
 
@@ -100,6 +106,16 @@ public abstract class LevelRendererMixin {
                 Set<LevelRenderer.RenderChunkInfo> diff2 = ConcurrentHashMap.newKeySet();
                 diff2.addAll(oldBrightChunks);
                 diff2.removeAll(newBrightChunks);
+
+                // reset their rendered flag so they revert to semi-darkness
+                FogOfWarClientEvents.exploredChunks.removeIf(p -> {
+                    for (LevelRenderer.RenderChunkInfo chunkInfo : diff2)
+                        if (chunkInfo.chunk.bb.equals(p.getFirst().chunk.bb))
+                            return true;
+                    return false;
+                });
+                for (LevelRenderer.RenderChunkInfo chunkInfo : diff2)
+                    FogOfWarClientEvents.exploredChunks.add(new Pair<>(chunkInfo, 1));
 
                 // symmetric difference (ie. items that appear in only one of the sets and not both)
                 diff1.addAll(diff2);
@@ -115,7 +131,6 @@ public abstract class LevelRendererMixin {
             this.minecraft.getProfiler().pop();
         }
     }
-
 
 
     @Shadow private ChunkRenderDispatcher chunkRenderDispatcher;
@@ -137,18 +152,23 @@ public abstract class LevelRendererMixin {
         BlockPos blockpos = pCamera.getBlockPosition();
         List<ChunkRenderDispatcher.RenderChunk> list = Lists.newArrayList();
 
-        List<AABB> brightAABBs = FogOfWarClientEvents.brightChunks.stream().map((c) -> c.chunk.bb).toList();
-        List<AABB> exploredAABBs = FogOfWarClientEvents.exploredChunks.stream().map((c) -> c.chunk.bb).toList();
+        List<AABB> brightAABBs = FogOfWarClientEvents.brightChunks.stream().map(c -> c.chunk.bb).toList();
+        List<Pair<LevelRenderer.RenderChunkInfo, Integer>> exploredChunksToMarkAsRendered = new ArrayList<>();
 
+        outerLoop:
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
-
-            // if we skip a chunk here that chunk retains its old view
-            // this should only ever be done to explored blocks that not currently bright
-            // TODO: works but old chunks are also rendered with their old brightness (ie. full brightness)
-            //  1. maybe only add to exploredChunks once out of view using diff2
-            if (exploredAABBs.contains(chunkInfo.chunk.bb) &&
-                !brightAABBs.contains(chunkInfo.chunk.bb))
-                continue;
+            if (!brightAABBs.contains(chunkInfo.chunk.bb)) {
+                // exploredChunks contains the bb and shouldBeRendered is false
+                for (Pair<LevelRenderer.RenderChunkInfo, Integer> pair : FogOfWarClientEvents.exploredChunks) {
+                    if (pair.getFirst().chunk.bb.equals(chunkInfo.chunk.bb)) {
+                        if (pair.getSecond() <= 0)
+                            continue outerLoop; // skip rendering this entirely, causes the chunk to retain its old view
+                        else {
+                            exploredChunksToMarkAsRendered.add(pair); // render this and mark as rendered
+                        }
+                    }
+                }
+            }
 
             ChunkRenderDispatcher.RenderChunk renderChunk = chunkInfo.chunk;
             ChunkPos chunkpos = new ChunkPos(renderChunk.getOrigin());
@@ -184,6 +204,12 @@ public abstract class LevelRendererMixin {
         }
 
         this.minecraft.getProfiler().pop();
+
+        // mark all chunks that just left the bright region as rendered
+        for (Pair<LevelRenderer.RenderChunkInfo, Integer> pair : exploredChunksToMarkAsRendered) {
+            if (FogOfWarClientEvents.exploredChunks.remove(pair))
+                FogOfWarClientEvents.exploredChunks.add(new Pair<>(pair.getFirst(), pair.getSecond() - 1));
+        }
     }
 
     @Shadow @Final private AtomicBoolean needsFrustumUpdate = new AtomicBoolean(false);

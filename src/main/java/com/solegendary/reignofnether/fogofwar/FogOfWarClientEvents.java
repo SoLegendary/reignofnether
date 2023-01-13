@@ -1,14 +1,19 @@
 package com.solegendary.reignofnether.fogofwar;
 
+import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -23,7 +28,8 @@ public class FogOfWarClientEvents {
 
     // chunks that have been in range of a unit or building before
     // if out of immediate view will be rendered with semi brightness and at its past state
-    public static final Set<LevelRenderer.RenderChunkInfo> exploredChunks = ConcurrentHashMap.newKeySet();
+    // Boolean is 'shouldBeRendered' so we render it once to update the brightness
+    public static final Set<Pair<LevelRenderer.RenderChunkInfo, Integer>> exploredChunks = ConcurrentHashMap.newKeySet();
 
     // TODO: fix smooth lighting shading issue in QuadLighter.process
     // 1. maybe have a static flag to change ClientLevel.shade brightness (since it doesn't get pos data) before call
@@ -41,10 +47,14 @@ public class FogOfWarClientEvents {
         for (LevelRenderer.RenderChunkInfo chunkInfo : brightChunks)
             if (chunkInfo.chunk.bb.contains(pPos.getX(), pPos.getY(), pPos.getZ()))
                 return BRIGHT_CHUNK_BRIGHTNESS;
-        for (LevelRenderer.RenderChunkInfo chunkInfo : exploredChunks)
-            if (chunkInfo.chunk.bb.contains(pPos.getX(), pPos.getY(), pPos.getZ()))
+        for (Pair<LevelRenderer.RenderChunkInfo, Integer> pair : exploredChunks)
+            if (pair.getFirst().chunk.bb.contains(pPos.getX(), pPos.getY(), pPos.getZ()))
                 return SEMI_DARK_CHUNK_BRIGHTNESS;
         return DARK_CHUNK_BRIGHTNESS;
+    }
+
+    public static int chunkManhattanDist(ChunkPos pos1, ChunkPos pos2) {
+        return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.z - pos2.z);
     }
 
     @SubscribeEvent

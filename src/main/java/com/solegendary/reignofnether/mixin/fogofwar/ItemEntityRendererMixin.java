@@ -1,0 +1,44 @@
+package com.solegendary.reignofnether.mixin.fogofwar;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import it.unimi.dsi.fastutil.longs.Long2FloatLinkedOpenHashMap;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.entity.ItemEntityRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+// brightness shading for blocks excluding liquids and flat flace blocks (like tall grass)
+
+@Mixin(ItemEntityRenderer.class)
+public abstract class ItemEntityRendererMixin {
+
+    @Inject(
+            method = "render(Lnet/minecraft/world/entity/item/ItemEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    public void render(ItemEntity pEntity, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight, CallbackInfo ci) {
+        boolean shouldRender = false;
+        BlockPos bp = pEntity.getOnPos();
+        for (LevelRenderer.RenderChunkInfo chunkInfo : FogOfWarClientEvents.brightChunks) {
+            if (chunkInfo.chunk.bb.contains(bp.getX(), bp.getY(), bp.getZ())) {
+                shouldRender = true;
+                break;
+            }
+        }
+        if (!shouldRender)
+            ci.cancel();
+    }
+}
