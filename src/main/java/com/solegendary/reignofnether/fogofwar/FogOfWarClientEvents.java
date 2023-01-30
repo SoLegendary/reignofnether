@@ -5,18 +5,16 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec2;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,7 +27,10 @@ public class FogOfWarClientEvents {
     // chunks that have been in range of a unit or building before
     // if out of immediate view will be rendered with semi brightness and at its past state
     // Boolean is 'shouldBeRendered' so we render it once to update the brightness
-    public static final Set<Pair<LevelRenderer.RenderChunkInfo, Integer>> exploredChunks = ConcurrentHashMap.newKeySet();
+    public static final Set<Pair<LevelRenderer.RenderChunkInfo, Boolean>> exploredChunks = ConcurrentHashMap.newKeySet();
+
+    // if false, disables ALL mixins related to fog of war
+    private static boolean enabled = true;
 
     // TODO: fix smooth lighting shading issue in QuadLighter.process
     // 1. maybe have a static flag to change ClientLevel.shade brightness (since it doesn't get pos data) before call
@@ -43,18 +44,57 @@ public class FogOfWarClientEvents {
 
     public static Minecraft MC = Minecraft.getInstance();
 
+    @SubscribeEvent
+    // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
+    public static void onInput(InputEvent.Key evt) {
+        if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
+            if (evt.getKey() == Keybindings.getFnum(8).key)
+                setEnabled(!enabled);
+        }
+    }
+
+    public static boolean isEnabled() {
+        return enabled;
+    }
+    public static void setEnabled(boolean value) {
+        enabled = value;
+        if (enabled) {
+            brightChunks.clear();
+            exploredChunks.clear();
+        }
+        // reload chunks like player pressed F3 + A
+        MC.levelRenderer.allChanged();
+    }
+
     public static float getPosBrightness(BlockPos pPos) {
-        for (LevelRenderer.RenderChunkInfo chunkInfo : brightChunks)
-            if (chunkInfo.chunk.bb.contains(pPos.getX(), pPos.getY(), pPos.getZ()))
-                return BRIGHT_CHUNK_BRIGHTNESS;
-        for (Pair<LevelRenderer.RenderChunkInfo, Integer> pair : exploredChunks)
-            if (pair.getFirst().chunk.bb.contains(pPos.getX(), pPos.getY(), pPos.getZ()))
-                return SEMI_DARK_CHUNK_BRIGHTNESS;
+        if (!isEnabled())
+            return BRIGHT_CHUNK_BRIGHTNESS;
+
+        if (isInBrightChunk(pPos))
+            return BRIGHT_CHUNK_BRIGHTNESS;
+
+        if (isInExploredChunk(pPos))
+            return SEMI_DARK_CHUNK_BRIGHTNESS;
+
         return DARK_CHUNK_BRIGHTNESS;
     }
 
     public static int chunkManhattanDist(ChunkPos pos1, ChunkPos pos2) {
         return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.z - pos2.z);
+    }
+
+    public static boolean isInBrightChunk(BlockPos bp) {
+        for (LevelRenderer.RenderChunkInfo chunkInfo : brightChunks)
+            if (chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
+                return true;
+        return false;
+    }
+
+    public static boolean isInExploredChunk(BlockPos bp) {
+        for (Pair<LevelRenderer.RenderChunkInfo, Boolean> pair : exploredChunks)
+            if (pair.getFirst().chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
+                return true;
+        return false;
     }
 
     @SubscribeEvent
@@ -81,11 +121,13 @@ public class FogOfWarClientEvents {
     @SubscribeEvent
     // hudSelectedEntity and portraitRendererUnit should be assigned in the same event to avoid desyncs
     public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
-        for (LevelRenderer.RenderChunkInfo chunkInfo : brightChunks) {
-            BlockPos bp = evt.getEntity().getOnPos();
-            if (chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
-                return;
-        }
+        if (!isEnabled())
+            return;
+
+        // don't render entities in non-bright chunks
+        if (isInBrightChunk(evt.getEntity().getOnPos()))
+            return;
+
         evt.setCanceled(true);
     }
 }

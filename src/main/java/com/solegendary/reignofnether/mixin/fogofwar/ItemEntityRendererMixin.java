@@ -30,14 +30,15 @@ public abstract class ItemEntityRendererMixin {
             cancellable = true
     )
     public void render(ItemEntity pEntity, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight, CallbackInfo ci) {
+        if (!FogOfWarClientEvents.isEnabled())
+            return;
+
         boolean shouldRender = false;
         BlockPos bp = pEntity.getOnPos();
-        for (LevelRenderer.RenderChunkInfo chunkInfo : FogOfWarClientEvents.brightChunks) {
-            if (chunkInfo.chunk.bb.contains(bp.getX(), bp.getY(), bp.getZ())) {
-                shouldRender = true;
-                break;
-            }
-        }
+
+        if (FogOfWarClientEvents.isInBrightChunk(pEntity.getOnPos()))
+            shouldRender = true;
+
         if (!shouldRender)
             ci.cancel();
     }

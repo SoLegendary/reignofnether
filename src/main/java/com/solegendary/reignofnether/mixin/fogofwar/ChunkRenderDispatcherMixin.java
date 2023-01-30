@@ -46,13 +46,14 @@ public abstract class ChunkRenderDispatcherMixin {
         cancellable = true
     )
     private void getRenderableBlockEntities(CallbackInfoReturnable<List<BlockEntity>> cir) {
+        if (!FogOfWarClientEvents.isEnabled())
+            return;
 
         List<BlockEntity> blockEntities = new ArrayList<>();
 
         for (BlockEntity be : renderableBlockEntities)
-            for (LevelRenderer.RenderChunkInfo chunkInfo : FogOfWarClientEvents.brightChunks)
-                if (chunkInfo.chunk.bb.contains(be.getBlockPos().getX(), be.getBlockPos().getY(), be.getBlockPos().getZ()))
-                    blockEntities.add(be);
+            if (FogOfWarClientEvents.isInBrightChunk(be.getBlockPos()))
+                blockEntities.add(be);
 
         cir.setReturnValue(blockEntities);
     }

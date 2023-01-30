@@ -45,7 +45,6 @@ public abstract class LevelRendererMixin {
 
     // any chunkInfo objects added to renderChunksInFrustum will be rendered
     // we can collect old chunk data here to render them in their past state
-
     @Inject(
         method = "applyFrustum(Lnet/minecraft/client/renderer/culling/Frustum;)V",
         at = @At("HEAD"),
@@ -82,7 +81,6 @@ public abstract class LevelRendererMixin {
 
                         if (chunkPos1.getChessboardDistance(chunkPos2) <= CHUNK_VIEW_DIST) {
                             newBrightChunks.add(chunkInfo);
-                            this.renderChunksInFrustum.add(chunkInfo);
                             break;
                         }
                     }
@@ -92,7 +90,7 @@ public abstract class LevelRendererMixin {
             List<AABB> exploredAABBs = FogOfWarClientEvents.exploredChunks.stream().map(p -> p.getFirst().chunk.bb).toList();
             for (LevelRenderer.RenderChunkInfo chunkInfo : newBrightChunks)
                 if (!exploredAABBs.contains(chunkInfo.chunk.bb)) {
-                    FogOfWarClientEvents.exploredChunks.add(new Pair<>(chunkInfo, 1));
+                    FogOfWarClientEvents.exploredChunks.add(new Pair<>(chunkInfo, true));
                     System.out.println("added chunkInfo " + FogOfWarClientEvents.exploredChunks.size());
                 }
 
@@ -115,7 +113,7 @@ public abstract class LevelRendererMixin {
                     return false;
                 });
                 for (LevelRenderer.RenderChunkInfo chunkInfo : diff2)
-                    FogOfWarClientEvents.exploredChunks.add(new Pair<>(chunkInfo, 1));
+                    FogOfWarClientEvents.exploredChunks.add(new Pair<>(chunkInfo, true));
 
                 // symmetric difference (ie. items that appear in only one of the sets and not both)
                 diff1.addAll(diff2);
@@ -142,7 +140,7 @@ public abstract class LevelRendererMixin {
             cancellable = true
     )
     private void compileChunks(Camera pCamera, CallbackInfo ci) {
-        if (OrthoviewClientEvents.enabledCount <= 0)
+        if (!FogOfWarClientEvents.isEnabled())
             return;
 
         ci.cancel();
@@ -153,15 +151,15 @@ public abstract class LevelRendererMixin {
         List<ChunkRenderDispatcher.RenderChunk> list = Lists.newArrayList();
 
         List<AABB> brightAABBs = FogOfWarClientEvents.brightChunks.stream().map(c -> c.chunk.bb).toList();
-        List<Pair<LevelRenderer.RenderChunkInfo, Integer>> exploredChunksToMarkAsRendered = new ArrayList<>();
+        List<Pair<LevelRenderer.RenderChunkInfo, Boolean>> exploredChunksToMarkAsRendered = new ArrayList<>();
 
         outerLoop:
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
             if (!brightAABBs.contains(chunkInfo.chunk.bb)) {
                 // exploredChunks contains the bb and shouldBeRendered is false
-                for (Pair<LevelRenderer.RenderChunkInfo, Integer> pair : FogOfWarClientEvents.exploredChunks) {
+                for (Pair<LevelRenderer.RenderChunkInfo, Boolean> pair : FogOfWarClientEvents.exploredChunks) {
                     if (pair.getFirst().chunk.bb.equals(chunkInfo.chunk.bb)) {
-                        if (pair.getSecond() <= 0)
+                        if (!pair.getSecond())
                             continue outerLoop; // skip rendering this entirely, causes the chunk to retain its old view
                         else {
                             exploredChunksToMarkAsRendered.add(pair); // render this and mark as rendered
@@ -206,19 +204,23 @@ public abstract class LevelRendererMixin {
         this.minecraft.getProfiler().pop();
 
         // mark all chunks that just left the bright region as rendered
-        for (Pair<LevelRenderer.RenderChunkInfo, Integer> pair : exploredChunksToMarkAsRendered) {
+        for (Pair<LevelRenderer.RenderChunkInfo, Boolean> pair : exploredChunksToMarkAsRendered) {
             if (FogOfWarClientEvents.exploredChunks.remove(pair))
-                FogOfWarClientEvents.exploredChunks.add(new Pair<>(pair.getFirst(), pair.getSecond() - 1));
+                FogOfWarClientEvents.exploredChunks.add(new Pair<>(pair.getFirst(), false));
         }
     }
 
     @Shadow @Final private AtomicBoolean needsFrustumUpdate = new AtomicBoolean(false);
 
+    // always rechecks chunks being in frustum - without this normally only checks when the camera moves
     @Inject(
             method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V",
             at = @At("HEAD")
     )
     private void setupRender(Camera pCamera, Frustum pFrustum, boolean pHasCapturedFrustum, boolean pIsSpectator, CallbackInfo ci) {
+        if (!FogOfWarClientEvents.isEnabled())
+            return;
+
         if (!OrthoviewClientEvents.isEnabled())
             return;
 

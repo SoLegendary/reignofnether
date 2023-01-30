@@ -45,8 +45,6 @@ public abstract class ModelBlockRendererCacheMixin {
 
             this.brightnessCache.put(i, f1);
         }
-
-        // TODO: need to mark chunks as dirty to actually update their brightness
         cir.setReturnValue(f1);
     }
 }
