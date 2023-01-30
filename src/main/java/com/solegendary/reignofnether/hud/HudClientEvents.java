@@ -187,7 +187,7 @@ public class HudClientEvents {
                             () -> {
                                 // click to select this unit type as a group
                                 if (hudSelectedBuilding.name.equals(building.name)) {
-                                    BuildingClientEvents.setSelectedBuildings(new ArrayList<>());
+                                    BuildingClientEvents.clearSelectedBuildings();
                                     BuildingClientEvents.addSelectedBuilding(building);
                                 } else { // select this one specific unit
                                     hudSelectedBuilding = building;
@@ -443,7 +443,7 @@ public class HudClientEvents {
                     () -> {
                         // click to select this unit type as a group
                         if (getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
-                            UnitClientEvents.setSelectedUnits(new ArrayList<>());
+                            UnitClientEvents.clearSelectedUnits();
                             UnitClientEvents.addSelectedUnit(unit);
                         } else { // select this one specific unit
                             hudSelectedEntity = unit;
@@ -668,7 +668,7 @@ public class HudClientEvents {
                 () -> {
                     if (idleWorkerIndex >= idleWorkers.size())
                         idleWorkerIndex = 0;
-                    setSelectedUnits(new ArrayList<>());
+                    clearSelectedUnits();
                     LivingEntity worker = idleWorkers.get(idleWorkerIndex);
                     addSelectedUnit(worker);
                     OrthoviewClientEvents.centreCameraOnPos(worker.getX(), worker.getZ());
@@ -810,8 +810,8 @@ public class HudClientEvents {
 
         // deselect everything
         if (evt.getKeyCode() == Keybindings.getFnum(1).key) {
-            UnitClientEvents.setSelectedUnits(new ArrayList<>());
-            BuildingClientEvents.setSelectedBuildings(new ArrayList<>());
+            UnitClientEvents.clearSelectedUnits();
+            BuildingClientEvents.clearSelectedBuildings();
             BuildingClientEvents.setBuildingToPlace(null);
         }
 

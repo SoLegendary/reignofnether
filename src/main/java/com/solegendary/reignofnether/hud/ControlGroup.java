@@ -84,14 +84,21 @@ public class ControlGroup {
         boolean doubleClicked = (System.currentTimeMillis() - lastClickTime) < DOUBLE_CLICK_TIME_MS && player != null;
 
         if (entities.size() > 0) {
-            BuildingClientEvents.setSelectedBuildings(new ArrayList<>());
-            UnitClientEvents.setSelectedUnits(entities);
+            BuildingClientEvents.clearSelectedBuildings();
+            UnitClientEvents.clearSelectedUnits();
+            for (LivingEntity entity : entities)
+                UnitClientEvents.addSelectedUnit(entity);
+
             if (doubleClicked)
                 OrthoviewClientEvents.centreCameraOnPos(entities.get(0).getX(), entities.get(0).getZ());
         }
         else if (buildings.size() > 0) {
-            UnitClientEvents.setSelectedUnits(new ArrayList<>());
-            BuildingClientEvents.setSelectedBuildings(buildings);
+            UnitClientEvents.clearSelectedUnits();
+
+            BuildingClientEvents.clearSelectedBuildings();
+            for (Building building : buildings)
+                BuildingClientEvents.addSelectedBuilding(building);
+
             if (doubleClicked) {
                 BlockPos pos = BuildingUtils.getCentrePos(buildings.get(0).getBlocks());
                 OrthoviewClientEvents.centreCameraOnPos(pos.getX(), pos.getZ());

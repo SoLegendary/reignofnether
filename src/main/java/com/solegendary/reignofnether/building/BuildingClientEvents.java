@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -79,16 +80,16 @@ public class BuildingClientEvents {
         return buildings;
     }
 
-    public static void setSelectedBuildings(ArrayList<Building> buildings) {
+    public static void clearSelectedBuildings() {
         selectedBuildings.clear();
-        selectedBuildings.addAll(buildings);
-        if (selectedBuildings.size() > 0)
-            UnitClientEvents.setSelectedUnits(new ArrayList<>());
     }
     public static void addSelectedBuilding(Building building) {
+        if (!FogOfWarClientEvents.isBuildingInBrightChunk(building))
+            return;
+
         selectedBuildings.add(building);
         selectedBuildings.sort(Comparator.comparing(b -> b.name));
-        UnitClientEvents.setSelectedUnits(new ArrayList<>());
+        UnitClientEvents.clearSelectedUnits();
     }
 
     public static void setBuildingToPlace(Class<? extends Building> building) {
@@ -288,31 +289,37 @@ public class BuildingClientEvents {
         totalPopulationSupply = 0;
 
         for (Building building : buildings) {
+
+            boolean isInBrightChunk = FogOfWarClientEvents.isBuildingInBrightChunk(building);
+
             AABB aabb = new AABB(
                     new BlockPos(BuildingUtils.getMinCorner(building.blocks)),
                     new BlockPos(BuildingUtils.getMaxCorner(building.blocks)).offset(1,1,1)
             );
 
-            if (selectedBuildings.contains(building))
-                MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
-            else if (building.equals(preselectedBuilding) && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
-                if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
-                    MiscUtil.isRightClickDown(MC))
+            if (isInBrightChunk) {
+                if (selectedBuildings.contains(building))
                     MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
-                else
-                    MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f);
+                else if (building.equals(preselectedBuilding) && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
+                    if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
+                            MiscUtil.isRightClickDown(MC))
+                        MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
+                    else
+                        MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f);
+                }
             }
-
 
             Relationship buildingRs = getPlayerToBuildingRelationship(building);
 
             if (buildingRs == Relationship.OWNED && building.isBuilt)
                 totalPopulationSupply += building.popSupply;
 
-            switch (buildingRs) {
-                case OWNED -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 1.0f, 0.3f, 0.2f);
-                case FRIENDLY -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 0.3f, 1.0f, 0.2f);
-                case HOSTILE -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 1.0f, 0.3f, 0.3f, 0.2f);
+            if (isInBrightChunk) {
+                switch (buildingRs) {
+                    case OWNED -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 1.0f, 0.3f, 0.2f);
+                    case FRIENDLY -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 0.3f, 1.0f, 0.2f);
+                    case HOSTILE -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 1.0f, 0.3f, 0.3f, 0.2f);
+                }
             }
         }
 
@@ -393,7 +400,7 @@ public class BuildingClientEvents {
                             OrthoviewClientEvents.getZoom() * 2,
                             selBuilding.name
                     );
-                    setSelectedBuildings(new ArrayList<>());
+                    clearSelectedBuildings();
                     for (Building building : nearbyBuildings)
                         if (getPlayerToBuildingRelationship(building) == Relationship.OWNED)
                             addSelectedBuilding(building);
@@ -412,7 +419,7 @@ public class BuildingClientEvents {
                         addSelectedBuilding(preSelBuilding);
                     }
                     else if (!deselected) { // select a single building - this should be the only code path that allows you to select a non-owned building
-                        setSelectedBuildings(new ArrayList<>());
+                        clearSelectedBuildings();
                         addSelectedBuilding(preSelBuilding);
                     }
                 }

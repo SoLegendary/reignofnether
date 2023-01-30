@@ -175,7 +175,7 @@ public class CursorClientEvents {
         // TODO: ignore units behind blocks
         List<LivingEntity> nearbyEntities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 10, LivingEntity.class, MC.level);
 
-        UnitClientEvents.setPreselectedUnits(new ArrayList<>());
+        UnitClientEvents.clearPreselectedUnits();
 
         for (LivingEntity entity : nearbyEntities) {
             // don't let the player select themselves
@@ -287,7 +287,7 @@ public class CursorClientEvents {
                         ownedEntities += 1;
 
                 if (ownedEntities > 0) {
-                    UnitClientEvents.setSelectedUnits(new ArrayList<>());
+                    UnitClientEvents.clearSelectedUnits();
                     for (LivingEntity unit : preselectedUnit)
                         if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
                             UnitClientEvents.addSelectedUnit(unit);

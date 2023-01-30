@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.fogofwar;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
@@ -83,7 +84,20 @@ public class FogOfWarClientEvents {
         return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.z - pos2.z);
     }
 
+    public static boolean isBuildingInBrightChunk(Building building) {
+        if (!enabled)
+            return true;
+
+        // TODO
+
+
+        return false;
+    }
+
     public static boolean isInBrightChunk(BlockPos bp) {
+        if (!enabled)
+            return true;
+
         for (LevelRenderer.RenderChunkInfo chunkInfo : brightChunks)
             if (chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
                 return true;

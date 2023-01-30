@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -49,27 +50,28 @@ public class UnitClientEvents {
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
     }
+
     public static void addPreselectedUnit(LivingEntity unit) {
         if (unit instanceof Player player && (player.isSpectator() || player.isCreative()))
             return;
+        if (!FogOfWarClientEvents.isInBrightChunk(unit.getOnPos()))
+            return;
         preselectedUnits.add(unit);
     }
-
-    public static void setPreselectedUnits(ArrayList<LivingEntity> units) {
-        preselectedUnits.clear();
-        preselectedUnits.addAll(units);
-    }
-    public static void setSelectedUnits(ArrayList<LivingEntity> units) {
-        selectedUnits.clear();
-        selectedUnits.addAll(units);
-        if (selectedUnits.size() > 0)
-            BuildingClientEvents.setSelectedBuildings(new ArrayList<>());
-    }
     public static void addSelectedUnit(LivingEntity unit) {
+        if (!FogOfWarClientEvents.isInBrightChunk(unit.getOnPos()))
+            return;
         selectedUnits.add(unit);
         selectedUnits.sort(Comparator.comparing(HudClientEvents::getSimpleEntityName));
-        BuildingClientEvents.setSelectedBuildings(new ArrayList<>());
+        BuildingClientEvents.clearSelectedBuildings();
     }
+    public static void clearPreselectedUnits() {
+        preselectedUnits.clear();
+    }
+    public static void clearSelectedUnits() {
+        selectedUnits.clear();
+    }
+
     private static long lastLeftClickTime = 0; // to track double clicks
     private static final long DOUBLE_CLICK_TIME_MS = 500;
 
@@ -266,7 +268,7 @@ public class UnitClientEvents {
                         MC.level
                 );
                 if (getPlayerToEntityRelationship(selectedUnit) == Relationship.OWNED) {
-                    setSelectedUnits(new ArrayList<>());
+                    clearSelectedUnits();
                     for (LivingEntity entity : nearbyEntities)
                         if (getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                             addSelectedUnit(entity);
@@ -293,7 +295,7 @@ public class UnitClientEvents {
                         addSelectedUnit(preselectedUnits.get(0));
                 }
                 else if (!deselected) { // select a single unit - this should be the only code path that allows you to select a non-owned unit
-                    setSelectedUnits(new ArrayList<>());
+                    clearSelectedUnits();
                     addSelectedUnit(preselectedUnits.get(0));
                 }
             }
@@ -363,6 +365,9 @@ public class UnitClientEvents {
         if (evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
         {
             for (LivingEntity entity : allUnits) {
+                if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()))
+                    continue;
+
                 Relationship unitRs = getPlayerToEntityRelationship(entity);
                 // always-shown highlights to indicate unit relationships
                 switch (unitRs) {
@@ -385,6 +390,9 @@ public class UnitClientEvents {
             // don't render preselection outlines if mousing over HUD
             if (OrthoviewClientEvents.isEnabled()) {
                 for (Entity entity : unitsToDraw) {
+                    if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()))
+                        continue;
+
                     if (preselectedUnits.contains(entity) &&
                             isLeftClickAttack() &&
                             !targetingSelf() && !HudClientEvents.isMouseOverAnyButtonOrHud())
