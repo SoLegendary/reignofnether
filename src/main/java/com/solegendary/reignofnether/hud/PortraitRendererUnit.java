@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -37,6 +38,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.solegendary.reignofnether.unit.UnitClientEvents.getPlayerToEntityRelationship;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
 
 // Renders a Unit's portrait including its animated head, name, healthbar, list of stats and UI frames for these
@@ -120,6 +122,10 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     // - unit name
     // Must be called from DrawScreenEvent
     public RectZone render(PoseStack poseStack, String name, int x, int y, LivingEntity entity) {
+        Relationship rs = UnitClientEvents.getPlayerToEntityRelationship(entity);
+
+        if (rs != Relationship.OWNED && entity instanceof Unit unit)
+            name += " (" + unit.getOwnerName() + ")";
 
         // draw name (unless a player, since their nametag will be rendered anyway)
         if (!(entity instanceof Player)) {
@@ -131,7 +137,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             );
         }
         int bgCol = 0x0;
-        switch (UnitClientEvents.getPlayerToEntityRelationship(entity)) {
+        switch (rs) {
             case OWNED    -> bgCol = 0x90000000;
             case FRIENDLY -> bgCol = 0x90009000;
             case NEUTRAL  -> bgCol = 0x90909000;

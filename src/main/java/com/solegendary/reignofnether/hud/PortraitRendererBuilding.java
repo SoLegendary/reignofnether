@@ -8,6 +8,8 @@ import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -35,16 +37,22 @@ class PortraitRendererBuilding {
     // - building name
     // Must be called from DrawScreenEvent
     public RectZone render(PoseStack poseStack, int x, int y, Building building) {
+        Relationship rs = BuildingClientEvents.getPlayerToBuildingRelationship(building);
+
+        String name = building.name;
+
+        if (rs != Relationship.OWNED)
+            name += " (" + building.ownerName + ")";
 
         // draw name
         GuiComponent.drawString(
                 poseStack, Minecraft.getInstance().font,
-                building.name,
+                name,
                 x+4,y-9,
                 0xFFFFFFFF
         );
         int bgCol = 0x0;
-        switch (BuildingClientEvents.getPlayerToBuildingRelationship(building)) {
+        switch (rs) {
             case OWNED    -> bgCol = 0x90000000;
             case FRIENDLY -> bgCol = 0x90009000;
             case NEUTRAL  -> bgCol = 0x90909000;

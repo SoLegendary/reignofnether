@@ -21,6 +21,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
 
 import java.util.ArrayList;
+import java.util.List;
 
 // this class tracks all available players so that any serverside functions that need to affect the player can be
 // performed here by sending a client->server packet containing MC.player.getId()
@@ -66,24 +67,18 @@ public class PlayerServerEvents {
                     System.out.println(err);
                 }
             }
-            if (words.length == 1 && words[0].equalsIgnoreCase("warpten")) {
-                if (ResearchServer.playerHasCheat(playerName, "warpten")) {
-                    ResearchServer.removeCheat(playerName, "warpten");
-                    ResearchClientboundPacket.removeCheat(playerName, "warpten");
-                }
-                else {
-                    ResearchServer.addCheat(playerName, "warpten");
-                    ResearchClientboundPacket.addCheat(playerName, "warpten");
-                }
-            }
-            if (words.length == 1 && words[0].equalsIgnoreCase("operationcwal")) {
-                if (ResearchServer.playerHasCheat(playerName, "operationcwal")) {
-                    ResearchServer.removeCheat(playerName, "operationcwal");
-                    ResearchClientboundPacket.removeCheat(playerName, "operationcwal");
-                }
-                else {
-                    ResearchServer.addCheat(playerName, "operationcwal");
-                    ResearchClientboundPacket.addCheat(playerName, "operationcwal");
+            List<String> singleWordCheats = List.of("warpten", "operationcwal", "iseedeadpeople");
+
+            for (String cheatName : singleWordCheats) {
+                if (words.length == 1 && words[0].equalsIgnoreCase(cheatName)) {
+                    if (ResearchServer.playerHasCheat(playerName, cheatName)) {
+                        ResearchServer.removeCheat(playerName, cheatName);
+                        ResearchClientboundPacket.removeCheat(playerName, cheatName);
+                    }
+                    else {
+                        ResearchServer.addCheat(playerName, cheatName);
+                        ResearchClientboundPacket.addCheat(playerName, cheatName);
+                    }
                 }
             }
             // TODO: invincibility and infinite damage

@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.fogofwar;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
@@ -11,12 +12,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -88,8 +91,9 @@ public class FogOfWarClientEvents {
         if (!enabled)
             return true;
 
-        // TODO
-
+        for (BlockPos bp : BuildingUtils.getUniqueChunkBps(building))
+            if (isInBrightChunk(bp))
+                return true;
 
         return false;
     }

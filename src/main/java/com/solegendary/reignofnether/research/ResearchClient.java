@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.research;
 
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+
 import java.util.ArrayList;
 
 // class to track status of research items for the client player - we generally don't care about other players' research
@@ -26,10 +28,14 @@ public class ResearchClient {
 
     public static void addCheat(String cheatItemName) {
         cheatItems.add(cheatItemName);
+        if (cheatItemName.equals("iseedeadpeople"))
+            FogOfWarClientEvents.setEnabled(false);
     }
 
     public static void removeCheat(String cheatItemName) {
         cheatItems.removeIf(r -> r.equals(cheatItemName));
+        if (cheatItemName.equals("iseedeadpeople"))
+            FogOfWarClientEvents.setEnabled(true);
     }
 
     public static boolean hasCheat(String cheatItemName) {

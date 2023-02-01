@@ -2,6 +2,9 @@ package com.solegendary.reignofnether.mixin.fogofwar;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -41,7 +44,8 @@ public abstract class LevelRendererMixin {
     @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
     @Final @Shadow private Minecraft minecraft;
 
-    private static final int CHUNK_VIEW_DIST = 1;
+    private static final int CHUNK_VIEW_DIST_UNIT = 2;
+    private static final int CHUNK_VIEW_DIST_BUILDING = 1;
 
     // any chunkInfo objects added to renderChunksInFrustum will be rendered
     // we can collect old chunk data here to render them in their past state
@@ -73,15 +77,27 @@ public abstract class LevelRendererMixin {
 
                     ChunkPos chunkPos1 = this.minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
 
+                    // chunks in view of owned units
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
                         if (UnitClientEvents.getPlayerToEntityRelationship(entity) != Relationship.OWNED)
                             continue;
 
                         ChunkPos chunkPos2 = this.minecraft.level.getChunk(entity.getOnPos()).getPos();
 
-                        if (chunkPos1.getChessboardDistance(chunkPos2) <= CHUNK_VIEW_DIST) {
+                        if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_UNIT) {
                             newBrightChunks.add(chunkInfo);
                             break;
+                        }
+                    }
+                    // chunks in view of owned buildings
+                    for (Building building : BuildingClientEvents.getBuildings()) {
+                        if (BuildingClientEvents.getPlayerToBuildingRelationship(building) != Relationship.OWNED)
+                            continue;
+
+                        for (BlockPos bp : BuildingUtils.getUniqueChunkBps(building)) {
+                            ChunkPos chunkPos2 = this.minecraft.level.getChunk(bp).getPos();
+                            if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_BUILDING)
+                                newBrightChunks.add(chunkInfo);
                         }
                     }
                 }

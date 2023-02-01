@@ -11,6 +11,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
@@ -19,6 +20,35 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class BuildingUtils {
+
+    // returns a list of BPs that may reside in unique chunks for fog of war calcs
+    public static ArrayList<BlockPos> getUniqueChunkBps(Building building) {
+        AABB aabb = new AABB(
+                new BlockPos(BuildingUtils.getMinCorner(building.getBlocks())),
+                new BlockPos(BuildingUtils.getMaxCorner(building.getBlocks()).offset(1,1,1))
+        );
+
+        ArrayList<BlockPos> bps = new ArrayList<>();
+        double x = aabb.minX;
+        double z = aabb.minZ;
+        do {
+            do {
+                bps.add(new BlockPos(x, aabb.minY, z));
+                x += 16;
+            }
+            while (x <= aabb.maxX);
+            z += 16;
+            x = aabb.minX;
+        }
+        while (z <= aabb.maxZ);
+
+        // include far corners
+        bps.add(new BlockPos(aabb.maxX, aabb.minY, aabb.minZ));
+        bps.add(new BlockPos(aabb.minX, aabb.minY, aabb.maxZ));
+        bps.add(new BlockPos(aabb.maxX, aabb.minY, aabb.maxZ));
+
+        return bps;
+    }
 
     // given a string name return a new instance of that building
     public static Building getNewBuilding(String buildingName, Level level, BlockPos pos, Rotation rotation, String ownerName) {

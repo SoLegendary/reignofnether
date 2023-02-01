@@ -190,7 +190,8 @@ public class BuildingClientEvents {
     public static boolean isBuildingPlacementValid(BlockPos originPos) {
         return !isBuildingPlacementInAir(originPos) &&
                !isBuildingPlacementClipping(originPos) &&
-               !isOverlappingAnyOtherBuilding();
+               !isOverlappingAnyOtherBuilding() &&
+                FogOfWarClientEvents.isInBrightChunk(originPos);
     }
 
     // disallow any building block from clipping into any other existing blocks
