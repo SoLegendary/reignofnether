@@ -29,10 +29,9 @@ public class Graveyard extends ProductionBuilding {
     public final static String structureName = "graveyard";
 
     public Graveyard(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName);
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.MOSSY_STONE_BRICKS;
         this.icon = new ResourceLocation("minecraft", "textures/block/mossy_stone_bricks.png");
 

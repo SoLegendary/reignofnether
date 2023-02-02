@@ -25,10 +25,9 @@ public class VillagerHouse extends Building {
     public final static String structureName = "villager_house";
 
     public VillagerHouse(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName);
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.OAK_LOG;
         this.icon = new ResourceLocation("minecraft", "textures/block/oak_log.png");
 

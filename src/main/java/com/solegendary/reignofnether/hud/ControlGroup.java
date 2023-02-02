@@ -100,7 +100,7 @@ public class ControlGroup {
                 BuildingClientEvents.addSelectedBuilding(building);
 
             if (doubleClicked) {
-                BlockPos pos = BuildingUtils.getCentrePos(buildings.get(0).getBlocks());
+                BlockPos pos = buildings.get(0).centrePos;
                 OrthoviewClientEvents.centreCameraOnPos(pos.getX(), pos.getZ());
             }
         }

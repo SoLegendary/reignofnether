@@ -49,8 +49,8 @@ public abstract class ProductionBuilding extends Building {
     public boolean canSetRallyPoint = true;
     protected int spawnRadiusOffset = 1;
 
-    public ProductionBuilding(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName);
+    public ProductionBuilding(Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks) {
+        super(level, originPos, rotation, ownerName, blocks);
     }
 
     public BlockPos getRallyPoint() {
@@ -72,7 +72,7 @@ public abstract class ProductionBuilding extends Building {
 
     // start with the centre pos then go down and look at adjacent blocks until we reach a non-solid block
     public BlockPos getIndoorSpawnPoint(ServerLevel level) {
-        BlockPos spawnPoint = BuildingUtils.getCentrePos(blocks);
+        BlockPos spawnPoint = this.centrePos;
 
         while (level.getBlockState(spawnPoint.below()).isAir())
             spawnPoint = spawnPoint.offset(0,-1,0);

@@ -96,7 +96,7 @@ public abstract class LevelRendererMixin {
 
                         // TODO: should be centrePos, need to replace the utils call with set attributes
                         // will probably improve performance in a lot of other places too anyway
-                        BlockPos bp = building.originPos;
+                        BlockPos bp = building.centrePos;
                         ChunkPos chunkPos2 = this.minecraft.level.getChunk(bp).getPos();
                         if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_BUILDING)
                             newBrightChunks.add(chunkInfo);

@@ -30,10 +30,9 @@ public class Blacksmith extends ProductionBuilding {
     public final static String structureName = "blacksmith";
 
     public Blacksmith(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName);
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.SMITHING_TABLE;
         this.icon = new ResourceLocation("minecraft", "textures/block/smithing_table_front.png");
 

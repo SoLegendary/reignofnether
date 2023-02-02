@@ -42,7 +42,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
                 stopBuilding();
             }
             if (isBuilding()) {
-                BlockPos bp = BuildingUtils.getCentrePos(buildingTarget.getBlocks());
+                BlockPos bp = buildingTarget.centrePos;
                 this.mob.getLookControl().setLookAt(bp.getX(), bp.getY(), bp.getZ());
             }
         }

@@ -330,7 +330,7 @@ public class HudClientEvents {
                         () -> false,
                         () -> true,
                         () -> {
-                            BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(hudSelectedBuilding.getBlocks()));
+                            BuildingServerboundPacket.cancelBuilding(hudSelectedBuilding.minCorner);
                             HudClientEvents.hudSelectedBuilding = null;
                         },
                         null,
@@ -756,7 +756,7 @@ public class HudClientEvents {
                 buildingPortraitZone.isMouseOver(mouseLeftDownX, mouseLeftDownY) &&
                 MC.player != null &&
                 hudSelectedBuilding != null) {
-                BlockPos pos = BuildingUtils.getCentrePos(hudSelectedBuilding.getBlocks());
+                BlockPos pos = hudSelectedBuilding.centrePos;
                 OrthoviewClientEvents.centreCameraOnPos(pos.getX(), pos.getZ());
             }
             else if (unitPortraitZone != null &&

@@ -24,8 +24,8 @@ public class BuildingUtils {
     // returns a list of BPs that may reside in unique chunks for fog of war calcs
     public static ArrayList<BlockPos> getUniqueChunkBps(Building building) {
         AABB aabb = new AABB(
-                new BlockPos(BuildingUtils.getMinCorner(building.getBlocks())),
-                new BlockPos(BuildingUtils.getMaxCorner(building.getBlocks()).offset(1,1,1))
+                building.minCorner,
+                building.maxCorner.offset(1,1,1)
         );
 
         ArrayList<BlockPos> bps = new ArrayList<>();
@@ -81,6 +81,8 @@ public class BuildingUtils {
         return null;
     }
 
+    // functions for corners/centrePos given only blocks
+    // if you have access to the Building itself, you should use .minCorner, .maxCorner and .centrePos
     public static BlockPos getMinCorner(ArrayList<BuildingBlock> blocks) {
         return new BlockPos(
                 blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
@@ -166,7 +168,7 @@ public class BuildingUtils {
         Building closestBuilding = null;
         for (Building building : buildings) {
             if (condition.test(building)) {
-                BlockPos bp = BuildingUtils.getCentrePos(building.getBlocks());
+                BlockPos bp = building.centrePos;
                 Vec3 bpVec3 = new Vec3(bp.getX(), bp.getY(), bp.getZ());
                 double dist = bpVec3.distanceToSqr(pos);
                 if (dist < closestDist) {

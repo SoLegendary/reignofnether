@@ -30,6 +30,7 @@ import net.minecraftforge.common.world.ForgeChunkManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Random;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.*;
@@ -73,6 +74,10 @@ public abstract class Building {
     public int oreCost;
     public int popSupply; // max population this building provides
 
+    public final BlockPos minCorner;
+    public final BlockPos maxCorner;
+    public final BlockPos centrePos;
+
     // blocks types that are placed automatically when the building is placed
     // used to control size of initial foundations while keeping it symmetrical
     public final ArrayList<Block> startingBlockTypes = new ArrayList<>();
@@ -88,11 +93,29 @@ public abstract class Building {
     public Level getLevel() { return level; }
     public void setLevel(Level level) { this.level = level; }
 
-    public Building(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
+    public Building(Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks) {
         this.level = level;
         this.originPos = originPos;
         this.rotation = rotation;
         this.ownerName = ownerName;
+        this.blocks = blocks;
+
+        // get min/max/centre positions
+        this.minCorner = new BlockPos(
+            blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
+            blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
+            blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
+        );
+        this.maxCorner = new BlockPos(
+            blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
+            blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
+            blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
+        );
+        this.centrePos = new BlockPos(
+            (float) (this.minCorner.getX() + this.maxCorner.getX()) / 2,
+            (float) (this.minCorner.getY() + this.maxCorner.getY()) / 2,
+            (float) (this.minCorner.getZ() + this.maxCorner.getZ()) / 2
+        );
     }
 
     // fully repairs and rebuilds all the blocks in the building
@@ -138,12 +161,9 @@ public abstract class Building {
     }
 
     public boolean isPosInsideBuilding(BlockPos bp) {
-        BlockPos min = getMinCorner(this.blocks);
-        BlockPos max = getMaxCorner(this.blocks);
-
-        return bp.getX() <= max.getX() && bp.getX() >= min.getX() &&
-                bp.getY() <= max.getY() && bp.getY() >= min.getY() &&
-                bp.getZ() <= max.getZ() && bp.getZ() >= min.getZ();
+        return bp.getX() <= this.maxCorner.getX() && bp.getX() >= this.minCorner.getX() &&
+                bp.getY() <= this.maxCorner.getY() && bp.getY() >= this.minCorner.getY() &&
+                bp.getZ() <= this.maxCorner.getZ() && bp.getZ() >= this.minCorner.getZ();
     }
 
     public boolean isPosPartOfBuilding(BlockPos bp, boolean onlyPlacedBlocks) {
@@ -157,11 +177,11 @@ public abstract class Building {
     // radius offset is the distance away from the building itself to have the returned pos
     public BlockPos getClosestGroundPos(BlockPos bpTarget, int radiusOffset) {
         float minDist = 999999;
-        BlockPos minPos = BuildingUtils.getMinCorner(this.blocks);
+        BlockPos minPos = this.minCorner;
         int minX = minPos.getX() - radiusOffset;
         int minY = minPos.getY();
         int minZ = minPos.getZ() - radiusOffset;
-        BlockPos maxPos = BuildingUtils.getMaxCorner(this.blocks);
+        BlockPos maxPos = this.maxCorner;
         int maxX = maxPos.getX() + radiusOffset + 1;
         int maxZ = maxPos.getZ() + radiusOffset + 1;
 
@@ -200,8 +220,6 @@ public abstract class Building {
     public float getBlocksPlacedPercent() {
         return (float) getBlocksPlaced() / (float) getBlocksTotal();
     }
-
-    // TODO: add some temporary scaffolding blocks if !isBuilt
 
     // place blocks according to the following rules:
     // - block must be connected to something else (not air)
@@ -258,8 +276,8 @@ public abstract class Building {
     }
 
     private void extinguishRandomFire(ServerLevel level) {
-        BlockPos minPos = BuildingUtils.getMinCorner(blocks).offset(-1,-1,-1);
-        BlockPos maxPos = BuildingUtils.getMaxCorner(blocks).offset(1,1,1);
+        BlockPos minPos = this.minCorner.offset(-1,-1,-1);
+        BlockPos maxPos = this.maxCorner.offset(1,1,1);
 
         for (int x = minPos.getX(); x <= maxPos.getX(); x++)
             for (int y = minPos.getY(); y <= maxPos.getY(); y++)
@@ -351,7 +369,7 @@ public abstract class Building {
 
     public void forceChunk(boolean add) {
         if (!level.isClientSide()) {
-            BlockPos centreBp = BuildingUtils.getCentrePos(blocks);
+            BlockPos centreBp = this.centrePos;
             ChunkAccess chunk = level.getChunk(centreBp);
             ForgeChunkManager.forceChunk((ServerLevel) level, ReignOfNether.MOD_ID, centreBp, chunk.getPos().x, chunk.getPos().z, add, true);
         }

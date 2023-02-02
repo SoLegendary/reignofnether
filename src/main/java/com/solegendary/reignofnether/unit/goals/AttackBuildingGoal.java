@@ -37,7 +37,7 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
                 stopAttacking();
             }
             if (isAttacking()) {
-                BlockPos bp = BuildingUtils.getCentrePos(buildingTarget.getBlocks());
+                BlockPos bp = buildingTarget.centrePos;
                 this.mob.getLookControl().setLookAt(bp.getX(), bp.getY(), bp.getZ());
 
                 // a unit with 1 attack damage @ 20 attack cd and building damage multiplier 1.0 will destroy a block once per second

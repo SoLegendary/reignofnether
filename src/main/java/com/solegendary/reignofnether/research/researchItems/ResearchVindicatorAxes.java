@@ -76,7 +76,7 @@ public class ResearchVindicatorAxes extends ProductionItem {
                 () -> false,
                 () -> false,
                 () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(BuildingUtils.getMinCorner(prodBuilding.getBlocks()), itemName, first),
+                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
                 null,
                 null
         );

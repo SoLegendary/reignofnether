@@ -34,10 +34,9 @@ public class Laboratory extends ProductionBuilding {
     public final static String structureName = "laboratory";
 
     public Laboratory(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName);
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.BREWING_STAND;
         this.icon = new ResourceLocation("minecraft", "textures/block/brewing_stand.png");
 

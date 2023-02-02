@@ -294,8 +294,8 @@ public class BuildingClientEvents {
             boolean isInBrightChunk = FogOfWarClientEvents.isBuildingInBrightChunk(building);
 
             AABB aabb = new AABB(
-                    new BlockPos(BuildingUtils.getMinCorner(building.blocks)),
-                    new BlockPos(BuildingUtils.getMaxCorner(building.blocks)).offset(1,1,1)
+                building.minCorner,
+                building.maxCorner.offset(1,1,1)
             );
 
             if (isInBrightChunk) {
@@ -333,7 +333,7 @@ public class BuildingClientEvents {
                         selProdBuilding.getRallyPoint(),
                         0, 1, 0, a);
                 MyRenderer.drawLine(evt.getPoseStack(),
-                        BuildingUtils.getCentrePos(selProdBuilding.getBlocks()).offset(0,-1,0),
+                        selProdBuilding.centrePos.offset(0,-1,0),
                         selProdBuilding.getRallyPoint(),
                         0, 1, 0, a);
             }
@@ -395,7 +395,7 @@ public class BuildingClientEvents {
 
                     lastLeftClickTime = 0;
                     Building selBuilding = selectedBuildings.get(0);
-                    BlockPos centre = BuildingUtils.getCentrePos(selBuilding.blocks);
+                    BlockPos centre = selBuilding.centrePos;
                     ArrayList<Building> nearbyBuildings = getBuildingsWithinRange(
                             new Vec3(centre.getX(), centre.getY(), centre.getZ()),
                             OrthoviewClientEvents.getZoom() * 2,
@@ -457,7 +457,7 @@ public class BuildingClientEvents {
             Building building = HudClientEvents.hudSelectedBuilding;
             if (building != null && building.isBuilt && getPlayerToBuildingRelationship(building) == Relationship.OWNED) {
                 HudClientEvents.hudSelectedBuilding = null;
-                BuildingServerboundPacket.cancelBuilding(BuildingUtils.getMinCorner(building.getBlocks()));
+                BuildingServerboundPacket.cancelBuilding(building.minCorner);
             }
         }
     }
@@ -500,7 +500,7 @@ public class BuildingClientEvents {
         ArrayList<Building> retBuildings = new ArrayList<>();
         for (Building building : buildings) {
             if (building.name.equals(buildingName)) {
-                BlockPos centre = BuildingUtils.getCentrePos(building.blocks);
+                BlockPos centre = building.centrePos;
                 Vec3 centreVec3 = new Vec3(centre.getX(), centre.getY(), centre.getZ());
                 if (pos.distanceTo(centreVec3) <= range)
                     retBuildings.add(building);

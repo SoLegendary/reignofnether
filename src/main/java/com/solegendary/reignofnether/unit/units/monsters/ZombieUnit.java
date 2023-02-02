@@ -142,7 +142,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
         AttackerUnit.tick(this);
 
         Predicate<Building> condition = (b) -> {
-            BlockPos bp = BuildingUtils.getCentrePos(b.getBlocks());
+            BlockPos bp = b.centrePos;
             Vec3 buildingPos = new Vec3(bp.getX(), bp.getY(), bp.getZ());
             return b.name.equals(Mausoleum.buildingName) &&
                 this.position().distanceToSqr(buildingPos) < Math.pow(Mausoleum.sunScreenDist, 2);

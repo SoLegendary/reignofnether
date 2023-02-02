@@ -25,10 +25,9 @@ public class HauntedHouse extends Building {
     public final static String structureName = "haunted_house";
 
     public HauntedHouse(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName);
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.DARK_OAK_LOG;
         this.icon = new ResourceLocation("minecraft", "textures/block/dark_oak_log.png");
 

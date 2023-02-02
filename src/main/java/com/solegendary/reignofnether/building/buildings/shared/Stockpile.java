@@ -47,10 +47,9 @@ public class Stockpile extends ProductionBuilding {
     public ResourceName mostAbundantNearbyResource = ResourceName.NONE;
 
     public Stockpile(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName);
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.CHEST;
         this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/chest.png");
 
@@ -132,7 +131,7 @@ public class Stockpile extends ProductionBuilding {
                 return true;
             };
 
-            for (BlockPos bp : BlockPos.withinManhattan(BuildingUtils.getCentrePos(blocks), 10, 5, 10))
+            for (BlockPos bp : BlockPos.withinManhattan(this.centrePos, 10, 5, 10))
                 if (BLOCK_CONDITION.test(bp))
                     switch(resourceName) {
                         case FOOD -> nearbyFoodBlocks += 1;
