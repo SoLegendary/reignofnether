@@ -469,8 +469,17 @@ public class BuildingClientEvents {
                 setBuildingToPlace(null);
     }
 
+    // prevent selection of buildings out of view
+    private static final int VIS_CHECK_TICKS_MAX = 10;
+    private static int ticksToNextVisCheck = VIS_CHECK_TICKS_MAX;
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        ticksToNextVisCheck -= 1;
+        if (ticksToNextVisCheck <= 0) {
+            ticksToNextVisCheck = VIS_CHECK_TICKS_MAX;
+            selectedBuildings.removeIf(b -> !FogOfWarClientEvents.isBuildingInBrightChunk(b));
+        }
+
         if (!replacedTexture) {
             replaceOverlayTexture();
             replacedTexture = true;

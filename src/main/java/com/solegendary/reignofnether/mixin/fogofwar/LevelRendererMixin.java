@@ -37,15 +37,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.CHUNK_VIEW_DIST_BUILDING;
+import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.CHUNK_VIEW_DIST_UNIT;
+
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
 
     @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
     @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
     @Final @Shadow private Minecraft minecraft;
-
-    private static final int CHUNK_VIEW_DIST_UNIT = 3;
-    private static final int CHUNK_VIEW_DIST_BUILDING = 2;
 
     // any chunkInfo objects added to renderChunksInFrustum will be rendered
     // we can collect old chunk data here to render them in their past state
@@ -94,8 +94,6 @@ public abstract class LevelRendererMixin {
                         if (BuildingClientEvents.getPlayerToBuildingRelationship(building) != Relationship.OWNED)
                             continue;
 
-                        // TODO: should be centrePos, need to replace the utils call with set attributes
-                        // will probably improve performance in a lot of other places too anyway
                         BlockPos bp = building.centrePos;
                         ChunkPos chunkPos2 = this.minecraft.level.getChunk(bp).getPos();
                         if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_BUILDING)

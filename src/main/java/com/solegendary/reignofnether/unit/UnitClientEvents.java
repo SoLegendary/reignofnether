@@ -24,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -178,6 +179,17 @@ public class UnitClientEvents {
         }
     }
 
+    // prevent selection of units out of view
+    private static final int VIS_CHECK_TICKS_MAX = 10;
+    private static int ticksToNextVisCheck = VIS_CHECK_TICKS_MAX;
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        ticksToNextVisCheck -= 1;
+        if (ticksToNextVisCheck <= 0) {
+            ticksToNextVisCheck = VIS_CHECK_TICKS_MAX;
+            selectedUnits.removeIf(e -> !FogOfWarClientEvents.isInBrightChunk(e.getOnPos()));
+        }
+    }
 
     @SubscribeEvent
     public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {

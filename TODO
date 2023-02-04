@@ -13,9 +13,7 @@ Apply required gamerules and terrain generation automatically:
 
 - rapidly switching control groups while right click moving will cause crash
 
-- fog of war rules for placing new buildings
-    - no part of the building can be in unexplored blocks
-    - always has 0 chunk range (can only see the chunks it is immediately inside of)
+- Fix smooth lighting issues on fog of war borders
 
 
 TODO bugs/features (backlog)
