@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
@@ -116,27 +117,6 @@ public class FogOfWarClientEvents {
             if (pair.getFirst().chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
                 return true;
         return false;
-    }
-
-    @SubscribeEvent
-    public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
-        if (evt.getKeyCode() == Keybindings.getFnum(7).key && MC.level != null && MC.player != null) {
-            System.out.println("test1");
-
-            MC.level.getProfiler().push("queueCheckLight");
-            MC.level.getChunkSource().getLightEngine().checkBlock(MC.player.getOnPos());
-            MC.level.getProfiler().pop();
-
-            MC.level.markAndNotifyBlock(MC.player.getOnPos(), (LevelChunk) MC.level.getChunk(MC.player.getOnPos()),
-                    Blocks.AIR.defaultBlockState(), Blocks.DIRT.defaultBlockState(), 3, 512);
-
-        }
-        if (evt.getKeyCode() == Keybindings.getFnum(8).key && MC.level != null && MC.player != null) {
-            System.out.println("test2");
-
-            MC.level.setBlock(MC.player.getOnPos(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
-            MC.level.destroyBlock(MC.player.getOnPos(), false, null);
-        }
     }
 
     @SubscribeEvent
