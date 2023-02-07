@@ -16,6 +16,7 @@ Apply required gamerules and terrain generation automatically:
 - Fix smooth lighting issues on fog of war borders
 
 - Add fog of war to minimap
+    - fix issue of units deselecting out of pan view... again
 
 
 

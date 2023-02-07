@@ -32,6 +32,7 @@ public class FogOfWarClientEvents {
     // chunks that have been in range of a unit or building before
     // if out of immediate view will be rendered with semi brightness and at its past state
     // Boolean is 'shouldBeRendered' so we render it once to update the brightness
+    // is a superset of brightChunks
     public static final Set<Pair<LevelRenderer.RenderChunkInfo, Boolean>> exploredChunks = ConcurrentHashMap.newKeySet();
 
     // if false, disables ALL mixins related to fog of war

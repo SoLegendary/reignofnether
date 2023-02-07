@@ -3,12 +3,14 @@ package com.solegendary.reignofnether.minimap;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -16,6 +18,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -25,11 +28,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.Arrays;
 
 public class MinimapClientEvents {
 
@@ -164,19 +170,6 @@ public class MinimapClientEvents {
                     rgb = MiscUtil.shadeHexRGB(rgb, 1.2F - (0.025F * depth));
                 }
 
-                // draw view quad
-                for (int i = 0; i < corners.length; i++) {
-                    int j = i + 1;
-                    if (j >= corners.length) j = 0;
-
-                    if (MyMath.isPointOnLine(
-                            new Vec2((float) corners[i].x, (float) corners[i].z),
-                            new Vec2((float) corners[j].x, (float) corners[j].z),
-                            new Vec2(x,z),
-                            OrthoviewClientEvents.getZoom() * 2 // larger = thicker line
-                    ))
-                        rgb = 0xFFFFFF;
-                }
                 // normalise xz back to 0,0
                 int x0 = x - xc_world + WORLD_RADIUS;
                 int z0 = z - zc_world + WORLD_RADIUS;
@@ -188,6 +181,9 @@ public class MinimapClientEvents {
 
         // draw buildings
         for (Building building : BuildingClientEvents.getBuildings()) {
+            if (!FogOfWarClientEvents.isInBrightChunk(building.centrePos))
+                continue;
+
             int xc = building.originPos.getX() + (BUILDING_RADIUS / 2);
             int zc = building.originPos.getZ() + (BUILDING_RADIUS / 2);
 
@@ -218,6 +214,9 @@ public class MinimapClientEvents {
 
         // draw units
         for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+            if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()))
+                continue;
+
             int xc = entity.getOnPos().getX();
             int zc = entity.getOnPos().getZ();
 
@@ -245,6 +244,69 @@ public class MinimapClientEvents {
                 }
             }
         }
+
+        // init a map filled with black
+        int[][] mapColoursCopy = new int[WORLD_RADIUS*2][WORLD_RADIUS*2];
+        for (int[] row : mapColoursCopy)
+            Arrays.fill(row, (0xFF << 24));
+
+        for (Pair<LevelRenderer.RenderChunkInfo, Boolean> pair : FogOfWarClientEvents.exploredChunks) {
+            AABB aabb = pair.getFirst().chunk.bb;
+            for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
+                for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
+                    int xN = x - xc_world + (MAP_RADIUS * 2);
+                    int zN = z - zc_world + (MAP_RADIUS * 2);
+
+                    int col = mapColours[xN][zN];
+                    int blue = (int) (((col >> 16) & 0xFF) * 0.35f);
+                    int green = (int) (((col >> 8) & 0xFF) * 0.35f);
+                    int red = (int) (((col) & 0xFF) * 0.35f);
+
+                    mapColoursCopy[xN][zN] = (0xFF << 24) | (blue << 16) | (green << 8) | (red);
+
+                }
+            }
+        }
+        for (LevelRenderer.RenderChunkInfo chunkInfo : FogOfWarClientEvents.brightChunks) {
+            AABB aabb = chunkInfo.chunk.bb;
+            for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
+                for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
+                    int xN = x - xc_world + (MAP_RADIUS * 2);
+                    int zN = z - zc_world + (MAP_RADIUS * 2);
+                    mapColoursCopy[xN][zN] = mapColours[xN][zN];
+                }
+            }
+        }
+        mapColours = mapColoursCopy;
+
+
+        // draw view quad
+        for (int z = zc_world - WORLD_RADIUS; z < zc_world + WORLD_RADIUS; z++)
+        {
+            for (int x = xc_world - WORLD_RADIUS; x < xc_world + WORLD_RADIUS; x++) {
+                for (int i = 0; i < corners.length; i++) {
+                    int j = i + 1;
+                    if (j >= corners.length) j = 0;
+
+                    if (MyMath.isPointOnLine(
+                            new Vec2((float) corners[i].x, (float) corners[i].z),
+                            new Vec2((float) corners[j].x, (float) corners[j].z),
+                            new Vec2(x,z),
+                            OrthoviewClientEvents.getZoom() * 2 // larger = thicker line
+                    )) {
+                        int x0 = x - xc_world + WORLD_RADIUS;
+                        int z0 = z - zc_world + WORLD_RADIUS;
+                        mapColours[x0][z0] = 0xFFFFFFFF;
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
     }
 
     private static boolean isXZinsideMap(int x, int z) {
