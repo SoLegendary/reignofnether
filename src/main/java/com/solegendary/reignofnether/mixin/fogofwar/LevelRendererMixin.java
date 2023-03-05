@@ -64,16 +64,19 @@ public abstract class LevelRendererMixin {
             throw new IllegalStateException("applyFrustum called from wrong thread: " + Thread.currentThread().getName());
         } else {
             this.minecraft.getProfiler().push("apply_frustum");
-            this.renderChunksInFrustum.clear();
 
             LinkedHashSet<LevelRenderer.RenderChunkInfo> renderChunkInfos = (this.renderChunkStorage.get()).renderChunks;
 
             Set<LevelRenderer.RenderChunkInfo> oldBrightChunks = FogOfWarClientEvents.brightChunks;
             Set<LevelRenderer.RenderChunkInfo> newBrightChunks = ConcurrentHashMap.newKeySet();
 
-            for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos) {
-                if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox())) {
+            // refresh renderChunksInFrustum
+            this.renderChunksInFrustum.clear();
+            for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos)
+                if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()))
                     this.renderChunksInFrustum.add(chunkInfo);
+
+            for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos) {
 
                     ChunkPos chunkPos1 = this.minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
 
@@ -99,7 +102,6 @@ public abstract class LevelRendererMixin {
                         if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_BUILDING)
                             newBrightChunks.add(chunkInfo);
                     }
-                }
             }
 
             List<AABB> exploredAABBs = FogOfWarClientEvents.exploredChunks.stream().map(p -> p.getFirst().chunk.bb).toList();

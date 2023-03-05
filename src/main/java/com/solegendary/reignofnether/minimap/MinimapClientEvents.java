@@ -254,16 +254,17 @@ public class MinimapClientEvents {
             AABB aabb = pair.getFirst().chunk.bb;
             for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
                 for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
-                    int xN = x - xc_world + (MAP_RADIUS * 2);
-                    int zN = z - zc_world + (MAP_RADIUS * 2);
+                    if (isXZinsideMap(x,z)) {
+                        int xN = x - xc_world + (MAP_RADIUS * 2);
+                        int zN = z - zc_world + (MAP_RADIUS * 2);
 
-                    int col = mapColours[xN][zN];
-                    int blue = (int) (((col >> 16) & 0xFF) * 0.35f);
-                    int green = (int) (((col >> 8) & 0xFF) * 0.35f);
-                    int red = (int) (((col) & 0xFF) * 0.35f);
+                        int col = mapColours[xN][zN];
+                        int blue = (int) (((col >> 16) & 0xFF) * 0.35f);
+                        int green = (int) (((col >> 8) & 0xFF) * 0.35f);
+                        int red = (int) (((col) & 0xFF) * 0.35f);
 
-                    mapColoursCopy[xN][zN] = (0xFF << 24) | (blue << 16) | (green << 8) | (red);
-
+                        mapColoursCopy[xN][zN] = (0xFF << 24) | (blue << 16) | (green << 8) | (red);
+                    }
                 }
             }
         }
@@ -271,9 +272,11 @@ public class MinimapClientEvents {
             AABB aabb = chunkInfo.chunk.bb;
             for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
                 for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
-                    int xN = x - xc_world + (MAP_RADIUS * 2);
-                    int zN = z - zc_world + (MAP_RADIUS * 2);
-                    mapColoursCopy[xN][zN] = mapColours[xN][zN];
+                    if (isXZinsideMap(x,z)) {
+                        int xN = x - xc_world + (MAP_RADIUS * 2);
+                        int zN = z - zc_world + (MAP_RADIUS * 2);
+                        mapColoursCopy[xN][zN] = mapColours[xN][zN];
+                    }
                 }
             }
         }
