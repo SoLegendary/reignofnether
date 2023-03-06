@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogChunk;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
@@ -250,8 +251,8 @@ public class MinimapClientEvents {
         for (int[] row : mapColoursCopy)
             Arrays.fill(row, (0xFF << 24));
 
-        for (Pair<LevelRenderer.RenderChunkInfo, Boolean> pair : FogOfWarClientEvents.exploredChunks) {
-            AABB aabb = pair.getFirst().chunk.bb;
+        for (FogChunk chunk : FogOfWarClientEvents.exploredChunks) {
+            AABB aabb = chunk.chunkInfo.chunk.bb;
             for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
                 for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
                     if (isXZinsideMap(x,z)) {
@@ -268,8 +269,8 @@ public class MinimapClientEvents {
                 }
             }
         }
-        for (LevelRenderer.RenderChunkInfo chunkInfo : FogOfWarClientEvents.brightChunks) {
-            AABB aabb = chunkInfo.chunk.bb;
+        for (FogChunk chunk : FogOfWarClientEvents.brightChunks) {
+            AABB aabb = chunk.chunkInfo.chunk.bb;
             for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
                 for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
                     if (isXZinsideMap(x,z)) {

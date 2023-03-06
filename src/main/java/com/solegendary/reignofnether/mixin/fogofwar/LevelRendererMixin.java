@@ -5,7 +5,9 @@ import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.fogofwar.FogChunk;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogTransitionBrightness;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -67,8 +69,8 @@ public abstract class LevelRendererMixin {
 
             LinkedHashSet<LevelRenderer.RenderChunkInfo> renderChunkInfos = (this.renderChunkStorage.get()).renderChunks;
 
-            Set<LevelRenderer.RenderChunkInfo> oldBrightChunks = FogOfWarClientEvents.brightChunks;
-            Set<LevelRenderer.RenderChunkInfo> newBrightChunks = ConcurrentHashMap.newKeySet();
+            Set<FogChunk> oldBrightChunks = FogOfWarClientEvents.brightChunks;
+            Set<FogChunk> newBrightChunks = ConcurrentHashMap.newKeySet();
 
             // refresh renderChunksInFrustum
             this.renderChunksInFrustum.clear();
@@ -88,7 +90,7 @@ public abstract class LevelRendererMixin {
                         ChunkPos chunkPos2 = this.minecraft.level.getChunk(entity.getOnPos()).getPos();
 
                         if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_UNIT) {
-                            newBrightChunks.add(chunkInfo);
+                            newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
                             break;
                         }
                     }
@@ -100,43 +102,57 @@ public abstract class LevelRendererMixin {
                         BlockPos bp = building.centrePos;
                         ChunkPos chunkPos2 = this.minecraft.level.getChunk(bp).getPos();
                         if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_BUILDING)
-                            newBrightChunks.add(chunkInfo);
+                            newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
                     }
             }
 
-            List<AABB> exploredAABBs = FogOfWarClientEvents.exploredChunks.stream().map(p -> p.getFirst().chunk.bb).toList();
-            for (LevelRenderer.RenderChunkInfo chunkInfo : newBrightChunks)
-                if (!exploredAABBs.contains(chunkInfo.chunk.bb)) {
-                    FogOfWarClientEvents.exploredChunks.add(new Pair<>(chunkInfo, true));
+            List<AABB> exploredAABBs = FogOfWarClientEvents.exploredChunks.stream().map(p -> p.chunkInfo.chunk.bb).toList();
+            for (FogChunk chunk : newBrightChunks)
+                if (!exploredAABBs.contains(chunk.chunkInfo.chunk.bb)) {
+                    chunk.fogTB = FogTransitionBrightness.DARK_TO_SEMI;
+                    FogOfWarClientEvents.exploredChunks.add(chunk);
                     System.out.println("added chunkInfo " + FogOfWarClientEvents.exploredChunks.size());
                 }
 
             if (!newBrightChunks.equals(oldBrightChunks)) {
                 // chunks just added to brightChunks
-                Set<LevelRenderer.RenderChunkInfo> diff1 = ConcurrentHashMap.newKeySet();
+                Set<FogChunk> diff1 = ConcurrentHashMap.newKeySet();
                 diff1.addAll(newBrightChunks);
-                diff1.removeAll(oldBrightChunks);
-
-                // chunks just removed from brightChunks
-                Set<LevelRenderer.RenderChunkInfo> diff2 = ConcurrentHashMap.newKeySet();
-                diff2.addAll(oldBrightChunks);
-                diff2.removeAll(newBrightChunks);
-
-                // reset their rendered flag so they revert to semi-darkness
-                FogOfWarClientEvents.exploredChunks.removeIf(p -> {
-                    for (LevelRenderer.RenderChunkInfo chunkInfo : diff2)
-                        if (chunkInfo.chunk.bb.equals(p.getFirst().chunk.bb))
+                diff1.removeIf(c -> {
+                    for (FogChunk oldBrightChunk : oldBrightChunks)
+                        if (c.chunkInfo.chunk.bb.equals(oldBrightChunk.chunkInfo.chunk.bb))
                             return true;
                     return false;
                 });
-                for (LevelRenderer.RenderChunkInfo chunkInfo : diff2)
-                    FogOfWarClientEvents.exploredChunks.add(new Pair<>(chunkInfo, true));
+
+                // chunks just removed from brightChunks
+                Set<FogChunk> diff2 = ConcurrentHashMap.newKeySet();
+                diff2.addAll(oldBrightChunks);
+                diff2.removeIf(c -> {
+                    for (FogChunk newBrightChunk : newBrightChunks)
+                        if (c.chunkInfo.chunk.bb.equals(newBrightChunk.chunkInfo.chunk.bb))
+                            return true;
+                    return false;
+                });
+
+                // reset their rendered flag so they revert to semi-darkness
+                FogOfWarClientEvents.exploredChunks.removeIf(p -> {
+                    for (FogChunk chunk : diff2)
+                        if (chunk.chunkInfo.chunk.bb.equals(p.chunkInfo.chunk.bb))
+                            return true;
+                    return false;
+                });
+                for (FogChunk chunk : diff2) {
+                    chunk.fogTB = FogTransitionBrightness.DARK_TO_SEMI;
+                    FogOfWarClientEvents.exploredChunks.add(chunk);
+                }
 
                 // symmetric difference (ie. items that appear in only one of the sets and not both)
                 diff1.addAll(diff2);
+                System.out.println("diff1: " + diff1.size());
                 diff1.forEach(c -> {
-                    c.chunk.setDirty(true);
-                    c.chunk.playerChanged = true;
+                    c.chunkInfo.chunk.setDirty(true);
+                    c.chunkInfo.chunk.playerChanged = true;
                 });
 
                 FogOfWarClientEvents.brightChunks.clear();
@@ -167,19 +183,19 @@ public abstract class LevelRendererMixin {
         BlockPos blockpos = pCamera.getBlockPosition();
         List<ChunkRenderDispatcher.RenderChunk> list = Lists.newArrayList();
 
-        List<AABB> brightAABBs = FogOfWarClientEvents.brightChunks.stream().map(c -> c.chunk.bb).toList();
-        List<Pair<LevelRenderer.RenderChunkInfo, Boolean>> exploredChunksToMarkAsRendered = new ArrayList<>();
+        List<AABB> brightAABBs = FogOfWarClientEvents.brightChunks.stream().map(c -> c.chunkInfo.chunk.bb).toList();
+        List<FogChunk> exploredChunksToMarkAsRendered = new ArrayList<>();
 
         outerLoop:
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
             if (!brightAABBs.contains(chunkInfo.chunk.bb)) {
                 // exploredChunks contains the bb and shouldBeRendered is false
-                for (Pair<LevelRenderer.RenderChunkInfo, Boolean> pair : FogOfWarClientEvents.exploredChunks) {
-                    if (pair.getFirst().chunk.bb.equals(chunkInfo.chunk.bb)) {
-                        if (!pair.getSecond())
+                for (FogChunk chunk : FogOfWarClientEvents.exploredChunks) {
+                    if (chunk.chunkInfo.chunk.bb.equals(chunkInfo.chunk.bb)) {
+                        if (!chunk.shouldBeRendered)
                             continue outerLoop; // skip rendering this entirely, causes the chunk to retain its old view
                         else {
-                            exploredChunksToMarkAsRendered.add(pair); // render this and mark as rendered
+                            exploredChunksToMarkAsRendered.add(chunk); // render this and mark as rendered
                         }
                     }
                 }
@@ -221,10 +237,8 @@ public abstract class LevelRendererMixin {
         this.minecraft.getProfiler().pop();
 
         // mark all chunks that just left the bright region as rendered
-        for (Pair<LevelRenderer.RenderChunkInfo, Boolean> pair : exploredChunksToMarkAsRendered) {
-            if (FogOfWarClientEvents.exploredChunks.remove(pair))
-                FogOfWarClientEvents.exploredChunks.add(new Pair<>(pair.getFirst(), false));
-        }
+        for (FogChunk chunk : exploredChunksToMarkAsRendered)
+            chunk.shouldBeRendered = false;
     }
 
     @Shadow @Final private AtomicBoolean needsFrustumUpdate = new AtomicBoolean(false);

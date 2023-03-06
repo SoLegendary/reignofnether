@@ -17,6 +17,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -27,15 +28,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FogOfWarClientEvents {
 
     // chunks that are in immediate view of a unit or building
-    public static final Set<LevelRenderer.RenderChunkInfo> brightChunks = ConcurrentHashMap.newKeySet();
+    public static final Set<FogChunk> brightChunks = ConcurrentHashMap.newKeySet();
 
     // chunks that have been in range of a unit or building before
     // if out of immediate view will be rendered with semi brightness and at its past state
     // Boolean is 'shouldBeRendered' so we render it once to update the brightness
     // is a superset of brightChunks
-
-    // TODO: maybe we can store just the coordiantes in the first() set?
-    public static final Set<Pair<LevelRenderer.RenderChunkInfo, Boolean>> exploredChunks = ConcurrentHashMap.newKeySet();
+    public static final Set<FogChunk> exploredChunks = ConcurrentHashMap.newKeySet();
 
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = true;
@@ -64,6 +63,12 @@ public class FogOfWarClientEvents {
         }
     }
 
+    @SubscribeEvent
+    public static void onTick(TickEvent.ClientTickEvent evt) {
+        brightChunks.forEach(FogChunk::tickBrightness);
+        exploredChunks.forEach(FogChunk::tickBrightness);
+    }
+
     public static boolean isEnabled() {
         return enabled;
     }
@@ -90,6 +95,23 @@ public class FogOfWarClientEvents {
         return DARK_CHUNK_BRIGHTNESS;
     }
 
+    /*
+    public static float getPosBrightness(BlockPos pPos) {
+        if (!isEnabled())
+            return 1.0f;
+
+        for (FogChunk chunkInfo : brightChunks)
+            if (chunkInfo.chunkInfo.chunk.bb.contains(pPos.getX() + 0.5f, pPos.getY() + 0.5f, pPos.getZ() + 0.5f))
+                return chunkInfo.brightness;
+
+        for (FogChunk chunkInfo : exploredChunks)
+            if (chunkInfo.chunkInfo.chunk.bb.contains(pPos.getX() + 0.5f, pPos.getY() + 0.5f, pPos.getZ() + 0.5f))
+                return chunkInfo.brightness;
+
+        return 0.0f;
+    }
+    */
+
     public static int chunkManhattanDist(ChunkPos pos1, ChunkPos pos2) {
         return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.z - pos2.z);
     }
@@ -109,15 +131,15 @@ public class FogOfWarClientEvents {
         if (!enabled)
             return true;
 
-        for (LevelRenderer.RenderChunkInfo chunkInfo : brightChunks)
-            if (chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
+        for (FogChunk chunkInfo : brightChunks)
+            if (chunkInfo.chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
                 return true;
         return false;
     }
 
     public static boolean isInExploredChunk(BlockPos bp) {
-        for (Pair<LevelRenderer.RenderChunkInfo, Boolean> pair : exploredChunks)
-            if (pair.getFirst().chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
+        for (FogChunk chunk : exploredChunks)
+            if (chunk.chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
                 return true;
         return false;
     }
