@@ -2,11 +2,11 @@
 
 **Video demo:** https://www.youtube.com/watch?v=lY1_i7xv1s4&feature=youtu.be
 
-Have you ever been playing Minecraft and thought to yourself: hey, this a great game and all, but I'm kind of tired of it being just a first-person survival crafter for the last 14 years? Well now you can experience it from an entirely new angle and genre!
-
 Inspired the classic Real Time Strategy games of the early 2000s including Starcraft, Warcraft and Age of Empires, Reign of Nether is trying to transform Minecraft into a experience just like one of them using all the same assets and models you find in the vanilla game.
 
-A core design tenet is that the gamemode is fully compatible with vanilla minecraft - meaning that players not familiar with RTS games can join the same server and play in first-person while players in the RTS gamemode can command their armies from on high.
+Reign of Nether doesn't try to imitate one of these games exactly, but instead aims to have uniquely-minecraft features. For example, buildings aren't just stationary monolithic objects that explode once their health is zero - to destroy a building you actually have to break it down block by block until it explodes once enough damage is taken.
+
+Another core design tenet is that the gamemode is fully compatible with vanilla minecraft - meaning that players not familiar with RTS games can join the same server and play in first-person while players in the RTS gamemode can command their armies from on high.
 
 # Features
 
