@@ -82,6 +82,7 @@ public class FogOfWarClientEvents {
         MC.levelRenderer.allChanged();
     }
 
+    /*
     public static float getPosBrightness(BlockPos pPos) {
         if (!isEnabled())
             return BRIGHT_CHUNK_BRIGHTNESS;
@@ -93,24 +94,24 @@ public class FogOfWarClientEvents {
             return SEMI_DARK_CHUNK_BRIGHTNESS;
 
         return DARK_CHUNK_BRIGHTNESS;
-    }
+    }*/
 
-    /*
+
     public static float getPosBrightness(BlockPos pPos) {
         if (!isEnabled())
             return 1.0f;
 
-        for (FogChunk chunkInfo : brightChunks)
-            if (chunkInfo.chunkInfo.chunk.bb.contains(pPos.getX() + 0.5f, pPos.getY() + 0.5f, pPos.getZ() + 0.5f))
-                return chunkInfo.brightness;
+        Set<FogChunk> chunks = ConcurrentHashMap.newKeySet();
+        chunks.addAll(brightChunks);
+        chunks.addAll(exploredChunks);
 
-        for (FogChunk chunkInfo : exploredChunks)
+        for (FogChunk chunkInfo : chunks)
             if (chunkInfo.chunkInfo.chunk.bb.contains(pPos.getX() + 0.5f, pPos.getY() + 0.5f, pPos.getZ() + 0.5f))
                 return chunkInfo.brightness;
 
         return 0.0f;
     }
-    */
+
 
     public static int chunkManhattanDist(ChunkPos pos1, ChunkPos pos2) {
         return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.z - pos2.z);

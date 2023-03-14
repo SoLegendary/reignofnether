@@ -1,46 +1,54 @@
+# Reign of Nether: Minecraft as an RTS
 
-Source installation information for modders
--------------------------------------------
-This code follows the Minecraft Forge installation methodology. It will apply
-some small patches to the vanilla MCP source code, giving you and it access 
-to some of the data and functions you need to build a successful mod.
+**Video demo:** https://www.youtube.com/watch?v=lY1_i7xv1s4&feature=youtu.be
 
-Note also that the patches are built against "un-renamed" MCP source code (aka
-SRG Names) - this means that you will not be able to read them directly against
-normal code.
+Have you ever been playing Minecraft and thought to yourself: hey, this a great game and all, but I'm kind of tired of it being just a first-person survival crafter for the last 14 years? Well now you can experience it from an entirely new angle and genre!
 
-Setup Process:
-==============================
+Inspired the classic Real Time Strategy games of the early 2000s including Starcraft, Warcraft and Age of Empires, Reign of Nether is trying to transform Minecraft into a experience just like one of them using all the same assets and models you find in the vanilla game.
 
-Step 1: Open your command-line and browse to the folder where you extracted the zip file.
+A core design tenet is that the gamemode is fully compatible with vanilla minecraft - meaning that players not familiar with RTS games can join the same server and play in first-person while players in the RTS gamemode can command their armies from on high.
 
-Step 2: You're left with a choice.
-If you prefer to use Eclipse:
-1. Run the following command: `gradlew genEclipseRuns` (`./gradlew genEclipseRuns` if you are on Mac/Linux)
-2. Open Eclipse, Import > Existing Gradle Project > Select Folder 
-   or run `gradlew eclipse` to generate the project.
+# Features
 
-If you prefer to use IntelliJ:
-1. Open IDEA, and import project.
-2. Select your build.gradle file and have it import.
-3. Run the following command: `gradlew genIntellijRuns` (`./gradlew genIntellijRuns` if you are on Mac/Linux)
-4. Refresh the Gradle Project in IDEA if required.
+| Feature | Status | Notes |
+|--|--|--|
+| Top down isometric camera | ✔️ |  |
+| Top down mouse controls | ✔️ |  |
+| Multiplayer | ✔️ |  |
+| Unit controls | ✔️ |  |
+| Building construction | ✔️ |  |
+| Building unit production | ✔️ |  |
+| Minimap | ✔️ |  |
+| Resources and population | ✔️ |  |
+| Resource collection | 🟡 | Currently very badly lags at high volumes |
+| Fog of war | 🟡 | Technically works, still looks quite janky |
+| Villagers Race | 🟡 |  |
+| Monsters Race | 🟡 |  |
+| Netherlings Race | ❌ |  |
+| Improved vanilla player features | ❌ | Give vanilla-mode players more interaction with their RTS teammates |
+| Unit abilities | ❌ | Think MOBA style abilities |
+| Teams | ❌ | Including resource trading, shared unit control, etc. |
+| RTS-friendly world generation| ❌ | Mostly just flattening the world, removing some biomes and adding more surface ores |
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can 
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+And many more that I've yet to think of...
 
-Mapping Names:
-=============================
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license, if you do not agree with it you can change your mapping names to other crowdsourced names in your 
-build.gradle. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
+# Races
 
-Additional Resources: 
-=========================
-Community Documentation: http://mcforge.readthedocs.io/en/latest/gettingstarted/  
-LexManos' Install Video: https://www.youtube.com/watch?v=8VEdtQLuLO0  
-Forge Forum: https://forums.minecraftforge.net/  
-Forge Discord: https://discord.gg/UvedJ9m  
+**Villagers** are the desperate alliance of villagers and illagers who have banded together to protect their home against these invaders. Their base is a typical vanilla village with villagers of many types crafting armour and weapons, building defences and training soldiers and is inspired by classic medieval fantasy designs.
+
+**Monsters** are the previously wild and untamed creatures of the overworld, now brought together by the forces of the end. Their base is centered around a stronghold and include ancient temples and ziggurats. Monsters shun sunlight and can only safely venture outside of their base during the night but once night falls, they should be feared just as they have been for ages past.
+
+**Netherlings** are the denizens of the nether who have come through portals to expand their empire by encroaching on the overworld. Wherever they expand the overworld is transformed into a visage of their home: dirt becomes netherrack, trees become mushrooms and sand becomes soulsand.
+
+# Release
+I don't really want to release this until it's done to a minimum level of polish. My criteria for that is basically: *at least two players can sit down and play a fun, balanced match together without anyone crashing or experiencing debilitating bugs*.
+
+Of course, since you're reading this you now have access to all my code, so feel free to run it yourself 🙂
+https://docs.minecraftforge.net/en/latest/gettingstarted/
+
+If you do run it I don't exactly have a startup guide so all I'll say is: once you're in the game, spawn in some "Villager Units" with some eggs in creative mode, press F12 and watch the magic happen.
+
+# Other stuff
+I am just working on this on and off in my free time so I don't have a strict dev schedule or roadmap. If you want to contact me directly for suggestions, advice or just to have a chat, feel free to DM me at /u/SoLegendary on Reddit.
+
+

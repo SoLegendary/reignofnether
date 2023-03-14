@@ -78,8 +78,8 @@ public abstract class LevelRendererMixin {
                 if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()))
                     this.renderChunksInFrustum.add(chunkInfo);
 
+            chunkInfoLoop:
             for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos) {
-
                     ChunkPos chunkPos1 = this.minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
 
                     // chunks in view of owned units
@@ -90,6 +90,14 @@ public abstract class LevelRendererMixin {
                         ChunkPos chunkPos2 = this.minecraft.level.getChunk(entity.getOnPos()).getPos();
 
                         if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_UNIT) {
+
+                            // if the chunk already exists in brightChunks, just update its renderInfo
+                            for (FogChunk chunk : FogOfWarClientEvents.brightChunks)
+                                if (chunk.chunkInfo.chunk.bb.equals(chunkInfo.chunk.bb)) {
+                                    chunk.chunkInfo = chunkInfo;
+                                    continue chunkInfoLoop;
+                                }
+                            // else, create a brand new FogChunk
                             newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
                             break;
                         }
@@ -101,8 +109,9 @@ public abstract class LevelRendererMixin {
 
                         BlockPos bp = building.centrePos;
                         ChunkPos chunkPos2 = this.minecraft.level.getChunk(bp).getPos();
-                        if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_BUILDING)
+                        if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_BUILDING) {
                             newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
+                        }
                     }
             }
 
@@ -114,8 +123,12 @@ public abstract class LevelRendererMixin {
                     System.out.println("added chunkInfo " + FogOfWarClientEvents.exploredChunks.size());
                 }
 
+            System.out.println("oldBrightChunks: " + oldBrightChunks.size());
+            System.out.println("newBrightChunks: " + newBrightChunks.size());
+
             if (!newBrightChunks.equals(oldBrightChunks)) {
-                // chunks just added to brightChunks
+
+                // chunks that just entered the bright zone
                 Set<FogChunk> diff1 = ConcurrentHashMap.newKeySet();
                 diff1.addAll(newBrightChunks);
                 diff1.removeIf(c -> {
@@ -125,7 +138,7 @@ public abstract class LevelRendererMixin {
                     return false;
                 });
 
-                // chunks just removed from brightChunks
+                // chunks that just left the bright zone
                 Set<FogChunk> diff2 = ConcurrentHashMap.newKeySet();
                 diff2.addAll(oldBrightChunks);
                 diff2.removeIf(c -> {
@@ -150,13 +163,22 @@ public abstract class LevelRendererMixin {
                 // symmetric difference (ie. items that appear in only one of the sets and not both)
                 diff1.addAll(diff2);
                 System.out.println("diff1: " + diff1.size());
+                System.out.println("diff2: " + diff2.size());
                 diff1.forEach(c -> {
                     c.chunkInfo.chunk.setDirty(true);
                     c.chunkInfo.chunk.playerChanged = true;
                 });
 
-                FogOfWarClientEvents.brightChunks.clear();
-                FogOfWarClientEvents.brightChunks.addAll(newBrightChunks);
+                //FogOfWarClientEvents.brightChunks.clear();
+                //FogOfWarClientEvents.brightChunks.addAll(newBrightChunks);
+
+                FogOfWarClientEvents.brightChunks.removeIf(c -> {
+                    for (FogChunk chunk : diff2)
+                        if (chunk.chunkInfo.chunk.bb.equals(c.chunkInfo.chunk.bb))
+                            return true;
+                    return false;
+                });
+                FogOfWarClientEvents.brightChunks.addAll(diff1);
             }
 
             this.minecraft.getProfiler().pop();
