@@ -72,7 +72,7 @@ public class HudClientEvents {
     // building that is selected in the list of unit icons
     public static Building hudSelectedBuilding = null;
     // classes used to render unit or building portrait (mode, frame, healthbar, stats)
-    public static PortraitRendererUnit portraitRendererUnit = new PortraitRendererUnit(null);
+    public static PortraitRendererUnit portraitRendererUnit = new PortraitRendererUnit();
     public static PortraitRendererBuilding portraitRendererBuilding = new PortraitRendererBuilding();
 
     private static RectZone unitPortraitZone = null;

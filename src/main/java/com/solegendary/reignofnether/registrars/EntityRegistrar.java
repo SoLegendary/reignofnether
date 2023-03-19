@@ -22,6 +22,7 @@ public class EntityRegistrar {
 
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, ReignOfNether.MOD_ID);
 
+
     // Entity Types
 
     public static final RegistryObject<EntityType<ZombieVillagerUnit>> ZOMBIE_VILLAGER_UNIT = ENTITIES.register("zombie_villager_unit",

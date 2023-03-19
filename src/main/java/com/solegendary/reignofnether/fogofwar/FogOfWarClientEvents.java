@@ -27,14 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FogOfWarClientEvents {
 
-    // chunks that are in immediate view of a unit or building
-    public static final Set<FogChunk> brightChunks = ConcurrentHashMap.newKeySet();
-
-    // chunks that have been in range of a unit or building before
-    // if out of immediate view will be rendered with semi brightness and at its past state
-    // Boolean is 'shouldBeRendered' so we render it once to update the brightness
-    // is a superset of brightChunks
-    public static final Set<FogChunk> exploredChunks = ConcurrentHashMap.newKeySet();
+    // all chunks that have ever been explored, including currently bright chunks
+    public static final Set<FogChunk> fogChunks = ConcurrentHashMap.newKeySet();
 
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = true;
@@ -63,49 +57,24 @@ public class FogOfWarClientEvents {
         }
     }
 
-    @SubscribeEvent
-    public static void onTick(TickEvent.ClientTickEvent evt) {
-        brightChunks.forEach(FogChunk::tickBrightness);
-        exploredChunks.forEach(FogChunk::tickBrightness);
-    }
-
     public static boolean isEnabled() {
         return enabled;
     }
     public static void setEnabled(boolean value) {
         enabled = value;
         if (enabled) {
-            brightChunks.clear();
-            exploredChunks.clear();
+            fogChunks.clear();
         }
         // reload chunks like player pressed F3 + A
         MC.levelRenderer.allChanged();
     }
-
-    /*
-    public static float getPosBrightness(BlockPos pPos) {
-        if (!isEnabled())
-            return BRIGHT_CHUNK_BRIGHTNESS;
-
-        if (isInBrightChunk(pPos))
-            return BRIGHT_CHUNK_BRIGHTNESS;
-
-        if (isInExploredChunk(pPos))
-            return SEMI_DARK_CHUNK_BRIGHTNESS;
-
-        return DARK_CHUNK_BRIGHTNESS;
-    }*/
 
 
     public static float getPosBrightness(BlockPos pPos) {
         if (!isEnabled())
             return 1.0f;
 
-        Set<FogChunk> chunks = ConcurrentHashMap.newKeySet();
-        chunks.addAll(brightChunks);
-        chunks.addAll(exploredChunks);
-
-        for (FogChunk chunkInfo : chunks)
+        for (FogChunk chunkInfo : fogChunks)
             if (chunkInfo.chunkInfo.chunk.bb.contains(pPos.getX() + 0.5f, pPos.getY() + 0.5f, pPos.getZ() + 0.5f))
                 return chunkInfo.brightness;
 
@@ -132,15 +101,8 @@ public class FogOfWarClientEvents {
         if (!enabled)
             return true;
 
-        for (FogChunk chunkInfo : brightChunks)
-            if (chunkInfo.chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
-                return true;
-        return false;
-    }
-
-    public static boolean isInExploredChunk(BlockPos bp) {
-        for (FogChunk chunk : exploredChunks)
-            if (chunk.chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
+        for (FogChunk fogChunk : fogChunks)
+            if (fogChunk.isBrightChunk() && fogChunk.chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
                 return true;
         return false;
     }
@@ -156,5 +118,12 @@ public class FogOfWarClientEvents {
             return;
 
         evt.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (enabled)
+            for (FogChunk fogChunk : FogOfWarClientEvents.fogChunks)
+                fogChunk.tickBrightness();
     }
 }

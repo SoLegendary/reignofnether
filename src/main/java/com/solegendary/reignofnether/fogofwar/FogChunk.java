@@ -17,12 +17,40 @@ public class FogChunk {
     public FogChunk(LevelRenderer.RenderChunkInfo chunkInfo, FogTransitionBrightness fogTB) {
         this.chunkInfo = chunkInfo;
         this.shouldBeRendered = true;
-        this.fogTB = fogTB;
+        this.setBrightness(fogTB);
+    }
+
+    // bright chunks are in immediate view of a unit or building
+    public boolean isBrightChunk() {
+        return this.fogTB == FogTransitionBrightness.DARK_TO_BRIGHT ||
+                this.fogTB == FogTransitionBrightness.SEMI_TO_BRIGHT;
+    }
+    // chunks that have been in range of a unit or building before
+    // if out of immediate view will be rendered with semi brightness and at its past state
+    public boolean isExploredChunk() {
+        return this.fogTB == FogTransitionBrightness.DARK_TO_SEMI ||
+                this.fogTB == FogTransitionBrightness.BRIGHT_TO_SEMI;
+    }
+
+    public void setBrightness(FogTransitionBrightness tb) {
+        this.fogTB = tb;
         switch(this.fogTB) {
             case BRIGHT_TO_SEMI, BRIGHT_TO_DARK -> this.brightness = BRIGHT;
-            case SEMI_TO_DARK, SEMI_TO_BRIGHT -> this.brightness = SEMI;
+            case SEMI_TO_DARK, SEMI_TO_BRIGHT -> {
+                this.brightness = SEMI;
+                this.shouldBeRendered = true;
+            }
             case DARK_TO_SEMI, DARK_TO_BRIGHT -> this.brightness = DARK;
         }
+    }
+
+    public boolean isAtFinalBrightness() {
+        return (this.fogTB == FogTransitionBrightness.SEMI_TO_BRIGHT && this.brightness == BRIGHT) ||
+                (this.fogTB == FogTransitionBrightness.DARK_TO_BRIGHT && this.brightness == BRIGHT) ||
+                (this.fogTB == FogTransitionBrightness.BRIGHT_TO_SEMI && this.brightness == SEMI) ||
+                (this.fogTB == FogTransitionBrightness.DARK_TO_SEMI && this.brightness == SEMI) ||
+                (this.fogTB == FogTransitionBrightness.BRIGHT_TO_DARK && this.brightness == DARK) ||
+                (this.fogTB == FogTransitionBrightness.SEMI_TO_DARK && this.brightness == DARK);
     }
 
     public void tickBrightness() {
@@ -65,7 +93,14 @@ public class FogChunk {
                     this.brightness = BRIGHT;
             }
         }
-        if (this.brightness != originalBrightness)
+        //if (this.brightness != originalBrightness && this.isAtFinalBrightness()) {
+        //    this.chunkInfo.chunk.setDirty(true);
+        //    this.chunkInfo.chunk.playerChanged = true;
+        //}
+
+        if (this.brightness != originalBrightness) {
             this.chunkInfo.chunk.setDirty(true);
+            this.chunkInfo.chunk.playerChanged = true;
+        }
     }
 }

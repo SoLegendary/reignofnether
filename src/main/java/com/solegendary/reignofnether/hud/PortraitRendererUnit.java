@@ -72,8 +72,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     private final int lookRangeY = 40;
 
 
-    public PortraitRendererUnit(R renderer) {
-        this.renderer = renderer;
+    public PortraitRendererUnit() {
     }
 
     public void randomiseAnimation(Boolean randomisePos) {
