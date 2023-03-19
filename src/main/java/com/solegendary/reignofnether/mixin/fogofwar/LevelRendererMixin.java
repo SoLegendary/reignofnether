@@ -83,7 +83,6 @@ public abstract class LevelRendererMixin {
                 if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()))
                     this.renderChunksInFrustum.add(chunkInfo);
 
-            chunkInfoLoop:
             for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos) {
                     ChunkPos chunkPos1 = this.minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
 
@@ -95,7 +94,6 @@ public abstract class LevelRendererMixin {
                         ChunkPos chunkPos2 = this.minecraft.level.getChunk(entity.getOnPos()).getPos();
 
                         if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_UNIT) {
-                            // TODO: check what the actual brightness should be
                             newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
                             break;
                         }
@@ -109,7 +107,6 @@ public abstract class LevelRendererMixin {
                         ChunkPos chunkPos2 = this.minecraft.level.getChunk(bp).getPos();
 
                         if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_BUILDING) {
-                            // TODO: check what the actual brightness should be
                             newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
                             break;
                         }

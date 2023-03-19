@@ -123,7 +123,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     public RectZone render(PoseStack poseStack, String name, int x, int y, LivingEntity entity) {
         Relationship rs = UnitClientEvents.getPlayerToEntityRelationship(entity);
 
-        if (rs != Relationship.OWNED && entity instanceof Unit unit)
+        if (rs != Relationship.OWNED && entity instanceof Unit unit && unit.getOwnerName().length() > 0)
             name += " (" + unit.getOwnerName() + ")";
 
         // draw name (unless a player, since their nametag will be rendered anyway)

@@ -36,7 +36,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.Arrays;
+import java.util.*;
 
 public class MinimapClientEvents {
 
@@ -246,46 +246,40 @@ public class MinimapClientEvents {
             }
         }
 
-        // init a map filled with black
-        int[][] mapColoursCopy = new int[WORLD_RADIUS*2][WORLD_RADIUS*2];
-        for (int[] row : mapColoursCopy)
-            Arrays.fill(row, (0xFF << 24));
+        // init a map filled with black and copy in only those pixels inside of explored/bright chunks
+        if (FogOfWarClientEvents.isEnabled()) {
+            int[][] mapColoursCopy = new int[WORLD_RADIUS*2][WORLD_RADIUS*2];
+            for (int[] row : mapColoursCopy)
+                Arrays.fill(row, (0xFF << 24));
 
-        for (FogChunk chunk : FogOfWarClientEvents.fogChunks) {
-
-            if (chunk.isBrightChunk()) {
+            for (FogChunk chunk : FogOfWarClientEvents.fogChunks) {
                 AABB aabb = chunk.chunkInfo.chunk.bb;
                 for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
                     for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
                         if (isXZinsideMap(x,z)) {
                             int xN = x - xc_world + (MAP_RADIUS * 2);
                             int zN = z - zc_world + (MAP_RADIUS * 2);
-                            mapColoursCopy[xN][zN] = mapColours[xN][zN];
-                        }
-                    }
-                }
-            }
-            else {
-                AABB aabb = chunk.chunkInfo.chunk.bb;
-                for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
-                    for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
-                        if (isXZinsideMap(x,z)) {
-                            int xN = x - xc_world + (MAP_RADIUS * 2);
-                            int zN = z - zc_world + (MAP_RADIUS * 2);
+
+                            // a chunk on the same Y column may not be bright
+                            // so prioritise bright chunks by skipping any pixels that have
+                            // already been filled in if the current chunk isn't bright
+                            if (mapColoursCopy[xN][zN] != (0xFF << 24) && !chunk.isBrightChunk())
+                                continue;
+
+                            float brightnessMult = chunk.isBrightChunk() ? 1.0f : 0.35f;
 
                             int col = mapColours[xN][zN];
-                            int blue = (int) (((col >> 16) & 0xFF) * 0.35f);
-                            int green = (int) (((col >> 8) & 0xFF) * 0.35f);
-                            int red = (int) (((col) & 0xFF) * 0.35f);
+                            int blue = (int) (((col >> 16) & 0xFF) * brightnessMult);
+                            int green = (int) (((col >> 8) & 0xFF) * brightnessMult);
+                            int red = (int) (((col) & 0xFF) * brightnessMult);
 
                             mapColoursCopy[xN][zN] = (0xFF << 24) | (blue << 16) | (green << 8) | (red);
                         }
                     }
                 }
             }
+            mapColours = mapColoursCopy;
         }
-        mapColours = mapColoursCopy;
-
 
         // draw view quad
         for (int z = zc_world - WORLD_RADIUS; z < zc_world + WORLD_RADIUS; z++)

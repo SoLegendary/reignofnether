@@ -9,7 +9,7 @@ public class FogChunk {
     public static float SEMI = 0.15f;
     public static float DARK = 0f;
 
-    public LevelRenderer.RenderChunkInfo chunkInfo;
+    public LevelRenderer.RenderChunkInfo chunkInfo; // IMPORTANT to note that chunkInfos are 3D so there may be vertical chunks too
     public Boolean shouldBeRendered; // only set false for explored chunks - rendered only once to retain its freeze-frame effect
     public FogTransitionBrightness fogTB;
     public float brightness;
