@@ -8,7 +8,8 @@
         "FrustumMixin",
         "OrthoViewMixin",
         "PlayerMixin",
-        "TopdownGuiMixin"
+        "TopdownGuiMixin",
+        "WitchMixin"
     ],
     "minVersion": "0.8",
     "client": [

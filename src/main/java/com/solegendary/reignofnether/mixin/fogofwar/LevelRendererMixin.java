@@ -113,9 +113,6 @@ public abstract class LevelRendererMixin {
                     }
             }
 
-            System.out.println("oldBrightChunks: " + oldBrightChunks.size());
-            System.out.println("newBrightChunks: " + newBrightChunks.size());
-
             if (!newBrightChunks.equals(oldBrightChunks)) {
 
                 // chunks that just entered the bright zone
@@ -137,9 +134,6 @@ public abstract class LevelRendererMixin {
                             return true;
                     return false;
                 });
-
-                System.out.println("diff1: " + diff1.size());
-                System.out.println("diff2: " + diff2.size());
 
                 // add new bright chunks
                 boolean chunkExists;

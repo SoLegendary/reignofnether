@@ -131,7 +131,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MOVEMENT_SPEED, VillagerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, VillagerUnit.maxHealth)
-                .add(Attributes.ATTACK_DAMAGE, VillagerUnit.movementSpeed)
                 .add(Attributes.ARMOR, VillagerUnit.armorValue);
     }
 

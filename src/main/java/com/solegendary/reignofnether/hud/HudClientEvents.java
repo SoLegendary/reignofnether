@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -55,6 +56,11 @@ public class HudClientEvents {
     ));
     private static final ArrayList<Button> genericActionButtonsAttacker = new ArrayList<>(Arrays.asList(
             ActionButtons.ATTACK,
+            ActionButtons.HOLD,
+            ActionButtons.MOVE,
+            ActionButtons.STOP
+    ));
+    private static final ArrayList<Button> genericActionButtons = new ArrayList<>(Arrays.asList(
             ActionButtons.HOLD,
             ActionButtons.MOVE,
             ActionButtons.STOP
@@ -520,10 +526,16 @@ public class HudClientEvents {
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
 
-            ArrayList<Button> genericActionButtons = hudSelectedEntity instanceof WorkerUnit ?
-                    genericActionButtonsWorker : genericActionButtonsAttacker;
+            ArrayList<Button> actionButtons;
 
-            for (Button actionButton : genericActionButtons) {
+            if (hudSelectedEntity instanceof AttackerUnit)
+                actionButtons = genericActionButtonsAttacker;
+            else if (hudSelectedEntity instanceof WorkerUnit)
+                actionButtons = genericActionButtonsWorker;
+            else
+                actionButtons = genericActionButtons;
+
+            for (Button actionButton : actionButtons) {
 
                 // GATHER button does not have a static icon
                 if (actionButton == ActionButtons.GATHER && hudSelectedEntity instanceof WorkerUnit workerUnit) {

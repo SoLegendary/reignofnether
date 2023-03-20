@@ -143,9 +143,9 @@ public class UnitServerEvents {
             allUnits.removeIf(e -> e.getId() == entity.getId());
             UnitClientboundPacket.sendLeavePacket(entity);
 
-            ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
-            ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, false, true);
-            forcedUnitChunks.removeIf(p -> p.getFirst().getId() == entity.getId());
+            //ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
+            //ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, false, true);
+            //forcedUnitChunks.removeIf(p -> p.getFirst().getId() == entity.getId());
         }
     }
 

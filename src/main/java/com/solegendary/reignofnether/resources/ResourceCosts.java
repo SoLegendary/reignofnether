@@ -65,6 +65,13 @@ public class ResourceCosts {
         public static final int TICKS = TICKS_PER_SECOND * 30;
         public static final int POPULATION = 2;
     }
+    public static class Witch {
+        public static final int FOOD = 100;
+        public static final int WOOD = 100;
+        public static final int ORE = 100;
+        public static final int TICKS = TICKS_PER_SECOND * 35;
+        public static final int POPULATION = 2;
+    }
     public static class Stockpile {
         public static final int FOOD = 0;
         public static final int WOOD = 75;

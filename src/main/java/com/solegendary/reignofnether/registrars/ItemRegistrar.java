@@ -46,6 +46,10 @@ public class ItemRegistrar {
             ITEMS.register("iron_golem_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.IRON_GOLEM_UNIT,
                     0x101010, 0x757D78, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
+    public static final RegistryObject<ForgeSpawnEggItem> WITCH_UNIT_SPAWN_EGG =
+            ITEMS.register("witch_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WITCH_UNIT,
+                    0x330000, 0x3A732D, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
     public static void init() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }

@@ -5,10 +5,7 @@ import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
-import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
+import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -65,6 +62,11 @@ public class EntityRegistrar {
             () -> EntityType.Builder.of(IronGolemUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.IRON_GOLEM.getWidth(), EntityType.IRON_GOLEM.getHeight())
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "iron_golem_unit").toString()));
+
+    public static final RegistryObject<EntityType<WitchUnit>> WITCH_UNIT = ENTITIES.register("witch_unit",
+            () -> EntityType.Builder.of(WitchUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.WITCH.getWidth(), EntityType.WITCH.getHeight())
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "witch_unit").toString()));
 
     public static void init() {
         ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
