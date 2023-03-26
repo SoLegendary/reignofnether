@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.abilities;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Ability;
@@ -38,11 +39,11 @@ public class ThrowHealingPotion extends Ability {
     }
 
     @Override
-    public AbilityButton getButton() {
+    public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
                 "Healing Potion",
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/splash_potion_healing.png"),
-                Keybindings.keyQ,
+                hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_HEALING_POTION,
                 () -> false,
                 () -> true,

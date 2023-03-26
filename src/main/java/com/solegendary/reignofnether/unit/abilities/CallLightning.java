@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -39,11 +40,11 @@ public class CallLightning extends Ability {
     }
 
     @Override
-    public AbilityButton getButton() {
+    public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
             "Call Lightning",
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_on.png"),
-            Keybindings.keyL,
+            hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.CALL_LIGHTNING,
             () -> !lab.isUpgraded(),
             () -> lab.getLightningRodPos() != null,

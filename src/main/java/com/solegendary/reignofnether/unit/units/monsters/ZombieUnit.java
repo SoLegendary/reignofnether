@@ -132,8 +132,6 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE, 0); // needs to be added for parent to work
     }
 
-    private final ObjectArrayList<AABB> renderChunksInFrustum = new ObjectArrayList<>(10000);
-
     public void tick() {
         this.setCanPickUpLoot(true);
 

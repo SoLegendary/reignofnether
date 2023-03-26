@@ -1,42 +1,52 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
-import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.abilities.Explode;
+import com.solegendary.reignofnether.unit.abilities.Teleport;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.Ability;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
+import net.minecraft.core.Direction;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.EntityTeleportEvent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
-public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
+public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
     // region
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -51,7 +61,6 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
-    public CreeperAttackUnitGoal attackGoal;
     public ReturnResourcesGoal returnResourcesGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
@@ -69,7 +78,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
-            SynchedEntityData.defineId(CreeperUnit.class, EntityDataSerializers.STRING);
+            SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.STRING);
 
     @Override
     protected void defineSynchedData() {
@@ -97,91 +106,76 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 20.0f;
-    final static public float attacksPerSecond = 1f;
-    final static public float maxHealth = 15.0f;
+    final static public float attackDamage = 3.0f;
+    final static public float attacksPerSecond = 0.6f;
+    final static public float maxHealth = 20.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.30f;
+    final static public float movementSpeed = 0.25f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
-    final static public boolean aggressiveWhenIdle = false;
-    final static public int popCost = ResourceCosts.Creeper.POPULATION;
-    final static public boolean canAttackBuildings = false;
-    final static public int maxResources = 0;
+    final static public boolean aggressiveWhenIdle = true;
+    final static public int popCost = ResourceCosts.Enderman.POPULATION;
+    final static public boolean canAttackBuildings = true;
+    public int maxResources = 100;
 
+    public MeleeAttackUnitGoal attackGoal;
     public AttackBuildingGoal attackBuildingGoal;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    private boolean forceExplode = false;
+    // TODO: prevent random teleport on being wet, damaged or being shot (but keep the damage)
 
-    public CreeperUnit(EntityType<? extends Creeper> entityType, Level level) {
+    public EndermanUnit(EntityType<? extends EnderMan> entityType, Level level) {
         super(entityType, level);
 
-        Explode explodeAbility = new Explode(this);
-        this.abilities.add(explodeAbility);
+        Teleport ab1 = new Teleport(this);
+        this.abilities.add(ab1);
 
         if (level.isClientSide())
-            this.abilityButtons.add(explodeAbility.getButton(Keybindings.keyQ));
+            this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
     }
 
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
 
-    public boolean canExplodeOnTarget() {
-        LivingEntity target = this.getTarget();
-        if (target != null && target.position().distanceTo(this.position()) <= 2f)
-            return true;
-        return false;
-    }
-
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MOVEMENT_SPEED, CreeperUnit.movementSpeed)
-                .add(Attributes.MAX_HEALTH, CreeperUnit.maxHealth)
-                .add(Attributes.ARMOR, CreeperUnit.armorValue);
+                .add(Attributes.MOVEMENT_SPEED, EndermanUnit.movementSpeed)
+                .add(Attributes.ATTACK_DAMAGE, EndermanUnit.attackDamage)
+                .add(Attributes.MAX_HEALTH, EndermanUnit.maxHealth);
     }
 
     public void tick() {
-        this.setCanPickUpLoot(false);
+        this.setCanPickUpLoot(true);
 
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
-
-        if (forceExplode)
-            this.setSwellDir(1);
-        else if (!canExplodeOnTarget())
-            this.setSwellDir(-1);
-    }
-
-    @Override
-    public void resetBehaviours() {
-        forceExplode = false;
     }
 
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.attackGoal = new CreeperAttackUnitGoal(this, getAttackCooldown(), 1.0f, false);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
+        this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
     }
 
     @Override
     protected void registerGoals() {
         initialiseGoals();
 
+        // movegoal must be lower priority than attacks so that attack-moving works correctly
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
+        this.goalSelector.addGoal(2, attackBuildingGoal);
+        this.goalSelector.addGoal(2, returnResourcesGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
-    }
-
-    public void explode() {
-        forceExplode = true;
     }
 }

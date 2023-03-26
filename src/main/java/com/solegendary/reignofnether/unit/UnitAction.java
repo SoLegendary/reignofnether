@@ -22,6 +22,7 @@ public enum UnitAction {
     // special abilities - these can also be assigned to cursor actions
     EXPLODE,
     CALL_LIGHTNING, // actually not from a unit, but we'll make an exception
+    TELEPORT,
 
     THROW_HARMING_POTION,
     THROW_HEALING_POTION

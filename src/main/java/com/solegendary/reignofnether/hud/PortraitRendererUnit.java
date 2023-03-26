@@ -32,6 +32,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
 
 import java.text.DecimalFormat;
@@ -149,8 +150,12 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
         RectZone rectZone = RectZone.getZoneByLW(x, y, frameWidth, frameHeight);
 
+        // remember 0,0 is top left
         int drawX = x + headOffsetX;
         int drawY = y + (int) (entity.getEyeHeight() / standardEyeHeight * headOffsetY);
+
+        if (entity instanceof EnderMan)
+            drawY -= 15;
 
         // hide all model parts except the head
         setNonHeadModelVisibility(false);

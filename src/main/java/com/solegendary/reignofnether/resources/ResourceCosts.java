@@ -37,6 +37,13 @@ public class ResourceCosts {
         public static final int TICKS = TICKS_PER_SECOND * 20;
         public static final int POPULATION = 1;
     }
+    public static class Enderman {
+        public static final int FOOD = 100;
+        public static final int WOOD = 100;
+        public static final int ORE = 100;
+        public static final int TICKS = TICKS_PER_SECOND * 30;
+        public static final int POPULATION = 3;
+    }
     public static class Villager {
         public static final int FOOD = 50;
         public static final int WOOD = 0;

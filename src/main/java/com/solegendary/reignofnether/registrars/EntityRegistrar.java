@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
+import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -67,6 +64,11 @@ public class EntityRegistrar {
             () -> EntityType.Builder.of(WitchUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.WITCH.getWidth(), EntityType.WITCH.getHeight())
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "witch_unit").toString()));
+
+    public static final RegistryObject<EntityType<EndermanUnit>> ENDERMAN_UNIT = ENTITIES.register("enderman_unit",
+            () -> EntityType.Builder.of(EndermanUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.ENDERMAN.getWidth(), EntityType.ENDERMAN.getHeight())
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "enderman_unit").toString()));
 
     public static void init() {
         ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());

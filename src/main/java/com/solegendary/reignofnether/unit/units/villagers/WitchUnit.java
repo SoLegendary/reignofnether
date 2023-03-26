@@ -103,12 +103,15 @@ public class WitchUnit extends Witch implements Unit {
     public WitchUnit(EntityType<? extends Witch> entityType, Level level) {
         super(entityType, level);
 
-        this.abilities.add(new ThrowHarmingPotion(this));
-        this.abilities.add(new ThrowHealingPotion(this));
+        ThrowHarmingPotion ab1 = new ThrowHarmingPotion(this);
+        ThrowHealingPotion ab2 = new ThrowHealingPotion(this);
+        this.abilities.add(ab1);
+        this.abilities.add(ab2);
 
-        if (level.isClientSide())
-            for (Ability ability : this.abilities)
-                this.abilityButtons.add(ability.getButton());
+        if (level.isClientSide()) {
+            this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
+            this.abilityButtons.add(ab2.getButton(Keybindings.keyW));
+        }
     }
 
     @Override

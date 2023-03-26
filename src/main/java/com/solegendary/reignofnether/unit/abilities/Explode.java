@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.abilities;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -32,11 +33,11 @@ public class Explode extends Ability {
     }
 
     @Override
-    public AbilityButton getButton() {
+    public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
             "Explode",
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
-            Keybindings.keyQ,
+            hotkey,
             () -> false,//CursorClientEvents.getLeftClickAction() == UnitAction.EXPLODE,
             () -> false,
             () -> true,

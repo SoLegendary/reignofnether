@@ -56,7 +56,7 @@ public class Laboratory extends ProductionBuilding {
                 CreeperUnitProd.getStartButton(this, Keybindings.keyQ),
                 ResearchLabLightningRod.getStartButton(this, Keybindings.keyW)
             );
-            this.abilityButtons.add(callLightning.getButton());
+            this.abilityButtons.add(callLightning.getButton(Keybindings.keyL));
         }
     }
 

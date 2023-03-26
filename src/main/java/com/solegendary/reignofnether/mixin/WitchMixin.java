@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableWitchTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestHealableRaiderTargetGoal;
@@ -20,8 +21,6 @@ public class WitchMixin {
     @Shadow private NearestHealableRaiderTargetGoal<Raider> healRaidersGoal;
     @Shadow private NearestAttackableWitchTargetGoal<Player> attackPlayersGoal;
 
-    // any chunkInfo objects added to renderChunksInFrustum will be rendered
-    // we can collect old chunk data here to render them in their past state
     @Inject(
             method = "aiStep",
             at = @At("HEAD")
@@ -32,5 +31,4 @@ public class WitchMixin {
         if (attackPlayersGoal == null)
             attackPlayersGoal = new NearestAttackableWitchTargetGoal(((Witch)(Object)this), Player.class, 10, true, false, (Predicate)null);
     }
-
 }
