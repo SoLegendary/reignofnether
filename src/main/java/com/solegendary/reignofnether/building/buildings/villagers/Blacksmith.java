@@ -60,7 +60,6 @@ public class Blacksmith extends ProductionBuilding {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 Blacksmith.buildingName,
-                Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/smithing_table_front.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Blacksmith.class,

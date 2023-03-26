@@ -49,7 +49,6 @@ public class WheatFarm extends Building {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 WheatFarm.buildingName,
-                Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/hay_block_side.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == WheatFarm.class,

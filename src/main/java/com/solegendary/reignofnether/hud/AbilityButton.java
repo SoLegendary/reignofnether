@@ -19,12 +19,12 @@ public class AbilityButton extends Button {
     // or simple abilities with no cooldown and the logic can be handled entirely in onLeftClick()
     public Ability ability;
 
-    public AbilityButton(String name, int iconSize, ResourceLocation rl, Keybinding hotkey, Supplier<Boolean> isSelected,
+    public AbilityButton(String name, ResourceLocation rl, Keybinding hotkey, Supplier<Boolean> isSelected,
                          Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, Runnable onLeftClick, Runnable onRightClick,
                          List<FormattedCharSequence> tooltipLines, @Nullable Ability ability) {
 
         // generate x/y based on given position (starting at 0 which is bottom left 1 row above generic action buttons)
-        super(name, iconSize, rl, hotkey, isSelected, isHidden, isEnabled, onLeftClick, onRightClick, tooltipLines);
+        super(name, Button.itemIconSize, rl, hotkey, isSelected, isHidden, isEnabled, onLeftClick, onRightClick, tooltipLines);
 
         this.ability = ability;
 

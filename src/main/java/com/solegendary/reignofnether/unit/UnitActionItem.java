@@ -121,10 +121,6 @@ public class UnitActionItem {
                 case FOLLOW -> {
                     unit.setFollowTarget((LivingEntity) level.getEntity(unitId));
                 }
-                case EXPLODE -> {
-                    if (unit instanceof CreeperUnit creeper)
-                        creeper.explode();
-                }
                 case BUILD_REPAIR -> {
                     // if the unit can't actually build/repair just treat this as a move action
                     if (unit instanceof WorkerUnit workerUnit) {
@@ -171,9 +167,14 @@ public class UnitActionItem {
                 case DELETE -> {
                     ((LivingEntity) unit).kill();
                 }
+
+                // any other Ability not explicitly defined here
+                default -> {
+                    for (Ability ability : unit.getAbilities())
+                        if (ability.action == action)
+                            ability.use(level, unit, preselectedBlockPos);
+                }
             }
-            // TODO: find which unit actually used the ability
-            // set ability cd on unit
         }
         if (this.selectedBuildingPos.equals(new BlockPos(0, 0, 0)))
             return;

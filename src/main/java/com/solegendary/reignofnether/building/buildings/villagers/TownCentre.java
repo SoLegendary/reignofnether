@@ -57,7 +57,6 @@ public class TownCentre extends ProductionBuilding {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 TownCentre.buildingName,
-                Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/polished_granite.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == TownCentre.class,

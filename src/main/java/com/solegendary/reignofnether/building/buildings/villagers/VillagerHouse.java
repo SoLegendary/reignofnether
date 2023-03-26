@@ -49,7 +49,6 @@ public class VillagerHouse extends Building {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
             VillagerHouse.buildingName,
-            Button.itemIconSize,
             new ResourceLocation("minecraft", "textures/block/oak_log.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == VillagerHouse.class,

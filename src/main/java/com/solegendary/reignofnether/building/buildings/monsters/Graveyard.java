@@ -58,7 +58,6 @@ public class Graveyard extends ProductionBuilding {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 Graveyard.buildingName,
-                Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/mossy_stone_bricks.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Graveyard.class,

@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit;
 
 import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -34,6 +35,10 @@ public class Ability {
     public void use(Level level, Unit unitUsing, BlockPos targetBp) { }
 
     public void use(Level level, Building buildingUsing, BlockPos targetBp) { }
+
+    public AbilityButton getButton() {
+        return null;
+    }
 
     // limits the targetPos to within this.range distance of originPos, ignoring Y values
     // https://math.stackexchange.com/questions/2045174/how-to-find-a-point-between-two-points-with-given-distance

@@ -4,14 +4,13 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.abilities.CallLightningAbility;
+import com.solegendary.reignofnether.unit.abilities.CallLightning;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
@@ -49,7 +48,7 @@ public class Laboratory extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.BLACKSTONE);
 
-        Ability callLightning = new CallLightningAbility();
+        Ability callLightning = new CallLightning(this);
         this.abilities.add(callLightning);
 
         if (level.isClientSide()) {
@@ -57,28 +56,7 @@ public class Laboratory extends ProductionBuilding {
                 CreeperUnitProd.getStartButton(this, Keybindings.keyQ),
                 ResearchLabLightningRod.getStartButton(this, Keybindings.keyW)
             );
-
-            this.abilityButtons.add(
-                new AbilityButton(
-                    "Call Lightning",
-                    14,
-                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_on.png"),
-                    Keybindings.keyL,
-                    () -> CursorClientEvents.getLeftClickAction() == UnitAction.CALL_LIGHTNING,
-                    () -> !this.isUpgraded(),
-                    () -> this.getLightningRodPos() != null,
-                    () -> CursorClientEvents.setLeftClickAction(UnitAction.CALL_LIGHTNING),
-                    null,
-                    List.of(
-                        FormattedCharSequence.forward("Call Lightning", Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE004  " + callLightning.cooldownMax/20 + "s  \uE005  " + (int) callLightning.range, MyRenderer.iconStyle),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Summon a bolt of lightning at the targeted location.", Style.EMPTY),
-                        FormattedCharSequence.forward("Can be used to charge creepers and damage enemies.", Style.EMPTY)
-                    ),
-                    callLightning
-                )
-            );
+            this.abilityButtons.add(callLightning.getButton());
         }
     }
 
@@ -115,7 +93,6 @@ public class Laboratory extends ProductionBuilding {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 Laboratory.buildingName,
-                Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/brewing_stand.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Laboratory.class,

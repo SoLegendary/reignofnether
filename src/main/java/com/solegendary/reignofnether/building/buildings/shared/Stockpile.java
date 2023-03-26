@@ -78,7 +78,6 @@ public class Stockpile extends ProductionBuilding {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 Stockpile.buildingName,
-                Button.itemIconSize,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/chest.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Stockpile.class,

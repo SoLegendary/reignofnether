@@ -60,7 +60,6 @@ public class Mausoleum extends ProductionBuilding {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 Mausoleum.buildingName,
-                Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/deepslate_tiles.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Mausoleum.class,

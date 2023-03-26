@@ -58,7 +58,6 @@ public class Barracks extends ProductionBuilding {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 Barracks.buildingName,
-                Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/fletching_table_front.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Barracks.class,

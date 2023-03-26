@@ -49,7 +49,6 @@ public class PumpkinFarm extends Building {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 PumpkinFarm.buildingName,
-                Button.itemIconSize,
                 new ResourceLocation("minecraft", "textures/block/pumpkin_side.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == PumpkinFarm.class,

@@ -23,4 +23,6 @@ public enum UnitAction {
     EXPLODE,
     CALL_LIGHTNING, // actually not from a unit, but we'll make an exception
 
+    THROW_HARMING_POTION,
+    THROW_HEALING_POTION
 }

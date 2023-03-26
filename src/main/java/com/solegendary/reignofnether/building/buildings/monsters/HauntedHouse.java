@@ -48,7 +48,6 @@ public class HauntedHouse extends Building {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
             HauntedHouse.buildingName,
-            Button.itemIconSize,
             new ResourceLocation("minecraft", "textures/block/dark_oak_log.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == HauntedHouse.class,

@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.abilities.Explode;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -121,22 +122,11 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     public CreeperUnit(EntityType<? extends Creeper> entityType, Level level) {
         super(entityType, level);
 
+        Explode explodeAbility = new Explode(this);
+        this.abilities.add(explodeAbility);
+
         if (level.isClientSide())
-            this.abilityButtons.add(new AbilityButton(
-                "Explode",
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
-                Keybindings.keyQ,
-                () -> false,//CursorClientEvents.getLeftClickAction() == UnitAction.EXPLODE,
-                () -> false,
-                () -> true,
-                () -> UnitClientEvents.sendUnitCommand(UnitAction.EXPLODE),//CursorClientEvents.setLeftClickAction(UnitAction.EXPLODE),
-                null,
-                List.of(
-                    FormattedCharSequence.forward("Explode", Style.EMPTY)
-                ),
-                null
-            ));
+            this.abilityButtons.add(explodeAbility.getButton());
     }
 
     @Override

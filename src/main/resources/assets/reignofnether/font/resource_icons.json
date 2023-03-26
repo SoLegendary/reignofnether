@@ -44,6 +44,20 @@
         },
         {
             "type": "bitmap",
+            "file": "reignofnether:icons/items/sword.png",
+            "ascent": 9,
+            "height": 9,
+            "chars": ["\uE006"]
+        },
+        {
+            "type": "bitmap",
+            "file": "reignofnether:icons/items/heart.png",
+            "ascent": 9,
+            "height": 9,
+            "chars": ["\uE007"]
+        },
+        {
+            "type": "bitmap",
             "file": "minecraft:font/ascii.png",
             "ascent": 7,
             "chars": [
