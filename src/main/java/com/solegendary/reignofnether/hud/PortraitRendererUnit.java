@@ -154,8 +154,12 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         int drawX = x + headOffsetX;
         int drawY = y + (int) (entity.getEyeHeight() / standardEyeHeight * headOffsetY);
 
-        if (entity instanceof EnderMan)
-            drawY -= 15;
+        if (entity instanceof EnderMan) {
+            if (((EnderMan) entity).isAggressive())
+                drawY -= 5;
+            else
+                drawY -= 15;
+        }
 
         // hide all model parts except the head
         setNonHeadModelVisibility(false);

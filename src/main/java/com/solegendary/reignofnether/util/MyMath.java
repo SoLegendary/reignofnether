@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.util;
 
 import com.mojang.math.Vector3d;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -167,5 +168,24 @@ public class MyMath {
     public static int randRangeInt(int min, int max) {
         int posRandInt = (int) ((max - min) * Math.random());
         return posRandInt + min;
+    }
+
+    // limits the targetPos to within this.range distance of originPos, ignoring Y values
+    // https://math.stackexchange.com/questions/2045174/how-to-find-a-point-between-two-points-with-given-distance
+    public static BlockPos getXZRangeLimitedBlockPos(BlockPos originPos, BlockPos targetPos, float range) {
+        float x1 = originPos.getX();
+        float x2 = targetPos.getX();
+        float z1 = originPos.getZ();
+        float z2 = targetPos.getZ();
+
+        double D = Math.sqrt(new Vec2(x1,z1).distanceToSqr(new Vec2(x2,z2)));
+
+        if (D <= range)
+            return targetPos;
+
+        double x3 = x1 + ((range/D) * (x2 - x1));
+        double z3 = z1 + ((range/D) * (z2 - z1));
+
+        return new BlockPos(x3, originPos.getY(), z3);
     }
 }

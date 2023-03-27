@@ -170,9 +170,14 @@ public class UnitActionItem {
 
                 // any other Ability not explicitly defined here
                 default -> {
-                    for (Ability ability : unit.getAbilities())
-                        if (ability.action == action)
-                            ability.use(level, unit, preselectedBlockPos);
+                    for (Ability ability : unit.getAbilities()) {
+                        if (ability.action == action) {
+                            if (ability.canTargetEntities && this.unitId > 0)
+                                ability.use(level, unit, (LivingEntity) level.getEntity(unitId));
+                            else
+                                ability.use(level, unit, preselectedBlockPos);
+                        }
+                    }
                 }
             }
         }

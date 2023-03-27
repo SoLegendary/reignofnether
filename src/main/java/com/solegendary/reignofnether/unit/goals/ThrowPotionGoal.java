@@ -1,0 +1,64 @@
+package com.solegendary.reignofnether.unit.goals;
+
+import com.solegendary.reignofnether.unit.Ability;
+import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
+import com.solegendary.reignofnether.util.MyMath;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.phys.Vec3;
+
+public class ThrowPotionGoal extends MoveToTargetBlockGoal {
+
+    private Potion potion = null;
+    private LivingEntity targetEntity = null;
+    private Ability throwPotionAbility;
+
+    public ThrowPotionGoal(PathfinderMob mob) {
+        super(mob, false, 1.0f, WitchUnit.getPotionThrowRange());
+    }
+
+    public void setPotion(Potion potion) {
+        this.potion = potion;
+    }
+
+    // set the target to throw a potion - the witch will move towards this location until we're within range
+    // then throw a potion at it
+    // if we set an entity target, on every tick we will follow that target
+    // if we set a BlockPos as the target, remove any entity target
+    public void setTarget(LivingEntity entity) {
+        this.targetEntity = entity;
+    }
+    public void setTarget(BlockPos bpTarget) {
+        this.setMoveTarget(bpTarget);
+        this.setTarget((LivingEntity) null);
+    }
+
+    @Override
+    public void tick() {
+        if (this.targetEntity != null)
+            this.setMoveTarget(this.targetEntity.getOnPos());
+
+        if (moveTarget != null) {
+
+            if (MyMath.distance(
+                this.mob.getX(), this.mob.getZ(),
+                moveTarget.getX(), moveTarget.getZ()) <= WitchUnit.getPotionThrowRange()) {
+
+                WitchUnit witch = (WitchUnit) this.mob;
+                if (moveTarget != null) {
+                    witch.throwPotion(new Vec3(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ()), this.potion);
+                }
+                this.stop();
+            }
+        }
+    }
+
+    @Override
+    public void stop() {
+        this.stopMoving();
+        this.setTarget((LivingEntity) null);
+        this.setPotion(null);
+    }
+}

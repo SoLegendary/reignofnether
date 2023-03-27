@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -24,7 +25,6 @@ import java.util.List;
 public class ThrowHealingPotion extends Ability {
 
     public static final int CD_MAX_SECONDS = 10;
-    public static final int RANGE = 8;
 
     private final WitchUnit witchUnit;
 
@@ -32,8 +32,9 @@ public class ThrowHealingPotion extends Ability {
         super(
                 UnitAction.THROW_HEALING_POTION,
                 CD_MAX_SECONDS * ResourceCosts.TICKS_PER_SECOND,
-                RANGE,
-                0
+                WitchUnit.getPotionThrowRange(),
+                0,
+                true
         );
         this.witchUnit = witchUnit;
     }
@@ -51,7 +52,7 @@ public class ThrowHealingPotion extends Ability {
                 null,
                 List.of(
                         FormattedCharSequence.forward("Healing Potion", Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE007  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("\uE007  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + WitchUnit.getPotionThrowRange(), MyRenderer.iconStyle),
                         FormattedCharSequence.forward("Throw a healing potion, restoring health to all units", Style.EMPTY)
                 ),
                 this
@@ -60,7 +61,11 @@ public class ThrowHealingPotion extends Ability {
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        ((WitchUnit) unitUsing).throwPotion(new Vec3(targetBp.getX(), targetBp.getY(), targetBp.getZ()), Potions.HEALING);
-        this.setToMaxCooldown();
+        ((WitchUnit) unitUsing).getThrowPotionGoal().setTarget(targetBp);
+    }
+
+    @Override
+    public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
+        ((WitchUnit) unitUsing).getThrowPotionGoal().setTarget(targetEntity);
     }
 }

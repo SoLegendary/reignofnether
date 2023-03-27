@@ -1,25 +1,18 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
-import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Ability;
-import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.abilities.ThrowHarmingPotion;
 import com.solegendary.reignofnether.unit.abilities.ThrowHealingPotion;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -33,6 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -89,6 +83,11 @@ public class WitchUnit extends Witch implements Unit {
 
     // endregion
 
+    private ThrowPotionGoal throwPotionGoal;
+    public ThrowPotionGoal getThrowPotionGoal() {
+        return throwPotionGoal;
+    }
+
     final static public float maxHealth = 15.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
@@ -112,6 +111,10 @@ public class WitchUnit extends Witch implements Unit {
             this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
             this.abilityButtons.add(ab2.getButton(Keybindings.keyW));
         }
+    }
+
+    public static int getPotionThrowRange() {
+        return 8;
     }
 
     @Override
@@ -138,6 +141,11 @@ public class WitchUnit extends Witch implements Unit {
             this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
         }
         this.level.addFreshEntity(thrownPotion);
+
+        if (potion == Potions.HARMING)
+            this.abilities.get(0).setToMaxCooldown();
+        if (potion == Potions.HEALING)
+            this.abilities.get(1).setToMaxCooldown();
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -151,12 +159,14 @@ public class WitchUnit extends Witch implements Unit {
         this.setCanPickUpLoot(true);
         super.tick();
         Unit.tick(this);
+        this.throwPotionGoal.tick();
     }
 
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.throwPotionGoal = new ThrowPotionGoal(this);
     }
 
     @Override
@@ -166,6 +176,7 @@ public class WitchUnit extends Witch implements Unit {
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, returnResourcesGoal);
         this.targetSelector.addGoal(2, targetGoal);
+        this.goalSelector.addGoal(2, throwPotionGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }

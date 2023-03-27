@@ -27,7 +27,8 @@ public class Explode extends Ability {
             UnitAction.EXPLODE,
             0,
             0,
-            0
+            0,
+                false
         );
         this.creeperUnit = creeperUnit;
     }

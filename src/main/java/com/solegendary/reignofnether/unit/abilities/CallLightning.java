@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -34,7 +35,8 @@ public class CallLightning extends Ability {
             UnitAction.CALL_LIGHTNING,
                 CD_MAX,
                 RANGE,
-            0
+            0,
+                false
         );
         this.lab = lab;
     }
@@ -68,7 +70,7 @@ public class CallLightning extends Ability {
             BlockPos rodPos = lab.getLightningRodPos();
 
             if (lab.isAbilityOffCooldown(UnitAction.CALL_LIGHTNING) && rodPos != null) {
-                BlockPos limitedBp = getXZRangeLimitedBlockPos(rodPos, targetBp);
+                BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(rodPos, targetBp, range);
                 // getXZRangeLimitedBlockPos' Y value is always the same as rodPos, but we want the first sky-exposed block
                 limitedBp = MiscUtil.getHighestSolidBlock(level, limitedBp);
 

@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -177,5 +178,36 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+    }
+
+    public void teleport(BlockPos bp) {
+        BlockPos.MutableBlockPos mBp = bp.mutable();
+
+        // find an adjacent non-blocking block
+        List<BlockPos> bps = List.of(
+            mBp.move(Direction.UP),
+            mBp.move(Direction.NORTH),
+            mBp.move(Direction.SOUTH),
+            mBp.move(Direction.EAST),
+            mBp.move(Direction.WEST)
+        );
+        BlockPos bpTarget = mBp;
+
+        for (BlockPos bp2 : bps)
+            if (!this.level.getBlockState(mBp).getMaterial().blocksMotion())
+                bpTarget = bp2;
+
+        this.moveTo(new Vec3(bpTarget.getX(), bpTarget.getY(), bpTarget.getZ()));
+        if (!this.isSilent()) {
+            this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
+            this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
+
+            if (this.level.isClientSide()) {
+                Player p = Minecraft.getInstance().player;
+                if (p != null)
+                    this.level.playSound(null, p.getX(), p.getY(), p.getZ(),
+                            SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
+            }
+        }
     }
 }
