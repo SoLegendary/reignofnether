@@ -120,22 +120,17 @@ public class WitchUnit extends Witch implements Unit {
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
 
-    public void throwPotion(LivingEntity targetEntity, Potion potion) {
-        Vec3 dMovement = targetEntity.getDeltaMovement();
-        double x = targetEntity.getX() + dMovement.x - this.getX();
-        double y = targetEntity.getEyeY() - 1.1d - this.getY();
-        double z = targetEntity.getZ() + dMovement.z - this.getZ();
-        this.throwPotion(new Vec3(x, y, z), potion);
-    }
-
     public void throwPotion(Vec3 targetBp, Potion potion) {
+
+        System.out.println(targetBp);
+
         double x = targetBp.x;
         double y = targetBp.y;
         double z = targetBp.z;
         double range = Math.sqrt(x * x + z * z);
         ThrownPotion thrownPotion = new ThrownPotion(this.level, this);
         thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), potion));
-        thrownPotion.setXRot(thrownPotion.getXRot() - -20.0F);
+        //thrownPotion.setXRot(thrownPotion.getXRot() - -20.0F);
         thrownPotion.shoot(x, y + range * 0.2, z, 0.75F, 8.0F);
         if (!this.isSilent()) {
             this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);

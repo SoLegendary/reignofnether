@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.unit.Ability;
+import com.solegendary.reignofnether.unit.AbilityClientboundPacket;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;
@@ -13,14 +15,17 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
 
     private Potion potion = null;
     private LivingEntity targetEntity = null;
-    private Ability throwPotionAbility;
+    private Ability ability; // used for syncing cooldown with clientside
 
     public ThrowPotionGoal(PathfinderMob mob) {
-        super(mob, false, 1.0f, WitchUnit.getPotionThrowRange());
+        super(mob, false, 1.0f, 0);
     }
 
     public void setPotion(Potion potion) {
         this.potion = potion;
+    }
+    public void setAbility(Ability ability) {
+        this.ability = ability;
     }
 
     // set the target to throw a potion - the witch will move towards this location until we're within range
@@ -47,9 +52,10 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
                 moveTarget.getX(), moveTarget.getZ()) <= WitchUnit.getPotionThrowRange()) {
 
                 WitchUnit witch = (WitchUnit) this.mob;
-                if (moveTarget != null) {
+                if (moveTarget != null)
                     witch.throwPotion(new Vec3(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ()), this.potion);
-                }
+                if (this.ability != null)
+                    AbilityClientboundPacket.sendSetCooldownPacket(this.mob.getId(), this.ability.action, this.ability.cooldownMax);
                 this.stop();
             }
         }
@@ -60,5 +66,6 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
         this.stopMoving();
         this.setTarget((LivingEntity) null);
         this.setPotion(null);
+        this.setAbility(null);
     }
 }

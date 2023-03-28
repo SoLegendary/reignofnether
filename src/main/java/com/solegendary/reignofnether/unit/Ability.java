@@ -37,6 +37,10 @@ public class Ability {
         this.cooldown = cooldownMax;
     }
 
+    public void setCooldown(int cooldown) {
+        this.cooldown = Math.min(cooldown, cooldownMax);
+    }
+
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) { }
 
     public void use(Level level, Building buildingUsing, LivingEntity targetEntity) { }
