@@ -18,10 +18,10 @@ import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.PlayerModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -156,7 +156,7 @@ public class UnitClientEvents {
      * Update data on a unit from serverside, mainly to ensure unit HUD data is up-to-date
      * Only try to update health and pos if out of view
      */
-    public static void syncUnitStats(int entityId, float health, Vec3 pos, boolean idle) {
+    public static void syncUnitStats(int entityId, float health, Vec3 pos, boolean idle, boolean isBuilding, boolean isGathering) {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 boolean isLoadedClientside = MC.level.getEntity(entityId) != null;
@@ -164,9 +164,13 @@ public class UnitClientEvents {
                     entity.setHealth(health);
                     entity.setPos(pos);
                 }
+                if (entity instanceof WorkerUnit workerUnit) {
+                    workerUnit.setIdle(idle);
+                    workerUnit.getBuildRepairGoal().setIsBuildingServerside(isBuilding);
+                    workerUnit.getGatherResourceGoal().setIsGatheringServerside(isGathering);
+                }
+
             }
-            if (entity instanceof WorkerUnit workerUnit)
-                workerUnit.setIdle(idle);
         }
     }
 
@@ -453,69 +457,5 @@ public class UnitClientEvents {
                 return Relationship.HOSTILE;
         }
         return Relationship.NEUTRAL;
-    }
-
-
-
-
-    public static float armXRot = 0;
-    public static float armYRot = 0;
-    public static float armZRot = 0;
-
-    public static final float incAmt = 0.1f;
-
-    @SubscribeEvent
-    public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
-        if (OrthoviewClientEvents.isEnabled()) {
-
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_5)
-                armXRot -= incAmt;
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_6)
-                armXRot += incAmt;
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_7)
-                armYRot -= incAmt;
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_8)
-                armYRot += incAmt;
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_9)
-                armZRot -= incAmt;
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_0)
-                armZRot += incAmt;
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_4) {
-
-                for (LivingEntity entity : getSelectedUnits())
-                    if (entity instanceof VillagerUnit unit)
-                        entity.swing(InteractionHand.MAIN_HAND, true);
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onInput(InputEvent.Key evt) {
-        if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-
-            if (evt.getKey() == GLFW.GLFW_KEY_5)
-                armXRot -= incAmt;
-            else if (evt.getKey() == GLFW.GLFW_KEY_6)
-                armXRot += incAmt;
-            else if (evt.getKey() == GLFW.GLFW_KEY_7)
-                armYRot -= incAmt;
-            else if (evt.getKey() == GLFW.GLFW_KEY_8)
-                armYRot += incAmt;
-            else if (evt.getKey() == GLFW.GLFW_KEY_9)
-                armZRot -= incAmt;
-            else if (evt.getKey() == GLFW.GLFW_KEY_0)
-                armZRot += incAmt;
-            else if (evt.getKey() == GLFW.GLFW_KEY_4)
-                VillagerUnitModel.swingArm();
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "xRot: " + armXRot,
-                "yRot: " + armYRot,
-                "zRot: " + armZRot
-        });
     }
 }

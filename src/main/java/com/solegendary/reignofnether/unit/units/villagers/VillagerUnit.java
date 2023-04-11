@@ -8,23 +8,29 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
+import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.unit.goals.*;
+import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
@@ -41,8 +47,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
+public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwingingUnit {
     // region
     public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -111,6 +118,29 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
+    private boolean isSwingingArmOnce = false;
+    private int swingTime = 0;
+
+    public int getSwingTime() {
+        return swingTime;
+    }
+
+    public void setSwingTime(int time) {
+        this.swingTime = time;
+    }
+
+    public boolean isSwingingArmOnce() {
+        return isSwingingArmOnce;
+    }
+
+    public void setSwingingArmOnce(boolean swing) {
+        isSwingingArmOnce = swing;
+    }
+
+    public boolean isSwingingArmRepeatedly() {
+        return (this.getGatherResourceGoal().isGathering() || this.getBuildRepairGoal().isBuilding());
+    }
+
     public VillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
 
@@ -163,7 +193,33 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
         Unit.tick(this);
         WorkerUnit.tick(this);
 
-        // TODO: run Player place block animations with arms shown when building
+        ItemStack mainHandItem = this.getItemBySlot(EquipmentSlot.MAINHAND);
+
+        if (this.getBuildRepairGoal().isBuilding() &&
+            !mainHandItem.is(Items.IRON_SHOVEL)) {
+            this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
+        }
+        else if (this.getGatherResourceGoal().isGathering()) {
+            BlockPos bp = this.getGatherResourceGoal().getGatherTarget();
+            switch (ResourceSources.getBlockResourceName(bp, this.level)) {
+                case FOOD -> {
+                    if (!mainHandItem.is(Items.IRON_HOE))
+                        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));
+                }
+                case WOOD -> {
+                    if (!mainHandItem.is(Items.IRON_AXE))
+                        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
+                }
+                case ORE -> {
+                    if (!mainHandItem.is(Items.IRON_PICKAXE))
+                        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
+                }
+                case NONE -> {
+                    if (!mainHandItem.is(Items.AIR))
+                        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.AIR));
+                }
+            }
+        }
     }
 
     public void initialiseGoals() {
@@ -184,7 +240,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit {
         this.goalSelector.addGoal(2, returnResourcesGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
-        //this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }
 
     @Override

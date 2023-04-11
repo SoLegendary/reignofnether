@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.unit.units.modelling;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
@@ -13,7 +13,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
@@ -85,9 +84,11 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
     }
 
     private ArmPose getArmPose(Entity entity) {
-        if (entity instanceof WorkerUnit workerUnit) {
-            // BUILDING
-            // GATHERING
+        if (entity instanceof WorkerUnit workerUnit && workerUnit.getGatherResourceGoal().isGathering()) {
+            return ArmPose.GATHERING;
+        }
+        if (entity instanceof WorkerUnit workerUnit && workerUnit.getBuildRepairGoal().isBuilding()) {
+            return ArmPose.BUILDING;
         }
         else if (entity instanceof VindicatorUnit vindicator) {
             if (vindicator.getTarget() != null || vindicator.getAttackBuildingGoal().isAttacking())
@@ -166,58 +167,33 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
             case CROSSBOW_HOLD -> AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
             case CROSSBOW_CHARGE -> AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, entity, true);
         }
-        armPose = ArmPose.BUILDING; // debug
 
         boolean armsCrossed = armPose == ArmPose.CROSSED;
         this.crossedArms.visible = armsCrossed && armsVisible;
         this.leftArm.visible = !armsCrossed && armsVisible;
         this.rightArm.visible = !armsCrossed && armsVisible;
 
-        // debugging
-        //this.rightArm.xRot = UnitClientEvents.armXRot;
-        //this.rightArm.yRot = UnitClientEvents.armYRot;
-        //this.rightArm.zRot = UnitClientEvents.armZRot;
+        if (entity instanceof ArmSwingingUnit armSwinger &&
+            (armSwinger.isSwingingArmRepeatedly() ||
+             armSwinger.isSwingingArmOnce())) {
 
-        if (isSwingingArm) {
+            List<Float> armRots = armSwinger.getNextArmRot();
+            this.rightArm.xRot = armRots.get(0);
+            this.rightArm.yRot = armRots.get(1);
+            this.rightArm.zRot = armRots.get(2);
 
-            float fracTotal = (float) swingTime / ((float) armRots.length + 1);
-            int index = (int) Math.floor(fracTotal);
-            float frac = fracTotal - index; // float between 0-1 representing value between indices
+            int swingTime = armSwinger.getSwingTime();
+            armSwinger.setSwingTime(swingTime + 1);
 
-            if (index < armRots.length - 1) {
-                this.rightArm.xRot = ((armRots[index+1][0] - armRots[index][0]) * frac) + armRots[index][0];
-                this.rightArm.yRot = ((armRots[index+1][1] - armRots[index][1]) * frac) + armRots[index][1];
-                this.rightArm.zRot = ((armRots[index+1][2] - armRots[index][2]) * frac) + armRots[index][2];
-            }
-
-            swingTime += 1;
-            if (swingTime >= swingTimeMax) {
-                swingTime = 0;
-                isSwingingArm = false;
+            if (swingTime >= armSwinger.getSwingTimeMax()) {
+                armSwinger.setSwingTime(0);
+                if (armSwinger.isSwingingArmOnce())
+                    armSwinger.setSwingingArmOnce(false);
             }
         }
     }
 
-    public static void swingArm() {
-        swingTime = 0;
-        isSwingingArm = true;
-    }
 
-    private static int swingTime = 0;
-    private static final int swingTimeMax = 200;
-    private static boolean isSwingingArm = false;
-    private static final Float[][] armRots = {
-        { 0.0f, 0.0f, 0.0f},
-        {-0.9f, 0.2f,-0.1f},
-        {-1.2f, 0.3f,-0.1f},
-        {-1.4f, 0.4f,-0.1f},
-        {-1.5f, 0.2f,-0.2f},
-        {-1.1f,-0.3f,-0.3f},
-        {-0.8f,-0.6f,-0.3f},
-        {-0.3f,-0.3f,-0.3f},
-        {-0.2f, 0.0f,-0.2f},
-        { 0.0f, 0.0f, 0.0f},
-    };
 
     private ModelPart getArm(HumanoidArm p_102923_) {
         return p_102923_ == HumanoidArm.LEFT ? this.leftArm : this.rightArm;

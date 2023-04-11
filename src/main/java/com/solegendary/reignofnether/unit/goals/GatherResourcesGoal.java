@@ -56,6 +56,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private ResourceSource targetResourceSourceSaved = null;
     private Building targetFarmSaved = null;
 
+    private boolean isGatheringServerside = false;
+
     // whenever we attempt to assign a block as a target it must pass this test
     private final Predicate<BlockPos> BLOCK_CONDITION = bp -> {
         BlockState bs = mob.level.getBlockState(bp);
@@ -107,6 +109,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     // set move goal as range -1, so we aren't slightly out of range
     public GatherResourcesGoal(PathfinderMob mob, double speedModifier) {
         super(mob, true, speedModifier, REACH_RANGE - 1);
+    }
+
+    public void setIsGatheringServerside(boolean isGathering) {
+        this.isGatheringServerside = isGathering;
     }
 
     // move towards the targeted block and start gathering it
@@ -290,6 +296,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     // only count as gathering if in range of the target
     public boolean isGathering() {
+        if (this.mob.level.isClientSide())
+            return isGatheringServerside;
+
         if (!Unit.atMaxResources((Unit) mob) && this.gatherTarget != null && this.targetResourceSource != null &&
             ResourceSources.getBlockResourceName(this.gatherTarget, mob.level) != ResourceName.NONE)
             return isBlockInRange(gatherTarget);

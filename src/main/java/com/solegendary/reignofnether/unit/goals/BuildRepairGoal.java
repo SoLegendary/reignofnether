@@ -23,8 +23,14 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
 
     private Building buildingTarget;
 
+    private Boolean isBuildingServerside = false;
+
     public BuildRepairGoal(PathfinderMob mob, double speedModifier) {
         super(mob, true, speedModifier, 0);
+    }
+
+    public void setIsBuildingServerside(boolean isBuilding) {
+        this.isBuildingServerside = isBuilding;
     }
 
     public void tick() {
@@ -57,6 +63,9 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
 
     // only count as building if in range of the target - building is actioned in Building.tick()
     public boolean isBuilding() {
+        if (this.mob.level.isClientSide())
+            return isBuildingServerside;
+
         if (buildingTarget != null && this.moveTarget != null)
             if (BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED)
                 return buildingTarget.isPosInsideBuilding(mob.getOnPos()) ||
