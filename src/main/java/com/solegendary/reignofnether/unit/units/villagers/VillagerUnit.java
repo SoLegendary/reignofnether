@@ -192,34 +192,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
         super.tick();
         Unit.tick(this);
         WorkerUnit.tick(this);
-
-        ItemStack mainHandItem = this.getItemBySlot(EquipmentSlot.MAINHAND);
-
-        if (this.getBuildRepairGoal().isBuilding() &&
-            !mainHandItem.is(Items.IRON_SHOVEL)) {
-            this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
-        }
-        else if (this.getGatherResourceGoal().isGathering()) {
-            BlockPos bp = this.getGatherResourceGoal().getGatherTarget();
-            switch (ResourceSources.getBlockResourceName(bp, this.level)) {
-                case FOOD -> {
-                    if (!mainHandItem.is(Items.IRON_HOE))
-                        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));
-                }
-                case WOOD -> {
-                    if (!mainHandItem.is(Items.IRON_AXE))
-                        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
-                }
-                case ORE -> {
-                    if (!mainHandItem.is(Items.IRON_PICKAXE))
-                        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
-                }
-                case NONE -> {
-                    if (!mainHandItem.is(Items.AIR))
-                        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.AIR));
-                }
-            }
-        }
     }
 
     public void initialiseGoals() {

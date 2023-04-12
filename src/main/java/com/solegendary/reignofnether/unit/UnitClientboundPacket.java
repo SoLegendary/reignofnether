@@ -32,23 +32,23 @@ public class UnitClientboundPacket {
     private final int wood;
     private final int ore;
     private final boolean idle;
-    private final boolean isBuilding; // for workers to know server state
-    private final boolean isGathering;
+    private final boolean isBuilding; // for workers to show arms swinging
+    private final ResourceName gatherTarget; // for workers to show arms swinging and have the right tool
 
     public static void sendLeavePacket(LivingEntity entity) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitClientboundPacket(UnitSyncAction.LEAVE_LEVEL,
-                entity.getId(),0,0,0,0,0,0,0, false, false, false)
+                entity.getId(),0,0,0,0,0,0,0, false, false, ResourceName.NONE)
         );
     }
 
     public static void sendSyncStatsPacket(LivingEntity entity) {
         boolean isBuilding = false;
-        boolean isGathering = false;
+        ResourceName gatherTarget = ResourceName.NONE;
         boolean isIdle = false;
         if (entity instanceof WorkerUnit workerUnit) {
             isBuilding = workerUnit.getBuildRepairGoal().isBuilding();
-            isGathering = workerUnit.getGatherResourceGoal().isGathering();
+            gatherTarget = workerUnit.getGatherResourceGoal().getTargetResourceName();
             isIdle = workerUnit.isIdle();
         }
 
@@ -57,7 +57,7 @@ public class UnitClientboundPacket {
                         entity.getId(),
                         entity.getHealth(),
                         entity.getX(), entity.getY(), entity.getZ(),
-                        0,0,0, isIdle, isBuilding, isGathering)
+                        0,0,0, isIdle, isBuilding, gatherTarget)
         );
     }
 
@@ -66,7 +66,7 @@ public class UnitClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitClientboundPacket(UnitSyncAction.SYNC_RESOURCES,
                         ((LivingEntity) unit).getId(), 0,0,0,0,
-                        res.food, res.wood, res.ore, false, false, false)
+                        res.food, res.wood, res.ore, false, false, ResourceName.NONE)
         );
     }
 
@@ -83,7 +83,7 @@ public class UnitClientboundPacket {
         int ore,
         boolean idle,
         boolean isBuilding,
-        boolean isGathering
+        ResourceName gatherTarget
     ) {
         // filter out non-owned entities so we can't control them
         this.syncAction = syncAction;
@@ -97,7 +97,7 @@ public class UnitClientboundPacket {
         this.ore = ore;
         this.idle = idle;
         this.isBuilding = isBuilding;
-        this.isGathering = isGathering;
+        this.gatherTarget = gatherTarget;
     }
 
     public UnitClientboundPacket(FriendlyByteBuf buffer) {
@@ -112,7 +112,7 @@ public class UnitClientboundPacket {
         this.ore = buffer.readInt();
         this.idle = buffer.readBoolean();
         this.isBuilding = buffer.readBoolean();
-        this.isGathering = buffer.readBoolean();
+        this.gatherTarget = buffer.readEnum(ResourceName.class);
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -127,7 +127,7 @@ public class UnitClientboundPacket {
         buffer.writeInt(this.ore);
         buffer.writeBoolean(this.idle);
         buffer.writeBoolean(this.isBuilding);
-        buffer.writeBoolean(this.isGathering);
+        buffer.writeEnum(this.gatherTarget);
     }
 
     // client-side packet-consuming functions
@@ -145,7 +145,7 @@ public class UnitClientboundPacket {
                                 new Vec3(this.posX, this.posY, this.posZ),
                                 this.idle,
                                 this.isBuilding,
-                                this.isGathering);
+                                this.gatherTarget);
                         case SYNC_RESOURCES -> UnitClientEvents.syncUnitResources(
                                 this.entityId,
                                 new Resources("", this.food, this.wood, this.ore));

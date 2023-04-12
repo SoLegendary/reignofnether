@@ -27,6 +27,9 @@ public abstract class ModelBlockRendererCacheMixin {
             cancellable = true
     )
     public void getShadeBrightness(BlockState pState, BlockAndTintGetter pLevel, BlockPos pPos, CallbackInfoReturnable<Float> cir) {
+        if (!FogOfWarClientEvents.isEnabled())
+            return;
+
         cir.cancel();
 
         float brightnessMulti = FogOfWarClientEvents.getPosBrightness(pPos);

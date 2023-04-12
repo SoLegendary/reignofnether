@@ -35,6 +35,9 @@ public abstract class ModelBlockRendererMixin {
     )
     private void renderModelFaceFlat(BlockAndTintGetter pLevel, BlockState pState, BlockPos pPos, int pPackedLight, int pPackedOverlay, boolean pRepackLight,
                                      PoseStack pPoseStack, VertexConsumer pConsumer, List<BakedQuad> pQuads, BitSet pShapeFlags, CallbackInfo ci) {
+        if (!FogOfWarClientEvents.isEnabled())
+            return;
+
         ci.cancel();
 
         for(BakedQuad bakedquad : pQuads) {

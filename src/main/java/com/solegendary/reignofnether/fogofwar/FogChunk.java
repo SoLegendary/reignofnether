@@ -93,10 +93,6 @@ public class FogChunk {
                     this.brightness = BRIGHT;
             }
         }
-        //if (this.brightness != originalBrightness && this.isAtFinalBrightness()) {
-        //    this.chunkInfo.chunk.setDirty(true);
-        //    this.chunkInfo.chunk.playerChanged = true;
-        //}
 
         if (this.brightness != originalBrightness) {
             this.chunkInfo.chunk.setDirty(true);

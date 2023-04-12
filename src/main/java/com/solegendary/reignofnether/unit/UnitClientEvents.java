@@ -156,7 +156,7 @@ public class UnitClientEvents {
      * Update data on a unit from serverside, mainly to ensure unit HUD data is up-to-date
      * Only try to update health and pos if out of view
      */
-    public static void syncUnitStats(int entityId, float health, Vec3 pos, boolean idle, boolean isBuilding, boolean isGathering) {
+    public static void syncUnitStats(int entityId, float health, Vec3 pos, boolean idle, boolean isBuilding, ResourceName gatherTarget) {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 boolean isLoadedClientside = MC.level.getEntity(entityId) != null;
@@ -167,7 +167,7 @@ public class UnitClientEvents {
                 if (entity instanceof WorkerUnit workerUnit) {
                     workerUnit.setIdle(idle);
                     workerUnit.getBuildRepairGoal().setIsBuildingServerside(isBuilding);
-                    workerUnit.getGatherResourceGoal().setIsGatheringServerside(isGathering);
+                    workerUnit.getGatherResourceGoal().setTargetResourceName(gatherTarget);
                 }
 
             }

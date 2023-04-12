@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCros
 import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.goals.*;
+import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.Ability;
@@ -42,7 +43,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
+public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwingingUnit {
     // region
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;}
@@ -111,6 +112,29 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
+    private boolean isSwingingArmOnce = false;
+    private int swingTime = 0;
+
+    public int getSwingTime() {
+        return swingTime;
+    }
+
+    public void setSwingTime(int time) {
+        this.swingTime = time;
+    }
+
+    public boolean isSwingingArmOnce() {
+        return isSwingingArmOnce;
+    }
+
+    public void setSwingingArmOnce(boolean swing) {
+        isSwingingArmOnce = swing;
+    }
+
+    public boolean isSwingingArmRepeatedly() {
+        return (this.getGatherResourceGoal().isGathering() || this.getBuildRepairGoal().isBuilding());
+    }
+
     public ZombieVillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
 
@@ -162,8 +186,6 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit {
         super.tick();
         Unit.tick(this);
         WorkerUnit.tick(this);
-
-        // TODO: run Player place block animations with arms shown when building
     }
 
     public void initialiseGoals() {

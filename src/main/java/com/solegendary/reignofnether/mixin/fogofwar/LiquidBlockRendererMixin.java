@@ -40,6 +40,9 @@ public abstract class LiquidBlockRendererMixin {
             cancellable = true
     )
     public void tesselate(BlockAndTintGetter pLevel, BlockPos pPos, VertexConsumer pVertexConsumer, BlockState pBlockState, FluidState pFluidState, CallbackInfo ci) {
+        if (!FogOfWarClientEvents.isEnabled())
+            return;
+
         ci.cancel();
 
         boolean flag = pFluidState.is(FluidTags.LAVA);

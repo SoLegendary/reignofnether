@@ -8,6 +8,7 @@ Apply required gamerules and terrain generation automatically:
     - /time set 12600
     - increased surface deposits of ore, and/or increased windswept hills biomes
     - reduced overall height (low weirdness?)
+        - important to avoid spectator being inside blocks (causes lag)
     - remove unwanted biomes: ocean, mesa, extreme hills, jungle
     - no caves
 
@@ -15,8 +16,8 @@ Apply required gamerules and terrain generation automatically:
 
 - Fix smooth lighting issues on fog of war borders
 
-- Add fog of war to minimap
-    - fix issue of units deselecting out of pan view... again
+- Serious client lag when spectator is inside of solid blocks
+    (maybe because it also loads all underground views?)
 
 
 
@@ -24,8 +25,8 @@ TODO bugs/features (backlog)
 
 - Can't noclip on remote server in orthoview when in creative
 
-1. Arm animations while attacking buildings and gathering resources
 2. Block cracking/particles while gathering resources
+    - workers should face exactly their target block
 
 
 TODO buildings/units (backlog)

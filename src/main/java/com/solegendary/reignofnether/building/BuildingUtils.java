@@ -47,8 +47,6 @@ public class BuildingUtils {
         bps.add(new BlockPos(aabb.minX, aabb.minY, aabb.maxZ));
         bps.add(new BlockPos(aabb.maxX, aabb.minY, aabb.maxZ));
 
-        System.out.println(bps.size());
-
         return bps;
     }
 
