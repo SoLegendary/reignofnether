@@ -431,15 +431,19 @@ public class CursorClientEvents {
         return bestBp;
     }
 
-    static float alpha = 1.0f;
+    private static int progress = 0;
 
     @SubscribeEvent
     public static void onKeyRelease(ScreenEvent.KeyPressed.KeyPressed.Post evt) {
-        if (evt.getKeyCode() == Keybindings.panMinusX.key)
-            alpha -= 0.1f;
-        if (evt.getKeyCode() == Keybindings.panPlusX.key)
-            alpha += 0.1f;
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT_SHIFT && preselectedBlockPos != null) {
+            MC.level.destroyBlockProgress(MC.player.getId(), preselectedBlockPos, progress);
+            progress += 1;
+            if (progress > 10)
+                progress = 0;
+        }
+
     }
+
     /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {

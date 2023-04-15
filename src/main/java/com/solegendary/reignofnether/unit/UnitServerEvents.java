@@ -28,7 +28,6 @@ import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -171,6 +170,7 @@ public class UnitServerEvents {
             unitSyncTicks = UNIT_SYNC_TICKS_MAX;
             for (LivingEntity entity : allUnits) {
                 UnitClientboundPacket.sendSyncStatsPacket(entity);
+                UnitWorkerClientBoundPacket.sendSyncWorkerPacket(entity);
 
                 // remove old chunk // add current chunk
                 boolean chunkNeedsUpdate = false;

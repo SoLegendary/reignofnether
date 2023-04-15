@@ -10,6 +10,9 @@ import com.solegendary.reignofnether.unit.UnitClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
@@ -109,10 +112,30 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         super(mob, true, speedModifier, REACH_RANGE - 1);
     }
 
+    public void syncFromServer(ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
+        this.targetResourceName = gatherName;
+        this.gatherTarget = gatherPos;
+        this.gatherTicksLeft = gatherTicks;
+        this.targetResourceSource = ResourceSources.getFromBlockPos(gatherTarget, mob.level);
+    }
+
+    public void tickClient() {
+        if (targetResourceSource != null && this.gatherTarget != null) {
+            gatherTicksLeft = Math.min(gatherTicksLeft, targetResourceSource.ticksToGather);
+            gatherTicksLeft -= 1;
+            if (gatherTicksLeft <= 0)
+                gatherTicksLeft = targetResourceSource.ticksToGather;
+            int gatherProgress = Math.round((targetResourceSource.ticksToGather - gatherTicksLeft) / (float) targetResourceSource.ticksToGather * 10);
+            this.mob.level.destroyBlockProgress(this.mob.getId(), this.gatherTarget, gatherProgress);
+        }
+    }
+
     // move towards the targeted block and start gathering it
     public void tick() {
-        if (this.mob.level.isClientSide())
+        if (this.mob.level.isClientSide()) {
+            tickClient();
             return;
+        }
 
         cdTicksLeft -= 1;
         if (cdTicksLeft <= 0)
@@ -186,7 +209,11 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 this.setMoveTarget(gatherTarget);
 
             if (isGathering()) {
+                // need to manually set cooldown higher (default is 2) or else we don't have enough time
+                // for the mob to turn before behaviour is reset
                 mob.getLookControl().setLookAt(gatherTarget.getX(), gatherTarget.getY(), gatherTarget.getZ());
+                mob.getLookControl().lookAtCooldown = 20;
+
                 // replant crops on empty farmland
                 if (mob.level.getBlockState(gatherTarget).getBlock() == Blocks.FARMLAND) {
                     gatherTicksLeft -= TICK_CD;
@@ -291,7 +318,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     // only count as gathering if in range of the target
     public boolean isGathering() {
         if (this.mob.level.isClientSide())
-            return targetResourceName != ResourceName.NONE;
+            return gatherTarget != null;
 
         if (!Unit.atMaxResources((Unit) mob) && this.gatherTarget != null && this.targetResourceSource != null &&
             ResourceSources.getBlockResourceName(this.gatherTarget, mob.level) != ResourceName.NONE)
@@ -336,6 +363,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     // stop gathering and searching entirely, and remove saved data for
     public void stopGathering() {
+        this.mob.level.destroyBlockProgress(this.mob.getId(), new BlockPos(0,0,0), 0);
         todoGatherTargets.clear();
         targetFarm = null;
         removeGatherTarget();
@@ -345,5 +373,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     public BlockPos getGatherTarget() {
         return gatherTarget;
+    }
+
+    public int getGatherTicksLeft() {
+        return gatherTicksLeft;
     }
 }

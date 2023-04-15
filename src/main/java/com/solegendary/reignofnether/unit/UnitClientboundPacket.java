@@ -31,33 +31,24 @@ public class UnitClientboundPacket {
     private final int food;
     private final int wood;
     private final int ore;
-    private final boolean idle;
-    private final boolean isBuilding; // for workers to show arms swinging
-    private final ResourceName gatherTarget; // for workers to show arms swinging and have the right tool
 
     public static void sendLeavePacket(LivingEntity entity) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitClientboundPacket(UnitSyncAction.LEAVE_LEVEL,
-                entity.getId(),0,0,0,0,0,0,0, false, false, ResourceName.NONE)
+                entity.getId(),0,0,0,0,0,0,0)
         );
     }
 
     public static void sendSyncStatsPacket(LivingEntity entity) {
         boolean isBuilding = false;
         ResourceName gatherTarget = ResourceName.NONE;
-        boolean isIdle = false;
-        if (entity instanceof WorkerUnit workerUnit) {
-            isBuilding = workerUnit.getBuildRepairGoal().isBuilding();
-            gatherTarget = workerUnit.getGatherResourceGoal().getTargetResourceName();
-            isIdle = workerUnit.isIdle();
-        }
 
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitClientboundPacket(UnitSyncAction.SYNC_STATS,
                         entity.getId(),
                         entity.getHealth(),
                         entity.getX(), entity.getY(), entity.getZ(),
-                        0,0,0, isIdle, isBuilding, gatherTarget)
+                        0,0,0)
         );
     }
 
@@ -66,7 +57,7 @@ public class UnitClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitClientboundPacket(UnitSyncAction.SYNC_RESOURCES,
                         ((LivingEntity) unit).getId(), 0,0,0,0,
-                        res.food, res.wood, res.ore, false, false, ResourceName.NONE)
+                        res.food, res.wood, res.ore)
         );
     }
 
@@ -80,10 +71,7 @@ public class UnitClientboundPacket {
         double posZ,
         int food,
         int wood,
-        int ore,
-        boolean idle,
-        boolean isBuilding,
-        ResourceName gatherTarget
+        int ore
     ) {
         // filter out non-owned entities so we can't control them
         this.syncAction = syncAction;
@@ -95,9 +83,6 @@ public class UnitClientboundPacket {
         this.food = food;
         this.wood = wood;
         this.ore = ore;
-        this.idle = idle;
-        this.isBuilding = isBuilding;
-        this.gatherTarget = gatherTarget;
     }
 
     public UnitClientboundPacket(FriendlyByteBuf buffer) {
@@ -110,9 +95,6 @@ public class UnitClientboundPacket {
         this.food = buffer.readInt();
         this.wood = buffer.readInt();
         this.ore = buffer.readInt();
-        this.idle = buffer.readBoolean();
-        this.isBuilding = buffer.readBoolean();
-        this.gatherTarget = buffer.readEnum(ResourceName.class);
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -125,9 +107,6 @@ public class UnitClientboundPacket {
         buffer.writeInt(this.food);
         buffer.writeInt(this.wood);
         buffer.writeInt(this.ore);
-        buffer.writeBoolean(this.idle);
-        buffer.writeBoolean(this.isBuilding);
-        buffer.writeEnum(this.gatherTarget);
     }
 
     // client-side packet-consuming functions
@@ -142,10 +121,7 @@ public class UnitClientboundPacket {
                         case SYNC_STATS -> UnitClientEvents.syncUnitStats(
                                 this.entityId,
                                 this.health,
-                                new Vec3(this.posX, this.posY, this.posZ),
-                                this.idle,
-                                this.isBuilding,
-                                this.gatherTarget);
+                                new Vec3(this.posX, this.posY, this.posZ));
                         case SYNC_RESOURCES -> UnitClientEvents.syncUnitResources(
                                 this.entityId,
                                 new Resources("", this.food, this.wood, this.ore));

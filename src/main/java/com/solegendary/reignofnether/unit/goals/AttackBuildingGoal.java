@@ -39,6 +39,7 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
             if (isAttacking()) {
                 BlockPos bp = buildingTarget.centrePos;
                 this.mob.getLookControl().setLookAt(bp.getX(), bp.getY(), bp.getZ());
+                mob.getLookControl().lookAtCooldown = 20;
 
                 // a unit with 1 attack damage @ 20 attack cd and building damage multiplier 1.0 will destroy a block once per second
                 // if the damage multiplier leaves a fraction remainder, treat that as a chance to destroy an additional block
