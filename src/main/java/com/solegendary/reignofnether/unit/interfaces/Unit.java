@@ -60,7 +60,6 @@ public interface Unit {
             ability.tickCooldown();
 
         if (!unitMob.level.isClientSide) {
-
             int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
             if (unitMob.canPickUpLoot()) {
                 for (ItemEntity itementity : unitMob.level.getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1,0,1))) {

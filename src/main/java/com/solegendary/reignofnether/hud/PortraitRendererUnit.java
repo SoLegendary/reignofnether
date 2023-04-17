@@ -67,8 +67,8 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     private int lookTargetX = 0;
     private int lookTargetY = 0;
     private int ticksLeft = 0;
-    private final int ticksLeftMin = 60;
-    private final int ticksLeftMax = 120;
+    private final int ticksLeftMin = 30;
+    private final int ticksLeftMax = 60;
     private final int lookRangeX = 100;
     private final int lookRangeY = 40;
 

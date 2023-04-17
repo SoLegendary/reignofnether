@@ -756,7 +756,9 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
-    public static void onTick(TickEvent.ClientTickEvent evt) {
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END)
+            return;
 
         if (OrthoviewClientEvents.isEnabled())
             portraitRendererUnit.tickAnimation();

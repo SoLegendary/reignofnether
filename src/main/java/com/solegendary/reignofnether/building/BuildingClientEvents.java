@@ -474,6 +474,9 @@ public class BuildingClientEvents {
     private static int ticksToNextVisCheck = VIS_CHECK_TICKS_MAX;
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END)
+            return;
+
         ticksToNextVisCheck -= 1;
         if (ticksToNextVisCheck <= 0) {
             ticksToNextVisCheck = VIS_CHECK_TICKS_MAX;
@@ -484,7 +487,7 @@ public class BuildingClientEvents {
             replaceOverlayTexture();
             replacedTexture = true;
         }
-        if (MC.level != null && MC.level.dimension() == Level.OVERWORLD && evt.phase == TickEvent.Phase.END) {
+        if (MC.level != null && MC.level.dimension() == Level.OVERWORLD) {
             for (Building building : buildings)
                 building.tick(MC.level);
 

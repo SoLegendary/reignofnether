@@ -1,7 +1,11 @@
 package com.solegendary.reignofnether.mixin.fogofwar;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Matrix4f;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -11,19 +15,34 @@ import com.solegendary.reignofnether.fogofwar.FogTransitionBrightness;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.PrioritizeChunkUpdates;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.chunk.RenderRegionCache;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.BlockDestructionProgress;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.model.data.ModelData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,10 +50,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -49,6 +65,8 @@ public abstract class LevelRendererMixin {
     @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
     @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
     @Final @Shadow private Minecraft minecraft;
+    @Final @Shadow private RenderBuffers renderBuffers;
+    @Final @Shadow private Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress;
 
     // any chunkInfo objects added to renderChunksInFrustum will be rendered
     // we can collect old chunk data here to render them in their past state
@@ -135,6 +153,9 @@ public abstract class LevelRendererMixin {
                     return false;
                 });
 
+                if (diff1.size() > 0 || diff2.size() > 0)
+                    FogOfWarClientEvents.onChunksChange(diff1, diff2);
+
                 // add new bright chunks
                 boolean chunkExists;
                 for (FogChunk fogChunkNew : diff1) {
@@ -198,7 +219,7 @@ public abstract class LevelRendererMixin {
             if (!brightAABBs.contains(chunkInfo.chunk.bb)) {
                 // exploredChunks contains the bb and shouldBeRendered is false
                 for (FogChunk chunk : FogOfWarClientEvents.fogChunks) {
-                    if (chunk.isExploredChunk() && chunk.isAtFinalBrightness() && chunk.chunkInfo.chunk.bb.equals(chunkInfo.chunk.bb)) {
+                    if (chunk.isExploredChunk() && chunk.isAtFinalBrightness() && !chunk.needsLightUpdate && chunk.chunkInfo.chunk.bb.equals(chunkInfo.chunk.bb)) {
                         if (!chunk.shouldBeRendered)
                             continue outerLoop; // skip rendering this entirely, causes the chunk to retain its old view
                         else {
@@ -263,5 +284,44 @@ public abstract class LevelRendererMixin {
             return;
 
         needsFrustumUpdate.set(true);
+    }
+
+    // rerun blockDestroyProgress overlays but with range extended to between 32-256 blocks
+    @Inject(
+            method = "renderLevel",
+            at = @At("TAIL")
+    )
+    private void renderLevel(PoseStack pPoseStack, float pPartialTick, long pFinishNanoTime,
+                             boolean pRenderBlockOutline, Camera pCamera, GameRenderer pGameRenderer,
+                             LightTexture pLightTexture, Matrix4f pProjectionMatrix, CallbackInfo ci) {
+
+        Vec3 vec3 = pCamera.getPosition();
+        double d0 = vec3.x();
+        double d1 = vec3.y();
+        double d2 = vec3.z();
+
+        ObjectIterator var42 = this.destructionProgress.long2ObjectEntrySet().iterator();
+
+        while (var42.hasNext()) {
+            Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>> entry = (Long2ObjectMap.Entry) var42.next();
+            BlockPos blockpos2 = BlockPos.of(entry.getLongKey());
+            double d3 = (double) blockpos2.getX() - d0;
+            double d4 = (double) blockpos2.getY() - d1;
+            double d5 = (double) blockpos2.getZ() - d2;
+            double distSqr = d3 * d3 + d4 * d4 + d5 * d5;
+            if ((distSqr > 1024.0 && distSqr < 65536)) {
+                SortedSet<BlockDestructionProgress> sortedset1 = (SortedSet) entry.getValue();
+                if (sortedset1 != null && !sortedset1.isEmpty()) {
+                    int k1 = (sortedset1.last()).getProgress();
+                    pPoseStack.pushPose();
+                    pPoseStack.translate((double) blockpos2.getX() - d0, (double) blockpos2.getY() - d1, (double) blockpos2.getZ() - d2);
+                    PoseStack.Pose posestack$pose = pPoseStack.last();
+                    VertexConsumer vertexconsumer1 = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer((RenderType) ModelBakery.DESTROY_TYPES.get(k1)), posestack$pose.pose(), posestack$pose.normal());
+                    ModelData modelData = this.level.getModelDataManager().getAt(blockpos2);
+                    this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockpos2), blockpos2, this.level, pPoseStack, vertexconsumer1, modelData == null ? ModelData.EMPTY : modelData);
+                    pPoseStack.popPose();
+                }
+            }
+        }
     }
 }

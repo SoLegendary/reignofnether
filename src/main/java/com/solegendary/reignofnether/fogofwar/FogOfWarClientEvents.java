@@ -1,29 +1,26 @@
 package com.solegendary.reignofnether.fogofwar;
 
-import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class FogOfWarClientEvents {
 
@@ -69,7 +66,7 @@ public class FogOfWarClientEvents {
         MC.levelRenderer.allChanged();
     }
 
-
+    // returns the shade modifier that should be applied at a given position based on the fog of war state there
     public static float getPosBrightness(BlockPos pPos) {
         if (!isEnabled())
             return 1.0f;
@@ -120,10 +117,67 @@ public class FogOfWarClientEvents {
         evt.setCanceled(true);
     }
 
+    private static int updateLightingTicks = 0;
+    private static final int UPDATE_LIGHTING_TICKS_MAX = 20;
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (enabled)
-            for (FogChunk fogChunk : FogOfWarClientEvents.fogChunks)
-                fogChunk.tickBrightness();
+        if (!enabled || MC.level == null)
+            return;
+
+        for (FogChunk fogChunk : FogOfWarClientEvents.fogChunks)
+            fogChunk.tickBrightness();
+
+        updateLightingTicks -= 1;
+        if (updateLightingTicks <= 0) {
+            updateLightingTicks = UPDATE_LIGHTING_TICKS_MAX;
+            updateChunkLighting();
+        }
+    }
+
+    // TODO: issue with lighting bugs is that the semi-bright chunks with issues are the ones 2 chunks away, not the
+    // closest ones
+    // maybe mark chunks adjacent to those leaving with needsLightUpdate = true?
+    public static void onChunksChange(Set<FogChunk> newBrightChunks, Set<FogChunk> newExploredChunks) {
+        newBrightChunks.addAll(newExploredChunks);
+
+        for (FogChunk fogChunk : newBrightChunks) {
+            fogChunk.needsLightUpdate = true;
+
+            for (FogChunk chunk : FogOfWarClientEvents.fogChunks)
+                if (chunk.chunkInfo.chunk.bb.getCenter().distanceToSqr(fogChunk.chunkInfo.chunk.bb.getCenter()) < 550)
+                    chunk.needsLightUpdate = true;
+        }
+    }
+
+    public static void updateChunkLighting() {
+        if (MC.level == null)
+            return;
+
+        Set<ChunkAccess> chunks = ConcurrentHashMap.newKeySet();
+
+        // update bright chunks regardless of if they have needsLightUpdate or not as we want to be 100%
+        // sure they're free of glitches as the player is most often looking at them
+        for (FogChunk fogChunk : FogOfWarClientEvents.fogChunks)
+            if (fogChunk.needsLightUpdate || fogChunk.isBrightChunk())
+                chunks.add(MC.level.getChunk(fogChunk.chunkInfo.chunk.getOrigin()));
+
+        for (ChunkAccess chunk : chunks) {
+            for (int y = MC.level.getMaxBuildHeight(); y > MC.level.getMinBuildHeight(); y -= 1) {
+                BlockPos pos = new BlockPos(chunk.getPos().getMiddleBlockX(), y, chunk.getPos().getMiddleBlockZ());
+                BlockState bs = MC.level.getBlockState(pos);
+                if (!bs.isAir()) {
+                    MC.level.setBlockAndUpdate(pos, Blocks.GLOWSTONE.defaultBlockState());
+                    MC.level.setBlockAndUpdate(pos, bs);
+                    break;
+                }
+            }
+        }
+
+        for (FogChunk fogChunk : fogChunks)
+            if (fogChunk.needsLightUpdate)
+                CompletableFuture.delayedExecutor(2000, TimeUnit.MILLISECONDS).execute(() -> {
+                    fogChunk.needsLightUpdate = false;
+                });
     }
 }

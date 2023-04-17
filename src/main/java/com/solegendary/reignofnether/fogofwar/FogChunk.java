@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.fogofwar;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 
 public class FogChunk {
@@ -9,10 +10,14 @@ public class FogChunk {
     public static float SEMI = 0.15f;
     public static float DARK = 0f;
 
+    public static Minecraft MC = Minecraft.getInstance();
+
     public LevelRenderer.RenderChunkInfo chunkInfo; // IMPORTANT to note that chunkInfos are 3D so there may be vertical chunks too
     public Boolean shouldBeRendered; // only set false for explored chunks - rendered only once to retain its freeze-frame effect
     public FogTransitionBrightness fogTB;
     public float brightness;
+
+    public boolean needsLightUpdate = true; // set for semi-dark chunks to refresh which allows lighting updates
 
     public FogChunk(LevelRenderer.RenderChunkInfo chunkInfo, FogTransitionBrightness fogTB) {
         this.chunkInfo = chunkInfo;
@@ -33,6 +38,7 @@ public class FogChunk {
     }
 
     public void setBrightness(FogTransitionBrightness tb) {
+        FogTransitionBrightness originalBrightness = this.fogTB;
         this.fogTB = tb;
         switch(this.fogTB) {
             case BRIGHT_TO_SEMI, BRIGHT_TO_DARK -> this.brightness = BRIGHT;
@@ -97,6 +103,7 @@ public class FogChunk {
         if (this.brightness != originalBrightness) {
             this.chunkInfo.chunk.setDirty(true);
             this.chunkInfo.chunk.playerChanged = true;
+            this.needsLightUpdate = true;
         }
     }
 }
