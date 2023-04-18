@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
+import com.solegendary.reignofnether.tps.TPSClientBoundPacket;
 import com.solegendary.reignofnether.unit.AbilityClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitServerboundPacket;
@@ -69,5 +70,9 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(AbilityClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(AbilityClientboundPacket::encode).decoder(AbilityClientboundPacket::new)
                 .consumer(AbilityClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(TPSClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(TPSClientBoundPacket::encode).decoder(TPSClientBoundPacket::new)
+                .consumer(TPSClientBoundPacket::handle).add();
     }
 }

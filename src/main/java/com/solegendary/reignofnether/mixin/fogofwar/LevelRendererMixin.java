@@ -76,7 +76,7 @@ public abstract class LevelRendererMixin {
         cancellable = true
     )
     private void applyFrustum(Frustum pFrustum, CallbackInfo ci) {
-        if (this.minecraft.level == null)
+        if (this.minecraft.level == null || !FogOfWarClientEvents.isEnabled())
             return;
 
         ci.cancel();

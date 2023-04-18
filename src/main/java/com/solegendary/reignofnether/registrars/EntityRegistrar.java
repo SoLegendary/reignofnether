@@ -70,6 +70,7 @@ public class EntityRegistrar {
                     .sized(EntityType.ENDERMAN.getWidth(), EntityType.ENDERMAN.getHeight())
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "enderman_unit").toString()));
 
+
     public static void init() {
         ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
     }

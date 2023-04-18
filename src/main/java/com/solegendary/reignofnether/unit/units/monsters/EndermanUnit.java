@@ -1,51 +1,36 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingServerEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.abilities.Teleport;
-import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.Ability;
+import com.solegendary.reignofnether.unit.abilities.Teleport;
+import com.solegendary.reignofnether.unit.goals.*;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Zombie;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.EntityTeleportEvent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
     // region
@@ -201,13 +186,6 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
         if (!this.isSilent()) {
             this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
             this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
-
-            if (this.level.isClientSide()) {
-                Player p = Minecraft.getInstance().player;
-                if (p != null)
-                    this.level.playSound(null, p.getX(), p.getY(), p.getZ(),
-                            SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
-            }
         }
     }
 }
