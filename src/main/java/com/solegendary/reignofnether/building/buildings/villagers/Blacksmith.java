@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -63,7 +64,8 @@ public class Blacksmith extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/smithing_table_front.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Blacksmith.class,
-                () -> !BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName),
+                () -> !BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) &&
+                       !ResearchClient.hasCheat("modifythephasevariance"),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(Blacksmith.class),
                 null,

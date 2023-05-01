@@ -148,8 +148,13 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
             // prioritise gathering adjacent targets first
             for (BlockPos todoBp : todoGatherTargets)
-                if (BLOCK_CONDITION.test(todoBp))
-                    gatherTarget = todoGatherTargets.get(0);
+                if (BLOCK_CONDITION.test(todoBp)) {
+                    gatherTarget = todoBp;
+                    break;
+                }
+
+            if (gatherTarget != null)
+                todoGatherTargets.remove(gatherTarget);
 
             if (gatherTarget == null && searchCdTicksLeft <= 0) {
                 if (targetFarm != null) {
@@ -317,8 +322,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     // only count as gathering if in range of the target
     public boolean isGathering() {
-        if (this.mob.level.isClientSide())
-            return gatherTarget != null;
+        if (this.mob.level.isClientSide() && gatherTarget != null)
+            return isBlockInRange(gatherTarget);
 
         if (!Unit.atMaxResources((Unit) mob) && this.gatherTarget != null && this.targetResourceSource != null &&
             ResourceSources.getBlockResourceName(this.gatherTarget, mob.level) != ResourceName.NONE)

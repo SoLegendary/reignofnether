@@ -81,8 +81,7 @@ public class Stockpile extends ProductionBuilding {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/chest.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Stockpile.class,
-                () -> false,//!BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) &&
-                      //!BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName),
+                () -> false,
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(Stockpile.class),
                 null,

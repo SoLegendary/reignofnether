@@ -30,11 +30,11 @@ public class TPSClientEvents {
         int col = (0xFF << 24) | (b << 16) | (g << 8) | (r);
 
         String tickStr = "Tick: " + String.format("%.2f", tickTime) + " ms";
-        GuiComponent.drawString(evt.getPoseStack(), MC.font, tickStr, x,y, col);
+        //GuiComponent.drawString(evt.getPoseStack(), MC.font, tickStr, x,y, col);
 
         // technically is bound to 20TPS but good to see the theoretical amount
 
         String tpsStr = "TPS: " + String.format("%.2f", worldTPS) + "";
-        GuiComponent.drawString(evt.getPoseStack(), MC.font, tpsStr, x,y + 10, col);
+        //GuiComponent.drawString(evt.getPoseStack(), MC.font, tpsStr, x,y + 10, col);
     }
 }

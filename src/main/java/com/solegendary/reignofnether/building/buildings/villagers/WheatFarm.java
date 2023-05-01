@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
@@ -52,7 +53,8 @@ public class WheatFarm extends Building {
                 new ResourceLocation("minecraft", "textures/block/hay_block_side.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == WheatFarm.class,
-                () -> !BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName),
+                () -> !BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) &&
+                       !ResearchClient.hasCheat("modifythephasevariance"),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(WheatFarm.class),
                 null,

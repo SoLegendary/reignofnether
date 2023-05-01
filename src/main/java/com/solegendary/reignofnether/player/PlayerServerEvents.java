@@ -67,7 +67,7 @@ public class PlayerServerEvents {
                     System.out.println(err);
                 }
             }
-            List<String> singleWordCheats = List.of("warpten", "operationcwal", "iseedeadpeople");
+            List<String> singleWordCheats = List.of("warpten", "operationcwal", "iseedeadpeople", "modifythephasevariance");
 
             for (String cheatName : singleWordCheats) {
                 if (words.length == 1 && words[0].equalsIgnoreCase(cheatName)) {
@@ -81,14 +81,15 @@ public class PlayerServerEvents {
                     }
                 }
             }
-            // TODO: invincibility and infinite damage
-            /*
-            if (words.length == 1 && words[0].equalsIgnoreCase("whosyourdaddy")) {
-                if (ResearchServer.playerHasCheat(playerName, "whosyourdaddy"))
-                    ResearchServer.removeCheat(playerName, "whosyourdaddy");
-                else
-                    ResearchServer.addCheat(playerName, "whosyourdaddy");
-            }*/
+
+            // apply all cheats
+            if (words.length == 1 && words[0].equalsIgnoreCase("allcheats")) {
+                ResourcesServerEvents.addSubtractResources(new Resources(playerName, 99999, 99999, 99999));
+                for (String cheatName : singleWordCheats) {
+                    ResearchServer.addCheat(playerName, cheatName);
+                    ResearchClientboundPacket.addCheat(playerName, cheatName);
+                }
+            }
         }
     }
 

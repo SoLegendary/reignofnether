@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnitProd;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnitProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -61,7 +62,8 @@ public class Graveyard extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/mossy_stone_bricks.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Graveyard.class,
-                () -> !BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName),
+                () -> !BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) &&
+                        !ResearchClient.hasCheat("modifythephasevariance"),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(Graveyard.class),
                 null,
@@ -69,7 +71,7 @@ public class Graveyard extends ProductionBuilding {
                         FormattedCharSequence.forward(Graveyard.buildingName, Style.EMPTY),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.Graveyard.WOOD, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("An eerie field that can raise Zombies and Skeletons", Style.EMPTY)
+                        FormattedCharSequence.forward("A field of the dead that can raise Zombies and Skeletons", Style.EMPTY)
                 ),
                 null
         );

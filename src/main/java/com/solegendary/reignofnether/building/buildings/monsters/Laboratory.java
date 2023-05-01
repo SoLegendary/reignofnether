@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -96,7 +97,8 @@ public class Laboratory extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/brewing_stand.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Laboratory.class,
-                () -> !BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName),
+                () -> !BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) &&
+                       !ResearchClient.hasCheat("modifythephasevariance"),
                 () -> true,
                 () -> BuildingClientEvents.setBuildingToPlace(Laboratory.class),
                 null,

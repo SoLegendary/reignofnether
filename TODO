@@ -14,12 +14,15 @@ Apply required gamerules and terrain generation automatically:
 
 - rapidly switching control groups while right click moving will cause crash
 
-- Fix smooth lighting issues on fog of war borders
+- Fix smooth lighting issues on fog of war borders (properly)
 
 - Serious client lag when spectator is inside of solid blocks
     (maybe because it also loads all underground views?)
 
+- play sounds from world (esp. building construction) more consistently during RTS view
+    - maybe somehow change the local player position for sound based on what is selected
 
+- lag in fog of war mode with lots of units/buildings
 
 TODO bugs/features (backlog)
 

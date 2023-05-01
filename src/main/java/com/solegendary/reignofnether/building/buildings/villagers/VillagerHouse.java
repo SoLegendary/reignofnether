@@ -52,7 +52,7 @@ public class VillagerHouse extends Building {
             new ResourceLocation("minecraft", "textures/block/oak_log.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == VillagerHouse.class,
-            () -> !BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName),
+            () -> false,
             () -> true,
             () -> BuildingClientEvents.setBuildingToPlace(VillagerHouse.class),
             null,

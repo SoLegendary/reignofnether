@@ -47,7 +47,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
                 }
                 stopBuilding();
             }
-            if (isBuilding()) {
+            if (isBuilding() && buildingTarget != null) {
                 BlockPos bp = buildingTarget.centrePos;
                 this.mob.getLookControl().setLookAt(bp.getX(), bp.getY(), bp.getZ());
                 mob.getLookControl().lookAtCooldown = 20;

@@ -709,11 +709,13 @@ public class HudClientEvents {
             if (MC.player != null && building.ownerName.equals(MC.player.getName().getString()))
                 numOwnedBuildings += 1;
         if (numOwnedBuildings == 0) {
+            /*
             GuiComponent.drawString(evt.getPoseStack(), MC.font,
                     "You have no buildings!",
                     screenWidth - 115,
                     5,
                     0xFFFFFFFF);
+             */
         }
     }
 
