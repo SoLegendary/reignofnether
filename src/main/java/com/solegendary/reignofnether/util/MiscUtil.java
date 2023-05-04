@@ -88,7 +88,7 @@ public class MiscUtil {
                 (pos2d.distanceToSqr(mob2d) < range * range && (pos.getY() - mob.getY()) < 16);
     }
 
-
+    // returns a random order of orthogonally adjacent blocks
     public static ArrayList<BlockPos> findAdjacentBlocks(BlockPos originPos, Predicate<BlockPos> condition) {
         ArrayList<BlockPos> adjBps = new ArrayList<>();
         ArrayList<BlockPos> retBps = new ArrayList<>();

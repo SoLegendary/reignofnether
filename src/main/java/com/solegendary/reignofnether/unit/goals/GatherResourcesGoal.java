@@ -66,7 +66,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         ResourceSource resBlock = ResourceSources.getFromBlockPos(bp, mob.level);
 
         // is a valid resource block and meets the target ResourceSource's blockstate condition
-        if (resBlock == null || resBlock.resourceName != targetResourceName || resBlock.name.equals("Leaves"))
+        if (resBlock == null || resBlock.resourceName != targetResourceName) // || resBlock.name.equals("Leaves")
             return false;
         if (!resBlock.blockStateTest.test(bs))
             return false;
