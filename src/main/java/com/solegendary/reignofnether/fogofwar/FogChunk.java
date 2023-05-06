@@ -2,6 +2,9 @@ package com.solegendary.reignofnether.fogofwar;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.world.level.chunk.ChunkAccess;
+
+import java.util.Set;
 
 public class FogChunk {
     private final static float TRANSITION_TICKS = 20;
@@ -13,6 +16,9 @@ public class FogChunk {
     public static Minecraft MC = Minecraft.getInstance();
 
     public LevelRenderer.RenderChunkInfo chunkInfo; // IMPORTANT to note that chunkInfos are 3D so there may be vertical chunks too
+
+    //public Set<LevelRenderer.RenderChunkInfo> chunkInfos;
+    //public ChunkAccess chunk; // whole chunk column
     public Boolean shouldBeRendered; // only set false for explored chunks - rendered only once to retain its freeze-frame effect
     public FogTransitionBrightness fogTB;
     public float brightness;

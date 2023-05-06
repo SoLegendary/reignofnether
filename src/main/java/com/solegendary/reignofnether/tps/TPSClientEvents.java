@@ -16,7 +16,7 @@ public class TPSClientEvents {
 
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        int x = evt.getWindow().getGuiScaledWidth() - 50;
+        int x = evt.getWindow().getGuiScaledWidth() - 55;
         int y = 20;
 
         double worldTPS = Math.min(1000.0 / tickTime, 99.99);
@@ -29,11 +29,14 @@ public class TPSClientEvents {
 
         int col = (0xFF << 24) | (b << 16) | (g << 8) | (r);
 
-        String tickStr = "Tick: " + String.format("%.2f", tickTime) + " ms";
+        String tickStr = "Tick: " + String.format("%.2f", tickTime) + "ms";
         GuiComponent.drawString(evt.getPoseStack(), MC.font, tickStr, x,y, col);
 
         // technically is bound to 20TPS but good to see the theoretical amount
-        String tpsStr = "TPS: " + String.format("%.2f", worldTPS) + "";
+        String tpsStr = "TPS: " + String.format("%.2f", worldTPS);
         GuiComponent.drawString(evt.getPoseStack(), MC.font, tpsStr, x,y + 10, col);
+
+        String fpsStr = "FPS: " + Minecraft.getInstance().fpsString.replace("fps","");
+        GuiComponent.drawString(evt.getPoseStack(), MC.font, fpsStr, x,y + 20, 0xFFFFFFFF);
     }
 }
