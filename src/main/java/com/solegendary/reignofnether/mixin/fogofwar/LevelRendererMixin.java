@@ -62,6 +62,11 @@ import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.CHUNK_
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
 
+    private static final Set<ChunkPos> chunksPosesWithUnits = ConcurrentHashMap.newKeySet();
+    private static final Set<ChunkPos> chunksPosesWithBuildings = ConcurrentHashMap.newKeySet();
+    private static final int UPDATE_TICKS_MAX = 10;
+    private static int updateTicks = 0;
+
     @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
     @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
     @Final @Shadow private Minecraft minecraft;
@@ -88,13 +93,6 @@ public abstract class LevelRendererMixin {
 
             LinkedHashSet<LevelRenderer.RenderChunkInfo> renderChunkInfos = (this.renderChunkStorage.get()).renderChunks;
 
-            // bright chunks in last tick
-            Set<FogChunk> oldBrightChunks = FogOfWarClientEvents.fogChunks.stream()
-                    .filter(FogChunk::isBrightChunk)
-                    .collect(Collectors.toSet());
-            // bright chunks in current tick
-            Set<FogChunk> newBrightChunks = ConcurrentHashMap.newKeySet();
-
             // refresh renderChunksInFrustum
             this.renderChunksInFrustum.clear();
             for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos)
@@ -102,14 +100,30 @@ public abstract class LevelRendererMixin {
                     this.renderChunksInFrustum.add(chunkInfo);
 
 
+            if (updateTicks < UPDATE_TICKS_MAX) {
+                updateTicks += 1;
+                this.minecraft.getProfiler().pop();
+                return;
+            }
+            else {
+                updateTicks = 0;
+                chunksPosesWithUnits.clear();
+                chunksPosesWithBuildings.clear();
+            }
+
+            // bright chunks in last tick
+            Set<FogChunk> oldBrightChunks = FogOfWarClientEvents.fogChunks.stream()
+                    .filter(FogChunk::isBrightChunk)
+                    .collect(Collectors.toSet());
+            // bright chunks in current tick
+            Set<FogChunk> newBrightChunks = ConcurrentHashMap.newKeySet();
 
             // get chunks that have units/buildings that can see
-            Set<ChunkPos> chunksPosesWithUnits = ConcurrentHashMap.newKeySet();
+
             for (LivingEntity entity : UnitClientEvents.getAllUnits())
                 if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                     chunksPosesWithUnits.add(this.minecraft.level.getChunk(entity.getOnPos()).getPos());
 
-            Set<ChunkPos> chunksPosesWithBuildings = ConcurrentHashMap.newKeySet();
             for (Building building : BuildingClientEvents.getBuildings())
                 if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED)
                     chunksPosesWithBuildings.add(this.minecraft.level.getChunk(building.centrePos).getPos());
