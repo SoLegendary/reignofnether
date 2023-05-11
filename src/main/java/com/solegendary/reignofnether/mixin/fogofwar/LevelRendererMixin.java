@@ -101,35 +101,33 @@ public abstract class LevelRendererMixin {
                 if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()))
                     this.renderChunksInFrustum.add(chunkInfo);
 
+
+
+            // get chunks that have units/buildings that can see
+            Set<ChunkPos> chunksPosesWithUnits = ConcurrentHashMap.newKeySet();
+            for (LivingEntity entity : UnitClientEvents.getAllUnits())
+                if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED)
+                    chunksPosesWithUnits.add(this.minecraft.level.getChunk(entity.getOnPos()).getPos());
+
+            Set<ChunkPos> chunksPosesWithBuildings = ConcurrentHashMap.newKeySet();
+            for (Building building : BuildingClientEvents.getBuildings())
+                if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED)
+                    chunksPosesWithBuildings.add(this.minecraft.level.getChunk(building.centrePos).getPos());
+
+            // can't use renderChunksInFrustum because then we wouldn't update explored status of chunks we aren't looking at
             for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos) {
-                ChunkPos chunkPos1 = this.minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
+                ChunkPos renderChunkPos = this.minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
 
-                // chunks in view of owned units
-                for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
-                    if (UnitClientEvents.getPlayerToEntityRelationship(entity) != Relationship.OWNED)
-                        continue;
-
-                    ChunkPos chunkPos2 = this.minecraft.level.getChunk(entity.getOnPos()).getPos();
-
-                    if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_UNIT) {
+                for (ChunkPos chunkPos : chunksPosesWithBuildings)
+                    if (chunkPos.getChessboardDistance(renderChunkPos) < CHUNK_VIEW_DIST_BUILDING)
                         newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
-                        break;
-                    }
-                }
-                // chunks in view of owned buildings
-                for (Building building : BuildingClientEvents.getBuildings()) {
-                    if (BuildingClientEvents.getPlayerToBuildingRelationship(building) != Relationship.OWNED)
-                        continue;
 
-                    BlockPos bp = building.centrePos;
-                    ChunkPos chunkPos2 = this.minecraft.level.getChunk(bp).getPos();
-
-                    if (chunkPos1.getChessboardDistance(chunkPos2) < CHUNK_VIEW_DIST_BUILDING) {
+                for (ChunkPos chunkPos : chunksPosesWithUnits)
+                    if (chunkPos.getChessboardDistance(renderChunkPos) < CHUNK_VIEW_DIST_UNIT)
                         newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
-                        break;
-                    }
-                }
             }
+
+
 
             if (!newBrightChunks.equals(oldBrightChunks)) {
 
