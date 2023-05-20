@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
@@ -16,6 +17,8 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -382,6 +385,8 @@ public class UnitClientEvents {
         CursorClientEvents.setLeftClickAction(null);
     }
 
+    private static RenderLevelStageEvent.Stage renderStage = RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS;
+
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (MC.level == null)
@@ -390,23 +395,28 @@ public class UnitClientEvents {
         /**
          *  TODO: make these visible to 1st-person players but currently had a visual glitch
          *  doesnt align to camera very well, sometimes sinks below ground and too thin
+         *  TODO: make this visible behind blocks (but only seems to work if orthoview is creative mode)
          */
-        // conditions if orthoview uses creative mode
-        //if ((OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) ||
-        //    (!OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS))
+        // if orthoview uses creative mode: RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS
+        // if orthoview uses spectator mode: RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS
 
-        if (evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+        if (OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS)
         {
             for (LivingEntity entity : allUnits) {
                 if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()))
                     continue;
 
                 Relationship unitRs = getPlayerToEntityRelationship(entity);
+
+                float alpha = 0.25f;
+                if (selectedUnits.stream().map(u -> u.getId()).toList().contains(entity.getId()))
+                    alpha = 1.0f;
+
                 // always-shown highlights to indicate unit relationships
                 switch (unitRs) {
-                    case OWNED -> MyRenderer.drawBoxBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 1.0f, 0.3f, 0.2f);
-                    case FRIENDLY -> MyRenderer.drawBoxBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 0.3f, 1.0f, 0.2f);
-                    case HOSTILE -> MyRenderer.drawBoxBottom(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 0.3f, 0.3f, 0.2f);
+                    case OWNED -> MyRenderer.drawBoxBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 1.0f, 0.3f, alpha);
+                    case FRIENDLY -> MyRenderer.drawBoxBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 0.3f, 1.0f, alpha);
+                    case HOSTILE -> MyRenderer.drawBoxBottom(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 0.3f, 0.3f, alpha);
                 }
             }
         }
@@ -445,6 +455,27 @@ public class UnitClientEvents {
             LivingEntity entity = HudClientEvents.hudSelectedEntity;
             if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                 sendUnitCommand(UnitAction.DELETE);
+        }
+
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_INSERT) {
+            if (renderStage == RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS)
+                renderStage = RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS;
+            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+                renderStage = RenderLevelStageEvent.Stage.AFTER_SKY;
+            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_SKY)
+                renderStage = RenderLevelStageEvent.Stage.AFTER_PARTICLES;
+            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_PARTICLES)
+                renderStage = RenderLevelStageEvent.Stage.AFTER_WEATHER;
+            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_WEATHER)
+                renderStage = RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS;
+            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS)
+                renderStage = RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS;
+            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS)
+                renderStage = RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS;
+            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS)
+                renderStage = RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS;
+
+            System.out.println(renderStage.toString());
         }
     }
 

@@ -11,6 +11,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.List;
+
 @Mixin(Entity.class)
 public abstract class PlayerMixin {
 
@@ -26,19 +28,16 @@ public abstract class PlayerMixin {
     // tick() naturally reverses all of this so no need for reversing it here when leaving orthoView
     // only needed if orthoview players are in CREATIVE mode
     private void tick(CallbackInfo ci) {
-        /*
-        for (ServerPlayer serverPlayer : PlayerServerEvents.orthoviewPlayers) {
-            if (serverPlayer.getId() == this.getId() && !this.noPhysics) {
-                this.noPhysics = true;
-                System.out.println("No physics enabled for: " + serverPlayer.getName().getString());
-                Entity entity = this.level.getEntity(this.getId());
-                if (entity instanceof Player player) {
-                    if (!player.getAbilities().flying) {
-                        player.getAbilities().flying = true;
-                        player.onUpdateAbilities();
-                    }
-                }
+        int id = this.getId();
+        Entity entity = this.level.getEntity(id);
+        List<Integer> orthoIds = PlayerServerEvents.orthoviewPlayers.stream().map(Entity::getId).toList();
+        if (entity instanceof Player player && player.isCreative() &&
+            (orthoIds.contains(id) || this.level.isClientSide())) {
+            this.noPhysics = true;
+            if (!player.getAbilities().flying) {
+                player.getAbilities().flying = true;
+                player.onUpdateAbilities();
             }
-        }*/
+        }
     }
 }

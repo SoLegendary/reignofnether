@@ -53,6 +53,9 @@ public class MyRenderer {
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
         double d2 = camEntity.getZ();
 
+        RenderSystem.disableDepthTest(); // enable showing lines through blocks
+        RenderSystem.depthMask(false);
+
         VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.lines());
 
         matrixStack.pushPose();

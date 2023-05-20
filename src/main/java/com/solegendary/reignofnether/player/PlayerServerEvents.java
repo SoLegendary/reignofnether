@@ -119,7 +119,7 @@ public class PlayerServerEvents {
             MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
             MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
             NetworkHooks.openScreen(serverPlayer, namedProvider);
-            serverPlayer.setGameMode(GameType.SPECTATOR); // could use spectator, but makes rendering less reliable
+            serverPlayer.setGameMode(GameType.CREATIVE); // could use spectator, but makes rendering less reliable
         }
         else {
             System.out.println("serverPlayer is null, cannot open topdown gui");
