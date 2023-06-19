@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.orthoview;
 
-import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -57,7 +56,7 @@ public class OrthoviewClientEvents {
     private static float mouseLeftDownX = 0;
     private static float mouseLeftDownY = 0;
 
-    private static final double setPlayerY = 85;
+    private static final double ORTHOVIEW_PLAYER_Y = 85; // flying Y value when in orthoview
 
     public static boolean isEnabled() {
         return enabled;
@@ -114,7 +113,7 @@ public class OrthoviewClientEvents {
             enabledCount += 1;
             PlayerServerboundPacket.enableOrthoview();
             MinimapClientEvents.setMapCentre(MC.player.getX(), MC.player.getZ());
-            PlayerServerboundPacket.teleportPlayer(MC.player.getX(), setPlayerY, MC.player.getZ());
+            PlayerServerboundPacket.teleportPlayer(MC.player.getX(), ORTHOVIEW_PLAYER_Y, MC.player.getZ());
             TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
         }
         else {

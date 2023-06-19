@@ -2,15 +2,8 @@
 TODO bugs/features:
 
 Apply required gamerules and terrain generation automatically:
-    https://minecraft.fandom.com/wiki/Custom
-    - /gamerule randomTickSpeed 12
-    - /gamerule doDaylightCycle false
-    - /time set 12600
-    - increased surface deposits of ore, and/or increased windswept hills biomes
     - reduced overall height (low weirdness?)
-        - important to avoid spectator being inside blocks (causes lag)
-    - remove unwanted biomes: ocean, mesa, extreme hills, jungle
-    - no caves
+        - important to avoid spectator being inside blocks (causes lag and graphical glitches)
 
 - rapidly switching control groups while right click moving will cause crash
 
@@ -24,9 +17,6 @@ Apply required gamerules and terrain generation automatically:
 
 - lag in fog of war mode with lots of units/buildings
 
-TODO bugs/features (backlog)
-
-- Can't noclip on remote server in orthoview when in creative
 
 
 TODO buildings/units (backlog)
