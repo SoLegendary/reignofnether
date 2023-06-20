@@ -10,9 +10,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
@@ -46,7 +48,7 @@ public class OrthoviewClientEvents {
     private static final float CAMROT_MOUSE_SENSITIVITY = 0.12f;
     private static final float CAMPAN_MOUSE_SENSITIVITY = 0.15f;
 
-    private static float zoom = 30; // * 2 = number of blocks in height
+    private static float zoom = 30; // * 2 = number of blocks in height (higher == zoomed out)
     private static float camRotX = 135; // left/right - should start northeast (towards -Z,+X)
     private static float camRotY = -45; // up/down
     private static float camRotAdjX = 0;
@@ -56,7 +58,11 @@ public class OrthoviewClientEvents {
     private static float mouseLeftDownX = 0;
     private static float mouseLeftDownY = 0;
 
-    private static final double ORTHOVIEW_PLAYER_Y = 85; // flying Y value when in orthoview
+    // by default orthoview players stay at BASE_Y, but can be raised to as high as MAX_Y if they are clipping terrain
+    private static final double ORTHOVIEW_PLAYER_BASE_Y = 85;
+    private static final double ORTHOVIEW_PLAYER_MAX_Y = 105;
+
+    private static float zoomModifier = 0; // zoom out when on higher elevation
 
     public static boolean isEnabled() {
         return enabled;
@@ -96,10 +102,10 @@ public class OrthoviewClientEvents {
             zoom = ZOOM_MAX;
     }
 
-    public static void panCam(float x, float z) { // pan camera relative to rotation
+    public static void panCam(float x, float y, float z) { // pan camera relative to rotation
         if (MC.player != null) {
             Vec2 XZRotated = MyMath.rotateCoords(x, z, -camRotX - camRotAdjX);
-            MC.player.move(MoverType.SELF, new Vec3(XZRotated.x, 0, XZRotated.y));
+            MC.player.move(MoverType.SELF, new Vec3(XZRotated.x, y, XZRotated.y));
         }
     }
 
@@ -113,7 +119,7 @@ public class OrthoviewClientEvents {
             enabledCount += 1;
             PlayerServerboundPacket.enableOrthoview();
             MinimapClientEvents.setMapCentre(MC.player.getX(), MC.player.getZ());
-            PlayerServerboundPacket.teleportPlayer(MC.player.getX(), ORTHOVIEW_PLAYER_Y, MC.player.getZ());
+            PlayerServerboundPacket.teleportPlayer(MC.player.getX(), ORTHOVIEW_PLAYER_BASE_Y, MC.player.getZ());
             TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
         }
         else {
@@ -191,13 +197,13 @@ public class OrthoviewClientEvents {
         // for one frame you can take the mouse outside of the window, so use this amount to adjust pan speed
         if (!Keybindings.altMod.isDown()) {
             if (cursorX <= 0)
-                panCam(EDGE_CAMPAM_SENSITIVITY, 0);
+                panCam(EDGE_CAMPAM_SENSITIVITY, 0, 0);
             else if (cursorX >= glfwWinWidth)
-                panCam(-EDGE_CAMPAM_SENSITIVITY, 0);
+                panCam(-EDGE_CAMPAM_SENSITIVITY, 0, 0);
             if (cursorY <= 0)
-                panCam(0, EDGE_CAMPAM_SENSITIVITY);
+                panCam(0, 0, EDGE_CAMPAM_SENSITIVITY);
             else if (cursorY >= glfwWinHeight)
-                panCam(0, -EDGE_CAMPAM_SENSITIVITY);
+                panCam(0, 0, -EDGE_CAMPAM_SENSITIVITY);
         }
 
         // lock mouse inside window
@@ -220,13 +226,13 @@ public class OrthoviewClientEvents {
 
         // pan camera with keys
         if (Keybindings.panPlusX.isDown())
-            panCam(PAN_KEY_STEP,0);
+            panCam(PAN_KEY_STEP,0,0);
         else if (Keybindings.panMinusX.isDown())
-            panCam(-PAN_KEY_STEP,0);
+            panCam(-PAN_KEY_STEP,0,0);
         if (Keybindings.panPlusZ.isDown())
-            panCam(0, PAN_KEY_STEP);
+            panCam(0,0,PAN_KEY_STEP);
         else if (Keybindings.panMinusZ.isDown())
-            panCam(0,-PAN_KEY_STEP);
+            panCam(0,0,-PAN_KEY_STEP);
 
         // note that we treat x and y rot as horizontal and vertical, but MC treats it the other way around...
         if (player != null) {
@@ -278,7 +284,7 @@ public class OrthoviewClientEvents {
             cameraMovingByMouse = true;
             float moveX = (float) evt.getDragX() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX); //* winWidth/1920;
             float moveZ = (float) evt.getDragY() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX); //* winHeight/1080;
-            panCam(moveX, moveZ);
+            panCam(moveX, 0, moveZ);
         }
         else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;
@@ -294,7 +300,7 @@ public class OrthoviewClientEvents {
         }
     }
 
-    // don't let orthoview players see other orthoview players
+    // don't let orthoview players see other orthoview players or themselves
     @SubscribeEvent
     public static void onPlayerRender(RenderPlayerEvent.Pre evt) {
         if (enabled && (evt.getEntity().isSpectator() || evt.getEntity().isCreative()))
@@ -307,14 +313,59 @@ public class OrthoviewClientEvents {
             evt.setFOV(180);
     }
 
-    /*
+    // Move orthoview players above out of terrain so they don't clip into it and prevent surface chunk rendering
+    // TODO: maybe treat the effective player position as closer to camera ?
+    // TODO: zoom out on going up
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (!enabled || MC.player == null || MC.level == null)
+            return;
+
+        final BlockPos eyeBp = new BlockPos(MC.player.getEyePosition()).offset(0,-2,0);
+        BlockState bs;
+        BlockPos bp = eyeBp.below();
+
+        double targetPlayerY;
+        do {
+            targetPlayerY = bp.getY();
+            bp = bp.above();
+            bs = MC.level.getBlockState(bp);
+        } while (!bs.isAir() && targetPlayerY <= ORTHOVIEW_PLAYER_MAX_Y);
+
+        targetPlayerY = Math.max(targetPlayerY, ORTHOVIEW_PLAYER_BASE_Y);
+        targetPlayerY = Math.min(targetPlayerY, ORTHOVIEW_PLAYER_MAX_Y);
+
+        final float speedY =  0.5f;
+        double diffY = targetPlayerY - eyeBp.getY();
+
+        if (Math.abs(diffY) > speedY) {
+            if (eyeBp.getY() < targetPlayerY)
+                panCam(0,speedY,0);
+            else if (eyeBp.getY() > targetPlayerY)
+                panCam(0,-speedY,0);
+        }
+        else if (Math.abs(diffY) != 0)
+            panCam(0, (float) diffY, 0);
+
+        float targetZoomMod = (float) ((float) targetPlayerY - ORTHOVIEW_PLAYER_BASE_Y);
+
+        final float speedZoom = 0.3f;
+        if (zoomModifier < targetZoomMod)
+            zoomModifier += speedZoom;
+        else if (zoomModifier > targetZoomMod)
+            zoomModifier -= speedZoom;
+
+        if (Math.abs(zoomModifier - targetZoomMod) < speedZoom)
+            zoomModifier = targetZoomMod;
+    }
+
+
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
         MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "camRotX: " + getCamRotX(),
-                "camRotY: " + getCamRotY()
+                "playerY: " + MC.player.getEyeY()
         });
-    }*/
+    }
 
     // OrthoViewMixin uses this to generate a customisation orthographic view to replace the usual view
     // shamelessly copied from ImmersivePortals 1.16
@@ -325,12 +376,14 @@ public class OrthoviewClientEvents {
         float near = -3000;
         float far = 3000;
 
-        float wView = (zoom / height) * width;
+        float zoomFinal = zoom + zoomModifier;
+
+        float wView = (zoomFinal / height) * width;
         float left = -wView / 2;
         float rgt = wView / 2;
 
-        float top = zoom / 2;
-        float bot = -zoom / 2;
+        float top = zoomFinal / 2;
+        float bot = -zoomFinal / 2;
 
         float[] arr = new float[]{
                 2.0f/(rgt-left), 0,              0,                -(rgt+left)/(rgt-left),
