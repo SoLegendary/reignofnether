@@ -62,8 +62,6 @@ public class OrthoviewClientEvents {
     private static final double ORTHOVIEW_PLAYER_BASE_Y = 85;
     private static final double ORTHOVIEW_PLAYER_MAX_Y = 105;
 
-    private static float zoomModifier = 0; // zoom out when on higher elevation
-
     public static boolean isEnabled() {
         return enabled;
     }
@@ -313,53 +311,6 @@ public class OrthoviewClientEvents {
             evt.setFOV(180);
     }
 
-    // Move orthoview players above out of terrain so they don't clip into it and prevent surface chunk rendering
-    // TODO: maybe treat the effective player position as closer to camera ?
-    // TODO: zoom out on going up
-    @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (!enabled || MC.player == null || MC.level == null)
-            return;
-
-        final BlockPos eyeBp = new BlockPos(MC.player.getEyePosition()).offset(0,-2,0);
-        BlockState bs;
-        BlockPos bp = eyeBp.below();
-
-        double targetPlayerY;
-        do {
-            targetPlayerY = bp.getY();
-            bp = bp.above();
-            bs = MC.level.getBlockState(bp);
-        } while (!bs.isAir() && targetPlayerY <= ORTHOVIEW_PLAYER_MAX_Y);
-
-        targetPlayerY = Math.max(targetPlayerY, ORTHOVIEW_PLAYER_BASE_Y);
-        targetPlayerY = Math.min(targetPlayerY, ORTHOVIEW_PLAYER_MAX_Y);
-
-        final float speedY =  0.5f;
-        double diffY = targetPlayerY - eyeBp.getY();
-
-        if (Math.abs(diffY) > speedY) {
-            if (eyeBp.getY() < targetPlayerY)
-                panCam(0,speedY,0);
-            else if (eyeBp.getY() > targetPlayerY)
-                panCam(0,-speedY,0);
-        }
-        else if (Math.abs(diffY) != 0)
-            panCam(0, (float) diffY, 0);
-
-        float targetZoomMod = (float) ((float) targetPlayerY - ORTHOVIEW_PLAYER_BASE_Y);
-
-        final float speedZoom = 0.3f;
-        if (zoomModifier < targetZoomMod)
-            zoomModifier += speedZoom;
-        else if (zoomModifier > targetZoomMod)
-            zoomModifier -= speedZoom;
-
-        if (Math.abs(zoomModifier - targetZoomMod) < speedZoom)
-            zoomModifier = targetZoomMod;
-    }
-
-
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
         MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
@@ -376,7 +327,7 @@ public class OrthoviewClientEvents {
         float near = -3000;
         float far = 3000;
 
-        float zoomFinal = zoom + zoomModifier;
+        float zoomFinal = zoom;
 
         float wView = (zoomFinal / height) * width;
         float left = -wView / 2;
