@@ -311,12 +311,13 @@ public class OrthoviewClientEvents {
             evt.setFOV(180);
     }
 
+    /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
         MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
                 "playerY: " + MC.player.getEyeY()
         });
-    }
+    }*/
 
     // OrthoViewMixin uses this to generate a customisation orthographic view to replace the usual view
     // shamelessly copied from ImmersivePortals 1.16

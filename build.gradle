@@ -139,7 +139,7 @@ dependencies {
     implementation 'org.jetbrains:annotations:20.1.0'
     implementation 'org.junit.jupiter:junit-jupiter:5.9.2'
 
-    minecraft 'net.minecraftforge:forge:1.19.2-43.2.0'
+    minecraft 'net.minecraftforge:forge:1.19.2-43.2.14'
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
