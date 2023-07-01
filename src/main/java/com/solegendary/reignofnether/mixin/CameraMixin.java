@@ -25,6 +25,7 @@ public class CameraMixin {
     @Shadow protected void move(double pDistanceOffset, double pVerticalOffset, double pHorizontalOffset) { }
     @Shadow private double getMaxZoom(double pStartingDistance) { return pStartingDistance; }
     @Shadow protected void setPosition(Vec3 pPos) { }
+    @Shadow protected void setPosition(double pX, double pY, double pZ) { }
     @Shadow @Final private Vector3f forwards;
     @Shadow @Final private Vector3f up;
     @Shadow @Final private Vector3f left;
@@ -32,6 +33,11 @@ public class CameraMixin {
     @Shadow private boolean detached;
     @Shadow private float xRot;
     @Shadow private float yRot;
+    @Shadow private boolean initialized;
+    @Shadow private BlockGetter level;
+    @Shadow private Entity entity;
+    @Shadow private float eyeHeight;
+    @Shadow private float eyeHeightOld;
 
     // when orthoview is enabled, set the camera to 3rd person and move it further back than normal
     // so that we still render chunks if the orthoview player is inside blocks
@@ -52,20 +58,27 @@ public class CameraMixin {
         this.setPosition(new Vec3(this.position.x + d0, this.position.y + d1, this.position.z + d2));
     }
 
-
     @Inject(
             method = "setup",
             at = @At("TAIL")
     )
     public void setup(BlockGetter pLevel, Entity pEntity, boolean pDetached, boolean pThirdPersonReverse,
                       float pPartialTick, CallbackInfo ci) {
-        if (!pDetached && OrthoviewClientEvents.isEnabled()) {
-            this.detached = true;
+        this.initialized = true;
+        this.level = pLevel;
+        this.entity = pEntity;
+        this.detached = pDetached || OrthoviewClientEvents.isEnabled();
+        this.setRotation(pEntity.getViewYRot(pPartialTick), pEntity.getViewXRot(pPartialTick));
+        this.setPosition(Mth.lerp((double)pPartialTick, pEntity.xo, pEntity.getX()), Mth.lerp((double)pPartialTick, pEntity.yo, pEntity.getY()) + (double)Mth.lerp(pPartialTick, this.eyeHeightOld, this.eyeHeight), Mth.lerp((double)pPartialTick, pEntity.zo, pEntity.getZ()));
+        if (pDetached) {
             if (pThirdPersonReverse) {
                 this.setRotation(this.yRot + 180.0F, -this.xRot);
             }
             this.move(-this.getMaxZoom(4.0), 0.0, 0.0);
+        } else if (pEntity instanceof LivingEntity && ((LivingEntity)pEntity).isSleeping()) {
+            Direction direction = ((LivingEntity)pEntity).getBedOrientation();
+            this.setRotation(direction != null ? direction.toYRot() - 180.0F : 0.0F, 0.0F);
+            this.move(0.0, 0.3, 0.0);
         }
     }
-
 }
