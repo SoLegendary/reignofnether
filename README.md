@@ -1,6 +1,6 @@
 # Reign of Nether: Minecraft as an RTS
 
-**Video demo:** https://www.youtube.com/watch?v=lY1_i7xv1s4&feature=youtu.be
+**Video demo:** https://www.youtube.com/watch?v=2kL4vyjE2Mc
 
 Inspired the classic Real Time Strategy games of the early 2000s including Starcraft, Warcraft and Age of Empires, Reign of Nether is trying to transform Minecraft into a experience just like one of them using all the same assets and models you find in the vanilla game.
 
@@ -10,25 +10,25 @@ Another core design tenet is that the gamemode is fully compatible with vanilla 
 
 # Features
 
-| Feature | Status | Notes |
-|--|--|--|
-| Top down isometric camera | ✔️ |  |
-| Top down mouse controls | ✔️ |  |
-| Multiplayer | ✔️ |  |
-| Unit controls | ✔️ |  |
-| Building construction | ✔️ |  |
-| Building unit production | ✔️ |  |
-| Minimap | ✔️ |  |
-| Resources and population | ✔️ |  |
-| Resource collection | 🟡 | Currently very badly lags at high volumes |
-| Fog of war | 🟡 | Technically works, still looks quite janky |
-| Villagers Race | 🟡 |  |
-| Monsters Race | 🟡 |  |
-| Netherlings Race | ❌ |  |
-| Improved vanilla player features | ❌ | Give vanilla-mode players more interaction with their RTS teammates |
-| Unit abilities | ❌ | Think MOBA style abilities |
+| Feature | Status | Notes |  
+|--|--|--|  
+| Top down isometric camera | ✔️ |  |  
+| Top down mouse controls | ✔️ |  |  
+| Multiplayer | ✔️ |  |  
+| Unit controls | ✔️ |  |  
+| Building construction | ✔️ |  |  
+| Building unit production | ✔️ |  |  
+| Minimap | ✔️ |  |  
+| Resources and population | ✔️ |  |  
+| RTS-friendly world generation | ✔️ | Flatter world, simpler biomes and added surface ores |  
+| Resource collection | 🟡 | Currently very badly lags at high volumes |  
+| Fog of war | 🟡 | Technically works, still looks quite janky |  
+| Villagers Race | 🟡 |  |  
+| Monsters Race | 🟡 |  |  
+| Netherlings Race | ❌ |  |  
+| Improved vanilla player features | ❌ | Give vanilla-mode players more interaction with their RTS teammates |  
+| Unit abilities | ❌ | Think MOBA style abilities |  
 | Teams | ❌ | Including resource trading, shared unit control, etc. |
-| RTS-friendly world generation| ❌ | Mostly just flattening the world, removing some biomes and adding more surface ores |
 
 And many more that I've yet to think of...
 

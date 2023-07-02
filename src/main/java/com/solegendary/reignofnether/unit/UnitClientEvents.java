@@ -28,6 +28,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
@@ -400,7 +401,8 @@ public class UnitClientEvents {
         // if orthoview uses creative mode: RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS
         // if orthoview uses spectator mode: RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS
 
-        if (OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS)
+        if ((OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) ||
+            (!OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS))
         {
             for (LivingEntity entity : allUnits) {
                 if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()))
@@ -408,15 +410,20 @@ public class UnitClientEvents {
 
                 Relationship unitRs = getPlayerToEntityRelationship(entity);
 
-                float alpha = 0.25f;
+                float alpha = 0.5f;
                 if (selectedUnits.stream().map(u -> u.getId()).toList().contains(entity.getId()))
                     alpha = 1.0f;
 
+                // draw only the bottom of the outline boxes
+                AABB entityAABB = entity.getBoundingBox();
+                entityAABB = entityAABB.setMaxY(entityAABB.minY);
+                boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
+
                 // always-shown highlights to indicate unit relationships
                 switch (unitRs) {
-                    case OWNED -> MyRenderer.drawBoxBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 1.0f, 0.3f, alpha);
-                    case FRIENDLY -> MyRenderer.drawBoxBottom(evt.getPoseStack(), entity.getBoundingBox(), 0.3f, 0.3f, 1.0f, alpha);
-                    case HOSTILE -> MyRenderer.drawBoxBottom(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 0.3f, 0.3f, alpha);
+                    case OWNED -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 1.0f, 0.2f, alpha, excludeMaxY);
+                    case FRIENDLY -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 0.2f, 1.0f, alpha, excludeMaxY);
+                    case HOSTILE -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.2f, 0.2f, alpha, excludeMaxY);
                 }
             }
         }
@@ -439,11 +446,11 @@ public class UnitClientEvents {
                     if (preselectedUnits.contains(entity) &&
                             isLeftClickAttack() &&
                             !targetingSelf() && !HudClientEvents.isMouseOverAnyButtonOrHud())
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 0.3f, 0.3f, 1.0f);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 0.3f, 0.3f, 1.0f, false);
                     else if (selectedUnits.contains(entity))
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 1.0f, 1.0f, 1.0f);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 1.0f, 1.0f, 1.0f, false);
                     else if (preselectedUnits.contains(entity) && !HudClientEvents.isMouseOverAnyButtonOrHud())
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(),1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(),1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f, false);
                 }
             }
         }
