@@ -7,7 +7,7 @@ More terrain generation:
         - lava lakes
         - mineshafts
 
-- rapidly switching control groups while right click moving will cause crash
+- rapidly switching control groups while right click moving will cause crash (?)
 
 - Fix smooth lighting issues on fog of war borders (properly)
 
@@ -17,6 +17,7 @@ More terrain generation:
 - lag in fog of war mode with lots of units/buildings
 
 - fix delayed rendering of unit outlines in non-orthoview
+
 
 
 TODO buildings/units (backlog)

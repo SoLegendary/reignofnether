@@ -19,9 +19,15 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.particle.ItemPickupParticle;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.PacketUtils;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -386,8 +392,6 @@ public class UnitClientEvents {
         CursorClientEvents.setLeftClickAction(null);
     }
 
-    private static RenderLevelStageEvent.Stage renderStage = RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS;
-
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (MC.level == null)
@@ -398,10 +402,10 @@ public class UnitClientEvents {
          *  doesnt align to camera very well, sometimes sinks below ground and too thin
          *  TODO: make this visible behind blocks (but only seems to work if orthoview is creative mode)
          */
-        // if orthoview uses creative mode: RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS
+        // if orthoview uses creative mode: RenderLevelStageEvent.Stage.AFTER_WEATHER
         // if orthoview uses spectator mode: RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS
 
-        if ((OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) ||
+        if ((OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) ||
             (!OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS))
         {
             for (LivingEntity entity : allUnits) {
@@ -456,6 +460,9 @@ public class UnitClientEvents {
         }
     }
 
+
+    //private static RenderLevelStageEvent.Stage renderStage = RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS;
+
     @SubscribeEvent
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
@@ -463,7 +470,7 @@ public class UnitClientEvents {
             if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                 sendUnitCommand(UnitAction.DELETE);
         }
-
+        /*
         if (evt.getKeyCode() == GLFW.GLFW_KEY_INSERT) {
             if (renderStage == RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS)
                 renderStage = RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS;
@@ -483,7 +490,7 @@ public class UnitClientEvents {
                 renderStage = RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS;
 
             System.out.println(renderStage.toString());
-        }
+        }*/
     }
 
     public static boolean targetingSelf() {
