@@ -149,7 +149,7 @@ public class CursorClientEvents {
         cursorWorldPos = MiscUtil.screenPosToWorldPos(MC, evt.getMouseX(), evt.getMouseY());
 
         // calc near and far cursorWorldPos to get a cursor line vector
-        Vector3d lookVector = getPlayerLookVector();
+        Vector3d lookVector = MiscUtil.getPlayerLookVector(MC);
         Vector3d cursorWorldPosNear = MyMath.addVector3d(cursorWorldPos, lookVector, -200);
         Vector3d cursorWorldPosFar = MyMath.addVector3d(cursorWorldPos, lookVector, 200);
 
@@ -185,7 +185,7 @@ public class CursorClientEvents {
             // inflate by set amount to improve click accuracy
             AABB entityaabb = entity.getBoundingBox().inflate(0.1);
 
-            if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, getPlayerLookVector(), entityaabb)) {
+            if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, MiscUtil.getPlayerLookVector(MC), entityaabb)) {
                 UnitClientEvents.addPreselectedUnit(entity);
                 break; // only allow one moused-over unit at a time
             }
@@ -355,14 +355,6 @@ public class CursorClientEvents {
         }
     }
 
-    // gets the unit vector in the direction of player facing (same as camera)
-    // calcs from https://stackoverflow.com/questions/65897792/3d-vector-coordinates-from-x-and-y-rotation
-    public static Vector3d getPlayerLookVector() {
-        float a = (float) Math.toRadians(MC.player.getYRot());
-        float b = (float) Math.toRadians(MC.player.getXRot());
-        return new Vector3d(-cos(b) * sin(a), -sin(b), cos(b) * cos(a));
-    }
-
     // returns the exact spot that the cursorWorldPos ray meets a solid block
     public static Vec3 getRefinedCursorWorldPos(Vector3d cursorWorldPosNear, Vector3d cursorWorldPosFar) {
         Vec3 vectorNear = new Vec3(cursorWorldPosNear.x, cursorWorldPosNear.y, cursorWorldPosNear.z);
@@ -408,7 +400,7 @@ public class CursorClientEvents {
 
         BlockPos bestBp = bp;
         double smallestDist = 10000;
-        Vector3d lookVector = getPlayerLookVector();
+        Vector3d lookVector = MiscUtil.getPlayerLookVector(MC);
 
         for (BlockPos block : blocks) {
             double dist = new Vec3(block.getX(), block.getY(), block.getZ())

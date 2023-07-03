@@ -113,7 +113,7 @@ public class MinimapClientEvents {
             MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), 0)
         };
         // adjust corners according to camera angle
-        Vector3d lookVector = CursorClientEvents.getPlayerLookVector();
+        Vector3d lookVector = MiscUtil.getPlayerLookVector(MC);
         corners[0] = MyMath.addVector3d(corners[0], lookVector, 90-OrthoviewClientEvents.getCamRotY());
         corners[1] = MyMath.addVector3d(corners[1], lookVector, 75-OrthoviewClientEvents.getCamRotY());
         corners[2] = MyMath.addVector3d(corners[2], lookVector, 75-OrthoviewClientEvents.getCamRotY());
@@ -302,15 +302,9 @@ public class MinimapClientEvents {
                 }
             }
         }
-
-
-
-
-
-
     }
 
-    private static boolean isXZinsideMap(int x, int z) {
+    public static boolean isXZinsideMap(int x, int z) {
         return x >= xc_world - WORLD_RADIUS && x < xc_world + WORLD_RADIUS &&
                z >= zc_world - WORLD_RADIUS && z < zc_world + WORLD_RADIUS;
     }

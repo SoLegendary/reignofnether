@@ -15,8 +15,9 @@
     "minVersion": "0.8",
     "client": [
         "CameraMixin",
+        "ClientLevelMixin",
         "fogofwar.ChunkRenderDispatcherMixin",
-        "fogofwar.ClientLevelMixin",
+        "fogofwar.ClientLevelFoWMixin",
         "fogofwar.EntityRenderDispatcherMixin",
         "fogofwar.EntityShadowMixin",
         "fogofwar.ItemEntityRendererMixin",

@@ -9,7 +9,6 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 
-import static com.solegendary.reignofnether.cursor.CursorClientEvents.getPlayerLookVector;
 import static java.lang.Math.*;
 import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
@@ -37,7 +36,7 @@ public class MyMath {
     // usually used to check if a point is in the view camera (or part of it)
     public static ArrayList<Vec3> prepIsPointInsideRect3d(Minecraft MC, int tlx, int tly, int blx, int bly, int brx, int bry) {
 
-        Vector3d lookVector = getPlayerLookVector();
+        Vector3d lookVector = MiscUtil.getPlayerLookVector(MC);
 
         Vector3d tl = MiscUtil.screenPosToWorldPos(MC, tlx, tly);
         Vector3d bl = MiscUtil.screenPosToWorldPos(MC, blx, bly);

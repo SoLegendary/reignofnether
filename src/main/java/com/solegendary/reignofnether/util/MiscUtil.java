@@ -29,6 +29,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static net.minecraft.util.Mth.cos;
+import static net.minecraft.util.Mth.sin;
+
 public class MiscUtil {
 
     public static BlockPos getHighestSolidBlock(Level level, BlockPos blockPos) {
@@ -185,5 +188,13 @@ public class MiscUtil {
     public static double round(double value, int precision) {
         int scale = (int) Math.pow(10, precision);
         return (double) Math.round(value * scale) / scale;
+    }
+
+    // gets the unit vector in the direction of player facing (same as camera)
+    // calcs from https://stackoverflow.com/questions/65897792/3d-vector-coordinates-from-x-and-y-rotation
+    public static Vector3d getPlayerLookVector(Minecraft MC) {
+        float a = (float) Math.toRadians(MC.player.getYRot());
+        float b = (float) Math.toRadians(MC.player.getXRot());
+        return new Vector3d(-cos(b) * sin(a), -sin(b), cos(b) * cos(a));
     }
 }
