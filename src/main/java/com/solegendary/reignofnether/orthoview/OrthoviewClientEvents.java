@@ -190,10 +190,8 @@ public class OrthoviewClientEvents {
         double cursorY = glfwCursorY.get();
 
         // panCam when cursor is at edge of screen
-        // mouse (0,0) is top left of screen
-
-        // for one frame you can take the mouse outside of the window, so use this amount to adjust pan speed
-        if (!Keybindings.altMod.isDown()) {
+        // remember that mouse (0,0) is top left of screen
+        if (!Keybindings.altMod.isDown() && MC.isWindowActive()) {
             if (cursorX <= 0)
                 panCam(EDGE_CAMPAM_SENSITIVITY, 0, 0);
             else if (cursorX >= glfwWinWidth)
