@@ -452,10 +452,7 @@ public class UnitClientEvents {
         }
     }
 
-
     //private static RenderLevelStageEvent.Stage renderStage = RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS;
-
-    public static long timeMod = 0;
 
     @SubscribeEvent
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
@@ -463,10 +460,6 @@ public class UnitClientEvents {
             LivingEntity entity = HudClientEvents.hudSelectedEntity;
             if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                 sendUnitCommand(UnitAction.DELETE);
-        }
-
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_INSERT && MC.level != null) {
-            timeMod += 10;
         }
 
         /*
