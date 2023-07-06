@@ -16,6 +16,7 @@
     "client": [
         "CameraMixin",
         "ClientLevelMixin",
+        "ClientPacketMixin",
         "fogofwar.ChunkRenderDispatcherMixin",
         "fogofwar.ClientLevelFoWMixin",
         "fogofwar.EntityRenderDispatcherMixin",

@@ -41,6 +41,9 @@ public class UnitClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
+    // setting this value causes the time of day to smoothly move towards it regardless of the server time
+    public static long targetClientTime = 0;
+
     // units moused over or inside a box select
     private static final ArrayList<LivingEntity> preselectedUnits = new ArrayList<>();
     // units selected by click or box select
@@ -452,6 +455,8 @@ public class UnitClientEvents {
 
     //private static RenderLevelStageEvent.Stage renderStage = RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS;
 
+    public static long timeMod = 0;
+
     @SubscribeEvent
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
@@ -459,6 +464,11 @@ public class UnitClientEvents {
             if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                 sendUnitCommand(UnitAction.DELETE);
         }
+
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_INSERT && MC.level != null) {
+            timeMod += 10;
+        }
+
         /*
         if (evt.getKeyCode() == GLFW.GLFW_KEY_INSERT) {
             if (renderStage == RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS)

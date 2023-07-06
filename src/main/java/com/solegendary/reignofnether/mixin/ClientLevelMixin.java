@@ -4,9 +4,11 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.monsters.HauntedHouse;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
@@ -19,8 +21,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.system.MathUtil;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,7 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(ClientLevel.class)
-public class ClientLevelMixin {
+public abstract class ClientLevelMixin {
+
+    @Shadow public abstract ClientLevel.ClientLevelData getLevelData();
 
     @Shadow @Final private Minecraft minecraft;
 
@@ -93,17 +97,59 @@ public class ClientLevelMixin {
             newPos = newPos.multiply(m, m, m);
         } else {
             // do a similar kind of calculation to get the pos at the centre of the screen as in CursorClientEvents
-            Vector3d centrePosd = MiscUtil.screenPosToWorldPos(this.minecraft,
-                    this.minecraft.getWindow().getGuiScaledWidth() / 2,
-                    this.minecraft.getWindow().getGuiScaledHeight() / 2
-            );
-            Vector3d lookVector = MiscUtil.getPlayerLookVector(this.minecraft);
-            Vector3d cursorWorldPosNear = MyMath.addVector3d(centrePosd, lookVector, -200);
-            Vector3d cursorWorldPosFar = MyMath.addVector3d(centrePosd, lookVector, 200);
-            newPos = CursorClientEvents.getRefinedCursorWorldPos(cursorWorldPosNear, cursorWorldPosFar);
+            newPos = MiscUtil.getOrthoviewCentreWorldPos(this.minecraft);
         }
         // get the position for the sound as though the player was at position newPos
         Vec3 diffOriginalToNew = originalPos.add(newPos.multiply(-1,-1,-1));
         return new Vec3(player.getX(), player.getY(), player.getZ()).add(diffOriginalToNew);
+    }
+
+    @Shadow public void setGameTime(long pTime) { }
+    @Shadow public void setDayTime(long pTime) { }
+
+    private final long MIDNIGHT = 18000;
+    private final long NOON = 6000;
+
+    // when near a monster obelisk or mausoleum, speed up time towards midnight (in whichever direction is closest)
+    @Inject(
+            method = "tickTime",
+            at = @At("HEAD"),
+            cancellable = true,
+            remap = false
+    )
+    private void tickTime(CallbackInfo ci) {
+        ci.cancel();
+
+        Minecraft MC = Minecraft.getInstance();
+        if (MC.player == null)
+            return;
+        Vec3 pos = MC.player.position();
+
+        long timeDiff = 100L;
+        long timeNow = this.getLevelData().getDayTime();
+        long targetTime = UnitClientEvents.targetClientTime;
+        long targetTimePlusHalfDay = targetTime + 12000;
+        while (targetTimePlusHalfDay < 0)
+            targetTimePlusHalfDay += 24000;
+        while (targetTimePlusHalfDay >= 24000)
+            targetTimePlusHalfDay -= 24000;
+
+        if (targetTime < 12000 && (timeNow > targetTime && timeNow <= targetTimePlusHalfDay))
+            timeDiff *= -1;
+        else if (targetTime >= 12000 && (timeNow > targetTime || timeNow <= targetTimePlusHalfDay))
+            timeDiff *= -1;
+
+        if (Math.abs(timeNow - targetTime) < Math.abs(timeDiff)) {
+            this.setGameTime(targetTime);
+            this.setDayTime(targetTime);
+            return;
+        }
+        long timeSet = this.getLevelData().getGameTime() + timeDiff;
+        while (timeSet < 0)
+            timeSet += 24000;
+        while (timeSet >= 24000)
+            timeSet -= 24000;
+        this.setGameTime(timeSet);
+        this.setDayTime(timeSet);
     }
 }

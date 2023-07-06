@@ -5,7 +5,6 @@ More terrain generation:
     - remove all underground features
         - amethyst geodes
         - lava lakes
-        - mineshafts
 
 - rapidly switching control groups while right click moving will cause crash (?)
 
@@ -27,6 +26,8 @@ Villager faction
 Monster faction
     - obelisk (population + prevent daylight burn while near it)
         - actual daylight burning and prevention mechanics
+        - TODO IMPORTANT:  need some way to visually indicate areas that are covered by obelisks
+            - if possible set client time of day when player is around an obelisk area
     - Spider lair
         - Upgrade to cave spiders
         - Upgrade to allow mounting spider jockeys
@@ -35,14 +36,38 @@ Monster faction
     - Strays (upgraded from Skeletons at the lab)
         - Fires slowing arrows
 
+Netherling faction
+    All netherling buildings slowly convert non-nether blocks around them into nether counterparts:
+        - Grass -> nylium
+        - Sand -> soulsand
+        - Stone -> netherrack, etc.
+        - Water -> lava
+    Netherling buildings apart from the Bastion and portals can only be built on nether blocks
 
+    Netherlings do not produce their own units, but instead (like Protoss) bring units in from the nether using portals
+    - (Town Centre) Bastion Portal
+        - blackstone-themed building with a decorated standard purple portal at the centre
+        - can build any unit as long as you have the appropriate supporting building/research
+        - produces units faster than any other production building
+        - only one allowed at any time
 
-
-
-
-
-
-
+    - Inactive portal
+        - Simple inactive portal on a pedestal
+        - On its own just supports population
+        - Can be upgraded to specialise (and gain appropriate decorations):
+            - Military portal (red): produces military units
+            - Civilian portal (green): produces workers and can drop off resources
+            - Transport portal (blue) (requires lategame research): can teleport units to a linked portal
+    - Mushroom farm
+    - Fortress
+        - Allows military piglins and hoglins (after an upgrade) to be produced at portals
+        - Researches regular upgrades
+    - Flame Sanctuary
+        - Allows magma cubes and blazes (after an upgrade) to be produced at portals
+        - Researches fire-related upgrades
+    - Wither Shrine
+        - Allows wither skeletons to be produced at portals
+        - Researches wither-related upgrades
 
 
 

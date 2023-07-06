@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -196,5 +197,17 @@ public class MiscUtil {
         float a = (float) Math.toRadians(MC.player.getYRot());
         float b = (float) Math.toRadians(MC.player.getXRot());
         return new Vector3d(-cos(b) * sin(a), -sin(b), cos(b) * cos(a));
+    }
+
+    // get the world position of the centre of the screen (as though the cursor was over it)
+    public static Vec3 getOrthoviewCentreWorldPos(Minecraft MC) {
+        Vector3d centrePosd = MiscUtil.screenPosToWorldPos(MC,
+                MC.getWindow().getGuiScaledWidth() / 2,
+                MC.getWindow().getGuiScaledHeight() / 2
+        );
+        Vector3d lookVector = MiscUtil.getPlayerLookVector(MC);
+        Vector3d cursorWorldPosNear = MyMath.addVector3d(centrePosd, lookVector, -200);
+        Vector3d cursorWorldPosFar = MyMath.addVector3d(centrePosd, lookVector, 200);
+        return CursorClientEvents.getRefinedCursorWorldPos(cursorWorldPosNear, cursorWorldPosFar);
     }
 }

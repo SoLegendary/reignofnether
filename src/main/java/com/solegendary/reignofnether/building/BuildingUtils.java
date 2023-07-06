@@ -21,6 +21,16 @@ import java.util.function.Predicate;
 
 public class BuildingUtils {
 
+    public static boolean isInObeliskRange(Vec3 pos) {
+        for (Building building : BuildingClientEvents.getBuildings()) {
+            if (building instanceof HauntedHouse house) {
+                if (BuildingUtils.getCentrePos(house.getBlocks()).distToCenterSqr(pos.x, pos.y, pos.z) < 400)
+                    return true;
+            }
+        }
+        return false;
+    }
+
     // returns a list of BPs that may reside in unique chunks for fog of war calcs
     public static ArrayList<BlockPos> getUniqueChunkBps(Building building) {
         AABB aabb = new AABB(
