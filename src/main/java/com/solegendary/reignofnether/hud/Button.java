@@ -193,7 +193,7 @@ public class Button {
                     x, y + greyHeightPx,
                     x + iconFrameSize,
                     y + iconFrameSize,
-                    0x80000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
+                    0x99000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
     }
 

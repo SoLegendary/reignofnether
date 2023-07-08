@@ -71,6 +71,9 @@ public abstract class Building {
     public boolean canAcceptResources = false; // can workers drop off resources here?
     public int serverBlocksPlaced = 1;
 
+    private long ticksToExtinguish = 0;
+    private final long TICKS_TO_EXTINGUISH = 100;
+
     public int foodCost;
     public int woodCost;
     public int oreCost;
@@ -278,17 +281,15 @@ public abstract class Building {
         }
     }
 
-    private void extinguishRandomFire(ServerLevel level) {
+    private void extinguishFires(ServerLevel level) {
         BlockPos minPos = this.minCorner.offset(-1,-1,-1);
         BlockPos maxPos = this.maxCorner.offset(1,1,1);
 
         for (int x = minPos.getX(); x <= maxPos.getX(); x++)
             for (int y = minPos.getY(); y <= maxPos.getY(); y++)
                 for (int z = minPos.getZ(); z <= maxPos.getZ(); z++)
-                    if (level.getBlockState(new BlockPos(x,y,z)).getBlock() == Blocks.FIRE) {
+                    if (level.getBlockState(new BlockPos(x,y,z)).getBlock() == Blocks.FIRE)
                         level.destroyBlock(new BlockPos(x,y,z), false);
-                        return;
-                    }
     }
 
     public void destroyRandomBlocks(int amount) {
@@ -409,6 +410,12 @@ public abstract class Building {
 
             // place a block if the tick has run down
             if (blocksPlaced < blocksTotal && builderCount > 0) {
+                this.ticksToExtinguish += 1;
+                if (ticksToExtinguish >= TICKS_TO_EXTINGUISH) {
+                    extinguishFires(serverLevel);
+                    ticksToExtinguish = 0;
+                }
+
                 int msPerBuild = (3 * BASE_MS_PER_BUILD) / (builderCount + 2);
                 if (!isBuilt)
                     msPerBuild *= buildTimeModifier;
@@ -423,10 +430,12 @@ public abstract class Building {
 
                 if (msToNextBuild <= 0) {
                     msToNextBuild = msPerBuild;
-                    extinguishRandomFire(serverLevel);
                     buildNextBlock(serverLevel);
                 }
+            } else {
+                this.ticksToExtinguish = 0;
             }
+
             if (this.shouldBeDestroyed())
                 this.destroy(serverLevel);
 
