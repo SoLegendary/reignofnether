@@ -26,8 +26,7 @@ Villager faction
 Monster faction
     - obelisk (population + prevent daylight burn while near it)
         - actual daylight burning and prevention mechanics
-        - TODO IMPORTANT:  need some way to visually indicate areas that are covered by obelisks
-            - if possible set client time of day when player is around an obelisk area
+        - TODO: test night distortion in multiplayer
     - Spider lair
         - Upgrade to cave spiders
         - Upgrade to allow mounting spider jockeys

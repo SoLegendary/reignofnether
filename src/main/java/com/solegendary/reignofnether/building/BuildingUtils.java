@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
@@ -21,13 +22,10 @@ import java.util.function.Predicate;
 
 public class BuildingUtils {
 
-    public static boolean isInObeliskRange(Vec3 pos) {
-        for (Building building : BuildingClientEvents.getBuildings()) {
-            if (building instanceof HauntedHouse house) {
-                if (BuildingUtils.getCentrePos(house.getBlocks()).distToCenterSqr(pos.x, pos.y, pos.z) < 400)
-                    return true;
-            }
-        }
+    public static boolean doesPlayerOwnTownCentre(String playerName) {
+        for (Building building : BuildingClientEvents.getBuildings())
+            if (building.isTownCentre && building.ownerName.equals(playerName))
+                return true;
         return false;
     }
 

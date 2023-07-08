@@ -30,7 +30,7 @@ public class Graveyard extends ProductionBuilding {
     public final static String structureName = "graveyard";
 
     public Graveyard(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.MOSSY_STONE_BRICKS;
@@ -68,7 +68,7 @@ public class Graveyard extends ProductionBuilding {
                 () -> BuildingClientEvents.setBuildingToPlace(Graveyard.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(Graveyard.buildingName, Style.EMPTY),
+                        FormattedCharSequence.forward(Graveyard.buildingName, Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.Graveyard.WOOD, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A field of the dead that can raise Zombies and Skeletons", Style.EMPTY)

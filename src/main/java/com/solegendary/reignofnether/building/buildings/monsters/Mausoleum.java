@@ -26,9 +26,10 @@ public class Mausoleum extends ProductionBuilding {
     public final static String buildingName = "Mausoleum";
     public final static String structureName = "mausoleum";
     public final static int sunScreenDist = 30;
+    public final static int nightRange = 90;
 
     public Mausoleum(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), true);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
@@ -68,11 +69,12 @@ public class Mausoleum extends ProductionBuilding {
                 () -> BuildingClientEvents.setBuildingToPlace(Mausoleum.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(Mausoleum.buildingName, Style.EMPTY),
+                        FormattedCharSequence.forward(Mausoleum.buildingName, Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.Mausoleum.WOOD + "  \uE002  " + ResourceCosts.Mausoleum.ORE, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A tomb of the dead that produces zombie villagers.", Style.EMPTY),
-                        FormattedCharSequence.forward("Is required to build most other buildings.", Style.EMPTY),
+                        FormattedCharSequence.forward("Distorts time to midnight within a " + nightRange + " block radius.", Style.EMPTY),
+                        FormattedCharSequence.forward("You may only have one mausoleum at any time.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Supports " + ResourceCosts.Mausoleum.SUPPLY + " population.", Style.EMPTY)
                 ),

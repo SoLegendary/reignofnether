@@ -47,6 +47,8 @@ public abstract class Building {
     public Rotation rotation;
     public ResourceLocation icon;
 
+    public final boolean isTownCentre;
+
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time; the building can then be used
     public int msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
 
@@ -93,12 +95,13 @@ public abstract class Building {
     public Level getLevel() { return level; }
     public void setLevel(Level level) { this.level = level; }
 
-    public Building(Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks) {
+    public Building(Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isTownCentre) {
         this.level = level;
         this.originPos = originPos;
         this.rotation = rotation;
         this.ownerName = ownerName;
         this.blocks = blocks;
+        this.isTownCentre = isTownCentre;
 
         // get min/max/centre positions
         this.minCorner = new BlockPos(

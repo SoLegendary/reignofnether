@@ -25,7 +25,7 @@ public class VillagerHouse extends Building {
     public final static String structureName = "villager_house";
 
     public VillagerHouse(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.OAK_LOG;
@@ -57,7 +57,7 @@ public class VillagerHouse extends Building {
             () -> BuildingClientEvents.setBuildingToPlace(VillagerHouse.class),
             null,
             List.of(
-                    FormattedCharSequence.forward(VillagerHouse.buildingName, Style.EMPTY),
+                    FormattedCharSequence.forward(VillagerHouse.buildingName, Style.EMPTY.withBold(true)),
                     FormattedCharSequence.forward("\uE001  " + ResourceCosts.VillagerHouse.WOOD, MyRenderer.iconStyle),
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("A simple house that provides population supply.", Style.EMPTY),

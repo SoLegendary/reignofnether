@@ -45,8 +45,8 @@ public class MinimapClientEvents {
     public static final int MAP_RADIUS = 50; // actual size on GUI
     private static final int REFRESH_TICKS_MAX = 100;
     private static int refreshTicksCurrent = 0;
-    private static final float CORNER_OFFSET = 10;
-    private static final float BG_OFFSET = 6;
+    public static final int CORNER_OFFSET = 10;
+    public static final int BG_OFFSET = 6;
 
     private static final int UNIT_RADIUS = 3;
     private static final int UNIT_THICKNESS = 1;
@@ -396,7 +396,7 @@ public class MinimapClientEvents {
 
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiOverlayEvent.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled())
+        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused())
             return;
 
         refreshTicksCurrent -= 1;

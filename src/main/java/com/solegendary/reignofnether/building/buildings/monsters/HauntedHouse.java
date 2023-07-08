@@ -26,7 +26,7 @@ public class HauntedHouse extends Building {
     public final static String structureName = "haunted_house";
 
     public HauntedHouse(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.DARK_OAK_LOG;
@@ -57,7 +57,7 @@ public class HauntedHouse extends Building {
             () -> BuildingClientEvents.setBuildingToPlace(HauntedHouse.class),
             null,
             List.of(
-                    FormattedCharSequence.forward(HauntedHouse.buildingName, Style.EMPTY),
+                    FormattedCharSequence.forward(HauntedHouse.buildingName, Style.EMPTY.withBold(true)),
                     FormattedCharSequence.forward("\uE001  " + ResourceCosts.HauntedHouse.WOOD, MyRenderer.iconStyle),
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("A spooky house that provides population supply. ", Style.EMPTY),

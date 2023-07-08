@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.buildings.monsters.HauntedHouse;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -32,6 +33,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.solegendary.reignofnether.time.TimeClientEvents.normaliseTime;
 
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin {
@@ -107,10 +110,7 @@ public abstract class ClientLevelMixin {
     @Shadow public void setGameTime(long pTime) { }
     @Shadow public void setDayTime(long pTime) { }
 
-    private final long MIDNIGHT = 18000;
-    private final long NOON = 6000;
-
-    // when near a monster obelisk or mausoleum, speed up time towards midnight (in whichever direction is closest)
+    // when near a source of night distortion, speed up time towards midnight (in whichever direction is closest)
     @Inject(
             method = "tickTime",
             at = @At("HEAD"),
@@ -120,35 +120,32 @@ public abstract class ClientLevelMixin {
     private void tickTime(CallbackInfo ci) {
         ci.cancel();
 
-        Minecraft MC = Minecraft.getInstance();
-        if (MC.player == null)
-            return;
-        Vec3 pos = MC.player.position();
-
-        long timeDiff = 100L;
         long timeNow = this.getLevelData().getDayTime();
-        long targetTime = UnitClientEvents.targetClientTime;
+        long targetTime = TimeClientEvents.targetClientTime;
         long targetTimePlusHalfDay = targetTime + 12000;
-        while (targetTimePlusHalfDay < 0)
-            targetTimePlusHalfDay += 24000;
-        while (targetTimePlusHalfDay >= 24000)
-            targetTimePlusHalfDay -= 24000;
+
+        // transition through day faster if in orthoview and we aren't near dawn/dusk since you can't see the sky anyway
+        long timeDiff = 100L;
+        if (OrthoviewClientEvents.isEnabled() &&
+                ((timeNow > 2000 && timeNow <= 10000) || (timeNow > 14000 && timeNow <= 22000)))
+            timeDiff = 500L;
+
+        targetTime = normaliseTime(targetTime);
+        targetTimePlusHalfDay = normaliseTime(targetTimePlusHalfDay);
 
         if (targetTime < 12000 && (timeNow > targetTime && timeNow <= targetTimePlusHalfDay))
             timeDiff *= -1;
         else if (targetTime >= 12000 && (timeNow > targetTime || timeNow <= targetTimePlusHalfDay))
             timeDiff *= -1;
 
-        if (Math.abs(timeNow - targetTime) < Math.abs(timeDiff)) {
-            this.setGameTime(targetTime);
-            this.setDayTime(targetTime);
-            return;
-        }
-        long timeSet = this.getLevelData().getGameTime() + timeDiff;
-        while (timeSet < 0)
-            timeSet += 24000;
-        while (timeSet >= 24000)
-            timeSet -= 24000;
+        long timeSet;
+        if (Math.abs(timeNow - targetTime) < Math.abs(timeDiff))
+            timeSet = targetTime;
+        else
+            timeSet = this.getLevelData().getGameTime() + timeDiff;
+
+        timeSet = normaliseTime(timeSet);
+
         this.setGameTime(timeSet);
         this.setDayTime(timeSet);
     }

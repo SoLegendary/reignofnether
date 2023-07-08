@@ -49,8 +49,8 @@ public abstract class ProductionBuilding extends Building {
     public boolean canSetRallyPoint = true;
     protected int spawnRadiusOffset = 1;
 
-    public ProductionBuilding(Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks) {
-        super(level, originPos, rotation, ownerName, blocks);
+    public ProductionBuilding(Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isTownCentre) {
+        super(level, originPos, rotation, ownerName, blocks, isTownCentre);
     }
 
     public BlockPos getRallyPoint() {

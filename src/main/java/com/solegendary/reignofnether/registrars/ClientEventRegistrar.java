@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.tps.TPSClientEvents;
 import com.solegendary.reignofnether.tps.TPSServerEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -38,6 +39,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(HudClientEvents.class); // ensure this is first so cursor is rendered above hud
         vanillaEventBus.register(CursorClientEvents.class);
         vanillaEventBus.register(MinimapClientEvents.class);
+        vanillaEventBus.register(TimeClientEvents.class);
         vanillaEventBus.register(FogOfWarClientEvents.class);
         vanillaEventBus.register(ResourcesClientEvents.class);
         vanillaEventBus.register(TPSClientEvents.class);

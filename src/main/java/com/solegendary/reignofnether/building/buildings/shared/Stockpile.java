@@ -47,7 +47,7 @@ public class Stockpile extends ProductionBuilding {
     public ResourceName mostAbundantNearbyResource = ResourceName.NONE;
 
     public Stockpile(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.CHEST;
@@ -86,7 +86,7 @@ public class Stockpile extends ProductionBuilding {
                 () -> BuildingClientEvents.setBuildingToPlace(Stockpile.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(Stockpile.buildingName, Style.EMPTY),
+                        FormattedCharSequence.forward(Stockpile.buildingName, Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.Stockpile.WOOD, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Storage for units and players to drop off resources", Style.EMPTY)

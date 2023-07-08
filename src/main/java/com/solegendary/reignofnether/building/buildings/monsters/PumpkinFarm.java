@@ -27,7 +27,7 @@ public class PumpkinFarm extends Building {
     public final static String structureName = "pumpkin_farm";
 
     public PumpkinFarm(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.PUMPKIN;
@@ -59,7 +59,7 @@ public class PumpkinFarm extends Building {
                 () -> BuildingClientEvents.setBuildingToPlace(PumpkinFarm.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(PumpkinFarm.buildingName, Style.EMPTY),
+                        FormattedCharSequence.forward(PumpkinFarm.buildingName, Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.PumpkinFarm.WOOD + "  +  " + ResourceCosts.REPLANT_WOOD_COST + "  per  crop  planted", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A pumpkin field that be can harvested to collect food.", Style.EMPTY),

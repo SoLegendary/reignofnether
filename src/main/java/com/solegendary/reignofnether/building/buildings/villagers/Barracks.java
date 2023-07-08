@@ -30,7 +30,7 @@ public class Barracks extends ProductionBuilding {
     public final static String structureName = "barracks";
 
     public Barracks(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.FLETCHING_TABLE;
@@ -68,7 +68,7 @@ public class Barracks extends ProductionBuilding {
                 () -> BuildingClientEvents.setBuildingToPlace(Barracks.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(Barracks.buildingName, Style.EMPTY),
+                        FormattedCharSequence.forward(Barracks.buildingName, Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.Barracks.WOOD, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A training ground for Pillagers and Vindicators", Style.EMPTY)

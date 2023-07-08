@@ -27,7 +27,7 @@ public class TownCentre extends ProductionBuilding {
     public final static String structureName = "town_centre";
 
     public TownCentre(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), true);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.POLISHED_GRANITE;
@@ -65,11 +65,11 @@ public class TownCentre extends ProductionBuilding {
                 () -> BuildingClientEvents.setBuildingToPlace(TownCentre.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(TownCentre.buildingName, Style.EMPTY),
+                        FormattedCharSequence.forward(TownCentre.buildingName, Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.TownCentre.WOOD + "  \uE002  " + ResourceCosts.TownCentre.ORE, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A gazebo at the centre of your village that produces villagers.", Style.EMPTY),
-                        FormattedCharSequence.forward("Is required to build most other buildings.", Style.EMPTY),
+                        FormattedCharSequence.forward("You may only have one town centre at any time.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Supports " + ResourceCosts.TownCentre.SUPPLY + " population.", Style.EMPTY)
                 ),

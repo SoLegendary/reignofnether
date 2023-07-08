@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.monsters.*;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
@@ -139,7 +140,9 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
         super(entityType, level);
 
         if (level.isClientSide()) {
-            this.abilityButtons.add(Mausoleum.getBuildButton(Keybindings.keyQ));
+            AbilityButton mausoleumButton = Mausoleum.getBuildButton(Keybindings.keyQ);
+            mausoleumButton.isEnabled = () -> !BuildingUtils.doesPlayerOwnTownCentre(getOwnerName());
+            this.abilityButtons.add(mausoleumButton);
             this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyW));
             this.abilityButtons.add(HauntedHouse.getBuildButton(Keybindings.keyE));
             this.abilityButtons.add(PumpkinFarm.getBuildButton(Keybindings.keyR));

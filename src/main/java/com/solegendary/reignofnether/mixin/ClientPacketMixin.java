@@ -1,13 +1,10 @@
 package com.solegendary.reignofnether.mixin;
 
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,9 +37,11 @@ public class ClientPacketMixin {
 
         ci.cancel();
 
-        if (BuildingUtils.isInObeliskRange(pos))
-            UnitClientEvents.targetClientTime = 18000; // midnight
+        TimeClientEvents.serverTime = TimeClientEvents.normaliseTime(pPacket.getDayTime());
+
+        if (TimeClientEvents.isInRangeOfNightSource(pos))
+            TimeClientEvents.targetClientTime = 18000; // midnight
         else
-            UnitClientEvents.targetClientTime = pPacket.getDayTime();
+            TimeClientEvents.targetClientTime = TimeClientEvents.serverTime;
     }
 }

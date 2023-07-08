@@ -27,7 +27,7 @@ public class WheatFarm extends Building {
     public final static String structureName = "wheat_farm";
 
     public WheatFarm(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.HAY_BLOCK;
@@ -59,7 +59,7 @@ public class WheatFarm extends Building {
                 () -> BuildingClientEvents.setBuildingToPlace(WheatFarm.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(WheatFarm.buildingName, Style.EMPTY),
+                        FormattedCharSequence.forward(WheatFarm.buildingName, Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.WheatFarm.WOOD + "  +  " + ResourceCosts.REPLANT_WOOD_COST + "  per  crop  planted", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A wheat field that be can tilled to collect food.", Style.EMPTY),

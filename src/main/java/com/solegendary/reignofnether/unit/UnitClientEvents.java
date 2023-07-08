@@ -41,9 +41,6 @@ public class UnitClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
-    // setting this value causes the time of day to smoothly move towards it regardless of the server time
-    public static long targetClientTime = 0;
-
     // units moused over or inside a box select
     private static final ArrayList<LivingEntity> preselectedUnits = new ArrayList<>();
     // units selected by click or box select

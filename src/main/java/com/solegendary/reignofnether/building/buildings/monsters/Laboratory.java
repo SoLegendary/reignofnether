@@ -34,7 +34,7 @@ public class Laboratory extends ProductionBuilding {
     public final static String structureName = "laboratory";
 
     public Laboratory(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.BREWING_STAND;
@@ -103,7 +103,7 @@ public class Laboratory extends ProductionBuilding {
                 () -> BuildingClientEvents.setBuildingToPlace(Laboratory.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(Laboratory.buildingName, Style.EMPTY),
+                        FormattedCharSequence.forward(Laboratory.buildingName, Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.Laboratory.WOOD + "  \uE002  " + ResourceCosts.Laboratory.ORE, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A sinister lab that can research new technologies and", Style.EMPTY),

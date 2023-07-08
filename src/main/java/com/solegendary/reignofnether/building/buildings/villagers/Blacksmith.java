@@ -31,7 +31,7 @@ public class Blacksmith extends ProductionBuilding {
     public final static String structureName = "blacksmith";
 
     public Blacksmith(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation));
+        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.SMITHING_TABLE;
@@ -70,7 +70,7 @@ public class Blacksmith extends ProductionBuilding {
                 () -> BuildingClientEvents.setBuildingToPlace(Blacksmith.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(Blacksmith.buildingName, Style.EMPTY),
+                        FormattedCharSequence.forward(Blacksmith.buildingName, Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.Blacksmith.WOOD + "  \uE002  " + ResourceCosts.Blacksmith.ORE, MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A smithy to forge military upgrades and iron golems", Style.EMPTY)
