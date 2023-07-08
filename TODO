@@ -14,6 +14,9 @@ More terrain generation:
 
 - fix delayed rendering of unit outlines in non-orthoview
 
+- fix clientLevelMixin not running on singleplayer client
+    - fix day/night settings and distortions in singleplayer
+    - for some reason this works in debugging but not in actual client?
 
 TODO buildings/units (backlog)
 

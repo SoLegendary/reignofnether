@@ -19,8 +19,7 @@ public abstract class EntityRenderDispatcherMixin {
     @Inject(
             method = "renderFlame",
             at = @At("HEAD"),
-            cancellable = true,
-            remap = false
+            cancellable = true
     )
     private void onRenderFlame(PoseStack pMatrixStack, MultiBufferSource pBuffer, Entity pEntity, CallbackInfo ci) {
         if (!FogOfWarClientEvents.isInBrightChunk(pEntity.getOnPos()))

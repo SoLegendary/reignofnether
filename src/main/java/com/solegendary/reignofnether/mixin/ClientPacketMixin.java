@@ -44,5 +44,6 @@ public class ClientPacketMixin {
             TimeClientEvents.targetClientTime = 18000; // midnight
         else
             TimeClientEvents.targetClientTime = TimeClientEvents.serverTime;
+
     }
 }

@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.monsters.HauntedHouse;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
@@ -23,6 +24,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,9 +39,7 @@ import java.util.List;
 import static com.solegendary.reignofnether.time.TimeClientEvents.normaliseTime;
 
 @Mixin(ClientLevel.class)
-public abstract class ClientLevelMixin {
-
-    @Shadow public abstract ClientLevel.ClientLevelData getLevelData();
+public class ClientLevelMixin {
 
     @Shadow @Final private Minecraft minecraft;
 
@@ -47,8 +47,7 @@ public abstract class ClientLevelMixin {
     @Inject(
             method = "playSound",
             at = @At("HEAD"),
-            cancellable = true,
-            remap = false
+            cancellable = true
     )
     private void playSound(double pX, double pY, double pZ, SoundEvent pSoundEvent, SoundSource pSource,
                            float pVolume, float pPitch, boolean pDistanceDelay, long pSeed, CallbackInfo ci) {
@@ -114,13 +113,15 @@ public abstract class ClientLevelMixin {
     @Inject(
             method = "tickTime",
             at = @At("HEAD"),
-            cancellable = true,
-            remap = false
+            cancellable = true
     )
     private void tickTime(CallbackInfo ci) {
+        if (minecraft.level == null)
+            return;
+
         ci.cancel();
 
-        long timeNow = this.getLevelData().getDayTime();
+        long timeNow = minecraft.level.getDayTime();
         long targetTime = TimeClientEvents.targetClientTime;
         long targetTimePlusHalfDay = targetTime + 12000;
 
@@ -142,11 +143,21 @@ public abstract class ClientLevelMixin {
         if (Math.abs(timeNow - targetTime) < Math.abs(timeDiff))
             timeSet = targetTime;
         else
-            timeSet = this.getLevelData().getGameTime() + timeDiff;
+            timeSet = minecraft.level.getLevelData().getGameTime() + timeDiff;
 
         timeSet = normaliseTime(timeSet);
 
         this.setGameTime(timeSet);
         this.setDayTime(timeSet);
+    }
+
+    @Inject(
+            method = "addDestroyBlockEffect",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void onAddDestroyBlockEffect(BlockPos pPos, BlockState pState, CallbackInfo ci) {
+        if (!FogOfWarClientEvents.isInBrightChunk(pPos))
+            ci.cancel();
     }
 }

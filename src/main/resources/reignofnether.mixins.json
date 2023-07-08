@@ -18,7 +18,6 @@
         "ClientLevelMixin",
         "ClientPacketMixin",
         "fogofwar.ChunkRenderDispatcherMixin",
-        "fogofwar.ClientLevelFoWMixin",
         "fogofwar.EntityRenderDispatcherMixin",
         "fogofwar.EntityShadowMixin",
         "fogofwar.ItemEntityRendererMixin",
