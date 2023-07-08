@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.time.TimeClientEvents;
@@ -139,7 +140,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
             attackGoal.tickCooldown();
 
         if (!this.level.isClientSide() && this.isOnFire() &&
-                TimeClientEvents.isInRangeOfNightSource(this.getEyePosition()))
+                BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false))
             this.setRemainingFireTicks(0);
     }
 

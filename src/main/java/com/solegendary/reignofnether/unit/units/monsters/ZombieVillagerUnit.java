@@ -196,7 +196,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
             this.setSecondsOnFire(8);
 
         if (!this.level.isClientSide()) {
-            boolean isInRangeOfNightSource = TimeClientEvents.isInRangeOfNightSource(this.getEyePosition());
+            boolean isInRangeOfNightSource = BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false);
             if (this.isOnFire() && isInRangeOfNightSource)
                 this.setRemainingFireTicks(0);
         }

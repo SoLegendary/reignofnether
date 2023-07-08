@@ -22,6 +22,17 @@ import java.util.function.Predicate;
 
 public class BuildingUtils {
 
+    public static boolean isInRangeOfNightSource(Vec3 pos, boolean clientSide) {
+        List<Building> buildings = clientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+        for (Building building : buildings) {
+            if (building instanceof Mausoleum mausoleum) {
+                if (BuildingUtils.getCentrePos(mausoleum.getBlocks()).distToCenterSqr(pos.x, pos.y, pos.z) < Math.pow(Mausoleum.nightRange, 2))
+                    return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean doesPlayerOwnTownCentre(String playerName) {
         for (Building building : BuildingClientEvents.getBuildings())
             if (building.isTownCentre && building.ownerName.equals(playerName))

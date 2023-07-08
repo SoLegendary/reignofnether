@@ -42,16 +42,6 @@ public class TimeClientEvents {
         return timeNorm;
     }
 
-    public static boolean isInRangeOfNightSource(Vec3 pos) {
-        for (Building building : BuildingClientEvents.getBuildings()) {
-            if (building instanceof Mausoleum mausoleum) {
-                if (BuildingUtils.getCentrePos(mausoleum.getBlocks()).distToCenterSqr(pos.x, pos.y, pos.z) < Math.pow(Mausoleum.nightRange, 2))
-                    return true;
-            }
-        }
-        return false;
-    }
-
     private static String get12HourTimeStr(long time) {
         long hours = time / 1000 + 6;
         long minutes = (time % 1000) * 60 / 1000;

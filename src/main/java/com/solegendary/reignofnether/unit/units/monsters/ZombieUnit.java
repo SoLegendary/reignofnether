@@ -141,7 +141,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
         AttackerUnit.tick(this);
 
         if (!this.level.isClientSide() && this.isOnFire() &&
-            TimeClientEvents.isInRangeOfNightSource(this.getEyePosition()))
+            BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false))
             this.setRemainingFireTicks(0);
     }
 

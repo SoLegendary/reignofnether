@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -39,7 +40,7 @@ public class ClientPacketMixin {
 
         TimeClientEvents.serverTime = TimeClientEvents.normaliseTime(pPacket.getDayTime());
 
-        if (TimeClientEvents.isInRangeOfNightSource(pos))
+        if (BuildingUtils.isInRangeOfNightSource(pos, true))
             TimeClientEvents.targetClientTime = 18000; // midnight
         else
             TimeClientEvents.targetClientTime = TimeClientEvents.serverTime;
