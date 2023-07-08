@@ -100,7 +100,7 @@ public class ResourceCosts {
     public static class VillagerHouse {
         public static final int FOOD = 0;
         public static final int WOOD = 100;
-        public static final int ORE = 100;
+        public static final int ORE = 0;
         public static final int SUPPLY = 10;
     }
     public static class HauntedHouse {

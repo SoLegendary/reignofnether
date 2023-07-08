@@ -10,13 +10,15 @@ More terrain generation:
 
 - Fix smooth lighting issues on fog of war borders (properly)
 
-- lag in fog of war mode with lots of units/buildings
-
 - fix delayed rendering of unit outlines in non-orthoview
 
-- fix clientLevelMixin not running on singleplayer client
-    - fix day/night settings and distortions in singleplayer
-    - for some reason this works in debugging but not in actual client?
+- workers can sometimes see through and mine underground ores
+    - workers must have line of sight somehow
+
+- workers and units sometimes get stuck in 2x1 holes
+
+- Make giant mushrooms worth food
+
 
 TODO buildings/units (backlog)
 
@@ -26,14 +28,12 @@ Villager faction
         - Witch (ground AOE splash potion abilities, upgrade to give more potion effects)
 
 Monster faction
-    - obelisk (population + prevent daylight burn while near it)
-        - actual daylight burning and prevention mechanics
-        - TODO: test night distortion in multiplayer
+    - Creepers should not friendly fire
     - Spider lair
         - Upgrade to cave spiders
         - Upgrade to allow mounting spider jockeys
     - Husks (upgraded from Zombies at the lab)
-        - 20 -> 25hp, doesn't burn in sunlight
+        - 20 -> 25hp, +1 armor, doesn't burn in sunlight
     - Strays (upgraded from Skeletons at the lab)
         - Fires slowing arrows
 
