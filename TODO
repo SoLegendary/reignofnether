@@ -12,6 +12,8 @@ More terrain generation:
 
 - lag in fog of war mode with lots of units/buildings
 
+- lag from workers building buildings
+
 - fix delayed rendering of unit outlines in non-orthoview
 
 

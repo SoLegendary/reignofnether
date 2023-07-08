@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -189,6 +190,16 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
         super.tick();
         Unit.tick(this);
         WorkerUnit.tick(this);
+
+        // won't naturally burn since we've extended a Vindicator
+        if (this.isSunBurnTick())
+            this.setSecondsOnFire(8);
+
+        if (!this.level.isClientSide()) {
+            boolean isInRangeOfNightSource = TimeClientEvents.isInRangeOfNightSource(this.getEyePosition());
+            if (this.isOnFire() && isInRangeOfNightSource)
+                this.setRemainingFireTicks(0);
+        }
     }
 
     public void initialiseGoals() {

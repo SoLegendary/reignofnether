@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.Ability;
@@ -139,17 +140,9 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
         Unit.tick(this);
         AttackerUnit.tick(this);
 
-        Predicate<Building> condition = (b) -> {
-            BlockPos bp = b.centrePos;
-            Vec3 buildingPos = new Vec3(bp.getX(), bp.getY(), bp.getZ());
-            return b.name.equals(Mausoleum.buildingName) &&
-                this.position().distanceToSqr(buildingPos) < Math.pow(Mausoleum.sunScreenDist, 2);
-        };
-        if (!this.level.isClientSide() && this.isOnFire()) {
-            Building mausoleumInRange = BuildingUtils.findClosestBuilding(BuildingServerEvents.getBuildings(), this.position(), condition);
-            if (mausoleumInRange != null)
-                this.setRemainingFireTicks(0);
-        }
+        if (!this.level.isClientSide() && this.isOnFire() &&
+            TimeClientEvents.isInRangeOfNightSource(this.getEyePosition()))
+            this.setRemainingFireTicks(0);
     }
 
     public void initialiseGoals() {

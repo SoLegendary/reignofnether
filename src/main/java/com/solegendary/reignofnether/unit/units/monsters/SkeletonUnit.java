@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -136,6 +137,10 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
         // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
         if (attackGoal != null)
             attackGoal.tickCooldown();
+
+        if (!this.level.isClientSide() && this.isOnFire() &&
+                TimeClientEvents.isInRangeOfNightSource(this.getEyePosition()))
+            this.setRemainingFireTicks(0);
     }
 
     public void initialiseGoals() {
