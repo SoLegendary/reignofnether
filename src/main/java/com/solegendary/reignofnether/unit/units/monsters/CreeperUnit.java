@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.mixin.monsters;
+package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;

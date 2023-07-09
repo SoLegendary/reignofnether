@@ -4,13 +4,13 @@ import com.solegendary.reignofnether.research.researchItems.ResearchLabLightning
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
-import com.solegendary.reignofnether.mixin.monsters.CreeperUnitProd;
-import com.solegendary.reignofnether.mixin.monsters.SkeletonUnitProd;
-import com.solegendary.reignofnether.mixin.monsters.ZombieVillagerUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnitProd;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemProdItem;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerProdItem;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerProdItem;
-import com.solegendary.reignofnether.mixin.monsters.ZombieUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnitProd;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;

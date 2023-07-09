@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.mixin.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 
 public class CreeperAttackUnitGoal extends AbstractMeleeAttackUnitGoal {
     private final CreeperUnit creeperUnit;

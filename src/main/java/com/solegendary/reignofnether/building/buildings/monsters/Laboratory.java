@@ -9,7 +9,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchLabLightning
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.abilities.CallLightning;
-import com.solegendary.reignofnether.mixin.monsters.CreeperUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
