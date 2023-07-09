@@ -21,7 +21,7 @@ Another core design tenet is that the gamemode is fully compatible with vanilla 
 | Minimap | ✔️ |  |  
 | Resources and population | ✔️ |  |  
 | RTS-friendly world generation | ✔️ | Flatter world, simpler biomes and added surface ores |  
-| Resource collection | 🟡 | Currently very badly lags at high volumes |  
+| Resource collection | 🟡 | Currently very badly lags at high volumes (30+ workers gathering) |  
 | Fog of war | 🟡 | Technically works, still looks quite janky |  
 | Villagers Race | 🟡 |  |  
 | Monsters Race | 🟡 |  |  

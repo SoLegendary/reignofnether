@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.unit.units.monsters;
+package com.solegendary.reignofnether.mixin.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
@@ -15,31 +15,31 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class ZombieUnitProd extends ProductionItem {
+public class SkeletonUnitProd extends ProductionItem {
 
-    public final static String itemName = "Zombie";
+    public final static String itemName = "Skeleton";
 
-    public ZombieUnitProd(ProductionBuilding building) {
-        super(building, ResourceCosts.Zombie.TICKS);
+    public SkeletonUnitProd(ProductionBuilding building) {
+        super(building, ResourceCosts.Skeleton.TICKS);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.SKELETON_UNIT.get(), building.ownerName, true);
         };
-        this.foodCost = ResourceCosts.Zombie.FOOD;
-        this.woodCost = ResourceCosts.Zombie.WOOD;
-        this.oreCost = ResourceCosts.Zombie.ORE;
-        this.popCost = ResourceCosts.Zombie.POPULATION;
+        this.foodCost = ResourceCosts.Skeleton.FOOD;
+        this.woodCost = ResourceCosts.Skeleton.WOOD;
+        this.oreCost = ResourceCosts.Skeleton.ORE;
+        this.popCost = ResourceCosts.Skeleton.POPULATION;
     }
 
     public String getItemName() {
-        return ZombieUnitProd.itemName;
+        return SkeletonUnitProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            ZombieUnitProd.itemName,
+            SkeletonUnitProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png"),
             hotkey,
             () -> false,
             () -> false,
@@ -47,20 +47,20 @@ public class ZombieUnitProd extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(ZombieUnitProd.itemName, Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Zombie.FOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Zombie.POPULATION + "     \uE004  " + ResourceCosts.Zombie.TICKS/20 + "s", MyRenderer.iconStyle),
+                FormattedCharSequence.forward(SkeletonUnitProd.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Skeleton.FOOD + "     \uE001  " + ResourceCosts.Skeleton.WOOD, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Skeleton.POPULATION + "     \uE004  " + ResourceCosts.Skeleton.TICKS/20 + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An undead monster with a basic melee attack.", Style.EMPTY)
+                FormattedCharSequence.forward("An undead soldier with a bow and arrows.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            ZombieUnitProd.itemName,
+            SkeletonUnitProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

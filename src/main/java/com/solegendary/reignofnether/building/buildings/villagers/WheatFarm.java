@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -53,9 +54,9 @@ public class WheatFarm extends Building {
                 new ResourceLocation("minecraft", "textures/block/hay_block_side.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == WheatFarm.class,
-                () -> !BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) &&
-                       !ResearchClient.hasCheat("modifythephasevariance"),
-                () -> true,
+                () -> false,
+                () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
+                        ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(WheatFarm.class),
                 null,
                 List.of(

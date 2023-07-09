@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -10,9 +8,8 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.abilities.CallLightning;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
+import com.solegendary.reignofnether.mixin.monsters.CreeperUnitProd;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -97,9 +94,9 @@ public class Laboratory extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/brewing_stand.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Laboratory.class,
-                () -> !BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) &&
-                       !ResearchClient.hasCheat("modifythephasevariance"),
-                () -> true,
+                () -> false,
+                () -> BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
+                        ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(Laboratory.class),
                 null,
                 List.of(

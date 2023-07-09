@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -64,9 +65,9 @@ public class Blacksmith extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/smithing_table_front.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Blacksmith.class,
-                () -> !BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) &&
-                       !ResearchClient.hasCheat("modifythephasevariance"),
-                () -> true,
+                () -> false,
+                () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
+                        ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(Blacksmith.class),
                 null,
                 List.of(

@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.unit.units.monsters;
+package com.solegendary.reignofnether.mixin.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;

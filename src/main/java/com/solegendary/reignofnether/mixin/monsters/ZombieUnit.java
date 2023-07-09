@@ -1,38 +1,32 @@
-package com.solegendary.reignofnether.unit.units.monsters;
+package com.solegendary.reignofnether.mixin.monsters;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.Ability;
-import com.solegendary.reignofnether.unit.abilities.Teleport;
-import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.goals.*;
+import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
+public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
     // region
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -95,14 +89,14 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
     final static public float attackDamage = 3.0f;
     final static public float attacksPerSecond = 0.6f;
     final static public float maxHealth = 20.0f;
-    final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.25f;
+    final static public float armorValue = 2.0f;
+    final static public float movementSpeed = 0.27f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-    final static public int popCost = ResourceCosts.Enderman.POPULATION;
+    final static public int popCost = ResourceCosts.Zombie.POPULATION;
     final static public boolean canAttackBuildings = true;
     public int maxResources = 100;
 
@@ -113,16 +107,8 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    // TODO: prevent random teleport on being wet, damaged or being shot (but keep the damage)
-
-    public EndermanUnit(EntityType<? extends EnderMan> entityType, Level level) {
+    public ZombieUnit(EntityType<? extends Zombie> entityType, Level level) {
         super(entityType, level);
-
-        Teleport ab1 = new Teleport(this);
-        this.abilities.add(ab1);
-
-        if (level.isClientSide())
-            this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
     }
 
     @Override
@@ -130,9 +116,11 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MOVEMENT_SPEED, EndermanUnit.movementSpeed)
-                .add(Attributes.ATTACK_DAMAGE, EndermanUnit.attackDamage)
-                .add(Attributes.MAX_HEALTH, EndermanUnit.maxHealth);
+                .add(Attributes.MOVEMENT_SPEED, ZombieUnit.movementSpeed)
+                .add(Attributes.ATTACK_DAMAGE, ZombieUnit.attackDamage)
+                .add(Attributes.ARMOR, ZombieUnit.armorValue)
+                .add(Attributes.MAX_HEALTH, ZombieUnit.maxHealth)
+                .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE, 0); // needs to be added for parent to work
     }
 
     public void tick() {
@@ -141,6 +129,10 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+
+        if (!this.level.isClientSide() && this.isOnFire() &&
+            BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false))
+            this.setRemainingFireTicks(0);
     }
 
     public void initialiseGoals() {
@@ -163,29 +155,5 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
-    }
-
-    public void teleport(BlockPos bp) {
-        BlockPos.MutableBlockPos mBp = bp.mutable();
-
-        // find an adjacent non-blocking block
-        List<BlockPos> bps = List.of(
-            mBp.move(Direction.UP),
-            mBp.move(Direction.NORTH),
-            mBp.move(Direction.SOUTH),
-            mBp.move(Direction.EAST),
-            mBp.move(Direction.WEST)
-        );
-        BlockPos bpTarget = mBp;
-
-        for (BlockPos bp2 : bps)
-            if (!this.level.getBlockState(mBp).getMaterial().blocksMotion())
-                bpTarget = bp2;
-
-        this.moveTo(new Vec3(bpTarget.getX(), bpTarget.getY(), bpTarget.getZ()));
-        if (!this.isSilent()) {
-            this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
-            this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
-        }
     }
 }

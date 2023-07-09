@@ -53,9 +53,9 @@ public class PumpkinFarm extends Building {
                 new ResourceLocation("minecraft", "textures/block/pumpkin_side.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == PumpkinFarm.class,
-                () -> !BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) &&
-                       !ResearchClient.hasCheat("modifythephasevariance"),
-                () -> true,
+                () -> false,
+                () -> BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
+                        ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(PumpkinFarm.class),
                 null,
                 List.of(
@@ -63,7 +63,7 @@ public class PumpkinFarm extends Building {
                         FormattedCharSequence.forward("\uE001  " + ResourceCosts.PumpkinFarm.WOOD + "  +  " + ResourceCosts.REPLANT_WOOD_COST + "  per  crop  planted", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A pumpkin field that be can harvested to collect food.", Style.EMPTY),
-                        FormattedCharSequence.forward("Pumpkins are slower to gather but do not require replanting.", Style.EMPTY)
+                        FormattedCharSequence.forward("Pumpkins are slow to gather but do not require replanting.", Style.EMPTY)
                 ),
                 null
         );

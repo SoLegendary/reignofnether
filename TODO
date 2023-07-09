@@ -17,7 +17,11 @@ More terrain generation:
 
 - workers and units sometimes get stuck in 2x1 holes
 
-- Make giant mushrooms worth food
+- time set <time_day_string_str> causes desyncs
+    - maybe just disable it entirely or override it
+
+- going to creative mode while on the ground (eg. in survival) forces you to walking speed while in the air
+    - workaround by first going to spectator mode
 
 
 TODO buildings/units (backlog)
@@ -33,7 +37,7 @@ Monster faction
         - Upgrade to cave spiders
         - Upgrade to allow mounting spider jockeys
     - Husks (upgraded from Zombies at the lab)
-        - 20 -> 25hp, +1 armor, doesn't burn in sunlight
+        - 20 -> 25hp, doesn't burn in sunlight
     - Strays (upgraded from Skeletons at the lab)
         - Fires slowing arrows
 
