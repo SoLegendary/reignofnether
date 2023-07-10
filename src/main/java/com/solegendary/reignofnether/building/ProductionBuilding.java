@@ -75,8 +75,8 @@ public abstract class ProductionBuilding extends Building {
     public void produceUnit(ServerLevel level, EntityType<? extends Unit> entityType, String ownerName, boolean spawnIndoors) {
         Entity entity = entityType.create(level);
         if (entity != null) {
-            level.addFreshEntity(entity);
             ((Unit) entity).setOwnerName(ownerName);
+            level.addFreshEntity(entity);
 
             BlockPos defaultRallyPoint = getMinCorner(this.blocks).offset(
                     0.5f - spawnRadiusOffset,

@@ -161,6 +161,17 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     }
 
     @Override
+    public double getWeaponDamageModifier() {
+        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+
+        if (!itemStack.isEmpty())
+            for(AttributeModifier attr : itemStack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE))
+                if (attr.getOperation() == AttributeModifier.Operation.ADDITION)
+                    return attr.getAmount();
+        return 0;
+    }
+
+    @Override
     public void setupEquipmentAndUpgradesServer() {
         // weapon is purely visual, damage is based solely on entity attribute ATTACK_DAMAGE
         Item axe = Items.IRON_AXE;
@@ -174,32 +185,5 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         axeStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
 
         this.setItemSlot(EquipmentSlot.MAINHAND, axeStack);
-    }
-
-    @Override
-    public void setupEquipmentAndUpgradesClient() {
-        // weapon is purely visual, damage is based solely on entity attribute ATTACK_DAMAGE
-        Item axe = Items.IRON_AXE;
-        int damageMod = 0;
-        if (ResearchClient.hasResearch(ResearchVindicatorAxes.itemName)) {
-            axe = Items.DIAMOND_AXE;
-            damageMod = 2;
-        }
-        ItemStack axeStack = new ItemStack(axe);
-        AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), damageMod, AttributeModifier.Operation.ADDITION);
-        axeStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
-
-        this.setItemSlot(EquipmentSlot.MAINHAND, axeStack);
-    }
-
-    @Override
-    public double getWeaponDamageModifier() {
-        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-
-        if (!itemStack.isEmpty())
-            for(AttributeModifier attr : itemStack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE))
-                if (attr.getOperation() == AttributeModifier.Operation.ADDITION)
-                    return attr.getAmount();
-        return 0;
     }
 }

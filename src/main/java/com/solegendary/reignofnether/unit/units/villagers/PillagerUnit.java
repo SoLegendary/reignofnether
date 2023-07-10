@@ -165,13 +165,4 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
 
         this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
     }
-
-    @Override
-    public void setupEquipmentAndUpgradesClient() {
-        ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
-        if (ResearchClient.hasResearch(ResearchPillagerCrossbows.itemName))
-            cbowStack.enchant(Enchantments.MULTISHOT, 1);
-
-        this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
-    }
 }
