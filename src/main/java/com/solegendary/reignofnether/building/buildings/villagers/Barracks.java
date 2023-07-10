@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerProdItem;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorProdItem;
@@ -29,6 +30,7 @@ public class Barracks extends ProductionBuilding {
 
     public final static String buildingName = "Barracks";
     public final static String structureName = "barracks";
+    public final static ResourceCost cost = ResourceCosts.BARRACKS;
 
     public Barracks(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -37,10 +39,10 @@ public class Barracks extends ProductionBuilding {
         this.portraitBlock = Blocks.FLETCHING_TABLE;
         this.icon = new ResourceLocation("minecraft", "textures/block/fletching_table_front.png");
 
-        this.foodCost = ResourceCosts.Barracks.FOOD;
-        this.woodCost = ResourceCosts.Barracks.WOOD;
-        this.oreCost = ResourceCosts.Barracks.ORE;
-        this.popSupply = ResourceCosts.Barracks.SUPPLY;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popSupply = cost.population;
 
         this.startingBlockTypes.add(Blocks.POLISHED_ANDESITE_STAIRS);
 
@@ -70,7 +72,7 @@ public class Barracks extends ProductionBuilding {
                 null,
                 List.of(
                         FormattedCharSequence.forward(Barracks.buildingName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.Barracks.WOOD, MyRenderer.iconStyle),
+                        ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A training ground for Pillagers and Vindicators", Style.EMPTY)
                 ),

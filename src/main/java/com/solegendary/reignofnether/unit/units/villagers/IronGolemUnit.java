@@ -98,7 +98,7 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-    final static public int popCost = ResourceCosts.IronGolem.POPULATION;
+    final static public int popCost = ResourceCosts.IRON_GOLEM.population;
     final static public boolean canAttackBuildings = true;
     final static public int maxResources = 200;
 

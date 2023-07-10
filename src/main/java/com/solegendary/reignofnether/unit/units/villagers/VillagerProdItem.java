@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
@@ -20,17 +21,18 @@ import java.util.List;
 public class VillagerProdItem extends ProductionItem {
 
     public final static String itemName = "Villager";
+    public final static ResourceCost cost = ResourceCosts.VILLAGER;
 
     public VillagerProdItem(ProductionBuilding building) {
-        super(building, ResourceCosts.Villager.TICKS);
+        super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
                 building.produceUnit((ServerLevel) level, EntityRegistrar.VILLAGER_UNIT.get(), building.ownerName, true);
         };
-        this.foodCost = ResourceCosts.Villager.FOOD;
-        this.woodCost = ResourceCosts.Villager.WOOD;
-        this.oreCost = ResourceCosts.Villager.ORE;
-        this.popCost = ResourceCosts.Villager.POPULATION;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popCost = cost.population;
     }
 
     public String getItemName() {
@@ -50,8 +52,8 @@ public class VillagerProdItem extends ProductionItem {
             null,
             List.of(
                 FormattedCharSequence.forward(VillagerProdItem.itemName, Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Villager.FOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Villager.POPULATION + "     \uE004  " + ResourceCosts.Villager.TICKS/20 + "s", MyRenderer.iconStyle),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedCostPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A worker that can construct and repair", Style.EMPTY),
                 FormattedCharSequence.forward("buildings and gather resources.", Style.EMPTY)

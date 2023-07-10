@@ -2,20 +2,18 @@ package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -27,9 +25,10 @@ import java.util.List;
 public class ResearchResourceCapacity extends ProductionItem {
 
     public final static String itemName = "Worker Carry Bags";
+    public final static ResourceCost cost = ResourceCosts.RESEARCH_RESOURCE_CAPACITY;
 
     public ResearchResourceCapacity(ProductionBuilding building) {
-        super(building, ResourceCosts.ResearchResourceCapacity.TICKS);
+        super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide()) {
                 ResearchClient.addResearch(ResearchResourceCapacity.itemName);
@@ -44,9 +43,9 @@ public class ResearchResourceCapacity extends ProductionItem {
                         ((Unit) unit).setupEquipmentAndUpgradesServer();
             }
         };
-        this.foodCost = ResourceCosts.ResearchResourceCapacity.FOOD;
-        this.woodCost = ResourceCosts.ResearchResourceCapacity.WOOD;
-        this.oreCost = ResourceCosts.ResearchResourceCapacity.ORE;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
     }
 
     public String getItemName() {
@@ -68,8 +67,8 @@ public class ResearchResourceCapacity extends ProductionItem {
                 null,
                 List.of(
                         FormattedCharSequence.forward(ResearchResourceCapacity.itemName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE000  " + ResourceCosts.ResearchResourceCapacity.FOOD + "     \uE001  " + ResourceCosts.ResearchResourceCapacity.WOOD, MyRenderer.iconStyle),
-                        FormattedCharSequence.forward("\uE004  " + ResourceCosts.ResearchResourceCapacity.TICKS/20 + "s", MyRenderer.iconStyle),
+                        ResourceCosts.getFormattedCost(cost),
+                        ResourceCosts.getFormattedCostTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Raises the resource capacity of workers from 100 to 150", Style.EMPTY)
                 )

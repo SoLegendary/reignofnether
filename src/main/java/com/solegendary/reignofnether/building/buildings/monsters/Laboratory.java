@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.abilities.CallLightning;
@@ -29,6 +30,7 @@ public class Laboratory extends ProductionBuilding {
 
     public final static String buildingName = "Laboratory";
     public final static String structureName = "laboratory";
+    public final static ResourceCost cost = ResourceCosts.LABORATORY;
 
     public Laboratory(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -37,10 +39,10 @@ public class Laboratory extends ProductionBuilding {
         this.portraitBlock = Blocks.BREWING_STAND;
         this.icon = new ResourceLocation("minecraft", "textures/block/brewing_stand.png");
 
-        this.foodCost = ResourceCosts.Laboratory.FOOD;
-        this.woodCost = ResourceCosts.Laboratory.WOOD;
-        this.oreCost = ResourceCosts.Laboratory.ORE;
-        this.popSupply = ResourceCosts.Laboratory.SUPPLY;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popSupply = cost.population;
         this.buildTimeModifier = 0.85f;
 
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
@@ -101,7 +103,7 @@ public class Laboratory extends ProductionBuilding {
                 null,
                 List.of(
                         FormattedCharSequence.forward(Laboratory.buildingName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.Laboratory.WOOD + "  \uE002  " + ResourceCosts.Laboratory.ORE, MyRenderer.iconStyle),
+                        ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A sinister lab that can research new technologies and", Style.EMPTY),
                         FormattedCharSequence.forward("produce creepers. Can be upgraded to have a lightning rod.", Style.EMPTY)

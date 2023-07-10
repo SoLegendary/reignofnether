@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemProdItem;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -30,6 +31,7 @@ public class Blacksmith extends ProductionBuilding {
 
     public final static String buildingName = "Blacksmith";
     public final static String structureName = "blacksmith";
+    public final static ResourceCost cost = ResourceCosts.BLACKSMITH;
 
     public Blacksmith(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -38,10 +40,10 @@ public class Blacksmith extends ProductionBuilding {
         this.portraitBlock = Blocks.SMITHING_TABLE;
         this.icon = new ResourceLocation("minecraft", "textures/block/smithing_table_front.png");
 
-        this.foodCost = ResourceCosts.Blacksmith.FOOD;
-        this.woodCost = ResourceCosts.Blacksmith.WOOD;
-        this.oreCost = ResourceCosts.Blacksmith.ORE;
-        this.popSupply = ResourceCosts.Blacksmith.SUPPLY;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popSupply = cost.population;
         this.buildTimeModifier = 0.85f;
 
         this.startingBlockTypes.add(Blocks.OAK_PLANKS);
@@ -72,7 +74,7 @@ public class Blacksmith extends ProductionBuilding {
                 null,
                 List.of(
                         FormattedCharSequence.forward(Blacksmith.buildingName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.Blacksmith.WOOD + "  \uE002  " + ResourceCosts.Blacksmith.ORE, MyRenderer.iconStyle),
+                        ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A smithy to forge military upgrades and iron golems", Style.EMPTY)
                 ),

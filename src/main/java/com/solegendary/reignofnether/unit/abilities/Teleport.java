@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -30,7 +31,7 @@ public class Teleport extends Ability {
     public Teleport(EndermanUnit unit) {
         super(
             UnitAction.TELEPORT,
-            CD_MAX_SECONDS * ResourceCosts.TICKS_PER_SECOND,
+            CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,
             RANGE,
             0,
                 false

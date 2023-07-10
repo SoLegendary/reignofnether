@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnitProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -24,6 +25,7 @@ public class Mausoleum extends ProductionBuilding {
 
     public final static String buildingName = "Mausoleum";
     public final static String structureName = "mausoleum";
+    public final static ResourceCost cost = ResourceCosts.MAUSOLEUM;
     public final static int nightRange = 80;
 
     public Mausoleum(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
@@ -34,10 +36,10 @@ public class Mausoleum extends ProductionBuilding {
         this.portraitBlock = Blocks.DEEPSLATE_TILES;
         this.icon = new ResourceLocation("minecraft", "textures/block/deepslate_tiles.png");
 
-        this.foodCost = ResourceCosts.Mausoleum.FOOD;
-        this.woodCost = ResourceCosts.Mausoleum.WOOD;
-        this.oreCost = ResourceCosts.Mausoleum.ORE;
-        this.popSupply = ResourceCosts.Mausoleum.SUPPLY;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popSupply = cost.population;
         this.buildTimeModifier = 0.66f;
         this.canAcceptResources = true;
 
@@ -68,13 +70,13 @@ public class Mausoleum extends ProductionBuilding {
                 null,
                 List.of(
                         FormattedCharSequence.forward(Mausoleum.buildingName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.Mausoleum.WOOD + "  \uE002  " + ResourceCosts.Mausoleum.ORE, MyRenderer.iconStyle),
+                        ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A tomb of the dead that produces zombie villagers.", Style.EMPTY),
                         FormattedCharSequence.forward("Distorts time to midnight within a " + nightRange + " block radius.", Style.EMPTY),
                         FormattedCharSequence.forward("You may only have one mausoleum at any time.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Supports " + ResourceCosts.Mausoleum.SUPPLY + " population.", Style.EMPTY)
+                        FormattedCharSequence.forward("Supports " + cost.population + " population.", Style.EMPTY)
                 ),
                 null
         );

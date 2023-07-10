@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
@@ -23,6 +24,7 @@ public class VillagerHouse extends Building {
 
     public final static String buildingName = "Villager House";
     public final static String structureName = "villager_house";
+    public final static ResourceCost cost = ResourceCosts.VILLAGER_HOUSE;
 
     public VillagerHouse(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -31,10 +33,10 @@ public class VillagerHouse extends Building {
         this.portraitBlock = Blocks.OAK_LOG;
         this.icon = new ResourceLocation("minecraft", "textures/block/oak_log.png");
 
-        this.foodCost = ResourceCosts.VillagerHouse.FOOD;
-        this.woodCost = ResourceCosts.VillagerHouse.WOOD;
-        this.oreCost = ResourceCosts.VillagerHouse.ORE;
-        this.popSupply = ResourceCosts.VillagerHouse.SUPPLY;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popSupply = cost.population;
         this.buildTimeModifier = 0.8f;
 
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
@@ -58,11 +60,11 @@ public class VillagerHouse extends Building {
             null,
             List.of(
                     FormattedCharSequence.forward(VillagerHouse.buildingName, Style.EMPTY.withBold(true)),
-                    FormattedCharSequence.forward("\uE001  " + ResourceCosts.VillagerHouse.WOOD, MyRenderer.iconStyle),
+                    ResourceCosts.getFormattedCost(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("A simple house that provides population supply.", Style.EMPTY),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Supports " + ResourceCosts.VillagerHouse.SUPPLY + " population.", Style.EMPTY)
+                    FormattedCharSequence.forward("Supports " + cost.population + " population.", Style.EMPTY)
             ),
             null
         );

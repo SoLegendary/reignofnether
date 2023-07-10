@@ -26,6 +26,14 @@ public class ItemRegistrar {
             ITEMS.register("creeper_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.CREEPER_UNIT,
                     0x0c990a, 0x000000, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
+    public static final RegistryObject<ForgeSpawnEggItem> SPIDER_UNIT_SPAWN_EGG =
+            ITEMS.register("spider_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.SPIDER_UNIT,
+                    0x322B26, 0x840B0B, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
+    public static final RegistryObject<ForgeSpawnEggItem> POISON_SPIDER_UNIT_SPAWN_EGG =
+            ITEMS.register("poison_spider_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.POISON_SPIDER_UNIT,
+                    0x0B3F4A, 0x840B0B, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
     public static final RegistryObject<ForgeSpawnEggItem> VILLAGER_UNIT_SPAWN_EGG =
             ITEMS.register("villager_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.VILLAGER_UNIT,
                     0x523632, 0x946F66, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));

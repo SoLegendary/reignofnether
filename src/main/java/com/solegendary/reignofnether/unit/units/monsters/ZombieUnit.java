@@ -96,7 +96,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-    final static public int popCost = ResourceCosts.Zombie.POPULATION;
+    final static public int popCost = ResourceCosts.ZOMBIE.population;
     final static public boolean canAttackBuildings = true;
     public int maxResources = 100;
 

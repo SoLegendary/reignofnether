@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -104,7 +105,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-    final static public int popCost = ResourceCosts.Vindicator.POPULATION;
+    final static public int popCost = ResourceCosts.VINDICATOR.population;
     final static public boolean canAttackBuildings = true;
     public int maxResources = 100;
 
@@ -165,6 +166,22 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         Item axe = Items.IRON_AXE;
         int damageMod = 0;
         if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchVindicatorAxes.itemName)) {
+            axe = Items.DIAMOND_AXE;
+            damageMod = 2;
+        }
+        ItemStack axeStack = new ItemStack(axe);
+        AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), damageMod, AttributeModifier.Operation.ADDITION);
+        axeStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+
+        this.setItemSlot(EquipmentSlot.MAINHAND, axeStack);
+    }
+
+    @Override
+    public void setupEquipmentAndUpgradesClient() {
+        // weapon is purely visual, damage is based solely on entity attribute ATTACK_DAMAGE
+        Item axe = Items.IRON_AXE;
+        int damageMod = 0;
+        if (ResearchClient.hasResearch(ResearchVindicatorAxes.itemName)) {
             axe = Items.DIAMOND_AXE;
             damageMod = 2;
         }

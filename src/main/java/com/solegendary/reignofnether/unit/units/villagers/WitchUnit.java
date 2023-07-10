@@ -92,7 +92,7 @@ public class WitchUnit extends Witch implements Unit {
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float sightRange = 10f;
-    final static public int popCost = ResourceCosts.Witch.POPULATION;
+    final static public int popCost = ResourceCosts.WITCH.population;
     public int maxResources = 100;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();

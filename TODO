@@ -10,18 +10,16 @@ More terrain generation:
 
 - Fix smooth lighting issues on fog of war borders (properly)
 
-- fix delayed rendering of unit outlines in non-orthoview
-
 - workers can sometimes see through and mine underground ores
     - workers must have line of sight somehow
+    - or maybe let workers dig towards it
 
 - workers and units sometimes get stuck in 2x1 holes
 
-- time set <time_day_string_str> causes desyncs
-    - maybe just disable it entirely or override it
+- time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
+    - not sure of the ordering...
 
-- going to creative mode while on the ground (eg. in survival) forces you to walking speed while in the air
-    - workaround by first going to spectator mode
+- Research for unit items (eg. vindicator axes) don't apply to newly created units
 
 
 TODO buildings/units (backlog)

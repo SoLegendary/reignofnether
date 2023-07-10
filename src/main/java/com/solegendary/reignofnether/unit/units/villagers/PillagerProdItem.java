@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
@@ -23,32 +24,31 @@ import java.util.List;
 public class PillagerProdItem extends ProductionItem {
 
     public final static String itemName = "Pillager";
+    public final static ResourceCost cost = ResourceCosts.PILLAGER;
 
     public PillagerProdItem(ProductionBuilding building) {
-        super(building, ResourceCosts.Pillager.TICKS);
+        super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
                 building.produceUnit((ServerLevel) level, EntityRegistrar.PILLAGER_UNIT.get(), building.ownerName, true);
         };
-        this.foodCost = ResourceCosts.Pillager.FOOD;
-        this.woodCost = ResourceCosts.Pillager.WOOD;
-        this.oreCost = ResourceCosts.Pillager.ORE;
-        this.popCost = ResourceCosts.Pillager.POPULATION;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popCost = cost.population;
     }
 
     public String getItemName() {
         return PillagerProdItem.itemName;
     }
 
-
-
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-                FormattedCharSequence.forward(PillagerProdItem.itemName, Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Pillager.FOOD + "     \uE001  " + ResourceCosts.Pillager.WOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Pillager.POPULATION + "     \uE004  " + ResourceCosts.Pillager.TICKS/20 + "s", MyRenderer.iconStyle),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A villager armed with a crossbow for ranged combat.", Style.EMPTY)
+            FormattedCharSequence.forward(PillagerProdItem.itemName, Style.EMPTY.withBold(true)),
+            ResourceCosts.getFormattedCost(cost),
+            ResourceCosts.getFormattedCostPopAndTime(cost),
+            FormattedCharSequence.forward("", Style.EMPTY),
+            FormattedCharSequence.forward("A villager armed with a crossbow for ranged combat.", Style.EMPTY)
         ));
         if (ResearchClient.hasResearch(ResearchVindicatorAxes.itemName)) {
             tooltipLines.add(FormattedCharSequence.forward("", Style.EMPTY));

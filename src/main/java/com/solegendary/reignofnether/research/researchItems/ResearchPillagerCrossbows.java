@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
@@ -24,9 +25,10 @@ import java.util.List;
 public class ResearchPillagerCrossbows extends ProductionItem {
 
     public final static String itemName = "Multishot Crossbows";
+    public final static ResourceCost cost = ResourceCosts.RESEARCH_PILLAGER_CROSSBOWS;
 
     public ResearchPillagerCrossbows(ProductionBuilding building) {
-        super(building, ResourceCosts.ResearchPillagerCrossbows.TICKS);
+        super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
                 ResearchClient.addResearch(ResearchPillagerCrossbows.itemName);
@@ -37,9 +39,9 @@ public class ResearchPillagerCrossbows extends ProductionItem {
                         pUnit.setupEquipmentAndUpgradesServer();
             }
         };
-        this.foodCost = ResourceCosts.ResearchPillagerCrossbows.FOOD;
-        this.woodCost = ResourceCosts.ResearchPillagerCrossbows.WOOD;
-        this.oreCost = ResourceCosts.ResearchPillagerCrossbows.ORE;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
     }
 
     public String getItemName() {
@@ -61,8 +63,8 @@ public class ResearchPillagerCrossbows extends ProductionItem {
                 null,
                 List.of(
                         FormattedCharSequence.forward(ResearchPillagerCrossbows.itemName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.ResearchPillagerCrossbows.WOOD + "     \uE002  " + ResourceCosts.ResearchPillagerCrossbows.ORE, MyRenderer.iconStyle),
-                        FormattedCharSequence.forward("\uE004  " + ResourceCosts.ResearchPillagerCrossbows.TICKS/20 + "s", MyRenderer.iconStyle),
+                        ResourceCosts.getFormattedCost(cost),
+                        ResourceCosts.getFormattedCostTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Enchants the crossbows of all pillagers with multishot", Style.EMPTY)
                 )

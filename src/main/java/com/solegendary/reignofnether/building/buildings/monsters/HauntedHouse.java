@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
@@ -24,6 +25,7 @@ public class HauntedHouse extends Building {
 
     public final static String buildingName = "Haunted House";
     public final static String structureName = "haunted_house";
+    public final static ResourceCost cost = ResourceCosts.HAUNTED_HOUSE;
 
     public HauntedHouse(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -32,10 +34,10 @@ public class HauntedHouse extends Building {
         this.portraitBlock = Blocks.DARK_OAK_LOG;
         this.icon = new ResourceLocation("minecraft", "textures/block/dark_oak_log.png");
 
-        this.foodCost = ResourceCosts.HauntedHouse.FOOD;
-        this.woodCost = ResourceCosts.HauntedHouse.WOOD;
-        this.oreCost = ResourceCosts.HauntedHouse.ORE;
-        this.popSupply = ResourceCosts.HauntedHouse.SUPPLY;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popSupply = cost.population;
         this.buildTimeModifier = 0.8f;
 
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
@@ -58,11 +60,11 @@ public class HauntedHouse extends Building {
             null,
             List.of(
                     FormattedCharSequence.forward(HauntedHouse.buildingName, Style.EMPTY.withBold(true)),
-                    FormattedCharSequence.forward("\uE001  " + ResourceCosts.HauntedHouse.WOOD, MyRenderer.iconStyle),
+                    ResourceCosts.getFormattedCost(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("A spooky house that provides population supply. ", Style.EMPTY),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Supports " + ResourceCosts.HauntedHouse.SUPPLY + " population.", Style.EMPTY)
+                    FormattedCharSequence.forward("Supports " + ResourceCosts.HAUNTED_HOUSE.population + " population.", Style.EMPTY)
             ),
             null
         );

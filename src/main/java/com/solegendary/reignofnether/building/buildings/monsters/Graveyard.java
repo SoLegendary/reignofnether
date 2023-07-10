@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnitProd;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnitProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -27,6 +28,7 @@ public class Graveyard extends ProductionBuilding {
 
     public final static String buildingName = "Graveyard";
     public final static String structureName = "graveyard";
+    public final static ResourceCost cost = ResourceCosts.GRAVEYARD;
 
     public Graveyard(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -35,10 +37,10 @@ public class Graveyard extends ProductionBuilding {
         this.portraitBlock = Blocks.MOSSY_STONE_BRICKS;
         this.icon = new ResourceLocation("minecraft", "textures/block/mossy_stone_bricks.png");
 
-        this.foodCost = ResourceCosts.Graveyard.FOOD;
-        this.woodCost = ResourceCosts.Graveyard.WOOD;
-        this.oreCost = ResourceCosts.Graveyard.ORE;
-        this.popSupply = ResourceCosts.Graveyard.SUPPLY;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popSupply = cost.population;
 
         this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICKS);
 
@@ -68,7 +70,7 @@ public class Graveyard extends ProductionBuilding {
                 null,
                 List.of(
                         FormattedCharSequence.forward(Graveyard.buildingName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.Graveyard.WOOD, MyRenderer.iconStyle),
+                        ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A field of the dead that can raise Zombies and Skeletons", Style.EMPTY)
                 ),

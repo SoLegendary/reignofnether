@@ -40,6 +40,16 @@ public class EntityRegistrar {
                     .sized(EntityType.CREEPER.getWidth(), EntityType.CREEPER.getHeight())
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "creeper_unit").toString()));
 
+    public static final RegistryObject<EntityType<SpiderUnit>> SPIDER_UNIT = ENTITIES.register("spider_unit",
+            () -> EntityType.Builder.of(SpiderUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.SPIDER.getWidth(), EntityType.SPIDER.getHeight())
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "spider_unit").toString()));
+
+    public static final RegistryObject<EntityType<PoisonSpiderUnit>> POISON_SPIDER_UNIT = ENTITIES.register("poison_spider_unit",
+            () -> EntityType.Builder.of(PoisonSpiderUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.CAVE_SPIDER.getWidth(), EntityType.CAVE_SPIDER.getHeight())
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "poison_spider_unit").toString()));
+
     public static final RegistryObject<EntityType<VillagerUnit>> VILLAGER_UNIT = ENTITIES.register("villager_unit",
             () -> EntityType.Builder.of(VillagerUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.VILLAGER.getWidth(), EntityType.VILLAGER.getHeight())

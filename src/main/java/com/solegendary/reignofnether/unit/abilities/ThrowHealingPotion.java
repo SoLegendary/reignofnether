@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -31,7 +32,7 @@ public class ThrowHealingPotion extends Ability {
     public ThrowHealingPotion(WitchUnit witchUnit) {
         super(
                 UnitAction.THROW_HEALING_POTION,
-                CD_MAX_SECONDS * ResourceCosts.TICKS_PER_SECOND,
+                CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,
                 WitchUnit.getPotionThrowRange(),
                 0,
                 true

@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -103,7 +104,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     final static public float sightRange = 15f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-    final static public int popCost = ResourceCosts.Pillager.POPULATION;
+    final static public int popCost = ResourceCosts.PILLAGER.population;
     final static public boolean canAttackBuildings = false;
     public int maxResources = 100;
 
@@ -160,6 +161,15 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public void setupEquipmentAndUpgradesServer() {
         ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
         if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchPillagerCrossbows.itemName))
+            cbowStack.enchant(Enchantments.MULTISHOT, 1);
+
+        this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
+    }
+
+    @Override
+    public void setupEquipmentAndUpgradesClient() {
+        ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
+        if (ResearchClient.hasResearch(ResearchPillagerCrossbows.itemName))
             cbowStack.enchant(Enchantments.MULTISHOT, 1);
 
         this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);

@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
@@ -26,6 +27,7 @@ public class WheatFarm extends Building {
 
     public final static String buildingName = "Wheat Farm";
     public final static String structureName = "wheat_farm";
+    public final static ResourceCost cost = ResourceCosts.WHEAT_FARM;
 
     public WheatFarm(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -34,10 +36,10 @@ public class WheatFarm extends Building {
         this.portraitBlock = Blocks.HAY_BLOCK;
         this.icon = new ResourceLocation("minecraft", "textures/block/hay_block_side.png");
 
-        this.foodCost = ResourceCosts.WheatFarm.FOOD;
-        this.woodCost = ResourceCosts.WheatFarm.WOOD;
-        this.oreCost = ResourceCosts.WheatFarm.ORE;
-        this.popSupply = ResourceCosts.WheatFarm.SUPPLY;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popSupply = cost.population;
 
         this.startingBlockTypes.add(Blocks.OAK_LOG);
 
@@ -61,7 +63,7 @@ public class WheatFarm extends Building {
                 null,
                 List.of(
                         FormattedCharSequence.forward(WheatFarm.buildingName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.WheatFarm.WOOD + "  +  " + ResourceCosts.REPLANT_WOOD_COST + "  per  crop  planted", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("\uE001  " + cost.wood + "  +  " + ResourceCosts.REPLANT_WOOD_COST + "  per  crop  planted", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A wheat field that be can tilled to collect food.", Style.EMPTY),
                         FormattedCharSequence.forward("Workers automatically use wood to replant seeds while working.", Style.EMPTY)

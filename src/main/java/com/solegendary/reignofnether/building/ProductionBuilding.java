@@ -1,16 +1,10 @@
 package com.solegendary.reignofnether.building;
 
-import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
-import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
-import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
-import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
-import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnitProd;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnitProd;
+import com.solegendary.reignofnether.research.researchItems.*;
+import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemProdItem;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerProdItem;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerProdItem;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieUnitProd;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
@@ -130,6 +124,8 @@ public abstract class ProductionBuilding extends Building {
                 case CreeperUnitProd.itemName -> prodItem = new CreeperUnitProd(building);
                 case SkeletonUnitProd.itemName -> prodItem = new SkeletonUnitProd(building);
                 case ZombieUnitProd.itemName -> prodItem = new ZombieUnitProd(building);
+                case SpiderUnitProd.itemName -> prodItem = new SpiderUnitProd(building);
+                case PoisonSpiderUnitProd.itemName -> prodItem = new PoisonSpiderUnitProd(building);
                 case VillagerProdItem.itemName -> prodItem = new VillagerProdItem(building);
                 case ZombieVillagerUnitProd.itemName -> prodItem = new ZombieVillagerUnitProd(building);
                 case VindicatorProdItem.itemName -> prodItem = new VindicatorProdItem(building);
@@ -140,6 +136,8 @@ public abstract class ProductionBuilding extends Building {
                 case ResearchPillagerCrossbows.itemName -> prodItem = new ResearchPillagerCrossbows(building);
                 case ResearchLabLightningRod.itemName -> prodItem = new ResearchLabLightningRod(building);
                 case ResearchResourceCapacity.itemName -> prodItem = new ResearchResourceCapacity(building);
+                case ResearchSpiderJockeys.itemName -> prodItem = new ResearchSpiderJockeys(building);
+                case ResearchPoisonSpiders.itemName -> prodItem = new ResearchPoisonSpiders(building);
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside

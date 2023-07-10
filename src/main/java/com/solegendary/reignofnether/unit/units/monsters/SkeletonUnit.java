@@ -98,7 +98,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-    final static public int popCost = ResourceCosts.Skeleton.POPULATION;
+    final static public int popCost = ResourceCosts.SKELETON.population;
     final static public boolean canAttackBuildings = false;
     public int maxResources = 100;
 

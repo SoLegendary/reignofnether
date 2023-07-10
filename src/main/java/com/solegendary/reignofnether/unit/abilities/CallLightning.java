@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -25,7 +26,7 @@ import java.util.List;
 
 public class CallLightning extends Ability {
 
-    private static final int CD_MAX = 60 * ResourceCosts.TICKS_PER_SECOND;
+    private static final int CD_MAX = 60 * ResourceCost.TICKS_PER_SECOND;
     private static final int RANGE = 25;
 
     private final Laboratory lab;

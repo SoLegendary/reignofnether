@@ -31,7 +31,7 @@ public class Stockpile extends ProductionBuilding {
 
     public final static String buildingName = "Stockpile";
     public final static String structureName = "stockpile";
-
+    public final static ResourceCost cost = ResourceCosts.STOCKPILE;
     public ResourceName mostAbundantNearbyResource = ResourceName.NONE;
 
     public Stockpile(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
@@ -41,10 +41,10 @@ public class Stockpile extends ProductionBuilding {
         this.portraitBlock = Blocks.CHEST;
         this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/chest.png");
 
-        this.foodCost = ResourceCosts.Stockpile.FOOD;
-        this.woodCost = ResourceCosts.Stockpile.WOOD;
-        this.oreCost = ResourceCosts.Stockpile.ORE;
-        this.popSupply = ResourceCosts.Stockpile.SUPPLY;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popSupply = cost.population;
         this.canAcceptResources = true;
         this.canSetRallyPoint = false;
 
@@ -75,7 +75,7 @@ public class Stockpile extends ProductionBuilding {
                 null,
                 List.of(
                         FormattedCharSequence.forward(Stockpile.buildingName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.Stockpile.WOOD, MyRenderer.iconStyle),
+                        ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Storage for units and players to drop off resources", Style.EMPTY)
                 ),

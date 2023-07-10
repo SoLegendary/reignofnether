@@ -100,7 +100,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
-    final static public int popCost = ResourceCosts.Creeper.POPULATION;
+    final static public int popCost = ResourceCosts.CREEPER.population;
     final static public boolean canAttackBuildings = false;
     final static public int maxResources = 0;
 

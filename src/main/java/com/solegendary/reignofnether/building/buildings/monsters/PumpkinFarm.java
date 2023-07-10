@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
@@ -25,6 +26,7 @@ public class PumpkinFarm extends Building {
 
     public final static String buildingName = "Pumpkin Farm";
     public final static String structureName = "pumpkin_farm";
+    public final static ResourceCost cost = ResourceCosts.PUMPKIN_FARM;
 
     public PumpkinFarm(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -33,10 +35,10 @@ public class PumpkinFarm extends Building {
         this.portraitBlock = Blocks.PUMPKIN;
         this.icon = new ResourceLocation("minecraft", "textures/block/pumpkin_side.png");
 
-        this.foodCost = ResourceCosts.PumpkinFarm.FOOD;
-        this.woodCost = ResourceCosts.PumpkinFarm.WOOD;
-        this.oreCost = ResourceCosts.PumpkinFarm.ORE;
-        this.popSupply = ResourceCosts.PumpkinFarm.SUPPLY;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popSupply = cost.population;
 
         this.startingBlockTypes.add(Blocks.DARK_OAK_LOG);
 
@@ -60,7 +62,7 @@ public class PumpkinFarm extends Building {
                 null,
                 List.of(
                         FormattedCharSequence.forward(PumpkinFarm.buildingName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.PumpkinFarm.WOOD + "  +  " + ResourceCosts.REPLANT_WOOD_COST + "  per  crop  planted", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward("\uE001  " + cost.wood + "  +  " + ResourceCosts.REPLANT_WOOD_COST + "  per  crop  planted", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A pumpkin field that be can harvested to collect food.", Style.EMPTY),
                         FormattedCharSequence.forward("Pumpkins are slow to gather but do not require replanting.", Style.EMPTY)

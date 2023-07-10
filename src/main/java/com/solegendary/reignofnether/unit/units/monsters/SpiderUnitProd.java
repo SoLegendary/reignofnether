@@ -1,9 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.BuildingServerboundPacket;
-import com.solegendary.reignofnether.building.ProductionBuilding;
-import com.solegendary.reignofnether.building.ProductionItem;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -18,16 +16,16 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class ZombieVillagerUnitProd extends ProductionItem {
+public class SpiderUnitProd extends ProductionItem {
 
-    public final static String itemName = "Zombie Villager";
-    public final static ResourceCost cost = ResourceCosts.ZOMBIE_VILLAGER;
+    public final static String itemName = "Spider";
+    public final static ResourceCost cost = ResourceCosts.SPIDER;
 
-    public ZombieVillagerUnitProd(ProductionBuilding building) {
+    public SpiderUnitProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.SPIDER_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -36,14 +34,14 @@ public class ZombieVillagerUnitProd extends ProductionItem {
     }
 
     public String getItemName() {
-        return ZombieVillagerUnitProd.itemName;
+        return SpiderUnitProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            ZombieVillagerUnitProd.itemName,
+            SpiderUnitProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/spider.png"),
             hotkey,
             () -> false,
             () -> false,
@@ -51,30 +49,30 @@ public class ZombieVillagerUnitProd extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(ZombieVillagerUnitProd.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(SpiderUnitProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedCostPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An undead worker that can construct and", Style.EMPTY),
-                FormattedCharSequence.forward("repair buildings and gather resources.", Style.EMPTY),
+                FormattedCharSequence.forward("A giant spider that is nimble but frail.", Style.EMPTY),
+                FormattedCharSequence.forward("Can be upgraded to allow skeletons to ride them.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Zombie villagers will burn under sunlight.", Style.EMPTY)
+                FormattedCharSequence.forward("Spiders move much more slowly under sunlight.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            ZombieVillagerUnitProd.itemName,
-            14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png"),
-            (Keybinding) null,
-            () -> false,
-            () -> false,
-            () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, itemName, first),
-            null,
-            null
+                SpiderUnitProd.itemName,
+                14,
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/spider.png"),
+                (Keybinding) null,
+                () -> false,
+                () -> false,
+                () -> true,
+                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, itemName, first),
+                null,
+                null
         );
     }
 }

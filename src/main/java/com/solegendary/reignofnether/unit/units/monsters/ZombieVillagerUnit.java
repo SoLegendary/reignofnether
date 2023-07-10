@@ -99,7 +99,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float sightRange = 10f;
-    final static public int popCost = ResourceCosts.ZombieVillager.POPULATION;
+    final static public int popCost = ResourceCosts.ZOMBIE_VILLAGER.population;
     public int maxResources = 100;
     public boolean isIdle = false;
 

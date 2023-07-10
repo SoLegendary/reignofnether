@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
@@ -18,17 +19,18 @@ import java.util.List;
 public class CreeperUnitProd extends ProductionItem {
 
     public final static String itemName = "Creeper";
+    public final static ResourceCost cost = ResourceCosts.CREEPER;
 
     public CreeperUnitProd(ProductionBuilding building) {
-        super(building, ResourceCosts.Creeper.TICKS);
+        super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
                 building.produceUnit((ServerLevel) level, EntityRegistrar.CREEPER_UNIT.get(), building.ownerName, true);
         };
-        this.foodCost = ResourceCosts.Creeper.FOOD;
-        this.woodCost = ResourceCosts.Creeper.WOOD;
-        this.oreCost = ResourceCosts.Creeper.ORE;
-        this.popCost = ResourceCosts.Creeper.POPULATION;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popCost = cost.population;
     }
 
     public String getItemName() {
@@ -48,8 +50,8 @@ public class CreeperUnitProd extends ProductionItem {
             null,
             List.of(
                 FormattedCharSequence.forward(CreeperUnitProd.itemName, Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Creeper.FOOD + "     \uE002  " + ResourceCosts.Creeper.ORE, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Creeper.POPULATION + "     \uE004  " + ResourceCosts.Creeper.TICKS/20 + "s", MyRenderer.iconStyle),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedCostPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("An explosive monster that can blow up units", Style.EMPTY),
                 FormattedCharSequence.forward("and buildings alike. Has no regular attack.", Style.EMPTY)

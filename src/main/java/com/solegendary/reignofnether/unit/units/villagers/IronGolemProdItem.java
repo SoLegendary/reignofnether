@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
@@ -20,17 +21,18 @@ import java.util.List;
 public class IronGolemProdItem extends ProductionItem {
 
     public final static String itemName = "Iron Golem";
+    public final static ResourceCost cost = ResourceCosts.IRON_GOLEM;
 
     public IronGolemProdItem(ProductionBuilding building) {
-        super(building, ResourceCosts.IronGolem.TICKS);
+        super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
                 building.produceUnit((ServerLevel) level, EntityRegistrar.IRON_GOLEM_UNIT.get(), building.ownerName, false);
         };
-        this.foodCost = ResourceCosts.IronGolem.FOOD;
-        this.woodCost = ResourceCosts.IronGolem.WOOD;
-        this.oreCost = ResourceCosts.IronGolem.ORE;
-        this.popCost = ResourceCosts.IronGolem.POPULATION;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popCost = cost.population;
     }
 
     public String getItemName() {
@@ -50,8 +52,8 @@ public class IronGolemProdItem extends ProductionItem {
             null,
             List.of(
                 FormattedCharSequence.forward(IronGolemProdItem.itemName, Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE002  " + ResourceCosts.IronGolem.ORE, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.IronGolem.POPULATION + "     \uE004  " + ResourceCosts.IronGolem.TICKS/20 + "s", MyRenderer.iconStyle),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedCostPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A hulking golem of metal with a powerful melee attack and high armour.", Style.EMPTY)
             )

@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
@@ -23,17 +24,18 @@ import java.util.List;
 public class VindicatorProdItem extends ProductionItem {
 
     public final static String itemName = "Vindicator";
+    public final static ResourceCost cost = ResourceCosts.VINDICATOR;
 
     public VindicatorProdItem(ProductionBuilding building) {
-        super(building, ResourceCosts.Vindicator.TICKS);
+        super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
                 building.produceUnit((ServerLevel) level, EntityRegistrar.VINDICATOR_UNIT.get(), building.ownerName, true);
         };
-        this.foodCost = ResourceCosts.Vindicator.FOOD;
-        this.woodCost = ResourceCosts.Vindicator.WOOD;
-        this.oreCost = ResourceCosts.Vindicator.ORE;
-        this.popCost = ResourceCosts.Vindicator.POPULATION;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popCost = cost.population;
     }
 
     public String getItemName() {
@@ -44,8 +46,8 @@ public class VindicatorProdItem extends ProductionItem {
 
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
                 FormattedCharSequence.forward(VindicatorProdItem.itemName, Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Vindicator.FOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Vindicator.POPULATION + "     \uE004  " + ResourceCosts.Vindicator.TICKS / 20 + "s", MyRenderer.iconStyle),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedCostPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A villager armed with an axe for melee combat.", Style.EMPTY)
         ));

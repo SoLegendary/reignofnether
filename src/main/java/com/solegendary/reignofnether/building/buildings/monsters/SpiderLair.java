@@ -2,9 +2,15 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.research.researchItems.ResearchPoisonSpiders;
+import com.solegendary.reignofnether.research.researchItems.ResearchSpiderJockeys;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.units.monsters.PoisonSpiderUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.SpiderUnitProd;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -24,6 +30,7 @@ public class SpiderLair extends ProductionBuilding {
 
     public final static String buildingName = "Spider Lair";
     public final static String structureName = "spider_lair";
+    public final static ResourceCost cost = ResourceCosts.SPIDER_LAIR;
 
     public SpiderLair(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -32,10 +39,10 @@ public class SpiderLair extends ProductionBuilding {
         this.portraitBlock = Blocks.COBWEB;
         this.icon = new ResourceLocation("minecraft", "textures/block/cobweb.png");
 
-        this.foodCost = ResourceCosts.SpiderLair.FOOD;
-        this.woodCost = ResourceCosts.SpiderLair.WOOD;
-        this.oreCost = ResourceCosts.SpiderLair.ORE;
-        this.popSupply = ResourceCosts.SpiderLair.SUPPLY;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popSupply = cost.population;
 
         this.startingBlockTypes.add(Blocks.DEEPSLATE);
         this.startingBlockTypes.add(Blocks.COBBLED_DEEPSLATE);
@@ -44,10 +51,10 @@ public class SpiderLair extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                    //SpiderUnitProd.getStartButton(this, Keybindings.keyQ),
-                    //PoisonSpiderUnitProd.getStartButton(this, Keybindings.keyW),
-                    //ResearchSpiderJockeys.getStartButton(this, Keybindings.keyE),
-                    //ResearchPoisonSpider.getStartButton(this, Keybindings.keyR),
+                    SpiderUnitProd.getStartButton(this, Keybindings.keyQ),
+                    PoisonSpiderUnitProd.getStartButton(this, Keybindings.keyW),
+                    ResearchSpiderJockeys.getStartButton(this, Keybindings.keyE),
+                    ResearchPoisonSpiders.getStartButton(this, Keybindings.keyR)
             );
     }
 
@@ -68,7 +75,7 @@ public class SpiderLair extends ProductionBuilding {
                 null,
                 List.of(
                         FormattedCharSequence.forward(SpiderLair.buildingName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + ResourceCosts.SpiderLair.WOOD + "  \uE002  " + ResourceCosts.SpiderLair.ORE, MyRenderer.iconStyle),
+                        ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A silken cave to grow spiders, both large and poisonous.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),

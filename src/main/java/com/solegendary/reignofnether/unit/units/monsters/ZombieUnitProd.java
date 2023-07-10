@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
@@ -18,17 +19,18 @@ import java.util.List;
 public class ZombieUnitProd extends ProductionItem {
 
     public final static String itemName = "Zombie";
+    public final static ResourceCost cost = ResourceCosts.ZOMBIE;
 
     public ZombieUnitProd(ProductionBuilding building) {
-        super(building, ResourceCosts.Zombie.TICKS);
+        super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
                 building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get(), building.ownerName, true);
         };
-        this.foodCost = ResourceCosts.Zombie.FOOD;
-        this.woodCost = ResourceCosts.Zombie.WOOD;
-        this.oreCost = ResourceCosts.Zombie.ORE;
-        this.popCost = ResourceCosts.Zombie.POPULATION;
+        this.foodCost = cost.food;
+        this.woodCost = cost.wood;
+        this.oreCost = cost.ore;
+        this.popCost = cost.population;
     }
 
     public String getItemName() {
@@ -48,10 +50,12 @@ public class ZombieUnitProd extends ProductionItem {
             null,
             List.of(
                 FormattedCharSequence.forward(ZombieUnitProd.itemName, Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE000  " + ResourceCosts.Zombie.FOOD, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("\uE003  " + ResourceCosts.Zombie.POPULATION + "     \uE004  " + ResourceCosts.Zombie.TICKS/20 + "s", MyRenderer.iconStyle),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedCostPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An undead monster with a basic melee attack.", Style.EMPTY)
+                FormattedCharSequence.forward("An undead monster with a basic melee attack.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Zombies will burn under sunlight.", Style.EMPTY)
             )
         );
     }

@@ -1,38 +1,33 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.Ability;
-import com.solegendary.reignofnether.unit.abilities.Teleport;
-import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.goals.*;
+import com.solegendary.reignofnether.unit.Ability;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Spider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
+public class SpiderUnit extends Spider implements Unit, AttackerUnit {
     // region
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -64,7 +59,7 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
-            SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.STRING);
+            SynchedEntityData.defineId(SpiderUnit.class, EntityDataSerializers.STRING);
 
     @Override
     protected void defineSynchedData() {
@@ -94,15 +89,15 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
 
     final static public float attackDamage = 3.0f;
     final static public float attacksPerSecond = 0.6f;
-    final static public float maxHealth = 20.0f;
+    final static public float maxHealth = 16.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.25f;
+    final static public float movementSpeed = 0.32f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-    final static public int popCost = ResourceCosts.ENDERMAN.population;
+    final static public int popCost = ResourceCosts.SPIDER.population;
     final static public boolean canAttackBuildings = true;
     public int maxResources = 100;
 
@@ -113,16 +108,8 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    // TODO: prevent random teleport on being wet, damaged or being shot (but keep the damage)
-
-    public EndermanUnit(EntityType<? extends EnderMan> entityType, Level level) {
+    public SpiderUnit(EntityType<? extends Spider> entityType, Level level) {
         super(entityType, level);
-
-        Teleport ab1 = new Teleport(this);
-        this.abilities.add(ab1);
-
-        if (level.isClientSide())
-            this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
     }
 
     @Override
@@ -130,17 +117,22 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MOVEMENT_SPEED, EndermanUnit.movementSpeed)
-                .add(Attributes.ATTACK_DAMAGE, EndermanUnit.attackDamage)
-                .add(Attributes.MAX_HEALTH, EndermanUnit.maxHealth);
+                .add(Attributes.MOVEMENT_SPEED, SpiderUnit.movementSpeed)
+                .add(Attributes.ATTACK_DAMAGE, SpiderUnit.attackDamage)
+                .add(Attributes.ARMOR, SpiderUnit.armorValue)
+                .add(Attributes.MAX_HEALTH, SpiderUnit.maxHealth);
     }
 
     public void tick() {
-        this.setCanPickUpLoot(true);
+        this.setCanPickUpLoot(false);
 
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+
+        // TODO: apply slowness level 2 during daytime for a short time repeatedly
+        //if (!this.level.isClientSide() && this.level.isDay() && !BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false))
+        //    this.addEffect(EffectInstance)
     }
 
     public void initialiseGoals() {
@@ -148,7 +140,6 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
         this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
-        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
     }
 
     @Override
@@ -159,33 +150,8 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, attackBuildingGoal);
-        this.goalSelector.addGoal(2, returnResourcesGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
-    }
-
-    public void teleport(BlockPos bp) {
-        BlockPos.MutableBlockPos mBp = bp.mutable();
-
-        // find an adjacent non-blocking block
-        List<BlockPos> bps = List.of(
-            mBp.move(Direction.UP),
-            mBp.move(Direction.NORTH),
-            mBp.move(Direction.SOUTH),
-            mBp.move(Direction.EAST),
-            mBp.move(Direction.WEST)
-        );
-        BlockPos bpTarget = mBp;
-
-        for (BlockPos bp2 : bps)
-            if (!this.level.getBlockState(mBp).getMaterial().blocksMotion())
-                bpTarget = bp2;
-
-        this.moveTo(new Vec3(bpTarget.getX(), bpTarget.getY(), bpTarget.getZ()));
-        if (!this.isSilent()) {
-            this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
-            this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
-        }
     }
 }
