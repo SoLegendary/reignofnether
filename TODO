@@ -10,16 +10,25 @@ More terrain generation:
 
 - Fix smooth lighting issues on fog of war borders (properly)
 
+
 - workers can sometimes see through and mine underground ores
+- workers and units sometimes get stuck in 2x1 holes
     - workers must have line of sight somehow
     - or maybe let workers dig towards it
+    - IDEA: solve these by replacing dug ore blocks with cobble
 
-- workers and units sometimes get stuck in 2x1 holes
 
 - time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
     - not sure of the ordering...
 
-- Research for unit items (eg. vindicator axes) don't apply to newly created units
+TODO buildings/units
+
+Spider
+    - apply slowness II in daylight
+    - nerf poison spider poison length
+    - prevent skeleton jockeys from fighting their spiders' movement AI
+        - replicate the same move command from the skeleton to the spider
+    - test in multiplayer!
 
 
 TODO buildings/units (backlog)
@@ -31,9 +40,6 @@ Villager faction
 
 Monster faction
     - Creepers should not friendly fire
-    - Spider lair
-        - Upgrade to cave spiders
-        - Upgrade to allow mounting spider jockeys
     - Husks (upgraded from Zombies at the lab)
         - 20 -> 25hp, doesn't burn in sunlight
     - Strays (upgraded from Skeletons at the lab)

@@ -1,9 +1,9 @@
-package com.solegendary.reignofnether.unit.abilities;
+package com.solegendary.reignofnether.ability.abilities;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.unit.Ability;
+import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -26,7 +26,7 @@ public class Explode extends Ability {
             0,
             0,
             0,
-                false
+            false
         );
         this.creeperUnit = creeperUnit;
     }

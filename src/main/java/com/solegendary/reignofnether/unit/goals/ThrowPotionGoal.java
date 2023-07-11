@@ -1,8 +1,7 @@
 package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.unit.Ability;
-import com.solegendary.reignofnether.unit.AbilityClientboundPacket;
-import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;

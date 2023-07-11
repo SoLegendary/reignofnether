@@ -1,9 +1,10 @@
-package com.solegendary.reignofnether.unit;
+package com.solegendary.reignofnether.ability;
 
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;

@@ -1,15 +1,12 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.unit.Ability;
-import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.ability.Ability;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.List;
 import java.util.function.Supplier;
 

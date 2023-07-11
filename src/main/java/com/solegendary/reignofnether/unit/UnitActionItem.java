@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;

@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.tps.TPSClientBoundPacket;
-import com.solegendary.reignofnether.unit.AbilityClientboundPacket;
+import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitServerboundPacket;
 import com.solegendary.reignofnether.unit.UnitWorkerClientBoundPacket;
