@@ -1,6 +1,10 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.ability.abilities.Dismount;
+import com.solegendary.reignofnether.ability.abilities.Mount;
+import com.solegendary.reignofnether.ability.abilities.MountSpider;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -44,10 +48,12 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public Goal getAttackGoal() {return attackGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
+    public MountGoal getMountGoal() {return mountGoal;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
     public ReturnResourcesGoal returnResourcesGoal;
+    public MountGoal mountGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -115,6 +121,16 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
 
     public PillagerUnit(EntityType<? extends Pillager> entityType, Level level) {
         super(entityType, level);
+
+        Mount mountAbility = new Mount(this);
+        Dismount dismountAbility = new Dismount(this);
+        this.abilities.add(mountAbility);
+        this.abilities.add(dismountAbility);
+
+        if (level.isClientSide()) {
+            this.abilityButtons.add(mountAbility.getButton(Keybindings.keyQ));
+            this.abilityButtons.add(dismountAbility.getButton(Keybindings.keyQ));
+        }
     }
 
     @Override
@@ -133,6 +149,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+        this.mountGoal.tick();
     }
 
     public void initialiseGoals() {
@@ -140,6 +157,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
         this.attackGoal = new UnitCrossbowAttackGoal<>(this, getAttackCooldown(), attackRange);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.mountGoal = new MountGoal(this);
     }
 
     @Override
@@ -149,6 +167,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
+        this.goalSelector.addGoal(2, mountGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));

@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.abilities.Dismount;
-import com.solegendary.reignofnether.ability.abilities.Explode;
 import com.solegendary.reignofnether.ability.abilities.MountSpider;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -43,13 +42,13 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
     public Goal getAttackGoal() {return attackGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
-    public MountSpiderGoal getMountSpiderGoal() {return mountSpiderGoal;}
     public int getMaxResources() {return maxResources;}
+    public MountGoal getMountGoal() {return mountGoal;}
 
     public MoveToTargetBlockGoal moveGoal;
     public SelectedTargetGoal<? extends LivingEntity> targetGoal;
     public ReturnResourcesGoal returnResourcesGoal;
-    public MountSpiderGoal mountSpiderGoal;
+    public MountGoal mountGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -145,7 +144,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
-        this.mountSpiderGoal.tick();
+        this.mountGoal.tick();
 
         // need to do this outside the goal so it ticks down while not attacking
         // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
@@ -162,7 +161,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
         this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown(), attackRange);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
-        this.mountSpiderGoal = new MountSpiderGoal(this);
+        this.mountGoal = new MountGoal(this);
     }
 
     @Override
@@ -172,7 +171,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
-        this.goalSelector.addGoal(2, mountSpiderGoal);
+        this.goalSelector.addGoal(2, mountGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));

@@ -56,7 +56,7 @@ public class Dismount extends Ability {
     }
 
     @Override
-    public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
+    public void use(Level level, Unit unitUsing, BlockPos targetBp) {
         ((LivingEntity) unitUsing).stopRiding();
     }
 }

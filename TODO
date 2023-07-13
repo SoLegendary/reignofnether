@@ -24,10 +24,6 @@ More terrain generation:
 TODO buildings/units
 
 Spider
-    - apply slowness II in daylight
-    - nerf poison spider poison length
-    - prevent skeleton jockeys from fighting their spiders' movement AI
-        - replicate the same move command from the skeleton to the spider
     - test in multiplayer!
 
 

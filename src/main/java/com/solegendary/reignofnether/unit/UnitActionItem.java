@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
@@ -56,10 +57,17 @@ public class UnitActionItem {
     public void action(Level level) {
 
         // filter out unowned units and non-unit entities
+        // and replicate the same command to the unit's vehicle
         ArrayList<Unit> actionableUnits = new ArrayList<>();
-        for (int id : unitIds)
-            if (level.getEntity(id) instanceof Unit unit && unit.getOwnerName().equals(this.ownerName))
+        for (int id : unitIds) {
+            Entity entity = level.getEntity(id);
+            if (entity instanceof Unit unit && unit.getOwnerName().equals(this.ownerName)) {
                 actionableUnits.add(unit);
+                if (entity.getVehicle() instanceof Unit unitVehicle)
+                    actionableUnits.add(unitVehicle);
+            }
+        }
+
 
         for (Unit unit : actionableUnits) {
 

@@ -23,6 +23,7 @@ public enum UnitAction {
     EXPLODE,
     CALL_LIGHTNING, // actually not from a unit, but we'll make an exception
     TELEPORT,
+    MOUNT,
     MOUNT_SPIDER,
     DISMOUNT,
 
