@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
+import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -58,6 +59,8 @@ public class Mount extends Ability {
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
         if (unitUsing instanceof SkeletonUnit)
             ((SkeletonUnit) unitUsing).getMountGoal().setTarget(targetEntity);
+        else if (unitUsing instanceof StrayUnit)
+            ((StrayUnit) unitUsing).getMountGoal().setTarget(targetEntity);
         else if (unitUsing instanceof PillagerUnit)
             ((PillagerUnit) unitUsing).getMountGoal().setTarget(targetEntity);
     }

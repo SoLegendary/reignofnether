@@ -14,13 +14,21 @@ public class ItemRegistrar {
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, ReignOfNether.MOD_ID);
 
+    public static final RegistryObject<ForgeSpawnEggItem> ZOMBIE_UNIT_SPAWN_EGG =
+            ITEMS.register("zombie_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.ZOMBIE_UNIT,
+                    0x009999, 0x577048, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
+    public static final RegistryObject<ForgeSpawnEggItem> HUSK_UNIT_SPAWN_EGG =
+            ITEMS.register("husk_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.HUSK_UNIT,
+                    0x71695B, 0xB7A276, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
     public static final RegistryObject<ForgeSpawnEggItem> SKELETON_UNIT_SPAWN_EGG =
             ITEMS.register("skeleton_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.SKELETON_UNIT,
                     0xa7a7a7, 0x3a3a3a, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
-    public static final RegistryObject<ForgeSpawnEggItem> ZOMBIE_UNIT_SPAWN_EGG =
-            ITEMS.register("zombie_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.ZOMBIE_UNIT,
-                    0x009999, 0x577048, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+    public static final RegistryObject<ForgeSpawnEggItem> STRAY_UNIT_SPAWN_EGG =
+            ITEMS.register("stray_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.STRAY_UNIT,
+                    0x5B6F6F, 0xAEB8B8, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
     public static final RegistryObject<ForgeSpawnEggItem> CREEPER_UNIT_SPAWN_EGG =
             ITEMS.register("creeper_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.CREEPER_UNIT,
@@ -57,6 +65,10 @@ public class ItemRegistrar {
     public static final RegistryObject<ForgeSpawnEggItem> WITCH_UNIT_SPAWN_EGG =
             ITEMS.register("witch_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WITCH_UNIT,
                     0x330000, 0x3A732D, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
+    public static final RegistryObject<ForgeSpawnEggItem> EVOKER_UNIT_SPAWN_EGG =
+            ITEMS.register("evoker_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.EVOKER_UNIT,
+                    0x8D9393, 0x141414, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
     public static final RegistryObject<ForgeSpawnEggItem> ENDERMAN_UNIT_SPAWN_EGG =
             ITEMS.register("enderman_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.ENDERMAN_UNIT,

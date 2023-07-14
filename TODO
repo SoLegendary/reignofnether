@@ -30,16 +30,14 @@ Spider
 TODO buildings/units (backlog)
 
 Villager faction
-    - tower (garrisons ranged units)
-    - Witch's hut
-        - Witch (ground AOE splash potion abilities, upgrade to give more potion effects)
+    - Tower (garrisons ranged units)
+    - Mage Tower
+        - Witch (upgrade to allow potions to linger)
+        - Evoker (evoker fangs + upgrade to summon uncontrollable vexes)
 
 Monster faction
     - Creepers should not friendly fire
-    - Husks (upgraded from Zombies at the lab)
-        - 20 -> 25hp, doesn't burn in sunlight
-    - Strays (upgraded from Skeletons at the lab)
-        - Fires slowing arrows
+    - Have existing zombies/skeletons turn into husks/strays on upgrade
 
 Netherling faction
     All netherling buildings slowly convert non-nether blocks around them into nether counterparts:

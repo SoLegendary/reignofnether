@@ -5,6 +5,8 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchHusks;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -44,7 +46,7 @@ public class ZombieUnitProd extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
             hotkey,
             () -> false,
-            () -> false,
+            () -> !ResearchClient.hasResearch(ResearchHusks.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,

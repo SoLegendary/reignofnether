@@ -30,10 +30,20 @@ public class EntityRegistrar {
                     .sized(EntityType.ZOMBIE.getWidth(), EntityType.ZOMBIE.getHeight())
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "zombie_unit").toString()));
 
+    public static final RegistryObject<EntityType<HuskUnit>> HUSK_UNIT = ENTITIES.register("husk_unit",
+            () -> EntityType.Builder.of(HuskUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.HUSK.getWidth(), EntityType.HUSK.getHeight())
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "husk_unit").toString()));
+
     public static final RegistryObject<EntityType<SkeletonUnit>> SKELETON_UNIT = ENTITIES.register("skeleton_unit",
             () -> EntityType.Builder.of(SkeletonUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "skeleton_unit").toString()));
+
+    public static final RegistryObject<EntityType<StrayUnit>> STRAY_UNIT = ENTITIES.register("stray_unit",
+            () -> EntityType.Builder.of(StrayUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.STRAY.getWidth(), EntityType.STRAY.getHeight())
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "stray_unit").toString()));
 
     public static final RegistryObject<EntityType<CreeperUnit>> CREEPER_UNIT = ENTITIES.register("creeper_unit",
             () -> EntityType.Builder.of(CreeperUnit::new, MobCategory.CREATURE)
@@ -74,6 +84,11 @@ public class EntityRegistrar {
             () -> EntityType.Builder.of(WitchUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.WITCH.getWidth(), EntityType.WITCH.getHeight())
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "witch_unit").toString()));
+
+    public static final RegistryObject<EntityType<EvokerUnit>> EVOKER_UNIT = ENTITIES.register("evoker_unit",
+            () -> EntityType.Builder.of(EvokerUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.EVOKER.getWidth(), EntityType.EVOKER.getHeight())
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "evoker_unit").toString()));
 
     public static final RegistryObject<EntityType<EndermanUnit>> ENDERMAN_UNIT = ENTITIES.register("enderman_unit",
             () -> EntityType.Builder.of(EndermanUnit::new, MobCategory.CREATURE)

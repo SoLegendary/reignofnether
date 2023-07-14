@@ -34,7 +34,9 @@ public class ResourceCosts {
     public static ResourceCost ZOMBIE_VILLAGER = ResourceCost.Unit(50,0,0,15,1);
     public static ResourceCost CREEPER = ResourceCost.Unit(50,0,100,35,2);
     public static ResourceCost SKELETON = ResourceCost.Unit(70,50,0,20,1);
+    public static ResourceCost STRAY = ResourceCost.Unit(70,50,0,20,1);
     public static ResourceCost ZOMBIE = ResourceCost.Unit(90,0,0,20,1);
+    public static ResourceCost HUSK = ResourceCost.Unit(90,0,0,20,1);
     public static ResourceCost SPIDER = ResourceCost.Unit(80,60,0,25,2);
     public static ResourceCost POISON_SPIDER = ResourceCost.Unit(80,0,60,25,2);
     public static ResourceCost ENDERMAN = ResourceCost.Unit(100,100,100,30,3);
@@ -45,7 +47,7 @@ public class ResourceCosts {
     public static ResourceCost PILLAGER = ResourceCost.Unit(100,80,0,30,2);
     public static ResourceCost VINDICATOR = ResourceCost.Unit(150,0,0,30,2);
     public static ResourceCost WITCH = ResourceCost.Unit(100,100,100,35,3);
-
+    public static ResourceCost EVOKER = ResourceCost.Unit(150,50,150,35,3);
 
     // ******************* BUILDINGS ******************* //
     public static ResourceCost STOCKPILE = ResourceCost.Building(0,75,0, 0);
@@ -68,9 +70,11 @@ public class ResourceCosts {
 
     // ******************* RESEARCH ******************* //
     public static ResourceCost RESEARCH_VINDICATOR_AXES = ResourceCost.Research(0,200,400, 120);
-    public static ResourceCost RESEARCH_PILLAGER_CROSSBOWS = ResourceCost.Research(0,500,250, 120);
+    public static ResourceCost RESEARCH_PILLAGER_CROSSBOWS = ResourceCost.Research(0,600,300, 180);
     public static ResourceCost RESEARCH_LAB_LIGHTNING_ROD = ResourceCost.Research(0,100,500, 120);
     public static ResourceCost RESEARCH_RESOURCE_CAPACITY = ResourceCost.Research(200,200,0, 90);
     public static ResourceCost RESEARCH_SPIDER_JOCKEYS = ResourceCost.Research(300,300,0, 120);
     public static ResourceCost RESEARCH_POISON_SPIDERS = ResourceCost.Research(300,0,300, 100);
+    public static ResourceCost RESEARCH_HUSKS = ResourceCost.Research(500,0,200, 120);
+    public static ResourceCost RESEARCH_STRAYS = ResourceCost.Research(500,300,0, 120);
 }

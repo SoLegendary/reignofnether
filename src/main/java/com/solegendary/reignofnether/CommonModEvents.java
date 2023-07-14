@@ -32,6 +32,8 @@ public class CommonModEvents {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers evt) {
         evt.registerEntityRenderer(EntityRegistrar.ZOMBIE_UNIT.get(), ZombieRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.SKELETON_UNIT.get(), SkeletonRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.HUSK_UNIT.get(), HuskRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.STRAY_UNIT.get(), StrayRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.CREEPER_UNIT.get(), CreeperRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.SPIDER_UNIT.get(), SpiderRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.POISON_SPIDER_UNIT.get(), CaveSpiderRenderer::new);
@@ -41,6 +43,7 @@ public class CommonModEvents {
         evt.registerEntityRenderer(EntityRegistrar.VINDICATOR_UNIT.get(), VindicatorUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.IRON_GOLEM_UNIT.get(), IronGolemRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WITCH_UNIT.get(), WitchRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.EVOKER_UNIT.get(), EvokerRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.ENDERMAN_UNIT.get(), EndermanRenderer::new);
     }
 
@@ -48,6 +51,8 @@ public class CommonModEvents {
     public static void registerAttributes(EntityAttributeCreationEvent evt) {
         evt.put(EntityRegistrar.ZOMBIE_UNIT.get(), ZombieUnit.createAttributes().build());
         evt.put(EntityRegistrar.SKELETON_UNIT.get(), SkeletonUnit.createAttributes().build());
+        evt.put(EntityRegistrar.HUSK_UNIT.get(), HuskUnit.createAttributes().build());
+        evt.put(EntityRegistrar.STRAY_UNIT.get(), StrayUnit.createAttributes().build());
         evt.put(EntityRegistrar.CREEPER_UNIT.get(), CreeperUnit.createAttributes().build());
         evt.put(EntityRegistrar.SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
         evt.put(EntityRegistrar.POISON_SPIDER_UNIT.get(), PoisonSpiderUnit.createAttributes().build());
@@ -57,6 +62,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.VINDICATOR_UNIT.get(), VindicatorUnit.createAttributes().build());
         evt.put(EntityRegistrar.IRON_GOLEM_UNIT.get(), IronGolemUnit.createAttributes().build());
         evt.put(EntityRegistrar.WITCH_UNIT.get(), WitchUnit.createAttributes().build());
+        evt.put(EntityRegistrar.EVOKER_UNIT.get(), EvokerUnit.createAttributes().build());
         evt.put(EntityRegistrar.ENDERMAN_UNIT.get(), EndermanUnit.createAttributes().build());
     }
 

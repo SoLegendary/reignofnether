@@ -2,9 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.research.researchItems.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
-import com.solegendary.reignofnether.unit.units.villagers.IronGolemProdItem;
-import com.solegendary.reignofnether.unit.units.villagers.PillagerProdItem;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerProdItem;
+import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
@@ -13,7 +11,6 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.unit.units.villagers.VindicatorProdItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -124,6 +121,8 @@ public abstract class ProductionBuilding extends Building {
                 case CreeperUnitProd.itemName -> prodItem = new CreeperUnitProd(building);
                 case SkeletonUnitProd.itemName -> prodItem = new SkeletonUnitProd(building);
                 case ZombieUnitProd.itemName -> prodItem = new ZombieUnitProd(building);
+                case StrayUnitProd.itemName -> prodItem = new StrayUnitProd(building);
+                case HuskUnitProd.itemName -> prodItem = new HuskUnitProd(building);
                 case SpiderUnitProd.itemName -> prodItem = new SpiderUnitProd(building);
                 case PoisonSpiderUnitProd.itemName -> prodItem = new PoisonSpiderUnitProd(building);
                 case VillagerProdItem.itemName -> prodItem = new VillagerProdItem(building);
@@ -131,6 +130,8 @@ public abstract class ProductionBuilding extends Building {
                 case VindicatorProdItem.itemName -> prodItem = new VindicatorProdItem(building);
                 case PillagerProdItem.itemName -> prodItem = new PillagerProdItem(building);
                 case IronGolemProdItem.itemName -> prodItem = new IronGolemProdItem(building);
+                case WitchProdItem.itemName -> prodItem = new WitchProdItem(building);
+                case EvokerProdItem.itemName -> prodItem = new EvokerProdItem(building);
 
                 case ResearchVindicatorAxes.itemName -> prodItem = new ResearchVindicatorAxes(building);
                 case ResearchPillagerCrossbows.itemName -> prodItem = new ResearchPillagerCrossbows(building);

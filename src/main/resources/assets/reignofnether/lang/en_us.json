@@ -1,6 +1,8 @@
 {
-  "item.reignofnether.skeleton_unit_spawn_egg": "Spawn Skeleton Unit",
   "item.reignofnether.zombie_unit_spawn_egg": "Spawn Zombie Unit",
+  "item.reignofnether.husk_unit_spawn_egg": "Spawn Husk Unit",
+  "item.reignofnether.skeleton_unit_spawn_egg": "Spawn Skeleton Unit",
+  "item.reignofnether.stray_unit_spawn_egg": "Spawn Stray Unit",
   "item.reignofnether.creeper_unit_spawn_egg": "Spawn Creeper Unit",
   "item.reignofnether.spider_unit_spawn_egg": "Spawn Spider Unit",
   "item.reignofnether.poison_spider_unit_spawn_egg": "Spawn Poison Spider Unit",
@@ -10,5 +12,6 @@
   "item.reignofnether.vindicator_unit_spawn_egg": "Spawn Vindicator Unit",
   "item.reignofnether.iron_golem_unit_spawn_egg": "Spawn Iron Golem Unit",
   "item.reignofnether.witch_unit_spawn_egg": "Spawn Witch Unit",
+  "item.reignofnether.evoker_unit_spawn_egg": "Spawn Evoker Unit",
   "item.reignofnether.enderman_unit_spawn_egg": "Spawn Enderman Unit"
 }

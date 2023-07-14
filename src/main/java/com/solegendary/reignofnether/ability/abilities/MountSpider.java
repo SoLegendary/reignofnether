@@ -23,9 +23,9 @@ import java.util.List;
 
 public class MountSpider extends Ability {
 
-    private final SkeletonUnit skeleton;
+    private final LivingEntity entity;
 
-    public MountSpider(SkeletonUnit skeleton) {
+    public MountSpider(LivingEntity entity) {
         super(
             UnitAction.MOUNT_SPIDER,
             0,
@@ -33,7 +33,7 @@ public class MountSpider extends Ability {
             0,
             true
         );
-        this.skeleton = skeleton;
+        this.entity = entity;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class MountSpider extends Ability {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/spider.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_SPIDER,
-            () -> skeleton.getVehicle() != null || !ResearchClient.hasResearch(ResearchSpiderJockeys.itemName),
+            () -> entity.getVehicle() != null || !ResearchClient.hasResearch(ResearchSpiderJockeys.itemName),
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_SPIDER),
             null,

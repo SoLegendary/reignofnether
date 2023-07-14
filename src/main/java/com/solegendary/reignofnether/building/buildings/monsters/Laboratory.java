@@ -5,7 +5,9 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchHusks;
 import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
+import com.solegendary.reignofnether.research.researchItems.ResearchStrays;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -53,7 +55,9 @@ public class Laboratory extends ProductionBuilding {
         if (level.isClientSide()) {
             this.productionButtons = Arrays.asList(
                 CreeperUnitProd.getStartButton(this, Keybindings.keyQ),
-                ResearchLabLightningRod.getStartButton(this, Keybindings.keyW)
+                ResearchHusks.getStartButton(this, Keybindings.keyW),
+                ResearchStrays.getStartButton(this, Keybindings.keyE),
+                ResearchLabLightningRod.getStartButton(this, Keybindings.keyR)
             );
             this.abilityButtons.add(callLightning.getButton(Keybindings.keyL));
         }
