@@ -43,7 +43,7 @@ public class MountSpider extends Ability {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/spider.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_SPIDER,
-            () -> entity.getVehicle() != null || !ResearchClient.hasResearch(ResearchSpiderJockeys.itemName),
+            () -> entity.isPassenger() || !ResearchClient.hasResearch(ResearchSpiderJockeys.itemName),
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_SPIDER),
             null,

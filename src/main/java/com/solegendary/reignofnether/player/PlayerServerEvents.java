@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.Resources;
@@ -8,6 +9,9 @@ import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
@@ -52,6 +56,16 @@ public class PlayerServerEvents {
     // commands for ops to give resources
     @SubscribeEvent
     public static void onPlayerChat(ServerChatEvent.Submitted evt) {
+
+        if (evt.getMessage().getString().equals("test husks"))
+            for (LivingEntity unit : UnitServerEvents.getAllUnits())
+                if (unit instanceof ZombieUnit zUnit)
+                    UnitServerEvents.convertToUnit(evt.getPlayer().getLevel(), zUnit, EntityRegistrar.HUSK_UNIT.get());
+        if (evt.getMessage().getString().equals("test strays"))
+            for (LivingEntity unit : UnitServerEvents.getAllUnits())
+                if (unit instanceof SkeletonUnit sUnit)
+                    UnitServerEvents.convertToUnit(evt.getPlayer().getLevel(), sUnit, EntityRegistrar.STRAY_UNIT.get());
+
 
         if (evt.getPlayer().hasPermissions(4)) {
             String msg = evt.getMessage().getString();

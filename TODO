@@ -38,6 +38,7 @@ Villager faction
 Monster faction
     - Creepers should not friendly fire
     - Have existing zombies/skeletons turn into husks/strays on upgrade
+        - conserve selected units and control groups
 
 Netherling faction
     All netherling buildings slowly convert non-nether blocks around them into nether counterparts:

@@ -35,7 +35,7 @@ public class ResearchPillagerCrossbows extends ProductionItem {
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchPillagerCrossbows.itemName);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())
-                    if (unit instanceof PillagerUnit pUnit)
+                    if (unit instanceof PillagerUnit pUnit && pUnit.getOwnerName().equals(building.ownerName))
                         pUnit.setupEquipmentAndUpgradesServer();
             }
         };

@@ -44,7 +44,7 @@ public class Mount extends Ability {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/saddle.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT,
-            () -> entity.getVehicle() != null,
+            entity::isPassenger,
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT),
             null,

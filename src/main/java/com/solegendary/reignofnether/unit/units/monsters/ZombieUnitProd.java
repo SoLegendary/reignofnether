@@ -46,7 +46,7 @@ public class ZombieUnitProd extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
             hotkey,
             () -> false,
-            () -> !ResearchClient.hasResearch(ResearchHusks.itemName),
+            () -> ResearchClient.hasResearch(ResearchHusks.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,

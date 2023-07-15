@@ -6,14 +6,18 @@ import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -33,10 +37,10 @@ public class ResearchStrays extends ProductionItem {
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchStrays.itemName);
 
-                // TODO: convert all skeletons into strays with the same stats/inventory/etc.
-                // for (LivingEntity unit : UnitServerEvents.getAllUnits())
-                //    if (unit instanceof VindicatorUnit vUnit)
-                //        vUnit.setupEquipmentAndUpgradesServer();
+                // convert all skeletons into strays with the same stats/inventory/etc.
+                for (LivingEntity unit : UnitServerEvents.getAllUnits())
+                    if (unit instanceof SkeletonUnit sUnit && sUnit.getOwnerName().equals(building.ownerName))
+                        UnitServerEvents.convertToUnit((ServerLevel) level, sUnit, EntityRegistrar.STRAY_UNIT.get());
             }
         };
         this.foodCost = cost.food;

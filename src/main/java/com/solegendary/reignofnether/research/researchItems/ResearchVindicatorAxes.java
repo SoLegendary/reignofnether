@@ -32,7 +32,7 @@ public class ResearchVindicatorAxes extends ProductionItem {
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchVindicatorAxes.itemName);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())
-                    if (unit instanceof VindicatorUnit vUnit)
+                    if (unit instanceof VindicatorUnit vUnit && vUnit.getOwnerName().equals(building.ownerName))
                         vUnit.setupEquipmentAndUpgradesServer();
             }
         };

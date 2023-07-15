@@ -47,7 +47,7 @@ public class HuskUnitProd extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
             hotkey,
             () -> false,
-            () -> ResearchClient.hasResearch(ResearchHusks.itemName),
+            () -> !ResearchClient.hasResearch(ResearchHusks.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,

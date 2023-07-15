@@ -6,11 +6,15 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
@@ -29,6 +33,7 @@ import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -46,6 +51,36 @@ public class UnitServerEvents {
 
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
+    }
+
+    public static void convertToUnit(ServerLevel level, Unit oldUnit, EntityType<? extends Unit> entityType) {
+        LivingEntity oldEntity = (LivingEntity) oldUnit;
+        LivingEntity newEntity = (LivingEntity) entityType.create(level);
+
+        if (newEntity == null)
+            return;
+
+        newEntity.setHealth(oldEntity.getHealth());
+        for (MobEffectInstance effect : oldEntity.getActiveEffects())
+            newEntity.addEffect(effect);
+
+        newEntity.copyPosition(oldEntity);
+        ((Unit) newEntity).setOwnerName(oldUnit.getOwnerName());
+        level.addFreshEntity(newEntity);
+
+        for (ItemStack item : oldUnit.getItems())
+            ((Unit) newEntity).getItems().add(item);
+
+        UnitClientboundPacket.sendSyncResourcesPacket((Unit) newEntity);
+
+        Entity vehicle = oldEntity.getVehicle();
+        if (vehicle != null) {
+            oldEntity.stopRiding();
+            newEntity.startRiding(vehicle, true);
+        }
+        oldEntity.discard();
+
+        // TODO: conserve selected units and control groups
     }
 
     public static int getCurrentPopulation(ServerLevel level, String ownerName) {

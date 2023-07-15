@@ -45,7 +45,7 @@ public class SkeletonUnitProd extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png"),
             hotkey,
             () -> false,
-            () -> !ResearchClient.hasResearch(ResearchStrays.itemName),
+            () -> ResearchClient.hasResearch(ResearchStrays.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,

@@ -48,7 +48,7 @@ public class StrayUnitProd extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
             hotkey,
             () -> false,
-            () -> ResearchClient.hasResearch(ResearchStrays.itemName),
+            () -> !ResearchClient.hasResearch(ResearchStrays.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
