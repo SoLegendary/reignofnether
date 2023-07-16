@@ -4,9 +4,11 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -38,6 +40,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class UnitServerEvents {
 
@@ -49,8 +52,21 @@ public class UnitServerEvents {
 
     private static final ArrayList<Pair<LivingEntity, ChunkAccess>> forcedUnitChunks = new ArrayList<>();
 
-    public static ArrayList<LivingEntity> getAllUnits() {
-        return allUnits;
+    public static ArrayList<LivingEntity> getAllUnits() { return allUnits; }
+
+    // convert all entities that match the condition to the given unit type
+    public static void convertAllToUnit(ServerLevel level, Predicate<LivingEntity> entityCondition, EntityType<? extends Unit> entityType) {
+        boolean foundUnit = true;
+        outerLoop:
+        while (foundUnit) { // looped like this to avoid array comodification (list of entities in the level)
+            for (LivingEntity unit : UnitServerEvents.getAllUnits()) {
+                if (entityCondition.test(unit)) {
+                    UnitServerEvents.convertToUnit(level, (Unit) unit, entityType);
+                    continue outerLoop;
+                }
+            }
+            foundUnit = false;
+        }
     }
 
     public static void convertToUnit(ServerLevel level, Unit oldUnit, EntityType<? extends Unit> entityType) {

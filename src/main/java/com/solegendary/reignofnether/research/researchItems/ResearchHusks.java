@@ -39,9 +39,13 @@ public class ResearchHusks extends ProductionItem {
                 ResearchServer.addResearch(this.building.ownerName, ResearchHusks.itemName);
 
                 // convert all zombies into husks with the same stats/inventory/etc.
-                for (LivingEntity unit : UnitServerEvents.getAllUnits())
-                    if (unit instanceof ZombieUnit zUnit && zUnit.getOwnerName().equals(building.ownerName))
-                        UnitServerEvents.convertToUnit((ServerLevel) level, zUnit, EntityRegistrar.HUSK_UNIT.get());
+                UnitServerEvents.convertAllToUnit(
+                    (ServerLevel) level,
+                    (LivingEntity entity) ->
+                        entity instanceof ZombieUnit zUnit &&
+                        zUnit.getOwnerName().equals(building.ownerName),
+                    EntityRegistrar.HUSK_UNIT.get()
+                );
             }
         };
         this.foodCost = cost.food;

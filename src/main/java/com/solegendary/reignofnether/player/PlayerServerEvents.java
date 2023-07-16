@@ -56,17 +56,6 @@ public class PlayerServerEvents {
     // commands for ops to give resources
     @SubscribeEvent
     public static void onPlayerChat(ServerChatEvent.Submitted evt) {
-
-        if (evt.getMessage().getString().equals("test husks"))
-            for (LivingEntity unit : UnitServerEvents.getAllUnits())
-                if (unit instanceof ZombieUnit zUnit)
-                    UnitServerEvents.convertToUnit(evt.getPlayer().getLevel(), zUnit, EntityRegistrar.HUSK_UNIT.get());
-        if (evt.getMessage().getString().equals("test strays"))
-            for (LivingEntity unit : UnitServerEvents.getAllUnits())
-                if (unit instanceof SkeletonUnit sUnit)
-                    UnitServerEvents.convertToUnit(evt.getPlayer().getLevel(), sUnit, EntityRegistrar.STRAY_UNIT.get());
-
-
         if (evt.getPlayer().hasPermissions(4)) {
             String msg = evt.getMessage().getString();
             String[] words = msg.split(" ");

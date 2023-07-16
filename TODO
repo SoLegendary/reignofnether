@@ -10,6 +10,8 @@ More terrain generation:
 
 - Fix smooth lighting issues on fog of war borders (properly)
 
+- time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
+    - not sure of the ordering...
 
 - workers can sometimes see through and mine underground ores
 - workers and units sometimes get stuck in 2x1 holes
@@ -18,8 +20,7 @@ More terrain generation:
     - IDEA: solve these by replacing dug ore blocks with cobble
 
 
-- time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
-    - not sure of the ordering...
+
 
 TODO buildings/units
 
@@ -39,6 +40,7 @@ Monster faction
     - Creepers should not friendly fire
     - Have existing zombies/skeletons turn into husks/strays on upgrade
         - conserve selected units and control groups
+    - Stray arrows slow duration seems to be stuck at 30s
 
 Netherling faction
     All netherling buildings slowly convert non-nether blocks around them into nether counterparts:

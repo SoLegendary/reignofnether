@@ -38,9 +38,13 @@ public class ResearchStrays extends ProductionItem {
                 ResearchServer.addResearch(this.building.ownerName, ResearchStrays.itemName);
 
                 // convert all skeletons into strays with the same stats/inventory/etc.
-                for (LivingEntity unit : UnitServerEvents.getAllUnits())
-                    if (unit instanceof SkeletonUnit sUnit && sUnit.getOwnerName().equals(building.ownerName))
-                        UnitServerEvents.convertToUnit((ServerLevel) level, sUnit, EntityRegistrar.STRAY_UNIT.get());
+                UnitServerEvents.convertAllToUnit(
+                    (ServerLevel) level,
+                    (LivingEntity entity) ->
+                        entity instanceof SkeletonUnit sUnit &&
+                        sUnit.getOwnerName().equals(building.ownerName),
+                    EntityRegistrar.STRAY_UNIT.get()
+                );
             }
         };
         this.foodCost = cost.food;
