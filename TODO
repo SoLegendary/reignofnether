@@ -13,19 +13,17 @@ More terrain generation:
 - time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
     - not sure of the ordering...
 
-- workers can sometimes see through and mine underground ores
-- workers and units sometimes get stuck in 2x1 holes
-    - workers must have line of sight somehow
-    - or maybe let workers dig towards it
-    - IDEA: solve these by replacing dug ore blocks with cobble
 
 
-
-
-TODO buildings/units
+TODO test in remote server
 
 Spider
-    - test in multiplayer!
+Poison spider
+Spider Jockey
+Upgrading husks/strays
+Witch
+Replacing mined ores with cobble
+
 
 
 TODO buildings/units (backlog)
@@ -38,8 +36,9 @@ Villager faction
 
 Monster faction
     - Creepers should not friendly fire
-    - Have existing zombies/skeletons turn into husks/strays on upgrade
-        - conserve selected units and control groups
+    - conserve selected units and control groups when upgrading to husks/strays
+    - conserve units' goals when upgrading to husks/strays
+        - at a minimum, move and attack/target goals
     - Stray arrows slow duration seems to be stuck at 30s
 
 Netherling faction

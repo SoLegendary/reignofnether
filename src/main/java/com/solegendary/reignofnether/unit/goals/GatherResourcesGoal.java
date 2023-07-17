@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -219,8 +220,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 mob.getLookControl().setLookAt(gatherTarget.getX(), gatherTarget.getY(), gatherTarget.getZ());
                 mob.getLookControl().lookAtCooldown = 20;
 
+                BlockState bsTarget = mob.level.getBlockState(gatherTarget);
+
                 // replant crops on empty farmland
-                if (mob.level.getBlockState(gatherTarget).getBlock() == Blocks.FARMLAND) {
+                if (bsTarget.getBlock() == Blocks.FARMLAND) {
                     gatherTicksLeft -= TICK_CD;
                     gatherTicksLeft = Math.min(gatherTicksLeft, ResourceSources.REPLANT_TICKS_MAX);
                     if (gatherTicksLeft <= 0) {
@@ -244,6 +247,16 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
                         ResourceName resourceName = ResourceSources.getBlockResourceName(this.gatherTarget, mob.level);
                         if (mob.level.destroyBlock(gatherTarget, false)) {
+
+                            // replace workers' mine ores with cobble to prevent creating potholes
+                            if (targetResourceSource.resourceName == ResourceName.ORE) {
+                                BlockState replaceBs;
+                                if (bsTarget.getBlock().getName().getString().toLowerCase().contains("deepslate"))
+                                    replaceBs = Blocks.COBBLED_DEEPSLATE.defaultBlockState();
+                                else
+                                    replaceBs = Blocks.COBBLESTONE.defaultBlockState();
+                                this.mob.level.setBlockAndUpdate(gatherTarget, replaceBs);
+                            }
 
                             // prioritise gathering adjacent targets first
                             todoGatherTargets.remove(gatherTarget);
