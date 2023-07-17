@@ -52,7 +52,7 @@ public class WitchProdItem extends ProductionItem {
             List.of(
                 FormattedCharSequence.forward(WitchProdItem.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
-                ResourceCosts.getFormattedCostPopAndTime(cost),
+                ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A devious hag who can heal and harm with potions.", Style.EMPTY)
             )

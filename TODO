@@ -12,6 +12,7 @@ More terrain generation:
 
 - time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
     - not sure of the ordering...
+    - might only be on singleplayer?
 
 
 
@@ -23,7 +24,7 @@ Spider Jockey
 Upgrading husks/strays
 Witch
 Replacing mined ores with cobble
-
+Mausoleum passive healing
 
 
 TODO buildings/units (backlog)

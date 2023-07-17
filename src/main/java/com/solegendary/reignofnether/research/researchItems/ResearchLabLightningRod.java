@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
@@ -10,7 +9,6 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -54,7 +52,7 @@ public class ResearchLabLightningRod extends ProductionItem {
                 List.of(
                         FormattedCharSequence.forward(ResearchLabLightningRod.itemName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedCostTime(cost),
+                        ResourceCosts.getFormattedTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Adds a lightning rod to this lab that can be activated ", Style.EMPTY),
                         FormattedCharSequence.forward("to call lightning to charge creepers and damage enemies.", Style.EMPTY)

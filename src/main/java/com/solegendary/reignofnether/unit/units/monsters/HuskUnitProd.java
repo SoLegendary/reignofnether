@@ -54,7 +54,7 @@ public class HuskUnitProd extends ProductionItem {
             List.of(
                 FormattedCharSequence.forward(HuskUnitProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
-                ResourceCosts.getFormattedCostPopAndTime(cost),
+                ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A hardy variant of the zombie with tougher skin.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),

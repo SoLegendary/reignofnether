@@ -13,8 +13,6 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
-import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -72,7 +70,7 @@ public class ResearchStrays extends ProductionItem {
             List.of(
                 FormattedCharSequence.forward(ResearchStrays.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
-                ResourceCosts.getFormattedCostTime(cost),
+                ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Transforms all existing and future skeletons", Style.EMPTY),
                 FormattedCharSequence.forward("into strays which fire slowing arrows.", Style.EMPTY)

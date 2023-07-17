@@ -61,10 +61,9 @@ public class HauntedHouse extends Building {
             List.of(
                     FormattedCharSequence.forward(HauntedHouse.buildingName, Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
+                    ResourceCosts.getFormattedPop(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("A spooky house that provides population supply. ", Style.EMPTY),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Supports " + ResourceCosts.HAUNTED_HOUSE.population + " population.", Style.EMPTY)
+                    FormattedCharSequence.forward("A spooky house that provides population supply. ", Style.EMPTY)
             ),
             null
         );

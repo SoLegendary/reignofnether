@@ -52,7 +52,7 @@ public class SkeletonUnitProd extends ProductionItem {
             List.of(
                 FormattedCharSequence.forward(SkeletonUnitProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
-                ResourceCosts.getFormattedCostPopAndTime(cost),
+                ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("An undead soldier with a bow and arrows.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),

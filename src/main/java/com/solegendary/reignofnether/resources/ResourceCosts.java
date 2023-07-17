@@ -19,10 +19,13 @@ public class ResourceCosts {
         str = str.trim();
         return FormattedCharSequence.forward(str, MyRenderer.iconStyle);
     }
-    public static FormattedCharSequence getFormattedCostPopAndTime(ResourceCost resCost) {
+    public static FormattedCharSequence getFormattedPopAndTime(ResourceCost resCost) {
         return FormattedCharSequence.forward("\uE003  " + resCost.population + "     \uE004  " + resCost.ticks/ResourceCost.TICKS_PER_SECOND + "s", MyRenderer.iconStyle);
     }
-    public static FormattedCharSequence getFormattedCostTime(ResourceCost resCost) {
+    public static FormattedCharSequence getFormattedPop(ResourceCost resCost) {
+        return FormattedCharSequence.forward("\uE003  " + resCost.population, MyRenderer.iconStyle);
+    }
+    public static FormattedCharSequence getFormattedTime(ResourceCost resCost) {
         return FormattedCharSequence.forward("\uE004  " + resCost.ticks/ResourceCost.TICKS_PER_SECOND + "s", MyRenderer.iconStyle);
     }
 

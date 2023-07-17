@@ -52,7 +52,7 @@ public class EvokerProdItem extends ProductionItem {
             List.of(
                 FormattedCharSequence.forward(EvokerProdItem.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
-                ResourceCosts.getFormattedCostPopAndTime(cost),
+                ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A learned wizard that can cast combat spells.", Style.EMPTY)
             )

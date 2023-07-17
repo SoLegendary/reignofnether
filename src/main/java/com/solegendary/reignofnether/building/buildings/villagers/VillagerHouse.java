@@ -59,12 +59,11 @@ public class VillagerHouse extends Building {
             () -> BuildingClientEvents.setBuildingToPlace(VillagerHouse.class),
             null,
             List.of(
-                    FormattedCharSequence.forward(VillagerHouse.buildingName, Style.EMPTY.withBold(true)),
-                    ResourceCosts.getFormattedCost(cost),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("A simple house that provides population supply.", Style.EMPTY),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Supports " + cost.population + " population.", Style.EMPTY)
+                FormattedCharSequence.forward(VillagerHouse.buildingName, Style.EMPTY.withBold(true)),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedPop(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("A simple house that provides population supply.", Style.EMPTY)
             ),
             null
         );

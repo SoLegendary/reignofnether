@@ -10,13 +10,9 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
@@ -60,7 +56,7 @@ public class ResearchSpiderJockeys extends ProductionItem {
                 List.of(
                         FormattedCharSequence.forward(ResearchSpiderJockeys.itemName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedCostTime(cost),
+                        ResourceCosts.getFormattedTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Unlocks the ability for skeletons to mount spiders.", Style.EMPTY)
                 )

@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
+import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -286,10 +287,13 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL || evt.getSource() == DamageSource.IN_FIRE))
             evt.setCanceled(true);
 
-        // nerf lightning damage
-        if (evt.getSource() == DamageSource.LIGHTNING_BOLT) {
+        // iron golem projectile armor
+        if (evt.getEntity() instanceof IronGolemUnit && (evt.getSource().isProjectile()))
             evt.setAmount(evt.getAmount() / 2);
-        }
+
+        // nerf lightning damage
+        if (evt.getSource() == DamageSource.LIGHTNING_BOLT)
+            evt.setAmount(evt.getAmount() / 2);
 
         // prevent friendly fire damage from ranged units (unless specifically targeted)
         if (evt.getSource().isProjectile() && evt.getSource().getEntity() instanceof Unit unit)

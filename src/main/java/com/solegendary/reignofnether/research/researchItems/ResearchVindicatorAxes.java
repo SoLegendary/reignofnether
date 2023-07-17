@@ -10,7 +10,6 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -61,7 +60,7 @@ public class ResearchVindicatorAxes extends ProductionItem {
                 List.of(
                         FormattedCharSequence.forward(ResearchVindicatorAxes.itemName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedCostTime(cost),
+                        ResourceCosts.getFormattedTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Upgrades the axes of all vindicators to diamond (+2 damage)", Style.EMPTY)
                 )

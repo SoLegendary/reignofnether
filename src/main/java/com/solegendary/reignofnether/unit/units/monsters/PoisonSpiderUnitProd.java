@@ -9,7 +9,6 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchPoisonSpiders;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -53,7 +52,7 @@ public class PoisonSpiderUnitProd extends ProductionItem {
                 List.of(
                         FormattedCharSequence.forward(PoisonSpiderUnitProd.itemName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedCostPopAndTime(cost),
+                        ResourceCosts.getFormattedPopAndTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A spider fanged with deadly poison.", Style.EMPTY),
                         FormattedCharSequence.forward("Too small to ride but good for hit and run tactics.", Style.EMPTY),
