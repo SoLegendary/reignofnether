@@ -4,6 +4,8 @@ import com.solegendary.reignofnether.ability.abilities.ThrowLingeringHarmingPoti
 import com.solegendary.reignofnether.ability.abilities.ThrowLingeringHealingPotion;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPotions;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.ThrowHarmingPotion;
@@ -130,7 +132,14 @@ public class WitchUnit extends Witch implements Unit {
 
     public void throwPotion(Vec3 targetBp, Potion potion) {
         ThrownPotion thrownPotion = new ThrownPotion(this.level, this);
-        thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), potion));
+
+        ItemStack potionItem;
+        if (ResearchServer.playerHasResearch(getOwnerName(), ResearchLingeringPotions.itemName))
+            potionItem = new ItemStack(Items.LINGERING_POTION);
+        else
+            potionItem = new ItemStack(Items.SPLASH_POTION);
+
+        thrownPotion.setItem(PotionUtils.setPotion(potionItem, potion));
 
         Vec3 dMove = targetBp.subtract(this.getEyePosition())
                 .multiply(1,0,1)

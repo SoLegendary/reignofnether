@@ -27,14 +27,17 @@ Replacing mined ores with cobble
 Mausoleum passive healing
 Arcane Tower
 Witch
-Lingering potions
+Potions and Lingering potions
+Chained creeper explosions
+
 
 
 TODO buildings/units (backlog)
 
 Villager faction
     - Mage Tower
-        - Find out how to make potions lingering (in the ability classes)
+        - nerf lingering potion duration
+        - spawn units at the bottom of the tower
         - Evoker (evoker fangs + upgrade to summon uncontrollable vexes)
         - library upgrade to unlock evoker and evoker upgrades
 

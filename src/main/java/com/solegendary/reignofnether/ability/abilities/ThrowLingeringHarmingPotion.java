@@ -59,6 +59,7 @@ public class ThrowLingeringHarmingPotion extends Ability {
         );
     }
 
+    // lingering vs splash is set in WitchUnit.throwPotion
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
         ((WitchUnit) unitUsing).getThrowPotionGoal().setPotion(Potions.HARMING);

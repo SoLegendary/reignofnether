@@ -43,7 +43,7 @@ public class ResearchLingeringPotions extends ProductionItem {
         return new Button(
             ResearchLingeringPotions.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/lingering_potion_healing.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lingering_potion_healing.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
@@ -66,7 +66,7 @@ public class ResearchLingeringPotions extends ProductionItem {
         return new Button(
             ResearchLingeringPotions.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/lingering_potion_healing.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lingering_potion_healing.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             null,
             () -> false,
