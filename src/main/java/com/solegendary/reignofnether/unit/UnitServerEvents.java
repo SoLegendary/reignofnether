@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
@@ -23,6 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.EntityHitResult;
@@ -37,6 +39,7 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.living.MobEffectEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -281,6 +284,10 @@ public class UnitServerEvents {
     // make creepers immune to lightning damage (but still get charged by them)
     @SubscribeEvent
     public static void onEntityDamaged(LivingDamageEvent evt) {
+
+        if (evt.getEntity() instanceof Creeper && (evt.getSource().isExplosion()))
+            evt.setCanceled(true);
+
         if (evt.getEntity() instanceof Creeper && (evt.getSource() == DamageSource.LIGHTNING_BOLT || evt.getSource() == DamageSource.ON_FIRE))
             evt.setCanceled(true);
 
@@ -288,7 +295,7 @@ public class UnitServerEvents {
             evt.setCanceled(true);
 
         // iron golem projectile armor
-        if (evt.getEntity() instanceof IronGolemUnit && (evt.getSource().isProjectile()))
+        if (evt.getEntity() instanceof IronGolemUnit && (evt.getSource().isProjectile() || evt.getSource().isExplosion()))
             evt.setAmount(evt.getAmount() / 2);
 
         // nerf lightning damage
@@ -300,6 +307,8 @@ public class UnitServerEvents {
             if (getUnitToEntityRelationship(unit, evt.getEntity()) == Relationship.FRIENDLY && unit.getTargetGoal().getTarget() != evt.getEntity())
                 evt.setCanceled(true);
     }
+
+
 
     // prevent friendly fire from ranged units (unless specifically targeted)
     // (just allows piercing, damage is cancelled in LivingDamageEvent)

@@ -22,21 +22,26 @@ Spider
 Poison spider
 Spider Jockey
 Upgrading husks/strays
-Witch
+    - and while they are attacking/following/moving and selected
 Replacing mined ores with cobble
 Mausoleum passive healing
+Arcane Tower
+Witch
+Lingering potions
 
 
 TODO buildings/units (backlog)
 
 Villager faction
-    - Tower (garrisons ranged units)
     - Mage Tower
-        - Witch (upgrade to allow potions to linger)
+        - Find out how to make potions lingering (in the ability classes)
         - Evoker (evoker fangs + upgrade to summon uncontrollable vexes)
+        - library upgrade to unlock evoker and evoker upgrades
 
 Monster faction
-    - Creepers should not friendly fire
+    - Spider lair
+        - building upgrade to unlock poison spiders
+        - research to allow spiders to produce webs
     - conserve selected units and control groups when upgrading to husks/strays
     - conserve units' goals when upgrading to husks/strays
         - at a minimum, move and attack/target goals

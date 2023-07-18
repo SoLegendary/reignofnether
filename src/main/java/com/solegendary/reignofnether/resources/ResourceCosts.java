@@ -69,7 +69,7 @@ public class ResourceCosts {
     public static ResourceCost WHEAT_FARM = ResourceCost.Building(0,100,0, 0);
     public static ResourceCost BARRACKS = ResourceCost.Building(0,150,0, 0);
     public static ResourceCost BLACKSMITH = ResourceCost.Building(0,250,150, 0);
-
+    public static ResourceCost ARCANE_TOWER = ResourceCost.Building(0,150,100, 0);
 
     // ******************* RESEARCH ******************* //
     public static ResourceCost RESEARCH_VINDICATOR_AXES = ResourceCost.Research(0,200,400, 120);
@@ -80,4 +80,6 @@ public class ResourceCosts {
     public static ResourceCost RESEARCH_POISON_SPIDERS = ResourceCost.Research(300,0,300, 100);
     public static ResourceCost RESEARCH_HUSKS = ResourceCost.Research(500,0,200, 120);
     public static ResourceCost RESEARCH_STRAYS = ResourceCost.Research(500,300,0, 120);
+    public static ResourceCost RESEARCH_LINGERING_POTIONS = ResourceCost.Research(300,300,300, 150);
+    public static ResourceCost RESEARCH_EVOKERS = ResourceCost.Research(500,0,300, 150);
 }

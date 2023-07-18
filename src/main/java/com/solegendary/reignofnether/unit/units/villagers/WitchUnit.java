@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.ability.abilities.ThrowLingeringHarmingPotion;
+import com.solegendary.reignofnether.ability.abilities.ThrowLingeringHealingPotion;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -104,12 +106,18 @@ public class WitchUnit extends Witch implements Unit {
 
         ThrowHarmingPotion ab1 = new ThrowHarmingPotion(this);
         ThrowHealingPotion ab2 = new ThrowHealingPotion(this);
+        ThrowLingeringHarmingPotion ab3 = new ThrowLingeringHarmingPotion(this);
+        ThrowLingeringHealingPotion ab4 = new ThrowLingeringHealingPotion(this);
         this.abilities.add(ab1);
         this.abilities.add(ab2);
+        this.abilities.add(ab3);
+        this.abilities.add(ab4);
 
         if (level.isClientSide()) {
             this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
             this.abilityButtons.add(ab2.getButton(Keybindings.keyW));
+            this.abilityButtons.add(ab3.getButton(Keybindings.keyQ));
+            this.abilityButtons.add(ab4.getButton(Keybindings.keyW));
         }
     }
 

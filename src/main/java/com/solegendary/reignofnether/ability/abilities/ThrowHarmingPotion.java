@@ -4,6 +4,8 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPotions;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -28,11 +30,11 @@ public class ThrowHarmingPotion extends Ability {
 
     public ThrowHarmingPotion(WitchUnit witchUnit) {
         super(
-                UnitAction.THROW_HARMING_POTION,
-                CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,
-                WitchUnit.getPotionThrowRange(),
-                0,
-                true
+            UnitAction.THROW_HARMING_POTION,
+            CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,
+            WitchUnit.getPotionThrowRange(),
+            0,
+            true
         );
         this.witchUnit = witchUnit;
     }
@@ -40,20 +42,20 @@ public class ThrowHarmingPotion extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-                "Harming Potion",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/splash_potion_harming.png"),
-                hotkey,
-                () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_HARMING_POTION,
-                () -> false,
-                () -> true,
-                () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_HARMING_POTION),
-                null,
-                List.of(
-                        FormattedCharSequence.forward("Harming Potion", Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE006  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + WitchUnit.getPotionThrowRange(), MyRenderer.iconStyle),
-                        FormattedCharSequence.forward("Throw a harming potion, dealing instant damage to any unit", Style.EMPTY)
-                ),
-                this
+            "Harming Potion",
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/splash_potion_harming.png"),
+            hotkey,
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_HARMING_POTION,
+            () -> ResearchClient.hasResearch(ResearchLingeringPotions.itemName),
+            () -> true,
+            () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_HARMING_POTION),
+            null,
+            List.of(
+                FormattedCharSequence.forward("Harming Potion", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("\uE006  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + WitchUnit.getPotionThrowRange(), MyRenderer.iconStyle),
+                FormattedCharSequence.forward("Throw a potion that deals instant damage to units.", Style.EMPTY)
+            ),
+            this
         );
     }
 

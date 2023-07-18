@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -32,6 +34,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -109,6 +112,38 @@ public class UnitClientEvents {
                             currentPopulation += prodItem.popCost;
         }
         return currentPopulation;
+    }
+
+    public static void sendUnitCommandManual(UnitAction action, int unitId, int[] unitIds,
+                                             BlockPos preselectedBlockPos, BlockPos selectedBuildingPos) {
+        if (MC.player != null) {
+            UnitActionItem actionItem = new UnitActionItem(
+                    MC.player.getName().getString(),
+                    action, unitId, unitIds,
+                    preselectedBlockPos,
+                    selectedBuildingPos
+            );
+            actionItem.action(MC.level);
+
+            PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
+                    MC.player.getName().getString(),
+                    action, unitId, unitIds,
+                    preselectedBlockPos,
+                    selectedBuildingPos
+            ));
+        }
+    }
+
+    public static void sendUnitCommandManual(UnitAction action, int unitId, int[] unitIds) {
+        sendUnitCommandManual(action, unitId, unitIds,
+                new BlockPos(0,0,0),
+                new BlockPos(0,0,0));
+    }
+
+    public static void sendUnitCommandManual(UnitAction action, int[] unitIds) {
+        sendUnitCommandManual(action, -1, unitIds,
+                new BlockPos(0,0,0),
+                new BlockPos(0,0,0));
     }
 
     public static void sendUnitCommand(UnitAction action) {
@@ -504,5 +539,12 @@ public class UnitClientEvents {
                 return Relationship.HOSTILE;
         }
         return Relationship.NEUTRAL;
+    }
+
+    // make creepers explode from other explosions, like TNT
+    public static void onExplosion(ExplosionEvent.Detonate evt) {
+        for (Entity entity : evt.getAffectedEntities())
+            if (entity instanceof CreeperUnit cUnit)
+                UnitClientEvents.sendUnitCommandManual(UnitAction.EXPLODE, new int[]{cUnit.getId()});
     }
 }
