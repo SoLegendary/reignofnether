@@ -36,10 +36,6 @@ TODO buildings/units (backlog)
 
 Villager faction
     - Mage Tower
-        - change potions to regeneration and poison instead of healing/damage
-            - OR remove knockbacks from harming/healing damage
-        - remove vanilla witch AI
-        - spawn units at the bottom of the tower
         - Evoker (evoker fangs + upgrade to summon uncontrollable vexes)
         - library upgrade to unlock evoker and evoker upgrades
 

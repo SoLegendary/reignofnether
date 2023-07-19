@@ -325,4 +325,19 @@ public class UnitServerEvents {
             if (getUnitToEntityRelationship(unit, hit) == Relationship.FRIENDLY && unit.getTargetGoal().getTarget() != hit)
                 evt.setCanceled(true);
     }
+
+    public static ArrayList<Integer> knockbackIgnoreIds = new ArrayList<>();
+
+    // prevent potion damage effects from causing knockback
+    @SubscribeEvent
+    public static void onLivingDamage(LivingDamageEvent evt)  {
+        if (evt.getSource().msgId.equals("indirectMagic"))
+            knockbackIgnoreIds.add(evt.getEntity().getId());
+    }
+
+    @SubscribeEvent
+    public static void onLivingKnockBack(LivingKnockBackEvent evt)  {
+        if (knockbackIgnoreIds.removeIf(i -> i == evt.getEntity().getId()))
+            evt.setCanceled(true);
+    }
 }
