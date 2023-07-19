@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPotions;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.ThrowHarmingPotion;
@@ -18,7 +19,9 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -26,6 +29,7 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
@@ -98,6 +102,8 @@ public class WitchUnit extends Witch implements Unit {
     final static public float sightRange = 10f;
     final static public int popCost = ResourceCosts.WITCH.population;
     public int maxResources = 100;
+
+    final static public int LINGERING_POTION_DURATION = 4 * ResourceCost.TICKS_PER_SECOND;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -188,5 +194,21 @@ public class WitchUnit extends Witch implements Unit {
         this.goalSelector.addGoal(2, throwPotionGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+
+        // prevent drinking potions as defined by vanilla code
+        if (this.getItemBySlot(EquipmentSlot.MAINHAND) != ItemStack.EMPTY) {
+            this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+            this.setUsingItem(false);
+            AttributeInstance attr = this.getAttribute(Attributes.MOVEMENT_SPEED);
+            if (attr != null) {
+                attr.removeModifier(Witch.SPEED_MODIFIER_DRINKING);
+                this.getEntityData().set(Witch.DATA_USING_ITEM, false);
+            }
+        }
     }
 }
