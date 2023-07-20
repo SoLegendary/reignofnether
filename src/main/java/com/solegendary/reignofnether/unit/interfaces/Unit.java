@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.*;
-import com.solegendary.reignofnether.unit.UnitClientboundPacket;
+import com.solegendary.reignofnether.unit.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.goals.ReturnResourcesGoal;
@@ -75,7 +75,7 @@ public interface Unit {
                                 if (itemstack.getCount() <= 0)
                                     itementity.discard();
 
-                                UnitClientboundPacket.sendSyncResourcesPacket(unit);
+                                UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                             }
                             if (Unit.atMaxResources(unit) && unit instanceof WorkerUnit workerUnit) {
                                 GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();

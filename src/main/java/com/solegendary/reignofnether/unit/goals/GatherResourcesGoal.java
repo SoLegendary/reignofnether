@@ -6,15 +6,11 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.UnitClientboundPacket;
+import com.solegendary.reignofnether.unit.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -266,7 +262,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
                             Unit unit = (Unit) mob;
                             unit.getItems().add(new ItemStack(targetResourceSource.items.get(0)));
-                            UnitClientboundPacket.sendSyncResourcesPacket(unit);
+                            UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
 
                             // if at max resources, go to drop off automatically, then return to this gather goal
                             if (Unit.atMaxResources(unit))

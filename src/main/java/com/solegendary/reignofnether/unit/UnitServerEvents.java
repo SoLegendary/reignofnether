@@ -4,28 +4,22 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.EntityHitResult;
@@ -89,7 +83,7 @@ public class UnitServerEvents {
         for (ItemStack item : oldUnit.getItems())
             ((Unit) newEntity).getItems().add(item);
 
-        UnitClientboundPacket.sendSyncResourcesPacket((Unit) newEntity);
+        UnitSyncClientboundPacket.sendSyncResourcesPacket((Unit) newEntity);
 
         Entity vehicle = oldEntity.getVehicle();
         if (vehicle != null) {
@@ -197,7 +191,7 @@ public class UnitServerEvents {
             !evt.getLevel().isClientSide) {
 
             allUnits.removeIf(e -> e.getId() == entity.getId());
-            UnitClientboundPacket.sendLeavePacket(entity);
+            UnitSyncClientboundPacket.sendLeavePacket(entity);
 
             //ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
             //ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, false, true);
@@ -226,7 +220,7 @@ public class UnitServerEvents {
         if (unitSyncTicks <= 0) {
             unitSyncTicks = UNIT_SYNC_TICKS_MAX;
             for (LivingEntity entity : allUnits) {
-                UnitClientboundPacket.sendSyncStatsPacket(entity);
+                UnitSyncClientboundPacket.sendSyncStatsPacket(entity);
                 UnitWorkerClientBoundPacket.sendSyncWorkerPacket(entity);
 
                 // remove old chunk // add current chunk
@@ -339,5 +333,13 @@ public class UnitServerEvents {
     public static void onLivingKnockBack(LivingKnockBackEvent evt)  {
         if (knockbackIgnoreIds.removeIf(i -> i == evt.getEntity().getId()))
             evt.setCanceled(true);
+    }
+
+    // make creepers explode from other explosions, like TNT
+    @SubscribeEvent
+    public static void onExplosion(ExplosionEvent.Detonate evt) {
+        for (Entity entity : evt.getAffectedEntities())
+            if (entity instanceof CreeperUnit cUnit)
+                UnitClientboundPacket.reflectUnitAction(cUnit.getOwnerName(), UnitAction.EXPLODE, new int[]{cUnit.getId()});
     }
 }
