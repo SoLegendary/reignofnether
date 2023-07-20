@@ -8,10 +8,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 
@@ -39,7 +36,7 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
                     ResourcesServerEvents.addSubtractResources(res);
                     ResourcesClientboundPacket.showFloatingText(res, this.moveTarget);
                     unit.getItems().clear();
-                    UnitClientboundPacket.sendSyncResourcesPacket(unit);
+                    UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                     this.stopReturning();
 
                     if (this.mob instanceof WorkerUnit worker) {

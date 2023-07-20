@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.tps.TPSClientBoundPacket;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitClientboundPacket;
+import com.solegendary.reignofnether.unit.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitServerboundPacket;
 import com.solegendary.reignofnether.unit.UnitWorkerClientBoundPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -42,6 +43,10 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(UnitClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(UnitClientboundPacket::encode).decoder(UnitClientboundPacket::new)
                 .consumer(UnitClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(UnitSyncClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(UnitSyncClientboundPacket::encode).decoder(UnitSyncClientboundPacket::new)
+                .consumer(UnitSyncClientboundPacket::handle).add();
 
         INSTANCE.messageBuilder(UnitWorkerClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(UnitWorkerClientBoundPacket::encode).decoder(UnitWorkerClientBoundPacket::new)

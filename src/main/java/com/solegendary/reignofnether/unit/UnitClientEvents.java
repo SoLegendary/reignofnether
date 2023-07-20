@@ -34,7 +34,6 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -115,22 +114,28 @@ public class UnitClientEvents {
         return currentPopulation;
     }
 
+    public static void reflectUnitActionFromServer(String playerName, UnitAction action, int unitId, int[] unitIds,
+                                             BlockPos preselectedBlockPos, BlockPos selectedBuildingPos) {
+        if (MC.player != null && playerName.equals(MC.player.getName().getString()))
+            sendUnitCommandManual(action, unitId, unitIds, preselectedBlockPos, selectedBuildingPos);
+    }
+
     public static void sendUnitCommandManual(UnitAction action, int unitId, int[] unitIds,
                                              BlockPos preselectedBlockPos, BlockPos selectedBuildingPos) {
         if (MC.player != null) {
             UnitActionItem actionItem = new UnitActionItem(
-                    MC.player.getName().getString(),
-                    action, unitId, unitIds,
-                    preselectedBlockPos,
-                    selectedBuildingPos
+                MC.player.getName().getString(),
+                action, unitId, unitIds,
+                preselectedBlockPos,
+                selectedBuildingPos
             );
             actionItem.action(MC.level);
 
             PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
-                    MC.player.getName().getString(),
-                    action, unitId, unitIds,
-                    preselectedBlockPos,
-                    selectedBuildingPos
+                MC.player.getName().getString(),
+                action, unitId, unitIds,
+                preselectedBlockPos,
+                selectedBuildingPos
             ));
         }
     }
@@ -540,12 +545,5 @@ public class UnitClientEvents {
                 return Relationship.HOSTILE;
         }
         return Relationship.NEUTRAL;
-    }
-
-    // make creepers explode from other explosions, like TNT
-    public static void onExplosion(ExplosionEvent.Detonate evt) {
-        for (Entity entity : evt.getAffectedEntities())
-            if (entity instanceof CreeperUnit cUnit)
-                UnitClientEvents.sendUnitCommandManual(UnitAction.EXPLODE, new int[]{cUnit.getId()});
     }
 }

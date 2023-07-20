@@ -51,8 +51,8 @@ public class Graveyard extends ProductionBuilding {
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
                 ZombieUnitProd.getStartButton(this, Keybindings.keyQ),
-                SkeletonUnitProd.getStartButton(this, Keybindings.keyW),
                 HuskUnitProd.getStartButton(this, Keybindings.keyQ),
+                SkeletonUnitProd.getStartButton(this, Keybindings.keyW),
                 StrayUnitProd.getStartButton(this, Keybindings.keyW)
             );
     }
@@ -63,22 +63,22 @@ public class Graveyard extends ProductionBuilding {
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
-                Graveyard.buildingName,
-                new ResourceLocation("minecraft", "textures/block/mossy_stone_bricks.png"),
-                hotkey,
-                () -> BuildingClientEvents.getBuildingToPlace() == Graveyard.class,
-                () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
-                        ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Graveyard.class),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(Graveyard.buildingName, Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A field of the dead that can raise Zombies and Skeletons", Style.EMPTY)
-                ),
-                null
+            Graveyard.buildingName,
+            new ResourceLocation("minecraft", "textures/block/mossy_stone_bricks.png"),
+            hotkey,
+            () -> BuildingClientEvents.getBuildingToPlace() == Graveyard.class,
+            () -> false,
+            () -> BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
+                    ResearchClient.hasCheat("modifythephasevariance"),
+            () -> BuildingClientEvents.setBuildingToPlace(Graveyard.class),
+            null,
+            List.of(
+                FormattedCharSequence.forward(Graveyard.buildingName, Style.EMPTY.withBold(true)),
+                ResourceCosts.getFormattedCost(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("A field of the dead that can raise Zombies and Skeletons", Style.EMPTY)
+            ),
+            null
         );
     }
 }
