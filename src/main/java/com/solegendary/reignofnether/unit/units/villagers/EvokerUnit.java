@@ -155,8 +155,6 @@ public class EvokerUnit extends Evoker implements Unit {
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, returnResourcesGoal);
-        this.goalSelector.addGoal(2, castFangsLineGoal);
-        this.goalSelector.addGoal(2, castFangsCircleGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));

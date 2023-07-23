@@ -49,8 +49,9 @@ public class CastFangsLineGoal extends MoveToTargetBlockGoal {
                 if (castTarget == null) {
                     this.castTarget = moveTarget;
                     this.stopMoving();
+                    this.setTarget((LivingEntity) null);
                 }
-                if (castTarget != null) {
+                else {
                     this.mob.getLookControl().setLookAt(castTarget.getX(), castTarget.getY(), castTarget.getZ());
                     ticksCasting += 1;
                     if (ticksCasting >= TICKS_CASTING_MAX) {

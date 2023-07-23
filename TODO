@@ -22,7 +22,7 @@ More terrain generation:
 
 
 
-Evoker fangs (line) doesn't work when targeting the ground
+Evoker fangs don't damage mobs for some reason
 
 TODO test in remote server
 
