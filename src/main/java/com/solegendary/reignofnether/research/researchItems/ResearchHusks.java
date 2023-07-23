@@ -38,6 +38,7 @@ public class ResearchHusks extends ProductionItem {
 
                 // convert all zombies into husks with the same stats/inventory/etc.
                 UnitServerEvents.convertAllToUnit(
+                    this.building.ownerName,
                     (ServerLevel) level,
                     (LivingEntity entity) ->
                         entity instanceof ZombieUnit zUnit &&

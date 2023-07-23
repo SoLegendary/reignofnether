@@ -77,13 +77,11 @@ public class UnitActionItem {
                     GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
                     ResourceName targetResourceName = goal.getTargetResourceName();
                     resetBehaviours(unit);
-                    if (goal != null) {
-                        switch (targetResourceName) {
-                            case NONE -> goal.setTargetResourceName(ResourceName.FOOD);
-                            case FOOD -> goal.setTargetResourceName(ResourceName.WOOD);
-                            case WOOD -> goal.setTargetResourceName(ResourceName.ORE);
-                            case ORE -> goal.setTargetResourceName(ResourceName.NONE);
-                        }
+                    switch (targetResourceName) {
+                        case NONE -> goal.setTargetResourceName(ResourceName.FOOD);
+                        case FOOD -> goal.setTargetResourceName(ResourceName.WOOD);
+                        case WOOD -> goal.setTargetResourceName(ResourceName.ORE);
+                        case ORE -> goal.setTargetResourceName(ResourceName.NONE);
                     }
                 }
             }
@@ -173,6 +171,9 @@ public class UnitActionItem {
                 }
                 case DELETE -> {
                     ((LivingEntity) unit).kill();
+                }
+                case DISCARD -> {
+                    ((LivingEntity) unit).discard();
                 }
 
                 // any other Ability not explicitly defined here

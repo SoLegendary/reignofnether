@@ -15,16 +15,22 @@ More terrain generation:
     - might only be on singleplayer?
 
 
-    - conserve selected units and control groups when upgrading to husks/strays
-    - conserve units' goals when upgrading to husks/strays
-        - at a minimum, move and attack/target goals
+
     - Stray arrows slow duration seems to be stuck at 30s
+    - Other players can't see evokers' channelling animations
+    - Evoker portraits should not show their arms
+    - syncConvertedUnits returnResourcesGoal doesn't sync
+    - sync control groups
 
-
-
-Evoker fangs don't damage mobs for some reason
 
 TODO test in remote server
+
+syncing unit convert goals
+    - move
+    - attack/follow
+    - return resources
+    - attack move
+evoker friendly fire
 
 
 
@@ -33,7 +39,6 @@ TODO buildings/units (backlog)
 
 Villager faction
     Evoker unit
-        - evoker fangs
         - summons uncontrollable vexes
 
     Blacksmith

@@ -16,7 +16,6 @@ import java.util.EnumSet;
 // - does not move towards a target if already in attack range and can see the target
 // - faces the target
 // - does not require the user to wind up bow attacks, instead using RTS-like attack cooldowns
-// TODO: prevent friendly fire
 
 public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & RangedAttackMob> extends Goal {
     private final T mob;

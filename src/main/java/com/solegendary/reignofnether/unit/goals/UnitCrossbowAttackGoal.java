@@ -18,8 +18,6 @@ import net.minecraft.world.item.ItemStack;
 // - has an attack cooldown parameter in the constructor
 // - has no pathfinding delay
 // - stops when the target is dead
-// TODO: prevent friendly fire
-// TODO: change attackCooldown to just be the total crossbow charge time
 
 public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & CrossbowAttackMob> extends Goal {
     private final T mob;

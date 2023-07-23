@@ -37,6 +37,7 @@ public class ResearchStrays extends ProductionItem {
 
                 // convert all skeletons into strays with the same stats/inventory/etc.
                 UnitServerEvents.convertAllToUnit(
+                    this.building.ownerName,
                     (ServerLevel) level,
                     (LivingEntity entity) ->
                         entity instanceof SkeletonUnit sUnit &&

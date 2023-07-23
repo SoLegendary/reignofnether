@@ -118,6 +118,11 @@ public class UnitClientEvents {
     }
 
     public static void sendUnitCommandManual(UnitAction action, int unitId, int[] unitIds,
+                                             BlockPos preselectedBlockPos) {
+        sendUnitCommandManual(action, unitId, unitIds, preselectedBlockPos, new BlockPos(0,0,0));
+    }
+
+    public static void sendUnitCommandManual(UnitAction action, int unitId, int[] unitIds,
                                              BlockPos preselectedBlockPos, BlockPos selectedBuildingPos) {
         if (MC.player != null) {
             UnitActionItem actionItem = new UnitActionItem(
@@ -487,8 +492,6 @@ public class UnitClientEvents {
         }
     }
 
-    //private static RenderLevelStageEvent.Stage renderStage = RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS;
-
     @SubscribeEvent
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
@@ -496,28 +499,6 @@ public class UnitClientEvents {
             if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                 sendUnitCommand(UnitAction.DELETE);
         }
-
-        /*
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_INSERT) {
-            if (renderStage == RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS)
-                renderStage = RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS;
-            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
-                renderStage = RenderLevelStageEvent.Stage.AFTER_SKY;
-            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_SKY)
-                renderStage = RenderLevelStageEvent.Stage.AFTER_PARTICLES;
-            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_PARTICLES)
-                renderStage = RenderLevelStageEvent.Stage.AFTER_WEATHER;
-            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_WEATHER)
-                renderStage = RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS;
-            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS)
-                renderStage = RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS;
-            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS)
-                renderStage = RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS;
-            else if (renderStage == RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS)
-                renderStage = RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS;
-
-            System.out.println(renderStage.toString());
-        }*/
     }
 
     public static boolean targetingSelf() {
@@ -542,5 +523,54 @@ public class UnitClientEvents {
                 return Relationship.HOSTILE;
         }
         return Relationship.NEUTRAL;
+    }
+
+    public static void syncConvertedUnits(String ownerName, int[] oldUnitIds, int[] newUnitIds) {
+
+        for (int i = 0; i < oldUnitIds.length; i++) {
+            if (MC.level == null)
+                break;
+
+            Entity oldEntity = MC.level.getEntity(oldUnitIds[i]);
+            Entity newEntity = MC.level.getEntity(newUnitIds[i]);
+            if (oldEntity instanceof Unit oldUnit &&
+                    newEntity instanceof Unit newUnit) {
+
+                int j = i;
+                if (selectedUnits.removeIf(e -> e.getId() == oldUnitIds[j]))
+                    selectedUnits.add((LivingEntity) newEntity);
+
+                if (oldUnit.getTargetGoal().getTarget() != null)
+                    sendUnitCommandManual(
+                        UnitAction.ATTACK,
+                        oldUnit.getTargetGoal().getTarget().getId(),
+                        new int[] { newEntity.getId() }
+                    );
+                if (oldUnit.getMoveGoal().getMoveTarget() != null)
+                    sendUnitCommandManual(
+                        UnitAction.MOVE, -1,
+                        new int[] { newEntity.getId() },
+                        oldUnit.getMoveGoal().getMoveTarget()
+                    );
+                if (oldUnit.getReturnResourcesGoal().getBuildingTarget() != null)
+                    sendUnitCommandManual(
+                        UnitAction.RETURN_RESOURCES, -1,
+                        new int[] { newEntity.getId() },
+                        new BlockPos(0,0,0),
+                        oldUnit.getReturnResourcesGoal().getBuildingTarget().originPos
+                    );
+            }
+            if (oldEntity instanceof AttackerUnit oldAUnit &&
+                newEntity instanceof AttackerUnit newAUnit) {
+
+                if (oldAUnit.getAttackMoveTarget() != null)
+                    sendUnitCommandManual(
+                            UnitAction.ATTACK_MOVE, -1,
+                            new int[] { newEntity.getId() },
+                            oldAUnit.getAttackMoveTarget()
+                    );
+            }
+        }
+        sendUnitCommandManual(UnitAction.DISCARD, oldUnitIds);
     }
 }

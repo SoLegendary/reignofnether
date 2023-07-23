@@ -51,26 +51,31 @@ public class UnitServerEvents {
     public static ArrayList<LivingEntity> getAllUnits() { return allUnits; }
 
     // convert all entities that match the condition to the given unit type
-    public static void convertAllToUnit(ServerLevel level, Predicate<LivingEntity> entityCondition, EntityType<? extends Unit> entityType) {
-        boolean foundUnit = true;
-        outerLoop:
-        while (foundUnit) { // looped like this to avoid array comodification (list of entities in the level)
-            for (LivingEntity unit : UnitServerEvents.getAllUnits()) {
-                if (entityCondition.test(unit)) {
-                    UnitServerEvents.convertToUnit(level, (Unit) unit, entityType);
-                    continue outerLoop;
-                }
-            }
-            foundUnit = false;
+    public static void convertAllToUnit(String ownerName, ServerLevel level, Predicate<LivingEntity> entityCondition, EntityType<? extends Unit> entityType) {
+        ArrayList<Integer> oldIds = new ArrayList<>();
+        ArrayList<Integer> newIds = new ArrayList<>();
+        ArrayList<LivingEntity> unitsToConvert = new ArrayList<>();
+
+        for (LivingEntity unit : UnitServerEvents.getAllUnits())
+            if (entityCondition.test(unit))
+                unitsToConvert.add(unit);
+
+        for (LivingEntity unit : unitsToConvert) {
+            oldIds.add(unit.getId());
+            int newId = UnitServerEvents.convertToUnit(level, (Unit) unit, entityType);
+            newIds.add(newId);
         }
+        if (oldIds.size() == newIds.size() && oldIds.size() > 0)
+            UnitConvertClientboundPacket.syncConvertedUnits(ownerName, oldIds, newIds);
     }
 
-    public static void convertToUnit(ServerLevel level, Unit oldUnit, EntityType<? extends Unit> entityType) {
+    // returns the new unit's id
+    public static int convertToUnit(ServerLevel level, Unit oldUnit, EntityType<? extends Unit> entityType) {
         LivingEntity oldEntity = (LivingEntity) oldUnit;
         LivingEntity newEntity = (LivingEntity) entityType.create(level);
 
         if (newEntity == null)
-            return;
+            return -1;
 
         newEntity.setHealth(oldEntity.getHealth());
         for (MobEffectInstance effect : oldEntity.getActiveEffects())
@@ -90,9 +95,9 @@ public class UnitServerEvents {
             oldEntity.stopRiding();
             newEntity.startRiding(vehicle, true);
         }
-        oldEntity.discard();
-
-        // TODO: conserve selected units and control groups
+        // discard with a reflected packet so the client has a chance to sync goals, command groups and selections
+        //oldEntity.discard();
+        return newEntity.getId();
     }
 
     public static int getCurrentPopulation(ServerLevel level, String ownerName) {
@@ -143,10 +148,7 @@ public class UnitServerEvents {
             return Relationship.NEUTRAL;
 
         if (ownerName1.equals(ownerName2)) {
-            if (entity instanceof Player)
-                return Relationship.OWNED;
-            else
-                return Relationship.FRIENDLY;
+            return Relationship.FRIENDLY;
         }
         else
             return Relationship.HOSTILE;

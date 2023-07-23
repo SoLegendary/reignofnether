@@ -90,7 +90,7 @@ public class EvokerUnit extends Evoker implements Unit {
     public CastFangsCircleGoal getCastFangsCircleGoal() {
         return castFangsCircleGoal;
     }
-    public static int getFangsRange() { return 8; }
+    public static int getFangsRange() { return 10; }
 
     final static public float maxHealth = 15.0f;
     final static public float armorValue = 0.0f;
@@ -176,7 +176,7 @@ public class EvokerUnit extends Evoker implements Unit {
         double d1 = Math.max(targetPos.getY(), this.getY()) + 1.0;
         float f = (float)Mth.atan2(targetPos.getZ() - this.getZ(), targetPos.getX() - this.getX());
         int k;
-        for(k = 0; k < 16; ++k) {
+        for(k = 0; k < getFangsRange(); ++k) {
             double d2 = 1.25 * (double)(k + 1);
             createEvokerFang(this.getX() + (double)Mth.cos(f) * d2, this.getZ() + (double)Mth.sin(f) * d2, d0, d1, f, k);
         }
@@ -184,18 +184,15 @@ public class EvokerUnit extends Evoker implements Unit {
 
     // based on Evoker.EvokerAttackSpellGoal.performSpellCasting
     public void createEvokerFangsCircle(BlockPos targetPos) {
-        double d0 = Math.min(targetPos.getY(), this.getY());
-        double d1 = Math.max(targetPos.getY(), this.getY()) + 1.0;
-        float f = (float)Mth.atan2(targetPos.getZ() - this.getZ(), targetPos.getX() - this.getX());
         int k;
         float f2;
         for(k = 0; k < 5; ++k) {
-            f2 = f + (float)k * (float) Math.PI * 0.4F;
-            createEvokerFang(this.getX() + (double)Mth.cos(f2) * 1.5, this.getZ() + (double)Mth.sin(f2) * 1.5, d0, d1, f2, 0);
+            f2 = (float)k * (float) Math.PI * 0.4F;
+            createEvokerFang(this.getX() + (double)Mth.cos(f2) * 1.5, this.getZ() + (double)Mth.sin(f2) * 1.5, this.getY(), this.getY() + 1, f2, 0);
         }
         for(k = 0; k < 8; ++k) {
-            f2 = f + (float)k * (float) Math.PI * 2.0F / 8.0F + 1.2566371F;
-            createEvokerFang(this.getX() + (double)Mth.cos(f2) * 2.5, this.getZ() + (double)Mth.sin(f2) * 2.5, d0, d1, f2, 3);
+            f2 = (float)k * (float) Math.PI * 2.0F / 8.0F + 1.2566371F;
+            createEvokerFang(this.getX() + (double)Mth.cos(f2) * 2.5, this.getZ() + (double)Mth.sin(f2) * 2.5, this.getY(), this.getY() + 1, f2, 3);
         }
     }
 
@@ -212,9 +209,8 @@ public class EvokerUnit extends Evoker implements Unit {
                 if (!this.level.isEmptyBlock(blockpos)) {
                     BlockState blockstate1 = this.level.getBlockState(blockpos);
                     VoxelShape voxelshape = blockstate1.getCollisionShape(this.level, blockpos);
-                    if (!voxelshape.isEmpty()) {
+                    if (!voxelshape.isEmpty())
                         d0 = voxelshape.max(Direction.Axis.Y);
-                    }
                 }
                 flag = true;
                 break;
@@ -222,8 +218,7 @@ public class EvokerUnit extends Evoker implements Unit {
             blockpos = blockpos.below();
         } while(blockpos.getY() >= Mth.floor(pMinY) - 1);
 
-        if (flag) {
+        if (flag)
             this.level.addFreshEntity(new EvokerFangs(this.level, pX, (double)blockpos.getY() + d0, pZ, pYRot, pWarmupDelay, this));
-        }
     }
 }

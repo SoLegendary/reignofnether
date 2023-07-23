@@ -6,6 +6,7 @@
     "mixins": [
         "EndermanMixin",
         "EntityRenderMixin",
+        "EvokerFangsMixin",
         "FrustumMixin",
         "OrthoViewMixin",
         "PlayerMixin",
