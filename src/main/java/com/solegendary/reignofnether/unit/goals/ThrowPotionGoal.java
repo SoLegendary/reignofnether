@@ -50,6 +50,7 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
                 this.mob.getX(), this.mob.getZ(),
                 moveTarget.getX(), moveTarget.getZ()) <= WitchUnit.getPotionThrowRange()) {
 
+                this.mob.getLookControl().setLookAt(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ());
                 WitchUnit witch = (WitchUnit) this.mob;
                 if (moveTarget != null)
                     witch.throwPotion(new Vec3(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ()), this.potion);

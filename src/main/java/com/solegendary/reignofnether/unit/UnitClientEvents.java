@@ -16,7 +16,6 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -26,7 +25,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -34,7 +32,6 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -114,7 +111,7 @@ public class UnitClientEvents {
         return currentPopulation;
     }
 
-    public static void reflectUnitActionFromServer(String playerName, UnitAction action, int unitId, int[] unitIds,
+    public static void sendUnitCommandManual(String playerName, UnitAction action, int unitId, int[] unitIds,
                                              BlockPos preselectedBlockPos, BlockPos selectedBuildingPos) {
         if (MC.player != null && playerName.equals(MC.player.getName().getString()))
             sendUnitCommandManual(action, unitId, unitIds, preselectedBlockPos, selectedBuildingPos);

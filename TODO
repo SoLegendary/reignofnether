@@ -15,6 +15,14 @@ More terrain generation:
     - might only be on singleplayer?
 
 
+    - conserve selected units and control groups when upgrading to husks/strays
+    - conserve units' goals when upgrading to husks/strays
+        - at a minimum, move and attack/target goals
+    - Stray arrows slow duration seems to be stuck at 30s
+
+
+
+Evoker fangs (line) doesn't work when targeting the ground
 
 TODO test in remote server
 
@@ -24,18 +32,43 @@ TODO test in remote server
 TODO buildings/units (backlog)
 
 Villager faction
-    - Mage Tower
-        - Evoker (evoker fangs + upgrade to summon uncontrollable vexes)
-        - library upgrade to unlock evoker and evoker upgrades
+    Evoker unit
+        - evoker fangs
+        - summons uncontrollable vexes
+
+    Blacksmith
+        - (now requires a barracks)
+
+    Library
+        - (requires an arcane tower)
+        - research: unlock evoker
+        - research: witch lingering potions
+        - research: evoker vexes
+
+    Castle
+       - Villagers' final building
+       - produces ravagers (crowd control/aoe damage bruiser, should be worse at sieging than iron golems)
+       - research to add battlements and allow garrisoning
 
 Monster faction
-    - Spider lair
-        - building upgrade to unlock poison spiders
-        - research to allow spiders to produce webs
-    - conserve selected units and control groups when upgrading to husks/strays
-    - conserve units' goals when upgrading to husks/strays
-        - at a minimum, move and attack/target goals
-    - Stray arrows slow duration seems to be stuck at 30s
+    Dungeon
+        - produces creepers
+
+    Laboratory
+        - (now requires a graveyard or a spider lair)
+            - enables more related upgrades depending on what has been built
+        - research: (dungeon) lightning rod
+        - research: (spider lair) unlock poison spiders
+        - research: (spider lair) spider jockeys
+        - research: (spider lair) allow both spiders to produce webs
+        - research: (graveyard) husks
+        - research: (graveyard) strays
+
+    Stronghold
+       - Monsters' final building
+       - Requires a laboratory
+       - produces wardens
+       - research to cause buildings to produce silverfish when damaged and/or destroyed
 
 Netherling faction
     All netherling buildings slowly convert non-nether blocks around them into nether counterparts:

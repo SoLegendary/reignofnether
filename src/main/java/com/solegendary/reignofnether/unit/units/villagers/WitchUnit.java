@@ -185,6 +185,11 @@ public class WitchUnit extends Witch implements Unit {
     }
 
     @Override
+    public void resetBehaviours() {
+        this.throwPotionGoal.stop();
+    }
+
+    @Override
     protected void registerGoals() {
         initialiseGoals();
 

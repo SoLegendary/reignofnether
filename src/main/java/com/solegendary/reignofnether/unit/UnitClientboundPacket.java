@@ -1,17 +1,8 @@
 package com.solegendary.reignofnether.unit;
 
-import com.solegendary.reignofnether.building.BuildingAction;
-import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.resources.ResourceName;
-import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -95,7 +86,7 @@ public class UnitClientboundPacket {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
-            UnitClientEvents.reflectUnitActionFromServer(
+            UnitClientEvents.sendUnitCommandManual(
                 this.ownerName,
                 this.action,
                 this.unitId,
