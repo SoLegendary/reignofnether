@@ -25,6 +25,7 @@
         "fogofwar.LevelRendererMixin",
         "fogofwar.LiquidBlockRendererMixin",
         "fogofwar.ModelBlockRendererCacheMixin",
-        "fogofwar.ModelBlockRendererMixin"
+        "fogofwar.ModelBlockRendererMixin",
+        "fogofwar.SingleQuadParticleMixin"
     ]
 }
