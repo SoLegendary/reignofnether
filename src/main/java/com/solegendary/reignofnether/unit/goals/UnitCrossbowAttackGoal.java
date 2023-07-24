@@ -2,9 +2,7 @@ package com.solegendary.reignofnether.unit.goals;
 
 import java.util.EnumSet;
 
-import com.solegendary.reignofnether.unit.interfaces.Unit;
-import net.minecraft.util.TimeUtil;
-import net.minecraft.util.valueproviders.UniformInt;
+import com.solegendary.reignofnether.unit.units.interfaces.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.CrossbowAttackMob;

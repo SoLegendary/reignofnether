@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.unit.interfaces;
+package com.solegendary.reignofnether.unit.units.interfaces;
 
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.unit.Relationship;

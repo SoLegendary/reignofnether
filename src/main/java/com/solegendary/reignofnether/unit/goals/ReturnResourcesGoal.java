@@ -4,8 +4,8 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.*;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
@@ -64,7 +64,8 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
     public boolean canDropOff() {
         if (buildingTarget != null && this.moveTarget != null)
             if (buildingTarget.isBuilt && buildingTarget.canAcceptResources &&
-                BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED)
+                BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED &&
+                BuildingServerEvents.getBuildings().contains(buildingTarget))
                 return buildingTarget.isPosInsideBuilding(mob.getOnPos()) || MiscUtil.isMobInRangeOfPos(moveTarget, mob, 1.5f);
         return false;
     }

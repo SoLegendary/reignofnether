@@ -9,10 +9,10 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchSpiderJockeys;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.goals.MountGoal;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
+import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -56,8 +56,12 @@ public class MountSpider extends Ability {
 
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
-        if (targetEntity instanceof SpiderUnit)
-            ((SkeletonUnit) unitUsing).getMountGoal().setTarget(targetEntity);
+        if (targetEntity instanceof SpiderUnit) {
+            if (unitUsing instanceof SkeletonUnit skeletonUnit)
+                skeletonUnit.getMountGoal().setTarget(targetEntity);
+            else if (unitUsing instanceof StrayUnit strayUnit)
+                strayUnit.getMountGoal().setTarget(targetEntity);
+        }
         else if (level.isClientSide())
             HudClientEvents.showTemporaryMessage("Invalid target!");
     }

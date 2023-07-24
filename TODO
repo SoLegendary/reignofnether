@@ -12,25 +12,15 @@ More terrain generation:
 
 - time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
     - not sure of the ordering...
-    - might only be on singleplayer?
 
 
 
     - Stray arrows slow duration seems to be stuck at 30s
     - Other players can't see evokers' channelling animations
     - Evoker portraits should not show their arms
-    - syncConvertedUnits returnResourcesGoal doesn't sync
-    - sync control groups
 
 
 TODO test in remote server
-
-syncing unit convert goals
-    - move
-    - attack/follow
-    - return resources
-    - attack move
-evoker friendly fire
 
 
 

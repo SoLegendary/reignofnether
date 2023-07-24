@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.resources;
 
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;

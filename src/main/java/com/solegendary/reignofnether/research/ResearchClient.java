@@ -18,6 +18,8 @@ public class ResearchClient {
     }
 
     public static boolean hasResearch(String researchItemName) {
+        if (hasCheat("medievalman"))
+            return true;
         for (String researchItem : researchItems)
             if (researchItem.equals(researchItemName))
                 return true;

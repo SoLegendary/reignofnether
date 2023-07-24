@@ -33,7 +33,7 @@ public class ControlGroup {
     private static final long DOUBLE_CLICK_TIME_MS = 500;
     public long lastClickTime = 0;
 
-    private final ArrayList<LivingEntity> entities = new ArrayList<>();
+    public final ArrayList<LivingEntity> entities = new ArrayList<>();
     private final ArrayList<Building> buildings = new ArrayList<>();
     private Keybinding keybinding = null;
 

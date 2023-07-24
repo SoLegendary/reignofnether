@@ -4,8 +4,8 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.units.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
@@ -95,6 +95,8 @@ public class UnitServerEvents {
             oldEntity.stopRiding();
             newEntity.startRiding(vehicle, true);
         }
+        newEntity.setYRot(oldEntity.getYRot());
+
         // discard with a reflected packet so the client has a chance to sync goals, command groups and selections
         //oldEntity.discard();
         return newEntity.getId();

@@ -10,10 +10,10 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.units.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -66,7 +66,6 @@ public class HudClientEvents {
             ActionButtons.STOP
     ));
     private static final ArrayList<ControlGroup> controlGroups = new ArrayList<>(10);
-
     private static final ArrayList<Button> buildingButtons = new ArrayList<>();
     private static final ArrayList<Button> unitButtons = new ArrayList<>();
     private static final ArrayList<Button> productionButtons = new ArrayList<>();
@@ -845,5 +844,25 @@ public class HudClientEvents {
         }
     }
 
-
+    // newUnitIds are replacing oldUnitIds - replace them in every control group while retaining their index
+    public static void convertControlGroups(int[] oldUnitIds, int[] newUnitIds) {
+        if (MC.level == null)
+            return;
+        for (ControlGroup group : controlGroups) {
+            for (int i = 0; i < oldUnitIds.length; i++) {
+                for (int j = 0; j < group.entities.size(); j++) {
+                    if (group.entities.get(j).getId() == oldUnitIds[i]) {
+                        group.entities.add(j, (LivingEntity) MC.level.getEntity(newUnitIds[i]));
+                        break;
+                    }
+                }
+            }
+            for (int i = 0; i < oldUnitIds.length; i++) {
+                for (int j = 0; j < oldUnitIds.length; j++) {
+                    final int k = j;
+                    group.entities.removeIf(e -> e.getId() == oldUnitIds[k]);
+                }
+            }
+        }
+    }
 }

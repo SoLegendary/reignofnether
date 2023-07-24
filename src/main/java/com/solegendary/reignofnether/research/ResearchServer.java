@@ -16,6 +16,8 @@ public class ResearchServer {
         researchItems.removeIf(p -> p.getFirst().equals(playerName) && p.getSecond().equals(researchItemName));
     }
     public static boolean playerHasResearch(String playerName, String researchItemName) {
+        if (playerHasCheat(playerName, "medievalman"))
+            return true;
         for (Pair<String, String> researchItem : researchItems)
             if (researchItem.getFirst().equals(playerName) && researchItem.getSecond().equals(researchItemName))
                 return true;

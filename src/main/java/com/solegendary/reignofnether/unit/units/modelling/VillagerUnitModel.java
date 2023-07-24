@@ -1,8 +1,8 @@
 package com.solegendary.reignofnether.unit.units.modelling;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
-import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.interfaces.ArmSwingingUnit;
+import com.solegendary.reignofnether.unit.units.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import net.minecraft.client.model.*;

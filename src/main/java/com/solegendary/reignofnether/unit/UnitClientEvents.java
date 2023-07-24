@@ -13,9 +13,9 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.units.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -534,16 +534,26 @@ public class UnitClientEvents {
             Entity oldEntity = MC.level.getEntity(oldUnitIds[i]);
             Entity newEntity = MC.level.getEntity(newUnitIds[i]);
             if (oldEntity instanceof Unit oldUnit &&
-                    newEntity instanceof Unit newUnit) {
+                newEntity instanceof Unit newUnit) {
 
+                // retain selections
                 int j = i;
                 if (selectedUnits.removeIf(e -> e.getId() == oldUnitIds[j]))
                     selectedUnits.add((LivingEntity) newEntity);
+
+                // retain control groups
+                HudClientEvents.convertControlGroups(oldUnitIds, newUnitIds);
 
                 if (oldUnit.getTargetGoal().getTarget() != null)
                     sendUnitCommandManual(
                         UnitAction.ATTACK,
                         oldUnit.getTargetGoal().getTarget().getId(),
+                        new int[] { newEntity.getId() }
+                    );
+                if (oldUnit.getFollowTarget() != null)
+                    sendUnitCommandManual(
+                        UnitAction.FOLLOW,
+                        oldUnit.getFollowTarget().getId(),
                         new int[] { newEntity.getId() }
                     );
                 if (oldUnit.getMoveGoal().getMoveTarget() != null)
@@ -556,8 +566,8 @@ public class UnitClientEvents {
                     sendUnitCommandManual(
                         UnitAction.RETURN_RESOURCES, -1,
                         new int[] { newEntity.getId() },
-                        new BlockPos(0,0,0),
-                        oldUnit.getReturnResourcesGoal().getBuildingTarget().originPos
+                        oldUnit.getReturnResourcesGoal().getBuildingTarget().originPos,
+                        new BlockPos(0,0,0)
                     );
             }
             if (oldEntity instanceof AttackerUnit oldAUnit &&
@@ -565,10 +575,18 @@ public class UnitClientEvents {
 
                 if (oldAUnit.getAttackMoveTarget() != null)
                     sendUnitCommandManual(
-                            UnitAction.ATTACK_MOVE, -1,
-                            new int[] { newEntity.getId() },
-                            oldAUnit.getAttackMoveTarget()
+                        UnitAction.ATTACK_MOVE, -1,
+                        new int[] { newEntity.getId() },
+                        oldAUnit.getAttackMoveTarget()
                     );
+            }
+        }
+        // for some reason if we don't discard here first the vehicle also gets discarded
+        if (MC.level != null) {
+            for (int id : oldUnitIds) {
+                Entity e = MC.level.getEntity(id);
+                if (e != null)
+                    e.discard();
             }
         }
         sendUnitCommandManual(UnitAction.DISCARD, oldUnitIds);
