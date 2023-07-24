@@ -1,7 +1,5 @@
 package com.solegendary.reignofnether.mixin;
 
-import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableWitchTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestHealableRaiderTargetGoal;
 import net.minecraft.world.entity.monster.Witch;

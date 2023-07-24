@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchEvokerVexes;
 import com.solegendary.reignofnether.research.researchItems.ResearchEvokers;
 import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPotions;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -59,7 +60,8 @@ public class ArcaneTower extends ProductionBuilding {
                 WitchProdItem.getStartButton(this, Keybindings.keyQ),
                 EvokerProdItem.getStartButton(this, Keybindings.keyW),
                 ResearchLingeringPotions.getStartButton(this, Keybindings.keyE),
-                ResearchEvokers.getStartButton(this, Keybindings.keyR)
+                ResearchEvokers.getStartButton(this, Keybindings.keyR),
+                ResearchEvokerVexes.getStartButton(this, Keybindings.keyT)
             );
     }
 

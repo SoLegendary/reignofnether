@@ -3,26 +3,31 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.CastFangsCircle;
 import com.solegendary.reignofnether.ability.abilities.CastFangsLine;
+import com.solegendary.reignofnether.ability.abilities.CastSummonVexes;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Evoker;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -90,6 +95,10 @@ public class EvokerUnit extends Evoker implements Unit {
     public CastFangsCircleGoal getCastFangsCircleGoal() {
         return castFangsCircleGoal;
     }
+    private CastSummonVexesGoal castSummonVexesGoal;
+    public CastSummonVexesGoal getCastSummonVexesGoal() {
+        return castSummonVexesGoal;
+    }
     public static int getFangsRange() { return 10; }
 
     final static public float maxHealth = 15.0f;
@@ -108,12 +117,15 @@ public class EvokerUnit extends Evoker implements Unit {
 
         CastFangsLine ab1 = new CastFangsLine(this);
         CastFangsCircle ab2 = new CastFangsCircle(this);
+        CastSummonVexes ab3 = new CastSummonVexes(this);
         this.abilities.add(ab1);
         this.abilities.add(ab2);
+        this.abilities.add(ab3);
 
         if (level.isClientSide()) {
             this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
             this.abilityButtons.add(ab2.getButton(Keybindings.keyW));
+            this.abilityButtons.add(ab3.getButton(Keybindings.keyE));
         }
     }
 
@@ -131,6 +143,7 @@ public class EvokerUnit extends Evoker implements Unit {
     public void resetBehaviours() {
         this.castFangsLineGoal.stop();
         this.castFangsCircleGoal.stop();
+        this.castSummonVexesGoal.stop();
     }
 
     public void tick() {
@@ -139,6 +152,13 @@ public class EvokerUnit extends Evoker implements Unit {
         Unit.tick(this);
         this.castFangsLineGoal.tick();
         this.castFangsCircleGoal.tick();
+        this.castSummonVexesGoal.tick();
+
+        if (this.getTarget() == null && !this.level.isClientSide()) {
+            Mob target = MiscUtil.findClosestAttackableEnemy(this, 10, (ServerLevel) level);
+            if (target != null)
+                this.setTarget(target);
+        }
     }
 
     public void initialiseGoals() {
@@ -147,6 +167,7 @@ public class EvokerUnit extends Evoker implements Unit {
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
         this.castFangsLineGoal = new CastFangsLineGoal(this);
         this.castFangsCircleGoal = new CastFangsCircleGoal(this);
+        this.castSummonVexesGoal = new CastSummonVexesGoal(this);
     }
 
     @Override
@@ -167,6 +188,8 @@ public class EvokerUnit extends Evoker implements Unit {
             return true;
         if (this.getCastFangsCircleGoal() != null && this.getCastFangsCircleGoal().isCasting())
             return true;
+        if (this.getCastSummonVexesGoal() != null && this.getCastSummonVexesGoal().isCasting())
+            return true;
         return false;
     }
 
@@ -183,7 +206,7 @@ public class EvokerUnit extends Evoker implements Unit {
     }
 
     // based on Evoker.EvokerAttackSpellGoal.performSpellCasting
-    public void createEvokerFangsCircle(BlockPos targetPos) {
+    public void createEvokerFangsCircle() {
         int k;
         float f2;
         for(k = 0; k < 5; ++k) {
@@ -220,5 +243,23 @@ public class EvokerUnit extends Evoker implements Unit {
 
         if (flag)
             this.level.addFreshEntity(new EvokerFangs(this.level, pX, (double)blockpos.getY() + d0, pZ, pYRot, pWarmupDelay, this));
+    }
+
+    public void summonVexes() {
+        if (this.level.isClientSide())
+            return;
+
+        for(int i = 0; i < 3; ++i) {
+            BlockPos blockpos = this.blockPosition().offset(-2 + this.random.nextInt(5), 1, -2 + this.random.nextInt(5));
+            Vex vex = EntityType.VEX.create(this.level);
+            if (vex != null) {
+                vex.moveTo(blockpos, 0.0F, 0.0F);
+                vex.finalizeSpawn((ServerLevel) this.level, this.level.getCurrentDifficultyAt(blockpos), MobSpawnType.MOB_SUMMONED, null, null);
+                vex.setOwner(this);
+                vex.setBoundOrigin(blockpos);
+                vex.setLimitedLife(CastSummonVexes.VEX_DURATION);
+                ((ServerLevel) this.level).addFreshEntityWithPassengers(vex);
+            }
+        }
     }
 }

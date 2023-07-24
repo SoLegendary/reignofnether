@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourceCost;
+import com.solegendary.reignofnether.unit.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;
@@ -68,9 +69,15 @@ public class CastFangsLineGoal extends MoveToTargetBlockGoal {
                     this.mob.getX(), this.mob.getZ(),
                     moveTarget.getX(), moveTarget.getZ()) <= EvokerUnit.getFangsRange()) {
                 if (moveTarget != null)
-                    isCasting = true;
+                    startCasting();
             }
         }
+    }
+
+    public void startCasting() {
+        this.isCasting = true;
+        if (!this.mob.level.isClientSide())
+            UnitSyncClientboundPacket.sendSyncEvokerCastingPacket(this.mob, true);
     }
 
     @Override
@@ -80,5 +87,7 @@ public class CastFangsLineGoal extends MoveToTargetBlockGoal {
         this.castTarget = null;
         this.stopMoving();
         this.setTarget((LivingEntity) null);
+        if (!this.mob.level.isClientSide())
+            UnitSyncClientboundPacket.sendSyncEvokerCastingPacket(this.mob, false);
     }
 }

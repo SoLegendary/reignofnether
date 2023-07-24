@@ -13,11 +13,10 @@ More terrain generation:
 - time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
     - not sure of the ordering...
 
+- Evoker portraits should not show their arms
 
+- Stray arrows slow duration seems to be stuck at 30s
 
-    - Stray arrows slow duration seems to be stuck at 30s
-    - Other players can't see evokers' channelling animations
-    - Evoker portraits should not show their arms
 
 
 TODO test in remote server
@@ -28,8 +27,6 @@ TODO test in remote server
 TODO buildings/units (backlog)
 
 Villager faction
-    Evoker unit
-        - summons uncontrollable vexes
 
     Blacksmith
         - (now requires a barracks)

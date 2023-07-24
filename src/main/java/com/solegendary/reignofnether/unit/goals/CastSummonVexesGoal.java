@@ -5,23 +5,19 @@ import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
-import com.solegendary.reignofnether.util.MyMath;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 
-// similar to castFangsGoal but does not require targeting, and so is not a MoveToTargetBlockGoal
-public class CastFangsCircleGoal extends Goal {
+public class CastSummonVexesGoal extends Goal {
 
     private final LivingEntity mob;
     private Ability ability; // used for syncing cooldown with clientside
     private int ticksCasting = 0; // how long have we spent trying to cast this spell
     public boolean isCasting() { return isCasting; }
-    public final static int TICKS_CASTING_MAX = 2 * ResourceCost.TICKS_PER_SECOND; // max time required to cast a spell
+    public final static int TICKS_CASTING_MAX = 5 * ResourceCost.TICKS_PER_SECOND; // max time required to cast a spell
     private boolean isCasting = false;
 
-    public CastFangsCircleGoal(LivingEntity mob) {
+    public CastSummonVexesGoal(LivingEntity mob) {
         this.mob = mob;
     }
 
@@ -34,7 +30,8 @@ public class CastFangsCircleGoal extends Goal {
         if (isCasting) {
             ticksCasting += 1;
             if (ticksCasting >= TICKS_CASTING_MAX) {
-                ((EvokerUnit) this.mob).createEvokerFangsCircle();
+                if (!this.mob.level.isClientSide())
+                    ((EvokerUnit) this.mob).summonVexes();
 
                 if (this.ability != null && !this.mob.level.isClientSide())
                     AbilityClientboundPacket.sendSetCooldownPacket(this.mob.getId(), this.ability.action, this.ability.cooldownMax);

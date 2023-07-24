@@ -39,20 +39,29 @@ public class UnitSyncClientboundPacket {
         ResourceName gatherTarget = ResourceName.NONE;
 
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new UnitSyncClientboundPacket(UnitSyncAction.SYNC_STATS,
-                        entity.getId(),
-                        entity.getHealth(),
-                        entity.getX(), entity.getY(), entity.getZ(),
-                        0,0,0)
+            new UnitSyncClientboundPacket(UnitSyncAction.SYNC_STATS,
+                entity.getId(),
+                entity.getHealth(),
+                entity.getX(), entity.getY(), entity.getZ(),
+                0,0,0)
         );
     }
 
     public static void sendSyncResourcesPacket(Unit unit) {
         Resources res = Resources.getTotalResourcesFromItems(unit.getItems());
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new UnitSyncClientboundPacket(UnitSyncAction.SYNC_RESOURCES,
-                        ((LivingEntity) unit).getId(), 0,0,0,0,
-                        res.food, res.wood, res.ore)
+            new UnitSyncClientboundPacket(UnitSyncAction.SYNC_RESOURCES,
+                ((LivingEntity) unit).getId(), 0,0,0,0,
+                res.food, res.wood, res.ore)
+        );
+    }
+
+    public static void sendSyncEvokerCastingPacket(LivingEntity entity, boolean startCasting) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+            new UnitSyncClientboundPacket(
+                startCasting ? UnitSyncAction.EVOKER_START_CASTING : UnitSyncAction.EVOKER_STOP_CASTING,
+                entity.getId(),
+                0,0,0,0,0,0,0)
         );
     }
 
@@ -120,6 +129,8 @@ public class UnitSyncClientboundPacket {
                         case SYNC_RESOURCES -> UnitClientEvents.syncUnitResources(
                                 this.entityId,
                                 new Resources("", this.food, this.wood, this.ore));
+                        case EVOKER_START_CASTING -> UnitClientEvents.syncEvokerCasting(this.entityId, true);
+                        case EVOKER_STOP_CASTING -> UnitClientEvents.syncEvokerCasting(this.entityId, false);
                     }
                 });
         });

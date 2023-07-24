@@ -82,4 +82,5 @@ public class ResourceCosts {
     public static ResourceCost RESEARCH_STRAYS = ResourceCost.Research(500,300,0, 120);
     public static ResourceCost RESEARCH_LINGERING_POTIONS = ResourceCost.Research(300,300,300, 150);
     public static ResourceCost RESEARCH_EVOKERS = ResourceCost.Research(500,0,300, 150);
+    public static ResourceCost RESEARCH_EVOKER_VEXES = ResourceCost.Research(500,0,300, 120);
 }

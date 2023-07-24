@@ -107,32 +107,8 @@ public interface AttackerUnit {
     // returns true and attacks the closest enemy OR
     // returns false and does nothing if none are found
     public default boolean attackClosestEnemy(ServerLevel level) {
-        Mob unitMob = (Mob) this;
-
-        List<PathfinderMob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
-                new Vector3d(unitMob.position().x, unitMob.position().y, unitMob.position().z),
-                this.getAggroRange(),
-                PathfinderMob.class,
-                level);
-
-        List<PathfinderMob> nearbyHostileMobs = new ArrayList<>();
-
-        for (PathfinderMob mob : nearbyMobs) {
-            Relationship rs = UnitServerEvents.getUnitToEntityRelationship((Unit) this, mob);
-            if (rs == Relationship.HOSTILE && mob.getId() != unitMob.getId())
-                nearbyHostileMobs.add(mob);
-        }
-        // find the closest mob
-        double closestDist = getAggroRange();
-        PathfinderMob closestMob = null;
-        for (PathfinderMob mob : nearbyHostileMobs) {
-            double dist = unitMob.position().distanceTo(mob.position());
-            if (dist < closestDist) {
-                closestDist = unitMob.position().distanceTo(mob.position());
-                closestMob = mob;
-            }
-        }
-        if (closestMob != null && unitMob.hasLineOfSight(closestMob)) {
+        PathfinderMob closestMob = MiscUtil.findClosestAttackableEnemy((Mob) this, this.getAggroRange(), level);
+        if (closestMob != null) {
             setAttackTarget(closestMob);
             return true;
         }

@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -590,5 +591,22 @@ public class UnitClientEvents {
             }
         }
         sendUnitCommandManual(UnitAction.DISCARD, oldUnitIds);
+    }
+
+    public static void syncEvokerCasting(int entityId, boolean startCasting) {
+        for (LivingEntity entity : getAllUnits()) {
+            if (entity instanceof EvokerUnit eUnit && eUnit.getId() == entityId) {
+                // skip if it's your evoker since it'll already be synced
+                if (MC.player != null && eUnit.getOwnerName().equals(MC.player.getName().getString()))
+                    return;
+
+                if (eUnit.getCastFangsLineGoal() != null) {
+                    if (startCasting)
+                        eUnit.getCastFangsLineGoal().startCasting();
+                    else
+                        eUnit.getCastFangsLineGoal().stop();
+                }
+            }
+        }
     }
 }

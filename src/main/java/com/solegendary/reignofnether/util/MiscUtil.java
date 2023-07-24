@@ -4,6 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -13,6 +16,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -109,6 +114,33 @@ public class MiscUtil {
             if (condition.test(bp))
                 retBps.add(bp);
         return retBps;
+    }
+
+    public static PathfinderMob findClosestAttackableEnemy(Mob unitMob, float range, ServerLevel level) {
+        List<PathfinderMob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
+                new Vector3d(unitMob.position().x, unitMob.position().y, unitMob.position().z),
+                range,
+                PathfinderMob.class,
+                level);
+
+        List<PathfinderMob> nearbyHostileMobs = new ArrayList<>();
+
+        for (PathfinderMob pfMob : nearbyMobs) {
+            Relationship rs = UnitServerEvents.getUnitToEntityRelationship((Unit) unitMob, pfMob);
+            if (rs == Relationship.HOSTILE && pfMob.getId() != unitMob.getId() && unitMob.hasLineOfSight(pfMob))
+                nearbyHostileMobs.add(pfMob);
+        }
+        // find the closest mob
+        double closestDist = range;
+        PathfinderMob closestMob = null;
+        for (PathfinderMob pfMob : nearbyHostileMobs) {
+            double dist = unitMob.position().distanceTo(pfMob.position());
+            if (dist < closestDist) {
+                closestDist = unitMob.position().distanceTo(pfMob.position());
+                closestMob = pfMob;
+            }
+        }
+        return closestMob;
     }
 
     public static <T extends Entity> List<T> getEntitiesWithinRange(Vector3d pos, float range, Class<T> entityType, Level level) {
