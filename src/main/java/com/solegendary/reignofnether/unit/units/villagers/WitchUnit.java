@@ -12,7 +12,7 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.ThrowHarmingPotion;
 import com.solegendary.reignofnether.ability.abilities.ThrowHealingPotion;
 import com.solegendary.reignofnether.unit.goals.*;
-import com.solegendary.reignofnether.unit.units.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;

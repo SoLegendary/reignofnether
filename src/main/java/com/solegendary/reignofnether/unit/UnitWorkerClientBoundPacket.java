@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.unit;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.ResourceName;
-import com.solegendary.reignofnether.unit.units.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;

@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.unit.units.interfaces;
+package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.*;
