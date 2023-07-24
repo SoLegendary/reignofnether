@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
@@ -11,15 +12,21 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.SpawnerBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -168,6 +175,20 @@ public class BuildingServerEvents {
             for (Building building : buildings)
                 if (building.isPosPartOfBuilding(evt.getPos(), true))
                     building.onBlockBreak((ServerLevel) evt.getLevel(), evt.getPos(), true);
+        }
+    }
+
+    // prevent dungeons spawners from actually spawning
+    @SubscribeEvent
+    public static void onLivingSpawn(LivingSpawnEvent.SpecialSpawn evt) {
+        if (evt.getSpawnReason() == MobSpawnType.SPAWNER) {
+            if (evt.getSpawner() != null &&
+                    evt.getSpawner().getSpawnerBlockEntity() != null) {
+                BlockEntity be = evt.getSpawner().getSpawnerBlockEntity();
+                BlockPos bp = evt.getSpawner().getSpawnerBlockEntity().getBlockPos();
+                if (BuildingUtils.findBuilding(getBuildings(), bp) instanceof Dungeon)
+                    evt.setResult(Event.Result.DENY);
+            }
         }
     }
 

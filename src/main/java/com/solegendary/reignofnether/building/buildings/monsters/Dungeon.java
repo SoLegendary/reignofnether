@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -63,22 +64,27 @@ public class Dungeon extends ProductionBuilding {
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
-                Dungeon.buildingName,
-                new ResourceLocation("minecraft", "textures/block/spawner.png"),
-                hotkey,
-                () -> BuildingClientEvents.getBuildingToPlace() == Dungeon.class,
-                () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
-                        ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Dungeon.class),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(Dungeon.buildingName, Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A fiery cage containing the power to create creepers.", Style.EMPTY)
-                ),
-                null
+            Dungeon.buildingName,
+            new ResourceLocation("minecraft", "textures/block/spawner.png"),
+            hotkey,
+            () -> BuildingClientEvents.getBuildingToPlace() == Dungeon.class,
+            () -> false,
+            () -> BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
+                    ResearchClient.hasCheat("modifythephasevariance"),
+            () -> BuildingClientEvents.setBuildingToPlace(Dungeon.class),
+            null,
+            List.of(
+                FormattedCharSequence.forward(Dungeon.buildingName, Style.EMPTY.withBold(true)),
+                ResourceCosts.getFormattedCost(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("A fiery cage containing the power to create creepers.", Style.EMPTY)
+            ),
+            null
         );
+    }
+
+    @Override
+    public BlockPos getIndoorSpawnPoint(ServerLevel level) {
+        return super.getIndoorSpawnPoint(level).offset(-1,0,0);
     }
 }

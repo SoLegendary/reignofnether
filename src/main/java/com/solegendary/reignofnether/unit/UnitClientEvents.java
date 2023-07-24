@@ -158,22 +158,22 @@ public class UnitClientEvents {
     public static void sendUnitCommand(UnitAction action) {
         if (MC.player != null) {
             UnitActionItem actionItem = new UnitActionItem(
-                    MC.player.getName().getString(),
-                    action,
-                    preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
-                    selectedUnits.stream().mapToInt(Entity::getId).toArray(),
-                    CursorClientEvents.getPreselectedBlockPos(),
-                    HudClientEvents.hudSelectedBuilding != null ? HudClientEvents.hudSelectedBuilding.originPos : new BlockPos(0,0,0)
+                MC.player.getName().getString(),
+                action,
+                preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
+                selectedUnits.stream().mapToInt(Entity::getId).toArray(),
+                CursorClientEvents.getPreselectedBlockPos(),
+                HudClientEvents.hudSelectedBuilding != null ? HudClientEvents.hudSelectedBuilding.originPos : new BlockPos(0,0,0)
             );
             actionItem.action(MC.level);
 
             PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
-                    MC.player.getName().getString(),
-                    action,
-                    preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
-                    selectedUnits.stream().mapToInt(Entity::getId).toArray(),
-                    CursorClientEvents.getPreselectedBlockPos(),
-                    HudClientEvents.hudSelectedBuilding != null ? HudClientEvents.hudSelectedBuilding.originPos : new BlockPos(0,0,0)
+                MC.player.getName().getString(),
+                action,
+                preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
+                selectedUnits.stream().mapToInt(Entity::getId).toArray(),
+                CursorClientEvents.getPreselectedBlockPos(),
+                HudClientEvents.hudSelectedBuilding != null ? HudClientEvents.hudSelectedBuilding.originPos : new BlockPos(0,0,0)
             ));
         }
     }

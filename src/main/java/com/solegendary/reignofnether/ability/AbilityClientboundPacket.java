@@ -20,7 +20,18 @@ public class AbilityClientboundPacket {
     private final UnitAction unitAction;
     private final int cooldown;
 
+    private static void setServersideCooldown(int unitId, UnitAction unitAction, int cooldown) {
+        for (LivingEntity entity : UnitClientEvents.getAllUnits())
+            if (entity.getId() == unitId && entity instanceof Unit unit)
+                for (Ability ability : unit.getAbilities())
+                    if (ability.action == unitAction) {
+                        ability.setCooldown(cooldown);
+                        return;
+                    }
+    }
+
     public static void sendSetCooldownPacket(int unitId, UnitAction unitAction, int cooldown) {
+        setServersideCooldown(unitId, unitAction, cooldown);
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new AbilityClientboundPacket(unitId, unitAction, cooldown)
         );

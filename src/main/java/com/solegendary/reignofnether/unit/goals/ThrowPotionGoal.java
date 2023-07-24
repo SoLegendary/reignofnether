@@ -32,9 +32,13 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
     // if we set an entity target, on every tick we will follow that target
     // if we set a BlockPos as the target, remove any entity target
     public void setTarget(LivingEntity entity) {
+        if (this.ability != null && this.ability.getCooldown() > 0)
+            return;
         this.targetEntity = entity;
     }
     public void setTarget(BlockPos bpTarget) {
+        if (this.ability != null && this.ability.getCooldown() > 0)
+            return;
         this.setMoveTarget(bpTarget);
         this.setTarget((LivingEntity) null);
     }
@@ -54,8 +58,10 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
                 WitchUnit witch = (WitchUnit) this.mob;
                 if (moveTarget != null)
                     witch.throwPotion(new Vec3(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ()), this.potion);
-                if (this.ability != null && !this.mob.level.isClientSide())
+                if (this.ability != null && !this.mob.level.isClientSide()) {
                     AbilityClientboundPacket.sendSetCooldownPacket(this.mob.getId(), this.ability.action, this.ability.cooldownMax);
+                }
+
                 this.stop();
             }
         }

@@ -76,11 +76,15 @@ public class CastFangsLine extends Ability {
         ((EvokerUnit) unitUsing).getCastFangsLineGoal().setTarget(targetEntity);
     }
 
+    public void setCooldownSingle(int cooldown) {
+        super.setCooldown(cooldown);
+    }
+
     @Override
     public void setCooldown(int cooldown) {
         super.setCooldown(cooldown);
         for (Ability ability : this.evokerUnit.getAbilities())
             if (ability instanceof CastFangsCircle ab)
-                ab.setCooldown(cooldown);
+                ab.setCooldownSingle(cooldown);
     }
 }

@@ -11,7 +11,12 @@ More terrain generation:
 - Evoker portraits should not show their arms
 - Stray arrows slow duration seems to be stuck at 30s
 
+- change dungeon spawners to creeper and confirm that it can't spawn anything
 
+- make base classes for ability goals
+    - TargetableAbilityGoal extends MoveToTargetBlockGoal
+    - AbilityGoal extends Goal (simple click to use abilities)
+    
 
 TODO test in remote server
 

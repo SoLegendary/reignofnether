@@ -28,9 +28,13 @@ public class CastFangsLineGoal extends MoveToTargetBlockGoal {
     // if we set a BlockPos as the target, remove any entity target
     // the user will only start casting once we reach the target
     public void setTarget(LivingEntity entity) {
+        if (this.ability != null && this.ability.getCooldown() > 0)
+            return;
         this.targetEntity = entity;
     }
     public void setTarget(BlockPos bpTarget) {
+        if (this.ability != null && this.ability.getCooldown() > 0)
+            return;
         this.setMoveTarget(bpTarget);
         this.setTarget((LivingEntity) null);
     }
@@ -75,6 +79,9 @@ public class CastFangsLineGoal extends MoveToTargetBlockGoal {
     }
 
     public void startCasting() {
+        if (this.ability != null && this.ability.getCooldown() > 0)
+            return;
+
         this.isCasting = true;
         if (!this.mob.level.isClientSide())
             UnitSyncClientboundPacket.sendSyncEvokerCastingPacket(this.mob, true);
