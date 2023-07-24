@@ -68,7 +68,7 @@ public class Blacksmith extends ProductionBuilding {
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Blacksmith.class,
                 () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
+                () -> BuildingClientEvents.hasFinishedBuilding(Barracks.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(Blacksmith.class),
                 null,
@@ -76,7 +76,9 @@ public class Blacksmith extends ProductionBuilding {
                         FormattedCharSequence.forward(Blacksmith.buildingName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A smithy to forge military upgrades and iron golems", Style.EMPTY)
+                        FormattedCharSequence.forward("A smithy to forge military upgrades and iron golems.", Style.EMPTY),
+                        FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.forward("Requires a barracks.", Style.EMPTY)
                 ),
                 null
         );

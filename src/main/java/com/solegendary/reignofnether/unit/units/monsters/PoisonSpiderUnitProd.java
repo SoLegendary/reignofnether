@@ -40,40 +40,40 @@ public class PoisonSpiderUnitProd extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-                PoisonSpiderUnitProd.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
-                hotkey,
-                () -> false,
-                () -> !ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
-                () -> true,
-                () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(PoisonSpiderUnitProd.itemName, Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedPopAndTime(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A spider fanged with deadly poison.", Style.EMPTY),
-                        FormattedCharSequence.forward("Too small to ride but good for hit and run tactics.", Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Spiders move much more slowly under sunlight.", Style.EMPTY)
-                )
+            PoisonSpiderUnitProd.itemName,
+            14,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
+            hotkey,
+            () -> false,
+            () -> false,
+            () -> ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
+            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
+            null,
+            List.of(
+                FormattedCharSequence.forward(PoisonSpiderUnitProd.itemName, Style.EMPTY.withBold(true)),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedPopAndTime(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("A spider fanged with deadly poison.", Style.EMPTY),
+                FormattedCharSequence.forward("Too small to ride but good for hit and run tactics.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Spiders move much more slowly under sunlight.", Style.EMPTY)
+            )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-                PoisonSpiderUnitProd.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, itemName, first),
-                null,
-                null
+            PoisonSpiderUnitProd.itemName,
+            14,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
+            (Keybinding) null,
+            () -> false,
+            () -> false,
+            () -> true,
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, itemName, first),
+            null,
+            null
         );
     }
 }

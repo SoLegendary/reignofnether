@@ -143,6 +143,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
             this.abilityButtons.add(Barracks.getBuildButton(Keybindings.keyT));
             this.abilityButtons.add(Blacksmith.getBuildButton(Keybindings.keyY));
             this.abilityButtons.add(ArcaneTower.getBuildButton(Keybindings.keyU));
+            this.abilityButtons.add(Library.getBuildButton(Keybindings.keyI));
         }
     }
 

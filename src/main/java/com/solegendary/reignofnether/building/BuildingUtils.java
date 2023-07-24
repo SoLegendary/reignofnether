@@ -86,6 +86,8 @@ public class BuildingUtils {
             case Mausoleum.buildingName -> building = new Mausoleum(level, pos, rotation, ownerName);
             case SpiderLair.buildingName -> building = new SpiderLair(level, pos, rotation, ownerName);
             case ArcaneTower.buildingName -> building = new ArcaneTower(level, pos, rotation, ownerName);
+            case Library.buildingName -> building = new Library(level, pos, rotation, ownerName);
+            case Dungeon.buildingName -> building = new Dungeon(level, pos, rotation, ownerName);
         }
         if (building != null)
             building.setLevel(level);

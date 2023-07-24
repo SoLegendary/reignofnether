@@ -14,7 +14,6 @@ import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -257,7 +256,7 @@ public class EvokerUnit extends Evoker implements Unit {
                 vex.finalizeSpawn((ServerLevel) this.level, this.level.getCurrentDifficultyAt(blockpos), MobSpawnType.MOB_SUMMONED, null, null);
                 vex.setOwner(this);
                 vex.setBoundOrigin(blockpos);
-                vex.setLimitedLife(CastSummonVexes.VEX_DURATION);
+                vex.setLimitedLife(CastSummonVexes.VEX_DURATION_SECONDS * ResourceCost.TICKS_PER_SECOND);
                 ((ServerLevel) this.level).addFreshEntityWithPassengers(vex);
             }
         }

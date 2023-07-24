@@ -1,9 +1,12 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
+import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
+import com.solegendary.reignofnether.building.buildings.monsters.SpiderLair;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -42,40 +45,42 @@ public class ResearchPoisonSpiders extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-                ResearchPoisonSpiders.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                hotkey,
-                () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchPoisonSpiders.itemName) ||
-                        ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
-                () -> true,
-                () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(ResearchPoisonSpiders.itemName, Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedTime(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Allows your spider lairs to create poison spiders.", Style.EMPTY)
-                )
+            ResearchPoisonSpiders.itemName,
+            14,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            hotkey,
+            () -> false,
+            () -> ProductionItem.itemIsBeingProduced(ResearchPoisonSpiders.itemName) ||
+                    ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
+            () -> BuildingClientEvents.hasFinishedBuilding(SpiderLair.buildingName),
+            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
+            null,
+            List.of(
+                FormattedCharSequence.forward(ResearchPoisonSpiders.itemName, Style.EMPTY.withBold(true)),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedTime(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Allows your spider lairs to create poison spiders.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires a spider lair.", Style.EMPTY)
+            )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-                ResearchPoisonSpiders.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
-                null,
-                null
+            ResearchPoisonSpiders.itemName,
+            14,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            null,
+            () -> false,
+            () -> false,
+            () -> true,
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
+            null,
+            null
         );
     }
 }

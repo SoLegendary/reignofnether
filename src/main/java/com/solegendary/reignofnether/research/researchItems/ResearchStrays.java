@@ -1,9 +1,11 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
+import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -65,7 +67,7 @@ public class ResearchStrays extends ProductionItem {
             () -> false,
             () -> ProductionItem.itemIsBeingProduced(ResearchStrays.itemName) ||
                     ResearchClient.hasResearch(ResearchStrays.itemName),
-            () -> true,
+            () -> BuildingClientEvents.hasFinishedBuilding(Graveyard.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
@@ -74,7 +76,9 @@ public class ResearchStrays extends ProductionItem {
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Transforms all existing and future skeletons", Style.EMPTY),
-                FormattedCharSequence.forward("into strays which fire slowing arrows.", Style.EMPTY)
+                FormattedCharSequence.forward("into strays which fire slowing arrows.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires a graveyard.", Style.EMPTY)
             )
         );
     }

@@ -60,8 +60,9 @@ public class ResourceCosts {
     public static ResourceCost HAUNTED_HOUSE = ResourceCost.Building(0,100,0, 10);
     public static ResourceCost PUMPKIN_FARM = ResourceCost.Building(0,120,0, 0);
     public static ResourceCost GRAVEYARD = ResourceCost.Building(0,150,0, 0);
-    public static ResourceCost LABORATORY = ResourceCost.Building(0,250,150, 0);
     public static ResourceCost SPIDER_LAIR = ResourceCost.Building(0,150,100, 0);
+    public static ResourceCost DUNGEON = ResourceCost.Building(0,100,200, 0);
+    public static ResourceCost LABORATORY = ResourceCost.Building(0,250,150, 0);
 
     // Villagers
     public static ResourceCost TOWN_CENTRE = ResourceCost.Building(0,300,150, 10);
@@ -70,6 +71,7 @@ public class ResourceCosts {
     public static ResourceCost BARRACKS = ResourceCost.Building(0,150,0, 0);
     public static ResourceCost BLACKSMITH = ResourceCost.Building(0,250,150, 0);
     public static ResourceCost ARCANE_TOWER = ResourceCost.Building(0,150,100, 0);
+    public static ResourceCost LIBRARY = ResourceCost.Building(0,350,100, 0);
 
     // ******************* RESEARCH ******************* //
     public static ResourceCost RESEARCH_VINDICATOR_AXES = ResourceCost.Research(0,200,400, 120);

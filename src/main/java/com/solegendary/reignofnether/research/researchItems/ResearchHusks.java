@@ -1,9 +1,12 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
+import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
+import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -66,7 +69,7 @@ public class ResearchHusks extends ProductionItem {
             () -> false,
             () -> ProductionItem.itemIsBeingProduced(ResearchHusks.itemName) ||
                     ResearchClient.hasResearch(ResearchHusks.itemName),
-            () -> true,
+            () -> BuildingClientEvents.hasFinishedBuilding(Graveyard.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
@@ -75,7 +78,9 @@ public class ResearchHusks extends ProductionItem {
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Transforms all existing and future zombies into husks,", Style.EMPTY),
-                FormattedCharSequence.forward("granting them +" + (int) (HuskUnit.maxHealth - ZombieUnit.maxHealth) + " health and immunity to sunlight.", Style.EMPTY)
+                FormattedCharSequence.forward("granting them +" + (int) (HuskUnit.maxHealth - ZombieUnit.maxHealth) + " health and immunity to sunlight.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires a graveyard.", Style.EMPTY)
             )
         );
     }

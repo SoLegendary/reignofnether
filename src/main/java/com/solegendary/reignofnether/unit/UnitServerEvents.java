@@ -243,7 +243,7 @@ public class UnitServerEvents {
                     forcedUnitChunks.removeIf(p -> p.getFirst().getId() == entity.getId());
                     ForgeChunkManager.forceChunk((ServerLevel) evt.level, ReignOfNether.MOD_ID, entity, newChunk.getPos().x, newChunk.getPos().z, true, true);
                     forcedUnitChunks.add(new Pair<>(entity, newChunk));
-                    System.out.println("Updated forced chunk for entity: " + entity.getId() + " at: " + newChunk.getPos().x + "," + newChunk.getPos().z);
+                    //System.out.println("Updated forced chunk for entity: " + entity.getId() + " at: " + newChunk.getPos().x + "," + newChunk.getPos().z);
                 }
             }
         }

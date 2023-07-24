@@ -4,6 +4,8 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchEvokerVexes;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -22,7 +24,7 @@ import java.util.List;
 public class CastSummonVexes extends Ability {
 
     public static final int CD_MAX_SECONDS = 60;
-    public static final int VEX_DURATION = 30 * ResourceCost.TICKS_PER_SECOND;
+    public static final int VEX_DURATION_SECONDS = 20;
 
     private final EvokerUnit evokerUnit;
 
@@ -48,7 +50,7 @@ public class CastSummonVexes extends Ability {
                     return this.evokerUnit.getCastSummonVexesGoal().isCasting();
                 return false;
             },
-            () -> false,
+            () -> !ResearchClient.hasResearch(ResearchEvokerVexes.itemName),
             () -> true,
             () -> UnitClientEvents.sendUnitCommand(UnitAction.CAST_SUMMON_VEXES),
             null,
@@ -56,7 +58,7 @@ public class CastSummonVexes extends Ability {
                 FormattedCharSequence.forward("Summon Vexes", Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE004  " + CD_MAX_SECONDS + "s", MyRenderer.iconStyle),
                 FormattedCharSequence.forward("After a long delay, summon a swarm of flying vexes that attack", Style.EMPTY),
-                FormattedCharSequence.forward("random nearby enemies. Vexes will die off after 30 seconds.", Style.EMPTY)
+                FormattedCharSequence.forward("random nearby enemies. Vexes start to die off after " + VEX_DURATION_SECONDS + " seconds.", Style.EMPTY)
             ),
             this
         );

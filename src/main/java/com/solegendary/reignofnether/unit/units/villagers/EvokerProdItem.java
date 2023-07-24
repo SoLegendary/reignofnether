@@ -46,9 +46,9 @@ public class EvokerProdItem extends ProductionItem {
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker.png"),
             hotkey,
-            () -> !ResearchClient.hasResearch(ResearchEvokers.itemName),
             () -> false,
-            () -> true,
+            () -> false,
+            () -> ResearchClient.hasResearch(ResearchEvokers.itemName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(

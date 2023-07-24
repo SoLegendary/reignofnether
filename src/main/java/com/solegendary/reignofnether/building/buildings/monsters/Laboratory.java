@@ -5,9 +5,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.researchItems.ResearchHusks;
-import com.solegendary.reignofnether.research.researchItems.ResearchLabLightningRod;
-import com.solegendary.reignofnether.research.researchItems.ResearchStrays;
+import com.solegendary.reignofnether.research.researchItems.*;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -46,6 +44,8 @@ public class Laboratory extends ProductionBuilding {
         this.popSupply = cost.population;
         this.buildTimeModifier = 0.85f;
 
+        this.canSetRallyPoint = false;
+
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.BLACKSTONE);
 
@@ -54,10 +54,11 @@ public class Laboratory extends ProductionBuilding {
 
         if (level.isClientSide()) {
             this.productionButtons = Arrays.asList(
-                CreeperUnitProd.getStartButton(this, Keybindings.keyQ),
-                ResearchHusks.getStartButton(this, Keybindings.keyW),
-                ResearchStrays.getStartButton(this, Keybindings.keyE),
-                ResearchLabLightningRod.getStartButton(this, Keybindings.keyR)
+                ResearchHusks.getStartButton(this, Keybindings.keyQ),
+                ResearchStrays.getStartButton(this, Keybindings.keyW),
+                ResearchSpiderJockeys.getStartButton(this, Keybindings.keyE),
+                ResearchPoisonSpiders.getStartButton(this, Keybindings.keyR),
+                ResearchLabLightningRod.getStartButton(this, Keybindings.keyT)
             );
             this.abilityButtons.add(callLightning.getButton(Keybindings.keyL));
         }
@@ -95,23 +96,23 @@ public class Laboratory extends ProductionBuilding {
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
-                Laboratory.buildingName,
-                new ResourceLocation("minecraft", "textures/block/brewing_stand.png"),
-                hotkey,
-                () -> BuildingClientEvents.getBuildingToPlace() == Laboratory.class,
-                () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
-                        ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Laboratory.class),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(Laboratory.buildingName, Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A sinister lab that can research new technologies and", Style.EMPTY),
-                        FormattedCharSequence.forward("produce creepers. Can be upgraded to have a lightning rod.", Style.EMPTY)
-                ),
-                null
+            Laboratory.buildingName,
+            new ResourceLocation("minecraft", "textures/block/brewing_stand.png"),
+            hotkey,
+            () -> BuildingClientEvents.getBuildingToPlace() == Laboratory.class,
+            () -> false,
+            () -> BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
+                    ResearchClient.hasCheat("modifythephasevariance"),
+            () -> BuildingClientEvents.setBuildingToPlace(Laboratory.class),
+            null,
+            List.of(
+                FormattedCharSequence.forward(Laboratory.buildingName, Style.EMPTY.withBold(true)),
+                ResourceCosts.getFormattedCost(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("A sinister lab that can research new technologies", Style.EMPTY),
+                FormattedCharSequence.forward("based on the other buildings that have been built.", Style.EMPTY)
+            ),
+            null
         );
     }
 }

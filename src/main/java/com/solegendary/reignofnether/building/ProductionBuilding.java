@@ -100,12 +100,12 @@ public abstract class ProductionBuilding extends Building {
             }
             CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
                 UnitServerEvents.addActionItem(
-                        this.ownerName,
-                        UnitAction.MOVE,
-                        -1,
-                        new int[] { entity.getId() },
-                        rallyPoint,
-                        new BlockPos(0,0,0)
+                    this.ownerName,
+                    UnitAction.MOVE,
+                    -1,
+                    new int[] { entity.getId() },
+                    rallyPoint,
+                    new BlockPos(0,0,0)
                 );
             });
         }

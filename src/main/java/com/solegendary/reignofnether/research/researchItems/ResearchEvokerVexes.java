@@ -49,9 +49,8 @@ public class ResearchEvokerVexes extends ProductionItem {
             hotkey,
             () -> false,
             () -> ProductionItem.itemIsBeingProduced(ResearchEvokerVexes.itemName) ||
-                    ResearchClient.hasResearch(ResearchEvokerVexes.itemName) ||
-                    !ResearchClient.hasResearch(ResearchEvokers.itemName),
-            () -> true,
+                    ResearchClient.hasResearch(ResearchEvokerVexes.itemName),
+            () -> ResearchClient.hasResearch(ResearchEvokers.itemName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
@@ -59,7 +58,9 @@ public class ResearchEvokerVexes extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Unlocks the ability for evokers to summon vexes.", Style.EMPTY)
+                FormattedCharSequence.forward("Unlocks the ability for evokers to summon vexes.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires evokers to have been unlocked.", Style.EMPTY)
             )
         );
     }

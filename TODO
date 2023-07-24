@@ -7,15 +7,11 @@ More terrain generation:
         - lava lakes
 
 - rapidly switching control groups while right click moving will cause crash (?)
-
-- Fix smooth lighting issues on fog of war borders (properly)
-
 - time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
-    - not sure of the ordering...
-
 - Evoker portraits should not show their arms
-
 - Stray arrows slow duration seems to be stuck at 30s
+
+- hide the smokestack from a blacksmith in fog of war
 
 
 
@@ -27,35 +23,12 @@ TODO test in remote server
 TODO buildings/units (backlog)
 
 Villager faction
-
-    Blacksmith
-        - (now requires a barracks)
-
-    Library
-        - (requires an arcane tower)
-        - research: unlock evoker
-        - research: witch lingering potions
-        - research: evoker vexes
-
     Castle
        - Villagers' final building
        - produces ravagers (crowd control/aoe damage bruiser, should be worse at sieging than iron golems)
        - research to add battlements and allow garrisoning
 
 Monster faction
-    Dungeon
-        - produces creepers
-
-    Laboratory
-        - (now requires a graveyard or a spider lair)
-            - enables more related upgrades depending on what has been built
-        - research: (dungeon) lightning rod
-        - research: (spider lair) unlock poison spiders
-        - research: (spider lair) spider jockeys
-        - research: (spider lair) allow both spiders to produce webs
-        - research: (graveyard) husks
-        - research: (graveyard) strays
-
     Stronghold
        - Monsters' final building
        - Requires a laboratory
