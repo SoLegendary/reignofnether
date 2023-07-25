@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.ability;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,7 +22,7 @@ public class AbilityClientboundPacket {
     private final int cooldown;
 
     private static void setServersideCooldown(int unitId, UnitAction unitAction, int cooldown) {
-        for (LivingEntity entity : UnitClientEvents.getAllUnits())
+        for (LivingEntity entity : UnitServerEvents.getAllUnits())
             if (entity.getId() == unitId && entity instanceof Unit unit)
                 for (Ability ability : unit.getAbilities())
                     if (ability.action == unitAction) {
