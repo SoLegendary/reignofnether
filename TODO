@@ -16,7 +16,10 @@ More terrain generation:
 - make base classes for ability goals
     - TargetableAbilityGoal extends MoveToTargetBlockGoal
     - AbilityGoal extends Goal (simple click to use abilities)
-    
+
+- Evoker spells can bypass cooldown by using grouping with a second evoker off cooldown
+    - for some reason the ability cooldown is set but it's off cooldown whenever we check it??
+
 
 TODO test in remote server
 

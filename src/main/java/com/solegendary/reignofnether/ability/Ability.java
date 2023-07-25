@@ -32,6 +32,8 @@ public class Ability {
 
     public int getCooldown() { return this.cooldown; }
 
+    public boolean isOffCooldown() { return this.cooldown <= 0; }
+
     public void setToMaxCooldown() {
         this.cooldown = cooldownMax;
     }

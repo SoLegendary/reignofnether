@@ -46,9 +46,6 @@ public class CastSummonVexesGoal extends Goal {
     }
 
     public void startCasting() {
-        if (this.ability != null && this.ability.getCooldown() > 0)
-            return;
-
         this.isCasting = true;
         if (!this.mob.level.isClientSide())
             UnitSyncClientboundPacket.sendSyncEvokerCastingPacket(this.mob, true);

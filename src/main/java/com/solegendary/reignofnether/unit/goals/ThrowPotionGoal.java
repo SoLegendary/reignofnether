@@ -32,13 +32,9 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
     // if we set an entity target, on every tick we will follow that target
     // if we set a BlockPos as the target, remove any entity target
     public void setTarget(LivingEntity entity) {
-        if (this.ability != null && this.ability.getCooldown() > 0)
-            return;
         this.targetEntity = entity;
     }
     public void setTarget(BlockPos bpTarget) {
-        if (this.ability != null && this.ability.getCooldown() > 0)
-            return;
         this.setMoveTarget(bpTarget);
         this.setTarget((LivingEntity) null);
     }
