@@ -54,8 +54,7 @@ public class IronGolemProdItem extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A hulking golem of metal with a powerful melee attack.", Style.EMPTY),
-                FormattedCharSequence.forward("Iron golems take halved damage from projectiles and explosions.", Style.EMPTY)
+                FormattedCharSequence.forward("A hulking golem of metal with a powerful melee attack.", Style.EMPTY)
             )
         );
     }

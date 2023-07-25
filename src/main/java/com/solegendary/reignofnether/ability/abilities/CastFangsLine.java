@@ -21,7 +21,7 @@ import java.util.List;
 
 public class CastFangsLine extends Ability {
 
-    public static final int CD_MAX_SECONDS = 15;
+    public static final int CD_MAX_SECONDS = 10;
 
     private final EvokerUnit evokerUnit;
 

@@ -24,7 +24,7 @@ import java.util.List;
 
 public class ThrowHealingPotion extends Ability {
 
-    public static final int CD_MAX_SECONDS = 10;
+    public static final int CD_MAX_SECONDS = 15;
 
     private final WitchUnit witchUnit;
 

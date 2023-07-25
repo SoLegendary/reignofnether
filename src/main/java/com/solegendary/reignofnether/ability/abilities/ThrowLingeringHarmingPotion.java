@@ -24,7 +24,7 @@ import java.util.List;
 
 public class ThrowLingeringHarmingPotion extends Ability {
 
-    public static final int CD_MAX_SECONDS = 30;
+    public static final int CD_MAX_SECONDS = 15;
 
     private final WitchUnit witchUnit;
 

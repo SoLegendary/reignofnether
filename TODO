@@ -1,24 +1,27 @@
 
 TODO bugs/features:
 
-More terrain generation:
-    - remove all underground features
-        - amethyst geodes
-        - lava lakes
-
-- rapidly switching control groups while right click moving will cause crash (?)
-- time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
-- Evoker portraits should not show their arms
-- Stray arrows slow duration seems to be stuck at 30s
-
-- change dungeon spawners to creeper and confirm that it can't spawn anything
-
 - make base classes for ability goals
     - TargetableAbilityGoal extends MoveToTargetBlockGoal
     - AbilityGoal extends Goal (simple click to use abilities)
 
-- Evoker spells can bypass cooldown by using grouping with a second evoker off cooldown
-    - for some reason the ability cooldown is set but it's off cooldown whenever we check it??
+- time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
+- Evoker portraits should not show their arms
+
+- change dungeon spawners to creeper and confirm that it can't spawn anything
+
+- hotkeys for zombie villager are weird
+- right clicking minimap should issue move commands
+
+- rapidly switching control groups while right click moving will cause crash (?)
+	- actually just selecting control groups with hotkeys too fast causes it
+	- might have something to do with setNonHeadModelVisibility
+    - control groups' entity locations are desynced on server
+        - test by creating some mixed control groups and sending them far away from each other
+
+- Check unit conversions on remote server
+
+- UI/sound warning for units/buildings being attacked out of view
 
 
 TODO test in remote server

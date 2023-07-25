@@ -95,14 +95,14 @@ public class WitchUnit extends Witch implements Unit {
         return throwPotionGoal;
     }
 
-    final static public float maxHealth = 15.0f;
+    final static public float maxHealth = 20.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float sightRange = 10f;
     final static public int popCost = ResourceCosts.WITCH.population;
     public int maxResources = 100;
 
-    final static public int LINGERING_POTION_DURATION = 4 * ResourceCost.TICKS_PER_SECOND;
+    final static public int LINGERING_POTION_DURATION = 5 * ResourceCost.TICKS_PER_SECOND;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();

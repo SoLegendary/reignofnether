@@ -850,9 +850,9 @@ public class HudClientEvents {
             return;
         for (ControlGroup group : controlGroups) {
             for (int i = 0; i < oldUnitIds.length; i++) {
-                for (int j = 0; j < group.entities.size(); j++) {
-                    if (group.entities.get(j).getId() == oldUnitIds[i]) {
-                        group.entities.add(j, (LivingEntity) MC.level.getEntity(newUnitIds[i]));
+                for (int j = 0; j < group.entityIds.size(); j++) {
+                    if (group.entityIds.get(j) == oldUnitIds[i]) {
+                        group.entityIds.add(j, newUnitIds[i]);
                         break;
                     }
                 }
@@ -860,7 +860,7 @@ public class HudClientEvents {
             for (int i = 0; i < oldUnitIds.length; i++) {
                 for (int j = 0; j < oldUnitIds.length; j++) {
                     final int k = j;
-                    group.entities.removeIf(e -> e.getId() == oldUnitIds[k]);
+                    group.entityIds.removeIf(id -> id == oldUnitIds[k]);
                 }
             }
         }

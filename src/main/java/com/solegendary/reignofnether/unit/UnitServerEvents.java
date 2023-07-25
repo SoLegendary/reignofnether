@@ -294,10 +294,6 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL || evt.getSource() == DamageSource.IN_FIRE))
             evt.setCanceled(true);
 
-        // iron golem projectile armor
-        if (evt.getEntity() instanceof IronGolemUnit && (evt.getSource().isProjectile() || evt.getSource().isExplosion()))
-            evt.setAmount(evt.getAmount() / 2);
-
         // nerf lightning damage
         if (evt.getSource() == DamageSource.LIGHTNING_BOLT)
             evt.setAmount(evt.getAmount() / 2);
@@ -329,8 +325,8 @@ public class UnitServerEvents {
     // prevent potion damage effects from causing knockback
     @SubscribeEvent
     public static void onLivingDamage(LivingDamageEvent evt)  {
-        if (evt.getSource().msgId.equals("indirectMagic"))
-            knockbackIgnoreIds.add(evt.getEntity().getId());
+       // if (evt.getSource().msgId.equals("indirectMagic"))
+       //     knockbackIgnoreIds.add(evt.getEntity().getId());
     }
 
     @SubscribeEvent

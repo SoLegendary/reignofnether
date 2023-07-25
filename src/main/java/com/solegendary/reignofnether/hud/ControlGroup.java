@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -33,8 +34,8 @@ public class ControlGroup {
     private static final long DOUBLE_CLICK_TIME_MS = 500;
     public long lastClickTime = 0;
 
-    public final ArrayList<LivingEntity> entities = new ArrayList<>();
-    private final ArrayList<Building> buildings = new ArrayList<>();
+    public final ArrayList<Integer> entityIds = new ArrayList<>();
+    private final ArrayList<BlockPos> buildingBps = new ArrayList<>(); // origin pos
     private Keybinding keybinding = null;
 
     public ControlGroup() { }
@@ -44,22 +45,22 @@ public class ControlGroup {
     }
 
     public void clearAll() {
-        this.entities.clear();
-        this.buildings.clear();
+        this.entityIds.clear();
+        this.buildingBps.clear();
     }
 
     public boolean isEmpty() {
-        return entities.size() == 0 && buildings.size() == 0;
+        return entityIds.size() == 0 && buildingBps.size() == 0;
     }
 
     // removes any entities/buildings that are no longer being tracked (likely dead/left world)
     public void clean() {
-        this.entities.removeIf(e ->
+        this.entityIds.removeIf(e ->
                 !UnitClientEvents.getAllUnits().stream().
-                map(Entity::getId).toList().contains(e.getId()));
-        this.buildings.removeIf(b ->
+                map(Entity::getId).toList().contains(e));
+        this.buildingBps.removeIf(b ->
                 !BuildingClientEvents.getBuildings().stream().
-                map(b2 -> b2.originPos).toList().contains(b.originPos));
+                map(b2 -> b2.originPos).toList().contains(b));
     }
 
     // assigns selected entities/buildings to this control group
@@ -71,51 +72,71 @@ public class ControlGroup {
         ArrayList<Building> selBuildings = BuildingClientEvents.getSelectedBuildings();
 
         if (selUnits.size() > 0 && getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED) {
-            this.entities.addAll(selUnits);
+            this.entityIds.addAll(selUnits.stream().map(Entity::getId).toList());
         }
         else if (selBuildings.size() > 0 && BuildingClientEvents.getPlayerToBuildingRelationship(selBuildings.get(0)) == Relationship.OWNED) {
-            this.buildings.addAll(selBuildings);
+            this.buildingBps.addAll(selBuildings.stream().map(b -> b.originPos).toList());
         }
     }
 
     // selects the control group's assigned entities/buildings
     public void loadToSelected() {
-        Player player = Minecraft.getInstance().player;
+        Minecraft MC = Minecraft.getInstance();
+        Player player = MC.player;
+        if (MC.level == null)
+            return;
+
         boolean doubleClicked = (System.currentTimeMillis() - lastClickTime) < DOUBLE_CLICK_TIME_MS && player != null;
 
-        if (entities.size() > 0) {
+        if (entityIds.size() > 0) {
             BuildingClientEvents.clearSelectedBuildings();
             UnitClientEvents.clearSelectedUnits();
-            for (LivingEntity entity : entities)
-                UnitClientEvents.addSelectedUnit(entity);
-
-            if (doubleClicked)
-                OrthoviewClientEvents.centreCameraOnPos(entities.get(0).getX(), entities.get(0).getZ());
+            for (int id : entityIds) {
+                Entity e = MC.level.getEntity(id);
+                if (e instanceof Unit && e instanceof LivingEntity le)
+                    UnitClientEvents.addSelectedUnit(le);
+            }
+            Entity e = MC.level.getEntity(entityIds.get(0));
+            if (doubleClicked && e != null)
+                OrthoviewClientEvents.centreCameraOnPos(e.getX(), e.getZ());
         }
-        else if (buildings.size() > 0) {
+        else if (buildingBps.size() > 0) {
             UnitClientEvents.clearSelectedUnits();
 
             BuildingClientEvents.clearSelectedBuildings();
-            for (Building building : buildings)
-                BuildingClientEvents.addSelectedBuilding(building);
+            for (BlockPos bp : buildingBps)
+                for (Building building : BuildingClientEvents.getBuildings())
+                    if (building.originPos == bp)
+                        BuildingClientEvents.addSelectedBuilding(building);
 
             if (doubleClicked) {
-                BlockPos pos = buildings.get(0).centrePos;
-                OrthoviewClientEvents.centreCameraOnPos(pos.getX(), pos.getZ());
+                BlockPos pos = buildingBps.get(0);
+                for (Building building : BuildingClientEvents.getBuildings())
+                    if (building.originPos == pos)
+                        OrthoviewClientEvents.centreCameraOnPos(building.centrePos.getX(), building.centrePos.getZ());
             }
         }
         lastClickTime = System.currentTimeMillis();
     }
 
     public Button getButton() {
+        Minecraft MC = Minecraft.getInstance();
 
         ResourceLocation icon = null;
-        if (this.entities.size() > 0) {
-            String unitName = HudClientEvents.getSimpleEntityName(this.entities.get(0));
-            icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png");
+        if (this.entityIds.size() > 0) {
+            if (MC.level != null) {
+                Entity e = MC.level.getEntity(entityIds.get(0));
+                if (e != null) {
+                    String unitName = HudClientEvents.getSimpleEntityName(e);
+                    icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png");
+                }
+            }
         }
-        else if (this.buildings.size() > 0)
-            icon = this.buildings.get(0).icon;
+        else if (this.buildingBps.size() > 0) {
+            for (Building building : BuildingClientEvents.getBuildings())
+                if (building.originPos == this.buildingBps.get(0))
+                    icon = building.icon;
+        }
 
         return new Button(
             "Control Group " + getKey(),
