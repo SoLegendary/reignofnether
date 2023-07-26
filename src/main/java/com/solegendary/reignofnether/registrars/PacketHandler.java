@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
@@ -80,5 +81,9 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(TPSClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(TPSClientBoundPacket::encode).decoder(TPSClientBoundPacket::new)
                 .consumer(TPSClientBoundPacket::handle).add();
+
+        INSTANCE.messageBuilder(AttackWarningClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(AttackWarningClientboundPacket::encode).decoder(AttackWarningClientboundPacket::new)
+                .consumer(AttackWarningClientboundPacket::handle).add();
     }
 }

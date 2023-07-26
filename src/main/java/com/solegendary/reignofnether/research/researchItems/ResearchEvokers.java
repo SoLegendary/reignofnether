@@ -42,24 +42,24 @@ public class ResearchEvokers extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-                ResearchEvokers.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                hotkey,
-                () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchEvokers.itemName) ||
-                        ResearchClient.hasResearch(ResearchEvokers.itemName),
-                () -> true,
-                () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(ResearchEvokers.itemName, Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedTime(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Allows your arcane towers to create evokers.", Style.EMPTY)
-                )
+            ResearchEvokers.itemName,
+            14,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            hotkey,
+            () -> false,
+            () -> ProductionItem.itemIsBeingProduced(ResearchEvokers.itemName) ||
+                    ResearchClient.hasResearch(ResearchEvokers.itemName),
+            () -> true,
+            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
+            null,
+            List.of(
+                FormattedCharSequence.forward(ResearchEvokers.itemName, Style.EMPTY.withBold(true)),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedTime(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Allows your arcane towers to create evokers.", Style.EMPTY)
+            )
         );
     }
 

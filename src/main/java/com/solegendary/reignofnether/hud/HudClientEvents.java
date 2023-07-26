@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -692,6 +693,16 @@ public class HudClientEvents {
             renderedButtons.add(idleButton);
         }
 
+        // ---------------------
+        // Attack warning button
+        // ---------------------
+        Button attackWarningButton = AttackWarningClientEvents.getWarningButton();
+        if (!attackWarningButton.isHidden.get())
+            attackWarningButton.render(evt.getPoseStack(),
+                MC.getWindow().getGuiScaledWidth() - (MinimapClientEvents.MAP_RADIUS * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 14,
+                MC.getWindow().getGuiScaledHeight() - MinimapClientEvents.MAP_RADIUS - (MinimapClientEvents.CORNER_OFFSET * 2) - 2,
+                mouseX, mouseY);
+        renderedButtons.add(attackWarningButton);
 
         // ------------------------------------------------------
         // Button tooltips (has to be rendered last to be on top)
@@ -716,6 +727,8 @@ public class HudClientEvents {
                     0xFFFFFFFF);
              */
         }
+
+
     }
 
     public static boolean isMouseOverAnyButton() {

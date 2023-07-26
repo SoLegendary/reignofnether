@@ -144,13 +144,14 @@ public class Button {
     public void render(PoseStack poseStack, int x, int y, int mouseX, int mouseY) {
         this.x = x;
         this.y = y;
-        MyRenderer.renderIconFrameWithBg(poseStack, this.frameResource, x, y, iconFrameSize, 0x64000000);
+        if (this.frameResource != null)
+            MyRenderer.renderIconFrameWithBg(poseStack, this.frameResource, x, y, iconFrameSize, 0x64000000);
 
         // item/unit icon
         MyRenderer.renderIcon(
                 poseStack,
                 iconResource,
-                x+4, y+4,
+                x+4 + (7 - iconSize/2), y+4 + (7 - iconSize/2),
                 iconSize
         );
         // hotkey letter
