@@ -13,5 +13,7 @@
   "item.reignofnether.iron_golem_unit_spawn_egg": "Spawn Iron Golem Unit",
   "item.reignofnether.witch_unit_spawn_egg": "Spawn Witch Unit",
   "item.reignofnether.evoker_unit_spawn_egg": "Spawn Evoker Unit",
-  "item.reignofnether.enderman_unit_spawn_egg": "Spawn Enderman Unit"
+  "item.reignofnether.enderman_unit_spawn_egg": "Spawn Enderman Unit",
+
+  "sounds.reignofnether.under_attack": "Under attack!"
 }

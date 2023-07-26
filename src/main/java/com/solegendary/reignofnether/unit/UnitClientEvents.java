@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
@@ -11,6 +12,7 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -21,20 +23,26 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
+import org.stringtemplate.v4.misc.Misc;
 
 import java.util.*;
 
@@ -244,6 +252,9 @@ public class UnitClientEvents {
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END)
             return;
+
+        if (attackWarningCd > 0)
+            attackWarningCd -= 1;
 
         ticksToNextVisCheck -= 1;
 
@@ -605,6 +616,32 @@ public class UnitClientEvents {
                         eUnit.getCastFangsLineGoal().startCasting();
                     else
                         eUnit.getCastFangsLineGoal().stop();
+                }
+            }
+        }
+    }
+
+    private static final int ATTACK_WARNING_CD_MAX = 300;
+    private static int attackWarningCd = 0;
+
+    // prevent potion damage effects from causing knockback
+    @SubscribeEvent
+    public static void onLivingDamage(LivingDamageEvent evt)  {
+        if (!OrthoviewClientEvents.isEnabled() || attackWarningCd > 0)
+            return;
+
+        if (MC.player != null && evt.getEntity() instanceof Unit unit) {
+            if (unit.getOwnerName().equals(MC.player.getName().getString())) {
+
+                Vec3 centrePos = MiscUtil.getOrthoviewCentreWorldPos(MC);
+                float dist2dSqr = new Vec2((float) evt.getEntity().getX(), (float) evt.getEntity().getZ()).distanceToSqr(
+                    new Vec2((float) centrePos.x, (float) centrePos.z)
+                );
+
+                if (dist2dSqr < Math.pow(OrthoviewClientEvents.getZoom() * 2, 2)) {
+                    System.out.println("Your unit was attacked: " + evt.getEntity().getName().getString() + " " + evt.getEntity().getOnPos());
+                    MC.player.playSound(SoundRegistrar.UNDER_ATTACK_SOUND.get(), 0.2f, 1.0f);
+                    attackWarningCd = ATTACK_WARNING_CD_MAX;
                 }
             }
         }

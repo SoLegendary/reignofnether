@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.fogofwar.FogChunk;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
@@ -24,7 +25,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -363,35 +366,57 @@ public class MinimapClientEvents {
         return d <= 0.5;
     }
 
-    private static void clickMapToMoveCamera(float x, float y) {
-        if (!isPointInsideMinimap(x,y) || CursorClientEvents.isBoxSelecting())
-            return;
+    // given an x and y on the screen that the player clicked, return the world position of that spot
+    private static BlockPos getWorldPosOnMinimap(float x, float y, boolean offsetForCamera) {
+        if (!isPointInsideMinimap(x,y) || CursorClientEvents.isBoxSelecting() || MC.level == null)
+            return null;
 
         float pixelsToBlocks = (float) WORLD_RADIUS / (float) MAP_RADIUS;
 
         // offset y up so that user clicks the centre of the view quad instead of bottom border
-        y += OrthoviewClientEvents.getZoom() * 0.5F / pixelsToBlocks;
+        if (offsetForCamera)
+            y += OrthoviewClientEvents.getZoom() * 0.5F / pixelsToBlocks;
 
         Vec2 clicked = MyMath.rotateCoords(x - xc, y - yc,45);
 
-        double xMoveTo = xc_world + clicked.x * pixelsToBlocks * Math.sqrt(2);
-        double zMoveTo = zc_world + clicked.y * pixelsToBlocks * Math.sqrt(2);
+        double xWorld = xc_world + clicked.x * pixelsToBlocks * Math.sqrt(2);
+        double zWorld = zc_world + clicked.y * pixelsToBlocks * Math.sqrt(2);
+        double yWorld = MiscUtil.getHighestSolidBlock(MC.level, new BlockPos(xWorld, 0, zWorld)).getY();
 
-        if (MC.player != null)
-            PlayerServerboundPacket.teleportPlayer(xMoveTo, MC.player.getY(), zMoveTo);
+        return new BlockPos(xWorld, yWorld, zWorld);
     }
 
-    // when clicking on map move player there
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
-        if (OrthoviewClientEvents.isEnabled() && evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1)
-            clickMapToMoveCamera((float) evt.getMouseX(), (float) evt.getMouseY());
+        // when clicking on map move player there
+        if (OrthoviewClientEvents.isEnabled() && evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
+            if (MC.player != null && moveTo != null)
+                PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
+        }
     }
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre evt) {
-        if (OrthoviewClientEvents.isEnabled() && evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1)
-            clickMapToMoveCamera((float) evt.getMouseX(), (float) evt.getMouseY());
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
+
+        // when clicking on map move player there
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
+            if (MC.player != null && moveTo != null)
+                PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
+        }
+        else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
+            if (UnitClientEvents.getSelectedUnits().size() > 0 && moveTo != null) {
+                UnitClientEvents.sendUnitCommandManual(
+                    UnitAction.MOVE, -1,
+                    UnitClientEvents.getSelectedUnits().stream().mapToInt(Entity::getId).toArray(),
+                    moveTo
+                );
+            }
+        }
     }
 
     @SubscribeEvent
