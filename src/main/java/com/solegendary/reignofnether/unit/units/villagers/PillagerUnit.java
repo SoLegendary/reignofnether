@@ -121,13 +121,13 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public PillagerUnit(EntityType<? extends Pillager> entityType, Level level) {
         super(entityType, level);
 
-        Mount mountAbility = new Mount(this);
+        //Mount mountAbility = new Mount(this);
         Dismount dismountAbility = new Dismount(this);
-        this.abilities.add(mountAbility);
+        //this.abilities.add(mountAbility);
         this.abilities.add(dismountAbility);
 
         if (level.isClientSide()) {
-            this.abilityButtons.add(mountAbility.getButton(Keybindings.keyQ));
+            //this.abilityButtons.add(mountAbility.getButton(Keybindings.keyQ));
             this.abilityButtons.add(dismountAbility.getButton(Keybindings.keyQ));
         }
     }
