@@ -40,8 +40,7 @@ public class FogOfWarClientEvents {
     public static float SEMI_DARK_CHUNK_BRIGHTNESS = 0.15f;
     public static float DARK_CHUNK_BRIGHTNESS = 0f;
 
-    public static final int CHUNK_VIEW_DIST_UNIT = 2;
-    public static final int CHUNK_VIEW_DIST_BUILDING = 2;
+    public static final int CHUNK_VIEW_DIST = 2;
 
     public static Minecraft MC = Minecraft.getInstance();
 

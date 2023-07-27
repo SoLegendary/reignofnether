@@ -4,42 +4,31 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.fogofwar.FogChunk;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogTransitionBrightness;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.PrioritizeChunkUpdates;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.chunk.RenderRegionCache;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.BlockDestructionProgress;
-import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;
@@ -56,14 +45,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.CHUNK_VIEW_DIST_BUILDING;
-import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.CHUNK_VIEW_DIST_UNIT;
+import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.CHUNK_VIEW_DIST;
+
 
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
 
-    private static final Set<ChunkPos> chunksPosesWithUnits = ConcurrentHashMap.newKeySet();
-    private static final Set<ChunkPos> chunksPosesWithBuildings = ConcurrentHashMap.newKeySet();
+    private static Set<ChunkPos> oldOccupiedChunks = ConcurrentHashMap.newKeySet();
+    private static final Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
     private static final int UPDATE_TICKS_MAX = 10;
     private static int updateTicks = 0;
 
@@ -89,11 +78,11 @@ public abstract class LevelRendererMixin {
         if (!Minecraft.getInstance().isSameThread()) {
             throw new IllegalStateException("applyFrustum called from wrong thread: " + Thread.currentThread().getName());
         } else {
+            long time0 = System.nanoTime();
+
             this.minecraft.getProfiler().push("apply_frustum");
 
             LinkedHashSet<LevelRenderer.RenderChunkInfo> renderChunkInfos = (this.renderChunkStorage.get()).renderChunks;
-
-            long time0 = System.nanoTime();
 
             // refresh renderChunksInFrustum
             this.renderChunksInFrustum.clear();
@@ -108,9 +97,11 @@ public abstract class LevelRendererMixin {
             }
             else {
                 updateTicks = 0;
-                chunksPosesWithUnits.clear();
-                chunksPosesWithBuildings.clear();
+                occupiedChunks.clear();
             }
+
+            long time1 = (System.nanoTime() - time0) / 100;
+            long time1b = System.nanoTime();
 
             // bright chunks in last tick
             Set<FogChunk> oldBrightChunks = FogOfWarClientEvents.fogChunks.stream()
@@ -119,36 +110,35 @@ public abstract class LevelRendererMixin {
             // bright chunks in current tick
             Set<FogChunk> newBrightChunks = ConcurrentHashMap.newKeySet();
 
+            long time2 = (System.nanoTime() - time1b) / 100;
+            long time2b = System.nanoTime();
+
             // get chunks that have units/buildings that can see
 
             for (LivingEntity entity : UnitClientEvents.getAllUnits())
                 if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED)
-                    chunksPosesWithUnits.add(this.minecraft.level.getChunk(entity.getOnPos()).getPos());
+                    occupiedChunks.add(this.minecraft.level.getChunk(entity.getOnPos()).getPos());
 
             for (Building building : BuildingClientEvents.getBuildings())
                 if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED)
-                    chunksPosesWithBuildings.add(this.minecraft.level.getChunk(building.centrePos).getPos());
+                    occupiedChunks.add(this.minecraft.level.getChunk(building.centrePos).getPos());
 
-            long time1 = System.nanoTime() - time0;
-            long time1b = System.nanoTime();
+            long time3 = (System.nanoTime() - time2b) / 100;
+            long time3b = System.nanoTime();
 
             // can't use renderChunksInFrustum because then we wouldn't update explored status of chunks we aren't looking at
             for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos) {
                 ChunkPos renderChunkPos = this.minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
 
-                for (ChunkPos chunkPos : chunksPosesWithBuildings)
-                    if (chunkPos.getChessboardDistance(renderChunkPos) < CHUNK_VIEW_DIST_BUILDING)
-                        newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
-
-                for (ChunkPos chunkPos : chunksPosesWithUnits)
-                    if (chunkPos.getChessboardDistance(renderChunkPos) < CHUNK_VIEW_DIST_UNIT)
+                for (ChunkPos chunkPos : occupiedChunks)
+                    if (chunkPos.getChessboardDistance(renderChunkPos) < CHUNK_VIEW_DIST)
                         newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
             }
 
-            long time2 = System.nanoTime() - time1b;
-            long time2b = System.nanoTime();
+            long time4 = (System.nanoTime() - time3b) / 100;
+            long time4b = System.nanoTime();
 
-            if (!newBrightChunks.equals(oldBrightChunks)) {
+            if (!occupiedChunks.equals(oldOccupiedChunks)) {
 
                 // chunks that just entered the bright zone
                 Set<FogChunk> diff1 = ConcurrentHashMap.newKeySet();
@@ -201,13 +191,19 @@ public abstract class LevelRendererMixin {
                 }
             }
 
-            long time3 = System.nanoTime() - time2b;
+            oldOccupiedChunks = occupiedChunks;
 
-            long totalTime = (time1 + time2 + time3) / 1000;
+            long time5 = (System.nanoTime() - time4b) / 100;
+            long time5b = System.nanoTime();
+
+            long totalTime = time1 + time2 + time3 + time4 + time5;
             System.out.println("total time: " + totalTime);
-            System.out.println("time1: " + time1/1000 + " (" +  ((double)time1/totalTime)*100 + "%)");
-            System.out.println("time2: " + time2/1000 + " (" +  ((double)time2/totalTime)*100 + "%)");
-            System.out.println("time3: " + time3/1000 + " (" +  ((double)time3/totalTime)*100 + "%)");
+            System.out.println("time1: " + time1 + " (" +  ((double)time1/totalTime)*100 + "%)");
+            System.out.println("time2: " + time2 + " (" +  ((double)time2/totalTime)*100 + "%)");
+            System.out.println("time3: " + time3 + " (" +  ((double)time3/totalTime)*100 + "%)");
+            System.out.println("time4: " + time4 + " (" +  ((double)time4/totalTime)*100 + "%)");
+            System.out.println("time5: " + time5 + " (" +  ((double)time5/totalTime)*100 + "%)");
+
 
             this.minecraft.getProfiler().pop();
         }
