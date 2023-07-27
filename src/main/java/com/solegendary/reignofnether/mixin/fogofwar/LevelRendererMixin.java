@@ -93,12 +93,13 @@ public abstract class LevelRendererMixin {
 
             LinkedHashSet<LevelRenderer.RenderChunkInfo> renderChunkInfos = (this.renderChunkStorage.get()).renderChunks;
 
+            long time0 = System.nanoTime();
+
             // refresh renderChunksInFrustum
             this.renderChunksInFrustum.clear();
             for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos)
                 if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()))
                     this.renderChunksInFrustum.add(chunkInfo);
-
 
             if (updateTicks < UPDATE_TICKS_MAX) {
                 updateTicks += 1;
@@ -128,6 +129,9 @@ public abstract class LevelRendererMixin {
                 if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED)
                     chunksPosesWithBuildings.add(this.minecraft.level.getChunk(building.centrePos).getPos());
 
+            long time1 = System.nanoTime() - time0;
+            long time1b = System.nanoTime();
+
             // can't use renderChunksInFrustum because then we wouldn't update explored status of chunks we aren't looking at
             for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos) {
                 ChunkPos renderChunkPos = this.minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
@@ -141,7 +145,8 @@ public abstract class LevelRendererMixin {
                         newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
             }
 
-
+            long time2 = System.nanoTime() - time1b;
+            long time2b = System.nanoTime();
 
             if (!newBrightChunks.equals(oldBrightChunks)) {
 
@@ -195,6 +200,14 @@ public abstract class LevelRendererMixin {
                     }
                 }
             }
+
+            long time3 = System.nanoTime() - time2b;
+
+            long totalTime = (time1 + time2 + time3) / 1000;
+            System.out.println("total time: " + totalTime);
+            System.out.println("time1: " + time1/1000 + " (" +  ((double)time1/totalTime)*100 + "%)");
+            System.out.println("time2: " + time2/1000 + " (" +  ((double)time2/totalTime)*100 + "%)");
+            System.out.println("time3: " + time3/1000 + " (" +  ((double)time3/totalTime)*100 + "%)");
 
             this.minecraft.getProfiler().pop();
         }
