@@ -1,12 +1,7 @@
 package com.solegendary.reignofnether.time;
 
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -14,7 +9,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -79,8 +73,8 @@ public class TimeClientEvents {
 
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused())
             return;
-        xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.MAP_RADIUS - (MinimapClientEvents.CORNER_OFFSET * 2) + 2;
-        yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.MAP_RADIUS * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 4;
+        xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.MAP_GUI_RADIUS - (MinimapClientEvents.CORNER_OFFSET * 2) + 2;
+        yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.MAP_GUI_RADIUS * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 4;
 
         ItemRenderer itemrenderer = MC.getItemRenderer();
         itemrenderer.renderAndDecorateItem(new ItemStack(Items.CLOCK), xPos, yPos);

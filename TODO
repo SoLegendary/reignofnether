@@ -10,6 +10,9 @@ TODO bugs/features:
 
 - Let units' pathfinding fall off of high drops
 
+- Minimap smoother processing for rendering
+    - and enlarge button
+
 - Refactor fog of war chunks to have 1 object per column instead of 3d chunk
 
 
@@ -20,6 +23,8 @@ attack warnings
 control groups
 moving with minimap
 units should not retaliate when already attacking a unit or building
+
+
 
 TODO buildings/units (backlog)
 

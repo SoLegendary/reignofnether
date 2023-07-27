@@ -699,8 +699,8 @@ public class HudClientEvents {
         Button attackWarningButton = AttackWarningClientEvents.getWarningButton();
         if (!attackWarningButton.isHidden.get())
             attackWarningButton.render(evt.getPoseStack(),
-                MC.getWindow().getGuiScaledWidth() - (MinimapClientEvents.MAP_RADIUS * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 14,
-                MC.getWindow().getGuiScaledHeight() - MinimapClientEvents.MAP_RADIUS - (MinimapClientEvents.CORNER_OFFSET * 2) - 2,
+                MC.getWindow().getGuiScaledWidth() - (MinimapClientEvents.MAP_GUI_RADIUS * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 14,
+                MC.getWindow().getGuiScaledHeight() - MinimapClientEvents.MAP_GUI_RADIUS - (MinimapClientEvents.CORNER_OFFSET * 2) - 2,
                 mouseX, mouseY);
         renderedButtons.add(attackWarningButton);
 

@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.minimap;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
@@ -20,12 +19,10 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -36,6 +33,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -45,8 +43,8 @@ public class MinimapClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
     public static final int WORLD_RADIUS = 100; // how many world blocks should be mapped
-    public static final int MAP_RADIUS = 50; // actual size on GUI
-    private static final int REFRESH_TICKS_MAX = 100;
+    public static final int MAP_GUI_RADIUS = 50; // actual size on the screen
+    private static final int REFRESH_TICKS_MAX = WORLD_RADIUS * 2; // as the map area increases, decrease refresh rate to maintain FPS
     private static int refreshTicksCurrent = 0;
     public static final int CORNER_OFFSET = 10;
     public static final int BG_OFFSET = 6;
@@ -208,8 +206,8 @@ public class MinimapClientEvents {
                                 case NEUTRAL -> rgb = 0xFFFF00;
                             }
                         }
-                        int xN = x - xc_world + (MAP_RADIUS * 2);
-                        int zN = z - zc_world + (MAP_RADIUS * 2);
+                        int xN = x - xc_world + (MAP_GUI_RADIUS * 2);
+                        int zN = z - zc_world + (MAP_GUI_RADIUS * 2);
                         mapColours[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                     }
                 }
@@ -241,8 +239,8 @@ public class MinimapClientEvents {
                                 case NEUTRAL -> rgb = 0xFFFF00;
                             }
                         }
-                        int xN = x - xc_world + (MAP_RADIUS * 2);
-                        int zN = z - zc_world + (MAP_RADIUS * 2);
+                        int xN = x - xc_world + (MAP_GUI_RADIUS * 2);
+                        int zN = z - zc_world + (MAP_GUI_RADIUS * 2);
                         mapColours[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                     }
                 }
@@ -260,8 +258,8 @@ public class MinimapClientEvents {
                 for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
                     for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
                         if (isXZinsideMap(x,z)) {
-                            int xN = x - xc_world + (MAP_RADIUS * 2);
-                            int zN = z - zc_world + (MAP_RADIUS * 2);
+                            int xN = x - xc_world + (MAP_GUI_RADIUS * 2);
+                            int zN = z - zc_world + (MAP_GUI_RADIUS * 2);
 
                             // a chunk on the same Y column may not be bright
                             // so prioritise bright chunks by skipping any pixels that have
@@ -318,11 +316,11 @@ public class MinimapClientEvents {
 
         // place vertices in a diamond shape - left, centre, right, top, centre, bottom
         // map vertex coordinates (left, centre, right, top, centre, bottom)
-        xl = MC.getWindow().getGuiScaledWidth() - (MAP_RADIUS * 2) - CORNER_OFFSET;
-        xc = MC.getWindow().getGuiScaledWidth() - MAP_RADIUS - CORNER_OFFSET;
+        xl = MC.getWindow().getGuiScaledWidth() - (MAP_GUI_RADIUS * 2) - CORNER_OFFSET;
+        xc = MC.getWindow().getGuiScaledWidth() - MAP_GUI_RADIUS - CORNER_OFFSET;
         xr = MC.getWindow().getGuiScaledWidth() - CORNER_OFFSET;
-        yt = MC.getWindow().getGuiScaledHeight() - (MAP_RADIUS * 2) - CORNER_OFFSET;
-        yc = MC.getWindow().getGuiScaledHeight() - MAP_RADIUS - CORNER_OFFSET;
+        yt = MC.getWindow().getGuiScaledHeight() - (MAP_GUI_RADIUS * 2) - CORNER_OFFSET;
+        yc = MC.getWindow().getGuiScaledHeight() - MAP_GUI_RADIUS - CORNER_OFFSET;
         yb = MC.getWindow().getGuiScaledHeight() - CORNER_OFFSET;
 
         // background vertex coords need to be slightly larger
@@ -362,7 +360,7 @@ public class MinimapClientEvents {
     public static boolean isPointInsideMinimap(double x, double y) {
         double dx = Math.abs(x - xc);
         double dy = Math.abs(y - yc);
-        double d = dx / (MAP_RADIUS * 2) + dy / (MAP_RADIUS * 2);
+        double d = dx / (MAP_GUI_RADIUS * 2) + dy / (MAP_GUI_RADIUS * 2);
         return d <= 0.5;
     }
 
@@ -371,7 +369,7 @@ public class MinimapClientEvents {
         if (!isPointInsideMinimap(x,y) || CursorClientEvents.isBoxSelecting() || MC.level == null)
             return null;
 
-        float pixelsToBlocks = (float) WORLD_RADIUS / (float) MAP_RADIUS;
+        float pixelsToBlocks = (float) WORLD_RADIUS / (float) MAP_GUI_RADIUS;
 
         // offset y up so that user clicks the centre of the view quad instead of bottom border
         if (offsetForCamera)
