@@ -11,6 +11,8 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogChunk;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -23,7 +25,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,9 +35,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -42,31 +46,72 @@ import java.util.*;
 public class MinimapClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
-    public static final int WORLD_RADIUS = 100; // how many world blocks should be mapped
-    public static final int MAP_GUI_RADIUS = 50; // actual size on the screen
-    private static final int REFRESH_TICKS_MAX = WORLD_RADIUS * 2; // as the map area increases, decrease refresh rate to maintain FPS
+    private static int worldRadius = 100; // how many world blocks should be mapped
+    private static int mapGuiRadius = 50; // actual size on the screen
+    private static int refreshTicksMax = worldRadius * 2;
     private static int refreshTicksCurrent = 0;
     public static final int CORNER_OFFSET = 10;
     public static final int BG_OFFSET = 6;
+
+    private static boolean largeMap = false;
+    private static boolean shouldToggleSize = false;
 
     private static final int UNIT_RADIUS = 3;
     private static final int UNIT_THICKNESS = 1;
     private static final int BUILDING_RADIUS = 7;
     private static final int BUILDING_THICKNESS = 2;
 
-    private static final DynamicTexture MAP_TEXTURE = new DynamicTexture(WORLD_RADIUS * 2, WORLD_RADIUS * 2, true);
-    private static final RenderType MAP_RENDER_TYPE = RenderType.textSeeThrough(Minecraft.getInstance()
-            .textureManager.register(ReignOfNether.MOD_ID + "_" + "minimap", MAP_TEXTURE));
+    private static DynamicTexture mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
+    private static RenderType mapRenderType = RenderType.textSeeThrough(Minecraft.getInstance()
+            .textureManager.register(ReignOfNether.MOD_ID + "_" + "minimap", mapTexture));
+    private static int[][] mapColours = new int[worldRadius *2][worldRadius *2];
 
-    private static int[][] mapColours = new int[WORLD_RADIUS*2][WORLD_RADIUS*2];
     private static int xc_world = 0; // world pos x centre, maps to xc
     private static int zc_world = 0; // world pos zcentre, maps to yc
 
     private static float xl, xc, xr, yt, yc, yb;
 
+
     public static void setMapCentre(double x, double z) {
         xc_world = (int) x;
         zc_world = (int) z;
+    }
+
+    public static int getMapGuiRadius() {
+        return mapGuiRadius;
+    }
+
+    private static void toggleMapSize() {
+        largeMap = !largeMap;
+        if (largeMap) {
+            worldRadius = 200;
+            mapGuiRadius = 100;
+        } else {
+            worldRadius = 100;
+            mapGuiRadius = 50;
+        }
+        mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
+        mapRenderType = RenderType.textSeeThrough(Minecraft.getInstance()
+                .textureManager.register(ReignOfNether.MOD_ID + "_" + "minimap", mapTexture));
+        mapColours = new int[worldRadius *2][worldRadius *2];
+        refreshTicksMax = worldRadius * 2; // as the map area increases, decrease refresh rate to maintain FPS
+    }
+
+    public static Button getToggleSizeButton() {
+        return new Button(
+            largeMap ? "Close" : "Open large map",
+            14,
+            largeMap ? new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png") :
+                        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+            Keybindings.keyM,
+            () -> false,
+            () -> false,
+            () -> true,
+            () -> shouldToggleSize = true,
+            () -> { },
+            List.of(FormattedCharSequence.forward(largeMap ? "Close" : "Open large map", Style.EMPTY))
+        );
     }
 
     public static void updateMapTexture()
@@ -74,30 +119,30 @@ public class MinimapClientEvents {
         // if camera is off the map, start panning the centre of the map
         double xCam = MC.player.getX();
         double zCam = MC.player.getZ();
-        double xDiff1 = xCam - (xc_world + WORLD_RADIUS);
+        double xDiff1 = xCam - (xc_world + worldRadius);
         if (xDiff1 > 0)
             xc_world += xDiff1;
-        double zDiff1 = zCam - (zc_world + WORLD_RADIUS);
+        double zDiff1 = zCam - (zc_world + worldRadius);
         if (zDiff1 > 0)
             zc_world += zDiff1;
-        double xDiff2 = xCam - (xc_world - WORLD_RADIUS);
+        double xDiff2 = xCam - (xc_world - worldRadius);
         if (xDiff2 < 0)
             xc_world += xDiff2;
-        double zDiff2 = zCam - (zc_world - WORLD_RADIUS);
+        double zDiff2 = zCam - (zc_world - worldRadius);
         if (zDiff2 < 0)
             zc_world += zDiff2;
 
-        NativeImage pixels = MAP_TEXTURE.getPixels();
+        NativeImage pixels = mapTexture.getPixels();
         if (pixels != null)
         {
             int i = 0;
-            for (int z = 0; z < WORLD_RADIUS *2; z ++) {
-                for (int x = 0; x < WORLD_RADIUS *2; x ++) {
+            for (int z = 0; z < worldRadius *2; z ++) {
+                for (int x = 0; x < worldRadius *2; x ++) {
                     pixels.setPixelRGBA(x, z, mapColours[x][z]);
                     i += 1;
                 }
             }
-            MAP_TEXTURE.upload();
+            mapTexture.upload();
         }
     }
 
@@ -120,11 +165,11 @@ public class MinimapClientEvents {
         corners[2] = MyMath.addVector3d(corners[2], lookVector, 75-OrthoviewClientEvents.getCamRotY());
         corners[3] = MyMath.addVector3d(corners[3], lookVector, 90-OrthoviewClientEvents.getCamRotY());
 
-        mapColours = new int[WORLD_RADIUS*2][WORLD_RADIUS*2];
+        mapColours = new int[worldRadius *2][worldRadius *2];
 
-        for (int z = zc_world - WORLD_RADIUS; z < zc_world + WORLD_RADIUS; z++)
+        for (int z = zc_world - worldRadius; z < zc_world + worldRadius; z++)
         {
-            for (int x = xc_world - WORLD_RADIUS; x < xc_world + WORLD_RADIUS; x++) {
+            for (int x = xc_world - worldRadius; x < xc_world + worldRadius; x++) {
 
                 int y = MC.level.getChunkAt(new BlockPos(x,0,z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                 BlockState bs;
@@ -173,8 +218,8 @@ public class MinimapClientEvents {
                 }
 
                 // normalise xz back to 0,0
-                int x0 = x - xc_world + WORLD_RADIUS;
-                int z0 = z - zc_world + WORLD_RADIUS;
+                int x0 = x - xc_world + worldRadius;
+                int z0 = z - zc_world + worldRadius;
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
                 mapColours[x0][z0] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
             }
@@ -206,8 +251,8 @@ public class MinimapClientEvents {
                                 case NEUTRAL -> rgb = 0xFFFF00;
                             }
                         }
-                        int xN = x - xc_world + (MAP_GUI_RADIUS * 2);
-                        int zN = z - zc_world + (MAP_GUI_RADIUS * 2);
+                        int xN = x - xc_world + (mapGuiRadius * 2);
+                        int zN = z - zc_world + (mapGuiRadius * 2);
                         mapColours[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                     }
                 }
@@ -239,8 +284,8 @@ public class MinimapClientEvents {
                                 case NEUTRAL -> rgb = 0xFFFF00;
                             }
                         }
-                        int xN = x - xc_world + (MAP_GUI_RADIUS * 2);
-                        int zN = z - zc_world + (MAP_GUI_RADIUS * 2);
+                        int xN = x - xc_world + (mapGuiRadius * 2);
+                        int zN = z - zc_world + (mapGuiRadius * 2);
                         mapColours[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                     }
                 }
@@ -249,7 +294,7 @@ public class MinimapClientEvents {
 
         // init a map filled with black and copy in only those pixels inside of explored/bright chunks
         if (FogOfWarClientEvents.isEnabled()) {
-            int[][] mapColoursCopy = new int[WORLD_RADIUS*2][WORLD_RADIUS*2];
+            int[][] mapColoursCopy = new int[worldRadius *2][worldRadius *2];
             for (int[] row : mapColoursCopy)
                 Arrays.fill(row, (0xFF << 24));
 
@@ -258,8 +303,8 @@ public class MinimapClientEvents {
                 for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
                     for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
                         if (isXZinsideMap(x,z)) {
-                            int xN = x - xc_world + (MAP_GUI_RADIUS * 2);
-                            int zN = z - zc_world + (MAP_GUI_RADIUS * 2);
+                            int xN = x - xc_world + (mapGuiRadius * 2);
+                            int zN = z - zc_world + (mapGuiRadius * 2);
 
                             // a chunk on the same Y column may not be bright
                             // so prioritise bright chunks by skipping any pixels that have
@@ -283,9 +328,9 @@ public class MinimapClientEvents {
         }
 
         // draw view quad
-        for (int z = zc_world - WORLD_RADIUS; z < zc_world + WORLD_RADIUS; z++)
+        for (int z = zc_world - worldRadius; z < zc_world + worldRadius; z++)
         {
-            for (int x = xc_world - WORLD_RADIUS; x < xc_world + WORLD_RADIUS; x++) {
+            for (int x = xc_world - worldRadius; x < xc_world + worldRadius; x++) {
                 for (int i = 0; i < corners.length; i++) {
                     int j = i + 1;
                     if (j >= corners.length) j = 0;
@@ -296,8 +341,8 @@ public class MinimapClientEvents {
                             new Vec2(x,z),
                             OrthoviewClientEvents.getZoom() * 2 // larger = thicker line
                     )) {
-                        int x0 = x - xc_world + WORLD_RADIUS;
-                        int z0 = z - zc_world + WORLD_RADIUS;
+                        int x0 = x - xc_world + worldRadius;
+                        int z0 = z - zc_world + worldRadius;
                         mapColours[x0][z0] = 0xFFFFFFFF;
                     }
                 }
@@ -306,8 +351,8 @@ public class MinimapClientEvents {
     }
 
     public static boolean isXZinsideMap(int x, int z) {
-        return x >= xc_world - WORLD_RADIUS && x < xc_world + WORLD_RADIUS &&
-               z >= zc_world - WORLD_RADIUS && z < zc_world + WORLD_RADIUS;
+        return x >= xc_world - worldRadius && x < xc_world + worldRadius &&
+               z >= zc_world - worldRadius && z < zc_world + worldRadius;
     }
 
     private static void renderMap(PoseStack stack)
@@ -316,11 +361,11 @@ public class MinimapClientEvents {
 
         // place vertices in a diamond shape - left, centre, right, top, centre, bottom
         // map vertex coordinates (left, centre, right, top, centre, bottom)
-        xl = MC.getWindow().getGuiScaledWidth() - (MAP_GUI_RADIUS * 2) - CORNER_OFFSET;
-        xc = MC.getWindow().getGuiScaledWidth() - MAP_GUI_RADIUS - CORNER_OFFSET;
+        xl = MC.getWindow().getGuiScaledWidth() - (mapGuiRadius * 2) - CORNER_OFFSET;
+        xc = MC.getWindow().getGuiScaledWidth() - mapGuiRadius - CORNER_OFFSET;
         xr = MC.getWindow().getGuiScaledWidth() - CORNER_OFFSET;
-        yt = MC.getWindow().getGuiScaledHeight() - (MAP_GUI_RADIUS * 2) - CORNER_OFFSET;
-        yc = MC.getWindow().getGuiScaledHeight() - MAP_GUI_RADIUS - CORNER_OFFSET;
+        yt = MC.getWindow().getGuiScaledHeight() - (mapGuiRadius * 2) - CORNER_OFFSET;
+        yc = MC.getWindow().getGuiScaledHeight() - mapGuiRadius - CORNER_OFFSET;
         yb = MC.getWindow().getGuiScaledHeight() - CORNER_OFFSET;
 
         // background vertex coords need to be slightly larger
@@ -347,7 +392,7 @@ public class MinimapClientEvents {
 
         // render map itself
         MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        VertexConsumer consumer = buffer.getBuffer(MAP_RENDER_TYPE);
+        VertexConsumer consumer = buffer.getBuffer(mapRenderType);
         consumer.vertex(matrix4f, xc, yb, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(255).endVertex();
         consumer.vertex(matrix4f, xr, yc, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(255).endVertex();
         consumer.vertex(matrix4f, xc, yt, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(255).endVertex();
@@ -360,7 +405,7 @@ public class MinimapClientEvents {
     public static boolean isPointInsideMinimap(double x, double y) {
         double dx = Math.abs(x - xc);
         double dy = Math.abs(y - yc);
-        double d = dx / (MAP_GUI_RADIUS * 2) + dy / (MAP_GUI_RADIUS * 2);
+        double d = dx / (mapGuiRadius * 2) + dy / (mapGuiRadius * 2);
         return d <= 0.5;
     }
 
@@ -369,7 +414,7 @@ public class MinimapClientEvents {
         if (!isPointInsideMinimap(x,y) || CursorClientEvents.isBoxSelecting() || MC.level == null)
             return null;
 
-        float pixelsToBlocks = (float) WORLD_RADIUS / (float) MAP_GUI_RADIUS;
+        float pixelsToBlocks = (float) worldRadius / (float) mapGuiRadius;
 
         // offset y up so that user clicks the centre of the view quad instead of bottom border
         if (offsetForCamera)
@@ -389,8 +434,9 @@ public class MinimapClientEvents {
         // when clicking on map move player there
         if (OrthoviewClientEvents.isEnabled() && evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
-            if (MC.player != null && moveTo != null)
+            if (MC.player != null && moveTo != null) {
                 PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
+            }
         }
     }
 
@@ -402,8 +448,11 @@ public class MinimapClientEvents {
         // when clicking on map move player there
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
-            if (MC.player != null && moveTo != null)
+            if (MC.player != null && moveTo != null) {
+                if (Keybindings.shiftMod.isDown())
+                    setMapCentre(moveTo.getX(), moveTo.getZ());
                 PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
+            }
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
@@ -422,9 +471,15 @@ public class MinimapClientEvents {
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused())
             return;
 
+        // toggle here to ensure it doesn't happen in the middle of the updates
+        if (shouldToggleSize) {
+            shouldToggleSize = false;
+            toggleMapSize();
+        }
+
         refreshTicksCurrent -= 1;
         if (refreshTicksCurrent <= 0) {
-            refreshTicksCurrent = REFRESH_TICKS_MAX;
+            refreshTicksCurrent = refreshTicksMax;
             updateMapColours();
             updateMapTexture();
         }
@@ -432,5 +487,13 @@ public class MinimapClientEvents {
 
         //MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
         //});
+    }
+
+    @SubscribeEvent
+    // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
+    public static void onInput(InputEvent.Key evt) {
+        if (evt.getAction() == GLFW.GLFW_PRESS)
+            if (evt.getKey() == Keybindings.getFnum(7).key)
+                shouldToggleSize = true;
     }
 }

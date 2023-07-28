@@ -65,7 +65,7 @@ public class AttackWarningClientEvents {
     }
 
     public static void checkAndTriggerAttackWarning(String attackedPlayerName, BlockPos attackPos) {
-        if (MC.player == null)
+        if (MC.player == null || !OrthoviewClientEvents.isEnabled())
             return;
         if (!MC.player.getName().getString().equals(attackedPlayerName))
             return;

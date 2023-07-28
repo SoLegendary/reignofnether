@@ -52,18 +52,15 @@ public class HudClientEvents {
             ActionButtons.BUILD_REPAIR,
             ActionButtons.GATHER,
             ActionButtons.HOLD,
-            ActionButtons.MOVE,
             ActionButtons.STOP
     ));
     private static final ArrayList<Button> genericActionButtonsAttacker = new ArrayList<>(Arrays.asList(
             ActionButtons.ATTACK,
             ActionButtons.HOLD,
-            ActionButtons.MOVE,
             ActionButtons.STOP
     ));
     private static final ArrayList<Button> genericActionButtons = new ArrayList<>(Arrays.asList(
             ActionButtons.HOLD,
-            ActionButtons.MOVE,
             ActionButtons.STOP
     ));
     private static final ArrayList<ControlGroup> controlGroups = new ArrayList<>(10);
@@ -699,10 +696,18 @@ public class HudClientEvents {
         Button attackWarningButton = AttackWarningClientEvents.getWarningButton();
         if (!attackWarningButton.isHidden.get())
             attackWarningButton.render(evt.getPoseStack(),
-                MC.getWindow().getGuiScaledWidth() - (MinimapClientEvents.MAP_GUI_RADIUS * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 14,
-                MC.getWindow().getGuiScaledHeight() - MinimapClientEvents.MAP_GUI_RADIUS - (MinimapClientEvents.CORNER_OFFSET * 2) - 2,
-                mouseX, mouseY);
+                    MC.getWindow().getGuiScaledWidth() - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 14,
+                    MC.getWindow().getGuiScaledHeight() - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) - 2,
+                    mouseX, mouseY);
         renderedButtons.add(attackWarningButton);
+
+        Button toggleMapSizeButton = MinimapClientEvents.getToggleSizeButton();
+        if (!toggleMapSizeButton.isHidden.get())
+            toggleMapSizeButton.render(evt.getPoseStack(),
+                    MC.getWindow().getGuiScaledWidth() - (toggleMapSizeButton.iconSize * 2),
+                    MC.getWindow().getGuiScaledHeight() - (toggleMapSizeButton.iconSize * 2),
+                    mouseX, mouseY);
+        renderedButtons.add(toggleMapSizeButton);
 
         // ------------------------------------------------------
         // Button tooltips (has to be rendered last to be on top)

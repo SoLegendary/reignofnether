@@ -73,8 +73,8 @@ public class TimeClientEvents {
 
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused())
             return;
-        xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.MAP_GUI_RADIUS - (MinimapClientEvents.CORNER_OFFSET * 2) + 2;
-        yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.MAP_GUI_RADIUS * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 4;
+        xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) + 2;
+        yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 4;
 
         ItemRenderer itemrenderer = MC.getItemRenderer();
         itemrenderer.renderAndDecorateItem(new ItemStack(Items.CLOCK), xPos, yPos);
