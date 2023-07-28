@@ -39,8 +39,9 @@ public class FogOfWarClientEvents {
     public static float BRIGHT_CHUNK_BRIGHTNESS = 1.0f;
     public static float SEMI_DARK_CHUNK_BRIGHTNESS = 0.15f;
     public static float DARK_CHUNK_BRIGHTNESS = 0f;
-
     public static final int CHUNK_VIEW_DIST = 2;
+
+    public static boolean forceUpdate = true;
 
     public static Minecraft MC = Minecraft.getInstance();
 
@@ -48,8 +49,10 @@ public class FogOfWarClientEvents {
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.Key evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-            if (evt.getKey() == Keybindings.getFnum(8).key)
+            if (evt.getKey() == Keybindings.getFnum(8).key) {
+                forceUpdate = true;
                 setEnabled(!enabled);
+            }
         }
     }
 

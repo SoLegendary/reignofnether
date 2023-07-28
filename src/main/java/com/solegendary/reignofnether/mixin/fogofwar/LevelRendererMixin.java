@@ -51,10 +51,11 @@ import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.CHUNK_
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
 
-    private static Set<ChunkPos> oldOccupiedChunks = ConcurrentHashMap.newKeySet();
     private static final Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
-    private static final int UPDATE_TICKS_MAX = 10;
-    private static int updateTicks = 0;
+    private static Set<ChunkPos> lastOccupiedChunks = ConcurrentHashMap.newKeySet();
+    private static final int UPDATE_A_TICKS_MAX = 10;
+    private static int updateATicks = 0;
+    private static int timesUpdated = 0;
 
     @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
     @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
@@ -78,8 +79,6 @@ public abstract class LevelRendererMixin {
         if (!Minecraft.getInstance().isSameThread()) {
             throw new IllegalStateException("applyFrustum called from wrong thread: " + Thread.currentThread().getName());
         } else {
-            long time0 = System.nanoTime();
-
             this.minecraft.getProfiler().push("apply_frustum");
 
             LinkedHashSet<LevelRenderer.RenderChunkInfo> renderChunkInfos = (this.renderChunkStorage.get()).renderChunks;
@@ -90,18 +89,15 @@ public abstract class LevelRendererMixin {
                 if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()))
                     this.renderChunksInFrustum.add(chunkInfo);
 
-            if (updateTicks < UPDATE_TICKS_MAX) {
-                updateTicks += 1;
+            if (updateATicks < UPDATE_A_TICKS_MAX) {
+                updateATicks += 1;
                 this.minecraft.getProfiler().pop();
                 return;
             }
             else {
-                updateTicks = 0;
+                updateATicks = 0;
                 occupiedChunks.clear();
             }
-
-            long time1 = (System.nanoTime() - time0) / 100;
-            long time1b = System.nanoTime();
 
             // bright chunks in last tick
             Set<FogChunk> oldBrightChunks = FogOfWarClientEvents.fogChunks.stream()
@@ -109,9 +105,6 @@ public abstract class LevelRendererMixin {
                     .collect(Collectors.toSet());
             // bright chunks in current tick
             Set<FogChunk> newBrightChunks = ConcurrentHashMap.newKeySet();
-
-            long time2 = (System.nanoTime() - time1b) / 100;
-            long time2b = System.nanoTime();
 
             // get chunks that have units/buildings that can see
 
@@ -123,22 +116,18 @@ public abstract class LevelRendererMixin {
                 if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED)
                     occupiedChunks.add(this.minecraft.level.getChunk(building.centrePos).getPos());
 
-            long time3 = (System.nanoTime() - time2b) / 100;
-            long time3b = System.nanoTime();
 
             // can't use renderChunksInFrustum because then we wouldn't update explored status of chunks we aren't looking at
-            for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos) {
-                ChunkPos renderChunkPos = this.minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
+            if (!lastOccupiedChunks.equals(occupiedChunks) || FogOfWarClientEvents.forceUpdate) {
+                FogOfWarClientEvents.forceUpdate = false;
 
-                for (ChunkPos chunkPos : occupiedChunks)
-                    if (chunkPos.getChessboardDistance(renderChunkPos) < CHUNK_VIEW_DIST)
-                        newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
-            }
+                for (LevelRenderer.RenderChunkInfo chunkInfo : renderChunkInfos) {
+                    ChunkPos renderChunkPos = this.minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
 
-            long time4 = (System.nanoTime() - time3b) / 100;
-            long time4b = System.nanoTime();
-
-            if (!occupiedChunks.equals(oldOccupiedChunks)) {
+                    for (ChunkPos chunkPos : occupiedChunks)
+                        if (chunkPos.getChessboardDistance(renderChunkPos) < CHUNK_VIEW_DIST)
+                            newBrightChunks.add(new FogChunk(chunkInfo, FogTransitionBrightness.DARK_TO_BRIGHT));
+                }
 
                 // chunks that just entered the bright zone
                 Set<FogChunk> diff1 = ConcurrentHashMap.newKeySet();
@@ -190,20 +179,8 @@ public abstract class LevelRendererMixin {
                     }
                 }
             }
-
-            oldOccupiedChunks = occupiedChunks;
-
-            long time5 = (System.nanoTime() - time4b) / 100;
-            long time5b = System.nanoTime();
-
-            long totalTime = time1 + time2 + time3 + time4 + time5;
-            System.out.println("total time: " + totalTime);
-            System.out.println("time1: " + time1 + " (" +  ((double)time1/totalTime)*100 + "%)");
-            System.out.println("time2: " + time2 + " (" +  ((double)time2/totalTime)*100 + "%)");
-            System.out.println("time3: " + time3 + " (" +  ((double)time3/totalTime)*100 + "%)");
-            System.out.println("time4: " + time4 + " (" +  ((double)time4/totalTime)*100 + "%)");
-            System.out.println("time5: " + time5 + " (" +  ((double)time5/totalTime)*100 + "%)");
-
+            lastOccupiedChunks.clear();
+            lastOccupiedChunks.addAll(occupiedChunks);
 
             this.minecraft.getProfiler().pop();
         }
