@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.fogofwar;
 
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
@@ -14,10 +13,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.checkerframework.checker.units.qual.C;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Set;
@@ -31,7 +28,7 @@ public class FogOfWarClientEvents {
     public static final Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
     public static final Set<ChunkPos> lastOccupiedChunks = ConcurrentHashMap.newKeySet();
 
-    public static ChunkPos lastPlayerChunkPos = new ChunkPos(0,0);
+    private static ChunkPos lastPlayerChunkPos = new ChunkPos(0,0);
 
     // all 3d chunks that have ever been explored, including currently bright chunks
     public static final Set<FogChunk> fogChunks = ConcurrentHashMap.newKeySet();
@@ -47,16 +44,13 @@ public class FogOfWarClientEvents {
     // 2. OR just disable smooth lighting entirely at the edges of those chunks?
     // 3. OR find the flag to rerender those edges
 
-    public static float BRIGHT_CHUNK_BRIGHTNESS = 1.0f;
-    public static float SEMI_DARK_CHUNK_BRIGHTNESS = 0.15f;
-    public static float DARK_CHUNK_BRIGHTNESS = 0f;
     public static final int CHUNK_VIEW_DIST = 2;
 
     public static boolean forceUpdate = true;
-    public static int forceUpdateDelayTicks = 0;
+    private static int forceUpdateDelayTicks = 0;
     public static int enableDelayTicks = 0;
 
-    public static Minecraft MC = Minecraft.getInstance();
+    private static Minecraft MC = Minecraft.getInstance();
 
     @SubscribeEvent
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
@@ -65,17 +59,16 @@ public class FogOfWarClientEvents {
             // toggle fog of war without changing explored chunks
             if (evt.getKey() == Keybindings.getFnum(8).key) {
                 fogChunks.clear();
-                // TODO: rebuild from exploredChunks
                 setEnabled(!enabled);
-                forceUpdateDelayTicks = 10;
+                forceUpdateDelayTicks = 20;
             }
             // reset fog of war
             if (enabled && evt.getKey() == Keybindings.getFnum(7).key) {
                 exploredChunks.clear();
                 fogChunks.clear();
                 setEnabled(false);
-                enableDelayTicks = 10;
-                forceUpdateDelayTicks = 20;
+                enableDelayTicks = 20;
+                forceUpdateDelayTicks = 40;
             }
         }
     }
