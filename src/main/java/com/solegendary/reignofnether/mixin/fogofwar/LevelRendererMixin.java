@@ -45,16 +45,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.CHUNK_VIEW_DIST;
+import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.*;
 
 
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
 
-    private static final Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
-    private static Set<ChunkPos> lastOccupiedChunks = ConcurrentHashMap.newKeySet();
-    private static final int UPDATE_A_TICKS_MAX = 10;
-    private static int updateATicks = 0;
+    private static final int UPDATE_TICKS_MAX = 10;
+    private static int updateTicks = 0;
     private static int timesUpdated = 0;
 
     @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
@@ -89,13 +87,13 @@ public abstract class LevelRendererMixin {
                 if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()))
                     this.renderChunksInFrustum.add(chunkInfo);
 
-            if (updateATicks < UPDATE_A_TICKS_MAX) {
-                updateATicks += 1;
+            if (updateTicks < UPDATE_TICKS_MAX) {
+                updateTicks += 1;
                 this.minecraft.getProfiler().pop();
                 return;
             }
             else {
-                updateATicks = 0;
+                updateTicks = 0;
                 occupiedChunks.clear();
             }
 

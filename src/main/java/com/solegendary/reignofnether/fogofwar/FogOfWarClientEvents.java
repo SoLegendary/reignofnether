@@ -27,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 
 public class FogOfWarClientEvents {
 
+    public static final Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
+    public static final Set<ChunkPos> lastOccupiedChunks = ConcurrentHashMap.newKeySet();
     public static ChunkPos lastPlayerChunkPos = new ChunkPos(0,0);
 
     // all chunks that have ever been explored, including currently bright chunks
@@ -59,14 +61,14 @@ public class FogOfWarClientEvents {
             // toggle fog of war without changing explored chunks
             if (evt.getKey() == Keybindings.getFnum(8).key) {
                 setEnabled(!enabled);
-                forceUpdateDelayTicks = 20;
+                forceUpdateDelayTicks = 10;
             }
             // reset fog of war
             if (enabled && evt.getKey() == Keybindings.getFnum(7).key) {
                 fogChunks.clear();
                 setEnabled(false);
-                enableDelayTicks = 20;
-                forceUpdateDelayTicks = 40;
+                enableDelayTicks = 10;
+                forceUpdateDelayTicks = 20;
             }
         }
     }
@@ -109,8 +111,13 @@ public class FogOfWarClientEvents {
     }
 
     public static boolean isInBrightChunk(BlockPos bp) {
-        if (!enabled)
+        if (!enabled || MC.level == null)
             return true;
+
+        // first check if the ChunkPos is already occupied as this is faster
+        for (ChunkPos chunkPos : occupiedChunks)
+            if (MC.level.getChunk(bp).getPos().getChessboardDistance(chunkPos) < CHUNK_VIEW_DIST)
+                return true;
 
         for (FogChunk fogChunk : fogChunks)
             if (fogChunk.isBrightChunk() && fogChunk.chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
