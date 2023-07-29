@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.registrars;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningServerEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.tps.TPSServerEvents;
@@ -30,7 +31,7 @@ public class ServerEventRegistrar {
         vanillaEventBus.register(UnitServerEvents.class);
         vanillaEventBus.register(BuildingServerEvents.class);
         vanillaEventBus.register(AttackWarningServerEvents.class);
-        vanillaEventBus.register(FogOfWarClientEvents.class);
+        vanillaEventBus.register(FogOfWarServerEvents.class);
         vanillaEventBus.register(ResourcesServerEvents.class);
         vanillaEventBus.register(TPSServerEvents.class);
         //vanillaEventBus.register(CursorServerEvents.class);

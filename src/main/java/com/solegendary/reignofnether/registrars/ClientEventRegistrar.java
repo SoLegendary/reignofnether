@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiClientEvents;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
@@ -52,7 +53,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(UnitServerEvents.class);
         vanillaEventBus.register(BuildingServerEvents.class);
         vanillaEventBus.register(AttackWarningServerEvents.class);
-        vanillaEventBus.register(FogOfWarClientEvents.class);
+        vanillaEventBus.register(FogOfWarServerEvents.class);
         vanillaEventBus.register(ResourcesServerEvents.class);
         vanillaEventBus.register(TPSServerEvents.class);
         //vanillaEventBus.register(CursorServerEvents.class);
