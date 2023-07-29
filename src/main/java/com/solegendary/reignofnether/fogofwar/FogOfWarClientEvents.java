@@ -44,6 +44,8 @@ public class FogOfWarClientEvents {
     public static final int CHUNK_VIEW_DIST = 2;
 
     public static boolean forceUpdate = true;
+    public static int forceUpdateDelayTicks = 0;
+    public static int enableDelayTicks = 0;
 
     public static Minecraft MC = Minecraft.getInstance();
 
@@ -51,22 +53,26 @@ public class FogOfWarClientEvents {
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.Key evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
+            // toggle fog of war without changing explored chunks
             if (evt.getKey() == Keybindings.getFnum(8).key) {
-                forceUpdate = true;
                 setEnabled(!enabled);
+                forceUpdateDelayTicks = 20;
+            }
+            // reset fog of war
+            if (enabled && evt.getKey() == Keybindings.getFnum(7).key) {
+                fogChunks.clear();
+                setEnabled(false);
+                enableDelayTicks = 20;
+                forceUpdateDelayTicks = 40;
             }
         }
     }
-
 
     public static boolean isEnabled() {
         return enabled;
     }
     public static void setEnabled(boolean value) {
         enabled = value;
-        if (enabled) {
-            fogChunks.clear();
-        }
         // reload chunks like player pressed F3 + A
         MC.levelRenderer.allChanged();
     }
@@ -123,12 +129,27 @@ public class FogOfWarClientEvents {
     }
 
     private static int updateLightingTicks = 0;
-    private static final int UPDATE_LIGHTING_TICKS_MAX = 20;
+    private static final int UPDATE_LIGHTING_TICKS_MAX = 10;
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (!enabled || MC.level == null)
+        if (MC.level == null || evt.phase != TickEvent.Phase.END)
             return;
+
+        if (enableDelayTicks > 0) {
+            enableDelayTicks -= 1;
+            if (enableDelayTicks == 0)
+                setEnabled(true);
+        }
+
+        if (!enabled)
+            return;
+
+        if (forceUpdateDelayTicks > 0) {
+            forceUpdateDelayTicks -= 1;
+            if (forceUpdateDelayTicks == 0)
+                forceUpdate = true;
+        }
 
         for (FogChunk fogChunk : FogOfWarClientEvents.fogChunks)
             fogChunk.tickBrightness();

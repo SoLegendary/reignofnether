@@ -7,7 +7,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import java.util.Set;
 
 public class FogChunk {
-    private final static float TRANSITION_TICKS = 20;
+    private final static float TRANSITION_TICKS = 10;
 
     public static float BRIGHT = 1.0f;
     public static float SEMI = 0.15f;

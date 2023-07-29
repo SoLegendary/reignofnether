@@ -488,12 +488,4 @@ public class MinimapClientEvents {
         //MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
         //});
     }
-
-    @SubscribeEvent
-    // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
-    public static void onInput(InputEvent.Key evt) {
-        if (evt.getAction() == GLFW.GLFW_PRESS)
-            if (evt.getKey() == Keybindings.getFnum(7).key)
-                shouldToggleSize = true;
-    }
 }
