@@ -30,12 +30,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
-import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -236,7 +236,7 @@ public class MinimapClientEvents {
 
             for (int x = xc - BUILDING_RADIUS; x < xc + BUILDING_RADIUS; x++) {
                 for (int z = zc - BUILDING_RADIUS; z < zc + BUILDING_RADIUS; z++) {
-                    if (isXZinsideMap(x,z)) {
+                    if (isWorldXZinsideMap(x,z)) {
                         int x0 = x - xc + BUILDING_RADIUS;
                         int z0 = z - zc + BUILDING_RADIUS;
                         int rgb = 0x000000;
@@ -269,7 +269,7 @@ public class MinimapClientEvents {
 
             for (int x = xc - UNIT_RADIUS; x < xc + UNIT_RADIUS; x++) {
                 for (int z = zc - UNIT_RADIUS; z < zc + UNIT_RADIUS; z++) {
-                    if (isXZinsideMap(x,z)) {
+                    if (isWorldXZinsideMap(x,z)) {
                         int x0 = x - xc + UNIT_RADIUS;
                         int z0 = z - zc + UNIT_RADIUS;
                         int rgb = 0x000000;
@@ -298,21 +298,15 @@ public class MinimapClientEvents {
             for (int[] row : mapColoursCopy)
                 Arrays.fill(row, (0xFF << 24));
 
-            for (FogChunk chunk : FogOfWarClientEvents.fogChunks) {
-                AABB aabb = chunk.chunkInfo.chunk.bb;
-                for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
-                    for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
-                        if (isXZinsideMap(x,z)) {
+            for (ChunkPos chunkPos : FogOfWarClientEvents.exploredChunks) {
+                boolean isBrightChunk = FogOfWarClientEvents.isInBrightChunk(chunkPos.getWorldPosition());
+                float brightnessMult = isBrightChunk ? 1.0f : 0.35f;
+
+                for (int x = chunkPos.getMinBlockX(); x <= chunkPos.getMaxBlockX(); x++) {
+                    for (int z = chunkPos.getMinBlockZ(); z <= chunkPos.getMaxBlockZ(); z++) {
+                        if (isWorldXZinsideMap(x,z)) {
                             int xN = x - xc_world + (mapGuiRadius * 2);
                             int zN = z - zc_world + (mapGuiRadius * 2);
-
-                            // a chunk on the same Y column may not be bright
-                            // so prioritise bright chunks by skipping any pixels that have
-                            // already been filled in if the current chunk isn't bright
-                            if (mapColoursCopy[xN][zN] != (0xFF << 24) && !chunk.isBrightChunk())
-                                continue;
-
-                            float brightnessMult = chunk.isBrightChunk() ? 1.0f : 0.35f;
 
                             int col = mapColours[xN][zN];
                             int blue = (int) (((col >> 16) & 0xFF) * brightnessMult);
@@ -350,7 +344,8 @@ public class MinimapClientEvents {
         }
     }
 
-    public static boolean isXZinsideMap(int x, int z) {
+    // checks whether a given X Z in the world is part of our map
+    public static boolean isWorldXZinsideMap(int x, int z) {
         return x >= xc_world - worldRadius && x < xc_world + worldRadius &&
                z >= zc_world - worldRadius && z < zc_world + worldRadius;
     }
@@ -449,9 +444,12 @@ public class MinimapClientEvents {
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
             if (MC.player != null && moveTo != null) {
-                if (Keybindings.shiftMod.isDown())
+                if (Keybindings.shiftMod.isDown()) {
                     setMapCentre(moveTo.getX(), moveTo.getZ());
-                PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
+                    PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
+                } else {
+                    PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
+                }
             }
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
@@ -487,13 +485,5 @@ public class MinimapClientEvents {
 
         //MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
         //});
-    }
-
-    @SubscribeEvent
-    // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
-    public static void onInput(InputEvent.Key evt) {
-        if (evt.getAction() == GLFW.GLFW_PRESS)
-            if (evt.getKey() == Keybindings.getFnum(7).key)
-                shouldToggleSize = true;
     }
 }

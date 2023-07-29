@@ -1,19 +1,14 @@
 package com.solegendary.reignofnether.mixin;
 
-import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.monsters.HauntedHouse;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
-import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
-import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -23,7 +18,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
@@ -88,7 +82,7 @@ public class ClientLevelMixin {
             posList.add(new Vec3(bp.getX(), bp.getY(), bp.getZ()));
         }
         // remove any positions that aren't on the screen
-        List<Vec3> posListOnScreen = posList.stream().filter(vec3 -> MinimapClientEvents.isXZinsideMap((int) vec3.x, (int) vec3.z)).toList();
+        List<Vec3> posListOnScreen = posList.stream().filter(vec3 -> MinimapClientEvents.isWorldXZinsideMap((int) vec3.x, (int) vec3.z)).toList();
 
         // calculate the average position
         Vec3 newPos = new Vec3(0,0,0);

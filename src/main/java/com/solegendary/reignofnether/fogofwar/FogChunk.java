@@ -7,11 +7,11 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import java.util.Set;
 
 public class FogChunk {
-    private final static float TRANSITION_TICKS = 20;
+    private final static float TRANSITION_TICKS = 10;
 
-    public static float BRIGHT = 1.0f;
-    public static float SEMI = 0.15f;
-    public static float DARK = 0f;
+    public static final float BRIGHT = 1.0f;
+    public static final float SEMI = 0.15f;
+    public static final float DARK = 0f;
 
     public static Minecraft MC = Minecraft.getInstance();
 
@@ -31,16 +31,16 @@ public class FogChunk {
         this.setBrightness(fogTB);
     }
 
-    // bright chunks are in immediate view of a unit or building
-    public boolean isBrightChunk() {
-        return this.fogTB == FogTransitionBrightness.DARK_TO_BRIGHT ||
-                this.fogTB == FogTransitionBrightness.SEMI_TO_BRIGHT;
-    }
-    // chunks that have been in range of a unit or building before
-    // if out of immediate view will be rendered with semi brightness and at its past state
-    public boolean isExploredChunk() {
-        return this.fogTB == FogTransitionBrightness.DARK_TO_SEMI ||
-                this.fogTB == FogTransitionBrightness.BRIGHT_TO_SEMI;
+    public float getFinalBrightness() {
+        switch(this.fogTB) {
+            case DARK_TO_BRIGHT, SEMI_TO_BRIGHT -> {
+                return BRIGHT;
+            }
+            case DARK_TO_SEMI, BRIGHT_TO_SEMI -> {
+                return SEMI;
+            }
+        }
+        return BRIGHT;
     }
 
     public void setBrightness(FogTransitionBrightness tb) {

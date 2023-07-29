@@ -64,6 +64,9 @@ public class MiscUtil {
 
     // converts a 2d screen position to a 3d world position while in ortho view
     public static Vector3d screenPosToWorldPos(Minecraft MC, int mouseX, int mouseY) {
+        if (MC.player == null) {
+            return new Vector3d(0,0,0);
+        }
         int winWidth = MC.getWindow().getGuiScaledWidth();
         int winHeight = MC.getWindow().getGuiScaledHeight();
 
@@ -226,6 +229,8 @@ public class MiscUtil {
     // gets the unit vector in the direction of player facing (same as camera)
     // calcs from https://stackoverflow.com/questions/65897792/3d-vector-coordinates-from-x-and-y-rotation
     public static Vector3d getPlayerLookVector(Minecraft MC) {
+        if (MC.player == null)
+            return new Vector3d(0,0,0);
         float a = (float) Math.toRadians(MC.player.getYRot());
         float b = (float) Math.toRadians(MC.player.getXRot());
         return new Vector3d(-cos(b) * sin(a), -sin(b), cos(b) * cos(a));

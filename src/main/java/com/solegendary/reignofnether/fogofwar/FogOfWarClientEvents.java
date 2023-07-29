@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.fogofwar;
 
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
@@ -14,7 +13,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -26,47 +24,75 @@ import java.util.concurrent.TimeUnit;
 
 public class FogOfWarClientEvents {
 
-    // all chunks that have ever been explored, including currently bright chunks
-    public static final Set<FogChunk> fogChunks = ConcurrentHashMap.newKeySet();
-
-    // if false, disables ALL mixins related to fog of war
-    private static boolean enabled = true;
-
     // TODO: fix smooth lighting shading issue in QuadLighter.process
     // 1. maybe have a static flag to change ClientLevel.shade brightness (since it doesn't get pos data) before call
     //    to render and revert it immediately after
     // 2. OR just disable smooth lighting entirely at the edges of those chunks?
     // 3. OR find the flag to rerender those edges
 
-    public static float BRIGHT_CHUNK_BRIGHTNESS = 1.0f;
-    public static float SEMI_DARK_CHUNK_BRIGHTNESS = 0.15f;
-    public static float DARK_CHUNK_BRIGHTNESS = 0f;
+    // ChunkPoses that have at least one owned unit/building in them - can be used to determine current bright chunks
+    public static final Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
+    public static final Set<ChunkPos> lastOccupiedChunks = ConcurrentHashMap.newKeySet();
+
+    private static ChunkPos lastPlayerChunkPos = new ChunkPos(0,0);
+
+    // all 3d chunks that have ever been explored, including currently bright chunks
+    public static final Set<FogChunk> fogChunks = ConcurrentHashMap.newKeySet();
+    // 2d position set of the above
+    public static final Set<ChunkPos> exploredChunks = ConcurrentHashMap.newKeySet();
+
+    // if false, disables ALL mixins related to fog of war
+    private static boolean enabled = true;
+
     public static final int CHUNK_VIEW_DIST = 2;
 
     public static boolean forceUpdate = true;
+    private static int forceUpdateDelayTicks = 0;
+    public static int enableDelayTicks = 0;
 
-    public static Minecraft MC = Minecraft.getInstance();
+    private static final int SAVE_CHUNKS_TICKS_MAX = 200;
+    private static int saveChunksTicks = SAVE_CHUNKS_TICKS_MAX;
+
+    private static final Minecraft MC = Minecraft.getInstance();
+
+    public static void loadExploredChunks(String playerName, int[] xPos, int[] zPos) {
+        if (MC.player == null || MC.level == null ||
+            xPos.length != zPos.length ||
+            !MC.player.getName().getString().equals(playerName))
+            return;
+
+        exploredChunks.clear();
+
+        for (int i = 0; i < xPos.length; i++)
+            exploredChunks.add(MC.level.getChunk(new BlockPos(xPos[i], 0, zPos[i])).getPos());
+    }
 
     @SubscribeEvent
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.Key evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
+            // toggle fog of war without changing explored chunks
             if (evt.getKey() == Keybindings.getFnum(8).key) {
-                forceUpdate = true;
+                fogChunks.clear();
                 setEnabled(!enabled);
+                forceUpdateDelayTicks = 20;
+            }
+            // reset fog of war
+            if (enabled && evt.getKey() == Keybindings.getFnum(7).key) {
+                exploredChunks.clear();
+                fogChunks.clear();
+                setEnabled(false);
+                enableDelayTicks = 20;
+                forceUpdateDelayTicks = 40;
             }
         }
     }
-
 
     public static boolean isEnabled() {
         return enabled;
     }
     public static void setEnabled(boolean value) {
         enabled = value;
-        if (enabled) {
-            fogChunks.clear();
-        }
         // reload chunks like player pressed F3 + A
         MC.levelRenderer.allChanged();
     }
@@ -100,11 +126,16 @@ public class FogOfWarClientEvents {
     }
 
     public static boolean isInBrightChunk(BlockPos bp) {
-        if (!enabled)
+        if (!enabled || MC.level == null)
             return true;
 
+        // first check if the ChunkPos is already occupied as this is faster
+        for (ChunkPos chunkPos : occupiedChunks)
+            if (MC.level.getChunk(bp).getPos().getChessboardDistance(chunkPos) < CHUNK_VIEW_DIST)
+                return true;
+
         for (FogChunk fogChunk : fogChunks)
-            if (fogChunk.isBrightChunk() && fogChunk.chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
+            if (fogChunk.getFinalBrightness() == FogChunk.BRIGHT && fogChunk.chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
                 return true;
         return false;
     }
@@ -123,12 +154,40 @@ public class FogOfWarClientEvents {
     }
 
     private static int updateLightingTicks = 0;
-    private static final int UPDATE_LIGHTING_TICKS_MAX = 20;
+    private static final int UPDATE_LIGHTING_TICKS_MAX = 10;
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (!enabled || MC.level == null)
+        if (MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
             return;
+
+        ChunkPos pos = MC.level.getChunk(MC.player.getOnPos()).getPos();
+        if (!pos.equals(lastPlayerChunkPos))
+            forceUpdate = true;
+        lastPlayerChunkPos = pos;
+
+        if (enableDelayTicks > 0) {
+            enableDelayTicks -= 1;
+            if (enableDelayTicks == 0)
+                setEnabled(true);
+        }
+
+        if (!enabled)
+            return;
+
+        if (saveChunksTicks > 0) {
+            saveChunksTicks -= 1;
+            if (saveChunksTicks == 0) {
+                saveChunksTicks = SAVE_CHUNKS_TICKS_MAX;
+                FogOfWarServerboundPacket.saveExploredChunks(MC.player.getName().getString(), exploredChunks);
+            }
+        }
+
+        if (forceUpdateDelayTicks > 0) {
+            forceUpdateDelayTicks -= 1;
+            if (forceUpdateDelayTicks == 0)
+                forceUpdate = true;
+        }
 
         for (FogChunk fogChunk : FogOfWarClientEvents.fogChunks)
             fogChunk.tickBrightness();
@@ -141,8 +200,7 @@ public class FogOfWarClientEvents {
     }
 
     // TODO: issue with lighting bugs is that the semi-bright chunks with issues are the ones 2 chunks away, not the
-    // closest ones
-    // maybe mark chunks adjacent to those leaving with needsLightUpdate = true?
+    // closest ones; maybe mark chunks adjacent to those leaving with needsLightUpdate = true?
     public static void onChunksChange(Set<FogChunk> newBrightChunks, Set<FogChunk> newExploredChunks) {
         newBrightChunks.addAll(newExploredChunks);
 
@@ -164,7 +222,7 @@ public class FogOfWarClientEvents {
         // update bright chunks regardless of if they have needsLightUpdate or not as we want to be 100%
         // sure they're free of glitches as the player is most often looking at them
         for (FogChunk fogChunk : FogOfWarClientEvents.fogChunks)
-            if (fogChunk.needsLightUpdate || fogChunk.isBrightChunk())
+            if (fogChunk.needsLightUpdate || fogChunk.getFinalBrightness() == FogChunk.BRIGHT)
                 chunks.add(MC.level.getChunk(fogChunk.chunkInfo.chunk.getOrigin()));
 
         for (ChunkAccess chunk : chunks) {

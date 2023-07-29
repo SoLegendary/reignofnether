@@ -10,11 +10,9 @@ TODO bugs/features:
 
 - Let units' pathfinding fall off of high drops
 
-- Minimap smoother processing for rendering
-    - and enlarge button
-
-- Refactor fog of war chunks to have 1 object per column instead of 3d chunk
-
+- lots of glitchy action happens when trying to retain fogChunks after disabling/enabling
+    - this includes when leaving/rejoining a level
+    - might need to clear fogChunks every time but still retain a list of explored chunkPoses to rebuild them from
 
 
 TODO test in remote server
