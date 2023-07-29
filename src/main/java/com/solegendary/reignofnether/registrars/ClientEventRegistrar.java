@@ -52,6 +52,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(UnitServerEvents.class);
         vanillaEventBus.register(BuildingServerEvents.class);
         vanillaEventBus.register(AttackWarningServerEvents.class);
+        vanillaEventBus.register(FogOfWarClientEvents.class);
         vanillaEventBus.register(ResourcesServerEvents.class);
         vanillaEventBus.register(TPSServerEvents.class);
         //vanillaEventBus.register(CursorServerEvents.class);

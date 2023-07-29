@@ -24,6 +24,12 @@ import java.util.concurrent.TimeUnit;
 
 public class FogOfWarClientEvents {
 
+    // TODO: fix smooth lighting shading issue in QuadLighter.process
+    // 1. maybe have a static flag to change ClientLevel.shade brightness (since it doesn't get pos data) before call
+    //    to render and revert it immediately after
+    // 2. OR just disable smooth lighting entirely at the edges of those chunks?
+    // 3. OR find the flag to rerender those edges
+
     // ChunkPoses that have at least one owned unit/building in them - can be used to determine current bright chunks
     public static final Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
     public static final Set<ChunkPos> lastOccupiedChunks = ConcurrentHashMap.newKeySet();
@@ -38,19 +44,28 @@ public class FogOfWarClientEvents {
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = true;
 
-    // TODO: fix smooth lighting shading issue in QuadLighter.process
-    // 1. maybe have a static flag to change ClientLevel.shade brightness (since it doesn't get pos data) before call
-    //    to render and revert it immediately after
-    // 2. OR just disable smooth lighting entirely at the edges of those chunks?
-    // 3. OR find the flag to rerender those edges
-
     public static final int CHUNK_VIEW_DIST = 2;
 
     public static boolean forceUpdate = true;
     private static int forceUpdateDelayTicks = 0;
     public static int enableDelayTicks = 0;
 
-    private static Minecraft MC = Minecraft.getInstance();
+    private static final int SAVE_CHUNKS_TICKS_MAX = 200;
+    private static int saveChunksTicks = SAVE_CHUNKS_TICKS_MAX;
+
+    private static final Minecraft MC = Minecraft.getInstance();
+
+    public static void loadExploredChunks(String playerName, int[] xPos, int[] zPos) {
+        if (MC.player == null || MC.level == null ||
+            xPos.length != zPos.length ||
+            !MC.player.getName().getString().equals(playerName))
+            return;
+
+        exploredChunks.clear();
+
+        for (int i = 0; i < xPos.length; i++)
+            exploredChunks.add(MC.level.getChunk(new BlockPos(xPos[i], 0, zPos[i])).getPos());
+    }
 
     @SubscribeEvent
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
@@ -143,15 +158,13 @@ public class FogOfWarClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (MC.level == null || evt.phase != TickEvent.Phase.END)
+        if (MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
             return;
 
-        if (MC.player != null) {
-            ChunkPos pos = MC.level.getChunk(MC.player.getOnPos()).getPos();
-            if (!pos.equals(lastPlayerChunkPos))
-                forceUpdate = true;
-            lastPlayerChunkPos = pos;
-        }
+        ChunkPos pos = MC.level.getChunk(MC.player.getOnPos()).getPos();
+        if (!pos.equals(lastPlayerChunkPos))
+            forceUpdate = true;
+        lastPlayerChunkPos = pos;
 
         if (enableDelayTicks > 0) {
             enableDelayTicks -= 1;
@@ -161,6 +174,14 @@ public class FogOfWarClientEvents {
 
         if (!enabled)
             return;
+
+        if (saveChunksTicks > 0) {
+            saveChunksTicks -= 1;
+            if (saveChunksTicks == 0) {
+                saveChunksTicks = SAVE_CHUNKS_TICKS_MAX;
+                FogOfWarServerboundPacket.saveExploredChunks(MC.player.getName().getString(), exploredChunks);
+            }
+        }
 
         if (forceUpdateDelayTicks > 0) {
             forceUpdateDelayTicks -= 1;
@@ -179,8 +200,7 @@ public class FogOfWarClientEvents {
     }
 
     // TODO: issue with lighting bugs is that the semi-bright chunks with issues are the ones 2 chunks away, not the
-    // closest ones
-    // maybe mark chunks adjacent to those leaving with needsLightUpdate = true?
+    // closest ones; maybe mark chunks adjacent to those leaving with needsLightUpdate = true?
     public static void onChunksChange(Set<FogChunk> newBrightChunks, Set<FogChunk> newExploredChunks) {
         newBrightChunks.addAll(newExploredChunks);
 
