@@ -300,6 +300,9 @@ public class MinimapClientEvents {
 
             for (FogChunk chunk : FogOfWarClientEvents.fogChunks) {
                 AABB aabb = chunk.chunkInfo.chunk.bb;
+                boolean isBrightChunk = FogOfWarClientEvents.isInBrightChunk(chunk.chunkInfo.chunk.getOrigin());
+                float brightnessMult = isBrightChunk ? 1.0f : 0.35f;
+
                 for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
                     for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
                         if (isXZinsideMap(x,z)) {
@@ -311,8 +314,6 @@ public class MinimapClientEvents {
                             // already been filled in if the current chunk isn't bright
                             if (mapColoursCopy[xN][zN] != (0xFF << 24) && !chunk.isBrightChunk())
                                 continue;
-
-                            float brightnessMult = chunk.isBrightChunk() ? 1.0f : 0.35f;
 
                             int col = mapColours[xN][zN];
                             int blue = (int) (((col >> 16) & 0xFF) * brightnessMult);
