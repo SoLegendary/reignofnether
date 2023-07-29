@@ -8,20 +8,20 @@ TODO bugs/features:
 
 - Check unit conversions on remote server
 
-- Let units' pathfinding fall off of high drops
-
-- lots of glitchy action happens when trying to retain fogChunks after disabling/enabling
-    - this includes when leaving/rejoining a level
-    - might need to clear fogChunks every time but still retain a list of explored chunkPoses to rebuild them from
+- Find solution to mobs (esp. workers) getting stuck on high blocks
+    - Maybe let units' pathfinding fall off of higher than 3-high drops?
+    - Or find a solution to mobs getting stuck on buildings
 
 
 TODO test in remote server
 
 attack warnings
-control groups
+    - building attacked
+    - unit attacked
+control groups crash testing
 moving with minimap
 units should not retaliate when already attacking a unit or building
-
+explored chunks saving/loading
 
 
 TODO buildings/units (backlog)

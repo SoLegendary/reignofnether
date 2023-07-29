@@ -80,6 +80,7 @@ public class FogOfWarClientEvents {
             // reset fog of war
             if (enabled && evt.getKey() == Keybindings.getFnum(7).key) {
                 exploredChunks.clear();
+                saveChunksTicks = 0;
                 fogChunks.clear();
                 setEnabled(false);
                 enableDelayTicks = 20;

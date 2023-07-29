@@ -427,7 +427,9 @@ public class MinimapClientEvents {
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
         // when clicking on map move player there
-        if (OrthoviewClientEvents.isEnabled() && evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+        if (OrthoviewClientEvents.isEnabled() &&
+            evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 &&
+            !Keybindings.shiftMod.isDown()) {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
             if (MC.player != null && moveTo != null) {
                 PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
