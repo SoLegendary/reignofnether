@@ -10,9 +10,9 @@ TODO bugs/features:
 
 - Let units' pathfinding fall off of high drops
 
-
-- fog chunks are broken when rejoining a level (unless you reset/clear them)
-- fog chunks lighting isn't cleaned up properly sometimes
+- lots of glitchy action happens when trying to retain fogChunks after disabling/enabling
+    - this includes when leaving/rejoining a level
+    - might need to clear fogChunks every time but still retain a list of explored chunkPoses
 
 
 TODO test in remote server

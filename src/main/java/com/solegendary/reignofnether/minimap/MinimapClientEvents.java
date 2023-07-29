@@ -450,9 +450,12 @@ public class MinimapClientEvents {
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
             if (MC.player != null && moveTo != null) {
-                if (Keybindings.shiftMod.isDown())
+                if (Keybindings.shiftMod.isDown()) {
                     setMapCentre(moveTo.getX(), moveTo.getZ());
-                PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
+                    PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
+                } else {
+                    PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
+                }
             }
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
