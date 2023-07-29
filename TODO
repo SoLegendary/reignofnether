@@ -12,7 +12,8 @@ TODO bugs/features:
 
 - lots of glitchy action happens when trying to retain fogChunks after disabling/enabling
     - this includes when leaving/rejoining a level
-    - might need to clear fogChunks every time but still retain a list of explored chunkPoses
+    - might need to clear fogChunks every time but still retain a list of explored chunkPoses to rebuild them from
+    - clearing fogChunks causes minimap to become completely black outside of where the player is immediately looking
 
 
 TODO test in remote server

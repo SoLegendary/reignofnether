@@ -27,12 +27,16 @@ import java.util.concurrent.TimeUnit;
 
 public class FogOfWarClientEvents {
 
+    // ChunkPoses that have at least one owned unit/building in them - can be used to determine current bright chunks
     public static final Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
     public static final Set<ChunkPos> lastOccupiedChunks = ConcurrentHashMap.newKeySet();
+
     public static ChunkPos lastPlayerChunkPos = new ChunkPos(0,0);
 
-    // all chunks that have ever been explored, including currently bright chunks
+    // all 3d chunks that have ever been explored, including currently bright chunks
     public static final Set<FogChunk> fogChunks = ConcurrentHashMap.newKeySet();
+    // 2d position set of the above
+    public static final Set<ChunkPos> exploredChunks = ConcurrentHashMap.newKeySet();
 
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = true;
@@ -60,11 +64,14 @@ public class FogOfWarClientEvents {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
             // toggle fog of war without changing explored chunks
             if (evt.getKey() == Keybindings.getFnum(8).key) {
+                fogChunks.clear();
+                // TODO: rebuild from exploredChunks
                 setEnabled(!enabled);
                 forceUpdateDelayTicks = 10;
             }
             // reset fog of war
             if (enabled && evt.getKey() == Keybindings.getFnum(7).key) {
+                exploredChunks.clear();
                 fogChunks.clear();
                 setEnabled(false);
                 enableDelayTicks = 10;
@@ -120,7 +127,7 @@ public class FogOfWarClientEvents {
                 return true;
 
         for (FogChunk fogChunk : fogChunks)
-            if (fogChunk.isBrightChunk() && fogChunk.chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
+            if (fogChunk.getFinalBrightness() == FogChunk.BRIGHT && fogChunk.chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
                 return true;
         return false;
     }
@@ -202,7 +209,7 @@ public class FogOfWarClientEvents {
         // update bright chunks regardless of if they have needsLightUpdate or not as we want to be 100%
         // sure they're free of glitches as the player is most often looking at them
         for (FogChunk fogChunk : FogOfWarClientEvents.fogChunks)
-            if (fogChunk.needsLightUpdate || fogChunk.isBrightChunk())
+            if (fogChunk.needsLightUpdate || fogChunk.getFinalBrightness() == FogChunk.BRIGHT)
                 chunks.add(MC.level.getChunk(fogChunk.chunkInfo.chunk.getOrigin()));
 
         for (ChunkAccess chunk : chunks) {

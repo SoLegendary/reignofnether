@@ -99,7 +99,7 @@ public abstract class LevelRendererMixin {
 
             // bright chunks in last tick
             Set<FogChunk> oldBrightChunks = FogOfWarClientEvents.fogChunks.stream()
-                    .filter(FogChunk::isBrightChunk)
+                    .filter(fc -> fc.getFinalBrightness() == FogChunk.BRIGHT)
                     .collect(Collectors.toSet());
             // bright chunks in current tick
             Set<FogChunk> newBrightChunks = ConcurrentHashMap.newKeySet();
@@ -153,6 +153,8 @@ public abstract class LevelRendererMixin {
                 // add new bright chunks
                 boolean chunkExists;
                 for (FogChunk fogChunkNew : diff1) {
+                    FogOfWarClientEvents.exploredChunks.add(minecraft.level.getChunk(fogChunkNew.chunkInfo.chunk.getOrigin()).getPos());
+
                     chunkExists = false;
                     for (FogChunk fogChunkCurrent : FogOfWarClientEvents.fogChunks) {
                         // this chunk already exists, so just update its brightness
@@ -205,7 +207,7 @@ public abstract class LevelRendererMixin {
         List<ChunkRenderDispatcher.RenderChunk> list = Lists.newArrayList();
 
         List<AABB> brightAABBs = FogOfWarClientEvents.fogChunks.stream()
-                .filter(FogChunk::isBrightChunk)
+                .filter(fc -> fc.getFinalBrightness() == FogChunk.BRIGHT)
                 .map(c -> c.chunkInfo.chunk.bb).toList();
         List<FogChunk> exploredChunksToNoLongerRender = new ArrayList<>();
 
@@ -215,7 +217,7 @@ public abstract class LevelRendererMixin {
             if (!brightAABBs.contains(chunkInfo.chunk.bb)) {
                 // exploredChunks contains the bb and shouldBeRendered is false
                 for (FogChunk chunk : FogOfWarClientEvents.fogChunks) {
-                    if (chunk.isExploredChunk() && chunk.isAtFinalBrightness() && !chunk.needsLightUpdate && chunk.chunkInfo.chunk.bb.equals(chunkInfo.chunk.bb)) {
+                    if (chunk.getFinalBrightness() == FogChunk.SEMI && chunk.isAtFinalBrightness() && !chunk.needsLightUpdate && chunk.chunkInfo.chunk.bb.equals(chunkInfo.chunk.bb)) {
                         if (!chunk.shouldBeRendered)
                             continue outerLoop; // skip rendering this entirely, causes the chunk to retain its old view
                         else {
