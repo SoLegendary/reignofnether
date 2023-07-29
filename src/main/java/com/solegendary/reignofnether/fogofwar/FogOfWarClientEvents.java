@@ -17,6 +17,7 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.checkerframework.checker.units.qual.C;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Set;
@@ -25,6 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class FogOfWarClientEvents {
+
+    public static ChunkPos lastPlayerChunkPos = new ChunkPos(0,0);
 
     // all chunks that have ever been explored, including currently bright chunks
     public static final Set<FogChunk> fogChunks = ConcurrentHashMap.newKeySet();
@@ -135,6 +138,13 @@ public class FogOfWarClientEvents {
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (MC.level == null || evt.phase != TickEvent.Phase.END)
             return;
+
+        if (MC.player != null) {
+            ChunkPos pos = MC.level.getChunk(MC.player.getOnPos()).getPos();
+            if (!pos.equals(lastPlayerChunkPos))
+                forceUpdate = true;
+            lastPlayerChunkPos = pos;
+        }
 
         if (enableDelayTicks > 0) {
             enableDelayTicks -= 1;
