@@ -282,7 +282,7 @@ public class HudClientEvents {
                     float percentageDone = (float) firstProdItem.ticksLeft / (float) firstProdItem.ticksToProduce;
 
                     GuiComponent.drawString(evt.getPoseStack(), MC.font,
-                            Math.round(100 - (percentageDone * 100f)) + "% " + firstProdItem.getItemName(),
+                            Math.round(100 - (percentageDone * 100f)) + "% " + productionButtons.get(0).name,
                             blitX + iconFrameSize + 5,
                             blitY + 2,
                             0xFFFFFF);

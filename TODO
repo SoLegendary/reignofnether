@@ -6,8 +6,6 @@ TODO bugs/features:
 
 - change dungeon spawners to creeper and confirm that it can't spawn anything
 
-- Check unit conversions on remote server
-
 - Find solution to mobs (esp. workers) getting stuck on high blocks
     - Maybe let units' pathfinding fall off of higher than 3-high drops?
     - Or find a solution to mobs getting stuck on buildings
@@ -22,6 +20,7 @@ control groups crash testing
 moving with minimap
 units should not retaliate when already attacking a unit or building
 explored chunks saving/loading
+converting unit production items
 
 
 TODO buildings/units (backlog)

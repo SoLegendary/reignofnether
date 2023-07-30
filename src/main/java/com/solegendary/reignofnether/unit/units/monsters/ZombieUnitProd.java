@@ -6,7 +6,9 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchHusks;
+import com.solegendary.reignofnether.research.researchItems.ResearchStrays;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Style;
@@ -25,8 +27,12 @@ public class ZombieUnitProd extends ProductionItem {
     public ZombieUnitProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get(), building.ownerName, true);
+            if (!level.isClientSide()) {
+                if (ResearchServer.playerHasResearch(this.building.ownerName, ResearchHusks.itemName))
+                    building.produceUnit((ServerLevel) level, EntityRegistrar.HUSK_UNIT.get(), building.ownerName, true);
+                else
+                    building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get(), building.ownerName, true);
+            }
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -42,7 +48,9 @@ public class ZombieUnitProd extends ProductionItem {
         return new Button(
             ZombieUnitProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
+            ResearchClient.hasResearch(ResearchHusks.itemName) ?
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png") :
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
             hotkey,
             () -> false,
             () -> ResearchClient.hasResearch(ResearchHusks.itemName),
@@ -63,9 +71,11 @@ public class ZombieUnitProd extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            ZombieUnitProd.itemName,
+            ResearchClient.hasResearch(ResearchHusks.itemName) ? "Husk" : "Zombie",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
+            ResearchClient.hasResearch(ResearchHusks.itemName) ?
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png") :
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
             (Keybinding) null,
             () -> false,
             () -> false,
