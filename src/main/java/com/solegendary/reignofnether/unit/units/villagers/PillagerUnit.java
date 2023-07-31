@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.abilities.Dismount;
-import com.solegendary.reignofnether.ability.abilities.Mount;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchServer;

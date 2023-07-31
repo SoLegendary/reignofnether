@@ -8,7 +8,6 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchHusks;
-import com.solegendary.reignofnether.research.researchItems.ResearchStrays;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Style;

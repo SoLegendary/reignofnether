@@ -11,7 +11,6 @@ import com.solegendary.reignofnether.unit.units.monsters.StrayUnitProd;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnitProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;

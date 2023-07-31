@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
-import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
 import com.solegendary.reignofnether.building.buildings.monsters.SpiderLair;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;

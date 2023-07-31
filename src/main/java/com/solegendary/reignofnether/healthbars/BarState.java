@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.healthbars;
 
-import com.solegendary.reignofnether.hud.HudClientEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 

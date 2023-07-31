@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.EggItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.registries.RegistryObject;

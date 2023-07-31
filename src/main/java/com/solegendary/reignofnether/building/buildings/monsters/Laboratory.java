@@ -10,7 +10,6 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.ability.abilities.CallLightning;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;

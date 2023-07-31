@@ -7,7 +7,6 @@ import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
 import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
-import com.solegendary.reignofnether.building.buildings.monsters.SpiderLair;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;

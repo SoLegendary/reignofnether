@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
-import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -40,7 +39,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private static final int TICK_CD = 20; // only tick down gather time once this many ticks to reduce processing requirements
     private int cdTicksLeft = TICK_CD;
     public static final int NO_TARGET_TIMEOUT = 100; // if we reach this time without progressing a gather tick while having navigation done, then switch a new target
-    public static final int IDLE_TIMEOUT = 200; // ticks spent without a target to be considered idle
+    public static final int IDLE_TIMEOUT = 300; // ticks spent without a target to be considered idle
     private int ticksWithoutTarget = 0; // ticks spent without an active gather target (only increments serverside)
     private int ticksIdle = 0; // ticksWithoutTarget but never reset unless we've reacquired a target - used for idle checks
     private BlockPos altSearchPos = null; // block search origin that may be used instead of the mob position

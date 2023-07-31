@@ -2,9 +2,6 @@ package com.solegendary.reignofnether.fogofwar;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.world.level.chunk.ChunkAccess;
-
-import java.util.Set;
 
 public class FogChunk {
     private final static float TRANSITION_TICKS = 10;

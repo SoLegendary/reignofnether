@@ -7,7 +7,6 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.resources.*;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;

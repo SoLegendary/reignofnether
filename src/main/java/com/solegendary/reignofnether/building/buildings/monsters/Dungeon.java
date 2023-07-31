@@ -1,16 +1,10 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
-import com.solegendary.reignofnether.building.BuildingBlock;
-import com.solegendary.reignofnether.building.BuildingBlockData;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.ProductionBuilding;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.researchItems.ResearchEvokerVexes;
-import com.solegendary.reignofnether.research.researchItems.ResearchEvokers;
-import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPotions;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
@@ -19,10 +13,14 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,6 +79,17 @@ public class Dungeon extends ProductionBuilding {
             ),
             null
         );
+    }
+
+    @Override
+    public void onBlockBuilt(BlockPos bp, BlockState bs) {
+        if (!this.getLevel().isClientSide()) {
+            if (bs.hasBlockEntity()) {
+                BlockEntity be = this.getLevel().getBlockEntity(bp);
+                if (be instanceof SpawnerBlockEntity sbe)
+                    sbe.getSpawner().setEntityId(EntityType.CREEPER);
+            }
+        }
     }
 
     @Override

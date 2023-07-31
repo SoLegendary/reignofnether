@@ -1,31 +1,21 @@
 package com.solegendary.reignofnether.resources;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;

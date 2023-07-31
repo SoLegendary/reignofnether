@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.guiscreen;
 
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
@@ -8,7 +7,6 @@ import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.glfw.GLFW;
 
 /**
  * Handler for TopdownGui, the GUI screen that allows for cursor movement on screen

@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.hud;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;

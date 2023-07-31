@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.healthbars;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;

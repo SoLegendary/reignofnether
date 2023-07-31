@@ -1,9 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -12,7 +10,6 @@ import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAx
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemProdItem;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;

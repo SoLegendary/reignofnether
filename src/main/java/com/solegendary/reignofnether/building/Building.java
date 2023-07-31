@@ -383,6 +383,8 @@ public abstract class Building {
         isBuilt = true;
     }
 
+    public void onBlockBuilt(BlockPos bp, BlockState bs) { }
+
     public void tick(Level tickLevel) {
         this.tickAge += 1;
 
@@ -449,6 +451,7 @@ public abstract class Building {
                     level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, bp, Block.getId(bs));
                     level.levelEvent(bs.getSoundType().getPlaceSound().hashCode(), bp, Block.getId(bs));
                     blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
+                    onBlockBuilt(bp, bs);
                 }
             }
         }

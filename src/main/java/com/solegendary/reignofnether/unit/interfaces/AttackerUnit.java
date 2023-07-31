@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
-import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
@@ -14,8 +13,6 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 
 public interface AttackerUnit {
 

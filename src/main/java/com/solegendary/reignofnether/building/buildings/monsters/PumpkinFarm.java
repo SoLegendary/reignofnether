@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;

@@ -8,7 +8,6 @@ import com.mojang.math.Matrix4f;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogChunk;
-import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogTransitionBrightness;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;

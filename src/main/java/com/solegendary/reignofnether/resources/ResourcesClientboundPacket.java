@@ -1,9 +1,7 @@
 package com.solegendary.reignofnether.resources;
 
-import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;

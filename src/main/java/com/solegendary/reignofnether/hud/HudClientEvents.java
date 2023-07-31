@@ -687,12 +687,15 @@ public class HudClientEvents {
                         idleWorkerIndex = 0;
                 },
                 null,
-                List.of(FormattedCharSequence.forward("Idle workers: " + idleWorkerIds.size(), Style.EMPTY))
+                List.of(FormattedCharSequence.forward("Idle workers", Style.EMPTY))
             );
-            idleButton.render(evt.getPoseStack(),
-                    screenWidth - (idleButton.iconSize * 2),
-                    screenHeight - 200,
-                    mouseX, mouseY);
+            int xi = screenWidth - (idleButton.iconSize * 2);
+            int yi = screenHeight - 200;
+
+            idleButton.render(evt.getPoseStack(), xi, yi, mouseX, mouseY);
+            GuiComponent.drawString(evt.getPoseStack(), MC.font, String.valueOf(idleWorkerIds.size()),
+                    xi + 2, yi + idleButton.iconSize - 1, 0xFFFFFF);
+
             renderedButtons.add(idleButton);
         }
 

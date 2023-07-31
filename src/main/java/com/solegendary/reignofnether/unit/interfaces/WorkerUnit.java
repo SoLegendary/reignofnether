@@ -59,7 +59,7 @@ public interface WorkerUnit {
         GatherResourcesGoal resGoal = unit.getGatherResourceGoal();
 
         boolean isMoving = !((PathfinderMob) unit).getNavigation().isDone();
-        boolean isGathering = resGoal.getGatherTarget() != null;
+        boolean isGathering = resGoal.isGathering();
         boolean isGatheringIdle = resGoal.isIdle();
         boolean isBuilding = unit.getBuildRepairGoal().getBuildingTarget() != null;
 

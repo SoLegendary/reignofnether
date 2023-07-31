@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.tps;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
