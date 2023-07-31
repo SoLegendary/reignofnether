@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.*;
-import com.solegendary.reignofnether.unit.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.goals.ReturnResourcesGoal;

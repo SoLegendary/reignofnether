@@ -1,9 +1,8 @@
-package com.solegendary.reignofnether.unit;
+package com.solegendary.reignofnether.unit.packets;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import net.minecraft.core.BlockPos;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 

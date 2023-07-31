@@ -6,7 +6,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -39,9 +39,12 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private static final int MAX_FAILED_SEARCHES = 3;
     private static final int TICK_CD = 20; // only tick down gather time once this many ticks to reduce processing requirements
     private int cdTicksLeft = TICK_CD;
-    public static final int IDLE_TIMEOUT = 100; // if we reach this time without progressing a gather tick while having navigation done, then switch a new target
-    public int idleTicks = 0; // only increments serverside
+    public static final int NO_TARGET_TIMEOUT = 100; // if we reach this time without progressing a gather tick while having navigation done, then switch a new target
+    public static final int IDLE_TIMEOUT = 200; // ticks spent without a target to be considered idle
+    private int ticksWithoutTarget = 0; // ticks spent without an active gather target (only increments serverside)
+    private int ticksIdle = 0; // ticksWithoutTarget but never reset unless we've reacquired a target - used for idle checks
     private BlockPos altSearchPos = null; // block search origin that may be used instead of the mob position
+
 
     private final ArrayList<BlockPos> todoGatherTargets = new ArrayList<>();
     private BlockPos gatherTarget = null;
@@ -211,6 +214,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 this.setMoveTarget(gatherTarget);
 
             if (isGathering()) {
+                ticksIdle = 0;
+
                 // need to manually set cooldown higher (default is 2) or else we don't have enough time
                 // for the mob to turn before behaviour is reset
                 mob.getLookControl().setLookAt(gatherTarget.getX(), gatherTarget.getY(), gatherTarget.getZ());
@@ -274,12 +279,15 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 }
             }
             else {
-                // track how long we've been
+                // track how long we've been without a target
+                // if we have spent too long still then we are stuck andreevaulate our gather target
                 if (mob.getNavigation().isDone())
-                    idleTicks += TICK_CD;
-                if (idleTicks >= IDLE_TIMEOUT)
+                    ticksWithoutTarget += TICK_CD;
+                if (ticksWithoutTarget >= NO_TARGET_TIMEOUT)
                     this.removeGatherTarget();
             }
+        } else {
+            ticksIdle += TICK_CD;
         }
     }
 
@@ -325,7 +333,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     private boolean isBlockInRange(BlockPos target) {
-        int reachRangeBonus = Math.min(5, idleTicks / TICK_CD);
+        int reachRangeBonus = Math.min(5, ticksWithoutTarget / TICK_CD);
         return target.distToCenterSqr(mob.getX(), mob.getEyeY(), mob.getZ()) <= Math.pow(REACH_RANGE + reachRangeBonus, 2);
     }
 
@@ -372,7 +380,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         targetResourceSource = null;
         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
         searchCdTicksLeft = 0;
-        idleTicks = 0;
+        ticksWithoutTarget = 0;
     }
 
     // stop gathering and searching entirely, and remove saved data for
@@ -391,5 +399,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     public int getGatherTicksLeft() {
         return gatherTicksLeft;
+    }
+
+    public boolean isIdle() {
+        return ticksIdle > IDLE_TIMEOUT;
     }
 }

@@ -11,8 +11,6 @@ public interface WorkerUnit {
     public BuildRepairGoal getBuildRepairGoal();
     public GatherResourcesGoal getGatherResourceGoal();
     public BlockState getReplantBlockState();
-    public boolean isIdle();
-    public void setIdle(boolean idle);
 
     public static void tick(WorkerUnit unit) {
         BuildRepairGoal buildRepairGoal = unit.getBuildRepairGoal();
@@ -61,10 +59,10 @@ public interface WorkerUnit {
         GatherResourcesGoal resGoal = unit.getGatherResourceGoal();
 
         boolean isMoving = !((PathfinderMob) unit).getNavigation().isDone();
-        boolean isGathering = resGoal.getGatherTarget() != null && resGoal.idleTicks < GatherResourcesGoal.IDLE_TIMEOUT;
-        //boolean isReturning = ((Unit) unit).getReturnResourcesGoal().getBuildingTarget() != null;
+        boolean isGathering = resGoal.getGatherTarget() != null;
+        boolean isGatheringIdle = resGoal.isIdle();
         boolean isBuilding = unit.getBuildRepairGoal().getBuildingTarget() != null;
 
-        return !isMoving && !isGathering && !isBuilding;
+        return !isMoving && !isGathering && !isBuilding && isGatheringIdle;
     }
 }

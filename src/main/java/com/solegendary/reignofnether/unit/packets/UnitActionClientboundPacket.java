@@ -1,13 +1,18 @@
-package com.solegendary.reignofnether.unit;
+package com.solegendary.reignofnether.unit.packets;
 
+import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class UnitServerboundPacket {
+// allow the server to force unit actions as though it was sent by the client so it is recorded on both sides
+public class UnitActionClientboundPacket {
 
     private final String ownerName; // player that is issuing this command
     private final UnitAction action;
@@ -16,8 +21,36 @@ public class UnitServerboundPacket {
     private final BlockPos preselectedBlockPos;
     private final BlockPos selectedBuildingPos; // for building abilities
 
+    public static void reflectUnitAction(String ownerName, UnitAction action, int unitId, int[] unitIds,
+                                 BlockPos preselectedBlockPos, BlockPos selectedBuildingPos) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+            new UnitActionClientboundPacket(
+                ownerName, action, unitId, unitIds,
+                preselectedBlockPos,
+                selectedBuildingPos
+            ));
+    }
+
+    public static void reflectUnitAction(String ownerName, UnitAction action, int unitId, int[] unitIds) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+            new UnitActionClientboundPacket(
+                ownerName, action, unitId, unitIds,
+                new BlockPos(0,0,0),
+                new BlockPos(0,0,0)
+            ));
+    }
+
+    public static void reflectUnitAction(String ownerName, UnitAction action, int[] unitIds) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+            new UnitActionClientboundPacket(
+                ownerName, action, -1, unitIds,
+                new BlockPos(0,0,0),
+                new BlockPos(0,0,0)
+            ));
+    }
+
     // packet-handler functions
-    public UnitServerboundPacket(
+    public UnitActionClientboundPacket(
         String ownerName,
         UnitAction action,
         int unitId,
@@ -33,7 +66,7 @@ public class UnitServerboundPacket {
         this.selectedBuildingPos = selectedBuildingPos;
     }
 
-    public UnitServerboundPacket(FriendlyByteBuf buffer) {
+    public UnitActionClientboundPacket(FriendlyByteBuf buffer) {
         this.ownerName = buffer.readUtf();
         this.action = buffer.readEnum(UnitAction.class);
         this.unitId = buffer.readInt();
@@ -55,7 +88,7 @@ public class UnitServerboundPacket {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
-            UnitServerEvents.addActionItem(
+            UnitClientEvents.sendUnitCommandManual(
                 this.ownerName,
                 this.action,
                 this.unitId,

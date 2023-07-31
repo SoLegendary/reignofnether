@@ -6,7 +6,7 @@ import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
-import com.solegendary.reignofnether.unit.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;

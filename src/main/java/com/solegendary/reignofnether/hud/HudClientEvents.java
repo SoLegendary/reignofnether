@@ -40,13 +40,13 @@ public class HudClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
+    private static int idleWorkerIndex = 0; // which worker to look at when clicking the idle workers button
+
     private static String tempMsg = "";
     private static int tempMsgTicksLeft = 0;
     private static final int TEMP_MSG_TICKS_FADE = 50; // ticks left when the msg starts to fade
     private static final int TEMP_MSG_TICKS_MAX = 150; // ticks to show the msg for
     private static final int MAX_BUTTONS_PER_ROW = 5;
-
-    private static int idleWorkerIndex = 0;
 
     private static final ArrayList<Button> genericActionButtonsWorker = new ArrayList<>(Arrays.asList(
             ActionButtons.BUILD_REPAIR,
@@ -664,29 +664,35 @@ public class HudClientEvents {
         // -------------------
         // Idle workers button
         // -------------------
-        ArrayList<LivingEntity> idleWorkers = UnitClientEvents.getOwnedIdleWorkers();
-        if (idleWorkers.size() > 0) {
+        if (idleWorkerIds.size() > 0) {
             Button idleButton = new Button(
                 "Idle workers",
                 iconSize,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
                 Keybindings.keyK,
                 () -> false,
-                () -> false,
+                () -> true,
                 () -> true,
                 () -> {
-                    if (idleWorkerIndex >= idleWorkers.size())
+                    if (idleWorkerIndex >= idleWorkerIds.size())
                         idleWorkerIndex = 0;
-                    clearSelectedUnits();
-                    LivingEntity worker = idleWorkers.get(idleWorkerIndex);
-                    addSelectedUnit(worker);
-                    OrthoviewClientEvents.centreCameraOnPos(worker.getX(), worker.getZ());
+                    Entity entity = MC.level.getEntity(idleWorkerIds.get(idleWorkerIndex));
+                    if (entity instanceof WorkerUnit) {
+                        OrthoviewClientEvents.centreCameraOnPos(entity.getX(), entity.getZ());
+                        UnitClientEvents.clearSelectedUnits();
+                        UnitClientEvents.addSelectedUnit((LivingEntity) entity);
+                    }
                     idleWorkerIndex += 1;
+                    if (idleWorkerIndex >= idleWorkerIds.size())
+                        idleWorkerIndex = 0;
                 },
                 null,
-                List.of(FormattedCharSequence.forward("Idle workers: " + idleWorkers.size(), Style.EMPTY)));
-
-            idleButton.render(evt.getPoseStack(), screenWidth - iconFrameSize, screenHeight - 200,  mouseX, mouseY);
+                List.of(FormattedCharSequence.forward("Idle workers: " + idleWorkerIds.size(), Style.EMPTY))
+            );
+            idleButton.render(evt.getPoseStack(),
+                    screenWidth - (idleButton.iconSize * 2),
+                    screenHeight - 200,
+                    mouseX, mouseY);
             renderedButtons.add(idleButton);
         }
 
@@ -696,16 +702,20 @@ public class HudClientEvents {
         Button attackWarningButton = AttackWarningClientEvents.getWarningButton();
         if (!attackWarningButton.isHidden.get())
             attackWarningButton.render(evt.getPoseStack(),
-                    MC.getWindow().getGuiScaledWidth() - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 14,
-                    MC.getWindow().getGuiScaledHeight() - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) - 2,
+                    screenWidth - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 14,
+                    screenHeight - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) - 2,
                     mouseX, mouseY);
         renderedButtons.add(attackWarningButton);
+
+        // ----------------------
+        // Map size toggle button
+        // ----------------------
 
         Button toggleMapSizeButton = MinimapClientEvents.getToggleSizeButton();
         if (!toggleMapSizeButton.isHidden.get())
             toggleMapSizeButton.render(evt.getPoseStack(),
-                    MC.getWindow().getGuiScaledWidth() - (toggleMapSizeButton.iconSize * 2),
-                    MC.getWindow().getGuiScaledHeight() - (toggleMapSizeButton.iconSize * 2),
+                    screenWidth - (toggleMapSizeButton.iconSize * 2),
+                    screenHeight - (toggleMapSizeButton.iconSize * 2),
                     mouseX, mouseY);
         renderedButtons.add(toggleMapSizeButton);
 

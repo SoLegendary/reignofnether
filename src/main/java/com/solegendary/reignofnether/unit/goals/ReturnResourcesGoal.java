@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;

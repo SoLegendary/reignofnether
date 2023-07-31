@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
@@ -12,20 +11,17 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -46,6 +42,9 @@ import java.util.*;
 public class UnitClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
+
+    // list of ids that correspond to idle workers - should only be updated from server side
+    public static final ArrayList<Integer> idleWorkerIds = new ArrayList<>();
 
     // units moused over or inside a box select
     private static final ArrayList<LivingEntity> preselectedUnits = new ArrayList<>();
@@ -90,16 +89,6 @@ public class UnitClientEvents {
         return CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK;
     }
 
-    public static ArrayList<LivingEntity> getOwnedIdleWorkers() {
-        ArrayList<LivingEntity> idleWorkers = new ArrayList<>();
-        for (LivingEntity entity : allUnits)
-            if (entity instanceof WorkerUnit workerUnit &&
-                getPlayerToEntityRelationship(entity) == Relationship.OWNED &&
-                workerUnit.isIdle())
-                idleWorkers.add(entity);
-        return idleWorkers;
-    }
-
     public static int getCurrentPopulation() {
         int currentPopulation = 0;
         if (MC.level != null && MC.player != null) {
@@ -139,7 +128,7 @@ public class UnitClientEvents {
             );
             actionItem.action(MC.level);
 
-            PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
+            PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
                 MC.player.getName().getString(),
                 action, unitId, unitIds,
                 preselectedBlockPos,
@@ -172,7 +161,7 @@ public class UnitClientEvents {
             );
             actionItem.action(MC.level);
 
-            PacketHandler.INSTANCE.sendToServer(new UnitServerboundPacket(
+            PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
                 MC.player.getName().getString(),
                 action,
                 preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
@@ -217,13 +206,12 @@ public class UnitClientEvents {
         }
     }
 
-    public static void syncWorkerUnit(int entityId, boolean idle, boolean isBuilding, ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
+    public static void syncWorkerUnit(int entityId, boolean isBuilding, ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 if (entity instanceof WorkerUnit workerUnit) {
                     workerUnit.getBuildRepairGoal().setIsBuildingServerside(isBuilding);
                     workerUnit.getGatherResourceGoal().syncFromServer(gatherName, gatherPos, gatherTicks);
-                    workerUnit.setIdle(idle);
                 }
             }
         }
@@ -615,5 +603,17 @@ public class UnitClientEvents {
         }
     }
 
+    public static void syncIdleWorkers(int[] idleWorkerIds) {
+        if (MC.level == null)
+            return;
 
+        UnitClientEvents.idleWorkerIds.clear();
+        for (int id : idleWorkerIds) {
+            Entity entity = MC.level.getEntity(id);
+            if (entity instanceof WorkerUnit unit &&
+                getPlayerToEntityRelationship((LivingEntity) entity) == Relationship.OWNED)
+                UnitClientEvents.idleWorkerIds.add(id);
+        }
+
+    }
 }

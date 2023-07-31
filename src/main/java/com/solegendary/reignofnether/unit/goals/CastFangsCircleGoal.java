@@ -3,12 +3,9 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.unit.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
-import com.solegendary.reignofnether.util.MyMath;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 // similar to castFangsGoal but does not require targeting, and so is not a MoveToTargetBlockGoal

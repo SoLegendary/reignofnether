@@ -12,7 +12,7 @@ import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.tps.TPSClientBoundPacket;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
-import com.solegendary.reignofnether.unit.*;
+import com.solegendary.reignofnether.unit.packets.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
@@ -36,13 +36,13 @@ public final class PacketHandler {
                 .encoder(TopdownGuiServerboundPacket::encode).decoder(TopdownGuiServerboundPacket::new)
                 .consumer(TopdownGuiServerboundPacket::handle).add();
 
-        INSTANCE.messageBuilder(UnitServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(UnitServerboundPacket::encode).decoder(UnitServerboundPacket::new)
-                .consumer(UnitServerboundPacket::handle).add();
+        INSTANCE.messageBuilder(UnitActionServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(UnitActionServerboundPacket::encode).decoder(UnitActionServerboundPacket::new)
+                .consumer(UnitActionServerboundPacket::handle).add();
 
-        INSTANCE.messageBuilder(UnitClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(UnitClientboundPacket::encode).decoder(UnitClientboundPacket::new)
-                .consumer(UnitClientboundPacket::handle).add();
+        INSTANCE.messageBuilder(UnitActionClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(UnitActionClientboundPacket::encode).decoder(UnitActionClientboundPacket::new)
+                .consumer(UnitActionClientboundPacket::handle).add();
 
         INSTANCE.messageBuilder(UnitConvertClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(UnitConvertClientboundPacket::encode).decoder(UnitConvertClientboundPacket::new)
@@ -52,9 +52,13 @@ public final class PacketHandler {
                 .encoder(UnitSyncClientboundPacket::encode).decoder(UnitSyncClientboundPacket::new)
                 .consumer(UnitSyncClientboundPacket::handle).add();
 
-        INSTANCE.messageBuilder(UnitWorkerClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(UnitWorkerClientBoundPacket::encode).decoder(UnitWorkerClientBoundPacket::new)
-                .consumer(UnitWorkerClientBoundPacket::handle).add();
+        INSTANCE.messageBuilder(UnitSyncWorkerClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(UnitSyncWorkerClientBoundPacket::encode).decoder(UnitSyncWorkerClientBoundPacket::new)
+                .consumer(UnitSyncWorkerClientBoundPacket::handle).add();
+
+        INSTANCE.messageBuilder(UnitIdleWorkerClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(UnitIdleWorkerClientBoundPacket::encode).decoder(UnitIdleWorkerClientBoundPacket::new)
+                .consumer(UnitIdleWorkerClientBoundPacket::handle).add();
 
         INSTANCE.messageBuilder(ResearchClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(ResearchClientboundPacket::encode).decoder(ResearchClientboundPacket::new)

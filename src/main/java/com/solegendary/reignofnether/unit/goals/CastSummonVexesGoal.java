@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.unit.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;

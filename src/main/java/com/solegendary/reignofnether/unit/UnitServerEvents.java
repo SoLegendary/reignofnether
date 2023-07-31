@@ -6,8 +6,8 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -225,7 +225,8 @@ public class UnitServerEvents {
             unitSyncTicks = UNIT_SYNC_TICKS_MAX;
             for (LivingEntity entity : allUnits) {
                 UnitSyncClientboundPacket.sendSyncStatsPacket(entity);
-                UnitWorkerClientBoundPacket.sendSyncWorkerPacket(entity);
+                UnitSyncWorkerClientBoundPacket.sendSyncWorkerPacket(entity);
+                UnitIdleWorkerClientBoundPacket.sendIdleWorkerPacket();
 
                 // remove old chunk // add current chunk
                 boolean chunkNeedsUpdate = false;
@@ -340,6 +341,6 @@ public class UnitServerEvents {
     public static void onExplosion(ExplosionEvent.Detonate evt) {
         for (Entity entity : evt.getAffectedEntities())
             if (entity instanceof CreeperUnit cUnit)
-                UnitClientboundPacket.reflectUnitAction(cUnit.getOwnerName(), UnitAction.EXPLODE, new int[]{cUnit.getId()});
+                UnitActionClientboundPacket.reflectUnitAction(cUnit.getOwnerName(), UnitAction.EXPLODE, new int[]{cUnit.getId()});
     }
 }

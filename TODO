@@ -21,6 +21,7 @@ moving with minimap
 units should not retaliate when already attacking a unit or building
 explored chunks saving/loading
 converting unit production items
+idle worker detection
 
 
 TODO buildings/units (backlog)
