@@ -34,15 +34,18 @@ public class PlayerServerEvents {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
-        System.out.println("Player logged in: " + evt.getEntity().getName().getString() + ", id: " + evt.getEntity().getId());
         ServerPlayer serverPlayer = (ServerPlayer) evt.getEntity();
         players.add((ServerPlayer) evt.getEntity());
+
+        String playerName = serverPlayer.getName().getString();
+        System.out.println("Player logged in: " + playerName + ", id: " + serverPlayer.getId());
 
         for (LivingEntity entity : UnitServerEvents.getAllUnits())
             if (entity instanceof Unit unit)
                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
 
-        ResearchServer.syncResearch(evt.getEntity().getName().getString());
+        ResearchServer.syncResearch(playerName);
+        ResearchServer.syncCheats(playerName);
     }
 
     @SubscribeEvent

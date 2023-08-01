@@ -32,10 +32,10 @@ public class ResearchServer {
 
     final private static ArrayList<Pair<String, String>> cheatItems = new ArrayList<>();
 
-    public static void syncCheats() {
-        for (Pair<String, String> cheatItem : cheatItems) {
-            ResearchClientboundPacket.addCheat(cheatItem.getFirst(), cheatItem.getSecond());
-        }
+    public static void syncCheats(String playerName) {
+        for (Pair<String, String> cheatItem : cheatItems)
+            if (playerName.equals(cheatItem.getFirst()))
+                ResearchClientboundPacket.addCheat(cheatItem.getFirst(), cheatItem.getSecond());
     }
 
     public static void addCheat(String playerName, String cheatItemName) {
