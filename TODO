@@ -11,6 +11,16 @@ TODO bugs/features:
     - Or find a solution to mobs getting stuck on buildings
 
 
+- attack warning cooldowns should be tracked serverside
+
+- clean up client data when leaving a level
+    - units
+    - buildings
+    - HUD stuff like control groups
+    - research (and need to sync research with server on login)
+        - maybe just clear it all by sending a server packet
+
+
 TODO test in remote server
 
 attack warnings

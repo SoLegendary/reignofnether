@@ -41,6 +41,8 @@ public class PlayerServerEvents {
         for (LivingEntity entity : UnitServerEvents.getAllUnits())
             if (entity instanceof Unit unit)
                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
+
+        ResearchServer.syncResearch(evt.getEntity().getName().getString());
     }
 
     @SubscribeEvent

@@ -9,6 +9,12 @@ public class ResearchServer {
 
     final private static ArrayList<Pair<String, String>> researchItems = new ArrayList<>();
 
+    public static void syncResearch(String playerName) {
+        for (Pair<String, String> researchItem : researchItems)
+            if (playerName.equals(researchItem.getFirst()))
+                ResearchClientboundPacket.addResearch(researchItem.getFirst(), researchItem.getSecond());
+    }
+
     public static void addResearch(String playerName, String researchItemName) {
         researchItems.add(new Pair<>(playerName, researchItemName));
     }
@@ -25,6 +31,12 @@ public class ResearchServer {
     }
 
     final private static ArrayList<Pair<String, String>> cheatItems = new ArrayList<>();
+
+    public static void syncCheats() {
+        for (Pair<String, String> cheatItem : cheatItems) {
+            ResearchClientboundPacket.addCheat(cheatItem.getFirst(), cheatItem.getSecond());
+        }
+    }
 
     public static void addCheat(String playerName, String cheatItemName) {
         cheatItems.add(new Pair<>(playerName, cheatItemName));
