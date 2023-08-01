@@ -10,28 +10,26 @@ TODO bugs/features:
     - Maybe let units' pathfinding fall off of higher than 3-high drops?
     - Or find a solution to mobs getting stuck on buildings
 
+- healthbars dont sync up sometimes
+    - when the unit leaves render range and then returns?
 
 - attack warning cooldowns should be tracked serverside
+    - buildings don't cause warnings for some reason
+    - sound should be slightly faster (no pause at beginning at all)
 
 - clean up client data when leaving a level
     - units
     - buildings
     - HUD stuff like control groups
     - research (and need to sync research with server on login)
-        - maybe just clear it all by sending a server packet
+        - maybe just clear it all by sending a clientbound packet
+
+- cull clientside idle workers when they die or leave
 
 
 TODO test in remote server
 
-attack warnings
-    - building attacked
-    - unit attacked
-control groups crash testing
-moving with minimap
-units should not retaliate when already attacking a unit or building
-explored chunks saving/loading
-converting unit production items
-idle worker detection
+
 
 
 TODO buildings/units (backlog)

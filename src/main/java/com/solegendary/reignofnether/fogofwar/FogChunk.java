@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 
 public class FogChunk {
-    private final static float TRANSITION_TICKS = 10;
+    private final static float TRANSITION_TICKS = 3;
 
     public static final float BRIGHT = 1.0f;
     public static final float SEMI = 0.15f;
@@ -70,36 +70,48 @@ public class FogChunk {
                     this.brightness -= ((BRIGHT - SEMI) / TRANSITION_TICKS);
                 else
                     this.brightness = SEMI;
+                if (brightness < SEMI)
+                    brightness = SEMI;
             }
             case SEMI_TO_DARK -> {
                 if (this.brightness > DARK)
                     this.brightness -= ((SEMI - DARK) / TRANSITION_TICKS);
                 else
                     this.brightness = DARK;
+                if (brightness < DARK)
+                    brightness = DARK;
             }
             case BRIGHT_TO_DARK -> {
                 if (this.brightness > DARK)
                     this.brightness -= ((BRIGHT - DARK) / TRANSITION_TICKS);
                 else
                     this.brightness = DARK;
+                if (brightness < DARK)
+                    brightness = DARK;
             }
             case SEMI_TO_BRIGHT -> {
                 if (this.brightness < BRIGHT)
                     this.brightness += ((BRIGHT - SEMI) / TRANSITION_TICKS);
                 else
                     this.brightness = BRIGHT;
+                if (brightness > BRIGHT)
+                    brightness = BRIGHT;
             }
             case DARK_TO_SEMI -> {
                 if (this.brightness < SEMI)
                     this.brightness += ((SEMI - DARK) / TRANSITION_TICKS);
                 else
                     this.brightness = SEMI;
+                if (brightness > SEMI)
+                    brightness = SEMI;
             }
             case DARK_TO_BRIGHT -> {
                 if (this.brightness < BRIGHT)
                     this.brightness += ((BRIGHT - DARK) / TRANSITION_TICKS);
                 else
                     this.brightness = BRIGHT;
+                if (brightness > BRIGHT)
+                    brightness = BRIGHT;
             }
         }
 
