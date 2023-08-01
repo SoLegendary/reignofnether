@@ -6,6 +6,8 @@ TODO bugs/features:
 
 - change dungeon spawners to creeper and confirm that it can't spawn anything
 
+- force set video option for chunk threading to THREADED
+
 - Find solution to mobs (esp. workers) getting stuck on high blocks
     - Maybe let units' pathfinding fall off of higher than 3-high drops?
     - Or find a solution to mobs getting stuck on buildings
@@ -18,13 +20,17 @@ TODO bugs/features:
     - sound should be slightly faster (no pause at beginning at all)
 
 - clean up client data when leaving a level
-    - units
-    - buildings
-    - HUD stuff like control groups
     - research (and need to sync research with server on login)
         - maybe just clear it all by sending a clientbound packet
 
-- cull clientside idle workers when they die or leave
+- unit formations
+    - each unit should try to take up its own block
+    - might need to do some logic to ensure they dont bump into each other too much for this
+        - each unit finds the closest distance?
+
+- continue to optimise fog of war...
+    - maybe only have fog chunks centered on enemy base?
+
 
 
 TODO test in remote server

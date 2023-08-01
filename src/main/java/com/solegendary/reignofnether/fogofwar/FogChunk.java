@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 
 public class FogChunk {
-    private final static float TRANSITION_TICKS = 3;
+    private final static float TRANSITION_TICKS = 10;
 
     public static final float BRIGHT = 1.0f;
     public static final float SEMI = 0.15f;
@@ -36,6 +36,9 @@ public class FogChunk {
             case DARK_TO_SEMI, BRIGHT_TO_SEMI -> {
                 return SEMI;
             }
+            case SEMI_TO_DARK, BRIGHT_TO_DARK -> {
+                return DARK;
+            }
         }
         return BRIGHT;
     }
@@ -54,6 +57,9 @@ public class FogChunk {
     }
 
     public boolean isAtFinalBrightness() {
+        if (!FogOfWarClientEvents.smoothBrightnessEnabled)
+            return true;
+
         return (this.fogTB == FogTransitionBrightness.SEMI_TO_BRIGHT && this.brightness == BRIGHT) ||
                 (this.fogTB == FogTransitionBrightness.DARK_TO_BRIGHT && this.brightness == BRIGHT) ||
                 (this.fogTB == FogTransitionBrightness.BRIGHT_TO_SEMI && this.brightness == SEMI) ||
@@ -64,57 +70,61 @@ public class FogChunk {
 
     public void tickBrightness() {
         float originalBrightness = this.brightness;
-        switch(this.fogTB) {
-            case BRIGHT_TO_SEMI -> {
-                if (this.brightness > SEMI)
-                    this.brightness -= ((BRIGHT - SEMI) / TRANSITION_TICKS);
-                else
-                    this.brightness = SEMI;
-                if (brightness < SEMI)
-                    brightness = SEMI;
-            }
-            case SEMI_TO_DARK -> {
-                if (this.brightness > DARK)
-                    this.brightness -= ((SEMI - DARK) / TRANSITION_TICKS);
-                else
-                    this.brightness = DARK;
-                if (brightness < DARK)
-                    brightness = DARK;
-            }
-            case BRIGHT_TO_DARK -> {
-                if (this.brightness > DARK)
-                    this.brightness -= ((BRIGHT - DARK) / TRANSITION_TICKS);
-                else
-                    this.brightness = DARK;
-                if (brightness < DARK)
-                    brightness = DARK;
-            }
-            case SEMI_TO_BRIGHT -> {
-                if (this.brightness < BRIGHT)
-                    this.brightness += ((BRIGHT - SEMI) / TRANSITION_TICKS);
-                else
-                    this.brightness = BRIGHT;
-                if (brightness > BRIGHT)
-                    brightness = BRIGHT;
-            }
-            case DARK_TO_SEMI -> {
-                if (this.brightness < SEMI)
-                    this.brightness += ((SEMI - DARK) / TRANSITION_TICKS);
-                else
-                    this.brightness = SEMI;
-                if (brightness > SEMI)
-                    brightness = SEMI;
-            }
-            case DARK_TO_BRIGHT -> {
-                if (this.brightness < BRIGHT)
-                    this.brightness += ((BRIGHT - DARK) / TRANSITION_TICKS);
-                else
-                    this.brightness = BRIGHT;
-                if (brightness > BRIGHT)
-                    brightness = BRIGHT;
+
+        if (!FogOfWarClientEvents.smoothBrightnessEnabled) {
+            this.brightness = getFinalBrightness();
+        } else {
+            switch(this.fogTB) {
+                case BRIGHT_TO_SEMI -> {
+                    if (this.brightness > SEMI)
+                        this.brightness -= ((BRIGHT - SEMI) / TRANSITION_TICKS);
+                    else
+                        this.brightness = SEMI;
+                    if (brightness < SEMI)
+                        brightness = SEMI;
+                }
+                case SEMI_TO_DARK -> {
+                    if (this.brightness > DARK)
+                        this.brightness -= ((SEMI - DARK) / TRANSITION_TICKS);
+                    else
+                        this.brightness = DARK;
+                    if (brightness < DARK)
+                        brightness = DARK;
+                }
+                case BRIGHT_TO_DARK -> {
+                    if (this.brightness > DARK)
+                        this.brightness -= ((BRIGHT - DARK) / TRANSITION_TICKS);
+                    else
+                        this.brightness = DARK;
+                    if (brightness < DARK)
+                        brightness = DARK;
+                }
+                case SEMI_TO_BRIGHT -> {
+                    if (this.brightness < BRIGHT)
+                        this.brightness += ((BRIGHT - SEMI) / TRANSITION_TICKS);
+                    else
+                        this.brightness = BRIGHT;
+                    if (brightness > BRIGHT)
+                        brightness = BRIGHT;
+                }
+                case DARK_TO_SEMI -> {
+                    if (this.brightness < SEMI)
+                        this.brightness += ((SEMI - DARK) / TRANSITION_TICKS);
+                    else
+                        this.brightness = SEMI;
+                    if (brightness > SEMI)
+                        brightness = SEMI;
+                }
+                case DARK_TO_BRIGHT -> {
+                    if (this.brightness < BRIGHT)
+                        this.brightness += ((BRIGHT - DARK) / TRANSITION_TICKS);
+                    else
+                        this.brightness = BRIGHT;
+                    if (brightness > BRIGHT)
+                        brightness = BRIGHT;
+                }
             }
         }
-
         if (this.brightness != originalBrightness) {
             this.chunkInfo.chunk.setDirty(true);
             this.chunkInfo.chunk.playerChanged = true;

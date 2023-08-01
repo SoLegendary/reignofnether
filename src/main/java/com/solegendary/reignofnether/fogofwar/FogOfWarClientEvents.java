@@ -22,6 +22,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static com.solegendary.reignofnether.fogofwar.FogChunk.*;
+
 public class FogOfWarClientEvents {
 
     // TODO: fix smooth lighting shading issue in QuadLighter.process
@@ -43,6 +45,7 @@ public class FogOfWarClientEvents {
 
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = true;
+    public static final boolean smoothBrightnessEnabled = false;
 
     public static final int CHUNK_VIEW_DIST = 2;
 
@@ -100,14 +103,24 @@ public class FogOfWarClientEvents {
 
     // returns the shade modifier that should be applied at a given position based on the fog of war state there
     public static float getPosBrightness(BlockPos pPos) {
-        if (!isEnabled())
-            return 1.0f;
+        if (!isEnabled() || MC.level == null)
+            return BRIGHT;
 
-        for (FogChunk chunkInfo : fogChunks)
-            if (chunkInfo.chunkInfo.chunk.bb.contains(pPos.getX() + 0.5f, pPos.getY() + 0.5f, pPos.getZ() + 0.5f))
-                return chunkInfo.brightness;
+        if (!smoothBrightnessEnabled) {
+            // first check if the ChunkPos is already occupied as this is faster
+            for (ChunkPos chunkPos : occupiedChunks)
+                if (MC.level.getChunk(pPos).getPos().getChessboardDistance(chunkPos) < CHUNK_VIEW_DIST)
+                    return BRIGHT;
 
-        return 0.0f;
+            for (ChunkPos chunkPos : exploredChunks)
+                if (MC.level.getChunk(pPos).getPos().getChessboardDistance(chunkPos) < CHUNK_VIEW_DIST)
+                    return SEMI;
+        } else {
+            for (FogChunk chunkInfo : fogChunks)
+                if (chunkInfo.chunkInfo.chunk.bb.contains(pPos.getX() + 0.5f, pPos.getY() + 0.5f, pPos.getZ() + 0.5f))
+                    return chunkInfo.brightness;
+        }
+        return DARK;
     }
 
 
@@ -136,7 +149,7 @@ public class FogOfWarClientEvents {
                 return true;
 
         for (FogChunk fogChunk : fogChunks)
-            if (fogChunk.getFinalBrightness() == FogChunk.BRIGHT && fogChunk.chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
+            if (fogChunk.getFinalBrightness() == BRIGHT && fogChunk.chunkInfo.chunk.bb.contains(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))
                 return true;
         return false;
     }
@@ -223,7 +236,7 @@ public class FogOfWarClientEvents {
         // update bright chunks regardless of if they have needsLightUpdate or not as we want to be 100%
         // sure they're free of glitches as the player is most often looking at them
         for (FogChunk fogChunk : FogOfWarClientEvents.fogChunks)
-            if (fogChunk.needsLightUpdate || fogChunk.getFinalBrightness() == FogChunk.BRIGHT)
+            if (fogChunk.needsLightUpdate || fogChunk.getFinalBrightness() == BRIGHT)
                 chunks.add(MC.level.getChunk(fogChunk.chunkInfo.chunk.getOrigin()));
 
         for (ChunkAccess chunk : chunks) {

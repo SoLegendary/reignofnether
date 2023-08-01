@@ -292,7 +292,7 @@ public class MinimapClientEvents {
 
         // init a map filled with black and copy in only those pixels inside of explored/bright chunks
         if (FogOfWarClientEvents.isEnabled()) {
-            int[][] mapColoursCopy = new int[worldRadius *2][worldRadius *2];
+            int[][] mapColoursCopy = new int[worldRadius*2][worldRadius*2];
             for (int[] row : mapColoursCopy)
                 Arrays.fill(row, (0xFF << 24));
 

@@ -29,6 +29,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -873,6 +874,14 @@ public class HudClientEvents {
             if (Keybindings.ctrlMod.isDown() && evt.getKeyCode() == keybinding.key)
                 controlGroups.get(index).saveFromSelected(keybinding);
         }
+    }
+
+
+    @SubscribeEvent
+    public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
+        // SINGLEPLAYER ONLY - client log out: remove control groups
+        if (MC.player != null && evt.getEntity().getId() == MC.player.getId())
+            controlGroups.clear();
     }
 
     // newUnitIds are replacing oldUnitIds - replace them in every control group while retaining their index

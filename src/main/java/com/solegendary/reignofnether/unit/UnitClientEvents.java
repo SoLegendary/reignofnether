@@ -260,7 +260,9 @@ public class UnitClientEvents {
             selectedUnits.clear();
             preselectedUnits.clear();
             allUnits.clear();
+            idleWorkerIds.clear();
         }
+        idleWorkerIds.removeIf(id -> id == evt.getEntity().getId());
     }
     /**
      * Clientside entities will join and leave based on render distance, but we want to keep entities tracked at all times

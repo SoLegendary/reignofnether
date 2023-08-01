@@ -37,6 +37,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -505,6 +506,15 @@ public class BuildingClientEvents {
         if ((screenName.equals("Chest") || screenName.equals("Large Chest")) && MC.level != null && MC.player != null) {
             BlockPos bp = Item.getPlayerPOVHitResult(MC.level, MC.player, ClipContext.Fluid.NONE).getBlockPos();
             BuildingServerboundPacket.checkStockpileChests(bp);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
+        // SINGLEPLAYER ONLY - client log out: remove buildings so we don't duplicate on logging back in
+        if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
+            buildings.clear();
+            selectedBuildings.clear();
         }
     }
 
