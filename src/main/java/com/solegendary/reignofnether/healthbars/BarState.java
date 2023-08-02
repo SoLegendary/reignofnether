@@ -1,11 +1,16 @@
 package com.solegendary.reignofnether.healthbars;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+
+import java.util.logging.Level;
 
 public class BarState {
 
-  public final LivingEntity entity;
+  public final int entityId;
 
   public float health;
   public float previousHealth;
@@ -19,24 +24,31 @@ public class BarState {
 
   private static final float HEALTH_INDICATOR_DELAY = 10;
 
-  public BarState(LivingEntity entity) {
-    this.entity = entity;
+  public BarState(int entityId) {
+    this.entityId = entityId;
   }
 
   public void tick() {
-    health = Math.min(entity.getHealth(), entity.getMaxHealth());
-    incrementTimers();
+    ClientLevel level = Minecraft.getInstance().level;
+    if (level == null)
+      return;
 
-    if (lastHealth < 0.1) {
-      reset();
+    Entity entity = Minecraft.getInstance().level.getEntity(entityId);
+    if (entity instanceof LivingEntity livingEntity) {
+      health = Math.min(livingEntity.getHealth(), livingEntity.getMaxHealth());
+      incrementTimers();
 
-    } else if (lastHealth != health) {
-      handleHealthChange();
+      if (lastHealth < 0.1) {
+        reset();
 
-    } else if (lastDmgDelay == 0.0F) {
-      reset();
+      } else if (lastHealth != health) {
+        handleHealthChange();
+
+      } else if (lastDmgDelay == 0.0F) {
+        reset();
+      }
+      updateAnimations();
     }
-    updateAnimations();
   }
 
   private void reset() {

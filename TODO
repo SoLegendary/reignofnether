@@ -4,20 +4,10 @@ TODO bugs/features:
 - time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
 - Evoker portraits should not show their arms
 
-- change dungeon spawners to creeper and confirm that it can't spawn anything
+- continue to optimise fog of war...
+    - maybe only have fog chunks centered on enemy base?
 
-- force set video option for chunk threading to THREADED
-
-- Find solution to mobs (esp. workers) getting stuck on high blocks
-    - Maybe let units' pathfinding fall off of higher than 3-high drops?
-    - Or find a solution to mobs getting stuck on buildings
-
-- healthbars dont sync up sometimes
-    - when the unit leaves render range and then returns?
-
-- attack warning cooldowns should be tracked serverside
-    - buildings don't cause warnings for some reason
-    - sound should be slightly faster (no pause at beginning at all)
+- use only one spell when multiple casters are selected
 
 - clean up client data when leaving a level
     - research (and need to sync research with server on login)
@@ -28,8 +18,16 @@ TODO bugs/features:
     - might need to do some logic to ensure they dont bump into each other too much for this
         - each unit finds the closest distance?
 
-- continue to optimise fog of war...
-    - maybe only have fog chunks centered on enemy base?
+
+
+
+- attack warning cooldowns should be tracked serverside
+    - buildings don't cause warnings for some reason
+    - sound should be slightly faster (no pause at beginning at all)
+
+- force set video option for chunk threading to THREADED
+
+- raise health of all mobs to slow down combat and see how that goes
 
 
 
