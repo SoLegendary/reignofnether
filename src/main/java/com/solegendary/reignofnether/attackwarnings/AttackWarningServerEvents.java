@@ -16,15 +16,7 @@ public class AttackWarningServerEvents {
         if (evt.getEntity().getLevel().isClientSide())
             return;
 
-        if (evt.getEntity() instanceof Unit unit)
+        if (evt.getEntity() instanceof Unit unit && !evt.getSource().isFall())
             AttackWarningClientboundPacket.sendWarning(unit.getOwnerName(), evt.getEntity().getOnPos());
-    }
-
-    @SubscribeEvent
-    public static void onBlockBreak(BlockEvent.BreakEvent evt) {
-        if (!evt.getLevel().isClientSide())
-            for (Building building : BuildingServerEvents.getBuildings())
-                if (building.isPosPartOfBuilding(evt.getPos(), true))
-                    AttackWarningClientboundPacket.sendWarning(building.ownerName, BuildingUtils.getCentrePos(building.getBlocks()));
     }
 }

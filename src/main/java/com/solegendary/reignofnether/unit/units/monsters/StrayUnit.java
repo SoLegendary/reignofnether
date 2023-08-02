@@ -102,7 +102,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
 
     final static public float attackDamage = 4.0f;
     final static public float attacksPerSecond = 0.3f;
-    final static public float maxHealth = 20.0f;
+    final static public float maxHealth = 40.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 10.0F; // only used by ranged units or melee building attackers

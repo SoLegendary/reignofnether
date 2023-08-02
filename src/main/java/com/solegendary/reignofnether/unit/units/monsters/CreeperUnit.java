@@ -92,7 +92,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
     final static public float attackDamage = 20.0f;
     final static public float attacksPerSecond = 1f;
-    final static public float maxHealth = 15.0f;
+    final static public float maxHealth = 20.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.27f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers

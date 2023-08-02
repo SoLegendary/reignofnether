@@ -33,7 +33,7 @@ public class AttackWarningClientEvents {
 
     public static Button getWarningButton() {
         return new Button(
-            "Go to the attack!",
+            "Go to alert",
             20,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/warning.png"),
             null,
@@ -51,7 +51,7 @@ public class AttackWarningClientEvents {
                 lastAttackPos = null;
             },
             List.of(
-                FormattedCharSequence.forward("Go to the attack!", Style.EMPTY),
+                FormattedCharSequence.forward("Go to alert", Style.EMPTY),
                 FormattedCharSequence.forward("(Right click to ignore)", Style.EMPTY)
             )
         );

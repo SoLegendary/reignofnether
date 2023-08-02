@@ -7,6 +7,7 @@ import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
@@ -130,7 +131,12 @@ public class HealthBarClientEvents {
             matrix.scale(-scaleToGui, -scaleToGui, scaleToGui);
 
             // calculate bar width based in entity max health (1hp : 2px)
-            int barWidth = (int) entity.getMaxHealth() * 2;
+            int barWidth;
+            if (entity instanceof Unit)
+                barWidth = (int) entity.getMaxHealth();
+            else
+                barWidth = (int) entity.getMaxHealth() * 2;
+
             barWidth = Math.min(barWidth, 120);
             barWidth = Math.max(barWidth, 20);
 

@@ -100,7 +100,7 @@ public class EvokerUnit extends Evoker implements Unit {
     }
     public static int getFangsRange() { return 10; }
 
-    final static public float maxHealth = 15.0f;
+    final static public float maxHealth = 40.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float sightRange = 10f;
