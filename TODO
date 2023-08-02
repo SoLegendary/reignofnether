@@ -9,9 +9,17 @@ TODO bugs/features:
 
 - use only one spell when multiple casters are selected
 
+- villager tools sometimes disappear
+
+- force set video option for chunk threading to THREADED
+
 - clean up client data when leaving a level
     - research (and need to sync research with server on login)
         - maybe just clear it all by sending a clientbound packet
+
+
+
+- queueing building construction
 
 - unit formations
     - each unit should try to take up its own block
@@ -19,7 +27,7 @@ TODO bugs/features:
         - each unit finds the closest distance?
 
 
-- force set video option for chunk threading to THREADED
+
 
 
 
