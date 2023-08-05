@@ -20,6 +20,8 @@ import java.util.function.Predicate;
 
 public class BuildingUtils {
 
+
+
     public static boolean isInRangeOfNightSource(Vec3 pos, boolean clientSide) {
         List<Building> buildings = clientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
         for (Building building : buildings) {

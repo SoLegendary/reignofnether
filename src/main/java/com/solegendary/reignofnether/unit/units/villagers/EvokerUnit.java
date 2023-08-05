@@ -154,6 +154,7 @@ public class EvokerUnit extends Evoker implements Unit {
         this.castFangsCircleGoal.tick();
         this.castSummonVexesGoal.tick();
 
+        // vexes will inherit this target
         if (this.getTarget() == null && !this.level.isClientSide()) {
             Mob target = MiscUtil.findClosestAttackableEnemy(this, 10, (ServerLevel) level);
             if (target != null)

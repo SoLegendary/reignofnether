@@ -23,8 +23,8 @@ import java.util.List;
 
 public class CastSummonVexes extends Ability {
 
-    public static final int CD_MAX_SECONDS = 60;
-    public static final int VEX_DURATION_SECONDS = 20;
+    public static final int CD_MAX_SECONDS = 80;
+    public static final int VEX_DURATION_SECONDS = 30;
 
     private final EvokerUnit evokerUnit;
 

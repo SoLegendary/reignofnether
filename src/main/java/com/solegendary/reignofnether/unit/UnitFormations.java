@@ -56,15 +56,7 @@ public class UnitFormations {
             }
         }
 
-        // 2. Fix Y positions to ensure we get the topmost block
-        /*
-        for (int i = 0; i < bps.size(); i++) {
-            int yOffset = 0;
-            while (level.getBlockState(bps.get(i).offset(0,yOffset,0)).isAir())
-                yOffset -= 1;
-        }*/
-
-        // 3. pair each unit to each square based on min/max x/z positions
+        // 2. pair each unit to each square based on min/max x/z positions
         //    eg. the north-west-most unit should go to the north-west-most square
         units.sort(Comparator.comparing(u -> u.getOnPos().getX()));
         units.sort(Comparator.comparing(u -> u.getOnPos().getZ()));

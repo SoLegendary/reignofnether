@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
@@ -269,8 +270,19 @@ public class MyRenderer {
         matrixStack.popPose();
     }
 
-    // draws a coloured line from centre-top of startPos to centre-top of endPos
     public static void drawLine(PoseStack matrixStack, BlockPos startPos, BlockPos endPos, float r, float g, float b, float a) {
+        drawLine(matrixStack,
+            new Vec3(startPos.getX() + 0.5f,
+                startPos.getY() + 0.5f,
+                startPos.getZ() + 0.5f),
+            new Vec3(endPos.getX() + 0.5f,
+                endPos.getY() + 0.5f,
+                endPos.getZ() + 0.5f),
+            r, g, b, a);
+    }
+
+    // draws a coloured line from centre-top of startPos to centre-top of endPos
+    public static void drawLine(PoseStack matrixStack, Vec3 startPos, Vec3 endPos, float r, float g, float b, float a) {
         Entity camEntity = MC.getCameraEntity();
         if (camEntity == null)
             return;
@@ -289,23 +301,11 @@ public class MyRenderer {
 
         VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES);
 
-        // centre the start and end pos
-        Vector3f startVec = new Vector3f(
-                startPos.getX() + 0.5f,
-                startPos.getY() + 1.1f,
-                startPos.getZ() + 0.5f
-        );
-        Vector3f endVec = new Vector3f(
-                endPos.getX() + 0.5f,
-                endPos.getY() + 1.1f,
-                endPos.getZ() + 0.5f
-        );
-
         // draw two lines on inverse normals so they're visible from any angle
-        vertexConsumer.vertex(matrix4f, startVec.x(), startVec.y(), startVec.z()).color(r, g, b, a).normal(matrix3f, 1.0f, 0,0).endVertex();
-        vertexConsumer.vertex(matrix4f,   endVec.x(),   endVec.y(),   endVec.z()).color(r, g, b, a).normal(matrix3f, 1.0f, 0,0).endVertex();
-        vertexConsumer.vertex(matrix4f, startVec.x(), startVec.y(), startVec.z()).color(r, g, b, a).normal(matrix3f, 0, 0,1.0f).endVertex();
-        vertexConsumer.vertex(matrix4f,   endVec.x(),   endVec.y(),   endVec.z()).color(r, g, b, a).normal(matrix3f, 0, 0,1.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, (float) startPos.x(), (float) startPos.y(), (float) startPos.z()).color(r, g, b, a).normal(matrix3f, 1.0f, 0,0).endVertex();
+        vertexConsumer.vertex(matrix4f, (float) endPos.x(),   (float) endPos.y(),   (float) endPos.z()).color(r, g, b, a).normal(matrix3f, 1.0f, 0,0).endVertex();
+        vertexConsumer.vertex(matrix4f, (float) startPos.x(), (float) startPos.y(), (float) startPos.z()).color(r, g, b, a).normal(matrix3f, 0, 0,1.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, (float) endPos.x(),   (float) endPos.y(),   (float) endPos.z()).color(r, g, b, a).normal(matrix3f, 0, 0,1.0f).endVertex();
 
         matrixStack.popPose();
     }

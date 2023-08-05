@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -10,7 +12,10 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
+
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 // Move towards a building to build/repair it
 // will continually try to move towards the building if too far away as long as this goal is being enacted
@@ -20,6 +25,7 @@ import javax.annotation.Nullable;
 
 public class BuildRepairGoal extends MoveToTargetBlockGoal {
 
+    public final List<Building> queuedBuildings = new ArrayList<>();
     private Building buildingTarget;
 
     private Boolean isBuildingServerside = false;
@@ -32,28 +38,52 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
         this.isBuildingServerside = isBuilding;
     }
 
+    public boolean isBuildingBuildable(Building building) {
+        if (this.mob.level.isClientSide())
+            return BuildingClientEvents.getBuildings().stream().map(b -> b.originPos).toList().contains(building.originPos) &&
+                    building.getBlocksPlaced() < building.getBlocksTotal();
+        else
+            return BuildingServerEvents.getBuildings().stream().map(b -> b.originPos).toList().contains(building.originPos) &&
+                    building.getBlocksPlaced() < building.getBlocksTotal();
+    }
+
+    public boolean startNextQueuedBuilding() {
+        queuedBuildings.removeIf(b -> !isBuildingBuildable(b));
+        if (queuedBuildings.size() > 0) {
+            setBuildingTarget(queuedBuildings.get(0));
+            queuedBuildings.remove(0);
+            return true;
+        }
+        return false;
+    }
+
     public void tick() {
-        if (buildingTarget != null) {
-            calcMoveTarget();
-            if (buildingTarget.getBlocksPlaced() >= buildingTarget.getBlocksTotal()) {
+        if (buildingTarget == null)
+            return;
+        if (!isBuildingBuildable(buildingTarget)) {
+            if (!startNextQueuedBuilding())
+                stopBuilding();
+            return;
+        }
+        calcMoveTarget();
+        if (buildingTarget.getBlocksPlaced() >= buildingTarget.getBlocksTotal()) {
+            if (!startNextQueuedBuilding()) {
                 if (buildingTarget.name.contains(" Farm") && mob instanceof WorkerUnit workerUnit) {
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetResourceName(ResourceName.FOOD);
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetFarm(buildingTarget);
                 }
                 // look for the nearest resource to gather after completing a stockpile
-                if (buildingTarget instanceof Stockpile stockpile && !buildingTarget.isBuilt && mob instanceof WorkerUnit workerUnit) {
+                else if (buildingTarget instanceof Stockpile stockpile && !buildingTarget.isBuilt && mob instanceof WorkerUnit workerUnit) {
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetResourceName(stockpile.mostAbundantNearbyResource);
                 }
                 stopBuilding();
             }
-            if (isBuilding() && buildingTarget != null) {
-                BlockPos bp = buildingTarget.centrePos;
-                this.mob.getLookControl().setLookAt(bp.getX(), bp.getY(), bp.getZ());
-                mob.getLookControl().lookAtCooldown = 20;
-            }
         }
-        else
-            this.moveTarget = null;
+        if (isBuilding() && buildingTarget != null) {
+            BlockPos bp = buildingTarget.centrePos;
+            this.mob.getLookControl().setLookAt(bp.getX(), bp.getY(), bp.getZ());
+            mob.getLookControl().lookAtCooldown = 20;
+        }
     }
 
     private void calcMoveTarget() {
@@ -83,6 +113,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
 
     // if we override stop() it for some reason is called after start() and we can never begin this goal...
     public void stopBuilding() {
+        queuedBuildings.clear();
         buildingTarget = null;
         super.stopMoving();
     }

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -11,6 +12,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -45,6 +47,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedEntity;
+import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
 
 public class BuildingClientEvents {
 
@@ -303,7 +308,7 @@ public class BuildingClientEvents {
                 if (selectedBuildings.contains(building))
                     MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
                 else if (building.equals(preselectedBuilding) && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
-                    if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
+                    if (hudSelectedEntity instanceof WorkerUnit &&
                             MiscUtil.isRightClickDown(MC))
                         MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
                     else
@@ -334,9 +339,28 @@ public class BuildingClientEvents {
                         selProdBuilding.getRallyPoint(),
                         0, 1, 0, a);
                 MyRenderer.drawLine(evt.getPoseStack(),
-                        selProdBuilding.centrePos.offset(0,-1,0),
+                        selProdBuilding.centrePos.offset(0,0,0),
                         selProdBuilding.getRallyPoint(),
                         0, 1, 0, a);
+            }
+        }
+
+        // draw queued buildings
+        if (hudSelectedEntity instanceof WorkerUnit workerUnit) {
+            BuildRepairGoal goal = workerUnit.getBuildRepairGoal();
+            float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
+
+            for (int i = 0; i < goal.queuedBuildings.size(); i++) {
+                Vec3 startPos;
+                if (i == 0)
+                    startPos = ((LivingEntity) workerUnit).getEyePosition();
+                else {
+                    BlockPos bp = goal.queuedBuildings.get(i-1).centrePos;
+                    startPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
+                }
+                BlockPos bp = goal.queuedBuildings.get(i).centrePos.offset(0,-1,0);
+                Vec3 endPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
+                MyRenderer.drawLine(evt.getPoseStack(), startPos, endPos, 0, 1, 0, a);
             }
         }
     }
@@ -377,14 +401,19 @@ public class BuildingClientEvents {
                 String buildingName = (String) buildingToPlace.getField("buildingName").get(null);
 
                 ArrayList<Integer> builderIds = new ArrayList<>();
-                for (LivingEntity builderEntity : UnitClientEvents.getSelectedUnits())
+                for (LivingEntity builderEntity : getSelectedUnits())
                     if (builderEntity instanceof WorkerUnit)
                         builderIds.add(builderEntity.getId());
 
-                BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
-                        builderIds.stream().mapToInt(i -> i).toArray());
-                if (!Keybindings.shiftMod.isDown())
+
+                if (Keybindings.shiftMod.isDown()) {
+                    BuildingServerboundPacket.placeAndQueueBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
+                            builderIds.stream().mapToInt(i -> i).toArray());
+                } else {
+                    BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
+                            builderIds.stream().mapToInt(i -> i).toArray());
                     setBuildingToPlace(null);
+                }
             }
             // equivalent of UnitClientEvents.onMouseClick()
             else if (buildingToPlace == null) {
@@ -494,8 +523,7 @@ public class BuildingClientEvents {
 
             // cleanup destroyed buildings
             selectedBuildings.removeIf(Building::shouldBeDestroyed);
-            if (buildings.removeIf(Building::shouldBeDestroyed))
-                System.out.println("removed client building");
+            buildings.removeIf(Building::shouldBeDestroyed);
         }
     }
 
@@ -557,7 +585,7 @@ public class BuildingClientEvents {
         }
 
         // sync the goal so we can display the correct animations
-        Entity entity = HudClientEvents.hudSelectedEntity;
+        Entity entity = hudSelectedEntity;
         if (entity instanceof WorkerUnit workerUnit) {
             ((Unit) entity).resetBehaviours();
             workerUnit.getBuildRepairGoal().setBuildingTarget(newBuilding);

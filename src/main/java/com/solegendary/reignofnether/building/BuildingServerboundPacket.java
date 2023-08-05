@@ -7,6 +7,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -25,6 +26,11 @@ public class BuildingServerboundPacket {
     public static void placeBuilding(String itemName, BlockPos originPos, Rotation rotation, String ownerName, int[] builderUnitIds) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.PLACE,
+                itemName, originPos, BlockPos.ZERO, rotation, ownerName, builderUnitIds));
+    }
+    public static void placeAndQueueBuilding(String itemName, BlockPos originPos, Rotation rotation, String ownerName, int[] builderUnitIds) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.PLACE_AND_QUEUE,
                 itemName, originPos, BlockPos.ZERO, rotation, ownerName, builderUnitIds));
     }
     public static void cancelBuilding(BlockPos buildingPos) {
@@ -52,7 +58,6 @@ public class BuildingServerboundPacket {
                 BuildingAction.CHECK_STOCKPILE_CHEST,
                 "", chestPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
     }
-
 
     public BuildingServerboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, BlockPos rallyPos, Rotation rotation, String ownerName, int[] builderUnitIds) {
         this.action = action;
@@ -90,13 +95,18 @@ public class BuildingServerboundPacket {
         ctx.get().enqueueWork(() -> {
 
             Building building = null;
-            if (this.action != BuildingAction.PLACE) {
+            if (!List.of(BuildingAction.PLACE, BuildingAction.PLACE_AND_QUEUE).contains(this.action)) {
                 building = findBuilding(BuildingServerEvents.getBuildings(), this.buildingPos);
                 if (building == null)
                     return;
             }
             switch (this.action) {
-                case PLACE -> BuildingServerEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds);
+                case PLACE -> {
+                    BuildingServerEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false);
+                }
+                case PLACE_AND_QUEUE -> {
+                    BuildingServerEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, true);
+                }
                 case DESTROY -> {
                     BuildingServerEvents.cancelBuilding(building);
                 }

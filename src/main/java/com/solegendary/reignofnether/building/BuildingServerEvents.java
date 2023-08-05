@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
@@ -41,7 +42,7 @@ public class BuildingServerEvents {
         return buildings;
     }
 
-    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int[] builderUnitIds) {
+    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int[] builderUnitIds, boolean queue) {
         Building building = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName);
         if (building != null) {
 
@@ -96,8 +97,15 @@ public class BuildingServerEvents {
                 for (int id : builderUnitIds) {
                     Entity entity = serverLevel.getEntity(id);
                     if (entity instanceof WorkerUnit workerUnit) {
-                        ((Unit) entity).resetBehaviours();
-                        workerUnit.getBuildRepairGoal().setBuildingTarget(building);
+                        BuildRepairGoal buildGoal = workerUnit.getBuildRepairGoal();
+                        if (queue) {
+                            buildGoal.queuedBuildings.add(building);
+                            if (buildGoal.getBuildingTarget() == null)
+                                buildGoal.startNextQueuedBuilding();
+                        } else {
+                            ((Unit) entity).resetBehaviours();
+                            buildGoal.setBuildingTarget(building);
+                        }
                     }
                 }
             }
