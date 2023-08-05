@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
@@ -36,6 +37,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -272,15 +274,22 @@ public class UnitClientEvents {
             if (HudClientEvents.portraitRendererUnit != null)
                 HudClientEvents.portraitRendererUnit.setNonHeadModelVisibility(true);
 
-        // SINGLEPLAYER ONLY - client log out: remove all entities so we don't duplicate on logging back in
+        idleWorkerIds.removeIf(id -> id == evt.getEntity().getId());
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogoutEvent(PlayerEvent.PlayerLoggedOutEvent evt) {
+        // client log out: remove all entities so we don't duplicate on logging back in
         if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
             selectedUnits.clear();
             preselectedUnits.clear();
             allUnits.clear();
             idleWorkerIds.clear();
+            ResearchClient.removeAllResearch();
+            ResearchClient.removeAllCheats();
         }
-        idleWorkerIds.removeIf(id -> id == evt.getEntity().getId());
     }
+
     /**
      * Clientside entities will join and leave based on render distance, but we want to keep entities tracked at all times
      * Therefore, only remove entities if they leave serverside via UnitClientboundPacket.

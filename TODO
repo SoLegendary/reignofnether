@@ -4,21 +4,18 @@ TODO bugs/features:
 - time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
 - Evoker portraits should not show their arms
 
-- continue to optimise fog of war...
-    - maybe only have fog chunks centered on enemy base?
-
 - use only one spell when multiple casters are selected
 
 - villager tools sometimes disappear
 
 - force set video option for chunk threading to THREADED
 
-- clean up client data when leaving a level
-    - research (and need to sync research with server on login)
-        - maybe just clear it all by sending a clientbound packet
+- UnitClientEvents.onPlayerLogoutEvent only runs on logging out of a singleplayer level
 
 
 
+- continue to optimise fog of war...
+    - maybe only have fog chunks centered on enemy base?
 
 
 

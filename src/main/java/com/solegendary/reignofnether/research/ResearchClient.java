@@ -9,6 +9,10 @@ public class ResearchClient {
 
     final private static ArrayList<String> researchItems = new ArrayList<>();
 
+    public static void removeAllResearch() {
+        researchItems.clear();
+    }
+
     public static void addResearch(String researchItemName) {
         researchItems.add(researchItemName);
     }
@@ -27,6 +31,10 @@ public class ResearchClient {
     }
 
     final private static ArrayList<String> cheatItems = new ArrayList<>();
+
+    public static void removeAllCheats() {
+        cheatItems.clear();
+    }
 
     public static void addCheat(String cheatItemName) {
         cheatItems.add(cheatItemName);
