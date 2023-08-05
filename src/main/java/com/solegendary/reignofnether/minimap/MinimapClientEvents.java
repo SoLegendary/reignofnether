@@ -284,6 +284,7 @@ public class MinimapClientEvents {
                         }
                         int xN = x - xc_world + (mapGuiRadius * 2);
                         int zN = z - zc_world + (mapGuiRadius * 2);
+
                         mapColours[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                     }
                 }
@@ -291,12 +292,14 @@ public class MinimapClientEvents {
         }
 
         // init a map filled with black and copy in only those pixels inside of explored/bright chunks
+
+        /*
         if (FogOfWarClientEvents.isEnabled()) {
             int[][] mapColoursCopy = new int[worldRadius*2][worldRadius*2];
             for (int[] row : mapColoursCopy)
                 Arrays.fill(row, (0xFF << 24));
 
-            for (ChunkPos chunkPos : FogOfWarClientEvents.exploredChunks) {
+            for (ChunkPos chunkPos : FogOfWarClientEvents.frozenChunks) {
                 boolean isBrightChunk = FogOfWarClientEvents.isInBrightChunk(chunkPos.getWorldPosition());
                 float brightnessMult = isBrightChunk ? 1.0f : 0.35f;
 
@@ -317,7 +320,7 @@ public class MinimapClientEvents {
                 }
             }
             mapColours = mapColoursCopy;
-        }
+        }*/
 
         // draw view quad
         for (int z = zc_world - worldRadius; z < zc_world + worldRadius; z++)
