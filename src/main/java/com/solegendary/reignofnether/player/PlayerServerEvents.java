@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.level.GameType;
@@ -46,6 +47,10 @@ public class PlayerServerEvents {
 
         ResearchServer.syncResearch(playerName);
         ResearchServer.syncCheats(playerName);
+
+        if (orthoviewPlayers.stream().map(Entity::getId).toList().contains(evt.getEntity().getId())) {
+            orthoviewPlayers.add((ServerPlayer) evt.getEntity());
+        }
     }
 
     @SubscribeEvent
