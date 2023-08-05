@@ -25,7 +25,7 @@ TODO bugs/features:
     - each unit should try to take up its own block
     - might need to do some logic to ensure they dont bump into each other too much for this
         - each unit finds the closest distance?
-
+    - temporarily highlight blocks that units are moving to (use same code as rally points)
 
 
 

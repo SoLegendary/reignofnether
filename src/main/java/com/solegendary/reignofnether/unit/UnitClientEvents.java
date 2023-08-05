@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -12,6 +13,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -38,6 +40,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
+
+import static com.solegendary.reignofnether.cursor.CursorClientEvents.getPreselectedBlockPos;
+import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedEntity;
 
 public class UnitClientEvents {
 
@@ -156,7 +161,7 @@ public class UnitClientEvents {
                 action,
                 preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
                 selectedUnits.stream().mapToInt(Entity::getId).toArray(),
-                CursorClientEvents.getPreselectedBlockPos(),
+                getPreselectedBlockPos(),
                 HudClientEvents.hudSelectedBuilding != null ? HudClientEvents.hudSelectedBuilding.originPos : new BlockPos(0,0,0)
             );
             actionItem.action(MC.level);
@@ -166,7 +171,7 @@ public class UnitClientEvents {
                 action,
                 preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
                 selectedUnits.stream().mapToInt(Entity::getId).toArray(),
-                CursorClientEvents.getPreselectedBlockPos(),
+                getPreselectedBlockPos(),
                 HudClientEvents.hudSelectedBuilding != null ? HudClientEvents.hudSelectedBuilding.originPos : new BlockPos(0,0,0)
             ));
         }
@@ -178,13 +183,25 @@ public class UnitClientEvents {
             sendUnitCommand(UnitAction.FOLLOW);
         }
         // move to ground pos (disabled during camera manip)
-        else if (!Keybindings.altMod.isDown()) {
-            sendUnitCommand(UnitAction.MOVE);
+        else if (!Keybindings.altMod.isDown() && selectedUnits.size() > 0 && MC.level != null) {
+            ResourceName resName = ResourceSources.getBlockResourceName(getPreselectedBlockPos(), MC.level);
+            boolean isGathering = hudSelectedEntity instanceof WorkerUnit && resName != ResourceName.NONE;
+
+            if (selectedUnits.size() == 1 || isGathering)
+                sendUnitCommand(UnitAction.MOVE);
+            else { // if we do not have a gathering villager as the fist
+                List<Pair<Integer, BlockPos>> formationPairs = UnitFormations.getMoveFormation(
+                    MC.level, selectedUnits, getPreselectedBlockPos()
+                );
+                for (Pair<Integer, BlockPos> pair : formationPairs) {
+                    sendUnitCommandManual(UnitAction.MOVE, -1, new int[]{pair.getFirst()}, pair.getSecond());
+                }
+            }
         }
     }
 
     public static ResourceName getSelectedUnitResourceTarget() {
-        Entity entity = HudClientEvents.hudSelectedEntity;
+        Entity entity = hudSelectedEntity;
         if (entity instanceof WorkerUnit workerUnit)
             return workerUnit.getGatherResourceGoal().getTargetResourceName();
         return ResourceName.NONE;
@@ -251,7 +268,7 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
         // set the whole model visible again if it leaves while selected, or else we get a bug where only the head shows until reselected
-        if (evt.getEntity() == HudClientEvents.hudSelectedEntity)
+        if (evt.getEntity() == hudSelectedEntity)
             if (HudClientEvents.portraitRendererUnit != null)
                 HudClientEvents.portraitRendererUnit.setNonHeadModelVisibility(true);
 
@@ -389,13 +406,13 @@ public class UnitClientEvents {
                     sendUnitCommand(UnitAction.ATTACK);
                 }
                 // right click -> attack unfriendly building
-                else if (HudClientEvents.hudSelectedEntity instanceof AttackerUnit &&
+                else if (hudSelectedEntity instanceof AttackerUnit &&
                         (preSelBuilding != null) &&
                         BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.HOSTILE) {
                     sendUnitCommand(UnitAction.ATTACK_BUILDING);
                 }
                 // right click -> return resources
-                else if (HudClientEvents.hudSelectedEntity instanceof Unit unit &&
+                else if (hudSelectedEntity instanceof Unit unit &&
                         unit.getReturnResourcesGoal() != null &&
                         Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0 &&
                         preSelBuilding != null && preSelBuilding.canAcceptResources && preSelBuilding.isBuilt &&
@@ -403,7 +420,7 @@ public class UnitClientEvents {
                     sendUnitCommand(UnitAction.RETURN_RESOURCES);
                 }
                 // right click -> build or repair preselected building
-                else if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
+                else if (hudSelectedEntity instanceof WorkerUnit &&
                         preSelBuilding != null && BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED) {
 
                     if (preSelBuilding.name.contains(" Farm") && preSelBuilding.isBuilt)
@@ -491,7 +508,7 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
-            LivingEntity entity = HudClientEvents.hudSelectedEntity;
+            LivingEntity entity = hudSelectedEntity;
             if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                 sendUnitCommand(UnitAction.DELETE);
         }

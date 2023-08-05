@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(SingleQuadParticle.class)
 public abstract class SingleQuadParticleMixin extends Particle {
 
-    // allows access to
     protected SingleQuadParticleMixin(ClientLevel pLevel, double pX, double pY, double pZ) {
         super(pLevel, pX, pY, pZ);
     }
@@ -29,6 +28,8 @@ public abstract class SingleQuadParticleMixin extends Particle {
         cancellable = true
     )
     public void render(VertexConsumer pBuffer, Camera pRenderInfo, float pPartialTicks, CallbackInfo ci) {
+        if (!FogOfWarClientEvents.isEnabled())
+            return;
         BlockPos bp = new BlockPos(x,y,z);
         if (!FogOfWarClientEvents.isInBrightChunk(bp))
             ci.cancel();

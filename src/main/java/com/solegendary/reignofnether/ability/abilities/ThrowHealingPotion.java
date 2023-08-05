@@ -61,14 +61,14 @@ public class ThrowHealingPotion extends Ability {
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        ((WitchUnit) unitUsing).getThrowPotionGoal().setPotion(Potions.HEALING);
+        ((WitchUnit) unitUsing).getThrowPotionGoal().setPotion(Potions.STRONG_HEALING);
         ((WitchUnit) unitUsing).getThrowPotionGoal().setAbility(this);
         ((WitchUnit) unitUsing).getThrowPotionGoal().setTarget(targetBp);
     }
 
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
-        ((WitchUnit) unitUsing).getThrowPotionGoal().setPotion(Potions.HEALING);
+        ((WitchUnit) unitUsing).getThrowPotionGoal().setPotion(Potions.STRONG_HEALING);
         ((WitchUnit) unitUsing).getThrowPotionGoal().setAbility(this);
         ((WitchUnit) unitUsing).getThrowPotionGoal().setTarget(targetEntity);
     }

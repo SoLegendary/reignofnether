@@ -99,6 +99,7 @@ public class EvokerUnit extends Evoker implements Unit {
         return castSummonVexesGoal;
     }
     public static int getFangsRange() { return 10; }
+    public static float getFangsDamage() { return 12f; }
 
     final static public float maxHealth = 40.0f;
     final static public float armorValue = 0.0f;

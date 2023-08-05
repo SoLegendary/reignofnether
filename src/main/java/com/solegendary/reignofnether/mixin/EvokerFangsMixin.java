@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.mixin;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.EvokerFangs;
@@ -32,7 +33,7 @@ public class EvokerFangsMixin {
             return;
 
         if (pTarget.isAlive() && !pTarget.isInvulnerable() && pTarget != this.getOwner())
-            pTarget.hurt(DamageSource.MAGIC, 6.0F);
+            pTarget.hurt(DamageSource.MAGIC, EvokerUnit.getFangsDamage());
     }
 
 }
