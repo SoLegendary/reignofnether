@@ -17,7 +17,17 @@ TODO bugs/features:
 - continue to optimise fog of war...
     - maybe only have fog chunks centered on enemy base?
 
+- proper RTS start/end conditions
+    - by default, start players in spectator mode
+    - player picks a spot as a spectator and types command /start [villagers/monsters] to begin
+        - enables orthoview and fog of war
+        - spawns 3 workers of the given type at the highest solid Y value at the player's position
+    - only ops can use special commands:
+        - F7,8,12, etc. to freely control settings
+        - can use /start unlimited amount of times
+        - can use cheats
 
+- Tutorial documentation/gifs
 
 
 TODO test in remote server

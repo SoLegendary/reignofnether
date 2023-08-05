@@ -71,7 +71,7 @@ public class ResourceSources {
                     List.of(Blocks.WHEAT),
                     List.of(Items.WHEAT),
                     TICKS_PER_SECOND * 4,
-                    10,
+                    5,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
@@ -79,7 +79,7 @@ public class ResourceSources {
                     List.of(Blocks.CARROTS),
                     List.of(Items.CARROT),
                     TICKS_PER_SECOND * 4,
-                    14,
+                    7,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
@@ -87,7 +87,7 @@ public class ResourceSources {
                     List.of(Blocks.POTATOES),
                     List.of(Items.POTATO, Items.BAKED_POTATO),
                     TICKS_PER_SECOND * 4,
-                    18,
+                    9,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
@@ -103,7 +103,7 @@ public class ResourceSources {
                     List.of(Blocks.MELON, Blocks.PUMPKIN),
                     List.of(Items.MELON, Items.PUMPKIN),
                     TICKS_PER_SECOND * 5,
-                    10,
+                    5,
                     ResourceName.FOOD
             ),
             new ResourceSource("Mushrooms",
@@ -185,7 +185,7 @@ public class ResourceSources {
                     List.of(),
                     List.of(Items.ACACIA_SAPLING, Items.SPRUCE_SAPLING, Items.BIRCH_SAPLING, Items.OAK_SAPLING, Items.OAK_SAPLING, Items.DARK_OAK_SAPLING, Items.JUNGLE_SAPLING),
                     0,
-                    5,
+                    4,
                     ResourceName.WOOD
             ),
             new ResourceSource("Planks",
@@ -204,8 +204,8 @@ public class ResourceSources {
                             Items.STRIPPED_OAK_LOG, Items.STRIPPED_BIRCH_LOG, Items.STRIPPED_ACACIA_LOG, Items.STRIPPED_DARK_OAK_LOG, Items.STRIPPED_JUNGLE_LOG, Items.STRIPPED_MANGROVE_LOG, Items.STRIPPED_SPRUCE_LOG,
                             Items.OAK_WOOD, Items.BIRCH_WOOD, Items.ACACIA_WOOD, Items.DARK_OAK_WOOD, Items.JUNGLE_WOOD, Items.MANGROVE_WOOD, Items.SPRUCE_WOOD,
                             Items.STRIPPED_OAK_WOOD, Items.STRIPPED_BIRCH_WOOD, Items.STRIPPED_ACACIA_WOOD, Items.STRIPPED_DARK_OAK_WOOD, Items.STRIPPED_JUNGLE_WOOD, Items.STRIPPED_MANGROVE_WOOD, Items.STRIPPED_SPRUCE_WOOD),
-                    TICKS_PER_SECOND * 9,
-                    15,
+                    TICKS_PER_SECOND * 12,
+                    12,
                     ResourceName.WOOD
             ),
             new ResourceSource("Leaves", // can't actually gather but can be targeted to begin wood gathering
@@ -229,28 +229,28 @@ public class ResourceSources {
                     List.of(Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE, Blocks.NETHER_QUARTZ_ORE),
                     List.of(Items.COAL, Items.QUARTZ),
                     TICKS_PER_SECOND * 12,
-                    25,
+                    20,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 2 Ores",
                     List.of(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.IRON_ORE, Blocks.LAPIS_ORE, Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.DEEPSLATE_LAPIS_ORE, Blocks.DEEPSLATE_REDSTONE_ORE, Blocks.NETHER_GOLD_ORE),
                     List.of(Items.RAW_IRON, Items.RAW_COPPER, Items.LAPIS_LAZULI, Items.REDSTONE),
                     TICKS_PER_SECOND * 12,
-                    50,
+                    40,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 3 Ores",
                     List.of(Blocks.GOLD_ORE, Blocks.EMERALD_ORE, Blocks.DEEPSLATE_GOLD_ORE, Blocks.DEEPSLATE_EMERALD_ORE),
                     List.of(Items.RAW_GOLD, Items.EMERALD),
                     TICKS_PER_SECOND * 12,
-                    100,
+                    80,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 4 Ores",
                     List.of(Blocks.DIAMOND_ORE, Blocks.ANCIENT_DEBRIS, Blocks.DEEPSLATE_DIAMOND_ORE),
                     List.of(Items.DIAMOND, Items.ANCIENT_DEBRIS),
                     TICKS_PER_SECOND * 12,
-                    250,
+                    200,
                     ResourceName.ORE
             )
     );
