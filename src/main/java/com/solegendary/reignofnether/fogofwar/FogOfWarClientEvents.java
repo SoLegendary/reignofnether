@@ -25,37 +25,26 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FogOfWarClientEvents {
 
     public static final float BRIGHT = 1.0f;
-    public static final float SEMI = 0.15f;
+    public static final float DARK = 0.22f;
 
-    // ChunkPoses that have at least one owned unit/building in them - can be used to determine current bright chunks
-    public static final Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
-
-    // ChunkPoses that are within CHUNK_VIEW_DIST of any occupied chunk
     public static final Set<ChunkPos> brightChunks = ConcurrentHashMap.newKeySet();
     public static final Set<ChunkPos> lastBrightChunks = ConcurrentHashMap.newKeySet();
     public static final Set<ChunkPos> newlyDarkChunksToRerender = ConcurrentHashMap.newKeySet();
 
-    private static ChunkPos lastPlayerChunkPos = new ChunkPos(0,0);
-
     // all chunk origins that have ever been explored, including currently bright chunks
     public static final Set<BlockPos> frozenChunks = ConcurrentHashMap.newKeySet();
+
+    public static final int CHUNK_VIEW_DIST = 1;
 
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = true;
 
     public static boolean forceUpdateLighting;
-
-    public static final int CHUNK_VIEW_DIST = 2;
-
     public static boolean forceUpdate = true;
     private static int forceUpdateDelayTicks = 0;
     public static int enableDelayTicks = 0;
 
     private static final Minecraft MC = Minecraft.getInstance();
-
-    public static void loadExploredChunks(String playerName, int[] xPos, int[] zPos) {
-
-    }
 
     @SubscribeEvent
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
@@ -84,7 +73,7 @@ public class FogOfWarClientEvents {
     public static void setEnabled(boolean value) {
         enabled = value;
         // reload chunks like player pressed F3 + A
-        MC.levelRenderer.allChanged();
+        //MC.levelRenderer.allChanged();
     }
 
     // returns the shade modifier that should be applied at a given position based on the fog of war state there
@@ -97,7 +86,7 @@ public class FogOfWarClientEvents {
             if (new ChunkPos(pPos).equals(chunkPos))
                 return BRIGHT;
 
-        return SEMI;
+        return DARK;
     }
 
     public static boolean isBuildingInBrightChunk(Building building) {
@@ -141,11 +130,6 @@ public class FogOfWarClientEvents {
         if (MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
             return;
 
-        ChunkPos pos = new ChunkPos(MC.player.getOnPos());
-        if (!pos.equals(lastPlayerChunkPos))
-            forceUpdate = true;
-        lastPlayerChunkPos = pos;
-
         if (enableDelayTicks > 0) {
             enableDelayTicks -= 1;
             if (enableDelayTicks == 0)
@@ -164,8 +148,8 @@ public class FogOfWarClientEvents {
 
         if (forceUpdate) {
             forceUpdate = false;
-            occupiedChunks.clear();
             brightChunks.clear();
+            Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
 
             // get chunks that have units/buildings that can see
             for (LivingEntity entity : UnitClientEvents.getAllUnits())
@@ -176,17 +160,10 @@ public class FogOfWarClientEvents {
                 if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED)
                     occupiedChunks.add(new ChunkPos(building.centrePos));
 
-            for (ChunkPos chunkPos : occupiedChunks) {
-                brightChunks.add(chunkPos);
-                brightChunks.add(new ChunkPos(chunkPos.x+1, chunkPos.z));
-                brightChunks.add(new ChunkPos(chunkPos.x, chunkPos.z+1));
-                brightChunks.add(new ChunkPos(chunkPos.x-1, chunkPos.z));
-                brightChunks.add(new ChunkPos(chunkPos.x, chunkPos.z-1));
-                brightChunks.add(new ChunkPos(chunkPos.x+1, chunkPos.z+1));
-                brightChunks.add(new ChunkPos(chunkPos.x-1, chunkPos.z-1));
-                brightChunks.add(new ChunkPos(chunkPos.x+1, chunkPos.z-1));
-                brightChunks.add(new ChunkPos(chunkPos.x-1, chunkPos.z+1));
-            }
+            for (ChunkPos chunkPos : occupiedChunks)
+                for (int x = -CHUNK_VIEW_DIST; x <= CHUNK_VIEW_DIST; x++)
+                    for (int z = -CHUNK_VIEW_DIST; z <= CHUNK_VIEW_DIST; z++)
+                        brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
 
             Set<ChunkPos> newlyDarkChunks = ConcurrentHashMap.newKeySet();
             newlyDarkChunks.addAll(lastBrightChunks);
