@@ -146,7 +146,14 @@ public class FogOfWarClientEvents {
             Set<ChunkPos> newlyDarkChunks = ConcurrentHashMap.newKeySet();
             newlyDarkChunks.addAll(lastBrightChunks);
             newlyDarkChunks.removeAll(brightChunks);
-            chunksToRerender.addAll(newlyDarkChunks);
+
+            for (ChunkPos cpos : newlyDarkChunks) {
+                for (int x = -1; x <= 1; x++)
+                    for (int z = -1; z <= 1; z++)
+                        chunksToRerender.add(new ChunkPos(cpos.x + x, cpos.z + z));
+            }
+
+
 
             frozenChunks.removeIf(bp -> {
                 if (isInBrightChunk(bp)) {
@@ -161,17 +168,20 @@ public class FogOfWarClientEvents {
         }
     }
 
-    public static void updateChunkLighting(BlockPos bp) {
+    public static void updateChunkLighting(BlockPos originBp) {
         if (MC.level == null)
             return;
 
-        for (int y = MC.level.getMaxBuildHeight(); y > MC.level.getMinBuildHeight(); y -= 1) {
-            BlockPos bp2 = new BlockPos(bp.getX(), y, bp.getZ());
-            BlockState bs = MC.level.getBlockState(bp2);
-            if (!bs.isAir()) {
-                MC.level.setBlockAndUpdate(bp2, Blocks.GLOWSTONE.defaultBlockState());
-                MC.level.setBlockAndUpdate(bp2, bs);
-                break;
+        for (int i = 0; i < 4; i++) {
+            BlockPos updatePos = originBp.offset(4*i, 0, 4*i);
+            for (int y = MC.level.getMaxBuildHeight(); y > MC.level.getMinBuildHeight(); y -= 1) {
+                BlockPos bp = new BlockPos(updatePos.getX(), y, updatePos.getZ());
+                BlockState bs = MC.level.getBlockState(bp);
+                if (!bs.isAir()) {
+                    MC.level.setBlockAndUpdate(bp, Blocks.GLOWSTONE.defaultBlockState());
+                    MC.level.setBlockAndUpdate(bp, bs);
+                    break;
+                }
             }
         }
     }
