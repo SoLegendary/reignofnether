@@ -22,7 +22,6 @@ import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;
 import org.spongepowered.asm.mixin.Final;
@@ -72,12 +71,9 @@ public abstract class LevelRendererMixin {
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
             BlockPos originPos = chunkInfo.chunk.getOrigin();
             ChunkPos chunkPos = new ChunkPos(originPos);
-            boolean updateLighting = false;
 
-            if (newlyDarkChunksToRerender.contains(chunkPos) || forceUpdateLighting) {
-                if (newlyDarkChunksToRerender.contains(chunkPos))
-                    newlyDarkChunksToRerender.remove(chunkPos);
-                updateLighting = true;
+            if (chunksToRerender.contains(chunkPos) || forceUpdateLighting) {
+                FogOfWarClientEvents.updateChunkLighting(originPos);
             }
             else if (!isInBrightChunk(originPos)) {
                 if (frozenChunks.contains(originPos)) {
@@ -108,11 +104,11 @@ public abstract class LevelRendererMixin {
                     list.add(renderChunk);
                 }
             }
-            if (updateLighting)
-                FogOfWarClientEvents.updateChunkLighting(originPos);
         }
         if (forceUpdateLighting)
             forceUpdateLighting = false;
+
+        chunksToRerender.clear();
 
         this.minecraft.getProfiler().popPush("upload");
         this.chunkRenderDispatcher.uploadAllPendingUploads();
