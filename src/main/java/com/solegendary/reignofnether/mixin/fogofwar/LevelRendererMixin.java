@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -70,14 +71,21 @@ public abstract class LevelRendererMixin {
 
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
             BlockPos originPos = chunkInfo.chunk.getOrigin();
-            if (!isInBrightChunk(originPos)) {
+            ChunkPos chunkPos = new ChunkPos(originPos);
+            boolean updateLighting = false;
+
+            if (newlyDarkChunksToRerender.contains(chunkPos) || forceUpdateLighting) {
+                if (newlyDarkChunksToRerender.contains(chunkPos))
+                    newlyDarkChunksToRerender.remove(chunkPos);
+                updateLighting = true;
+            }
+            else if (!isInBrightChunk(originPos)) {
                 if (frozenChunks.contains(originPos)) {
                     continue;
                 } else {
                     frozenChunks.add(originPos);
                 }
             }
-
             ChunkRenderDispatcher.RenderChunk renderChunk = chunkInfo.chunk;
             ChunkPos chunkpos = new ChunkPos(renderChunk.getOrigin());
             if (renderChunk.isDirty() && this.level.getChunk(chunkpos.x, chunkpos.z).isClientLightReady()) {
@@ -100,7 +108,11 @@ public abstract class LevelRendererMixin {
                     list.add(renderChunk);
                 }
             }
+            if (updateLighting)
+                FogOfWarClientEvents.updateChunkLighting(originPos);
         }
+        if (forceUpdateLighting)
+            forceUpdateLighting = false;
 
         this.minecraft.getProfiler().popPush("upload");
         this.chunkRenderDispatcher.uploadAllPendingUploads();

@@ -13,7 +13,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.event.TickEvent;
@@ -21,9 +20,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 public class FogOfWarClientEvents {
 
@@ -32,7 +29,11 @@ public class FogOfWarClientEvents {
 
     // ChunkPoses that have at least one owned unit/building in them - can be used to determine current bright chunks
     public static final Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
-    // TODO: remake lastOccupiedChunks and make sure LevelRenderer rerenders chunks that fell out of the bright zone
+
+    // ChunkPoses that are within CHUNK_VIEW_DIST of any occupied chunk
+    public static final Set<ChunkPos> brightChunks = ConcurrentHashMap.newKeySet();
+    public static final Set<ChunkPos> lastBrightChunks = ConcurrentHashMap.newKeySet();
+    public static final Set<ChunkPos> newlyDarkChunksToRerender = ConcurrentHashMap.newKeySet();
 
     private static ChunkPos lastPlayerChunkPos = new ChunkPos(0,0);
 
@@ -41,6 +42,8 @@ public class FogOfWarClientEvents {
 
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = true;
+
+    public static boolean forceUpdateLighting;
 
     public static final int CHUNK_VIEW_DIST = 2;
 
@@ -68,6 +71,10 @@ public class FogOfWarClientEvents {
                 setEnabled(false);
                 enableDelayTicks = 20;
             }
+
+            if (enabled && evt.getKey() == Keybindings.getFnum(6).key) {
+                forceUpdateLighting = true;
+            }
         }
     }
 
@@ -86,16 +93,11 @@ public class FogOfWarClientEvents {
             return BRIGHT;
 
         // first check if the ChunkPos is already occupied as this is faster
-        for (ChunkPos chunkPos : occupiedChunks)
-            if (MC.level.getChunk(pPos).getPos().getChessboardDistance(chunkPos) < CHUNK_VIEW_DIST)
+        for (ChunkPos chunkPos : brightChunks)
+            if (new ChunkPos(pPos).equals(chunkPos))
                 return BRIGHT;
 
         return SEMI;
-    }
-
-
-    public static int chunkManhattanDist(ChunkPos pos1, ChunkPos pos2) {
-        return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.z - pos2.z);
     }
 
     public static boolean isBuildingInBrightChunk(Building building) {
@@ -114,8 +116,8 @@ public class FogOfWarClientEvents {
             return true;
 
         // first check if the ChunkPos is already occupied as this is faster
-        for (ChunkPos chunkPos : occupiedChunks)
-            if (MC.level.getChunk(bp).getPos().getChessboardDistance(chunkPos) < CHUNK_VIEW_DIST)
+        for (ChunkPos chunkPos : brightChunks)
+            if (new ChunkPos(bp).equals(chunkPos))
                 return true;
 
         return false;
@@ -139,7 +141,7 @@ public class FogOfWarClientEvents {
         if (MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
             return;
 
-        ChunkPos pos = MC.level.getChunk(MC.player.getOnPos()).getPos();
+        ChunkPos pos = new ChunkPos(MC.player.getOnPos());
         if (!pos.equals(lastPlayerChunkPos))
             forceUpdate = true;
         lastPlayerChunkPos = pos;
@@ -163,15 +165,33 @@ public class FogOfWarClientEvents {
         if (forceUpdate) {
             forceUpdate = false;
             occupiedChunks.clear();
+            brightChunks.clear();
 
             // get chunks that have units/buildings that can see
             for (LivingEntity entity : UnitClientEvents.getAllUnits())
                 if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED)
-                    occupiedChunks.add(MC.level.getChunk(entity.getOnPos()).getPos());
+                    occupiedChunks.add(new ChunkPos(entity.getOnPos()));
 
             for (Building building : BuildingClientEvents.getBuildings())
                 if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED)
-                    occupiedChunks.add(MC.level.getChunk(building.centrePos).getPos());
+                    occupiedChunks.add(new ChunkPos(building.centrePos));
+
+            for (ChunkPos chunkPos : occupiedChunks) {
+                brightChunks.add(chunkPos);
+                brightChunks.add(new ChunkPos(chunkPos.x+1, chunkPos.z));
+                brightChunks.add(new ChunkPos(chunkPos.x, chunkPos.z+1));
+                brightChunks.add(new ChunkPos(chunkPos.x-1, chunkPos.z));
+                brightChunks.add(new ChunkPos(chunkPos.x, chunkPos.z-1));
+                brightChunks.add(new ChunkPos(chunkPos.x+1, chunkPos.z+1));
+                brightChunks.add(new ChunkPos(chunkPos.x-1, chunkPos.z-1));
+                brightChunks.add(new ChunkPos(chunkPos.x+1, chunkPos.z-1));
+                brightChunks.add(new ChunkPos(chunkPos.x-1, chunkPos.z+1));
+            }
+
+            Set<ChunkPos> newlyDarkChunks = ConcurrentHashMap.newKeySet();
+            newlyDarkChunks.addAll(lastBrightChunks);
+            newlyDarkChunks.removeAll(brightChunks);
+            newlyDarkChunksToRerender.addAll(newlyDarkChunks);
 
             frozenChunks.removeIf(bp -> {
                 if (isInBrightChunk(bp)) {
@@ -180,6 +200,9 @@ public class FogOfWarClientEvents {
                 }
                 return false;
             });
+
+            lastBrightChunks.clear();
+            lastBrightChunks.addAll(brightChunks);
             forceUpdateDelayTicks = 10;
         }
     }
@@ -189,10 +212,11 @@ public class FogOfWarClientEvents {
             return;
 
         for (int y = MC.level.getMaxBuildHeight(); y > MC.level.getMinBuildHeight(); y -= 1) {
-            BlockState bs = MC.level.getBlockState(bp);
+            BlockPos bp2 = new BlockPos(bp.getX(), y, bp.getZ());
+            BlockState bs = MC.level.getBlockState(bp2);
             if (!bs.isAir()) {
-                MC.level.setBlockAndUpdate(bp, Blocks.GLOWSTONE.defaultBlockState());
-                MC.level.setBlockAndUpdate(bp, bs);
+                MC.level.setBlockAndUpdate(bp2, Blocks.GLOWSTONE.defaultBlockState());
+                MC.level.setBlockAndUpdate(bp2, bs);
                 break;
             }
         }

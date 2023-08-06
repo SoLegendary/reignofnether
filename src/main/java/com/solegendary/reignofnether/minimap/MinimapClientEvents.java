@@ -212,12 +212,17 @@ public class MinimapClientEvents {
 
                     // only reduce shade every nth step to have the map look sharper
                     depth = (int) (5*(Math.ceil(Math.abs(depth/5))));
+
                     rgb = MiscUtil.shadeHexRGB(rgb, 1.2F - (0.025F * depth));
                 }
 
                 // normalise xz back to 0,0
                 int x0 = x - xc_world + worldRadius;
                 int z0 = z - zc_world + worldRadius;
+
+                if (!FogOfWarClientEvents.isInBrightChunk(new BlockPos(x,0,z)))
+                    rgb = MiscUtil.shadeHexRGB(rgb, 0.35f);
+
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
                 mapColours[x0][z0] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
             }
@@ -290,37 +295,6 @@ public class MinimapClientEvents {
                 }
             }
         }
-
-        // init a map filled with black and copy in only those pixels inside of explored/bright chunks
-
-        /*
-        if (FogOfWarClientEvents.isEnabled()) {
-            int[][] mapColoursCopy = new int[worldRadius*2][worldRadius*2];
-            for (int[] row : mapColoursCopy)
-                Arrays.fill(row, (0xFF << 24));
-
-            for (ChunkPos chunkPos : FogOfWarClientEvents.frozenChunks) {
-                boolean isBrightChunk = FogOfWarClientEvents.isInBrightChunk(chunkPos.getWorldPosition());
-                float brightnessMult = isBrightChunk ? 1.0f : 0.35f;
-
-                for (int x = chunkPos.getMinBlockX(); x <= chunkPos.getMaxBlockX(); x++) {
-                    for (int z = chunkPos.getMinBlockZ(); z <= chunkPos.getMaxBlockZ(); z++) {
-                        if (isWorldXZinsideMap(x,z)) {
-                            int xN = x - xc_world + (mapGuiRadius * 2);
-                            int zN = z - zc_world + (mapGuiRadius * 2);
-
-                            int col = mapColours[xN][zN];
-                            int blue = (int) (((col >> 16) & 0xFF) * brightnessMult);
-                            int green = (int) (((col >> 8) & 0xFF) * brightnessMult);
-                            int red = (int) (((col) & 0xFF) * brightnessMult);
-
-                            mapColoursCopy[xN][zN] = (0xFF << 24) | (blue << 16) | (green << 8) | (red);
-                        }
-                    }
-                }
-            }
-            mapColours = mapColoursCopy;
-        }*/
 
         // draw view quad
         for (int z = zc_world - worldRadius; z < zc_world + worldRadius; z++)
