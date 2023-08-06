@@ -22,12 +22,12 @@ TODO bugs/features:
         - can use /start unlimited amount of times
         - can use cheats
 
+- only show TPS/FPS with an F button
+
 - Tutorial documentation/gifs
 
+- allow ops to hard disable fog of war for all players
 
-
-- lighting chunk updates don't work unless you are looking at the chunks as it happens
-    - don't remove from rerender chunks unless it was actually actioned
 
 
 

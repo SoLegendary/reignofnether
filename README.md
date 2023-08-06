@@ -18,16 +18,17 @@ Another core design tenet is that the gamemode is fully compatible with vanilla 
 | Unit controls | ✔️ |  |  
 | Building construction | ✔️ |  |  
 | Building unit production | ✔️ |  |  
+| Unit and building upgrades | ✔️ |  |  
 | Minimap | ✔️ |  |  
 | Resources and population | ✔️ |  |  
 | RTS-friendly world generation | ✔️ | Flatter world, simpler biomes and added surface ores |  
-| Resource collection | 🟡 | Currently very badly lags at high volumes (30+ workers gathering) |  
-| Fog of war | 🟡 | Technically works, still looks quite janky |  
-| Villagers Race | 🟡 |  |  
-| Monsters Race | 🟡 |  |  
+| Unit abilities | ✔ | Cooldowns, range, channeling, etc. |  
+| Fog of war | ✔ |  |  
+| Resource collection | 🟡 | Currently lags at high volumes (30+ workers gathering) |
+| Villagers Race | 🟡 | TODO: Castle building and ravager units |  
+| Monsters Race | 🟡 | TODO: Stronghold building and warden units |  
 | Netherlings Race | ❌ |  |  
-| Improved vanilla player features | ❌ | Give vanilla-mode players more interaction with their RTS teammates |  
-| Unit abilities | ❌ | Think MOBA style abilities |  
+| Improved vanilla player features | ❌ | Give vanilla-mode players more interaction with their RTS teammates |
 | Teams | ❌ | Including resource trading, shared unit control, etc. |
 
 And many more that I've yet to think of...
