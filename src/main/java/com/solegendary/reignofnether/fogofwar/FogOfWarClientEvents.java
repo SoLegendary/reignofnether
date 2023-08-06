@@ -40,8 +40,9 @@ public class FogOfWarClientEvents {
     private static boolean enabled = false;
 
     public static boolean forceUpdateLighting;
-    public static boolean forceUpdate = true;
-    private static int forceUpdateDelayTicks = 0;
+
+    private static final int UPDATE_TICKS_MAX = 10;
+    private static int updateTicksLeft = UPDATE_TICKS_MAX;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -121,15 +122,10 @@ public class FogOfWarClientEvents {
         if (!enabled || MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
             return;
 
-        if (forceUpdateDelayTicks > 0) {
-            forceUpdateDelayTicks -= 1;
-            if (forceUpdateDelayTicks == 0) {
-                forceUpdate = true;
-            }
-        }
-
-        if (forceUpdate) {
-            forceUpdate = false;
+        if (updateTicksLeft > 0) {
+            updateTicksLeft -= 1;
+        } else {
+            updateTicksLeft = UPDATE_TICKS_MAX;
             brightChunks.clear();
             Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
 
@@ -162,7 +158,6 @@ public class FogOfWarClientEvents {
 
             lastBrightChunks.clear();
             lastBrightChunks.addAll(brightChunks);
-            forceUpdateDelayTicks = 10;
         }
     }
 
