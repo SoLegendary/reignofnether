@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -67,12 +68,17 @@ public abstract class LevelRendererMixin {
         RenderRegionCache renderregioncache = new RenderRegionCache();
         BlockPos blockpos = pCamera.getBlockPosition();
         List<ChunkRenderDispatcher.RenderChunk> list = Lists.newArrayList();
+        Set<ChunkPos> rerenderChunksToRemove = ConcurrentHashMap.newKeySet();
 
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
             BlockPos originPos = chunkInfo.chunk.getOrigin();
             ChunkPos chunkPos = new ChunkPos(originPos);
 
-            if (chunksToRerender.contains(chunkPos) || forceUpdateLighting) {
+            if (rerenderChunks.contains(chunkPos)) {
+                FogOfWarClientEvents.updateChunkLighting(originPos);
+                rerenderChunksToRemove.add(chunkPos);
+            }
+            if (forceUpdateLighting) {
                 FogOfWarClientEvents.updateChunkLighting(originPos);
             }
             else if (!isInBrightChunk(originPos)) {
@@ -108,7 +114,7 @@ public abstract class LevelRendererMixin {
         if (forceUpdateLighting)
             forceUpdateLighting = false;
 
-        chunksToRerender.clear();
+        rerenderChunks.removeAll(rerenderChunksToRemove);
 
         this.minecraft.getProfiler().popPush("upload");
         this.chunkRenderDispatcher.uploadAllPendingUploads();

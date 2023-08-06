@@ -29,7 +29,7 @@ public class FogOfWarClientEvents {
 
     public static final Set<ChunkPos> brightChunks = ConcurrentHashMap.newKeySet();
     public static final Set<ChunkPos> lastBrightChunks = ConcurrentHashMap.newKeySet();
-    public static final Set<ChunkPos> chunksToRerender = ConcurrentHashMap.newKeySet();
+    public static final Set<ChunkPos> rerenderChunks = ConcurrentHashMap.newKeySet();
 
     // all chunk origins that have ever been explored, including currently bright chunks
     public static final Set<BlockPos> frozenChunks = ConcurrentHashMap.newKeySet();
@@ -150,7 +150,7 @@ public class FogOfWarClientEvents {
             for (ChunkPos cpos : newlyDarkChunks) {
                 for (int x = -1; x <= 1; x++)
                     for (int z = -1; z <= 1; z++)
-                        chunksToRerender.add(new ChunkPos(cpos.x + x, cpos.z + z));
+                        rerenderChunks.add(new ChunkPos(cpos.x + x, cpos.z + z));
             }
 
 

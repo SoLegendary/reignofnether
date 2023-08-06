@@ -12,11 +12,6 @@ TODO bugs/features:
 
 - UnitClientEvents.onPlayerLogoutEvent only runs on logging out of a singleplayer level
 
-
-
-- continue to optimise fog of war...
-    - maybe only have fog chunks centered on enemy base?
-
 - proper RTS start/end conditions
     - by default, start players in spectator mode
     - player picks a spot as a spectator and types command /start [villagers/monsters] to begin
@@ -28,6 +23,12 @@ TODO bugs/features:
         - can use cheats
 
 - Tutorial documentation/gifs
+
+
+
+- lighting chunk updates don't work unless you are looking at the chunks as it happens
+    - don't remove from rerender chunks unless it was actually actioned
+
 
 
 TODO test in remote server
