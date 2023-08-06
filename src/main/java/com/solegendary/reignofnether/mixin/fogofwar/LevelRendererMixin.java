@@ -77,8 +77,7 @@ public abstract class LevelRendererMixin {
             if (rerenderChunks.contains(chunkPos)) {
                 FogOfWarClientEvents.updateChunkLighting(originPos);
                 rerenderChunksToRemove.add(chunkPos);
-            }
-            if (forceUpdateLighting) {
+            } else if (forceUpdateLighting) {
                 FogOfWarClientEvents.updateChunkLighting(originPos);
             }
             else if (!isInBrightChunk(originPos)) {
