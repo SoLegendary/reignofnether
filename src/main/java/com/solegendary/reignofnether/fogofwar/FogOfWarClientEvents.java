@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FogOfWarClientEvents {
 
     public static final float BRIGHT = 1.0f;
-    public static final float DARK = 0.22f;
+    public static final float DARK = 0.25f;
 
     public static final Set<ChunkPos> brightChunks = ConcurrentHashMap.newKeySet();
     public static final Set<ChunkPos> lastBrightChunks = ConcurrentHashMap.newKeySet();
@@ -37,12 +37,11 @@ public class FogOfWarClientEvents {
     public static final int CHUNK_VIEW_DIST = 1;
 
     // if false, disables ALL mixins related to fog of war
-    private static boolean enabled = true;
+    private static boolean enabled = false;
 
     public static boolean forceUpdateLighting;
     public static boolean forceUpdate = true;
     private static int forceUpdateDelayTicks = 0;
-    public static int enableDelayTicks = 0;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -51,19 +50,10 @@ public class FogOfWarClientEvents {
     public static void onInput(InputEvent.Key evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
             // toggle fog of war without changing explored chunks
-            if (evt.getKey() == Keybindings.getFnum(8).key) {
+            if (evt.getKey() == Keybindings.getFnum(8).key)
                 setEnabled(!enabled);
-            }
-            // reset fog of war
-            if (enabled && evt.getKey() == Keybindings.getFnum(7).key) {
-                frozenChunks.clear();
-                setEnabled(false);
-                enableDelayTicks = 20;
-            }
-
-            if (enabled && evt.getKey() == Keybindings.getFnum(6).key) {
+            else if (enabled && evt.getKey() == Keybindings.getFnum(7).key)
                 forceUpdateLighting = true;
-            }
         }
     }
 
@@ -73,7 +63,8 @@ public class FogOfWarClientEvents {
     public static void setEnabled(boolean value) {
         enabled = value;
         // reload chunks like player pressed F3 + A
-        //MC.levelRenderer.allChanged();
+        MC.levelRenderer.allChanged();
+        frozenChunks.clear();
     }
 
     // returns the shade modifier that should be applied at a given position based on the fog of war state there
@@ -127,16 +118,7 @@ public class FogOfWarClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
-            return;
-
-        if (enableDelayTicks > 0) {
-            enableDelayTicks -= 1;
-            if (enableDelayTicks == 0)
-                setEnabled(true);
-        }
-
-        if (!enabled)
+        if (!enabled || MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
             return;
 
         if (forceUpdateDelayTicks > 0) {

@@ -221,7 +221,7 @@ public class MinimapClientEvents {
                 int z0 = z - zc_world + worldRadius;
 
                 if (!FogOfWarClientEvents.isInBrightChunk(new BlockPos(x,0,z)))
-                    rgb = MiscUtil.shadeHexRGB(rgb, 0.40f);
+                    rgb = MiscUtil.shadeHexRGB(rgb, FogOfWarClientEvents.DARK * 2);
 
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
                 mapColours[x0][z0] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
