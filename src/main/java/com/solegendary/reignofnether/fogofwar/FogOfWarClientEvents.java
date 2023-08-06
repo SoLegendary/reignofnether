@@ -27,17 +27,12 @@ import java.util.concurrent.TimeUnit;
 
 public class FogOfWarClientEvents {
 
-    // TODO: fix smooth lighting shading issue in QuadLighter.process
-    // 1. maybe have a static flag to change ClientLevel.shade brightness (since it doesn't get pos data) before call
-    //    to render and revert it immediately after
-    // 2. OR just disable smooth lighting entirely at the edges of those chunks?
-    // 3. OR find the flag to rerender those edges
-
     public static final float BRIGHT = 1.0f;
     public static final float SEMI = 0.15f;
 
     // ChunkPoses that have at least one owned unit/building in them - can be used to determine current bright chunks
     public static final Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
+    // TODO: remake lastOccupiedChunks and make sure LevelRenderer rerenders chunks that fell out of the bright zone
 
     private static ChunkPos lastPlayerChunkPos = new ChunkPos(0,0);
 
@@ -66,14 +61,12 @@ public class FogOfWarClientEvents {
             // toggle fog of war without changing explored chunks
             if (evt.getKey() == Keybindings.getFnum(8).key) {
                 setEnabled(!enabled);
-                forceUpdateDelayTicks = 20;
             }
             // reset fog of war
             if (enabled && evt.getKey() == Keybindings.getFnum(7).key) {
                 frozenChunks.clear();
                 setEnabled(false);
                 enableDelayTicks = 20;
-                forceUpdateDelayTicks = 40;
             }
         }
     }
@@ -140,9 +133,6 @@ public class FogOfWarClientEvents {
 
         evt.setCanceled(true);
     }
-
-    private static int updateLightingTicks = 0;
-    private static final int UPDATE_LIGHTING_TICKS_MAX = 10;
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
