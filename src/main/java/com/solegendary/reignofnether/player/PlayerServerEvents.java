@@ -11,6 +11,8 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -20,6 +22,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -39,7 +42,6 @@ public class PlayerServerEvents {
     public static final ArrayList<ServerPlayer> players = new ArrayList<>();
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
     public static final Set<Integer> rtsPlayerIds = new HashSet<>(); // players that have run /startrts
-    public static ServerLevel serverLevel = null;
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
@@ -68,13 +70,13 @@ public class PlayerServerEvents {
         players.removeIf(player -> player.getId() == id);
     }
 
-    public static void startRTS(int playerId, Faction faction) {
+    public static void startRTS(int playerId, Vec3 pos, Faction faction) {
         ServerPlayer serverPlayer = null;
         for (ServerPlayer player : players)
             if (player.getId() == playerId)
                 serverPlayer = player;
 
-        if (serverLevel == null || serverPlayer == null)
+        if (serverPlayer == null)
             return;
         //if (rtsPlayerIds.contains(playerId))
         //    return;
@@ -84,37 +86,22 @@ public class PlayerServerEvents {
             case MONSTERS -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
             case NETHERLINGS -> null;
         };
-        Entity entity = entityType.create(serverLevel);
-        if (entity != null) {
-
-            ((Unit) entity).setOwnerName(serverPlayer.getName().getString());
-            entity.moveTo(serverPlayer.getEyePosition());
-            serverLevel.addFreshEntity(entity);
-            rtsPlayerIds.add(serverPlayer.getId());
+        ServerLevel level = serverPlayer.getLevel();
+        for (int i = -1; i <= 1; i++) {
+            Entity entity = entityType.create(level);
+            if (entity != null) {
+                BlockPos bp = MiscUtil.getHighestSolidBlock(level, new BlockPos(pos.x + i, 0, pos.z));
+                ((Unit) entity).setOwnerName(serverPlayer.getName().getString());
+                entity.moveTo(bp.above().above(), 0,0);
+                level.addFreshEntity(entity);
+                rtsPlayerIds.add(serverPlayer.getId());
+            }
         }
-    }
-
-    @SubscribeEvent
-    public static void onServerTick(TickEvent.LevelTickEvent evt) {
-        if (!evt.level.isClientSide())
-            serverLevel = (ServerLevel) evt.level;
     }
 
     // commands for ops to give resources
     @SubscribeEvent
     public static void onPlayerChat(ServerChatEvent.Submitted evt) {
-
-        if (evt.getMessage().getString().equals("test strays")) {
-            UnitServerEvents.convertAllToUnit(
-                evt.getPlayer().getName().getString(),
-                evt.getPlayer().getLevel(),
-                (LivingEntity entity) ->
-                    entity instanceof SkeletonUnit sUnit &&
-                    sUnit.getOwnerName().equals(evt.getPlayer().getName().getString()),
-                EntityRegistrar.STRAY_UNIT.get()
-            );
-        }
-
         if (evt.getPlayer().hasPermissions(4)) {
             String msg = evt.getMessage().getString();
             String[] words = msg.split(" ");

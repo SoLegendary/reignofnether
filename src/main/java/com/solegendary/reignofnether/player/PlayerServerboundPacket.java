@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,7 +40,11 @@ public class PlayerServerboundPacket {
                 case MONSTERS -> PlayerAction.START_RTS_MONSTERS;
                 case NETHERLINGS -> PlayerAction.START_RTS_NETHERLINGS;
             };
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(playerAction, MC.player.getId(), 0d,0d,0d));
+            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+                    playerAction, MC.player.getId(),
+                    MC.player.getEyePosition().x,
+                    MC.player.getEyePosition().y,
+                    MC.player.getEyePosition().z));
         }
     }
 
@@ -76,9 +81,9 @@ public class PlayerServerboundPacket {
                 case TELEPORT -> PlayerServerEvents.movePlayer(this.playerId, this.x, this.y, this.z);
                 case ENABLE_ORTHOVIEW -> PlayerServerEvents.enableOrthoview(this.playerId);
                 case DISABLE_ORTHOVIEW -> PlayerServerEvents.disableOrthoview(this.playerId);
-                case START_RTS_VILLAGERS -> PlayerServerEvents.startRTS(this.playerId, Faction.VILLAGERS);
-                case START_RTS_MONSTERS -> PlayerServerEvents.startRTS(this.playerId, Faction.MONSTERS);
-                case START_RTS_NETHERLINGS -> PlayerServerEvents.startRTS(this.playerId, Faction.NETHERLINGS);
+                case START_RTS_VILLAGERS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.VILLAGERS);
+                case START_RTS_MONSTERS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.MONSTERS);
+                case START_RTS_NETHERLINGS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.NETHERLINGS);
             }
             success.set(true);
         });
