@@ -10,25 +10,15 @@ TODO bugs/features:
 
 - force set video option for chunk threading to THREADED
 
-- UnitClientEvents.onPlayerLogoutEvent only runs on logging out of a singleplayer level
-
-- proper RTS start/end conditions
-    - by default, start players in spectator mode
-    - player picks a spot as a spectator and types command /start [villagers/monsters] to begin
-        - enables orthoview and fog of war
-        - spawns 3 workers of the given type at the highest solid Y value at the player's position
-    - only ops can use special commands:
-        - F7,8,12, etc. to freely control settings
-        - can use /start unlimited amount of times
-        - can use cheats
-
-- only show TPS/FPS with an F button
+- only show TPS/FPS with an F key
 
 - Tutorial documentation/gifs
 
-- allow ops to hard disable fog of war for all players
-
 - dont toggle fog of war with iseedeadpeople but instead just ignore it
+
+- startrts commands not spawning units
+    - also set players in spectator mode by default
+
 
 
 TODO test in remote server
@@ -36,6 +26,12 @@ TODO test in remote server
 - queued building constructions
     - including destroying buildings in between queues, and current building when queued/not queued/not in position yet
     - repeat with multiple selected workers and mixed with non-worker units selected
+
+- command-based fog of war
+
+- startrts commands
+
+
 
 TODO buildings/units (backlog)
 

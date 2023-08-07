@@ -86,6 +86,7 @@ public class PlayerServerEvents {
         };
         Entity entity = entityType.create(serverLevel);
         if (entity != null) {
+
             ((Unit) entity).setOwnerName(serverPlayer.getName().getString());
             entity.moveTo(serverPlayer.getEyePosition());
             serverLevel.addFreshEntity(entity);

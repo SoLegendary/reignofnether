@@ -16,6 +16,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
@@ -92,7 +93,7 @@ public class FogOfWarClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRegisterCommand(RegisterCommandsEvent evt) {
+    public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
         evt.getDispatcher().register(Commands.literal("fog").then(Commands.literal("enable")
                 .executes((command) -> {
                     if (MC.player == null)
