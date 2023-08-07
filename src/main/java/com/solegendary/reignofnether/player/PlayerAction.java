@@ -4,5 +4,8 @@ package com.solegendary.reignofnether.player;
 public enum PlayerAction {
     TELEPORT,
     ENABLE_ORTHOVIEW,
-    DISABLE_ORTHOVIEW
+    DISABLE_ORTHOVIEW,
+    START_RTS_VILLAGERS,
+    START_RTS_MONSTERS,
+    START_RTS_NETHERLINGS
 }

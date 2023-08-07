@@ -10,20 +10,26 @@ import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 // this class tracks all available players so that any serverside functions that need to affect the player can be
 // performed here by sending a client->server packet containing MC.player.getId()
@@ -32,6 +38,8 @@ public class PlayerServerEvents {
 
     public static final ArrayList<ServerPlayer> players = new ArrayList<>();
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
+    public static final Set<Integer> rtsPlayerIds = new HashSet<>(); // players that have run /startrts
+    public static ServerLevel serverLevel = null;
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
@@ -58,6 +66,37 @@ public class PlayerServerEvents {
         int id = evt.getEntity().getId();
         System.out.println("Player logged out: " + evt.getEntity().getName().getString() + ", id: " + id);
         players.removeIf(player -> player.getId() == id);
+    }
+
+    public static void startRTS(int playerId, Faction faction) {
+        ServerPlayer serverPlayer = null;
+        for (ServerPlayer player : players)
+            if (player.getId() == playerId)
+                serverPlayer = player;
+
+        if (serverLevel == null || serverPlayer == null)
+            return;
+        //if (rtsPlayerIds.contains(playerId))
+        //    return;
+
+        EntityType<? extends Unit> entityType = switch(faction) {
+            case VILLAGERS -> EntityRegistrar.VILLAGER_UNIT.get();
+            case MONSTERS -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
+            case NETHERLINGS -> null;
+        };
+        Entity entity = entityType.create(serverLevel);
+        if (entity != null) {
+            ((Unit) entity).setOwnerName(serverPlayer.getName().getString());
+            entity.moveTo(serverPlayer.getEyePosition());
+            serverLevel.addFreshEntity(entity);
+            rtsPlayerIds.add(serverPlayer.getId());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onServerTick(TickEvent.LevelTickEvent evt) {
+        if (!evt.level.isClientSide())
+            serverLevel = (ServerLevel) evt.level;
     }
 
     // commands for ops to give resources

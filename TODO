@@ -28,7 +28,7 @@ TODO bugs/features:
 
 - allow ops to hard disable fog of war for all players
 
-
+- dont toggle fog of war with iseedeadpeople but instead just ignore it
 
 
 TODO test in remote server

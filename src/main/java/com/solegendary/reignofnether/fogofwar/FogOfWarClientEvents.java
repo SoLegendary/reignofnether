@@ -3,11 +3,13 @@ package com.solegendary.reignofnether.fogofwar;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
@@ -15,12 +17,17 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
+import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
 
 public class FogOfWarClientEvents {
 
@@ -39,33 +46,71 @@ public class FogOfWarClientEvents {
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = false;
 
-    public static boolean forceUpdateLighting;
-
     private static final int UPDATE_TICKS_MAX = 10;
     private static int updateTicksLeft = UPDATE_TICKS_MAX;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
+    private static int delayedEnableTicks = -1;
+
+
     @SubscribeEvent
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.Key evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-            // toggle fog of war without changing explored chunks
+            if (MC.player == null)
+                return;
+            if (!MC.player.hasPermissions(4))
+                return;
+
             if (evt.getKey() == Keybindings.getFnum(8).key)
-                setEnabled(!enabled);
-            else if (enabled && evt.getKey() == Keybindings.getFnum(7).key)
-                forceUpdateLighting = true;
+                resetFogChunks();
+        }
+    }
+
+    // these should only be called from server side
+    public static void resetFogChunks() {
+        if (MC.player == null)
+            return;
+        setEnabled(false);
+        delayedEnableTicks = 20;
+    }
+    public static void setEnabled(boolean value) {
+        if (MC.player == null)
+            return;
+
+        if (enabled != value) {
+            enabled = value;
+            // reload chunks like player pressed F3 + A
+            MC.levelRenderer.allChanged();
+            frozenChunks.clear();
         }
     }
 
     public static boolean isEnabled() {
         return enabled;
     }
-    public static void setEnabled(boolean value) {
-        enabled = value;
-        // reload chunks like player pressed F3 + A
-        MC.levelRenderer.allChanged();
-        frozenChunks.clear();
+
+    @SubscribeEvent
+    public static void onRegisterCommand(RegisterCommandsEvent evt) {
+        evt.getDispatcher().register(Commands.literal("fog").then(Commands.literal("enable")
+                .executes((command) -> {
+                    if (MC.player == null)
+                        return -1;
+                    if (!MC.player.hasPermissions(4))
+                        return -1;
+                    setServerFog(true);
+                    return 1;
+                })));
+        evt.getDispatcher().register(Commands.literal("fog").then(Commands.literal("disable")
+                .executes((command) -> {
+                    if (MC.player == null)
+                        return -1;
+                    if (!MC.player.hasPermissions(4))
+                        return -1;
+                    setServerFog(false);
+                    return 1;
+                })));
     }
 
     // returns the shade modifier that should be applied at a given position based on the fog of war state there
@@ -119,6 +164,12 @@ public class FogOfWarClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (delayedEnableTicks >= 0) {
+            delayedEnableTicks -= 1;
+            if (delayedEnableTicks == 0)
+                setEnabled(true);
+        }
+
         if (!enabled || MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
             return;
 
@@ -152,9 +203,6 @@ public class FogOfWarClientEvents {
                     for (int z = -1; z <= 1; z++)
                         rerenderChunks.add(new ChunkPos(cpos.x + x, cpos.z + z));
             }
-
-
-
             frozenChunks.removeIf(bp -> {
                 if (isInBrightChunk(bp)) {
                     updateChunkLighting(bp);

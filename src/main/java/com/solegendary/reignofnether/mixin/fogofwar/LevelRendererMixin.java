@@ -77,8 +77,6 @@ public abstract class LevelRendererMixin {
             if (rerenderChunks.contains(chunkPos)) {
                 FogOfWarClientEvents.updateChunkLighting(originPos);
                 rerenderChunksToRemove.add(chunkPos);
-            } else if (forceUpdateLighting) {
-                FogOfWarClientEvents.updateChunkLighting(originPos);
             }
             else if (!isInBrightChunk(originPos)) {
                 if (frozenChunks.contains(originPos)) {
@@ -110,9 +108,6 @@ public abstract class LevelRendererMixin {
                 }
             }
         }
-        if (forceUpdateLighting)
-            forceUpdateLighting = false;
-
         rerenderChunks.removeAll(rerenderChunksToRemove);
 
         this.minecraft.getProfiler().popPush("upload");

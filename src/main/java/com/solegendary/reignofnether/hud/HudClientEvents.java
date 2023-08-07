@@ -106,7 +106,12 @@ public class HudClientEvents {
     }
 
     public static void showTemporaryMessage(String msg) {
-        tempMsgTicksLeft = TEMP_MSG_TICKS_MAX;
+        showTemporaryMessage(msg, TEMP_MSG_TICKS_MAX);
+    }
+    public static void showTemporaryMessage(String msg, int ticks) {
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
+        tempMsgTicksLeft = ticks;
         tempMsg = msg;
     }
 
@@ -331,7 +336,7 @@ public class HudClientEvents {
                         new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
                         Keybindings.cancelBuild,
                         () -> false,
-                        () -> false,
+                        () -> hudSelectedBuilding.isTownCentre,
                         () -> true,
                         () -> {
                             BuildingServerboundPacket.cancelBuilding(hudSelectedBuilding.minCorner);
