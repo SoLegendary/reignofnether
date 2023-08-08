@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
@@ -16,6 +18,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 // Defines method bodies for Units
@@ -31,6 +34,11 @@ public interface Unit {
     public List<Ability> getAbilities();
     public List<ItemStack> getItems();
     public int getMaxResources();
+
+    // list of positions to draw lines between to indicate unit intents - will fade over time unless shift is held
+    public ArrayList<BlockPos> getCheckpoints();
+    public int getCheckpointTicksLeft();
+    public void setCheckpointTicksLeft(int ticks);
 
     // note that attackGoal is specific to unit types
     public MoveToTargetBlockGoal getMoveGoal();
@@ -55,6 +63,15 @@ public interface Unit {
 
         for (Ability ability : unit.getAbilities())
             ability.tickCooldown();
+
+        if (Keybindings.shiftMod.isDown()) {
+            unit.setCheckpointTicksLeft(UnitClientEvents.CHECKPOINT_TICKS_MAX);
+        }
+        else if (unit.getCheckpointTicksLeft() > 0) {
+            unit.setCheckpointTicksLeft(unit.getCheckpointTicksLeft() - 1);
+            if (unit.getCheckpointTicksLeft() <= 0)
+                unit.getCheckpoints().clear();
+        }
 
         if (!unitMob.level.isClientSide) {
             int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();

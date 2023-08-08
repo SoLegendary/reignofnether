@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -25,6 +26,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -91,6 +93,10 @@ public class UnitClientEvents {
 
     private static long lastLeftClickTime = 0; // to track double clicks
     private static final long DOUBLE_CLICK_TIME_MS = 500;
+
+    // unit checkpoint draw lines (eg. where the unit was issued a command to move/build to)
+    public static final int CHECKPOINT_TICKS_MAX = 200;
+    public static final int CHECKPOINT_TICKS_FADE = 20; // ticks left at which the lines start to fade
 
     private static boolean isLeftClickAttack() {
         return CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK;
@@ -509,6 +515,29 @@ public class UnitClientEvents {
                         MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 1.0f, 1.0f, 1.0f, false);
                     else if (preselectedUnits.contains(entity) && !HudClientEvents.isMouseOverAnyButtonOrHud())
                         MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(),1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f, false);
+                }
+            }
+
+            // draw unit checkpoints
+            for (LivingEntity entity : getSelectedUnits()) {
+                if (entity instanceof Unit unit) {
+                    int ticksUnderFade = Math.min(unit.getCheckpointTicksLeft(), CHECKPOINT_TICKS_FADE);
+                    float a = ((float) ticksUnderFade / (float) CHECKPOINT_TICKS_FADE) * 0.4f;
+
+                    for (int i = 0; i < unit.getCheckpoints().size(); i++) {
+                        Vec3 startPos;
+                        if (i == 0)
+                            startPos = ((LivingEntity) unit).getEyePosition().add(0,-1,0);
+                        else {
+                            BlockPos bp = unit.getCheckpoints().get(i-1);
+                            startPos = new Vec3(bp.getX() + 0.5f, bp.getY(), bp.getZ() + 0.5f);
+                        }
+                        BlockPos bp = unit.getCheckpoints().get(i);
+                        Vec3 endPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 1.0f, bp.getZ() + 0.5f);
+
+                        MyRenderer.drawLine(evt.getPoseStack(), startPos, endPos, 0, 1, 0, a);
+                        MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp,0, 1, 0, a);
+                    }
                 }
             }
         }

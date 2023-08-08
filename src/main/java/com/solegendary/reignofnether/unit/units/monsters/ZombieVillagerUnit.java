@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -16,6 +17,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -40,6 +42,12 @@ import java.util.List;
 
 public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwingingUnit {
     // region
+    private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
+    private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
+    public ArrayList<BlockPos> getCheckpoints() { return checkpoints; };
+    public int getCheckpointTicksLeft() { return checkpointTicksLeft; }
+    public void setCheckpointTicksLeft(int ticks) { checkpointTicksLeft = ticks; }
+
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;}
     public List<Ability> getAbilities() {return abilities;}
@@ -51,11 +59,11 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
 
-    public MoveToTargetBlockGoal moveGoal;
-    public SelectedTargetGoal<? extends LivingEntity> targetGoal;
+    private MoveToTargetBlockGoal moveGoal;
+    private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     public BuildRepairGoal buildRepairGoal;
     public GatherResourcesGoal gatherResourcesGoal;
-    public ReturnResourcesGoal returnResourcesGoal;
+    private ReturnResourcesGoal returnResourcesGoal;
 
     public LivingEntity getFollowTarget() { return followTarget; }
     public boolean getHoldPosition() { return holdPosition; }

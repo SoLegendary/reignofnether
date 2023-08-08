@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -36,6 +37,12 @@ import java.util.List;
 
 public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     // region
+    private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
+    private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
+    public ArrayList<BlockPos> getCheckpoints() { return checkpoints; };
+    public int getCheckpointTicksLeft() { return checkpointTicksLeft; }
+    public void setCheckpointTicksLeft(int ticks) { checkpointTicksLeft = ticks; }
+
     public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
     public List<Ability> getAbilities() {return abilities;}
@@ -48,9 +55,9 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public int getMaxResources() {return maxResources;}
     public MountGoal getMountGoal() {return mountGoal;}
 
-    public MoveToTargetBlockGoal moveGoal;
-    public SelectedTargetGoal<? extends LivingEntity> targetGoal;
-    public ReturnResourcesGoal returnResourcesGoal;
+    private MoveToTargetBlockGoal moveGoal;
+    private SelectedTargetGoal<? extends LivingEntity> targetGoal;
+    private ReturnResourcesGoal returnResourcesGoal;
     public MountGoal mountGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
@@ -110,8 +117,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     final static public boolean canAttackBuildings = false;
     public int maxResources = 100;
 
-    public UnitCrossbowAttackGoal<? extends LivingEntity> attackGoal;
-    public AttackBuildingGoal attackBuildingGoal;
+    private UnitCrossbowAttackGoal<? extends LivingEntity> attackGoal;
+    private AttackBuildingGoal attackBuildingGoal;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();

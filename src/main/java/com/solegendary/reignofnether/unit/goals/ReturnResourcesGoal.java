@@ -93,6 +93,9 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     public void setBuildingTarget(@Nullable Building target) {
+        if (target != null) {
+            MiscUtil.addUnitCheckpoint((Unit) mob, target.centrePos);
+        }
         this.buildingTarget = target;
         calcMoveTarget();
         this.start();

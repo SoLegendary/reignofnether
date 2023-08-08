@@ -361,6 +361,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     @Override
     public void setMoveTarget(@Nullable BlockPos bp) {
+        if (bp != null) {
+            MiscUtil.addUnitCheckpoint((Unit) mob, bp);
+        }
         super.setMoveTarget(bp);
         if (BLOCK_CONDITION.test(bp)) {
             this.gatherTarget = bp;
@@ -370,6 +373,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     // locks the worker to only gather from this specific building
     public void setTargetFarm(Building building) {
+        if (building != null) {
+            MiscUtil.addUnitCheckpoint((Unit) mob, building.centrePos);
+        }
         this.targetFarm = building;
     }
 

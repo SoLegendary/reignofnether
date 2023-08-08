@@ -25,6 +25,7 @@ import java.util.List;
 
 public class BuildRepairGoal extends MoveToTargetBlockGoal {
 
+    public boolean ignoreNextCheckpoint = false;
     public final List<Building> queuedBuildings = new ArrayList<>();
     private Building buildingTarget;
 
@@ -104,6 +105,16 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     }
 
     public void setBuildingTarget(@Nullable Building target) {
+        if (target != null) {
+            if (ignoreNextCheckpoint)
+                ignoreNextCheckpoint = false;
+            else
+                MiscUtil.addUnitCheckpoint((Unit) mob, new BlockPos(
+                    target.centrePos.getX(),
+                    target.originPos.getY() + 1,
+                    target.centrePos.getZ())
+                );
+        }
         this.buildingTarget = target;
         calcMoveTarget();
         this.start();

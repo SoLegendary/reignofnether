@@ -276,7 +276,7 @@ public class MyRenderer {
                 startPos.getY() + 0.5f,
                 startPos.getZ() + 0.5f),
             new Vec3(endPos.getX() + 0.5f,
-                endPos.getY() + 0.5f,
+                endPos.getY() + 1.0f,
                 endPos.getZ() + 0.5f),
             r, g, b, a);
     }

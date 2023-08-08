@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.goals.ReturnResourcesGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -44,6 +45,7 @@ public class UnitActionItem {
     }
 
     public void resetBehaviours(Unit unit) {
+        unit.getCheckpoints().clear();
         unit.resetBehaviours();
         Unit.resetBehaviours(unit);
         if (unit instanceof WorkerUnit workerUnit)
@@ -104,8 +106,9 @@ public class UnitActionItem {
                 }
                 case ATTACK_MOVE -> {
                     // if the unit can't actually attack just treat this as a move action
-                    if (unit instanceof AttackerUnit attackerUnit)
+                    if (unit instanceof AttackerUnit attackerUnit) {
                         attackerUnit.setAttackMoveTarget(preselectedBlockPos);
+                    }
                     else
                         unit.setMoveTarget(preselectedBlockPos);
                 }

@@ -346,25 +346,6 @@ public class BuildingClientEvents {
                         0, 1, 0, a);
             }
         }
-
-        // draw queued buildings
-        if (hudSelectedEntity instanceof WorkerUnit workerUnit) {
-            BuildRepairGoal goal = workerUnit.getBuildRepairGoal();
-            float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
-
-            for (int i = 0; i < goal.queuedBuildings.size(); i++) {
-                Vec3 startPos;
-                if (i == 0)
-                    startPos = ((LivingEntity) workerUnit).getEyePosition();
-                else {
-                    BlockPos bp = goal.queuedBuildings.get(i-1).centrePos;
-                    startPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
-                }
-                BlockPos bp = goal.queuedBuildings.get(i).centrePos.offset(0,-1,0);
-                Vec3 endPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
-                MyRenderer.drawLine(evt.getPoseStack(), startPos, endPos, 0, 1, 0, a);
-            }
-        }
     }
 
     // on scroll rotate the building placement by 90deg by resorting the blocks list
@@ -407,14 +388,29 @@ public class BuildingClientEvents {
                     if (builderEntity instanceof WorkerUnit)
                         builderIds.add(builderEntity.getId());
 
-
                 if (Keybindings.shiftMod.isDown()) {
                     BuildingServerboundPacket.placeAndQueueBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
                             builderIds.stream().mapToInt(i -> i).toArray());
+
+                    for (LivingEntity entity : getSelectedUnits()) {
+                        if (entity instanceof Unit unit) {
+                            MiscUtil.addUnitCheckpoint(unit, CursorClientEvents.getPreselectedBlockPos().above(), false);
+                            if (unit instanceof WorkerUnit workerUnit)
+                                workerUnit.getBuildRepairGoal().ignoreNextCheckpoint = true;
+                        }
+                    }
                 } else {
                     BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
                             builderIds.stream().mapToInt(i -> i).toArray());
                     setBuildingToPlace(null);
+
+                    for (LivingEntity entity : getSelectedUnits()) {
+                        if (entity instanceof Unit unit) {
+                            MiscUtil.addUnitCheckpoint(unit, CursorClientEvents.getPreselectedBlockPos().above());
+                            if (unit instanceof WorkerUnit workerUnit)
+                                workerUnit.getBuildRepairGoal().ignoreNextCheckpoint = true;
+                        }
+                    }
                 }
             }
             // equivalent of UnitClientEvents.onMouseClick()

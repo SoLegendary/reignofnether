@@ -8,10 +8,11 @@ TODO bugs/features:
 
 - force set video option for chunk threading to THREADED
 
-- only show TPS/FPS with an F key
-
 - Tutorial documentation/gifs
 
+- New checkpoint field for entity targets
+    - and option to set colour to red for hostile actions
+- clear checkpoints when the goal is completed
 
 
 TODO test in remote server

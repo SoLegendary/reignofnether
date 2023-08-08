@@ -39,7 +39,6 @@ public class FogOfWarClientEvents {
     private static final Minecraft MC = Minecraft.getInstance();
     private static final int UPDATE_TICKS_MAX = 10;
     private static int updateTicksLeft = UPDATE_TICKS_MAX;
-    private static int delayedEnableTicks = -1;
 
     public static final Set<ChunkPos> brightChunks = ConcurrentHashMap.newKeySet();
     public static final Set<ChunkPos> lastBrightChunks = ConcurrentHashMap.newKeySet();
@@ -61,12 +60,8 @@ public class FogOfWarClientEvents {
                 return;
 
             // resetFogChunks
-            if (evt.getKey() == Keybindings.getFnum(8).key) {
-                if (MC.player == null)
-                    return;
-                setEnabled(false);
-                delayedEnableTicks = 20;
-            }
+            if (evt.getKey() == Keybindings.getFnum(8).key)
+                resetFogChunks();
         }
     }
 
@@ -165,12 +160,6 @@ public class FogOfWarClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (delayedEnableTicks >= 0) {
-            delayedEnableTicks -= 1;
-            if (delayedEnableTicks == 0)
-                setEnabled(true);
-        }
-
         if (!isEnabled() || MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
             return;
 
