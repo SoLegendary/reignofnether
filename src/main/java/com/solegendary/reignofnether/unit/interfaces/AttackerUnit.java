@@ -32,7 +32,7 @@ public interface AttackerUnit {
     // chase and attack the target ignoring all else until it is dead or out of sight
     public default void setAttackTarget(@Nullable LivingEntity target) {
         if (target != null) {
-            ((Unit) this).setEntityCheckpointId(target.getId());
+            MiscUtil.addUnitCheckpoint(((Unit) this), target.getId());
             ((Unit) this).setIsCheckpointGreen(false);
         }
         ((Unit) this).getTargetGoal().setTarget(target);

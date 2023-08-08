@@ -522,7 +522,7 @@ public class UnitClientEvents {
             for (LivingEntity entity : getSelectedUnits()) {
                 if (entity instanceof Unit unit) {
                     int ticksUnderFade = Math.min(unit.getCheckpointTicksLeft(), CHECKPOINT_TICKS_FADE);
-                    float a = ((float) ticksUnderFade / (float) CHECKPOINT_TICKS_FADE) * 0.4f;
+                    float a = ((float) ticksUnderFade / (float) CHECKPOINT_TICKS_FADE) * 0.5f;
 
 
                     int id = unit.getEntityCheckpointId();
