@@ -35,6 +35,7 @@ import java.util.Comparator;
 import java.util.Random;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.*;
+import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
 
 public abstract class Building {
 
@@ -384,6 +385,11 @@ public abstract class Building {
 
     public void onBuilt() {
         isBuilt = true;
+
+        if (this.isTownCentre && !this.level.isClientSide()) {
+            sendMessageToAllPlayers(this.ownerName + " has started their base at: " +
+                    "x=" + originPos.getX() + " z=" + originPos.getZ());
+        }
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) { }

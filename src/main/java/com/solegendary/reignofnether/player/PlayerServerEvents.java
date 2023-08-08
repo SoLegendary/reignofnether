@@ -12,6 +12,8 @@ import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -26,6 +28,7 @@ import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,6 +49,7 @@ public class PlayerServerEvents {
     // iseedeadpeople - ignore fog of war
     // modifythephasevariance - ignore building requirements
     // medievalman - get all research (cannot disable)
+    // greedisgood X - gain X of each resource
     public static final List<String> singleWordCheats = List.of("warpten", "operationcwal", "iseedeadpeople", "modifythephasevariance", "medievalman");
 
     @SubscribeEvent
@@ -95,9 +99,9 @@ public class PlayerServerEvents {
         for (int i = -1; i <= 1; i++) {
             Entity entity = entityType.create(level);
             if (entity != null) {
-                BlockPos bp = MiscUtil.getHighestSolidBlock(level, new BlockPos(pos.x + i, 0, pos.z));
+                BlockPos bp = MiscUtil.getHighestSolidBlock(level, new BlockPos(pos.x + i, 0, pos.z)).above().above();
                 ((Unit) entity).setOwnerName(serverPlayer.getName().getString());
-                entity.moveTo(bp.above().above(), 0,0);
+                entity.moveTo(bp, 0,0);
                 level.addFreshEntity(entity);
                 rtsPlayerIds.add(serverPlayer.getId());
             }
@@ -116,6 +120,8 @@ public class PlayerServerEvents {
                 try {
                     int amount = Integer.parseInt(words[1]);
                     ResourcesServerEvents.addSubtractResources(new Resources(playerName, amount, amount, amount));
+                    evt.setCanceled(true);
+                    sendMessageToAllPlayers(playerName + " used cheat: " + words[0] + " " + amount);
                 }
                 catch(NumberFormatException err) {
                     System.out.println(err);
@@ -127,10 +133,14 @@ public class PlayerServerEvents {
                     if (ResearchServer.playerHasCheat(playerName, cheatName) && !cheatName.equals("medievalman")) {
                         ResearchServer.removeCheat(playerName, cheatName);
                         ResearchClientboundPacket.removeCheat(playerName, cheatName);
+                        evt.setCanceled(true);
+                        sendMessageToAllPlayers(playerName + " disabled cheat: " + cheatName);
                     }
                     else {
                         ResearchServer.addCheat(playerName, cheatName);
                         ResearchClientboundPacket.addCheat(playerName, cheatName);
+                        evt.setCanceled(true);
+                        sendMessageToAllPlayers(playerName + " enabled cheat: " + cheatName);
                     }
                 }
             }
@@ -141,7 +151,9 @@ public class PlayerServerEvents {
                 for (String cheatName : singleWordCheats) {
                     ResearchServer.addCheat(playerName, cheatName);
                     ResearchClientboundPacket.addCheat(playerName, cheatName);
+                    evt.setCanceled(true);
                 }
+                sendMessageToAllPlayers(playerName + " enabled all cheats");
             }
         }
     }
@@ -187,5 +199,10 @@ public class PlayerServerEvents {
     public static void movePlayer(int playerId, double x, double y, double z) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
         serverPlayer.moveTo(x, y, z);
+    }
+
+    public static void sendMessageToAllPlayers(String msg) {
+        for (ServerPlayer player : players)
+            player.sendSystemMessage(Component.literal(msg));
     }
 }

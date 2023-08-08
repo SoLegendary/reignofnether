@@ -119,18 +119,23 @@ public class BuildingServerEvents {
     }
 
     public static void cancelBuilding(Building building) {
+        if (building.isTownCentre)
+            return;
+
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);
 
         // AOE2-style refund: return the % of the non-built portion of the building
         // eg. cancelling a building at 70% completion will refund only 30% cost
-        float buildPercent = building.getBlocksPlacedPercent();
-        ResourcesServerEvents.addSubtractResources(new Resources(
-                building.ownerName,
-                Math.round(building.foodCost * (1 - buildPercent)),
-                Math.round(building.woodCost * (1 - buildPercent)),
-                Math.round(building.oreCost * (1 - buildPercent))
-        ));
+        if (!building.isBuilt) {
+            float buildPercent = building.getBlocksPlacedPercent();
+            ResourcesServerEvents.addSubtractResources(new Resources(
+                    building.ownerName,
+                    Math.round(building.foodCost * (1 - buildPercent)),
+                    Math.round(building.woodCost * (1 - buildPercent)),
+                    Math.round(building.oreCost * (1 - buildPercent))
+            ));
+        }
         building.destroy((ServerLevel) building.getLevel());
     }
 

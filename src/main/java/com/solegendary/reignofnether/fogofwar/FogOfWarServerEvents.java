@@ -1,9 +1,9 @@
 package com.solegendary.reignofnether.fogofwar;
 
-import net.minecraft.commands.Commands;
-import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
 
 public class FogOfWarServerEvents {
 
@@ -16,12 +16,12 @@ public class FogOfWarServerEvents {
 
     public static void setEnabled(boolean value) {
         enabled = value;
+        sendMessageToAllPlayers((enabled ? "Enabled" : "Disabled") + " fog of war for all players");
         syncClientFog();
     }
 
     // sets the fog to match what all
-    private static int syncClientFog() {
+    private static void syncClientFog() {
         FogOfWarClientboundPacket.setEnabled(enabled);
-        return 1;
     }
 }

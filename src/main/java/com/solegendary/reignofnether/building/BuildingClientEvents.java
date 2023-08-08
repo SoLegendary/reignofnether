@@ -74,6 +74,10 @@ public class BuildingClientEvents {
     private static long lastLeftClickTime = 0; // to track double clicks
     private static final long DOUBLE_CLICK_TIME_MS = 500;
 
+    // minimum % of blocks below a building that need to be supported by a solid block for it to be placeable
+    // 1 means you can't have any gaps at all, 0 means you can place buildings in mid-air
+    private static final float MIN_SUPPORTED_BLOCKS_PERCENT = 0.7f;
+
     // can only be one preselected building as you can't box-select them like units
     public static Building getPreselectedBuilding() {
         for (Building building: buildings)
@@ -238,10 +242,8 @@ public class BuildingClientEvents {
                 }
             }
         }
-        float minBlocksBelow = 0.7f;
-
         if (blocksBelow <= 0) return false; // avoid division by 0
-        return ((float) solidBlocksBelow / (float) blocksBelow) < minBlocksBelow;
+        return ((float) solidBlocksBelow / (float) blocksBelow) < MIN_SUPPORTED_BLOCKS_PERCENT;
     }
 
     // disallow the building borders from overlapping any other's, even if they don't collide physical blocks

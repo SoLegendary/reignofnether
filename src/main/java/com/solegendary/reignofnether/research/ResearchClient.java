@@ -44,16 +44,12 @@ public class ResearchClient {
         cheatItems.add(cheatItemName);
         if (cheatItemName.equals("iseedeadpeople"))
             resetFogChunks();
-        if (MC.player != null)
-            MC.player.sendSystemMessage(Component.literal("Enabled cheat: " + cheatItemName));
     }
 
     public static void removeCheat(String cheatItemName) {
         cheatItems.removeIf(r -> r.equals(cheatItemName));
         if (cheatItemName.equals("iseedeadpeople"))
             resetFogChunks();
-        if (MC.player != null)
-            MC.player.sendSystemMessage(Component.literal("Disabled cheat: " + cheatItemName));
     }
 
     public static boolean hasCheat(String cheatItemName) {
