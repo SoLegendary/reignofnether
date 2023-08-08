@@ -12,8 +12,6 @@ TODO bugs/features:
 
 - Tutorial documentation/gifs
 
-- dont toggle fog of war with iseedeadpeople but instead just ignore it
-
 
 
 TODO test in remote server
@@ -25,6 +23,8 @@ TODO test in remote server
 - command-based fog of war
 
 - startrts commands
+
+- iseedeadpeople cheat
 
 
 

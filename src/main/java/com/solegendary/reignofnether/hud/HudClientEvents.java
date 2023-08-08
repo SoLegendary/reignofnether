@@ -109,8 +109,6 @@ public class HudClientEvents {
         showTemporaryMessage(msg, TEMP_MSG_TICKS_MAX);
     }
     public static void showTemporaryMessage(String msg, int ticks) {
-        if (!OrthoviewClientEvents.isEnabled())
-            return;
         tempMsgTicksLeft = ticks;
         tempMsg = msg;
     }

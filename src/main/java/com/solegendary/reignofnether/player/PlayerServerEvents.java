@@ -6,10 +6,9 @@ import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
-import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -24,7 +23,6 @@ import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
@@ -42,6 +40,13 @@ public class PlayerServerEvents {
     public static final ArrayList<ServerPlayer> players = new ArrayList<>();
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
     public static final Set<Integer> rtsPlayerIds = new HashSet<>(); // players that have run /startrts
+
+    // warpten - faster building/unit production
+    // operationcwal - faster resource gathering
+    // iseedeadpeople - ignore fog of war
+    // modifythephasevariance - ignore building requirements
+    // medievalman - get all research (cannot disable)
+    public static final List<String> singleWordCheats = List.of("warpten", "operationcwal", "iseedeadpeople", "modifythephasevariance", "medievalman");
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
@@ -78,8 +83,8 @@ public class PlayerServerEvents {
 
         if (serverPlayer == null)
             return;
-        //if (rtsPlayerIds.contains(playerId))
-        //    return;
+        if (rtsPlayerIds.contains(playerId) && !serverPlayer.hasPermissions(4))
+            return;
 
         EntityType<? extends Unit> entityType = switch(faction) {
             case VILLAGERS -> EntityRegistrar.VILLAGER_UNIT.get();
@@ -116,11 +121,10 @@ public class PlayerServerEvents {
                     System.out.println(err);
                 }
             }
-            List<String> singleWordCheats = List.of("warpten", "operationcwal", "iseedeadpeople", "modifythephasevariance", "medievalman");
 
             for (String cheatName : singleWordCheats) {
                 if (words.length == 1 && words[0].equalsIgnoreCase(cheatName)) {
-                    if (ResearchServer.playerHasCheat(playerName, cheatName)) {
+                    if (ResearchServer.playerHasCheat(playerName, cheatName) && !cheatName.equals("medievalman")) {
                         ResearchServer.removeCheat(playerName, cheatName);
                         ResearchClientboundPacket.removeCheat(playerName, cheatName);
                     }

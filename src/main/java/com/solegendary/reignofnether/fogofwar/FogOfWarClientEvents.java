@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.Minecraft;
@@ -34,6 +35,11 @@ public class FogOfWarClientEvents {
 
     public static final float BRIGHT = 1.0f;
     public static final float DARK = 0.25f;
+    public static final int CHUNK_VIEW_DIST = 1;
+    private static final Minecraft MC = Minecraft.getInstance();
+    private static final int UPDATE_TICKS_MAX = 10;
+    private static int updateTicksLeft = UPDATE_TICKS_MAX;
+    private static int delayedEnableTicks = -1;
 
     public static final Set<ChunkPos> brightChunks = ConcurrentHashMap.newKeySet();
     public static final Set<ChunkPos> lastBrightChunks = ConcurrentHashMap.newKeySet();
@@ -42,18 +48,8 @@ public class FogOfWarClientEvents {
     // all chunk origins that have ever been explored, including currently bright chunks
     public static final Set<BlockPos> frozenChunks = ConcurrentHashMap.newKeySet();
 
-    public static final int CHUNK_VIEW_DIST = 1;
-
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = false;
-
-    private static final int UPDATE_TICKS_MAX = 10;
-    private static int updateTicksLeft = UPDATE_TICKS_MAX;
-
-    private static final Minecraft MC = Minecraft.getInstance();
-
-    private static int delayedEnableTicks = -1;
-
 
     @SubscribeEvent
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
@@ -64,31 +60,35 @@ public class FogOfWarClientEvents {
             if (!MC.player.hasPermissions(4))
                 return;
 
-            if (evt.getKey() == Keybindings.getFnum(8).key)
-                resetFogChunks();
+            // resetFogChunks
+            if (evt.getKey() == Keybindings.getFnum(8).key) {
+                if (MC.player == null)
+                    return;
+                setEnabled(false);
+                delayedEnableTicks = 20;
+            }
         }
     }
 
-    // these should only be called from server side
+    // reload chunks like player pressed F3 + A
     public static void resetFogChunks() {
-        if (MC.player == null)
-            return;
-        setEnabled(false);
-        delayedEnableTicks = 20;
+        MC.levelRenderer.allChanged();
+        frozenChunks.clear();
     }
+
     public static void setEnabled(boolean value) {
         if (MC.player == null)
             return;
 
         if (enabled != value) {
             enabled = value;
-            // reload chunks like player pressed F3 + A
-            MC.levelRenderer.allChanged();
-            frozenChunks.clear();
+            resetFogChunks();
         }
     }
 
     public static boolean isEnabled() {
+        if (ResearchClient.hasCheat("iseedeadpeople"))
+            return false;
         return enabled;
     }
 
@@ -128,7 +128,7 @@ public class FogOfWarClientEvents {
     }
 
     public static boolean isBuildingInBrightChunk(Building building) {
-        if (!enabled)
+        if (!isEnabled())
             return true;
 
         for (BlockPos bp : BuildingUtils.getUniqueChunkBps(building))
@@ -139,7 +139,7 @@ public class FogOfWarClientEvents {
     }
 
     public static boolean isInBrightChunk(BlockPos bp) {
-        if (!enabled || MC.level == null)
+        if (!isEnabled() || MC.level == null)
             return true;
 
         // first check if the ChunkPos is already occupied as this is faster
@@ -171,7 +171,7 @@ public class FogOfWarClientEvents {
                 setEnabled(true);
         }
 
-        if (!enabled || MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
+        if (!isEnabled() || MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
             return;
 
         if (updateTicksLeft > 0) {

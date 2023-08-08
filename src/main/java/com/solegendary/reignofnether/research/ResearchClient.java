@@ -1,11 +1,18 @@
 package com.solegendary.reignofnether.research;
 
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.hud.HudClientEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 
+import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.resetFogChunks;
+
 // class to track status of research items for the client player - we generally don't care about other players' research
 public class ResearchClient {
+
+    private final static Minecraft MC = Minecraft.getInstance();
 
     final private static ArrayList<String> researchItems = new ArrayList<>();
 
@@ -15,10 +22,7 @@ public class ResearchClient {
 
     public static void addResearch(String researchItemName) {
         researchItems.add(researchItemName);
-    }
-
-    public static void removeResearch(String researchItemName) {
-        researchItems.removeIf(r -> r.equals(researchItemName));
+        HudClientEvents.showTemporaryMessage("Upgrade completed: " + researchItemName);
     }
 
     public static boolean hasResearch(String researchItemName) {
@@ -38,10 +42,18 @@ public class ResearchClient {
 
     public static void addCheat(String cheatItemName) {
         cheatItems.add(cheatItemName);
+        if (cheatItemName.equals("iseedeadpeople"))
+            resetFogChunks();
+        if (MC.player != null)
+            MC.player.sendSystemMessage(Component.literal("Enabled cheat: " + cheatItemName));
     }
 
     public static void removeCheat(String cheatItemName) {
         cheatItems.removeIf(r -> r.equals(cheatItemName));
+        if (cheatItemName.equals("iseedeadpeople"))
+            resetFogChunks();
+        if (MC.player != null)
+            MC.player.sendSystemMessage(Component.literal("Disabled cheat: " + cheatItemName));
     }
 
     public static boolean hasCheat(String cheatItemName) {
