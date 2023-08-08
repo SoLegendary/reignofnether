@@ -96,7 +96,7 @@ public class UnitClientEvents {
 
     // unit checkpoint draw lines (eg. where the unit was issued a command to move/build to)
     public static final int CHECKPOINT_TICKS_MAX = 200;
-    public static final int CHECKPOINT_TICKS_FADE = 20; // ticks left at which the lines start to fade
+    public static final int CHECKPOINT_TICKS_FADE = 15; // ticks left at which the lines start to fade
 
     private static boolean isLeftClickAttack() {
         return CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK;
@@ -524,19 +524,35 @@ public class UnitClientEvents {
                     int ticksUnderFade = Math.min(unit.getCheckpointTicksLeft(), CHECKPOINT_TICKS_FADE);
                     float a = ((float) ticksUnderFade / (float) CHECKPOINT_TICKS_FADE) * 0.4f;
 
-                    for (int i = 0; i < unit.getCheckpoints().size(); i++) {
-                        Vec3 startPos;
-                        if (i == 0)
-                            startPos = ((LivingEntity) unit).getEyePosition().add(0,-1,0);
-                        else {
-                            BlockPos bp = unit.getCheckpoints().get(i-1);
-                            startPos = new Vec3(bp.getX() + 0.5f, bp.getY(), bp.getZ() + 0.5f);
-                        }
-                        BlockPos bp = unit.getCheckpoints().get(i);
-                        Vec3 endPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 1.0f, bp.getZ() + 0.5f);
 
-                        MyRenderer.drawLine(evt.getPoseStack(), startPos, endPos, 0, 1, 0, a);
-                        MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp,0, 1, 0, a);
+                    int id = unit.getEntityCheckpointId();
+                    if (id > -1) {
+                        Entity checkpointEntity = MC.level.getEntity(id);
+                        if (checkpointEntity != null) {
+                            float entityYOffset1 = 1.74f - ((LivingEntity) unit).getEyeHeight() - 1;
+                            Vec3 startPos = ((LivingEntity) unit).getEyePosition().add(0,entityYOffset1,0);
+                            float entityYOffset2 = 1.74f - checkpointEntity.getEyeHeight() - 1;
+                            Vec3 endPos = checkpointEntity.getEyePosition().add(0,entityYOffset2,0);
+                            boolean green = unit.isCheckpointGreen();
+                            MyRenderer.drawLine(evt.getPoseStack(), startPos, endPos, green ? 0 : 1, green ? 1 : 0, 0, a);
+                        }
+                    } else {
+                        for (int i = 0; i < unit.getCheckpoints().size(); i++) {
+                            Vec3 startPos;
+                            if (i == 0) {
+                                float entityYOffset = 1.74f - ((LivingEntity) unit).getEyeHeight() - 1;
+                                startPos = ((LivingEntity) unit).getEyePosition().add(0,entityYOffset,0);
+                            } else {
+                                BlockPos bp = unit.getCheckpoints().get(i-1);
+                                startPos = new Vec3(bp.getX() + 0.5f, bp.getY(), bp.getZ() + 0.5f);
+                            }
+                            BlockPos bp = unit.getCheckpoints().get(i);
+                            Vec3 endPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 1.0f, bp.getZ() + 0.5f);
+
+                            boolean green = unit.isCheckpointGreen();
+                            MyRenderer.drawLine(evt.getPoseStack(), startPos, endPos, green ? 0 : 1, green ? 1 : 0, 0, a);
+                            MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp,green ? 0 : 1, green ? 1 : 0, 0, a);
+                        }
                     }
                 }
             }

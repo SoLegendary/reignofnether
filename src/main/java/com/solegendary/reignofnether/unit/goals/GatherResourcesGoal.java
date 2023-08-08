@@ -363,6 +363,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     public void setMoveTarget(@Nullable BlockPos bp) {
         if (bp != null) {
             MiscUtil.addUnitCheckpoint((Unit) mob, bp);
+            ((Unit) mob).setIsCheckpointGreen(true);
         }
         super.setMoveTarget(bp);
         if (BLOCK_CONDITION.test(bp)) {
@@ -375,6 +376,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     public void setTargetFarm(Building building) {
         if (building != null) {
             MiscUtil.addUnitCheckpoint((Unit) mob, building.centrePos);
+            ((Unit) mob).setIsCheckpointGreen(true);
         }
         this.targetFarm = building;
     }

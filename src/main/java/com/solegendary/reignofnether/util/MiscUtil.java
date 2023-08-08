@@ -38,12 +38,18 @@ public class MiscUtil {
     public static void addUnitCheckpoint(Unit unit, BlockPos blockPos) {
         addUnitCheckpoint(unit, blockPos, true);
     }
-
     public static void addUnitCheckpoint(Unit unit, BlockPos blockPos, boolean clearExisting) {
-        if (clearExisting)
+        if (clearExisting) {
             unit.getCheckpoints().clear();
+            unit.setEntityCheckpointId(-1);
+        }
         unit.setCheckpointTicksLeft(UnitClientEvents.CHECKPOINT_TICKS_MAX);
         unit.getCheckpoints().add(blockPos);
+    }
+    public static void addUnitCheckpoint(Unit unit, int id) {
+        unit.getCheckpoints().clear();
+        unit.setEntityCheckpointId(id);
+        unit.setCheckpointTicksLeft(UnitClientEvents.CHECKPOINT_TICKS_MAX);
     }
 
     public static BlockPos getHighestSolidBlock(Level level, BlockPos blockPos) {

@@ -10,9 +10,6 @@ TODO bugs/features:
 
 - Tutorial documentation/gifs
 
-- New checkpoint field for entity targets
-    - and option to set colour to red for hostile actions
-- clear checkpoints when the goal is completed
 
 
 TODO test in remote server
@@ -26,6 +23,8 @@ TODO test in remote server
 - startrts commands
 
 - iseedeadpeople cheat
+
+- all UnitActions for checkpoints
 
 
 

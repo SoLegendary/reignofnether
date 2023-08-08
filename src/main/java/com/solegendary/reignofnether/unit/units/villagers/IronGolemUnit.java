@@ -35,6 +35,12 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     public ArrayList<BlockPos> getCheckpoints() { return checkpoints; };
     public int getCheckpointTicksLeft() { return checkpointTicksLeft; }
     public void setCheckpointTicksLeft(int ticks) { checkpointTicksLeft = ticks; }
+    private boolean isCheckpointGreen = true;
+    public boolean isCheckpointGreen() { return isCheckpointGreen; };
+    public void setIsCheckpointGreen(boolean green) { isCheckpointGreen = green; };
+    private int entityCheckpointId = -1;
+    public int getEntityCheckpointId() { return entityCheckpointId; };
+    public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
 
     public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};

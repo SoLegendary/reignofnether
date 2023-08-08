@@ -59,7 +59,6 @@ public class BuildingClientEvents {
     public static int getTotalPopulationSupply() {
         return Math.min(ResourceCosts.MAX_POPULATION, totalPopulationSupply);
     }
-
     // clientside buildings used for tracking position (for cursor selection)
     private static final ArrayList<Building> buildings = new ArrayList<>();
 

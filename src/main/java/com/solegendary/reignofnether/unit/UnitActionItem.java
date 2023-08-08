@@ -107,6 +107,8 @@ public class UnitActionItem {
                 case ATTACK_MOVE -> {
                     // if the unit can't actually attack just treat this as a move action
                     if (unit instanceof AttackerUnit attackerUnit) {
+                        MiscUtil.addUnitCheckpoint(unit, preselectedBlockPos);
+                        unit.setIsCheckpointGreen(false);
                         attackerUnit.setAttackMoveTarget(preselectedBlockPos);
                     }
                     else
@@ -116,8 +118,14 @@ public class UnitActionItem {
                     // if the unit can't actually attack just treat this as a follow action
                     if (unit instanceof AttackerUnit attackerUnit)
                         attackerUnit.setAttackTarget((LivingEntity) level.getEntity(unitId));
-                    else
-                        unit.setFollowTarget((LivingEntity) level.getEntity(unitId));
+                    else {
+                        LivingEntity livingEntity = (LivingEntity) level.getEntity(unitId);
+                        if (livingEntity != null) {
+                            MiscUtil.addUnitCheckpoint(unit, unitId);
+                            unit.setIsCheckpointGreen(true);
+                        }
+                        unit.setFollowTarget(livingEntity);
+                    }
                 }
                 case ATTACK_BUILDING -> {
                     // if the unit can't actually attack just treat this as a move action
@@ -127,7 +135,12 @@ public class UnitActionItem {
                         unit.setMoveTarget(preselectedBlockPos);
                 }
                 case FOLLOW -> {
-                    unit.setFollowTarget((LivingEntity) level.getEntity(unitId));
+                    LivingEntity livingEntity = (LivingEntity) level.getEntity(unitId);
+                    if (livingEntity != null) {
+                        MiscUtil.addUnitCheckpoint(unit, unitId);
+                        unit.setIsCheckpointGreen(true);
+                    }
+                    unit.setFollowTarget(livingEntity);
                 }
                 case BUILD_REPAIR -> {
                     // if the unit can't actually build/repair just treat this as a move action
