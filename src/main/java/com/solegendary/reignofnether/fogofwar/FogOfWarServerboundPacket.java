@@ -1,52 +1,41 @@
 package com.solegendary.reignofnether.fogofwar;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public class FogOfWarServerboundPacket {
 
-    private final String playerName;
-    private final int[] xPos;
-    private final int[] zPos;
+    boolean enable;
 
-    public static void saveExploredChunks(String playerName, Set<ChunkPos> exploredChunkPoses) {
-        // TODO confirm this is in the right order
-        int[] xp = exploredChunkPoses.stream().mapToInt(ChunkPos::getMinBlockX).toArray();
-        int[] zp = exploredChunkPoses.stream().mapToInt(ChunkPos::getMinBlockZ).toArray();
-
-        PacketHandler.INSTANCE.sendToServer(new FogOfWarServerboundPacket(playerName, xp, zp));
+    public static void setServerFog(boolean enable) {
+        Minecraft MC = Minecraft.getInstance();
+        if (MC.player != null)
+            PacketHandler.INSTANCE.sendToServer(new FogOfWarServerboundPacket(enable));
     }
 
     // packet-handler functions
-    public FogOfWarServerboundPacket(String playerName, int[] xPos, int[] zPos) {
-        this.playerName = playerName;
-        this.xPos = xPos;
-        this.zPos = zPos;
+    public FogOfWarServerboundPacket(boolean enable) {
+        this.enable = enable;
     }
 
     public FogOfWarServerboundPacket(FriendlyByteBuf buffer) {
-        this.playerName = buffer.readUtf();
-        this.xPos = buffer.readVarIntArray();
-        this.zPos = buffer.readVarIntArray();
+        this.enable = buffer.readBoolean();
     }
 
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeUtf(playerName);
-        buffer.writeVarIntArray(xPos);
-        buffer.writeVarIntArray(zPos);
+        buffer.writeBoolean(this.enable);
     }
 
     // server-side packet-consuming functions
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
-            FogOfWarServerEvents.saveExploredChunks(playerName, xPos, zPos);
+            FogOfWarServerEvents.setEnabled(enable);
             success.set(true);
         });
         ctx.get().setPacketHandled(true);

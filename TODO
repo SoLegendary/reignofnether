@@ -1,40 +1,45 @@
 
 TODO bugs/features:
 
-- time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
+- time set causes desyncs when done with /gamerule dodaynightcycle false
 - Evoker portraits should not show their arms
-
-- use only one spell when multiple casters are selected
-
-- villager tools sometimes disappear
-
 - force set video option for chunk threading to THREADED
-
-- UnitClientEvents.onPlayerLogoutEvent only runs on logging out of a singleplayer level
-
-
-
-- continue to optimise fog of war...
-    - maybe only have fog chunks centered on enemy base?
-
-- proper RTS start/end conditions
-    - by default, start players in spectator mode
-    - player picks a spot as a spectator and types command /start [villagers/monsters] to begin
-        - enables orthoview and fog of war
-        - spawns 3 workers of the given type at the highest solid Y value at the player's position
-    - only ops can use special commands:
-        - F7,8,12, etc. to freely control settings
-        - can use /start unlimited amount of times
-        - can use cheats
+- onEntityLeaveEvent sometimes causes a concurrentModificationException when a converted unit was attacking a worker
+- GUI scale should be 3
 
 - Tutorial documentation/gifs
+
+- if units are out of render range as they won't be loaded clientside
+    - can't MC.level.getEntity(id)
+    - can't issue any automatic commands too,
+        eg. when a stockpile is built the workers wont autogather
+        eg. syncConvertedunits
+    - idle workers button won't work
+    - syncing unit resources
+
+- have setting for fog of war chunks brightness
+
+- right clicking a useless building should at least move your workers there
+
+- zombie villagers sometimes get stuck gathering anything
+    - after getting attacked?
+
+- multiple selected production buildings should each build 1 item each when selected
+
+- make skeletons riding on spiders unselectable
+    - move dismount to the spider
+
+- big map is still too badly performing
+    - increase small size
+    - only update for fog periodically
+    - only update bright chunks
 
 
 TODO test in remote server
 
-- queued building constructions
-    - including destroying buildings in between queues, and current building when queued/not queued/not in position yet
-    - repeat with multiple selected workers and mixed with non-worker units selected
+
+
+
 
 TODO buildings/units (backlog)
 

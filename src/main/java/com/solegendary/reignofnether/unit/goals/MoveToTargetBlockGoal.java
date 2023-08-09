@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -58,6 +59,10 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     public void setMoveTarget(@Nullable BlockPos bp) {
+        if (bp != null) {
+            MiscUtil.addUnitCheckpoint((Unit) mob, bp);
+            ((Unit) mob).setIsCheckpointGreen(true);
+        }
         this.moveTarget = bp;
         this.start();
     }

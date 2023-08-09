@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
@@ -9,13 +11,17 @@ import com.solegendary.reignofnether.unit.goals.ReturnResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 // Defines method bodies for Units
@@ -25,8 +31,16 @@ import java.util.List;
 
 public interface Unit {
 
-    public Faction getFaction();
+    // list of positions to draw lines between to indicate unit intents - will fade over time unless shift is held
+    public ArrayList<BlockPos> getCheckpoints();
+    public int getCheckpointTicksLeft();
+    public void setCheckpointTicksLeft(int ticks);
+    public boolean isCheckpointGreen();
+    public void setIsCheckpointGreen(boolean green);
+    public int getEntityCheckpointId();
+    public void setEntityCheckpointId(int id);
 
+    public Faction getFaction();
     public List<AbilityButton> getAbilityButtons();
     public List<Ability> getAbilities();
     public List<ItemStack> getItems();
@@ -56,7 +70,36 @@ public interface Unit {
         for (Ability ability : unit.getAbilities())
             ability.tickCooldown();
 
-        if (!unitMob.level.isClientSide) {
+        // ------------- CHECKPOINT LOGIC ------------- //
+        if (unitMob.level.isClientSide()) {
+            if (Keybindings.shiftMod.isDown()) {
+                unit.setCheckpointTicksLeft(UnitClientEvents.CHECKPOINT_TICKS_MAX);
+            }
+            else if (unit.getCheckpointTicksLeft() > 0) {
+                unit.setCheckpointTicksLeft(unit.getCheckpointTicksLeft() - 1);
+                if (unit.getCheckpointTicksLeft() <= 0) {
+                    unit.getCheckpoints().clear();
+                    unit.setEntityCheckpointId(-1);
+                } else if (unit.getEntityCheckpointId() > -1 && unit.getCheckpointTicksLeft() > UnitClientEvents.CHECKPOINT_TICKS_FADE) {
+                    // remove an entity checkpoint if the given entity no longer exists
+                    if (Minecraft.getInstance().level != null) {
+                        Entity entity = Minecraft.getInstance().level.getEntity(unit.getEntityCheckpointId());
+                        if (entity == null)
+                            unit.setCheckpointTicksLeft(UnitClientEvents.CHECKPOINT_TICKS_FADE);
+                    }
+                }
+                // remove any BlockPos checkpoints if we're already close enough to them
+                if (unit.getCheckpoints().size() > 1) {
+                    unit.getCheckpoints().removeIf(bp -> ((Mob) unit).position().distanceToSqr(new Vec3(bp.getX(), bp.getY(), bp.getZ())) < 4f);
+                } // if we only have one checkpoint, fade it out instead of removing it
+                else if (unit.getCheckpoints().size() == 1 && unit.getCheckpointTicksLeft() > UnitClientEvents.CHECKPOINT_TICKS_FADE) {
+                    BlockPos bp = unit.getCheckpoints().get(0);
+                    if (((Mob) unit).position().distanceToSqr(new Vec3(bp.getX(), bp.getY(), bp.getZ())) < 4f)
+                        unit.setCheckpointTicksLeft(UnitClientEvents.CHECKPOINT_TICKS_FADE);
+                }
+
+            }
+        } else {
             int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
             if (unitMob.canPickUpLoot()) {
                 for (ItemEntity itementity : unitMob.level.getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1,0,1))) {
@@ -129,7 +172,6 @@ public interface Unit {
     public default void setMoveTarget(@Nullable BlockPos bp) {
         this.getMoveGoal().setMoveTarget(bp);
     }
-
 
     // continuously move to a target until told to do something else
     public void setFollowTarget(@Nullable LivingEntity target);

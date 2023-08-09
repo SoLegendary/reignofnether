@@ -276,7 +276,7 @@ public class MyRenderer {
                 startPos.getY() + 0.5f,
                 startPos.getZ() + 0.5f),
             new Vec3(endPos.getX() + 0.5f,
-                endPos.getY() + 0.5f,
+                endPos.getY() + 1.0f,
                 endPos.getZ() + 0.5f),
             r, g, b, a);
     }
@@ -378,17 +378,13 @@ public class MyRenderer {
     }
 
     public static void renderIcon(PoseStack poseStack, ResourceLocation resourceLocation, int x, int y, int size) {
-        try {
-            RenderSystem.setShaderTexture(0, resourceLocation);
-            GuiComponent.blit(poseStack,
-                    x, y, 0,
-                    0,0, // where on texture to start drawing from
-                    size, size, // dimensions of blit texture
-                    size, size // size of texture itself (if < dimensions, texture is repeated)
-            );
-        } catch (NullPointerException e) {
-            System.out.println("Failed to render icon: " + e);
-        }
+        RenderSystem.setShaderTexture(0, resourceLocation);
+        GuiComponent.blit(poseStack,
+                x, y, 0,
+                0,0, // where on texture to start drawing from
+                size, size, // dimensions of blit texture
+                size, size // size of texture itself (if < dimensions, texture is repeated)
+        );
     }
 
     public static void renderTooltip(PoseStack poseStack, List<FormattedCharSequence> tooltipLines, int mouseX, int mouseY) {

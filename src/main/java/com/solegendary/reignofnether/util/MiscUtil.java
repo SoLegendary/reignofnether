@@ -6,6 +6,7 @@ import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.Minecraft;
@@ -34,7 +35,22 @@ import static net.minecraft.util.Mth.sin;
 
 public class MiscUtil {
 
-
+    public static void addUnitCheckpoint(Unit unit, BlockPos blockPos) {
+        addUnitCheckpoint(unit, blockPos, true);
+    }
+    public static void addUnitCheckpoint(Unit unit, BlockPos blockPos, boolean clearExisting) {
+        if (clearExisting) {
+            unit.getCheckpoints().clear();
+            unit.setEntityCheckpointId(-1);
+        }
+        unit.setCheckpointTicksLeft(UnitClientEvents.CHECKPOINT_TICKS_MAX);
+        unit.getCheckpoints().add(blockPos);
+    }
+    public static void addUnitCheckpoint(Unit unit, int id) {
+        unit.getCheckpoints().clear();
+        unit.setEntityCheckpointId(id);
+        unit.setCheckpointTicksLeft(UnitClientEvents.CHECKPOINT_TICKS_MAX);
+    }
 
     public static BlockPos getHighestSolidBlock(Level level, BlockPos blockPos) {
         int y = level.getHeight();

@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -66,8 +67,35 @@ public class MinimapClientEvents {
 
     private static int xc_world = 0; // world pos x centre, maps to xc
     private static int zc_world = 0; // world pos zcentre, maps to yc
-
     private static float xl, xc, xr, yt, yc, yb;
+
+    public static final ArrayList<MinimapUnit> minimapUnits = new ArrayList<>();
+
+
+    // objects for tracking serverside Units that don't yet exist on clientside
+    private static class MinimapUnit {
+        public BlockPos pos;
+        public final int id;
+        public final String ownerName;
+
+        public MinimapUnit(BlockPos pos, int id, String ownerName) {
+            this.pos = pos;
+            this.id = id;
+            this.ownerName = ownerName;
+        }
+    }
+    public static void removeMinimapUnit(int id) {
+        minimapUnits.removeIf(u -> u.id == id);
+    }
+    public static void syncMinimapUnits(BlockPos pos, int id, String ownerName) {
+        for (MinimapUnit unit : minimapUnits) {
+            if (unit.id == id) {
+                unit.pos = pos;
+                return;
+            }
+        }
+        minimapUnits.add(new MinimapUnit(pos, id, ownerName));
+    }
 
 
     public static void setMapCentre(double x, double z) {
@@ -114,6 +142,9 @@ public class MinimapClientEvents {
 
     public static void updateMapTexture()
     {
+        if (MC.player == null)
+            return;
+
         // if camera is off the map, start panning the centre of the map
         double xCam = MC.player.getX();
         double zCam = MC.player.getZ();
@@ -212,12 +243,17 @@ public class MinimapClientEvents {
 
                     // only reduce shade every nth step to have the map look sharper
                     depth = (int) (5*(Math.ceil(Math.abs(depth/5))));
+
                     rgb = MiscUtil.shadeHexRGB(rgb, 1.2F - (0.025F * depth));
                 }
 
                 // normalise xz back to 0,0
                 int x0 = x - xc_world + worldRadius;
                 int z0 = z - zc_world + worldRadius;
+
+                if (!FogOfWarClientEvents.isInBrightChunk(new BlockPos(x,0,z)))
+                    rgb = MiscUtil.shadeHexRGB(rgb, 0.40f);
+
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
                 mapColours[x0][z0] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
             }
@@ -226,7 +262,7 @@ public class MinimapClientEvents {
 
         // draw buildings
         for (Building building : BuildingClientEvents.getBuildings()) {
-            if (!FogOfWarClientEvents.isInBrightChunk(building.centrePos))
+            if (!building.isTownCentre && !FogOfWarClientEvents.isInBrightChunk(building.centrePos))
                 continue;
 
             int xc = building.originPos.getX() + (BUILDING_RADIUS / 2);
@@ -261,62 +297,23 @@ public class MinimapClientEvents {
         for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
             if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()))
                 continue;
-
-            int xc = entity.getOnPos().getX();
-            int zc = entity.getOnPos().getZ();
-
-            for (int x = xc - UNIT_RADIUS; x < xc + UNIT_RADIUS; x++) {
-                for (int z = zc - UNIT_RADIUS; z < zc + UNIT_RADIUS; z++) {
-                    if (isWorldXZinsideMap(x,z)) {
-                        int x0 = x - xc + UNIT_RADIUS;
-                        int z0 = z - zc + UNIT_RADIUS;
-                        int rgb = 0x000000;
-
-                        // if pixel is on the edge of the square keep it coloured black
-                        if (!(x0 < UNIT_THICKNESS || x0 >= (UNIT_RADIUS * 2) - UNIT_THICKNESS ||
-                              z0 < UNIT_THICKNESS || z0 >= (UNIT_RADIUS * 2) - UNIT_THICKNESS)) {
-                            switch (UnitClientEvents.getPlayerToEntityRelationship(entity)) {
-                                case OWNED -> rgb = 0x00FF00;
-                                case FRIENDLY -> rgb = 0x0000FF;
-                                case HOSTILE -> rgb = 0xFF0000;
-                                case NEUTRAL -> rgb = 0xFFFF00;
-                            }
-                        }
-                        int xN = x - xc_world + (mapGuiRadius * 2);
-                        int zN = z - zc_world + (mapGuiRadius * 2);
-                        mapColours[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
-                    }
-                }
-            }
+            drawUnitOnMap(entity.getOnPos().getX(),
+                    entity.getOnPos().getZ(),
+                    UnitClientEvents.getPlayerToEntityRelationship(entity)
+            );
         }
+        for (MinimapUnit minimapUnit : minimapUnits) {
+            if (!FogOfWarClientEvents.isInBrightChunk(minimapUnit.pos) || MC.player == null)
+                continue;
 
-        // init a map filled with black and copy in only those pixels inside of explored/bright chunks
-        if (FogOfWarClientEvents.isEnabled()) {
-            int[][] mapColoursCopy = new int[worldRadius*2][worldRadius*2];
-            for (int[] row : mapColoursCopy)
-                Arrays.fill(row, (0xFF << 24));
+            Relationship relationship = Relationship.HOSTILE;
+            if (MC.player.getName().getString().equals(minimapUnit.ownerName))
+                relationship = Relationship.OWNED;
 
-            for (ChunkPos chunkPos : FogOfWarClientEvents.exploredChunks) {
-                boolean isBrightChunk = FogOfWarClientEvents.isInBrightChunk(chunkPos.getWorldPosition());
-                float brightnessMult = isBrightChunk ? 1.0f : 0.35f;
-
-                for (int x = chunkPos.getMinBlockX(); x <= chunkPos.getMaxBlockX(); x++) {
-                    for (int z = chunkPos.getMinBlockZ(); z <= chunkPos.getMaxBlockZ(); z++) {
-                        if (isWorldXZinsideMap(x,z)) {
-                            int xN = x - xc_world + (mapGuiRadius * 2);
-                            int zN = z - zc_world + (mapGuiRadius * 2);
-
-                            int col = mapColours[xN][zN];
-                            int blue = (int) (((col >> 16) & 0xFF) * brightnessMult);
-                            int green = (int) (((col >> 8) & 0xFF) * brightnessMult);
-                            int red = (int) (((col) & 0xFF) * brightnessMult);
-
-                            mapColoursCopy[xN][zN] = (0xFF << 24) | (blue << 16) | (green << 8) | (red);
-                        }
-                    }
-                }
-            }
-            mapColours = mapColoursCopy;
+            drawUnitOnMap(minimapUnit.pos.getX(),
+                    minimapUnit.pos.getZ(),
+                    relationship
+            );
         }
 
         // draw view quad
@@ -337,6 +334,33 @@ public class MinimapClientEvents {
                         int z0 = z - zc_world + worldRadius;
                         mapColours[x0][z0] = 0xFFFFFFFF;
                     }
+                }
+            }
+        }
+    }
+
+    private static void drawUnitOnMap(int xc, int zc, Relationship relationship) {
+        for (int x = xc - UNIT_RADIUS; x < xc + UNIT_RADIUS; x++) {
+            for (int z = zc - UNIT_RADIUS; z < zc + UNIT_RADIUS; z++) {
+                if (isWorldXZinsideMap(x,z)) {
+                    int x0 = x - xc + UNIT_RADIUS;
+                    int z0 = z - zc + UNIT_RADIUS;
+                    int rgb = 0x000000;
+
+                    // if pixel is on the edge of the square keep it coloured black
+                    if (!(x0 < UNIT_THICKNESS || x0 >= (UNIT_RADIUS * 2) - UNIT_THICKNESS ||
+                            z0 < UNIT_THICKNESS || z0 >= (UNIT_RADIUS * 2) - UNIT_THICKNESS)) {
+                        switch (relationship) {
+                            case OWNED -> rgb = 0x00FF00;
+                            case FRIENDLY -> rgb = 0x0000FF;
+                            case HOSTILE -> rgb = 0xFF0000;
+                            case NEUTRAL -> rgb = 0xFFFF00;
+                        }
+                    }
+                    int xN = x - xc_world + (mapGuiRadius * 2);
+                    int zN = z - zc_world + (mapGuiRadius * 2);
+
+                    mapColours[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                 }
             }
         }

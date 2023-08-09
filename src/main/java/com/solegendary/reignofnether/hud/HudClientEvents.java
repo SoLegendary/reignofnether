@@ -106,7 +106,10 @@ public class HudClientEvents {
     }
 
     public static void showTemporaryMessage(String msg) {
-        tempMsgTicksLeft = TEMP_MSG_TICKS_MAX;
+        showTemporaryMessage(msg, TEMP_MSG_TICKS_MAX);
+    }
+    public static void showTemporaryMessage(String msg, int ticks) {
+        tempMsgTicksLeft = ticks;
         tempMsg = msg;
     }
 
@@ -331,7 +334,7 @@ public class HudClientEvents {
                         new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
                         Keybindings.cancelBuild,
                         () -> false,
-                        () -> false,
+                        () -> hudSelectedBuilding.isTownCentre,
                         () -> true,
                         () -> {
                             BuildingServerboundPacket.cancelBuilding(hudSelectedBuilding.minCorner);
@@ -340,8 +343,10 @@ public class HudClientEvents {
                         null,
                         List.of(FormattedCharSequence.forward("Cancel", Style.EMPTY))
                 );
-                cancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
-                renderedButtons.add(cancelButton);
+                if (!cancelButton.isHidden.get()) {
+                    cancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
+                    renderedButtons.add(cancelButton);
+                }
             }
             else if (hudSelBuildingOwned) {
 
@@ -421,7 +426,11 @@ public class HudClientEvents {
                     }
                 }
             }
-            blitX += portraitRendererUnit.statsWidth + 10;
+            if (hudSelectedEntity instanceof Unit unit &&
+                Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0)
+                blitX += portraitRendererUnit.frameWidth + 5;
+            else
+                blitX += 25;
         }
 
         // ----------------------------------------------
@@ -746,8 +755,6 @@ public class HudClientEvents {
                     0xFFFFFFFF);
              */
         }
-
-
     }
 
     public static boolean isMouseOverAnyButton() {
@@ -830,6 +837,7 @@ public class HudClientEvents {
             hudSelectedEntity = units.get(0);
 
         if (hudSelectedEntity == null) {
+            portraitRendererUnit.setNonHeadModelVisibility(true);
             portraitRendererUnit.model = null;
             portraitRendererUnit.renderer = null;
         }

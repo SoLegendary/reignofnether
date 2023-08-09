@@ -4,6 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -11,6 +13,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -19,6 +22,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
 
 public class ResourcesClientEvents {
 
@@ -76,8 +81,15 @@ public class ResourcesClientEvents {
 
     public static void showWarning(String ownerName, String msg) {
         Player player = Minecraft.getInstance().player;
-        if (player != null && player.getName().getString().equals(ownerName))
+        if (player != null && player.getName().getString().equals(ownerName)) {
             HudClientEvents.showTemporaryMessage(msg);
+
+            // remove checkpoints from a failed building placement since the client has no knowledge of resource costs
+            if (msg.contains("You don't have enough"))
+                for (LivingEntity entity : getSelectedUnits())
+                    if (entity instanceof Unit unit)
+                        unit.getCheckpoints().clear();
+        }
     }
 
     // floating text for resource dropoffs

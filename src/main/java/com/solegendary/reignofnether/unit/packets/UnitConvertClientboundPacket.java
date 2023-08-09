@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 // send a list of the old units ids that have been converted into new units (with new ids) so the client can retain
-// these units' selections, goals and
+// these units' selections, goals and continue the same actions they were taking
 public class UnitConvertClientboundPacket {
 
     private final String ownerName; // the player that owns these units

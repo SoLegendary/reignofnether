@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
@@ -75,8 +76,17 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
 
     public void setBuildingTarget(BlockPos blockPos) {
         if (blockPos != null) {
-            if (this.mob.level.isClientSide())
+            if (this.mob.level.isClientSide()) {
                 this.buildingTarget = BuildingUtils.findBuilding(BuildingClientEvents.getBuildings(), blockPos);
+                if (this.buildingTarget != null) {
+                    MiscUtil.addUnitCheckpoint(((Unit) mob), new BlockPos(
+                            buildingTarget.centrePos.getX(),
+                            buildingTarget.originPos.getY() + 1,
+                            buildingTarget.centrePos.getZ())
+                    );
+                    ((Unit) mob).setIsCheckpointGreen(false);
+                }
+            }
             else
                 this.buildingTarget = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), blockPos);
             calcMoveTarget();

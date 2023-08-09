@@ -20,7 +20,11 @@ import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.solegendary.reignofnether.unit.UnitClientEvents.getPlayerToEntityRelationship;
+import static com.solegendary.reignofnether.building.BuildingClientEvents.getPlayerToBuildingRelationship;
+import static com.solegendary.reignofnether.building.BuildingClientEvents.getSelectedBuildings;
+import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedBuilding;
+import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedEntity;
+import static com.solegendary.reignofnether.unit.UnitClientEvents.*;
 
 // classic RTS control groups that can contain either buildings or units
 // ctrl + number to create a group, number to select that group
@@ -36,6 +40,7 @@ public class ControlGroup {
     public final ArrayList<Integer> entityIds = new ArrayList<>();
     private final ArrayList<BlockPos> buildingBps = new ArrayList<>(); // origin pos
     private Keybinding keybinding = null;
+    private ResourceLocation iconRl = null;
 
     public ControlGroup() { }
 
@@ -64,6 +69,14 @@ public class ControlGroup {
 
     // assigns selected entities/buildings to this control group
     public void saveFromSelected(Keybinding keybinding) {
+        int numSaveableUnits = getSelectedUnits().stream().filter(
+                e -> getPlayerToEntityRelationship(e) == Relationship.OWNED).toList().size();
+        int numSaveableBuildings = getSelectedBuildings().stream().filter(
+                b -> getPlayerToBuildingRelationship(b) == Relationship.OWNED).toList().size();
+
+        if (numSaveableUnits == 0 && numSaveableBuildings == 0)
+            return;
+
         this.clearAll();
         this.keybinding = keybinding;
 
@@ -73,8 +86,15 @@ public class ControlGroup {
         if (selUnits.size() > 0 && getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED) {
             this.entityIds.addAll(selUnits.stream().map(Entity::getId).toList());
         }
-        else if (selBuildings.size() > 0 && BuildingClientEvents.getPlayerToBuildingRelationship(selBuildings.get(0)) == Relationship.OWNED) {
+        else if (selBuildings.size() > 0 && getPlayerToBuildingRelationship(selBuildings.get(0)) == Relationship.OWNED) {
             this.buildingBps.addAll(selBuildings.stream().map(b -> b.originPos).toList());
+        }
+        // assign the icon resource (won't update if the front entity/building dies)
+        if (hudSelectedEntity != null) {
+            String unitName = HudClientEvents.getSimpleEntityName(hudSelectedEntity);
+            iconRl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png");
+        } else if (hudSelectedBuilding != null) {
+            iconRl = hudSelectedBuilding.icon;
         }
     }
 
@@ -91,13 +111,15 @@ public class ControlGroup {
             BuildingClientEvents.clearSelectedBuildings();
             UnitClientEvents.clearSelectedUnits();
             for (int id : entityIds) {
-                Entity e = MC.level.getEntity(id);
-                if (e instanceof Unit && e instanceof LivingEntity le)
-                    UnitClientEvents.addSelectedUnit(le);
+                List<LivingEntity> entities = getAllUnits().stream().filter(e -> entityIds.contains(e.getId()) && e instanceof Unit).toList();
+                if (entities.size() > 0) {
+                    UnitClientEvents.clearSelectedUnits();
+                    for (LivingEntity entity : entities)
+                        UnitClientEvents.addSelectedUnit(entity);
+                    if (doubleClicked)
+                        OrthoviewClientEvents.centreCameraOnPos(entities.get(0).getX(), entities.get(0).getZ());
+                }
             }
-            Entity e = MC.level.getEntity(entityIds.get(0));
-            if (doubleClicked && e != null)
-                OrthoviewClientEvents.centreCameraOnPos(e.getX(), e.getZ());
         }
         else if (buildingBps.size() > 0) {
             UnitClientEvents.clearSelectedUnits();
@@ -119,28 +141,10 @@ public class ControlGroup {
     }
 
     public Button getButton() {
-        Minecraft MC = Minecraft.getInstance();
-
-        ResourceLocation icon = null;
-        if (this.entityIds.size() > 0) {
-            if (MC.level != null) {
-                Entity e = MC.level.getEntity(entityIds.get(0));
-                if (e != null) {
-                    String unitName = HudClientEvents.getSimpleEntityName(e);
-                    icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png");
-                }
-            }
-        }
-        else if (this.buildingBps.size() > 0) {
-            for (Building building : BuildingClientEvents.getBuildings())
-                if (building.originPos == this.buildingBps.get(0))
-                    icon = building.icon;
-        }
-
         return new Button(
             "Control Group " + getKey(),
             Button.itemIconSize,
-            icon,
+            iconRl == null ? new ResourceLocation("") : iconRl,
             this.keybinding,
             () -> false,
             () -> false,

@@ -84,9 +84,12 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
         // not covered by solid blocks
         boolean hasClearNeighbour = false;
-        for (BlockPos adjBp : List.of(bp.north(), bp.south(), bp.east(), bp.west(), bp.above(), bp.below()))
-            if (ResourceSources.CLEAR_MATERIALS.contains(mob.level.getBlockState(adjBp).getMaterial()))
+        for (BlockPos adjBp : List.of(bp.above(), bp.north(), bp.south(), bp.east(), bp.west())) {
+            if (ResourceSources.CLEAR_MATERIALS.contains(mob.level.getBlockState(adjBp).getMaterial())) {
                 hasClearNeighbour = true;
+                break;
+            }
+        }
         if (!hasClearNeighbour)
             return false;
 
@@ -361,6 +364,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     @Override
     public void setMoveTarget(@Nullable BlockPos bp) {
+        if (bp != null) {
+            MiscUtil.addUnitCheckpoint((Unit) mob, bp);
+            ((Unit) mob).setIsCheckpointGreen(true);
+        }
         super.setMoveTarget(bp);
         if (BLOCK_CONDITION.test(bp)) {
             this.gatherTarget = bp;
@@ -370,6 +377,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     // locks the worker to only gather from this specific building
     public void setTargetFarm(Building building) {
+        if (building != null) {
+            MiscUtil.addUnitCheckpoint((Unit) mob, building.centrePos);
+            ((Unit) mob).setIsCheckpointGreen(true);
+        }
         this.targetFarm = building;
     }
 

@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -59,7 +60,6 @@ public class BuildingClientEvents {
     public static int getTotalPopulationSupply() {
         return Math.min(ResourceCosts.MAX_POPULATION, totalPopulationSupply);
     }
-
     // clientside buildings used for tracking position (for cursor selection)
     private static final ArrayList<Building> buildings = new ArrayList<>();
 
@@ -73,6 +73,10 @@ public class BuildingClientEvents {
 
     private static long lastLeftClickTime = 0; // to track double clicks
     private static final long DOUBLE_CLICK_TIME_MS = 500;
+
+    // minimum % of blocks below a building that need to be supported by a solid block for it to be placeable
+    // 1 means you can't have any gaps at all, 0 means you can place buildings in mid-air
+    private static final float MIN_SUPPORTED_BLOCKS_PERCENT = 0.7f;
 
     // can only be one preselected building as you can't box-select them like units
     public static Building getPreselectedBuilding() {
@@ -238,10 +242,8 @@ public class BuildingClientEvents {
                 }
             }
         }
-        float minBlocksBelow = 0.7f;
-
         if (blocksBelow <= 0) return false; // avoid division by 0
-        return ((float) solidBlocksBelow / (float) blocksBelow) < minBlocksBelow;
+        return ((float) solidBlocksBelow / (float) blocksBelow) < MIN_SUPPORTED_BLOCKS_PERCENT;
     }
 
     // disallow the building borders from overlapping any other's, even if they don't collide physical blocks
@@ -344,25 +346,6 @@ public class BuildingClientEvents {
                         0, 1, 0, a);
             }
         }
-
-        // draw queued buildings
-        if (hudSelectedEntity instanceof WorkerUnit workerUnit) {
-            BuildRepairGoal goal = workerUnit.getBuildRepairGoal();
-            float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
-
-            for (int i = 0; i < goal.queuedBuildings.size(); i++) {
-                Vec3 startPos;
-                if (i == 0)
-                    startPos = ((LivingEntity) workerUnit).getEyePosition();
-                else {
-                    BlockPos bp = goal.queuedBuildings.get(i-1).centrePos;
-                    startPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
-                }
-                BlockPos bp = goal.queuedBuildings.get(i).centrePos.offset(0,-1,0);
-                Vec3 endPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
-                MyRenderer.drawLine(evt.getPoseStack(), startPos, endPos, 0, 1, 0, a);
-            }
-        }
     }
 
     // on scroll rotate the building placement by 90deg by resorting the blocks list
@@ -405,14 +388,29 @@ public class BuildingClientEvents {
                     if (builderEntity instanceof WorkerUnit)
                         builderIds.add(builderEntity.getId());
 
-
                 if (Keybindings.shiftMod.isDown()) {
                     BuildingServerboundPacket.placeAndQueueBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
                             builderIds.stream().mapToInt(i -> i).toArray());
+
+                    for (LivingEntity entity : getSelectedUnits()) {
+                        if (entity instanceof Unit unit) {
+                            MiscUtil.addUnitCheckpoint(unit, CursorClientEvents.getPreselectedBlockPos().above(), false);
+                            if (unit instanceof WorkerUnit workerUnit)
+                                workerUnit.getBuildRepairGoal().ignoreNextCheckpoint = true;
+                        }
+                    }
                 } else {
                     BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
                             builderIds.stream().mapToInt(i -> i).toArray());
                     setBuildingToPlace(null);
+
+                    for (LivingEntity entity : getSelectedUnits()) {
+                        if (entity instanceof Unit unit) {
+                            MiscUtil.addUnitCheckpoint(unit, CursorClientEvents.getPreselectedBlockPos().above());
+                            if (unit instanceof WorkerUnit workerUnit)
+                                workerUnit.getBuildRepairGoal().ignoreNextCheckpoint = true;
+                        }
+                    }
                 }
             }
             // equivalent of UnitClientEvents.onMouseClick()

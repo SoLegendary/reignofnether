@@ -42,7 +42,7 @@ public class AttackWarningClientEvents {
             () -> lastAttackPos == null || warnDuration <= 0,
             () -> true,
             () -> {
-                PlayerServerboundPacket.teleportPlayer((double) lastAttackPos.getX(), MC.player.getY(), (double) lastAttackPos.getZ());
+                OrthoviewClientEvents.centreCameraOnPos(lastAttackPos.getX(), lastAttackPos.getZ());
                 attackWarningCd = ATTACK_WARNING_CD_MAX;
                 lastAttackPos = null;
             },
@@ -72,7 +72,7 @@ public class AttackWarningClientEvents {
             lastAttackPos = attackPos;
 
         if (dist2dSqr > Math.pow(OrthoviewClientEvents.getZoom() * 2, 2) && attackWarningCd <= 0) {
-            HudClientEvents.showTemporaryMessage("Your units are in danger!");
+            HudClientEvents.showTemporaryMessage("Your units are in danger!", 200);
             lastAttackPos = attackPos;
             if (MC.player != null)
                 MC.player.playSound(SoundRegistrar.UNDER_ATTACK_SOUND.get(), 0.2f, 1.0f);

@@ -23,6 +23,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
@@ -166,13 +167,9 @@ public class CursorClientEvents {
             }
         }
 
-        // TODO: make this be CursorEntity and only show when moving a mob instead of following cursor
-        //CursorServerEvents.moveCursorEntity(cursorWorldPos);
-
         // ****************************************
         // Find entity moused over and/or selected
         // ****************************************
-        // TODO: ignore units behind blocks
         List<LivingEntity> nearbyEntities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 10, LivingEntity.class, MC.level);
 
         UnitClientEvents.clearPreselectedUnits();
@@ -287,10 +284,16 @@ public class CursorClientEvents {
                         ownedEntities += 1;
 
                 if (ownedEntities > 0) {
-                    UnitClientEvents.clearSelectedUnits();
+                    ArrayList<LivingEntity> unitsToAdd = new ArrayList<>();
                     for (LivingEntity unit : preselectedUnit)
                         if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
-                            UnitClientEvents.addSelectedUnit(unit);
+                            unitsToAdd.add(unit);
+
+                    List<Integer> selectedIds = UnitClientEvents.getSelectedUnits().stream().map(Entity::getId).toList();
+                    unitsToAdd.removeIf(e -> selectedIds.contains(e.getId()));
+
+                    for (LivingEntity unit : unitsToAdd)
+                        UnitClientEvents.addSelectedUnit(unit);
                 }
 
             }

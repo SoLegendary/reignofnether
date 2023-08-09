@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
@@ -47,15 +48,15 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(FogOfWarClientEvents.class);
         vanillaEventBus.register(ResourcesClientEvents.class);
         vanillaEventBus.register(TPSClientEvents.class);
+        vanillaEventBus.register(PlayerClientEvents.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(PlayerServerEvents.class);
         vanillaEventBus.register(UnitServerEvents.class);
         vanillaEventBus.register(BuildingServerEvents.class);
         vanillaEventBus.register(AttackWarningServerEvents.class);
-        vanillaEventBus.register(FogOfWarServerEvents.class);
         vanillaEventBus.register(ResourcesServerEvents.class);
         vanillaEventBus.register(TPSServerEvents.class);
-        //vanillaEventBus.register(CursorServerEvents.class);
+        vanillaEventBus.register(FogOfWarServerEvents.class);
     }
 }

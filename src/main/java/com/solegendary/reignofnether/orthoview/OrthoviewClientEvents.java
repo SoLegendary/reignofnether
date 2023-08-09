@@ -133,6 +133,8 @@ public class OrthoviewClientEvents {
 
     // moves the camera to the position such that x,z is at the centre of the screen
     public static void centreCameraOnPos(double x, double z) {
+        if (MC.player == null)
+            return;
         // at 0deg by default camera is facing +Z and we want to move it backwards from this
         Vec2 XZRotated = MyMath.rotateCoords(0,-20, OrthoviewClientEvents.getCamRotX());
         PlayerServerboundPacket.teleportPlayer(x + XZRotated.x, MC.player.getY(), z + XZRotated.y);

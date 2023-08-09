@@ -28,11 +28,12 @@ public class UnitSyncClientboundPacket {
     private final int food;
     private final int wood;
     private final int ore;
+    private final String ownerName;
 
     public static void sendLeavePacket(LivingEntity entity) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitSyncClientboundPacket(UnitSyncAction.LEAVE_LEVEL,
-                entity.getId(),0,0,0,0,0,0,0)
+                entity.getId(),0,0,0,0,0,0,0, "")
         );
     }
 
@@ -40,12 +41,16 @@ public class UnitSyncClientboundPacket {
         boolean isBuilding = false;
         ResourceName gatherTarget = ResourceName.NONE;
 
+        String owner = "";
+        if (entity instanceof Unit unit)
+            owner = unit.getOwnerName();
+
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitSyncClientboundPacket(UnitSyncAction.SYNC_STATS,
                 entity.getId(),
                 entity.getHealth(),
                 entity.getX(), entity.getY(), entity.getZ(),
-                0,0,0)
+                0,0,0, owner)
         );
     }
 
@@ -54,7 +59,7 @@ public class UnitSyncClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitSyncClientboundPacket(UnitSyncAction.SYNC_RESOURCES,
                 ((LivingEntity) unit).getId(), 0,0,0,0,
-                res.food, res.wood, res.ore)
+                res.food, res.wood, res.ore, "")
         );
     }
 
@@ -63,7 +68,7 @@ public class UnitSyncClientboundPacket {
             new UnitSyncClientboundPacket(
                 startCasting ? UnitSyncAction.EVOKER_START_CASTING : UnitSyncAction.EVOKER_STOP_CASTING,
                 entity.getId(),
-                0,0,0,0,0,0,0)
+                0,0,0,0,0,0,0, "")
         );
     }
 
@@ -77,7 +82,8 @@ public class UnitSyncClientboundPacket {
         double posZ,
         int food,
         int wood,
-        int ore
+        int ore,
+        String ownerName
     ) {
         // filter out non-owned entities so we can't control them
         this.syncAction = syncAction;
@@ -89,6 +95,7 @@ public class UnitSyncClientboundPacket {
         this.food = food;
         this.wood = wood;
         this.ore = ore;
+        this.ownerName = ownerName;
     }
 
     public UnitSyncClientboundPacket(FriendlyByteBuf buffer) {
@@ -101,6 +108,7 @@ public class UnitSyncClientboundPacket {
         this.food = buffer.readInt();
         this.wood = buffer.readInt();
         this.ore = buffer.readInt();
+        this.ownerName = buffer.readUtf();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -113,6 +121,7 @@ public class UnitSyncClientboundPacket {
         buffer.writeInt(this.food);
         buffer.writeInt(this.wood);
         buffer.writeInt(this.ore);
+        buffer.writeUtf(this.ownerName);
     }
 
     // client-side packet-consuming functions
@@ -127,7 +136,8 @@ public class UnitSyncClientboundPacket {
                         case SYNC_STATS -> UnitClientEvents.syncUnitStats(
                                 this.entityId,
                                 this.health,
-                                new Vec3(this.posX, this.posY, this.posZ));
+                                new Vec3(this.posX, this.posY, this.posZ),
+                                this.ownerName);
                         case SYNC_RESOURCES -> UnitClientEvents.syncUnitResources(
                                 this.entityId,
                                 new Resources("", this.food, this.wood, this.ore));

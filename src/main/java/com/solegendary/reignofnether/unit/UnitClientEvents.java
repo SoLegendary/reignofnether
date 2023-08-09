@@ -10,12 +10,14 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -25,6 +27,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -37,6 +40,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -80,6 +84,7 @@ public class UnitClientEvents {
             return;
         selectedUnits.add(unit);
         selectedUnits.sort(Comparator.comparing(HudClientEvents::getSimpleEntityName));
+        selectedUnits.sort(Comparator.comparing(Entity::getId));
         BuildingClientEvents.clearSelectedBuildings();
     }
     public static void clearPreselectedUnits() {
@@ -91,6 +96,10 @@ public class UnitClientEvents {
 
     private static long lastLeftClickTime = 0; // to track double clicks
     private static final long DOUBLE_CLICK_TIME_MS = 500;
+
+    // unit checkpoint draw lines (eg. where the unit was issued a command to move/build to)
+    public static final int CHECKPOINT_TICKS_MAX = 200;
+    public static final int CHECKPOINT_TICKS_FADE = 15; // ticks left at which the lines start to fade
 
     private static boolean isLeftClickAttack() {
         return CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK;
@@ -213,16 +222,20 @@ public class UnitClientEvents {
      * Update data on a unit from serverside, mainly to ensure unit HUD data is up-to-date
      * Only try to update health and pos if out of view
      */
-    public static void syncUnitStats(int entityId, float health, Vec3 pos) {
-        for(LivingEntity entity : allUnits) {
+    public static void syncUnitStats(int entityId, float health, Vec3 pos, String ownerName) {
+        for (LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 boolean isLoadedClientside = MC.level.getEntity(entityId) != null;
                 if (!isLoadedClientside) {
                     entity.setHealth(health);
                     entity.setPos(pos);
                 }
+                MinimapClientEvents.removeMinimapUnit(entityId);
+                return;
             }
         }
+        // if the unit doesn't exist at all clientside, create a MinimapUnit to at least track its minimap position
+        MinimapClientEvents.syncMinimapUnits(new BlockPos(pos.x, pos.y, pos.z), entityId, ownerName);
     }
 
     public static void syncWorkerUnit(int entityId, boolean isBuilding, ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
@@ -269,11 +282,6 @@ public class UnitClientEvents {
 
     @SubscribeEvent
     public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
-        // set the whole model visible again if it leaves while selected, or else we get a bug where only the head shows until reselected
-        if (evt.getEntity() == hudSelectedEntity)
-            if (HudClientEvents.portraitRendererUnit != null)
-                HudClientEvents.portraitRendererUnit.setNonHeadModelVisibility(true);
-
         idleWorkerIds.removeIf(id -> id == evt.getEntity().getId());
     }
 
@@ -301,6 +309,7 @@ public class UnitClientEvents {
         //System.out.println("preselectedUnits removed entity: " + entityId);
         allUnits.removeIf(e -> e.getId() == entityId);
         //System.out.println("allUnits removed entity: " + entityId);
+        MinimapClientEvents.removeMinimapUnit(entityId);
     }
     /**
      * Add and update entities from clientside action
@@ -511,6 +520,44 @@ public class UnitClientEvents {
                         MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(),1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f, false);
                 }
             }
+
+            // draw unit checkpoints
+            for (LivingEntity entity : getSelectedUnits()) {
+                if (entity instanceof Unit unit) {
+                    int ticksUnderFade = Math.min(unit.getCheckpointTicksLeft(), CHECKPOINT_TICKS_FADE);
+                    float a = ((float) ticksUnderFade / (float) CHECKPOINT_TICKS_FADE) * 0.5f;
+
+                    int id = unit.getEntityCheckpointId();
+                    if (id > -1) {
+                        Entity checkpointEntity = MC.level.getEntity(id);
+                        if (checkpointEntity != null) {
+                            float entityYOffset1 = 1.74f - ((LivingEntity) unit).getEyeHeight() - 1;
+                            Vec3 startPos = ((LivingEntity) unit).getEyePosition().add(0,entityYOffset1,0);
+                            float entityYOffset2 = 1.74f - checkpointEntity.getEyeHeight() - 1;
+                            Vec3 endPos = checkpointEntity.getEyePosition().add(0,entityYOffset2,0);
+                            boolean green = unit.isCheckpointGreen();
+                            MyRenderer.drawLine(evt.getPoseStack(), startPos, endPos, green ? 0 : 1, green ? 1 : 0, 0, a);
+                        }
+                    } else {
+                        for (int i = 0; i < unit.getCheckpoints().size(); i++) {
+                            Vec3 startPos;
+                            if (i == 0) {
+                                float entityYOffset = 1.74f - ((LivingEntity) unit).getEyeHeight() - 1;
+                                startPos = ((LivingEntity) unit).getEyePosition().add(0,entityYOffset,0);
+                            } else {
+                                BlockPos bp = unit.getCheckpoints().get(i-1);
+                                startPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 1, bp.getZ() + 0.5f);
+                            }
+                            BlockPos bp = unit.getCheckpoints().get(i);
+                            Vec3 endPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 1.0f, bp.getZ() + 0.5f);
+
+                            boolean green = unit.isCheckpointGreen();
+                            MyRenderer.drawLine(evt.getPoseStack(), startPos, endPos, green ? 0 : 1, green ? 1 : 0, 0, a);
+                            MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp,green ? 0 : 1, green ? 1 : 0, 0, a);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -530,7 +577,7 @@ public class UnitClientEvents {
     }
 
     public static Relationship getPlayerToEntityRelationship(LivingEntity entity) {
-        if (MC.level != null) {
+        if (MC.level != null && MC.player != null) {
 
             if (entity instanceof Player)
                 return Relationship.HOSTILE;
@@ -555,6 +602,19 @@ public class UnitClientEvents {
 
             Entity oldEntity = MC.level.getEntity(oldUnitIds[i]);
             Entity newEntity = MC.level.getEntity(newUnitIds[i]);
+
+            /* TODO: this doesn't work when the entities are out of client render range
+            // TODO: but it also doesn't work by getAllUnits() since units don't enter the client list until in render range
+            LivingEntity oldEntity = null;
+            LivingEntity newEntity = null;
+
+            for (LivingEntity entity : getAllUnits()) {
+                if (entity.getId() == oldUnitIds[i])
+                    oldEntity = entity;
+                else if (entity.getId() == newUnitIds[i])
+                    newEntity = entity;
+            }*/
+
             if (oldEntity instanceof Unit oldUnit &&
                 newEntity instanceof Unit newUnit) {
 
@@ -637,10 +697,12 @@ public class UnitClientEvents {
 
         UnitClientEvents.idleWorkerIds.clear();
         for (int id : idleWorkerIds) {
-            Entity entity = MC.level.getEntity(id);
-            if (entity instanceof WorkerUnit unit &&
-                getPlayerToEntityRelationship((LivingEntity) entity) == Relationship.OWNED)
-                UnitClientEvents.idleWorkerIds.add(id);
+            for (LivingEntity entity : getAllUnits()) {
+                if (entity.getId() == id &&
+                    entity instanceof WorkerUnit unit &&
+                    getPlayerToEntityRelationship(entity) == Relationship.OWNED)
+                    UnitClientEvents.idleWorkerIds.add(id);
+            }
         }
 
     }

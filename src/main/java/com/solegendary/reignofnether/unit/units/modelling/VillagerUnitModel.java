@@ -39,7 +39,6 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
 
     public boolean armsVisible = true;
 
-    // TODO: use player arm poses and animations
     public enum ArmPose {
         CROSSED,
         ATTACKING,

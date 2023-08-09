@@ -12,7 +12,7 @@ import net.minecraft.world.level.material.Material;
 import java.util.List;
 
 public class ResourceSources {
-    public static final List<Material> CLEAR_MATERIALS = List.of(Material.WATER, Material.AIR, Material.GRASS, Material.LEAVES);
+    public static final List<Material> CLEAR_MATERIALS = List.of(Material.WATER, Material.AIR, Material.PLANT, Material.LEAVES);
 
     public static final int TICKS_PER_SECOND = 20;
 
@@ -79,7 +79,7 @@ public class ResourceSources {
                     List.of(Blocks.CARROTS),
                     List.of(Items.CARROT),
                     TICKS_PER_SECOND * 4,
-                    7,
+                    6,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
@@ -87,7 +87,7 @@ public class ResourceSources {
                     List.of(Blocks.POTATOES),
                     List.of(Items.POTATO, Items.BAKED_POTATO),
                     TICKS_PER_SECOND * 4,
-                    9,
+                    7,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
@@ -185,7 +185,7 @@ public class ResourceSources {
                     List.of(),
                     List.of(Items.ACACIA_SAPLING, Items.SPRUCE_SAPLING, Items.BIRCH_SAPLING, Items.OAK_SAPLING, Items.OAK_SAPLING, Items.DARK_OAK_SAPLING, Items.JUNGLE_SAPLING),
                     0,
-                    4,
+                    5,
                     ResourceName.WOOD
             ),
             new ResourceSource("Planks",
@@ -205,7 +205,7 @@ public class ResourceSources {
                             Items.OAK_WOOD, Items.BIRCH_WOOD, Items.ACACIA_WOOD, Items.DARK_OAK_WOOD, Items.JUNGLE_WOOD, Items.MANGROVE_WOOD, Items.SPRUCE_WOOD,
                             Items.STRIPPED_OAK_WOOD, Items.STRIPPED_BIRCH_WOOD, Items.STRIPPED_ACACIA_WOOD, Items.STRIPPED_DARK_OAK_WOOD, Items.STRIPPED_JUNGLE_WOOD, Items.STRIPPED_MANGROVE_WOOD, Items.STRIPPED_SPRUCE_WOOD),
                     TICKS_PER_SECOND * 12,
-                    12,
+                    15,
                     ResourceName.WOOD
             ),
             new ResourceSource("Leaves", // can't actually gather but can be targeted to begin wood gathering
@@ -228,28 +228,28 @@ public class ResourceSources {
             new ResourceSource("Tier 1 Ores",
                     List.of(Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE, Blocks.NETHER_QUARTZ_ORE),
                     List.of(Items.COAL, Items.QUARTZ),
-                    TICKS_PER_SECOND * 12,
-                    20,
+                    TICKS_PER_SECOND * 25,
+                    50,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 2 Ores",
                     List.of(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.IRON_ORE, Blocks.LAPIS_ORE, Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.DEEPSLATE_LAPIS_ORE, Blocks.DEEPSLATE_REDSTONE_ORE, Blocks.NETHER_GOLD_ORE),
                     List.of(Items.RAW_IRON, Items.RAW_COPPER, Items.LAPIS_LAZULI, Items.REDSTONE),
-                    TICKS_PER_SECOND * 12,
-                    40,
+                    TICKS_PER_SECOND * 25,
+                    75,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 3 Ores",
                     List.of(Blocks.GOLD_ORE, Blocks.EMERALD_ORE, Blocks.DEEPSLATE_GOLD_ORE, Blocks.DEEPSLATE_EMERALD_ORE),
                     List.of(Items.RAW_GOLD, Items.EMERALD),
-                    TICKS_PER_SECOND * 12,
-                    80,
+                    TICKS_PER_SECOND * 25,
+                    100,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 4 Ores",
                     List.of(Blocks.DIAMOND_ORE, Blocks.ANCIENT_DEBRIS, Blocks.DEEPSLATE_DIAMOND_ORE),
                     List.of(Items.DIAMOND, Items.ANCIENT_DEBRIS),
-                    TICKS_PER_SECOND * 12,
+                    TICKS_PER_SECOND * 25,
                     200,
                     ResourceName.ORE
             )
