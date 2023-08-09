@@ -82,6 +82,7 @@ public class UnitClientEvents {
             return;
         selectedUnits.add(unit);
         selectedUnits.sort(Comparator.comparing(HudClientEvents::getSimpleEntityName));
+        selectedUnits.sort(Comparator.comparing(Entity::getId));
         BuildingClientEvents.clearSelectedBuildings();
     }
     public static void clearPreselectedUnits() {

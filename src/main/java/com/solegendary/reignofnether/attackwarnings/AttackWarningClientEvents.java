@@ -42,7 +42,7 @@ public class AttackWarningClientEvents {
             () -> lastAttackPos == null || warnDuration <= 0,
             () -> true,
             () -> {
-                PlayerServerboundPacket.teleportPlayer((double) lastAttackPos.getX(), MC.player.getY(), (double) lastAttackPos.getZ());
+                OrthoviewClientEvents.centreCameraOnPos(lastAttackPos.getX(), lastAttackPos.getZ());
                 attackWarningCd = ATTACK_WARNING_CD_MAX;
                 lastAttackPos = null;
             },

@@ -343,8 +343,10 @@ public class HudClientEvents {
                         null,
                         List.of(FormattedCharSequence.forward("Cancel", Style.EMPTY))
                 );
-                cancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
-                renderedButtons.add(cancelButton);
+                if (!cancelButton.isHidden.get()) {
+                    cancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
+                    renderedButtons.add(cancelButton);
+                }
             }
             else if (hudSelBuildingOwned) {
 
@@ -424,7 +426,7 @@ public class HudClientEvents {
                     }
                 }
             }
-            blitX += portraitRendererUnit.statsWidth + 10;
+            blitX += 30;
         }
 
         // ----------------------------------------------
@@ -749,8 +751,6 @@ public class HudClientEvents {
                     0xFFFFFFFF);
              */
         }
-
-
     }
 
     public static boolean isMouseOverAnyButton() {

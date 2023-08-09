@@ -1,15 +1,14 @@
 
 TODO bugs/features:
 
-- time set <time_day_string_str> causes desyncs when done with /gamerule dodaynightcycle false
+- time set causes desyncs when done with /gamerule dodaynightcycle false
 - Evoker portraits should not show their arms
-
 - villager tools sometimes disappear
-
 - force set video option for chunk threading to THREADED
 
 - Tutorial documentation/gifs
 
+- vet all uses of MC.level.getEntity(id) (will return null if the entity is outside of render range)
 
 
 TODO test in remote server
@@ -25,6 +24,11 @@ TODO test in remote server
 - iseedeadpeople cheat
 
 - all UnitActions for checkpoints
+
+- control groups
+
+- syncConvertedUnits
+
 
 
 
