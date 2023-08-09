@@ -73,9 +73,10 @@ public class PlayerServerEvents {
             orthoviewPlayers.add((ServerPlayer) evt.getEntity());
         }
 
-        if (rtsPlayerIds.contains(serverPlayer.getId())) {
-            serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether!").withStyle(Style.EMPTY.withBold(true)));
+        if (!rtsPlayerIds.contains(serverPlayer.getId())) {
+            serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
             serverPlayer.sendSystemMessage(Component.literal("Use /startrts <faction_name> to get started"));
+            serverPlayer.sendSystemMessage(Component.literal("Make sure to look for a good base location first!"));
         } else {
             serverPlayer.sendSystemMessage(Component.literal("Welcome back to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
         }
