@@ -3,12 +3,19 @@ TODO bugs/features:
 
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - Evoker portraits should not show their arms
-- villager tools sometimes disappear
 - force set video option for chunk threading to THREADED
 
 - Tutorial documentation/gifs
 
-- vet all uses of MC.level.getEntity(id) (will return null if the entity is outside of render range)
+- onEntityLeaveEvent sometimes causes a concurrentModificationException when a converted unit was attacking a worker
+
+- unit weapons/tools sometimes disappear
+    - could be related to bodies also disappearing when out of view?
+
+- units entering the server don't enter the client if they're out of render range
+    - this means units that are built/converted outside of render range don't exist until they're seen by the client
+    - won't show on minimap and will be removed from all selections and control groups
+
 
 
 TODO test in remote server
@@ -29,7 +36,7 @@ TODO test in remote server
 
 - syncConvertedUnits
 
-
+- idle workers again
 
 
 TODO buildings/units (backlog)

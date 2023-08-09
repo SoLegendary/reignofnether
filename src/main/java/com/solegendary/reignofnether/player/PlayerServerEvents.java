@@ -9,6 +9,8 @@ import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -111,6 +113,19 @@ public class PlayerServerEvents {
     // commands for ops to give resources
     @SubscribeEvent
     public static void onPlayerChat(ServerChatEvent.Submitted evt) {
+
+        if (evt.getMessage().getString().equals("test strays")) {
+            UnitServerEvents.convertAllToUnit(
+                    evt.getPlayer().getName().getString(),
+                    evt.getPlayer().getLevel(),
+                    (LivingEntity entity) ->
+                            entity instanceof SkeletonUnit zUnit &&
+                                    zUnit.getOwnerName().equals(evt.getPlayer().getName().getString()),
+                    EntityRegistrar.STRAY_UNIT.get()
+            );
+        }
+
+
         if (evt.getPlayer().hasPermissions(4)) {
             String msg = evt.getMessage().getString();
             String[] words = msg.split(" ");
