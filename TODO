@@ -5,38 +5,64 @@ TODO bugs/features:
 - Evoker portraits should not show their arms
 - force set video option for chunk threading to THREADED
 - onEntityLeaveEvent sometimes causes a concurrentModificationException when a converted unit was attacking a worker
-- units entering the server don't enter the client if they're out of render range
-    - this means units that are built/converted outside of render range don't exist on clientside until in range
-    - MinimapUnits at least can sync their position on the minimap
+- GUI scale should be 3
 
 - Tutorial documentation/gifs
 
+- if units are out of render range as they won't be loaded clientside
+    - can't MC.level.getEntity(id)
+    - can't issue any automatic commands too,
+        eg. when a stockpile is built the workers wont autogather
+        eg. syncConvertedunits
+    - idle workers button won't work
+    - syncing unit resources
 
+- start non-op players in spectator mode by default
+    - give them a welcome message explaining how to start on login
+    - welcome back, if they previously logged in this session
+
+- queued checkpoints start their blockpos 1 block too low
+    - if i>0, yoffset should be 1 higher
+
+
+- have setting for fog of war chunks brightness
+
+- town centres dont show up on minimap
+
+- UI for resources overlaps selected units
+
+- asking villagers to build while theyre gathering does not work sometimes
+
+- workers can mine through the ground still
+
+- right clicking a useless building should at least
+
+- zombie villagers sometimes get stuck gathering anything
+    - after getting attacked?
+
+- big map is still too badly performing
+    - increase small size
+    - only update for fog periodically
+    - only update bright chunks
+
+- food too easy
+- ore too hard
+    - especially for expanding monsters
+    - should clump them together more
+
+- multiple selected production buildings should each build items each
+
+- box selecting with shift doesn't add to your currently selected units
+
+- make skeletons riding on spiders unselectable
+    - move dismount to the spider
 
 
 
 TODO test in remote server
 
-- queued building constructions
-    - including destroying buildings in between queues, and current building when queued/not queued/not in position yet
-    - repeat with multiple selected workers and mixed with non-worker units selected
 
-- command-based fog of war
 
-- startrts commands
-
-- iseedeadpeople cheat
-
-- all UnitActions for checkpoints
-
-- control groups
-
-- syncConvertedUnits
-
-- idle workers again
-
-- syncing MinimapUnits
-    - leaving, creating, updating, removal from converting to real unit
 
 
 TODO buildings/units (backlog)

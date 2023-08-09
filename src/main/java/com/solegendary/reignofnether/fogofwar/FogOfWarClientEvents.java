@@ -34,7 +34,7 @@ import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.s
 public class FogOfWarClientEvents {
 
     public static final float BRIGHT = 1.0f;
-    public static final float DARK = 0.25f;
+    public static final float DARK = 0.35f;
     public static final int CHUNK_VIEW_DIST = 1;
     private static final Minecraft MC = Minecraft.getInstance();
     private static final int UPDATE_TICKS_MAX = 10;
