@@ -306,11 +306,9 @@ public class MinimapClientEvents {
             if (!FogOfWarClientEvents.isInBrightChunk(minimapUnit.pos) || MC.player == null)
                 continue;
 
-            Relationship relationship = Relationship.NEUTRAL;
-            //if (MC.player.getName().getString().equals(minimapUnit.ownerName))
-            //    relationship = Relationship.OWNED;
-            //else
-            //    relationship = Relationship.HOSTILE;
+            Relationship relationship = Relationship.HOSTILE;
+            if (MC.player.getName().getString().equals(minimapUnit.ownerName))
+                relationship = Relationship.OWNED;
 
             drawUnitOnMap(minimapUnit.pos.getX(),
                     minimapUnit.pos.getZ(),
