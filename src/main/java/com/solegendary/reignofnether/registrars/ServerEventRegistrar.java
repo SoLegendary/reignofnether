@@ -33,6 +33,5 @@ public class ServerEventRegistrar {
         vanillaEventBus.register(ResourcesServerEvents.class);
         vanillaEventBus.register(TPSServerEvents.class);
         vanillaEventBus.register(FogOfWarServerEvents.class);
-        //vanillaEventBus.register(CursorServerEvents.class);
     }
 }

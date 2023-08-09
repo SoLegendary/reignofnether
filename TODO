@@ -9,11 +9,10 @@ TODO bugs/features:
 
 - onEntityLeaveEvent sometimes causes a concurrentModificationException when a converted unit was attacking a worker
 
-- unit weapons/tools sometimes disappear
-    - could be related to bodies also disappearing when out of view?
+- bodies disappearing when out of views
 
 - units entering the server don't enter the client if they're out of render range
-    - this means units that are built/converted outside of render range don't exist until they're seen by the client
+    - this means units that are built/converted outside of render range don't exist on clientside until in range
     - won't show on minimap and will be removed from all selections and control groups
 
 

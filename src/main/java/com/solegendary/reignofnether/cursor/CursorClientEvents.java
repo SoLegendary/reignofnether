@@ -166,13 +166,9 @@ public class CursorClientEvents {
             }
         }
 
-        // TODO: make this be CursorEntity and only show when moving a mob instead of following cursor
-        //CursorServerEvents.moveCursorEntity(cursorWorldPos);
-
         // ****************************************
         // Find entity moused over and/or selected
         // ****************************************
-        // TODO: ignore units behind blocks
         List<LivingEntity> nearbyEntities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 10, LivingEntity.class, MC.level);
 
         UnitClientEvents.clearPreselectedUnits();
