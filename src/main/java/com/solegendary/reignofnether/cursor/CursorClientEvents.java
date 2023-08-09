@@ -23,6 +23,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
@@ -283,10 +284,16 @@ public class CursorClientEvents {
                         ownedEntities += 1;
 
                 if (ownedEntities > 0) {
-                    UnitClientEvents.clearSelectedUnits();
+                    ArrayList<LivingEntity> unitsToAdd = new ArrayList<>();
                     for (LivingEntity unit : preselectedUnit)
                         if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
-                            UnitClientEvents.addSelectedUnit(unit);
+                            unitsToAdd.add(unit);
+
+                    List<Integer> selectedIds = UnitClientEvents.getSelectedUnits().stream().map(Entity::getId).toList();
+                    unitsToAdd.removeIf(e -> selectedIds.contains(e.getId()));
+
+                    for (LivingEntity unit : unitsToAdd)
+                        UnitClientEvents.addSelectedUnit(unit);
                 }
 
             }

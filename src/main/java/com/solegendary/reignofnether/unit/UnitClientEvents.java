@@ -527,7 +527,6 @@ public class UnitClientEvents {
                     int ticksUnderFade = Math.min(unit.getCheckpointTicksLeft(), CHECKPOINT_TICKS_FADE);
                     float a = ((float) ticksUnderFade / (float) CHECKPOINT_TICKS_FADE) * 0.5f;
 
-
                     int id = unit.getEntityCheckpointId();
                     if (id > -1) {
                         Entity checkpointEntity = MC.level.getEntity(id);
@@ -547,7 +546,7 @@ public class UnitClientEvents {
                                 startPos = ((LivingEntity) unit).getEyePosition().add(0,entityYOffset,0);
                             } else {
                                 BlockPos bp = unit.getCheckpoints().get(i-1);
-                                startPos = new Vec3(bp.getX() + 0.5f, bp.getY(), bp.getZ() + 0.5f);
+                                startPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 1, bp.getZ() + 0.5f);
                             }
                             BlockPos bp = unit.getCheckpoints().get(i);
                             Vec3 endPos = new Vec3(bp.getX() + 0.5f, bp.getY() + 1.0f, bp.getZ() + 0.5f);

@@ -426,7 +426,11 @@ public class HudClientEvents {
                     }
                 }
             }
-            blitX += 30;
+            if (hudSelectedEntity instanceof Unit unit &&
+                Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0)
+                blitX += portraitRendererUnit.frameWidth + 5;
+            else
+                blitX += 25;
         }
 
         // ----------------------------------------------

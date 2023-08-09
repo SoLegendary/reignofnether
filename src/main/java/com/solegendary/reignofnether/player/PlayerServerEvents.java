@@ -72,6 +72,20 @@ public class PlayerServerEvents {
         if (orthoviewPlayers.stream().map(Entity::getId).toList().contains(evt.getEntity().getId())) {
             orthoviewPlayers.add((ServerPlayer) evt.getEntity());
         }
+
+        if (rtsPlayerIds.contains(serverPlayer.getId())) {
+            serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether!").withStyle(Style.EMPTY.withBold(true)));
+            serverPlayer.sendSystemMessage(Component.literal("Use /startrts <faction_name> to get started"));
+        } else {
+            serverPlayer.sendSystemMessage(Component.literal("Welcome back to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
+        }
+        if (serverPlayer.hasPermissions(4)) {
+            serverPlayer.sendSystemMessage(Component.literal(""));
+            serverPlayer.sendSystemMessage(Component.literal("As a server op you may use:"));
+            serverPlayer.sendSystemMessage(Component.literal("/fog enable|disable"));
+            serverPlayer.sendSystemMessage(Component.literal("/startrts (unlimited use)"));
+        }
+
     }
 
     @SubscribeEvent

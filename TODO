@@ -17,46 +17,22 @@ TODO bugs/features:
     - idle workers button won't work
     - syncing unit resources
 
-- start non-op players in spectator mode by default
-    - give them a welcome message explaining how to start on login
-    - welcome back, if they previously logged in this session
-
-- queued checkpoints start their blockpos 1 block too low
-    - if i>0, yoffset should be 1 higher
-
-
 - have setting for fog of war chunks brightness
 
-- town centres dont show up on minimap
-
-- UI for resources overlaps selected units
-
-- asking villagers to build while theyre gathering does not work sometimes
-
-- workers can mine through the ground still
-
-- right clicking a useless building should at least
+- right clicking a useless building should at least move your workers there
 
 - zombie villagers sometimes get stuck gathering anything
     - after getting attacked?
+
+- multiple selected production buildings should each build 1 item each when selected
+
+- make skeletons riding on spiders unselectable
+    - move dismount to the spider
 
 - big map is still too badly performing
     - increase small size
     - only update for fog periodically
     - only update bright chunks
-
-- food too easy
-- ore too hard
-    - especially for expanding monsters
-    - should clump them together more
-
-- multiple selected production buildings should each build items each
-
-- box selecting with shift doesn't add to your currently selected units
-
-- make skeletons riding on spiders unselectable
-    - move dismount to the spider
-
 
 
 TODO test in remote server

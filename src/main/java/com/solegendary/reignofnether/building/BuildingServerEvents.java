@@ -98,12 +98,13 @@ public class BuildingServerEvents {
                     Entity entity = serverLevel.getEntity(id);
                     if (entity instanceof WorkerUnit workerUnit) {
                         BuildRepairGoal buildGoal = workerUnit.getBuildRepairGoal();
+                        ((Unit) entity).resetBehaviours();
+                        WorkerUnit.resetBehaviours(workerUnit);
                         if (queue) {
                             buildGoal.queuedBuildings.add(building);
                             if (buildGoal.getBuildingTarget() == null)
                                 buildGoal.startNextQueuedBuilding();
                         } else {
-                            ((Unit) entity).resetBehaviours();
                             buildGoal.setBuildingTarget(building);
                         }
                     }

@@ -70,7 +70,7 @@ public class ResearchResourceCapacity extends ProductionItem {
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Raises the resource capacity of workers from 100 to 150", Style.EMPTY)
+                        FormattedCharSequence.forward("Raises the resource capacity of workers from 50 to 100", Style.EMPTY)
                 )
         );
     }

@@ -112,7 +112,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     final static public float movementSpeed = 0.25f;
     final static public float sightRange = 10f;
     final static public int popCost = ResourceCosts.ZOMBIE_VILLAGER.population;
-    public int maxResources = 100;
+    public int maxResources = 50;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -232,12 +232,12 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     @Override
     public void setupEquipmentAndUpgradesClient() {
         if (ResearchClient.hasResearch(ResearchResourceCapacity.itemName))
-            this.maxResources = 150;
+            this.maxResources = 100;
     }
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
         if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchResourceCapacity.itemName))
-            this.maxResources = 150;
+            this.maxResources = 100;
     }
 }
