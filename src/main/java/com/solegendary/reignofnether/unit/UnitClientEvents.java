@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -221,16 +222,20 @@ public class UnitClientEvents {
      * Update data on a unit from serverside, mainly to ensure unit HUD data is up-to-date
      * Only try to update health and pos if out of view
      */
-    public static void syncUnitStats(int entityId, float health, Vec3 pos) {
-        for(LivingEntity entity : allUnits) {
+    public static void syncUnitStats(int entityId, float health, Vec3 pos, String ownerName) {
+        for (LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 boolean isLoadedClientside = MC.level.getEntity(entityId) != null;
                 if (!isLoadedClientside) {
                     entity.setHealth(health);
                     entity.setPos(pos);
                 }
+                MinimapClientEvents.removeMinimapUnit(entityId);
+                return;
             }
         }
+        // if the unit doesn't exist at all clientside, create a MinimapUnit to at least track its minimap position
+        MinimapClientEvents.syncMinimapUnits(new BlockPos(pos.x, pos.y, pos.z), entityId, ownerName);
     }
 
     public static void syncWorkerUnit(int entityId, boolean isBuilding, ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
@@ -304,6 +309,7 @@ public class UnitClientEvents {
         //System.out.println("preselectedUnits removed entity: " + entityId);
         allUnits.removeIf(e -> e.getId() == entityId);
         //System.out.println("allUnits removed entity: " + entityId);
+        MinimapClientEvents.removeMinimapUnit(entityId);
     }
     /**
      * Add and update entities from clientside action
@@ -572,7 +578,7 @@ public class UnitClientEvents {
     }
 
     public static Relationship getPlayerToEntityRelationship(LivingEntity entity) {
-        if (MC.level != null) {
+        if (MC.level != null && MC.player != null) {
 
             if (entity instanceof Player)
                 return Relationship.HOSTILE;
