@@ -833,6 +833,7 @@ public class HudClientEvents {
             hudSelectedEntity = units.get(0);
 
         if (hudSelectedEntity == null) {
+            portraitRendererUnit.setNonHeadModelVisibility(true);
             portraitRendererUnit.model = null;
             portraitRendererUnit.renderer = null;
         }

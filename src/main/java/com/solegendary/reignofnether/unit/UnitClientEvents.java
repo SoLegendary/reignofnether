@@ -39,6 +39,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -276,11 +277,6 @@ public class UnitClientEvents {
 
     @SubscribeEvent
     public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
-        // set the whole model visible again if it leaves while selected, or else we get a bug where only the head shows until reselected
-        if (evt.getEntity() == hudSelectedEntity)
-            if (HudClientEvents.portraitRendererUnit != null)
-                HudClientEvents.portraitRendererUnit.setNonHeadModelVisibility(true);
-
         idleWorkerIds.removeIf(id -> id == evt.getEntity().getId());
     }
 
