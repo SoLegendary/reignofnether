@@ -51,6 +51,6 @@ public class Explode extends Ability {
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        creeperUnit.explode();
+        creeperUnit.startToExplode();
     }
 }

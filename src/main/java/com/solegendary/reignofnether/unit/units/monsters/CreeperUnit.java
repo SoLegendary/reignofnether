@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -14,6 +15,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -103,7 +106,6 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
     // endregion
 
-
     final static public float attackDamage = 20.0f;
     final static public float attacksPerSecond = 1f;
     final static public float maxHealth = 20.0f;
@@ -124,7 +126,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    private boolean forceExplode = false;
+    private boolean forceSwelling = false;
 
     public CreeperUnit(EntityType<? extends Creeper> entityType, Level level) {
         super(entityType, level);
@@ -160,15 +162,19 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
         Unit.tick(this);
         AttackerUnit.tick(this);
 
-        if (forceExplode)
+        if (forceSwelling)
             this.setSwellDir(1);
         else if (!canExplodeOnTarget())
             this.setSwellDir(-1);
+
+        // apply slowness level 2 during daytime for a short time repeatedly
+        if (!this.level.isClientSide() && this.level.isDay() && !BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false))
+            this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 2, 1));
     }
 
     @Override
     public void resetBehaviours() {
-        forceExplode = false;
+        forceSwelling = false;
     }
 
     public void initialiseGoals() {
@@ -188,7 +194,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }
 
-    public void explode() {
-        forceExplode = true;
+    public void startToExplode() {
+        forceSwelling = true;
     }
 }

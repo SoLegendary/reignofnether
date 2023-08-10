@@ -125,7 +125,7 @@ public class HudClientEvents {
         mouseY = evt.getMouseY();
 
         // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
-        int hudStartingXPos = (MC.getWindow().getGuiScaledWidth() / 5) + 20;
+        int hudStartingXPos = Button.iconFrameSize * 6;
 
         ArrayList<LivingEntity> selUnits = UnitClientEvents.getSelectedUnits();
         ArrayList<Building> selBuildings = BuildingClientEvents.getSelectedBuildings();
@@ -428,9 +428,9 @@ public class HudClientEvents {
             }
             if (hudSelectedEntity instanceof Unit unit &&
                 Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0)
-                blitX += portraitRendererUnit.frameWidth + 5;
+                blitX += portraitRendererUnit.statsWidth + 5;
             else
-                blitX += 25;
+                blitX += 15;
         }
 
         // ----------------------------------------------

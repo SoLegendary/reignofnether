@@ -22,6 +22,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -30,6 +31,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -278,6 +280,12 @@ public class UnitClientEvents {
             // prevent selection of units out of view
             selectedUnits.removeIf(e -> !FogOfWarClientEvents.isInBrightChunk(e.getOnPos()));
         }
+    }
+
+    @SubscribeEvent
+    public static void onEntityLeaveEvent(LivingDeathEvent evt) {
+        if (evt.getEntity() instanceof CreeperUnit creeperUnit)
+            creeperUnit.explodeCreeper();
     }
 
     @SubscribeEvent

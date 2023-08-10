@@ -4,6 +4,7 @@ TODO bugs/features:
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - Evoker portraits should not show their arms
 - force set video option for chunk threading to THREADED
+- workers are not marked as idle until 10-15s after stopping gathering
 - onEntityLeaveEvent sometimes causes a concurrentModificationException when a converted unit was attacking a worker
 - GUI scale should be 3
 
@@ -15,11 +16,13 @@ TODO bugs/features:
         eg. when a stockpile is built the workers wont autogather
         eg. syncConvertedunits
     - idle workers button won't work
-    - syncing unit resources
+        > maybe solved with .clientTrackingRange() in entityRegistrar?
 
 - have setting for fog of war chunks brightness
 
 - right clicking a useless building should at least move your workers there
+
+- queued buildings stopped moving
 
 - zombie villagers sometimes get stuck gathering anything
     - after getting attacked?
@@ -30,9 +33,8 @@ TODO bugs/features:
     - move dismount to the spider
 
 - big map is still too badly performing
-    - increase small size
     - only update for fog periodically
-    - only update bright chunks
+    - only update bright chunks as often as we are now
 
 
 TODO test in remote server
@@ -42,6 +44,9 @@ TODO test in remote server
 
 
 TODO buildings/units (backlog)
+
+Research: Creepers explode with harming cloud effects
+Research: Villagers can build Iron Golems (treated as buildings but become iron golem units on completion)
 
 Villager faction
     Castle

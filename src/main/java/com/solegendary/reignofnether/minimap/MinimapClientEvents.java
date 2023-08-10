@@ -30,7 +30,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
@@ -47,8 +46,7 @@ public class MinimapClientEvents {
     private static final Minecraft MC = Minecraft.getInstance();
     private static int worldRadius = 100; // how many world blocks should be mapped
     private static int mapGuiRadius = 50; // actual size on the screen
-    private static int refreshTicksMax = worldRadius * 2;
-    private static int refreshTicksCurrent = 0;
+    private static int terrainRefreshTicks = 0;
     public static final int CORNER_OFFSET = 10;
     public static final int BG_OFFSET = 6;
 
@@ -63,7 +61,12 @@ public class MinimapClientEvents {
     private static DynamicTexture mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
     private static RenderType mapRenderType = RenderType.textSeeThrough(Minecraft.getInstance()
             .textureManager.register(ReignOfNether.MOD_ID + "_" + "minimap", mapTexture));
-    private static int[][] mapColours = new int[worldRadius *2][worldRadius *2];
+    private static int[][] mapColoursTerrain = new int[worldRadius * 2][worldRadius * 2];
+    private static int[][] mapColoursUandBs = new int[worldRadius * 2][worldRadius * 2];
+
+    private static int terrainUpdatePartition = 1;
+    private static final int TERRAIN_UPDATE_PARTITIONS_MAX = 10;
+    private static boolean forceUpdateAllPartitions = true;
 
     private static int xc_world = 0; // world pos x centre, maps to xc
     private static int zc_world = 0; // world pos zcentre, maps to yc
@@ -110,17 +113,18 @@ public class MinimapClientEvents {
     private static void toggleMapSize() {
         largeMap = !largeMap;
         if (largeMap) {
-            worldRadius = 200;
-            mapGuiRadius = 100;
+            worldRadius = 240;
+            mapGuiRadius = 120;
         } else {
-            worldRadius = 100;
-            mapGuiRadius = 50;
+            worldRadius = 120;
+            mapGuiRadius = 60;
         }
         mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
         mapRenderType = RenderType.textSeeThrough(Minecraft.getInstance()
                 .textureManager.register(ReignOfNether.MOD_ID + "_" + "minimap", mapTexture));
-        mapColours = new int[worldRadius *2][worldRadius *2];
-        refreshTicksMax = worldRadius * 2; // as the map area increases, decrease refresh rate to maintain FPS
+        mapColoursTerrain = new int[worldRadius * 2][worldRadius * 2];
+        mapColoursUandBs = new int[worldRadius * 2][worldRadius * 2];
+        forceUpdateAllPartitions = true;
     }
 
     public static Button getToggleSizeButton() {
@@ -167,7 +171,11 @@ public class MinimapClientEvents {
             int i = 0;
             for (int z = 0; z < worldRadius *2; z ++) {
                 for (int x = 0; x < worldRadius *2; x ++) {
-                    pixels.setPixelRGBA(x, z, mapColours[x][z]);
+                    if (mapColoursUandBs[x][z] != 0) {
+                        pixels.setPixelRGBA(x, z, mapColoursUandBs[x][z]);
+                    } else {
+                        pixels.setPixelRGBA(x, z, mapColoursTerrain[x][z]);
+                    }
                     i += 1;
                 }
             }
@@ -175,7 +183,7 @@ public class MinimapClientEvents {
         }
     }
 
-    private static void updateMapColours()
+    private static void updateMapTerrain(int partition)
     {
         if (MC.level == null || MC.player == null)
             return;
@@ -194,11 +202,66 @@ public class MinimapClientEvents {
         corners[2] = MyMath.addVector3d(corners[2], lookVector, 75-OrthoviewClientEvents.getCamRotY());
         corners[3] = MyMath.addVector3d(corners[3], lookVector, 90-OrthoviewClientEvents.getCamRotY());
 
-        mapColours = new int[worldRadius *2][worldRadius *2];
+        int zMin = zc_world - worldRadius;
+        int zMax = zc_world + worldRadius;
+        int xMin = xc_world - worldRadius;
+        int xMax = xc_world + worldRadius;
 
-        for (int z = zc_world - worldRadius; z < zc_world + worldRadius; z++)
+        //Set<ChunkPos> brightChunks = FogOfWarClientEvents.brightChunks;
+
+        // draw terrain blocks
+        for (int z = zMin; z < zMax; z++)
         {
-            for (int x = xc_world - worldRadius; x < xc_world + worldRadius; x++) {
+            // eg. if z ranges from -500 to 300, that's a range of 800
+            // if we have 10 partitions, partition 3 should range from:
+            // zPartMin = (800 / 10) * 2 = 160
+            // xPartMax = (800 / 10) * 3 = 240
+            // so only update this pixel if the z row is between 160 and 240
+            if (!forceUpdateAllPartitions) {
+                int zMaxN = zMax - zMin; // zMax normalised to 0 -> (worldRadius * 2)
+                int zPartMin = (zMaxN / TERRAIN_UPDATE_PARTITIONS_MAX) * (partition - 1);
+                int zPartMax = (zMaxN / TERRAIN_UPDATE_PARTITIONS_MAX) * partition;
+                int zN = z - zMin;
+                if (zN < zPartMin || zN >= zPartMax)
+                    continue;
+            }
+
+            xLoop:
+            for (int x = xMin; x < xMax; x++) {
+
+                // TODO: apply a much slower update rate to dark chunks
+                /*
+                boolean isBright = false;
+                for (ChunkPos chunkPos : brightChunks) {
+                    if (x >= chunkPos.getMinBlockX() && x <= chunkPos.getMaxBlockX() &&
+                        z >= chunkPos.getMinBlockZ() && z <= chunkPos.getMaxBlockZ()) {
+                        isBright = true;
+                        break;
+                    }
+                }
+                if (!isBright) {
+                    continue;
+                }*/
+
+
+                // draw view quad
+                for (int i = 0; i < corners.length; i++) {
+                    int j = i + 1;
+                    if (j >= corners.length) j = 0;
+
+                    if (MyMath.isPointOnLine(
+                            new Vec2((float) corners[i].x, (float) corners[i].z),
+                            new Vec2((float) corners[j].x, (float) corners[j].z),
+                            new Vec2(x,z),
+                            OrthoviewClientEvents.getZoom() * 2 // larger = thicker line
+                    )) {
+                        int x0 = x - xc_world + worldRadius;
+                        int z0 = z - zc_world + worldRadius;
+                        mapColoursTerrain[x0][z0] = 0xFFFFFFFF;
+                        continue xLoop;
+                    }
+                }
+
 
                 int y = MC.level.getChunkAt(new BlockPos(x,0,z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                 BlockState bs;
@@ -247,7 +310,7 @@ public class MinimapClientEvents {
                     rgb = MiscUtil.shadeHexRGB(rgb, 1.2F - (0.025F * depth));
                 }
 
-                // normalise xz back to 0,0
+                // normalise xz's to colour array ranges
                 int x0 = x - xc_world + worldRadius;
                 int z0 = z - zc_world + worldRadius;
 
@@ -255,10 +318,14 @@ public class MinimapClientEvents {
                     rgb = MiscUtil.shadeHexRGB(rgb, 0.40f);
 
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
-                mapColours[x0][z0] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
+                mapColoursTerrain[x0][z0] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
             }
         }
+        forceUpdateAllPartitions = false;
+    }
 
+    private static void updateMapUnitsAndBuildings() {
+        mapColoursUandBs = new int[worldRadius * 2][worldRadius * 2];
 
         // draw buildings
         for (Building building : BuildingClientEvents.getBuildings()) {
@@ -277,7 +344,7 @@ public class MinimapClientEvents {
 
                         // if pixel is on the edge of the square keep it coloured black
                         if (!(x0 < BUILDING_THICKNESS || x0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS ||
-                              z0 < BUILDING_THICKNESS || z0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS)) {
+                                z0 < BUILDING_THICKNESS || z0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS)) {
                             switch (BuildingClientEvents.getPlayerToBuildingRelationship(building)) {
                                 case OWNED -> rgb = 0x00FF00;
                                 case FRIENDLY -> rgb = 0x0000FF;
@@ -287,7 +354,7 @@ public class MinimapClientEvents {
                         }
                         int xN = x - xc_world + (mapGuiRadius * 2);
                         int zN = z - zc_world + (mapGuiRadius * 2);
-                        mapColours[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
+                        mapColoursUandBs[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                     }
                 }
             }
@@ -315,28 +382,6 @@ public class MinimapClientEvents {
                     relationship
             );
         }
-
-        // draw view quad
-        for (int z = zc_world - worldRadius; z < zc_world + worldRadius; z++)
-        {
-            for (int x = xc_world - worldRadius; x < xc_world + worldRadius; x++) {
-                for (int i = 0; i < corners.length; i++) {
-                    int j = i + 1;
-                    if (j >= corners.length) j = 0;
-
-                    if (MyMath.isPointOnLine(
-                            new Vec2((float) corners[i].x, (float) corners[i].z),
-                            new Vec2((float) corners[j].x, (float) corners[j].z),
-                            new Vec2(x,z),
-                            OrthoviewClientEvents.getZoom() * 2 // larger = thicker line
-                    )) {
-                        int x0 = x - xc_world + worldRadius;
-                        int z0 = z - zc_world + worldRadius;
-                        mapColours[x0][z0] = 0xFFFFFFFF;
-                    }
-                }
-            }
-        }
     }
 
     private static void drawUnitOnMap(int xc, int zc, Relationship relationship) {
@@ -360,7 +405,7 @@ public class MinimapClientEvents {
                     int xN = x - xc_world + (mapGuiRadius * 2);
                     int zN = z - zc_world + (mapGuiRadius * 2);
 
-                    mapColours[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
+                    mapColoursUandBs[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                 }
             }
         }
@@ -470,6 +515,7 @@ public class MinimapClientEvents {
             if (MC.player != null && moveTo != null) {
                 if (Keybindings.shiftMod.isDown()) {
                     setMapCentre(moveTo.getX(), moveTo.getZ());
+                    forceUpdateAllPartitions = true;
                     PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
                 } else {
                     PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
@@ -499,12 +545,18 @@ public class MinimapClientEvents {
             toggleMapSize();
         }
 
-        refreshTicksCurrent -= 1;
-        if (refreshTicksCurrent <= 0) {
-            refreshTicksCurrent = refreshTicksMax;
-            updateMapColours();
+        terrainRefreshTicks -= 1;
+        if (terrainRefreshTicks <= 0) {
+            updateMapTerrain(terrainUpdatePartition);
+            updateMapUnitsAndBuildings();
+            // as the map area increases, decrease refresh rate to maintain FPS
+            terrainRefreshTicks = (worldRadius * 2) / TERRAIN_UPDATE_PARTITIONS_MAX;
+            terrainUpdatePartition += 1;
+            if (terrainUpdatePartition > TERRAIN_UPDATE_PARTITIONS_MAX)
+                terrainUpdatePartition = 1;
             updateMapTexture();
         }
+
         renderMap(evt.getPoseStack());
 
         //MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {

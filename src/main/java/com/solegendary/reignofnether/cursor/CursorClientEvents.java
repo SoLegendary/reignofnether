@@ -289,8 +289,12 @@ public class CursorClientEvents {
                         if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
                             unitsToAdd.add(unit);
 
-                    List<Integer> selectedIds = UnitClientEvents.getSelectedUnits().stream().map(Entity::getId).toList();
-                    unitsToAdd.removeIf(e -> selectedIds.contains(e.getId()));
+                    if (Keybindings.shiftMod.isDown()) {
+                        List<Integer> selectedIds = UnitClientEvents.getSelectedUnits().stream().map(Entity::getId).toList();
+                        unitsToAdd.removeIf(e -> selectedIds.contains(e.getId()));
+                    } else {
+                        UnitClientEvents.clearSelectedUnits();
+                    }
 
                     for (LivingEntity unit : unitsToAdd)
                         UnitClientEvents.addSelectedUnit(unit);

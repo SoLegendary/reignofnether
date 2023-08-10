@@ -26,6 +26,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -189,6 +190,11 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
         return SoundEvents.ZOMBIE_VILLAGER_HURT;
     }
 
+    // needed as we extended a Vindicator - ensures we reverse healing/harming potions
+    @Override
+    public MobType getMobType() {
+        return MobType.UNDEAD;
+    }
 
     public void tick() {
         this.setCanPickUpLoot(true);

@@ -228,28 +228,28 @@ public class ResourceSources {
             new ResourceSource("Tier 1 Ores",
                     List.of(Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE, Blocks.NETHER_QUARTZ_ORE),
                     List.of(Items.COAL, Items.QUARTZ),
-                    TICKS_PER_SECOND * 25,
+                    TICKS_PER_SECOND * 30,
                     50,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 2 Ores",
                     List.of(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.IRON_ORE, Blocks.LAPIS_ORE, Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.DEEPSLATE_LAPIS_ORE, Blocks.DEEPSLATE_REDSTONE_ORE, Blocks.NETHER_GOLD_ORE),
                     List.of(Items.RAW_IRON, Items.RAW_COPPER, Items.LAPIS_LAZULI, Items.REDSTONE),
-                    TICKS_PER_SECOND * 25,
+                    TICKS_PER_SECOND * 30,
                     75,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 3 Ores",
                     List.of(Blocks.GOLD_ORE, Blocks.EMERALD_ORE, Blocks.DEEPSLATE_GOLD_ORE, Blocks.DEEPSLATE_EMERALD_ORE),
                     List.of(Items.RAW_GOLD, Items.EMERALD),
-                    TICKS_PER_SECOND * 25,
+                    TICKS_PER_SECOND * 30,
                     100,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 4 Ores",
                     List.of(Blocks.DIAMOND_ORE, Blocks.ANCIENT_DEBRIS, Blocks.DEEPSLATE_DIAMOND_ORE),
                     List.of(Items.DIAMOND, Items.ANCIENT_DEBRIS),
-                    TICKS_PER_SECOND * 25,
+                    TICKS_PER_SECOND * 30,
                     200,
                     ResourceName.ORE
             )

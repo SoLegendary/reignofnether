@@ -76,14 +76,14 @@ public class PlayerServerEvents {
         if (!rtsPlayerIds.contains(serverPlayer.getId())) {
             serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
             serverPlayer.sendSystemMessage(Component.literal("Use /startrts <faction_name> to get started"));
-            serverPlayer.sendSystemMessage(Component.literal("Make sure to look for a good base location first!"));
+            serverPlayer.sendSystemMessage(Component.literal("Make sure to be in a good base location first!"));
         } else {
             serverPlayer.sendSystemMessage(Component.literal("Welcome back to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
         }
         if (serverPlayer.hasPermissions(4)) {
             serverPlayer.sendSystemMessage(Component.literal(""));
             serverPlayer.sendSystemMessage(Component.literal("As a server op you may use:"));
-            serverPlayer.sendSystemMessage(Component.literal("/fog enable|disable"));
+            serverPlayer.sendSystemMessage(Component.literal("/fog enable | disable"));
             serverPlayer.sendSystemMessage(Component.literal("/startrts (unlimited use)"));
         }
 

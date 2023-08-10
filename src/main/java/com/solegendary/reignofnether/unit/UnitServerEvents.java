@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
@@ -223,10 +224,15 @@ public class UnitServerEvents {
         unitSyncTicks -= 1;
         if (unitSyncTicks <= 0) {
             unitSyncTicks = UNIT_SYNC_TICKS_MAX;
+            UnitIdleWorkerClientBoundPacket.sendIdleWorkerPacket();
+
             for (LivingEntity entity : allUnits) {
-                UnitSyncClientboundPacket.sendSyncStatsPacket(entity);
-                UnitSyncWorkerClientBoundPacket.sendSyncWorkerPacket(entity);
-                UnitIdleWorkerClientBoundPacket.sendIdleWorkerPacket();
+                if (entity instanceof Unit unit) {
+                    UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
+                    UnitSyncClientboundPacket.sendSyncStatsPacket(entity);
+                }
+                if (entity instanceof WorkerUnit)
+                    UnitSyncWorkerClientBoundPacket.sendSyncWorkerPacket(entity);
 
                 // remove old chunk // add current chunk
                 boolean chunkNeedsUpdate = false;
