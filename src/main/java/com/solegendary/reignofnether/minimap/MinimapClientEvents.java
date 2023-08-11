@@ -30,6 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
@@ -46,7 +47,7 @@ public class MinimapClientEvents {
     private static final Minecraft MC = Minecraft.getInstance();
     private static int worldRadius = 100; // how many world blocks should be mapped
     private static int mapGuiRadius = 50; // actual size on the screen
-    private static int terrainRefreshTicks = 0;
+    private static int refreshTicks = 0;
     public static final int CORNER_OFFSET = 10;
     public static final int BG_OFFSET = 6;
 
@@ -62,10 +63,12 @@ public class MinimapClientEvents {
     private static RenderType mapRenderType = RenderType.textSeeThrough(Minecraft.getInstance()
             .textureManager.register(ReignOfNether.MOD_ID + "_" + "minimap", mapTexture));
     private static int[][] mapColoursTerrain = new int[worldRadius * 2][worldRadius * 2];
-    private static int[][] mapColoursUandBs = new int[worldRadius * 2][worldRadius * 2];
+    private static int[][] mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2]; // view quad, units, buildings
 
-    private static int terrainUpdatePartition = 1;
-    private static final int TERRAIN_UPDATE_PARTITIONS_MAX = 10;
+    private static int terrainPartition = 1;
+    private static final int TERRAIN_PARTITIONS_MAX = 10;
+    private static int darkTerrainPartition = 1;
+    private static final int DARK_TERRAIN_PARTITIONS_MAX = 5; // sub-partitions of terrain_partitions - so there will be 5*10 total
     private static boolean forceUpdateAllPartitions = true;
 
     private static int xc_world = 0; // world pos x centre, maps to xc
@@ -123,7 +126,7 @@ public class MinimapClientEvents {
         mapRenderType = RenderType.textSeeThrough(Minecraft.getInstance()
                 .textureManager.register(ReignOfNether.MOD_ID + "_" + "minimap", mapTexture));
         mapColoursTerrain = new int[worldRadius * 2][worldRadius * 2];
-        mapColoursUandBs = new int[worldRadius * 2][worldRadius * 2];
+        mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
         forceUpdateAllPartitions = true;
     }
 
@@ -171,8 +174,8 @@ public class MinimapClientEvents {
             int i = 0;
             for (int z = 0; z < worldRadius *2; z ++) {
                 for (int x = 0; x < worldRadius *2; x ++) {
-                    if (mapColoursUandBs[x][z] != 0) {
-                        pixels.setPixelRGBA(x, z, mapColoursUandBs[x][z]);
+                    if (mapColoursOverlays[x][z] != 0) {
+                        pixels.setPixelRGBA(x, z, mapColoursOverlays[x][z]);
                     } else {
                         pixels.setPixelRGBA(x, z, mapColoursTerrain[x][z]);
                     }
@@ -183,35 +186,23 @@ public class MinimapClientEvents {
         }
     }
 
-    private static void updateMapTerrain(int partition)
+    private static void updateMapTerrain(int partition, int darkPartition)
     {
         if (MC.level == null || MC.player == null)
             return;
-
-        // get world position of corners of the screen
-        Vector3d[] corners = new Vector3d[] {
-            MiscUtil.screenPosToWorldPos(MC, 0,0),
-            MiscUtil.screenPosToWorldPos(MC, 0, MC.getWindow().getGuiScaledHeight()),
-            MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), MC.getWindow().getGuiScaledHeight()),
-            MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), 0)
-        };
-        // adjust corners according to camera angle
-        Vector3d lookVector = MiscUtil.getPlayerLookVector(MC);
-        corners[0] = MyMath.addVector3d(corners[0], lookVector, 90-OrthoviewClientEvents.getCamRotY());
-        corners[1] = MyMath.addVector3d(corners[1], lookVector, 75-OrthoviewClientEvents.getCamRotY());
-        corners[2] = MyMath.addVector3d(corners[2], lookVector, 75-OrthoviewClientEvents.getCamRotY());
-        corners[3] = MyMath.addVector3d(corners[3], lookVector, 90-OrthoviewClientEvents.getCamRotY());
 
         int zMin = zc_world - worldRadius;
         int zMax = zc_world + worldRadius;
         int xMin = xc_world - worldRadius;
         int xMax = xc_world + worldRadius;
 
-        //Set<ChunkPos> brightChunks = FogOfWarClientEvents.brightChunks;
+        Set<ChunkPos> brightChunks = FogOfWarClientEvents.brightChunks;
 
         // draw terrain blocks
         for (int z = zMin; z < zMax; z++)
         {
+            boolean skipDarkPartition = false;
+
             // eg. if z ranges from -500 to 300, that's a range of 800
             // if we have 10 partitions, partition 3 should range from:
             // zPartMin = (800 / 10) * 2 = 160
@@ -219,47 +210,33 @@ public class MinimapClientEvents {
             // so only update this pixel if the z row is between 160 and 240
             if (!forceUpdateAllPartitions) {
                 int zMaxN = zMax - zMin; // zMax normalised to 0 -> (worldRadius * 2)
-                int zPartMin = (zMaxN / TERRAIN_UPDATE_PARTITIONS_MAX) * (partition - 1);
-                int zPartMax = (zMaxN / TERRAIN_UPDATE_PARTITIONS_MAX) * partition;
+                int zPartMin = (zMaxN / TERRAIN_PARTITIONS_MAX) * (partition - 1);
+                int zPartMax = (zMaxN / TERRAIN_PARTITIONS_MAX) * partition;
                 int zN = z - zMin;
                 if (zN < zPartMin || zN >= zPartMax)
                     continue;
+
+                int zPartMind = (zMaxN / DARK_TERRAIN_PARTITIONS_MAX) * (darkPartition - 1);
+                int zPartMaxd = (zMaxN / DARK_TERRAIN_PARTITIONS_MAX) * darkPartition;
+                if (zN < zPartMind || zN >= zPartMaxd)
+                    skipDarkPartition = true;
             }
 
             xLoop:
             for (int x = xMin; x < xMax; x++) {
 
-                // TODO: apply a much slower update rate to dark chunks
-                /*
-                boolean isBright = false;
-                for (ChunkPos chunkPos : brightChunks) {
-                    if (x >= chunkPos.getMinBlockX() && x <= chunkPos.getMaxBlockX() &&
-                        z >= chunkPos.getMinBlockZ() && z <= chunkPos.getMaxBlockZ()) {
-                        isBright = true;
-                        break;
+                if (FogOfWarClientEvents.isEnabled()) {
+                    // apply a much slower update rate to dark chunks
+                    boolean isBright = false;
+                    for (ChunkPos chunkPos : brightChunks) {
+                        if (x >= chunkPos.getMinBlockX() && x <= chunkPos.getMaxBlockX() &&
+                                z >= chunkPos.getMinBlockZ() && z <= chunkPos.getMaxBlockZ()) {
+                            isBright = true;
+                            break;
+                        }
                     }
-                }
-                if (!isBright) {
-                    continue;
-                }*/
-
-
-                // draw view quad
-                for (int i = 0; i < corners.length; i++) {
-                    int j = i + 1;
-                    if (j >= corners.length) j = 0;
-
-                    if (MyMath.isPointOnLine(
-                            new Vec2((float) corners[i].x, (float) corners[i].z),
-                            new Vec2((float) corners[j].x, (float) corners[j].z),
-                            new Vec2(x,z),
-                            OrthoviewClientEvents.getZoom() * 2 // larger = thicker line
-                    )) {
-                        int x0 = x - xc_world + worldRadius;
-                        int z0 = z - zc_world + worldRadius;
-                        mapColoursTerrain[x0][z0] = 0xFFFFFFFF;
-                        continue xLoop;
-                    }
+                    if (!isBright && skipDarkPartition)
+                        continue;
                 }
 
 
@@ -324,9 +301,56 @@ public class MinimapClientEvents {
         forceUpdateAllPartitions = false;
     }
 
-    private static void updateMapUnitsAndBuildings() {
-        mapColoursUandBs = new int[worldRadius * 2][worldRadius * 2];
+    private static void updateMapViewQuad() {
+        if (MC.level == null || MC.player == null)
+            return;
 
+        // get world position of corners of the screen
+        Vector3d[] corners = new Vector3d[]{
+                MiscUtil.screenPosToWorldPos(MC, 0, 0),
+                MiscUtil.screenPosToWorldPos(MC, 0, MC.getWindow().getGuiScaledHeight()),
+                MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), MC.getWindow().getGuiScaledHeight()),
+                MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), 0)
+        };
+        // adjust corners according to camera angle
+        Vector3d lookVector = MiscUtil.getPlayerLookVector(MC);
+        corners[0] = MyMath.addVector3d(corners[0], lookVector, 90 - OrthoviewClientEvents.getCamRotY());
+        corners[1] = MyMath.addVector3d(corners[1], lookVector, 75 - OrthoviewClientEvents.getCamRotY());
+        corners[2] = MyMath.addVector3d(corners[2], lookVector, 75 - OrthoviewClientEvents.getCamRotY());
+        corners[3] = MyMath.addVector3d(corners[3], lookVector, 90 - OrthoviewClientEvents.getCamRotY());
+
+        int zMin = zc_world - worldRadius;
+        int zMax = zc_world + worldRadius;
+        int xMin = xc_world - worldRadius;
+        int xMax = xc_world + worldRadius;
+
+        // draw terrain blocks
+        for (int z = zMin; z < zMax; z++) {
+            xLoop:
+            for (int x = xMin; x < xMax; x++) {
+
+                // draw view quad
+                for (int i = 0; i < corners.length; i++) {
+                    int j = i + 1;
+                    if (j >= corners.length) j = 0;
+
+                    if (MyMath.isPointOnLine(
+                            new Vec2((float) corners[i].x, (float) corners[i].z),
+                            new Vec2((float) corners[j].x, (float) corners[j].z),
+                            new Vec2(x, z),
+                            OrthoviewClientEvents.getZoom() * 2 // larger = thicker line
+                    )) {
+                        int x0 = x - xc_world + worldRadius;
+                        int z0 = z - zc_world + worldRadius;
+                        mapColoursOverlays[x0][z0] = 0xFFFFFFFF;
+                        continue xLoop;
+                    }
+                }
+            }
+        }
+    }
+
+    private static void updateMapUnitsAndBuildings() {
         // draw buildings
         for (Building building : BuildingClientEvents.getBuildings()) {
             if (!building.isTownCentre && !FogOfWarClientEvents.isInBrightChunk(building.centrePos))
@@ -354,7 +378,7 @@ public class MinimapClientEvents {
                         }
                         int xN = x - xc_world + (mapGuiRadius * 2);
                         int zN = z - zc_world + (mapGuiRadius * 2);
-                        mapColoursUandBs[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
+                        mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                     }
                 }
             }
@@ -405,7 +429,7 @@ public class MinimapClientEvents {
                     int xN = x - xc_world + (mapGuiRadius * 2);
                     int zN = z - zc_world + (mapGuiRadius * 2);
 
-                    mapColoursUandBs[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
+                    mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                 }
             }
         }
@@ -545,15 +569,24 @@ public class MinimapClientEvents {
             toggleMapSize();
         }
 
-        terrainRefreshTicks -= 1;
-        if (terrainRefreshTicks <= 0) {
-            updateMapTerrain(terrainUpdatePartition);
+        refreshTicks -= 1;
+        if (refreshTicks <= 0) {
+            updateMapTerrain(terrainPartition, darkTerrainPartition);
+            mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
             updateMapUnitsAndBuildings();
+            updateMapViewQuad();
+
             // as the map area increases, decrease refresh rate to maintain FPS
-            terrainRefreshTicks = (worldRadius * 2) / TERRAIN_UPDATE_PARTITIONS_MAX;
-            terrainUpdatePartition += 1;
-            if (terrainUpdatePartition > TERRAIN_UPDATE_PARTITIONS_MAX)
-                terrainUpdatePartition = 1;
+            refreshTicks = (worldRadius * 2) / TERRAIN_PARTITIONS_MAX;
+            terrainPartition += 1;
+            if (terrainPartition > TERRAIN_PARTITIONS_MAX) {
+                terrainPartition = 1;
+
+                darkTerrainPartition += 1;
+                if (darkTerrainPartition > DARK_TERRAIN_PARTITIONS_MAX)
+                    darkTerrainPartition = 1;
+            }
+
             updateMapTexture();
         }
 
