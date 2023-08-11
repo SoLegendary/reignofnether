@@ -32,10 +32,6 @@ TODO bugs/features:
 - make skeletons riding on spiders unselectable
     - move dismount to the spider
 
-- big map is still too badly performing
-    - only update for fog periodically
-    - only update bright chunks as often as we are now
-
 
 TODO test in remote server
 
