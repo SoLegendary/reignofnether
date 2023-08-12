@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.ability.abilities.Eject;
+import com.solegendary.reignofnether.ability.abilities.Teleport;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -124,6 +127,12 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit {
 
     public SpiderUnit(EntityType<? extends Spider> entityType, Level level) {
         super(entityType, level);
+
+        Eject ab1 = new Eject(this);
+        this.abilities.add(ab1);
+
+        if (level.isClientSide())
+            this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
     }
 
     @Override

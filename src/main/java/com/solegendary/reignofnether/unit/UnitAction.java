@@ -26,7 +26,8 @@ public enum UnitAction {
     TELEPORT,
     MOUNT,
     MOUNT_SPIDER,
-    DISMOUNT,
+    DISMOUNT, // passenger removes itself from vehicle
+    EJECT, // vehicle removes itself from passengers
 
     THROW_HARMING_POTION,
     THROW_HEALING_POTION,

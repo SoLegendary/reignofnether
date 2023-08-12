@@ -63,16 +63,11 @@ public class UnitActionItem {
         ArrayList<Unit> actionableUnits = new ArrayList<>();
         for (int id : unitIds) {
             Entity entity = level.getEntity(id);
-            if (entity instanceof Unit unit && unit.getOwnerName().equals(this.ownerName)) {
+            if (entity instanceof Unit unit && unit.getOwnerName().equals(this.ownerName))
                 actionableUnits.add(unit);
-                if (entity.getVehicle() instanceof Unit unitVehicle)
-                    actionableUnits.add(unitVehicle);
-            }
         }
 
-
         for (Unit unit : actionableUnits) {
-
             // have to do this before resetBehaviours so we can assign the correct resourceName first
             if (action == UnitAction.TOGGLE_GATHER_TARGET) {
                 if (unit instanceof WorkerUnit workerUnit) {

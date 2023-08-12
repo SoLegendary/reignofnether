@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -32,6 +33,8 @@ import net.minecraft.world.entity.player.Player;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.solegendary.reignofnether.hud.HudClientEvents.getSimpleEntityName;
 
 // Renders a Unit's portrait including its animated head, name, healthbar, list of stats and UI frames for these
 
@@ -114,6 +117,13 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     // Must be called from DrawScreenEvent
     public RectZone render(PoseStack poseStack, String name, int x, int y, LivingEntity entity) {
         Relationship rs = UnitClientEvents.getPlayerToEntityRelationship(entity);
+
+        if (entity.getPassengers().size() == 1) {
+            String pName = getSimpleEntityName(entity.getPassengers().get(0)).replace("_"," ");
+            String nameCap = pName.substring(0, 1).toUpperCase() + pName.substring(1);
+            name += " & " + nameCap;
+        }
+
 
         if (rs != Relationship.OWNED && entity instanceof Unit unit && unit.getOwnerName().length() > 0)
             name += " (" + unit.getOwnerName() + ")";

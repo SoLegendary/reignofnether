@@ -20,6 +20,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -39,6 +40,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -76,6 +78,8 @@ public class UnitClientEvents {
             return;
         if (!FogOfWarClientEvents.isInBrightChunk(unit.getOnPos()))
             return;
+        if (unit.isPassenger())
+            return;
         preselectedUnits.add(unit);
     }
     public static void addSelectedUnit(LivingEntity unit) {
@@ -102,6 +106,12 @@ public class UnitClientEvents {
 
     private static boolean isLeftClickAttack() {
         return CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK;
+    }
+
+    @SubscribeEvent
+    public static void onEntityMount(EntityMountEvent evt) {
+        if (evt.getLevel().isClientSide())
+            selectedUnits.removeIf(e -> e.getId() == evt.getEntityMounting().getId());
     }
 
     public static int getCurrentPopulation() {
@@ -479,7 +489,8 @@ public class UnitClientEvents {
             (!OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS))
         {
             for (LivingEntity entity : allUnits) {
-                if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()))
+                if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()) ||
+                    entity.isPassenger())
                     continue;
 
                 Relationship unitRs = getPlayerToEntityRelationship(entity);

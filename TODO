@@ -13,12 +13,12 @@ TODO bugs/features:
 - Tutorial documentation/gifs
 
 - zombie villagers sometimes get stuck gathering anything
+    - progress gets reset repeatedly for some reason
     - after getting attacked?
 
 - multiple selected production buildings should each build 1 item each when selected
 
-- make skeletons riding on spiders unselectable
-    - move dismount to the spider
+- give focus fire ability to spiders to allow skeletons to attack a target without moving
 
 
 

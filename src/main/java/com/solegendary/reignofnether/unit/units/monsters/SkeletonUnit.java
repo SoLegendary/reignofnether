@@ -131,14 +131,19 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
         super(entityType, level);
 
         MountSpider mountSpiderAbility = new MountSpider(this);
-        Dismount dismountAbility = new Dismount(this);
+        //Dismount dismountAbility = new Dismount(this);
         this.abilities.add(mountSpiderAbility);
-        this.abilities.add(dismountAbility);
+        //this.abilities.add(dismountAbility);
 
         if (level.isClientSide()) {
             this.abilityButtons.add(mountSpiderAbility.getButton(Keybindings.keyQ));
-            this.abilityButtons.add(dismountAbility.getButton(Keybindings.keyQ));
+            //this.abilityButtons.add(dismountAbility.getButton(Keybindings.keyQ));
         }
+    }
+
+    @Override
+    public void resetBehaviours() {
+        this.mountGoal.stop();
     }
 
     @Override
