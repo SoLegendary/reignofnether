@@ -8,17 +8,9 @@ TODO bugs/features:
 - onEntityLeaveEvent sometimes causes a concurrentModificationException when a converted unit was attacking a worker
 - GUI scale should be 3
 
-- Tutorial documentation/gifs
-
-- if units are out of render range as they won't be loaded clientside
-    - can't MC.level.getEntity(id)
-    - can't issue any automatic commands too,
-        eg. when a stockpile is built the workers wont autogather
-        eg. syncConvertedunits
-    - idle workers button won't work
-        > maybe solved with .clientTrackingRange() in entityRegistrar?
-
 - have setting for fog of war chunks brightness
+
+- Tutorial documentation/gifs
 
 - zombie villagers sometimes get stuck gathering anything
     - after getting attacked?
