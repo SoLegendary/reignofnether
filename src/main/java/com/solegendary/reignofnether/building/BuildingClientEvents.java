@@ -359,8 +359,7 @@ public class BuildingClientEvents {
         if (buildingToPlace != null) {
             Rotation rotation = evt.getScrollDelta() > 0 ? Rotation.CLOCKWISE_90 : Rotation.COUNTERCLOCKWISE_90;
             buildingRotation = buildingRotation.getRotated(rotation);
-            for (int i = 0; i < blocksToDraw.size(); i++)
-                blocksToDraw.set(i, blocksToDraw.get(i).rotate(MC.level, rotation));
+            blocksToDraw.replaceAll(buildingBlock -> buildingBlock.rotate(MC.level, rotation));
         }
     }
 
@@ -394,6 +393,7 @@ public class BuildingClientEvents {
 
                     for (LivingEntity entity : getSelectedUnits()) {
                         if (entity instanceof Unit unit) {
+                            unit.getCheckpoints().removeIf(bp -> !BuildingUtils.isPosInsideAnyBuilding(MC.level, bp));
                             MiscUtil.addUnitCheckpoint(unit, CursorClientEvents.getPreselectedBlockPos().above(), false);
                             if (unit instanceof WorkerUnit workerUnit)
                                 workerUnit.getBuildRepairGoal().ignoreNextCheckpoint = true;

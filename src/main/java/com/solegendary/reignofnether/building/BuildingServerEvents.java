@@ -97,15 +97,18 @@ public class BuildingServerEvents {
                 for (int id : builderUnitIds) {
                     Entity entity = serverLevel.getEntity(id);
                     if (entity instanceof WorkerUnit workerUnit) {
-                        BuildRepairGoal buildGoal = workerUnit.getBuildRepairGoal();
-                        ((Unit) entity).resetBehaviours();
-                        WorkerUnit.resetBehaviours(workerUnit);
                         if (queue) {
-                            buildGoal.queuedBuildings.add(building);
-                            if (buildGoal.getBuildingTarget() == null)
-                                buildGoal.startNextQueuedBuilding();
+                            if (workerUnit.getBuildRepairGoal().queuedBuildings.size() == 0) {
+                                ((Unit) entity).resetBehaviours();
+                                WorkerUnit.resetBehaviours(workerUnit);
+                            }
+                            workerUnit.getBuildRepairGoal().queuedBuildings.add(building);
+                            if (workerUnit.getBuildRepairGoal().getBuildingTarget() == null)
+                                workerUnit.getBuildRepairGoal().startNextQueuedBuilding();
                         } else {
-                            buildGoal.setBuildingTarget(building);
+                            ((Unit) entity).resetBehaviours();
+                            WorkerUnit.resetBehaviours(workerUnit);
+                            workerUnit.getBuildRepairGoal().setBuildingTarget(building);
                         }
                     }
                 }

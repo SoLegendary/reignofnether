@@ -20,7 +20,14 @@ import java.util.function.Predicate;
 
 public class BuildingUtils {
 
-
+    public static boolean isBuildingBuildable(Level level, Building building) {
+        if (level.isClientSide())
+            return BuildingClientEvents.getBuildings().stream().map(b -> b.originPos).toList().contains(building.originPos) &&
+                    building.getBlocksPlaced() < building.getBlocksTotal();
+        else
+            return BuildingServerEvents.getBuildings().stream().map(b -> b.originPos).toList().contains(building.originPos) &&
+                    building.getBlocksPlaced() < building.getBlocksTotal();
+    }
 
     public static boolean isInRangeOfNightSource(Vec3 pos, boolean clientSide) {
         List<Building> buildings = clientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();

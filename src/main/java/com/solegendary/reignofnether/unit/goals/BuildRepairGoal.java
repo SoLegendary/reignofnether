@@ -39,20 +39,12 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
         this.isBuildingServerside = isBuilding;
     }
 
-    public boolean isBuildingBuildable(Building building) {
-        if (this.mob.level.isClientSide())
-            return BuildingClientEvents.getBuildings().stream().map(b -> b.originPos).toList().contains(building.originPos) &&
-                    building.getBlocksPlaced() < building.getBlocksTotal();
-        else
-            return BuildingServerEvents.getBuildings().stream().map(b -> b.originPos).toList().contains(building.originPos) &&
-                    building.getBlocksPlaced() < building.getBlocksTotal();
-    }
+
 
     public boolean startNextQueuedBuilding() {
-        queuedBuildings.removeIf(b -> !isBuildingBuildable(b));
+        queuedBuildings.removeIf(b -> !BuildingUtils.isBuildingBuildable(this.mob.level, b));
         if (queuedBuildings.size() > 0) {
             setBuildingTarget(queuedBuildings.get(0));
-            queuedBuildings.remove(0);
             return true;
         }
         return false;
@@ -61,7 +53,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     public void tick() {
         if (buildingTarget == null)
             return;
-        if (!isBuildingBuildable(buildingTarget)) {
+        if (!BuildingUtils.isBuildingBuildable(this.mob.level, buildingTarget)) {
             if (!startNextQueuedBuilding())
                 stopBuilding();
             return;

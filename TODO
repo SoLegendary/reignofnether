@@ -22,8 +22,6 @@ TODO bugs/features:
 
 - right clicking a useless building should at least move your workers there
 
-- queued buildings stopped moving
-
 - zombie villagers sometimes get stuck gathering anything
     - after getting attacked?
 
@@ -31,6 +29,7 @@ TODO bugs/features:
 
 - make skeletons riding on spiders unselectable
     - move dismount to the spider
+
 
 
 TODO test in remote server

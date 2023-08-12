@@ -1,5 +1,9 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.*;
@@ -11,6 +15,7 @@ import com.solegendary.reignofnether.unit.goals.ReturnResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -90,7 +95,7 @@ public interface Unit {
                 }
                 // remove any BlockPos checkpoints if we're already close enough to them
                 if (unit.getCheckpoints().size() > 1) {
-                    unit.getCheckpoints().removeIf(bp -> ((Mob) unit).position().distanceToSqr(new Vec3(bp.getX(), bp.getY(), bp.getZ())) < 4f);
+                    unit.getCheckpoints().removeIf(bp -> ((Mob) unit).getOnPos().distToCenterSqr(new Vec3(bp.getX(), bp.getY(), bp.getZ())) < 4f);
                 } // if we only have one checkpoint, fade it out instead of removing it
                 else if (unit.getCheckpoints().size() == 1 && unit.getCheckpointTicksLeft() > UnitClientEvents.CHECKPOINT_TICKS_FADE) {
                     BlockPos bp = unit.getCheckpoints().get(0);
