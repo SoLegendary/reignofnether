@@ -2,10 +2,7 @@ package com.solegendary.reignofnether.unit;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.ProductionBuilding;
-import com.solegendary.reignofnether.building.ProductionItem;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -451,8 +448,10 @@ public class UnitClientEvents {
 
                     if (preSelBuilding.name.contains(" Farm") && preSelBuilding.isBuilt)
                         sendUnitCommand(UnitAction.FARM);
-                    else
+                    else if (BuildingUtils.isBuildingBuildable(MC.level, preSelBuilding))
                         sendUnitCommand(UnitAction.BUILD_REPAIR);
+                    else
+                        resolveMoveAction();
                 }
                 // right click -> follow friendly unit or go to preselected blockPos
                 else

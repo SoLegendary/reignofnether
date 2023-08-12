@@ -58,6 +58,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private ResourceSource targetResourceSourceSaved = null;
     private Building targetFarmSaved = null;
 
+    public boolean isValidBlock(BlockPos bp) {
+        return BLOCK_CONDITION.test(bp);
+    }
+
     // whenever we attempt to assign a block as a target it must pass this test
     private final Predicate<BlockPos> BLOCK_CONDITION = bp -> {
         BlockState bs = mob.level.getBlockState(bp);
