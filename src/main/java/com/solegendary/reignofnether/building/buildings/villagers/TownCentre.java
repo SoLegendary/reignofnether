@@ -65,13 +65,13 @@ public class TownCentre extends ProductionBuilding {
                 () -> BuildingClientEvents.setBuildingToPlace(TownCentre.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(TownCentre.buildingName, Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(TownCentre.buildingName + " (Capitol)", Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPop(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A gazebo at the centre of your village that produces villagers.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("You may only have one town centre at any time.", Style.EMPTY)
+                        FormattedCharSequence.forward("You may only have one capitol building at any time.", Style.EMPTY)
                 ),
                 null
         );

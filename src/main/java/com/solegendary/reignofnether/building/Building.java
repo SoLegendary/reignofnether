@@ -49,7 +49,7 @@ public abstract class Building {
     public Rotation rotation;
     public ResourceLocation icon;
 
-    public final boolean isTownCentre;
+    public final boolean isCapitol;
 
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time; the building can then be used
     public int msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
@@ -106,7 +106,7 @@ public abstract class Building {
         this.rotation = rotation;
         this.ownerName = ownerName;
         this.blocks = blocks;
-        this.isTownCentre = isTownCentre;
+        this.isCapitol = isTownCentre;
 
         // get min/max/centre positions
         this.minCorner = new BlockPos(
@@ -347,6 +347,9 @@ public abstract class Building {
             if (serverLevel.getBlockState(block.getBlockPos()).getBlock() == Blocks.SCAFFOLDING)
                 serverLevel.destroyBlock(block.getBlockPos(), false);
         });
+
+        if (this.isCapitol)
+            sendMessageToAllPlayers(this.ownerName + " has lost their capitol building!");
     }
 
     // should only be run serverside
@@ -386,7 +389,7 @@ public abstract class Building {
     public void onBuilt() {
         isBuilt = true;
 
-        if (this.isTownCentre && !this.level.isClientSide()) {
+        if (this.isCapitol && !this.level.isClientSide()) {
             sendMessageToAllPlayers(this.ownerName + " has started their base at: " +
                     "x=" + originPos.getX() + " z=" + originPos.getZ());
         }

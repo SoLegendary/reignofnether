@@ -77,7 +77,7 @@ public class BuildingClientEvents {
 
     // minimum % of blocks below a building that need to be supported by a solid block for it to be placeable
     // 1 means you can't have any gaps at all, 0 means you can place buildings in mid-air
-    private static final float MIN_SUPPORTED_BLOCKS_PERCENT = 0.7f;
+    private static final float MIN_SUPPORTED_BLOCKS_PERCENT = 0.6f;
 
     // can only be one preselected building as you can't box-select them like units
     public static Building getPreselectedBuilding() {

@@ -15,8 +15,6 @@ NOTE: don't send multiple packets in succession that modify the same array - can
 
 - GUI scale should be 3
 
-- have setting for fog of war chunks brightness
-
 - Tutorial documentation/gifs
 
 - zombie villagers sometimes get stuck gathering anything
@@ -60,7 +58,7 @@ Netherling faction
     Netherling buildings apart from the Bastion and portals can only be built on nether blocks
 
     Netherlings do not produce their own units, but instead (like Protoss) bring units in from the nether using portals
-    - (Town Centre) Bastion Portal
+    - (Capitol) Bastion Portal
         - blackstone-themed building with a decorated standard purple portal at the centre
         - can build any unit as long as you have the appropriate supporting building/research
         - produces units faster than any other production building

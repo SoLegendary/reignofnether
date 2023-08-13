@@ -334,7 +334,7 @@ public class HudClientEvents {
                         new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
                         Keybindings.cancelBuild,
                         () -> false,
-                        () -> hudSelectedBuilding.isTownCentre,
+                        () -> hudSelectedBuilding.isCapitol,
                         () -> true,
                         () -> {
                             BuildingServerboundPacket.cancelBuilding(hudSelectedBuilding.minCorner);

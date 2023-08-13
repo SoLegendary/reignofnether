@@ -42,7 +42,7 @@ public class BuildingUtils {
 
     public static boolean doesPlayerOwnTownCentre(String playerName) {
         for (Building building : BuildingClientEvents.getBuildings())
-            if (building.isTownCentre && building.ownerName.equals(playerName))
+            if (building.isCapitol && building.ownerName.equals(playerName))
                 return true;
         return false;
     }

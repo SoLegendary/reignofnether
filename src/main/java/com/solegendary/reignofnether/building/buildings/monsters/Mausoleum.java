@@ -74,7 +74,7 @@ public class Mausoleum extends ProductionBuilding {
             () -> BuildingClientEvents.setBuildingToPlace(Mausoleum.class),
             null,
             List.of(
-                FormattedCharSequence.forward(Mausoleum.buildingName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(Mausoleum.buildingName + " (capitol)", Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPop(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
@@ -82,7 +82,7 @@ public class Mausoleum extends ProductionBuilding {
                 FormattedCharSequence.forward("Distorts time to midnight within a " + nightRange + " block radius", Style.EMPTY),
                 FormattedCharSequence.forward("and slowly heals friendly monsters under this effect.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("You may only have one mausoleum at any time.", Style.EMPTY)
+                FormattedCharSequence.forward("You may only have one capitol building at any time.", Style.EMPTY)
             ),
             null
         );

@@ -353,7 +353,7 @@ public class MinimapClientEvents {
     private static void updateMapUnitsAndBuildings() {
         // draw buildings
         for (Building building : BuildingClientEvents.getBuildings()) {
-            if (!building.isTownCentre && !FogOfWarClientEvents.isInBrightChunk(building.centrePos))
+            if (!building.isCapitol && !FogOfWarClientEvents.isInBrightChunk(building.centrePos))
                 continue;
 
             int xc = building.originPos.getX() + (BUILDING_RADIUS / 2);
