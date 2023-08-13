@@ -55,8 +55,6 @@ public class TopdownGuiClientEvents {
 
     @SubscribeEvent
     public static void onScreenOpen(ScreenEvent.Opening evt) {
-        System.out.println("Opening: " + evt.getScreen().getTitle().getString());
-
         if (evt.getScreen() instanceof TopdownGui) {
             int i = MC.getWindow().calculateScale(GUI_SCALE_MOD, MC.isEnforceUnicode());
             MC.getWindow().setGuiScale(i);

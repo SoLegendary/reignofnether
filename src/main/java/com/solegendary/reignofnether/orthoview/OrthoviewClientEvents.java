@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
+import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.MoverType;
@@ -118,6 +119,7 @@ public class OrthoviewClientEvents {
             MinimapClientEvents.setMapCentre(MC.player.getX(), MC.player.getZ());
             PlayerServerboundPacket.teleportPlayer(MC.player.getX(), ORTHOVIEW_PLAYER_BASE_Y, MC.player.getZ());
             TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
+            MC.options.cloudStatus().set(CloudStatus.OFF);
         }
         else {
             PlayerServerboundPacket.disableOrthoview();
