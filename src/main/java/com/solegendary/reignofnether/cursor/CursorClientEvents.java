@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -85,11 +86,9 @@ public class CursorClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
-
-        String screenName = evt.getScreen().getTitle().getString();
         long window = MC.getWindow().getWindow();
 
-        if (!OrthoviewClientEvents.isEnabled() || !screenName.equals("topdowngui_container")) {
+        if (!OrthoviewClientEvents.isEnabled() || !(evt.getScreen() instanceof TopdownGui)) {
             if (GLFW.glfwRawMouseMotionSupported()) // raw mouse increases sensitivity massively for some reason
                 GLFW.glfwSetInputMode(window, GLFW.GLFW_RAW_MOUSE_MOTION, GLFW.GLFW_TRUE);
             return;

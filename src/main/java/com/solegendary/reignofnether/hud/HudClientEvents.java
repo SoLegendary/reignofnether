@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.hud;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -115,8 +116,7 @@ public class HudClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
-        String screenName = evt.getScreen().getTitle().getString();
-        if (!OrthoviewClientEvents.isEnabled() || !screenName.equals("topdowngui_container"))
+        if (!OrthoviewClientEvents.isEnabled() || !(evt.getScreen() instanceof TopdownGui))
             return;
         if (MC.level == null)
             return;

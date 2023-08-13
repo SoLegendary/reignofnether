@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.orthoview;
 
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -173,9 +174,7 @@ public class OrthoviewClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
-        String screenName = evt.getScreen().getTitle().getString();
-
-        if (!enabled || !screenName.equals("topdowngui_container")) return;
+        if (!enabled || !(evt.getScreen() instanceof TopdownGui)) return;
 
         // GLFW coords seem to be 2x vanilla coords, but use only them for consistency
         // since we need to use glfwSetCursorPos

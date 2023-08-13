@@ -1,9 +1,13 @@
 package com.solegendary.reignofnether.guiscreen;
 
+import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ClipContext;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -18,16 +22,16 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class TopdownGuiClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
-    private static int NO_SCREEN_TICKS_MAX = 3;
     private static int noScreenTicks = 0; // ticks that no screen has been opened
     private static boolean shouldPause = false;
+    private static final int GUI_SCALE_MOD = 3;
 
     // if no other screen is open and we've got orthoview enabled, open a screen based on shouldPause
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (OrthoviewClientEvents.isEnabled() && Minecraft.getInstance().screen == null) {
             noScreenTicks += 1;
-            if (noScreenTicks >= NO_SCREEN_TICKS_MAX) {
+            if (noScreenTicks >= 3) {
                 if (shouldPause) {
                     shouldPause = false;
                     MC.setScreen(new PauseScreen(true));
@@ -44,14 +48,28 @@ public class TopdownGuiClientEvents {
     public static void onScreenClose(ScreenEvent.Closing evt) {
         if (evt.getScreen().isPauseScreen())
             shouldPause = false;
+
+        int i = MC.getWindow().calculateScale(MC.options.guiScale().get(), MC.isEnforceUnicode());
+        MC.getWindow().setGuiScale(i);
+    }
+
+    @SubscribeEvent
+    public static void onScreenOpen(ScreenEvent.Opening evt) {
+        System.out.println("Opening: " + evt.getScreen().getTitle().getString());
+
+        if (evt.getScreen() instanceof TopdownGui) {
+            int i = MC.getWindow().calculateScale(GUI_SCALE_MOD, MC.isEnforceUnicode());
+            MC.getWindow().setGuiScale(i);
+        } else {
+            int i = MC.getWindow().calculateScale(MC.options.guiScale().get(), MC.isEnforceUnicode());
+            MC.getWindow().setGuiScale(i);
+        }
     }
 
     @SubscribeEvent
     public static void beforeGuiRender(ScreenEvent.Render.Pre evt) {
-        String guiTitle = evt.getScreen().getTitle().getString();
-
         // cancel drawing the GUI
-        if (guiTitle.equals("topdowngui_container"))
+        if (evt.getScreen() instanceof TopdownGui)
             evt.setCanceled(true);
     }
 

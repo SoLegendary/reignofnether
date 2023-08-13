@@ -13,13 +13,10 @@ NOTE: don't send multiple packets in succession that modify the same array - can
 - spiders and poison spiders (even when not mounted) don't stop movement on S
     - mob.getNavigation().stop() doesn't seem to affect them, even though it sets isDone() and !isInProgress()
 
-- GUI scale should be 3
-
-- Tutorial documentation/gifs
-
 - zombie villagers sometimes get stuck gathering anything
     - progress gets reset repeatedly for some reason
 
+- Tutorial documentation/gifs
 
 
 TODO test in remote server
