@@ -24,9 +24,12 @@ NOTE: don't send multiple packets in succession that modify the same array - can
     - after getting attacked?
 
 
+
 TODO test in remote server
 
-
+- spider movement
+- foodforthought cheat
+- spread unit productions
 
 
 

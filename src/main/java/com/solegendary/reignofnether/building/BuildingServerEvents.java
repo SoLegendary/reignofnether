@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
+import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
@@ -144,6 +145,9 @@ public class BuildingServerEvents {
     }
 
     public static int getTotalPopulationSupply(String ownerName) {
+        if (ResearchServer.playerHasCheat(ownerName, "foodforthought"))
+            return Integer.MAX_VALUE;
+
         int totalPopulationSupply = 0;
         for (Building building : buildings)
             if (building.ownerName.equals(ownerName) && building.isBuilt)
