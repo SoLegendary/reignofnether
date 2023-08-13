@@ -52,7 +52,10 @@ public class PlayerServerEvents {
     // modifythephasevariance - ignore building requirements
     // medievalman - get all research (cannot disable)
     // greedisgood X - gain X of each resource
-    public static final List<String> singleWordCheats = List.of("warpten", "operationcwal", "iseedeadpeople", "modifythephasevariance", "medievalman");
+    // foodforthought - unlimited population
+    public static final List<String> singleWordCheats = List.of(
+            "warpten", "operationcwal", "iseedeadpeople", "modifythephasevariance", "medievalman", "foodforthought"
+    );
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
@@ -175,7 +178,8 @@ public class PlayerServerEvents {
                 }
             }
 
-            // apply all cheats
+            // apply all cheats - NOTE can cause concurrentModificationException clientside
+            /*
             if (words.length == 1 && words[0].equalsIgnoreCase("allcheats")) {
                 ResourcesServerEvents.addSubtractResources(new Resources(playerName, 99999, 99999, 99999));
                 for (String cheatName : singleWordCheats) {
@@ -184,7 +188,7 @@ public class PlayerServerEvents {
                     evt.setCanceled(true);
                 }
                 sendMessageToAllPlayers(playerName + " enabled all cheats");
-            }
+            }*/
         }
     }
 

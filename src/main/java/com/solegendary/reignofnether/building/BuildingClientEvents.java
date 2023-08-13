@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedBuilding;
 import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedEntity;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
 
@@ -100,6 +101,25 @@ public class BuildingClientEvents {
         selectedBuildings.add(building);
         selectedBuildings.sort(Comparator.comparing(b -> b.name));
         UnitClientEvents.clearSelectedUnits();
+    }
+
+    // switch to the building with the least production, so we can spread out production items
+    public static void switchHudToIdlestBuilding() {
+        Building idlestBuilding = null;
+        int prodTicksLeftMax = Integer.MAX_VALUE;
+        if (selectedBuildings.size() > 0) {
+            for (Building building : selectedBuildings) {
+                if (building instanceof ProductionBuilding prodB) {
+                    int prodTicksLeft = prodB.productionQueue.stream().map(p -> p.ticksLeft).reduce(0, Integer::sum);
+                    if (prodTicksLeft < prodTicksLeftMax) {
+                        prodTicksLeftMax = prodTicksLeft;
+                        idlestBuilding = building;
+                    }
+                }
+            }
+        }
+        if (idlestBuilding != null)
+            hudSelectedBuilding = idlestBuilding;
     }
 
     public static void setBuildingToPlace(Class<? extends Building> building) {

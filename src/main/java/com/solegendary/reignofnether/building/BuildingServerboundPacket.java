@@ -47,6 +47,8 @@ public class BuildingServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.START_PRODUCTION,
                 itemName, buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
+
+        BuildingClientEvents.switchHudToIdlestBuilding();
     }
     public static void cancelProduction(BlockPos buildingPos, String itemName, boolean frontItem) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(

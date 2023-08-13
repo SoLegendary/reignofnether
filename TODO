@@ -10,6 +10,9 @@ NOTE: don't send multiple packets in succession that modify the same array - can
 - force set video option for chunk threading to THREADED
 - workers are not marked as idle until 10-15s after stopping gathering
 
+- spiders and poison spiders (even when not mounted) don't stop movement on S
+    - mob.getNavigation().stop() doesn't seem to affect them, even though it sets isDone() and !isInProgress()
+
 - GUI scale should be 3
 
 - have setting for fog of war chunks brightness
@@ -20,10 +23,6 @@ NOTE: don't send multiple packets in succession that modify the same array - can
     - progress gets reset repeatedly for some reason
     - after getting attacked?
 
-- multiple selected production buildings should each build 1 item each when selected
-
-- spiders and poison spiders (even when not mounted) don't stop movement on S
-    - mob.getNavigation().stop() doesn't seem to affect them, even though it sets isDone() and !isInProgress()
 
 TODO test in remote server
 
