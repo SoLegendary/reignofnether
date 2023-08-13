@@ -59,7 +59,6 @@ public class UnitActionItem {
     public void action(Level level) {
 
         // filter out unowned units and non-unit entities
-        // and replicate the same command to the unit's vehicle
         ArrayList<Unit> actionableUnits = new ArrayList<>();
         for (int id : unitIds) {
             Entity entity = level.getEntity(id);

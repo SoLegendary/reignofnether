@@ -1,6 +1,9 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
@@ -44,10 +47,22 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
     }
 
     public boolean canContinueToUse() {
-       return (this.canUse() || !this.mob.getNavigation().isDone()) &&
-            this.isHoldingBow() &&
-            this.mob.getTarget() != null &&
-            this.mob.getTarget().isAlive();
+        Entity target = this.mob.getTarget();
+
+        if (target == null || !target.isAlive() || !this.isHoldingBow())
+            return false;
+        if (!this.canUse() && this.mob.getNavigation().isDone())
+            return false;
+
+        if (this.mob instanceof AttackerUnit attackerUnit) {
+            double dist = target.position().distanceTo(this.mob.position());
+            if (dist > attackerUnit.getAttackRange()) {
+                this.stop();
+                attackerUnit.setAttackTarget(null);
+                return false;
+            }
+        }
+        return true;
     }
 
     public void start() {
@@ -84,10 +99,13 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
             }
 
             // move towards the target until in range and target is visible
-            if ((distToTargetSqr > (double) this.attackRadiusSqr || !canSeeTarget) && !((Unit) this.mob).getHoldPosition()) {
-                this.mob.getNavigation().moveTo(target, 1.0f);
-            } else {
-                this.mob.getNavigation().stop();
+            // don't if the attacker is riding (eg. skeleton jockey) or it influences the vehicle movement
+            if (!this.mob.isPassenger()) {
+                if ((distToTargetSqr > (double) this.attackRadiusSqr || !canSeeTarget) && !((Unit) this.mob).getHoldPosition()) {
+                    this.mob.getNavigation().moveTo(target, 1.0f);
+                } else {
+                    this.mob.getNavigation().stop();
+                }
             }
 
             if (this.mob.isUsingItem()) {

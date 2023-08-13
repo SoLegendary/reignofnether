@@ -1,11 +1,15 @@
 
 TODO bugs/features:
 
+NOTE: don't send multiple packets in succession that modify the same array - can cause comodification errors
+    - may need to make arrays thread-safe
+    - onEntityLeaveEvent sometimes causes a concurrentModificationException when a converted unit was attacking a worker
+
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - Evoker portraits should not show their arms
 - force set video option for chunk threading to THREADED
 - workers are not marked as idle until 10-15s after stopping gathering
-- onEntityLeaveEvent sometimes causes a concurrentModificationException when a converted unit was attacking a worker
+
 - GUI scale should be 3
 
 - have setting for fog of war chunks brightness
@@ -18,9 +22,8 @@ TODO bugs/features:
 
 - multiple selected production buildings should each build 1 item each when selected
 
-- give focus fire ability to spiders to allow skeletons to attack a target without moving
-
-
+- spiders and poison spiders (even when not mounted) don't stop movement on S
+    - mob.getNavigation().stop() doesn't seem to affect them, even though it sets isDone() and !isInProgress()
 
 TODO test in remote server
 

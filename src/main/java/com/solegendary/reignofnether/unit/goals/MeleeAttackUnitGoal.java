@@ -4,7 +4,7 @@ import net.minecraft.world.entity.PathfinderMob;
 
 public class MeleeAttackUnitGoal extends AbstractMeleeAttackUnitGoal {
     private final PathfinderMob mob;
-    private int raiseArmTicks;
+    private int raiseArmTicks; // for zombies
 
     public MeleeAttackUnitGoal(PathfinderMob mob, int attackInterval, double speedModifier, boolean followingTargetEvenIfNotSeen) {
         super(mob, attackInterval, speedModifier, followingTargetEvenIfNotSeen);

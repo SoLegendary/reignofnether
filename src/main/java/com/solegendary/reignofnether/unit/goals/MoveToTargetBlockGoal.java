@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
@@ -31,7 +32,6 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     public boolean canContinueToUse() {
-
         // PathNavigation seems to have a max length so restart it if we haven't actually reached the target yet
         if (this.mob.getNavigation().isDone() && moveTarget != null &&
             this.mob.getOnPos().distSqr(moveTarget) > 1) {
@@ -74,5 +74,8 @@ public class MoveToTargetBlockGoal extends Goal {
     public void stopMoving() {
         this.moveTarget = null;
         this.mob.getNavigation().stop();
+
+        if (this.mob.isVehicle() && this.mob.getPassengers().get(0) instanceof Unit unit)
+            unit.getMoveGoal().stopMoving();
     }
 }
