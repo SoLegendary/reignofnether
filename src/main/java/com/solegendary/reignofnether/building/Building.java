@@ -390,7 +390,7 @@ public abstract class Building {
         isBuilt = true;
 
         if (this.isCapitol && !this.level.isClientSide()) {
-            sendMessageToAllPlayers(this.ownerName + " has started their base at: " +
+            sendMessageToAllPlayers(this.ownerName + " has completed their capitol at: " +
                     "x=" + originPos.getX() + " z=" + originPos.getZ());
         }
     }

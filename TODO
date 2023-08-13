@@ -19,7 +19,6 @@ NOTE: don't send multiple packets in succession that modify the same array - can
 
 - zombie villagers sometimes get stuck gathering anything
     - progress gets reset repeatedly for some reason
-    - after getting attacked?
 
 
 

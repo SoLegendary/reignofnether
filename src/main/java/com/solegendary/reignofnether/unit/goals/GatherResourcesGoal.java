@@ -58,8 +58,17 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private ResourceSource targetResourceSourceSaved = null;
     private Building targetFarmSaved = null;
 
-    public boolean isValidBlock(BlockPos bp) {
-        return BLOCK_CONDITION.test(bp);
+    public boolean isValidBlockAnyResourceType(BlockPos bp) {
+        ResourceName originalResName = this.targetResourceName;
+        for (ResourceName resourceName : ResourceName.values()) {
+            this.targetResourceName = resourceName;
+            if (BLOCK_CONDITION.test(bp)) {
+                this.targetResourceName = originalResName;
+                return true;
+            }
+        }
+        this.targetResourceName = originalResName;
+        return false;
     }
 
     // whenever we attempt to assign a block as a target it must pass this test
