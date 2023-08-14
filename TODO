@@ -7,7 +7,6 @@ NOTE: don't send multiple packets in succession that modify the same array - can
 
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - Evoker portraits should not show their arms
-- force set video option for chunk threading to THREADED
 - workers are not marked as idle until 10-15s after stopping gathering
 
 - spiders and poison spiders (even when not mounted) don't stop movement on S
