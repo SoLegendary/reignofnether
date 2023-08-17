@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.monsters.DarkWatchtower;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -149,7 +148,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
 
         if (level.isClientSide()) {
             AbilityButton townCentreButton = TownCentre.getBuildButton(Keybindings.keyQ);
-            townCentreButton.isEnabled = () -> !BuildingUtils.doesPlayerOwnTownCentre(getOwnerName());
+            townCentreButton.isEnabled = () -> !BuildingUtils.doesPlayerOwnCapitol(getOwnerName());
             this.abilityButtons.add(townCentreButton);
             this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyW));
             this.abilityButtons.add(VillagerHouse.getBuildButton(Keybindings.keyE));

@@ -5,10 +5,8 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.building.buildings.monsters.*;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
@@ -42,7 +40,7 @@ public class BuildingUtils {
         return false;
     }
 
-    public static boolean doesPlayerOwnTownCentre(String playerName) {
+    public static boolean doesPlayerOwnCapitol(String playerName) {
         for (Building building : BuildingClientEvents.getBuildings())
             if (building.isCapitol && building.ownerName.equals(playerName))
                 return true;
