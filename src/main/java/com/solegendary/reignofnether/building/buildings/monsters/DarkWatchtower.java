@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.core.BlockPos;
@@ -54,16 +55,16 @@ public class DarkWatchtower extends Building implements Garrisonable {
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == DarkWatchtower.class,
             () -> false,
-            () -> true,
+            () -> BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
+                    ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(DarkWatchtower.class),
             null,
             List.of(
                     FormattedCharSequence.forward(DarkWatchtower.buildingName, Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
-                    ResourceCosts.getFormattedPop(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("An ominous tower that can garrison units.", Style.EMPTY),
-                    FormattedCharSequence.forward("Garrisoned ranged units attack with increased range.", Style.EMPTY)
+                    FormattedCharSequence.forward("Garrisoned ranged units have increased range.", Style.EMPTY)
             ),
             null
         );

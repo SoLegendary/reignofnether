@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.core.BlockPos;
@@ -53,16 +55,16 @@ public class Watchtower extends Building implements Garrisonable {
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Watchtower.class,
             () -> false,
-            () -> true,
+            () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
+                    ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(Watchtower.class),
             null,
             List.of(
                     FormattedCharSequence.forward(Watchtower.buildingName, Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
-                    ResourceCosts.getFormattedPop(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("A fortified tower that can garrison units.", Style.EMPTY),
-                    FormattedCharSequence.forward("Garrisoned ranged units attack with increased range.", Style.EMPTY)
+                    FormattedCharSequence.forward("Garrisoned ranged units have increased range.", Style.EMPTY)
             ),
             null
         );
