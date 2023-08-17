@@ -40,8 +40,14 @@ public class BuildingUtils {
         return false;
     }
 
-    public static boolean doesPlayerOwnCapitol(String playerName) {
-        for (Building building : BuildingClientEvents.getBuildings())
+    public static boolean doesPlayerOwnCapitol(Level level, String playerName) {
+        List<Building> buildings;
+        if (level.isClientSide())
+            buildings = BuildingClientEvents.getBuildings();
+        else
+            buildings = BuildingServerEvents.getBuildings();
+
+        for (Building building : buildings)
             if (building.isCapitol && building.ownerName.equals(playerName))
                 return true;
         return false;

@@ -26,6 +26,8 @@ NOTE: don't send multiple packets in succession that modify the same array - can
 SERVER ISSUES
 UnitServerEvents line 258 comodificationException
     - make everything threadsafe??
+    - apply the same synchronized() fix to the allcheats feature and test in local server
+
 - workers don't automatically gather after building a stockpile
 - workers don't automatically gather adjacent blocks if a group of workers are asked to gather the same block
 - villagers arent being assigned to the farm they build automatically

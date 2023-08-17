@@ -127,16 +127,18 @@ public class UnitServerEvents {
             BlockPos preselectedBlockPos,
             BlockPos selectedBuildingPos
     ) {
-        unitActionQueue.add(
-            new UnitActionItem(
-                ownerName,
-                action,
-                unitId,
-                unitIds,
-                preselectedBlockPos,
-                selectedBuildingPos
-            )
-        );
+        synchronized (unitActionQueue) {
+            unitActionQueue.add(
+                    new UnitActionItem(
+                            ownerName,
+                            action,
+                            unitId,
+                            unitIds,
+                            preselectedBlockPos,
+                            selectedBuildingPos
+                    )
+            );
+        }
     }
 
     // similar to UnitClientEvents getUnitRelationship: given a Unit and Entity, what is the relationship between them
@@ -257,10 +259,15 @@ public class UnitServerEvents {
                 }
             }
         }
-        for (UnitActionItem actionItem : unitActionQueue)
-            actionItem.action(evt.level);
 
-        unitActionQueue.clear();
+
+        synchronized (unitActionQueue) {
+            for (UnitActionItem actionItem : unitActionQueue)
+                actionItem.action(evt.level);
+            unitActionQueue.clear();
+        }
+
+
     }
 
     @SubscribeEvent
