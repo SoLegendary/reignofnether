@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.building.Garrisonable;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
@@ -56,7 +57,10 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
 
         if (this.mob instanceof AttackerUnit attackerUnit) {
             double dist = target.position().distanceTo(this.mob.position());
-            if (dist > attackerUnit.getAttackRange()) {
+            float range = attackerUnit.getAttackRange();
+            if (Garrisonable.getGarrison((Unit) this.mob) != null)
+                range *= 3;
+            if (dist > range) {
                 this.stop();
                 attackerUnit.setAttackTarget(null);
                 return false;
@@ -85,8 +89,10 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
 
             this.mob.getLookControl().setLookAt(target.getX(), target.getEyeY(), target.getZ());
 
+            boolean isGarrisoned = Garrisonable.getGarrison((Unit) this.mob) != null;
+
             double distToTargetSqr = this.mob.distanceToSqr(target.getX(), target.getY(), target.getZ());
-            boolean canSeeTarget = this.mob.getSensing().hasLineOfSight(target);
+            boolean canSeeTarget = this.mob.getSensing().hasLineOfSight(target) || isGarrisoned;
             boolean flag = this.seeTime > 0;
             if (canSeeTarget != flag) {
                 this.seeTime = 0;
@@ -100,8 +106,10 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
 
             // move towards the target until in range and target is visible
             // don't if the attacker is riding (eg. skeleton jockey) or it influences the vehicle movement
+            // also don't if garrisoned or the unit might fall off the building
             if (!this.mob.isPassenger()) {
-                if ((distToTargetSqr > (double) this.attackRadiusSqr || !canSeeTarget) && !((Unit) this.mob).getHoldPosition()) {
+                if ((distToTargetSqr > (double) this.attackRadiusSqr || !canSeeTarget) &&
+                    !((Unit) this.mob).getHoldPosition()) {
                     this.mob.getNavigation().moveTo(target, 1.0f);
                 } else {
                     this.mob.getNavigation().stop();

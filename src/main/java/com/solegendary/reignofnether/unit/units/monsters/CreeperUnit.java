@@ -45,7 +45,11 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     public void setIsCheckpointGreen(boolean green) { isCheckpointGreen = green; };
     private int entityCheckpointId = -1;
     public int getEntityCheckpointId() { return entityCheckpointId; };
-    public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
+    public void setEntityCheckpointId(int id) { entityCheckpointId = id; }
+
+    GarrisonGoal garrisonGoal;
+    public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
+    public boolean canGarrison() { return true; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -97,7 +101,6 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     public float getUnitAttackDamage() {return attackDamage;}
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
-    public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
     public boolean canAttackBuildings() {return canAttackBuildings;}
 
@@ -113,7 +116,6 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     final static public float movementSpeed = 0.27f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
-    final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.CREEPER.population;
@@ -180,6 +182,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
+        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
         this.attackGoal = new CreeperAttackUnitGoal(this, getAttackCooldown(), 1.0f, false);
     }
 
@@ -189,6 +192,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
+        this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));

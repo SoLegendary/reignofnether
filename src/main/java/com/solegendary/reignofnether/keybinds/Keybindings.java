@@ -37,6 +37,7 @@ public class Keybindings {
     public static final Keybinding move = new Keybinding(GLFW.GLFW_KEY_M, "M", "Move");
     public static final Keybinding build = new Keybinding(GLFW.GLFW_KEY_B, "B", "Build");
     public static final Keybinding gather = new Keybinding(GLFW.GLFW_KEY_G, "G", "Gather");
+    public static final Keybinding garrison = new Keybinding(GLFW.GLFW_KEY_N, "N", "Garrison");
 
     public static final Keybinding[] nums = {
         new Keybinding(GLFW.GLFW_KEY_0, "0", "0"),

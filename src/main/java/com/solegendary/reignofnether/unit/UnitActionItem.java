@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.unit;
 
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingServerEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
@@ -46,6 +43,7 @@ public class UnitActionItem {
 
     public void resetBehaviours(Unit unit) {
         unit.getCheckpoints().clear();
+        unit.setEntityCheckpointId(-1);
         unit.resetBehaviours();
         Unit.resetBehaviours(unit);
         if (unit instanceof WorkerUnit workerUnit)
@@ -89,10 +87,21 @@ public class UnitActionItem {
                 case HOLD -> {
                     unit.setHoldPosition(true);
                 }
+                case GARRISON -> {
+                    if (unit.canGarrison())
+                        unit.getGarrisonGoal().setBuildingTarget(preselectedBlockPos);
+                }
+                case UNGARRISON -> {
+                    if (Garrisonable.getGarrison(unit) instanceof Garrisonable garrisonable) {
+                        Building building = (Building) garrisonable;
+                        BlockPos bp = building.originPos.offset(garrisonable.getExitPosition());
+                        ((LivingEntity) unit).teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
+                    }
+                }
                 case MOVE -> {
                     ResourceName resName = ResourceSources.getBlockResourceName(preselectedBlockPos, level);
                     if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE &&
-                        workerUnit.getGatherResourceGoal().isValidBlockAnyResourceType(preselectedBlockPos))
+                            workerUnit.getGatherResourceGoal().isValidBlockAnyResourceType(preselectedBlockPos))
                     {
                         workerUnit.getGatherResourceGoal().setTargetResourceName(resName);
                         workerUnit.getGatherResourceGoal().setMoveTarget(preselectedBlockPos);

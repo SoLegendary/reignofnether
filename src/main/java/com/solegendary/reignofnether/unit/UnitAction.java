@@ -10,6 +10,8 @@ public enum UnitAction {
     STOP,
     HOLD,
     MOVE,
+    GARRISON,
+    UNGARRISON,
     ATTACK_MOVE, // enacted by attack button + left click on ground
     FOLLOW, // enacted by move button + left click on another entity
     BUILD_REPAIR, // build or repair the building at the targeted blockPos

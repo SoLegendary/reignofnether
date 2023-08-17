@@ -16,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -30,6 +31,8 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Stray;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -52,6 +55,10 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
     private int entityCheckpointId = -1;
     public int getEntityCheckpointId() { return entityCheckpointId; };
     public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
+
+    GarrisonGoal garrisonGoal;
+    public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
+    public boolean canGarrison() { return true; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -104,7 +111,6 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
     public float getUnitAttackDamage() {return attackDamage;}
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
-    public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
     public boolean canAttackBuildings() {return canAttackBuildings;}
 
@@ -120,7 +126,6 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 10.0F; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
-    final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.STRAY.population;
@@ -184,6 +189,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
+        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
         this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown(), attackRange);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
         this.mountGoal = new MountGoal(this);
@@ -197,6 +203,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
         this.goalSelector.addGoal(2, mountGoal);
+        this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
@@ -215,5 +222,24 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
     @Override
     public void setupEquipmentAndUpgradesServer() {
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+    }
+
+    // override to make inaccuracy 0
+    @Override
+    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
+        ItemStack itemstack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this,
+                (item) -> item instanceof BowItem
+        )));
+        AbstractArrow abstractarrow = this.getArrow(itemstack, pDistanceFactor);
+        if (this.getMainHandItem().getItem() instanceof BowItem) {
+            abstractarrow = ((BowItem)this.getMainHandItem().getItem()).customArrow(abstractarrow);
+        }
+        double d0 = pTarget.getX() - this.getX();
+        double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
+        double d2 = pTarget.getZ() - this.getZ();
+        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, 0);
+        this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.level.addFreshEntity(abstractarrow);
     }
 }

@@ -16,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -26,6 +27,8 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Pillager;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -48,6 +51,10 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     private int entityCheckpointId = -1;
     public int getEntityCheckpointId() { return entityCheckpointId; };
     public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
+
+    GarrisonGoal garrisonGoal;
+    public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
+    public boolean canGarrison() { return true; }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -100,7 +107,6 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public float getUnitAttackDamage() {return attackDamage;}
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
-    public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
     public boolean canAttackBuildings() {return canAttackBuildings;}
 
@@ -116,7 +122,6 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 15.0F; // only used by ranged units or melee building attackers
     final static public float aggroRange = 15;
-    final static public float sightRange = 15f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.PILLAGER.population;
@@ -166,6 +171,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
+        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
         this.attackGoal = new UnitCrossbowAttackGoal<>(this, getAttackCooldown(), attackRange);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
         this.mountGoal = new MountGoal(this);
@@ -179,6 +185,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
         this.goalSelector.addGoal(2, mountGoal);
+        this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
@@ -192,5 +199,18 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
             cbowStack.enchant(Enchantments.MULTISHOT, 1);
 
         this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
+    }
+
+    // override to make inaccuracy 0
+    @Override
+    public void performCrossbowAttack(LivingEntity pUser, float pVelocity) {
+        InteractionHand interactionhand = ProjectileUtil.getWeaponHoldingHand(pUser, (item) ->
+                item instanceof CrossbowItem
+        );
+        ItemStack itemstack = pUser.getItemInHand(interactionhand);
+        if (pUser.isHolding((is) -> is.getItem() instanceof CrossbowItem)) {
+            CrossbowItem.performShooting(pUser.level, pUser, interactionhand, itemstack, pVelocity, 0);
+        }
+        this.onCrossbowAttackPerformed();
     }
 }

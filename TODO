@@ -17,15 +17,23 @@ NOTE: don't send multiple packets in succession that modify the same array - can
 
 - Tutorial documentation/gifs
 
-- start non-ops in spectator mode
+
+
+Garrisons
+    - check pillager/crossbow unit range/sight for garrisoned units
+
+Skeletons ignore focus attack commands and instead just attack nearest enemies
+
+Arrows bounce off enemies if multiple hit at the same time
 
 
 
 TODO test in remote server
 
-- spider movement
+- spider jockey movement
 - foodforthought cheat
 - spread unit productions
+- garrisons
 
 
 
@@ -149,17 +157,24 @@ Research: Creepers explode with harming cloud effects
 Research: Villagers can build Iron Golems (treated as buildings but become iron golem units on completion)
 
 Villager faction
+    Market
+        - Deposited resources become 'coins' currency to be exchanged for any resource (ore is 2x as expensive)
+        - Workers can be assigned to withdraw resources from your capitol to deposit at the market
+        - The further the distance from the capitol to the market, the better the exchange rate, ranging from 25% to 75%
     Castle
-       - Villagers' final building
-       - produces ravagers (crowd control/aoe damage bruiser, should be worse at sieging than iron golems)
-       - research to add battlements and allow garrisoning
+        - Villagers' final building
+        - produces ravagers (crowd control/aoe damage bruiser, should be worse at sieging than iron golems)
+        - research to add battlements and allow garrisoning
 
 Monster faction
+    Sacrificial pit
+        - sacrifices units to refund 50% of their cost as any other resource
+        - accumulates 'souls' currency to be exchanged for any resource (ore is 2x as expensive)
     Stronghold
-       - Monsters' final building
-       - Requires a laboratory
-       - produces wardens
-       - research to cause buildings to produce silverfish when damaged and/or destroyed
+        - Monsters' final building
+        - Requires a laboratory
+        - produces wardens
+        - research to cause buildings to produce silverfish when damaged and/or destroyed
 
 Netherling faction
     All netherling buildings slowly convert non-nether blocks around them into nether counterparts:
@@ -176,7 +191,6 @@ Netherling faction
         - produces units faster than any other production building
         - only one allowed at any time
 
-    - Inactive portal
     - Inactive portal
         - Simple inactive portal on a pedestal
         - On its own just supports population

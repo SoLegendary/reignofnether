@@ -46,6 +46,9 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit {
     public int getEntityCheckpointId() { return entityCheckpointId; };
     public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
 
+    public GarrisonGoal getGarrisonGoal() { return null; }
+    public boolean canGarrison() { return false; }
+
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
     public List<Ability> getAbilities() {return abilities;};
@@ -95,7 +98,6 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit {
     public float getUnitAttackDamage() {return attackDamage;}
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
-    public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
     public boolean canAttackBuildings() {return canAttackBuildings;}
 
@@ -111,7 +113,6 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit {
     final static public float movementSpeed = 0.32f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
-    final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.SPIDER.population;

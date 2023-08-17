@@ -94,4 +94,28 @@ public class ActionButtons {
         null,
         List.of(FormattedCharSequence.forward("Move", Style.EMPTY))
     );
+    public static final Button GARRISON = new Button(
+        "Garrison",
+        Button.itemIconSize,
+        new ResourceLocation("minecraft", "textures/block/oak_door.png"),
+        Keybindings.garrison,
+        () -> CursorClientEvents.getLeftClickAction() == UnitAction.GARRISON,
+        () -> false,
+        () -> true,
+        () -> CursorClientEvents.setLeftClickAction(UnitAction.GARRISON),
+        null,
+        List.of(FormattedCharSequence.forward("Garrison", Style.EMPTY))
+    );
+    public static final Button UNGARRISON = new Button(
+        "Ungarrison",
+        Button.itemIconSize,
+        new ResourceLocation("minecraft", "textures/block/oak_door.png"),
+        Keybindings.garrison,
+        () -> false,
+        () -> false,
+        () -> true,
+        () -> sendUnitCommand(UnitAction.UNGARRISON),
+        null,
+        List.of(FormattedCharSequence.forward("Ungarrison", Style.EMPTY))
+    );
 }

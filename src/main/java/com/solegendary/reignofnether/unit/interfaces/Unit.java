@@ -8,11 +8,8 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
-import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
-import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
-import com.solegendary.reignofnether.unit.goals.ReturnResourcesGoal;
-import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -45,6 +42,9 @@ public interface Unit {
     public int getEntityCheckpointId();
     public void setEntityCheckpointId(int id);
 
+    public GarrisonGoal getGarrisonGoal();
+    public boolean canGarrison();
+
     public Faction getFaction();
     public List<AbilityButton> getAbilityButtons();
     public List<Ability> getAbilities();
@@ -59,7 +59,6 @@ public interface Unit {
     public float getMovementSpeed();
     public float getUnitMaxHealth();
     public float getUnitArmorValue();
-    public float getSightRange();
     public int getPopCost();
 
     public LivingEntity getFollowTarget();
@@ -167,6 +166,8 @@ public interface Unit {
             unit.getReturnResourcesGoal().stopReturning();
         unit.setFollowTarget(null);
         unit.setHoldPosition(false);
+        if (unit.canGarrison())
+            unit.getGarrisonGoal().stopGarrisoning();
     }
 
     // can be overridden in the Unit's class to do additional logic on a reset

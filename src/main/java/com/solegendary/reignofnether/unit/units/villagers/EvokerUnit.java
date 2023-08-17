@@ -52,6 +52,10 @@ public class EvokerUnit extends Evoker implements Unit {
     public int getEntityCheckpointId() { return entityCheckpointId; };
     public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
 
+    GarrisonGoal garrisonGoal;
+    public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
+    public boolean canGarrison() { return true; }
+
     public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;}
     public List<Ability> getAbilities() {return abilities;}
@@ -92,7 +96,6 @@ public class EvokerUnit extends Evoker implements Unit {
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
-    public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
 
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -117,7 +120,6 @@ public class EvokerUnit extends Evoker implements Unit {
     final static public float maxHealth = 40.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
-    final static public float sightRange = 10f;
     final static public int popCost = ResourceCosts.EVOKER.population;
     public int maxResources = 100;
 
@@ -178,6 +180,7 @@ public class EvokerUnit extends Evoker implements Unit {
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
+        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
         this.castFangsLineGoal = new CastFangsLineGoal(this);
         this.castFangsCircleGoal = new CastFangsCircleGoal(this);
@@ -190,6 +193,7 @@ public class EvokerUnit extends Evoker implements Unit {
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, returnResourcesGoal);
+        this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));

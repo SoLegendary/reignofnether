@@ -5,8 +5,10 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.building.buildings.monsters.*;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
@@ -95,6 +97,8 @@ public class BuildingUtils {
             case ArcaneTower.buildingName -> building = new ArcaneTower(level, pos, rotation, ownerName);
             case Library.buildingName -> building = new Library(level, pos, rotation, ownerName);
             case Dungeon.buildingName -> building = new Dungeon(level, pos, rotation, ownerName);
+            case Watchtower.buildingName -> building = new Watchtower(level, pos, rotation, ownerName);
+            case DarkWatchtower.buildingName -> building = new DarkWatchtower(level, pos, rotation, ownerName);
         }
         if (building != null)
             building.setLevel(level);

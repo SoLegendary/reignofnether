@@ -49,6 +49,10 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     public int getEntityCheckpointId() { return entityCheckpointId; };
     public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
 
+    GarrisonGoal garrisonGoal;
+    public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
+    public boolean canGarrison() { return true; }
+
     public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
     public List<Ability> getAbilities() {return abilities;}
@@ -98,7 +102,6 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     public float getUnitAttackDamage() {return attackDamage;}
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
-    public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
     public boolean canAttackBuildings() {return canAttackBuildings;}
 
@@ -114,7 +117,6 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     final static public float movementSpeed = 0.27f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
-    final static public float sightRange = 10f;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.VINDICATOR.population;
@@ -154,6 +156,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
+        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
         this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
         this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
@@ -167,8 +170,9 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, attackBuildingGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
+        this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
-        this.goalSelector.addGoal(3, moveGoal);
+        this.targetSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }
 

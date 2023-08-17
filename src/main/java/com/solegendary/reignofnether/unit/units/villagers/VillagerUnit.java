@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.monsters.DarkWatchtower;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -54,6 +55,10 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
     public int getEntityCheckpointId() { return entityCheckpointId; };
     public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
 
+    GarrisonGoal garrisonGoal;
+    public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
+    public boolean canGarrison() { return true; }
+
     public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
     public List<Ability> getAbilities() {return abilities;}
@@ -96,7 +101,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
-    public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
 
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -110,7 +114,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
     final static public float maxHealth = 25.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
-    final static public float sightRange = 10f;
     final static public int popCost = ResourceCosts.VILLAGER.population;
     public int maxResources = 50;
 
@@ -151,10 +154,11 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
             this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyW));
             this.abilityButtons.add(VillagerHouse.getBuildButton(Keybindings.keyE));
             this.abilityButtons.add(WheatFarm.getBuildButton(Keybindings.keyR));
-            this.abilityButtons.add(Barracks.getBuildButton(Keybindings.keyT));
-            this.abilityButtons.add(Blacksmith.getBuildButton(Keybindings.keyY));
-            this.abilityButtons.add(ArcaneTower.getBuildButton(Keybindings.keyU));
-            this.abilityButtons.add(Library.getBuildButton(Keybindings.keyI));
+            this.abilityButtons.add(Watchtower.getBuildButton(Keybindings.keyT));
+            this.abilityButtons.add(Barracks.getBuildButton(Keybindings.keyY));
+            this.abilityButtons.add(Blacksmith.getBuildButton(Keybindings.keyU));
+            this.abilityButtons.add(ArcaneTower.getBuildButton(Keybindings.keyI));
+            this.abilityButtons.add(Library.getBuildButton(Keybindings.keyO));
         }
     }
 
@@ -201,6 +205,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
+        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
         this.buildRepairGoal = new BuildRepairGoal(this, 1.0f);
         this.gatherResourcesGoal = new GatherResourcesGoal(this, 1.0f);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
@@ -214,6 +219,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
         this.goalSelector.addGoal(2, buildRepairGoal);
         this.goalSelector.addGoal(2, gatherResourcesGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
+        this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));

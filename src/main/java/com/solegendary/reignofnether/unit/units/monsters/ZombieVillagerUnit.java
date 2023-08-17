@@ -55,6 +55,10 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     public int getEntityCheckpointId() { return entityCheckpointId; };
     public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
 
+    GarrisonGoal garrisonGoal;
+    public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
+    public boolean canGarrison() { return true; }
+
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;}
     public List<Ability> getAbilities() {return abilities;}
@@ -97,7 +101,6 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
-    public float getSightRange() {return sightRange;}
     public int getPopCost() {return popCost;}
 
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -111,7 +114,6 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
-    final static public float sightRange = 10f;
     final static public int popCost = ResourceCosts.ZOMBIE_VILLAGER.population;
     public int maxResources = 50;
 
@@ -152,10 +154,11 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
             this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyW));
             this.abilityButtons.add(HauntedHouse.getBuildButton(Keybindings.keyE));
             this.abilityButtons.add(PumpkinFarm.getBuildButton(Keybindings.keyR));
-            this.abilityButtons.add(Graveyard.getBuildButton(Keybindings.keyT));
-            this.abilityButtons.add(Dungeon.getBuildButton(Keybindings.keyY));
-            this.abilityButtons.add(SpiderLair.getBuildButton(Keybindings.keyU));
-            this.abilityButtons.add(Laboratory.getBuildButton(Keybindings.keyI));
+            this.abilityButtons.add(DarkWatchtower.getBuildButton(Keybindings.keyT));
+            this.abilityButtons.add(Graveyard.getBuildButton(Keybindings.keyY));
+            this.abilityButtons.add(Dungeon.getBuildButton(Keybindings.keyU));
+            this.abilityButtons.add(SpiderLair.getBuildButton(Keybindings.keyI));
+            this.abilityButtons.add(Laboratory.getBuildButton(Keybindings.keyO));
         }
     }
 
@@ -217,6 +220,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
+        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
         this.buildRepairGoal = new BuildRepairGoal(this, 1.0f);
         this.gatherResourcesGoal = new GatherResourcesGoal(this, 1.0f);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
@@ -230,6 +234,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
         this.goalSelector.addGoal(2, buildRepairGoal);
         this.goalSelector.addGoal(2, gatherResourcesGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
+        this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         //this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));

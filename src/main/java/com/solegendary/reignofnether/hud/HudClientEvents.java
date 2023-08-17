@@ -50,21 +50,6 @@ public class HudClientEvents {
     private static final int TEMP_MSG_TICKS_MAX = 150; // ticks to show the msg for
     private static final int MAX_BUTTONS_PER_ROW = 5;
 
-    private static final ArrayList<Button> genericActionButtonsWorker = new ArrayList<>(Arrays.asList(
-            ActionButtons.BUILD_REPAIR,
-            ActionButtons.GATHER,
-            ActionButtons.HOLD,
-            ActionButtons.STOP
-    ));
-    private static final ArrayList<Button> genericActionButtonsAttacker = new ArrayList<>(Arrays.asList(
-            ActionButtons.ATTACK,
-            ActionButtons.HOLD,
-            ActionButtons.STOP
-    ));
-    private static final ArrayList<Button> genericActionButtons = new ArrayList<>(Arrays.asList(
-            ActionButtons.HOLD,
-            ActionButtons.STOP
-    ));
     private static final ArrayList<ControlGroup> controlGroups = new ArrayList<>(10);
     private static final ArrayList<Button> buildingButtons = new ArrayList<>();
     private static final ArrayList<Button> unitButtons = new ArrayList<>();
@@ -528,19 +513,28 @@ public class HudClientEvents {
         // Unit action buttons (attack, stop, move, abilities etc.)
         // --------------------------------------------------------
         if (selUnits.size() > 0 &&
-            getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED) {
+            getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED &&
+            hudSelectedEntity instanceof Unit unit) {
 
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
 
-            ArrayList<Button> actionButtons;
+            ArrayList<Button> actionButtons = new ArrayList<>();
 
-            if (hudSelectedEntity instanceof AttackerUnit)
-                actionButtons = genericActionButtonsAttacker;
-            else if (hudSelectedEntity instanceof WorkerUnit)
-                actionButtons = genericActionButtonsWorker;
-            else
-                actionButtons = genericActionButtons;
+            if (hudSelectedEntity instanceof WorkerUnit) {
+                actionButtons.add(ActionButtons.BUILD_REPAIR);
+                actionButtons.add(ActionButtons.GATHER);
+            }
+            else if (hudSelectedEntity instanceof AttackerUnit)
+                actionButtons.add(ActionButtons.ATTACK);
+
+            if (unit.canGarrison() && Garrisonable.getGarrison(unit) == null)
+                actionButtons.add(ActionButtons.GARRISON);
+            else if (Garrisonable.getGarrison(unit) != null)
+                actionButtons.add(ActionButtons.UNGARRISON);
+
+            actionButtons.add(ActionButtons.HOLD);
+            actionButtons.add(ActionButtons.STOP);
 
             for (Button actionButton : actionButtons) {
 
@@ -564,9 +558,9 @@ public class HudClientEvents {
             blitY = screenHeight - (iconFrameSize * 2);
 
             // includes worker building buttons
-            for (LivingEntity unit : selUnits) {
-                if (getSimpleEntityName(unit).equals(getSimpleEntityName(hudSelectedEntity))) {
-                    List<AbilityButton> abilityButtons = ((Unit) unit).getAbilityButtons();
+            for (LivingEntity livingEntity : selUnits) {
+                if (getSimpleEntityName(livingEntity).equals(getSimpleEntityName(hudSelectedEntity))) {
+                    List<AbilityButton> abilityButtons = ((Unit) livingEntity).getAbilityButtons();
 
                     int shownAbilities = abilityButtons.stream().filter(b -> !b.isHidden.get()).toList().size();
                     int rowsUp = (int) Math.floor((float) shownAbilities / MAX_BUTTONS_PER_ROW);
