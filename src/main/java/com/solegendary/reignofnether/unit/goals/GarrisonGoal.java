@@ -41,8 +41,10 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
                     moveTarget.getZ() + 0.5f)) <= 3f) {
 
                 // teleport to garrison entry pos
-                BlockPos bp = buildingTarget.originPos.offset(garrisonable.getEntryPosition());
-                this.mob.teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
+                if (!garrisonable.isFull()) {
+                    BlockPos bp = buildingTarget.originPos.offset(garrisonable.getEntryPosition());
+                    this.mob.teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
+                }
                 this.stopGarrisoning();
             }
         }
@@ -59,15 +61,19 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
         if (blockPos != null) {
             if (this.mob.level.isClientSide()) {
                 this.buildingTarget = BuildingUtils.findBuilding(BuildingClientEvents.getBuildings(), blockPos);
-                if (this.buildingTarget instanceof Garrisonable &&
+                if (this.buildingTarget instanceof Garrisonable garrisonable &&
                         buildingTarget.ownerName.equals(((Unit) mob).getOwnerName())) {
 
-                    MiscUtil.addUnitCheckpoint(((Unit) mob), new BlockPos(
-                            buildingTarget.centrePos.getX(),
-                            buildingTarget.originPos.getY() + 1,
-                            buildingTarget.centrePos.getZ())
-                    );
-                    ((Unit) mob).setIsCheckpointGreen(true);
+                    if (!garrisonable.isFull()) {
+                        MiscUtil.addUnitCheckpoint(((Unit) mob), new BlockPos(
+                                buildingTarget.centrePos.getX(),
+                                buildingTarget.originPos.getY() + 1,
+                                buildingTarget.centrePos.getZ())
+                        );
+                        ((Unit) mob).setIsCheckpointGreen(true);
+                    } else {
+                        HudClientEvents.showTemporaryMessage("That building is full!");
+                    }
                 } else if (this.buildingTarget == null) {
                     HudClientEvents.showTemporaryMessage("That building is not garrisonable");
                 }

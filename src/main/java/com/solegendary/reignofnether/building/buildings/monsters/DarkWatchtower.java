@@ -26,6 +26,8 @@ public class DarkWatchtower extends Building implements Garrisonable {
     public final static String structureName = "dark_watchtower";
     public final static ResourceCost cost = ResourceCosts.DARK_WATCHTOWER;
 
+    private final static int MAX_OCCUPANTS = 5;
+
     public DarkWatchtower(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
@@ -64,7 +66,9 @@ public class DarkWatchtower extends Building implements Garrisonable {
                     ResourceCosts.getFormattedCost(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("An ominous tower that can garrison units.", Style.EMPTY),
-                    FormattedCharSequence.forward("Garrisoned ranged units have increased range.", Style.EMPTY)
+                    FormattedCharSequence.forward("Garrisoned ranged units have increased range.", Style.EMPTY),
+                    FormattedCharSequence.forward("", Style.EMPTY),
+                    FormattedCharSequence.forward("Can hold a maximum of " + MAX_OCCUPANTS + " units", Style.EMPTY)
             ),
             null
         );
@@ -79,4 +83,7 @@ public class DarkWatchtower extends Building implements Garrisonable {
     public BlockPos getExitPosition() {
         return new BlockPos(2,1,2);
     }
+
+    @Override
+    public boolean isFull() { return Garrisonable.getNumOccupants(this) >= MAX_OCCUPANTS; }
 }
