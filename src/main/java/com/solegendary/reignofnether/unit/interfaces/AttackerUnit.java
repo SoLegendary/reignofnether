@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.building.Garrisonable;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
@@ -110,7 +111,11 @@ public interface AttackerUnit {
     // returns true and attacks the closest enemy OR
     // returns false and does nothing if none are found
     public default boolean attackClosestEnemy(ServerLevel level) {
-        PathfinderMob closestMob = MiscUtil.findClosestAttackableEnemy((Mob) this, this.getAggroRange(), level);
+        float aggroRange = this.getAggroRange();
+        if (Garrisonable.getGarrison((Unit) this) != null)
+            aggroRange *= 3;
+
+        PathfinderMob closestMob = MiscUtil.findClosestAttackableEnemy((Mob) this, aggroRange, level);
         if (closestMob != null) {
             setAttackTarget(closestMob);
             return true;
