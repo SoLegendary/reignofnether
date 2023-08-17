@@ -2,9 +2,12 @@ package com.solegendary.reignofnether.building.buildings.shared;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
+import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.resources.*;
 import net.minecraft.core.BlockPos;
@@ -69,7 +72,9 @@ public class Stockpile extends ProductionBuilding {
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Stockpile.class,
                 () -> false,
-                () -> true,
+                () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
+                        BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
+                        ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(Stockpile.class),
                 null,
                 List.of(

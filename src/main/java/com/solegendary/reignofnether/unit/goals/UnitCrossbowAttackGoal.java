@@ -2,7 +2,10 @@ package com.solegendary.reignofnether.unit.goals;
 
 import java.util.EnumSet;
 
+import com.solegendary.reignofnether.building.Garrisonable;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.CrossbowAttackMob;
@@ -20,15 +23,13 @@ import net.minecraft.world.item.ItemStack;
 public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & CrossbowAttackMob> extends Goal {
     private final T mob;
     private UnitCrossbowAttackGoal.CrossbowState crossbowState = UnitCrossbowAttackGoal.CrossbowState.UNCHARGED;
-    private final float attackRadiusSqr;
     private int seeTime;
     private int attackCooldown;
     private int attackCooldownMax;
 
-    public UnitCrossbowAttackGoal(T mob, int attackCooldown, float attackRadius) {
+    public UnitCrossbowAttackGoal(T mob, int attackCooldown) {
         this.mob = mob;
         this.attackCooldownMax = attackCooldown;
-        this.attackRadiusSqr = attackRadius * attackRadius;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
@@ -41,7 +42,14 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
     }
 
     public boolean canContinueToUse() {
-        return this.isValidTarget() && (this.canUse() || !this.mob.getNavigation().isDone()) && this.isHoldingCrossbow();
+        Entity target = this.mob.getTarget();
+
+        if (target == null || !target.isAlive() || !this.isHoldingCrossbow())
+            return false;
+        if (!this.canUse() && this.mob.getNavigation().isDone())
+            return false;
+
+        return true;
     }
 
     private boolean isValidTarget() {
@@ -68,25 +76,34 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
     public void tick() {
         LivingEntity target = this.mob.getTarget();
         if (target != null && target.isAlive()) {
-            boolean flag = this.mob.getSensing().hasLineOfSight(target);
-            boolean flag1 = this.seeTime > 0;
-            if (flag != flag1) {
+            boolean isGarrisoned = Garrisonable.getGarrison((Unit) this.mob) != null;
+            boolean canSeeTarget = this.mob.getSensing().hasLineOfSight(target) || isGarrisoned;
+            boolean flag = this.seeTime > 0;
+
+            if (canSeeTarget != flag) {
                 this.seeTime = 0;
             }
-
-            if (flag) {
+            if (canSeeTarget) {
                 ++this.seeTime;
             } else {
                 --this.seeTime;
             }
+            double distToTarget = this.mob.distanceTo(target);
+            float attackRange = ((AttackerUnit) this.mob).getAttackRange();
 
-            double d0 = this.mob.distanceToSqr(target);
-            boolean flag2 = (d0 > (double)this.attackRadiusSqr || this.seeTime < 5) && this.attackCooldown == 0;
-            if (flag2 && !((Unit) this.mob).getHoldPosition()) {
-                this.mob.getNavigation().moveTo(target, 1.0f);
-            } else {
-                this.mob.getNavigation().stop();
+            // dont consider garrison range here so the unit still moves towards the edge of the building
+            if (!this.mob.isPassenger()) {
+                if ((distToTarget > attackRange || !canSeeTarget) &&
+                        !((Unit) this.mob).getHoldPosition()) {
+                    this.mob.getNavigation().moveTo(target, 1.0f);
+                } else {
+                    this.mob.getNavigation().stop();
+                }
             }
+            if (isGarrisoned)
+                attackRange *= 3;
+
+            boolean flag2 = (distToTarget > attackRange || this.seeTime < 5) && this.attackCooldown == 0;
 
             this.mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
             if (this.crossbowState == UnitCrossbowAttackGoal.CrossbowState.UNCHARGED) {
@@ -113,7 +130,7 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
                 if (this.attackCooldown == 0) {
                     this.crossbowState = UnitCrossbowAttackGoal.CrossbowState.READY_TO_ATTACK;
                 }
-            } else if (this.crossbowState == UnitCrossbowAttackGoal.CrossbowState.READY_TO_ATTACK && flag) {
+            } else if (this.crossbowState == UnitCrossbowAttackGoal.CrossbowState.READY_TO_ATTACK && canSeeTarget) {
                 this.mob.performRangedAttack(target, 1.0F);
                 ItemStack itemstack1 = this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof CrossbowItem));
                 CrossbowItem.setCharged(itemstack1, false);

@@ -22,7 +22,7 @@ public interface Garrisonable {
 
         for (Building building : buildings) {
             if (unit.getOwnerName().equals(building.ownerName) &&
-                    building instanceof Garrisonable &&
+                    building instanceof Garrisonable && building.isBuilt &&
                     building.isPosInsideBuilding(((LivingEntity) unit).getOnPos()) &&
                     ((LivingEntity) unit).getOnPos().getY() > building.originPos.getY() + 2) {
                 return building;

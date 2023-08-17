@@ -62,7 +62,7 @@ public class Watchtower extends Building implements Garrisonable {
                     ResourceCosts.getFormattedPop(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("A fortified tower that can garrison units.", Style.EMPTY),
-                    FormattedCharSequence.forward("Ranged units can attack while garrisoned.", Style.EMPTY)
+                    FormattedCharSequence.forward("Garrisoned ranged units attack with increased range.", Style.EMPTY)
             ),
             null
         );
@@ -70,7 +70,7 @@ public class Watchtower extends Building implements Garrisonable {
 
     @Override
     public BlockPos getEntryPosition() {
-        return new BlockPos(2,12,2);
+        return new BlockPos(2,11,2);
     }
 
     @Override

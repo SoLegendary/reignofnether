@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.core.BlockPos;
@@ -53,7 +55,8 @@ public class VillagerHouse extends Building {
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == VillagerHouse.class,
             () -> false,
-            () -> true,
+            () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
+                    ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(VillagerHouse.class),
             null,
             List.of(

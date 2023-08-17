@@ -25,14 +25,12 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
     private final int attackWindupTime = 5; // time to wind up a bow attack
     private int attackCooldownMax;
     private int attackCooldown = 0; // time to wait between bow windups
-    private final float attackRadiusSqr;
     private int attackTime = -1;
     private int seeTime; // how long we have seen the target for
 
-    public UnitBowAttackGoal(T mob, int attackCooldown, float attackRadius) {
+    public UnitBowAttackGoal(T mob, int attackCooldown) {
         this.mob = mob;
         this.attackCooldownMax = attackCooldown;
-        this.attackRadiusSqr = attackRadius * attackRadius;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
@@ -55,17 +53,6 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
         if (!this.canUse() && this.mob.getNavigation().isDone())
             return false;
 
-        if (this.mob instanceof AttackerUnit attackerUnit) {
-            double dist = target.position().distanceTo(this.mob.position());
-            float range = attackerUnit.getAttackRange();
-            if (Garrisonable.getGarrison((Unit) this.mob) != null)
-                range *= 3;
-            if (dist > range) {
-                this.stop();
-                attackerUnit.setAttackTarget(null);
-                return false;
-            }
-        }
         return true;
     }
 
@@ -86,18 +73,14 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
         LivingEntity target = this.mob.getTarget();
 
         if (target != null && target.isAlive()) {
-
             this.mob.getLookControl().setLookAt(target.getX(), target.getEyeY(), target.getZ());
 
             boolean isGarrisoned = Garrisonable.getGarrison((Unit) this.mob) != null;
-
-            double distToTargetSqr = this.mob.distanceToSqr(target.getX(), target.getY(), target.getZ());
             boolean canSeeTarget = this.mob.getSensing().hasLineOfSight(target) || isGarrisoned;
             boolean flag = this.seeTime > 0;
             if (canSeeTarget != flag) {
                 this.seeTime = 0;
             }
-
             if (canSeeTarget) {
                 ++this.seeTime;
             } else {
@@ -108,7 +91,9 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
             // don't if the attacker is riding (eg. skeleton jockey) or it influences the vehicle movement
             // also don't if garrisoned or the unit might fall off the building
             if (!this.mob.isPassenger()) {
-                if ((distToTargetSqr > (double) this.attackRadiusSqr || !canSeeTarget) &&
+                double distToTarget = this.mob.distanceTo(target);
+                float attackRange = ((AttackerUnit) this.mob).getAttackRange();
+                if ((distToTarget > attackRange || !canSeeTarget) &&
                     !((Unit) this.mob).getHoldPosition()) {
                     this.mob.getNavigation().moveTo(target, 1.0f);
                 } else {

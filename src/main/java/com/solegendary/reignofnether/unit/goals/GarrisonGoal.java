@@ -59,7 +59,9 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
         if (blockPos != null) {
             if (this.mob.level.isClientSide()) {
                 this.buildingTarget = BuildingUtils.findBuilding(BuildingClientEvents.getBuildings(), blockPos);
-                if (this.buildingTarget instanceof Garrisonable && buildingTarget.ownerName.equals(((Unit) mob).getOwnerName())) {
+                if (this.buildingTarget instanceof Garrisonable &&
+                        buildingTarget.ownerName.equals(((Unit) mob).getOwnerName())) {
+
                     MiscUtil.addUnitCheckpoint(((Unit) mob), new BlockPos(
                             buildingTarget.centrePos.getX(),
                             buildingTarget.originPos.getY() + 1,
