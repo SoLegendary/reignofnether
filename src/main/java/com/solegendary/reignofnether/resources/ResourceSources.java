@@ -70,7 +70,7 @@ public class ResourceSources {
             new ResourceSource("Wheat",
                     List.of(Blocks.WHEAT),
                     List.of(Items.WHEAT),
-                    TICKS_PER_SECOND * 4,
+                    TICKS_PER_SECOND * 2,
                     5,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
@@ -78,7 +78,7 @@ public class ResourceSources {
             new ResourceSource("Carrots",
                     List.of(Blocks.CARROTS),
                     List.of(Items.CARROT),
-                    TICKS_PER_SECOND * 4,
+                    TICKS_PER_SECOND * 2,
                     6,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
@@ -86,7 +86,7 @@ public class ResourceSources {
             new ResourceSource("Potatoes",
                     List.of(Blocks.POTATOES),
                     List.of(Items.POTATO, Items.BAKED_POTATO),
-                    TICKS_PER_SECOND * 4,
+                    TICKS_PER_SECOND * 2,
                     7,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
@@ -94,7 +94,7 @@ public class ResourceSources {
             new ResourceSource("Beetroots",
                     List.of(Blocks.BEETROOTS),
                     List.of(Items.BEETROOT),
-                    TICKS_PER_SECOND * 4,
+                    TICKS_PER_SECOND * 2,
                     10,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_3) == 3
@@ -102,7 +102,7 @@ public class ResourceSources {
             new ResourceSource("Gourds",
                     List.of(Blocks.MELON, Blocks.PUMPKIN),
                     List.of(Items.MELON, Items.PUMPKIN),
-                    TICKS_PER_SECOND * 5,
+                    TICKS_PER_SECOND * 4,
                     5,
                     ResourceName.FOOD
             ),
@@ -204,7 +204,7 @@ public class ResourceSources {
                             Items.STRIPPED_OAK_LOG, Items.STRIPPED_BIRCH_LOG, Items.STRIPPED_ACACIA_LOG, Items.STRIPPED_DARK_OAK_LOG, Items.STRIPPED_JUNGLE_LOG, Items.STRIPPED_MANGROVE_LOG, Items.STRIPPED_SPRUCE_LOG,
                             Items.OAK_WOOD, Items.BIRCH_WOOD, Items.ACACIA_WOOD, Items.DARK_OAK_WOOD, Items.JUNGLE_WOOD, Items.MANGROVE_WOOD, Items.SPRUCE_WOOD,
                             Items.STRIPPED_OAK_WOOD, Items.STRIPPED_BIRCH_WOOD, Items.STRIPPED_ACACIA_WOOD, Items.STRIPPED_DARK_OAK_WOOD, Items.STRIPPED_JUNGLE_WOOD, Items.STRIPPED_MANGROVE_WOOD, Items.STRIPPED_SPRUCE_WOOD),
-                    TICKS_PER_SECOND * 12,
+                    TICKS_PER_SECOND * 8,
                     15,
                     ResourceName.WOOD
             ),

@@ -12,14 +12,13 @@ NOTE: don't send multiple packets in succession that modify the same array - can
 - spiders and poison spiders (even when not mounted) don't stop movement on S
     - mob.getNavigation().stop() doesn't seem to affect them, even though it sets isDone() and !isInProgress()
 
-- zombie villagers sometimes get stuck gathering anything
-    - progress gets reset repeatedly for some reason
-
 - Tutorial documentation/gifs
+
+Arrows bounce off enemies if multiple hit at the same time
+
 
 
 - give villagers ability to kill animals without combat
-
 
 
 
@@ -28,13 +27,12 @@ UnitServerEvents line 258 comodificationException
     - make everything threadsafe??
     - apply the same synchronized() fix to the allcheats feature and test in local server
 
-- workers don't automatically gather after building a stockpile
-- workers don't automatically gather adjacent blocks if a group of workers are asked to gather the same block
-- villagers arent being assigned to the farm they build automatically
+- workers sometimes get stuck gathering anything
+    - progress gets reset repeatedly
+    - happens when their inventory is full
 
 
 
-Arrows bounce off enemies if multiple hit at the same time
 
 
 TODO test in remote server
@@ -42,6 +40,7 @@ TODO test in remote server
 - spider jockey movement
 - foodforthought cheat
 - spread unit productions
+- measure gather times
 
 
 

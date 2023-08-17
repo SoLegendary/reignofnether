@@ -54,12 +54,6 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
         if (buildingTarget == null)
             return;
         if (!BuildingUtils.isBuildingBuildable(this.mob.level, buildingTarget)) {
-            if (!startNextQueuedBuilding())
-                stopBuilding();
-            return;
-        }
-        calcMoveTarget();
-        if (buildingTarget.getBlocksPlaced() >= buildingTarget.getBlocksTotal()) {
             if (!startNextQueuedBuilding()) {
                 if (buildingTarget.name.contains(" Farm") && mob instanceof WorkerUnit workerUnit) {
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetResourceName(ResourceName.FOOD);
@@ -71,7 +65,9 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
                 }
                 stopBuilding();
             }
+            return;
         }
+        calcMoveTarget();
         if (isBuilding() && buildingTarget != null) {
             BlockPos bp = buildingTarget.centrePos;
             this.mob.getLookControl().setLookAt(bp.getX(), bp.getY(), bp.getZ());

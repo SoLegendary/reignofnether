@@ -30,7 +30,7 @@ import java.util.function.Predicate;
 public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     private static final int REACH_RANGE = 5;
-    private static final int DEFAULT_MAX_GATHER_TICKS = 300; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
+    private static final int DEFAULT_MAX_GATHER_TICKS = 600; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
     private int gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
     private static final int MAX_SEARCH_CD_TICKS = 40; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
     private int searchCdTicksLeft = 0;
@@ -135,12 +135,13 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     public void tickClient() {
-        if (targetResourceSource != null && this.gatherTarget != null) {
+        if (targetResourceSource != null && this.gatherTarget != null && isGathering()) {
             gatherTicksLeft = Math.min(gatherTicksLeft, targetResourceSource.ticksToGather);
             gatherTicksLeft -= 1;
             if (gatherTicksLeft <= 0)
                 gatherTicksLeft = targetResourceSource.ticksToGather;
             int gatherProgress = Math.round((targetResourceSource.ticksToGather - gatherTicksLeft) / (float) targetResourceSource.ticksToGather * 10);
+            System.out.println(gatherProgress);
             this.mob.level.destroyBlockProgress(this.mob.getId(), this.gatherTarget, gatherProgress);
         }
     }
@@ -159,7 +160,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             return;
 
         if (gatherTarget == null && targetResourceName != ResourceName.NONE) {
-            searchCdTicksLeft -= TICK_CD;
+            searchCdTicksLeft -= (TICK_CD / 2); // for some this is run twice as fast as we expect
 
             // prioritise gathering adjacent targets first
             for (BlockPos todoBp : todoGatherTargets)
@@ -240,7 +241,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
                 // replant crops on empty farmland
                 if (bsTarget.getBlock() == Blocks.FARMLAND) {
-                    gatherTicksLeft -= TICK_CD;
+                    gatherTicksLeft -= (TICK_CD / 2);
                     gatherTicksLeft = Math.min(gatherTicksLeft, ResourceSources.REPLANT_TICKS_MAX);
                     if (gatherTicksLeft <= 0) {
                         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
@@ -254,9 +255,11 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 }
                 else {
                     if (ResearchServer.playerHasCheat(((Unit) mob).getOwnerName(), "operationcwal"))
-                        this.gatherTicksLeft -= TICK_CD * 10;
+                        this.gatherTicksLeft -= (TICK_CD / 2) * 10;
                     else
-                        this.gatherTicksLeft -= TICK_CD;
+                        this.gatherTicksLeft -= (TICK_CD / 2);
+
+                    System.out.println(gatherTicksLeft);
 
                     gatherTicksLeft = Math.min(gatherTicksLeft, targetResourceSource.ticksToGather);
                     if (gatherTicksLeft <= 0) {
@@ -297,12 +300,12 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 // track how long we've been without a target
                 // if we have spent too long still then we are stuck andreevaulate our gather target
                 if (mob.getNavigation().isDone())
-                    ticksWithoutTarget += TICK_CD;
+                    ticksWithoutTarget += (TICK_CD / 2);
                 if (ticksWithoutTarget >= NO_TARGET_TIMEOUT)
                     this.removeGatherTarget();
             }
         } else {
-            ticksIdle += TICK_CD;
+            ticksIdle += (TICK_CD / 2);
         }
         if (targetFarm != null)
             ticksIdle = 0;
@@ -356,7 +359,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     // only count as gathering if in range of the target
     public boolean isGathering() {
-        if (this.mob.level.isClientSide() && gatherTarget != null)
+        if (!Unit.atMaxResources((Unit) mob) && gatherTarget != null && this.mob.level.isClientSide())
             return isBlockInRange(gatherTarget);
 
         if (!Unit.atMaxResources((Unit) mob) && this.gatherTarget != null && this.targetResourceSource != null &&

@@ -100,9 +100,9 @@ public class UnitActionItem {
                 }
                 case MOVE -> {
                     ResourceName resName = ResourceSources.getBlockResourceName(preselectedBlockPos, level);
-                    if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE &&
-                            workerUnit.getGatherResourceGoal().isValidBlockAnyResourceType(preselectedBlockPos))
-                    {
+                    boolean inBuilding = BuildingUtils.isPosInsideAnyBuilding(((Entity) unit).level, preselectedBlockPos);
+
+                    if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE && !inBuilding) {
                         workerUnit.getGatherResourceGoal().setTargetResourceName(resName);
                         workerUnit.getGatherResourceGoal().setMoveTarget(preselectedBlockPos);
                     }
