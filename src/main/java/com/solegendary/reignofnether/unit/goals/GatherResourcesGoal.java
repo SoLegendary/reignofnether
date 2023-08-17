@@ -304,6 +304,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         } else {
             ticksIdle += TICK_CD;
         }
+        if (targetFarm != null)
+            ticksIdle = 0;
     }
 
     public void saveAndReturnResources() {

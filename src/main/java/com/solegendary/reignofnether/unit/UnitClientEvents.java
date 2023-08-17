@@ -287,12 +287,6 @@ public class UnitClientEvents {
     }
 
     @SubscribeEvent
-    public static void onEntityLeaveEvent(LivingDeathEvent evt) {
-        if (evt.getEntity() instanceof CreeperUnit creeperUnit)
-            creeperUnit.explodeCreeper();
-    }
-
-    @SubscribeEvent
     public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
         idleWorkerIds.removeIf(id -> id == evt.getEntity().getId());
     }
