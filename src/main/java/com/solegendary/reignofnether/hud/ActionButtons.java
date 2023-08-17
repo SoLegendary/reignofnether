@@ -97,7 +97,7 @@ public class ActionButtons {
     public static final Button GARRISON = new Button(
         "Garrison",
         Button.itemIconSize,
-        new ResourceLocation("minecraft", "textures/block/oak_door.png"),
+        new ResourceLocation("minecraft", "textures/block/oak_door_top.png"),
         Keybindings.garrison,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.GARRISON,
         () -> false,
@@ -109,7 +109,7 @@ public class ActionButtons {
     public static final Button UNGARRISON = new Button(
         "Ungarrison",
         Button.itemIconSize,
-        new ResourceLocation("minecraft", "textures/block/oak_door.png"),
+        new ResourceLocation("minecraft", "textures/block/oak_trapdoor.png"),
         Keybindings.garrison,
         () -> false,
         () -> false,

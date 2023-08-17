@@ -22,11 +22,6 @@ NOTE: don't send multiple packets in succession that modify the same array - can
 
 Arrows bounce off enemies if multiple hit at the same time
 
-Garrisons
-    - limit garrison size
-
-Skeletons ignore focus attack commands and instead just attack nearest enemies
-
 
 TODO test in remote server
 
