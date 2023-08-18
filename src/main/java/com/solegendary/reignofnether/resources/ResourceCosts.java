@@ -29,7 +29,7 @@ public class ResourceCosts {
         return FormattedCharSequence.forward("\uE004  " + resCost.ticks/ResourceCost.TICKS_PER_SECOND + "s", MyRenderer.iconStyle);
     }
 
-    public static final int REPLANT_WOOD_COST = 3;
+    public static final int REPLANT_WOOD_COST = 2;
     public static final int MAX_POPULATION = 100; // max possible pop you can have regardless of buildings
 
     // ******************* UNITS ******************* //

@@ -12,10 +12,12 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
+import com.solegendary.reignofnether.unit.units.monsters.HuskUnit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -40,7 +42,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwingingUnit {
+public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, AttackerUnit, ArmSwingingUnit {
     // region
     private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
     private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
@@ -74,6 +76,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
     public BuildRepairGoal buildRepairGoal;
     public GatherResourcesGoal gatherResourcesGoal;
     private ReturnResourcesGoal returnResourcesGoal;
+    private MeleeAttackUnitGoal attackGoal;
 
     public LivingEntity getFollowTarget() { return followTarget; }
     public boolean getHoldPosition() { return holdPosition; }
@@ -83,6 +86,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
     // moves to a block but will chase/attack nearby monsters in range up to a certain distance away
     private LivingEntity followTarget = null; // if nonnull, continuously moves to the target
     private boolean holdPosition = false;
+    private BlockPos attackMoveTarget = null;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
@@ -101,7 +105,18 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
     public int getPopCost() {return popCost;}
-
+    public boolean getWillRetaliate() {return willRetaliate;}
+    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
+    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAggroRange() {return aggroRange;}
+    public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
+    public float getAttackRange() {return attackRange;}
+    public float getUnitAttackDamage() {return attackDamage;}
+    public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
+    public boolean canAttackBuildings() {return canAttackBuildings;}
+    public Goal getAttackGoal() { return attackGoal; }
+    public AttackBuildingGoal getAttackBuildingGoal() { return null; }
+    public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
     // endregion
@@ -110,6 +125,13 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
         return Blocks.WHEAT.defaultBlockState();
     }
 
+    final static public float attackDamage = 1.0f;
+    final static public float attacksPerSecond = 0.3f;
+    final static public float attackRange = 2; // only used by ranged units or melee building attackers
+    final static public float aggroRange = 0;
+    final static public boolean willRetaliate = false; // will attack when hurt by an enemy
+    final static public boolean aggressiveWhenIdle = false;
+    final static public boolean canAttackBuildings = false;
     final static public float maxHealth = 25.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
@@ -131,9 +153,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
         this.swingTime = time;
     }
 
-    public boolean isSwingingArmOnce() {
-        return isSwingingArmOnce;
-    }
+    public boolean isSwingingArmOnce() { return isSwingingArmOnce; }
 
     public void setSwingingArmOnce(boolean swing) {
         isSwingingArmOnce = swing;
@@ -166,36 +186,22 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
+                .add(Attributes.ATTACK_DAMAGE, VillagerUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, VillagerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, VillagerUnit.maxHealth)
                 .add(Attributes.ARMOR, VillagerUnit.armorValue);
     }
 
-    public VillagerUnitModel.ArmPose getVillagerUnitArmPose() {
-        if (this.buildRepairGoal != null && this.buildRepairGoal.isBuilding())
-            return VillagerUnitModel.ArmPose.BUILDING;
-        else if (this.gatherResourcesGoal != null && this.gatherResourcesGoal.isGathering())
-            return VillagerUnitModel.ArmPose.GATHERING;
-        return VillagerUnitModel.ArmPose.CROSSED;
-    }
-
     @Override
-    protected SoundEvent getAmbientSound() {
-        return SoundEvents.VILLAGER_AMBIENT;
-    }
+    protected SoundEvent getAmbientSound() { return SoundEvents.VILLAGER_AMBIENT;}
     @Override
-    protected SoundEvent getDeathSound() {
-        return SoundEvents.VILLAGER_DEATH;
-    }
+    protected SoundEvent getDeathSound() { return SoundEvents.VILLAGER_DEATH; }
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_34103_) {
-        return SoundEvents.VILLAGER_HURT;
-    }
+    protected SoundEvent getHurtSound(DamageSource p_34103_) { return SoundEvents.VILLAGER_HURT; }
 
 
     public void tick() {
         this.setCanPickUpLoot(true);
-
         super.tick();
         Unit.tick(this);
         WorkerUnit.tick(this);
@@ -205,6 +211,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this, 1.0f);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
         this.buildRepairGoal = new BuildRepairGoal(this, 1.0f);
         this.gatherResourcesGoal = new GatherResourcesGoal(this, 1.0f);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
@@ -215,6 +222,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, ArmSwi
         initialiseGoals();
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, buildRepairGoal);
         this.goalSelector.addGoal(2, gatherResourcesGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);

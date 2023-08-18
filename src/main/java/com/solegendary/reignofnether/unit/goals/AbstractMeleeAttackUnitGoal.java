@@ -5,6 +5,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
@@ -145,6 +146,7 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
             this.checkAndPerformAttack(livingentity, d0);
         }
     }
+
 
     protected void checkAndPerformAttack(LivingEntity p_25557_, double p_25558_) {
         double d0 = this.getAttackReachSqr(p_25557_);

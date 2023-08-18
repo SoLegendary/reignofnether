@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import net.minecraft.world.entity.*;
@@ -8,6 +9,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface WorkerUnit {
+
+    // damage animals should always take from workers
+    int DAMAGE_TO_ANIMALS = 3;
+
     public BuildRepairGoal getBuildRepairGoal();
     public GatherResourcesGoal getGatherResourceGoal();
     public BlockState getReplantBlockState();
@@ -46,6 +51,14 @@ public interface WorkerUnit {
                         entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.AIR));
                 }
             }
+        } else if (entity instanceof AttackerUnit attackerUnit &&
+                ResourceSources.isHuntableAnimal(((Unit) entity).getTargetGoal().getTarget())) {
+            if (!mainHandItem.is(Items.STONE_SWORD))
+                entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.STONE_SWORD));
+        }
+        else {
+            if (!mainHandItem.is(Items.AIR))
+                entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.AIR));
         }
     }
 
@@ -62,7 +75,8 @@ public interface WorkerUnit {
         boolean isGathering = resGoal.isGathering();
         boolean isGatheringIdle = resGoal.isIdle();
         boolean isBuilding = unit.getBuildRepairGoal().getBuildingTarget() != null;
+        boolean isFarming = resGoal.isFarming();
 
-        return !isMoving && !isGathering && !isBuilding && isGatheringIdle;
+        return !isMoving && !isGathering && !isBuilding && isGatheringIdle && !isFarming;
     }
 }

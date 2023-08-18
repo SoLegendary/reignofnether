@@ -2,6 +2,8 @@ package com.solegendary.reignofnether.unit.units.modelling;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
@@ -89,14 +91,14 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
         if (entity instanceof WorkerUnit workerUnit && workerUnit.getBuildRepairGoal().isBuilding()) {
             return ArmPose.BUILDING;
         }
-        else if (entity instanceof VindicatorUnit vindicator) {
-            if (vindicator.getTarget() != null || vindicator.getAttackBuildingGoal().isAttacking())
-                return ArmPose.ATTACKING;
-        }
         else if (entity instanceof PillagerUnit) {
             // CROSSBOW_HOLD
             // CROSSBOW_CHARGE
             return ArmPose.CROSSBOW_CHARGE;
+        }
+        else if (entity instanceof AttackerUnit attackerUnit) {
+            if (((Unit) entity).getTargetGoal().getTarget() != null || attackerUnit.getAttackBuildingGoal().isAttacking())
+                return ArmPose.ATTACKING;
         }
         return ArmPose.CROSSED;
     }

@@ -521,12 +521,11 @@ public class HudClientEvents {
 
             ArrayList<Button> actionButtons = new ArrayList<>();
 
-            if (hudSelectedEntity instanceof WorkerUnit) {
-                actionButtons.add(ActionButtons.BUILD_REPAIR);
-                actionButtons.add(ActionButtons.GATHER);
-            }
-            else if (hudSelectedEntity instanceof AttackerUnit)
+
+            if (hudSelectedEntity instanceof AttackerUnit)
                 actionButtons.add(ActionButtons.ATTACK);
+            if (hudSelectedEntity instanceof WorkerUnit)
+                actionButtons.add(ActionButtons.GATHER);
 
             if (unit.canGarrison() && Garrisonable.getGarrison(unit) == null)
                 actionButtons.add(ActionButtons.GARRISON);

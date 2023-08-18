@@ -18,19 +18,13 @@ Arrows bounce off enemies if multiple hit at the same time
 
 
 
-- give villagers ability to kill animals without combat
-
-
 
 SERVER ISSUES
 UnitServerEvents line 258 comodificationException
     - make everything threadsafe??
     - apply the same synchronized() fix to the allcheats feature and test in local server
 
-- workers sometimes get stuck gathering anything
-    - progress gets reset repeatedly
-    - happens when their inventory is full
-
+- on server, checkpoint on a farm isn't centred
 
 
 
@@ -41,7 +35,9 @@ TODO test in remote server
 - foodforthought cheat
 - spread unit productions
 - measure gather times
-
+- zombie villager temporary sunlight immunity
+- worker hunting/attacking
+    - make sure grouped units dont cause illegal actions/crashes
 
 
 TODO tutorial docs

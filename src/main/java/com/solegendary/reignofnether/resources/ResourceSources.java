@@ -1,6 +1,9 @@
 package com.solegendary.reignofnether.resources;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.*;
+import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -15,6 +18,15 @@ public class ResourceSources {
     public static final List<Material> CLEAR_MATERIALS = List.of(Material.WATER, Material.AIR, Material.PLANT, Material.LEAVES);
 
     public static final int TICKS_PER_SECOND = 20;
+
+    public static boolean isHuntableAnimal(LivingEntity entity) {
+        return entity instanceof Cow ||
+                entity instanceof Sheep ||
+                entity instanceof Pig ||
+                entity instanceof Chicken ||
+                entity instanceof PolarBear ||
+                entity instanceof Goat;
+    }
 
     public static ResourceSource getFromBlockPos(BlockPos bp, Level level) {
         Block block = level.getBlockState(bp).getBlock();

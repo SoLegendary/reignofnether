@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -301,6 +302,10 @@ public class UnitServerEvents {
     // make creepers immune to lightning damage (but still get charged by them)
     @SubscribeEvent
     public static void onEntityDamaged(LivingDamageEvent evt) {
+
+        if (ResourceSources.isHuntableAnimal(evt.getEntity()) &&
+            evt.getSource().getEntity() instanceof WorkerUnit)
+            evt.setAmount(WorkerUnit.DAMAGE_TO_ANIMALS);
 
         if (evt.getEntity() instanceof Creeper && (evt.getSource().isExplosion()))
             evt.setCanceled(true);

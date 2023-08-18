@@ -19,7 +19,9 @@ public class VillagerUnitRenderer extends AbstractVillagerUnitRenderer<VillagerU
         super(p_174439_, new VillagerUnitModel<>(p_174439_.bakeLayer(ModelLayers.VINDICATOR)), 0.5F);
         this.addLayer(new ItemInHandLayer<VillagerUnit, VillagerUnitModel<VillagerUnit>>(this, p_174439_.getItemInHandRenderer()) {
             public void render(PoseStack pose, MultiBufferSource mbs, int p_116354_, VillagerUnit unit, float p_116356_, float p_116357_, float p_116358_, float p_116359_, float p_116360_, float p_116361_) {
-                if (unit.getBuildRepairGoal().isBuilding() || unit.getGatherResourceGoal().isGathering()) {
+                if (unit.getBuildRepairGoal().isBuilding() ||
+                    unit.getGatherResourceGoal().isGathering() ||
+                    unit.getTargetGoal().getTarget() != null) {
                     super.render(pose, mbs, p_116354_, unit, p_116356_, p_116357_, p_116358_, p_116359_, p_116360_, p_116361_);
                 }
             }

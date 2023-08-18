@@ -141,7 +141,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             if (gatherTicksLeft <= 0)
                 gatherTicksLeft = targetResourceSource.ticksToGather;
             int gatherProgress = Math.round((targetResourceSource.ticksToGather - gatherTicksLeft) / (float) targetResourceSource.ticksToGather * 10);
-            System.out.println(gatherProgress);
             this.mob.level.destroyBlockProgress(this.mob.getId(), this.gatherTarget, gatherProgress);
         }
     }
@@ -259,8 +258,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                     else
                         this.gatherTicksLeft -= (TICK_CD / 2);
 
-                    System.out.println(gatherTicksLeft);
-
                     gatherTicksLeft = Math.min(gatherTicksLeft, targetResourceSource.ticksToGather);
                     if (gatherTicksLeft <= 0) {
                         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
@@ -307,8 +304,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         } else {
             ticksIdle += (TICK_CD / 2);
         }
-        if (targetFarm != null)
-            ticksIdle = 0;
     }
 
     public void saveAndReturnResources() {
@@ -391,6 +386,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             this.gatherTarget = bp;
             this.targetResourceSource = ResourceSources.getFromBlockPos(gatherTarget, this.mob.level);
         }
+    }
+
+    public boolean isFarming() {
+        return this.targetFarm != null;
     }
 
     // locks the worker to only gather from this specific building
