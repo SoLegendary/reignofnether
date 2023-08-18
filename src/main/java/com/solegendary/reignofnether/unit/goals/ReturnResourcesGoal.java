@@ -27,19 +27,26 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
         super(mob, true, speedModifier, 0);
     }
 
+    public void depositItems() {
+        if (this.mob instanceof Unit unit && !this.mob.level.isClientSide()) {
+            Resources res = Resources.getTotalResourcesFromItems(unit.getItems());
+            if (res.getTotalValue() > 0) {
+                res.ownerName = unit.getOwnerName();
+                ResourcesServerEvents.addSubtractResources(res);
+                ResourcesClientboundPacket.showFloatingText(res, this.moveTarget != null ? this.moveTarget : this.mob.getOnPos());
+                unit.getItems().clear();
+                UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
+                this.stopReturning();
+            }
+        }
+    }
+
     public void tick() {
         if (buildingTarget != null) {
             calcMoveTarget();
             if (canDropOff() && this.mob instanceof Unit unit) {
                 if (!this.mob.level.isClientSide()) {
-                    Resources res = Resources.getTotalResourcesFromItems(unit.getItems());
-                    res.ownerName = unit.getOwnerName();
-                    ResourcesServerEvents.addSubtractResources(res);
-                    ResourcesClientboundPacket.showFloatingText(res, this.moveTarget);
-                    unit.getItems().clear();
-                    UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
-                    this.stopReturning();
-
+                    this.depositItems();
                     if (this.mob instanceof WorkerUnit worker) {
                         unit.resetBehaviours();
                         WorkerUnit.resetBehaviours((WorkerUnit) unit);

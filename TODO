@@ -18,6 +18,10 @@ Arrows bounce off enemies if multiple hit at the same time
 
 
 
+make all units right handed
+
+workers can't pick up dropped items now??
+
 
 SERVER ISSUES
 UnitServerEvents line 258 comodificationException
@@ -37,7 +41,6 @@ TODO test in remote server
 - measure gather times
 - zombie villager temporary sunlight immunity
 - worker hunting/attacking
-    - make sure grouped units dont cause illegal actions/crashes
 
 
 TODO tutorial docs

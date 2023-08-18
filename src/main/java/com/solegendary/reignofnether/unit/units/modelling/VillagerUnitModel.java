@@ -97,7 +97,7 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
             return ArmPose.CROSSBOW_CHARGE;
         }
         else if (entity instanceof AttackerUnit attackerUnit) {
-            if (((Unit) entity).getTargetGoal().getTarget() != null || attackerUnit.getAttackBuildingGoal().isAttacking())
+            if (((Unit) entity).getTargetGoal().getTarget() != null)
                 return ArmPose.ATTACKING;
         }
         return ArmPose.CROSSED;
