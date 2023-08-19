@@ -46,7 +46,7 @@ public class UnitServerEvents {
     private static final int UNIT_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
     private static int unitSyncTicks = UNIT_SYNC_TICKS_MAX;
 
-    private static final List<UnitActionItem> unitActionQueue = Collections.synchronizedList(new ArrayList<UnitActionItem>());
+    private static final List<UnitActionItem> unitActionQueue = Collections.synchronizedList(new ArrayList<>());
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
     private static final ArrayList<Pair<Integer, ChunkAccess>> forcedUnitChunks = new ArrayList<>();

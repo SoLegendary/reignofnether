@@ -2,10 +2,13 @@ package com.solegendary.reignofnether.research;
 
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.unit.UnitActionItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.resetFogChunks;
 
@@ -14,49 +17,62 @@ public class ResearchClient {
 
     private final static Minecraft MC = Minecraft.getInstance();
 
-    final private static ArrayList<String> researchItems = new ArrayList<>();
+    final private static List<String> researchItems = Collections.synchronizedList(new ArrayList<>());
 
     public static void removeAllResearch() {
-        researchItems.clear();
+        synchronized (researchItems) {
+            researchItems.clear();
+        }
     }
 
     public static void addResearch(String researchItemName) {
-        researchItems.add(researchItemName);
-        HudClientEvents.showTemporaryMessage("Upgrade completed: " + researchItemName);
+        synchronized (researchItems) {
+            researchItems.add(researchItemName);
+            HudClientEvents.showTemporaryMessage("Upgrade completed: " + researchItemName);
+        }
     }
 
     public static boolean hasResearch(String researchItemName) {
-        if (hasCheat("medievalman"))
-            return true;
-        for (String researchItem : researchItems)
-            if (researchItem.equals(researchItemName))
+        synchronized (researchItems) {
+            if (hasCheat("medievalman"))
                 return true;
-        return false;
+            for (String researchItem : researchItems)
+                if (researchItem.equals(researchItemName))
+                    return true;
+            return false;
+        }
     }
 
-    final private static ArrayList<String> cheatItems = new ArrayList<>();
+    final private static List<String> cheatItems = Collections.synchronizedList(new ArrayList<>());
 
     public static void removeAllCheats() {
-        cheatItems.clear();
+        synchronized (cheatItems) {
+            cheatItems.clear();
+        }
     }
 
     public static void addCheat(String cheatItemName) {
-        cheatItems.add(cheatItemName);
-        if (cheatItemName.equals("iseedeadpeople"))
-            resetFogChunks();
+        synchronized (cheatItems) {
+            cheatItems.add(cheatItemName);
+            if (cheatItemName.equals("iseedeadpeople"))
+                resetFogChunks();
+        }
     }
 
     public static void removeCheat(String cheatItemName) {
-        cheatItems.removeIf(r -> r.equals(cheatItemName));
-        if (cheatItemName.equals("iseedeadpeople"))
-            resetFogChunks();
+        synchronized (cheatItems) {
+            cheatItems.removeIf(r -> r.equals(cheatItemName));
+            if (cheatItemName.equals("iseedeadpeople"))
+                resetFogChunks();
+        }
     }
 
     public static boolean hasCheat(String cheatItemName) {
-        for (String cheatItem : cheatItems)
-            if (cheatItem.equals(cheatItemName))
-                return true;
-        return false;
+        synchronized (cheatItems) {
+            for (String cheatItem : cheatItems)
+                if (cheatItem.equals(cheatItemName))
+                    return true;
+            return false;
+        }
     }
-
 }

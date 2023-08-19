@@ -1,14 +1,9 @@
 
 TODO bugs/features:
 
-NOTE: don't send multiple packets in succession that modify the same array - can cause comodification errors
-    - may need to make arrays thread-safe
-    - onEntityLeaveEvent sometimes causes a concurrentModificationException when a converted unit was attacking a worker
-
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - Evoker portraits should not show their arms
 - workers are not marked as idle until 10-15s after stopping gathering
-
 - spiders and poison spiders (even when not mounted) don't stop movement on S
     - mob.getNavigation().stop() doesn't seem to affect them, even though it sets isDone() and !isInProgress()
 
@@ -18,8 +13,6 @@ Arrows bounce off enemies if multiple hit at the same time
 
 
 
-villagers hunting animals
-    - prevent item drops, instead just add set amount of food directly to the killer
 
 
 
@@ -41,6 +34,7 @@ TODO test in remote server
 - measure gather times
 - zombie villager temporary sunlight immunity
 - worker hunting/attacking
+- synchonized cheats/research
 
 
 TODO tutorial docs

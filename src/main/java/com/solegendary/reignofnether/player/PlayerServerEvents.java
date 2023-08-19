@@ -179,7 +179,6 @@ public class PlayerServerEvents {
             }
 
             // apply all cheats - NOTE can cause concurrentModificationException clientside
-            /*
             if (words.length == 1 && words[0].equalsIgnoreCase("allcheats")) {
                 ResourcesServerEvents.addSubtractResources(new Resources(playerName, 99999, 99999, 99999));
                 for (String cheatName : singleWordCheats) {
@@ -188,7 +187,7 @@ public class PlayerServerEvents {
                     evt.setCanceled(true);
                 }
                 sendMessageToAllPlayers(playerName + " enabled all cheats");
-            }*/
+            }
         }
     }
 
