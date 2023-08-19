@@ -61,8 +61,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
                 }
                 // look for the nearest resource to gather after completing a stockpile
                 else if (buildingTarget instanceof Stockpile stockpile && !buildingTarget.isBuilt && mob instanceof WorkerUnit workerUnit) {
-                    if (Unit.atMaxResources((Unit) mob))
-                        ((Unit) mob).getReturnResourcesGoal().depositItems();
+                    ((Unit) mob).getReturnResourcesGoal().depositItems();
                     workerUnit.getGatherResourceGoal().setTargetResourceName(stockpile.mostAbundantNearbyResource);
                 }
                 stopBuilding();
