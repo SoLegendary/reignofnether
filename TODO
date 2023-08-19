@@ -15,9 +15,8 @@ TODO bugs/features:
 
 - does attack speed stat actually work for melee units?
 
-- workers should return resources when directed to gather or farm
-    (and then return to that same target)
-
+- prevent workers getting stuck in trees
+    - maybe make leaves a block to avoid?
 
 
 TODO test in remote server

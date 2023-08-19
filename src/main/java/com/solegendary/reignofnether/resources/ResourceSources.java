@@ -83,7 +83,7 @@ public class ResourceSources {
                     List.of(Blocks.WHEAT),
                     List.of(Items.WHEAT),
                     TICKS_PER_SECOND * 2,
-                    5,
+                    6,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
@@ -91,7 +91,7 @@ public class ResourceSources {
                     List.of(Blocks.CARROTS),
                     List.of(Items.CARROT),
                     TICKS_PER_SECOND * 2,
-                    6,
+                    8,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
@@ -99,7 +99,7 @@ public class ResourceSources {
                     List.of(Blocks.POTATOES),
                     List.of(Items.POTATO, Items.BAKED_POTATO),
                     TICKS_PER_SECOND * 2,
-                    7,
+                    10,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
@@ -114,8 +114,8 @@ public class ResourceSources {
             new ResourceSource("Gourds",
                     List.of(Blocks.MELON, Blocks.PUMPKIN),
                     List.of(Items.MELON, Items.PUMPKIN),
-                    TICKS_PER_SECOND * 4,
-                    5,
+                    TICKS_PER_SECOND * 3,
+                    8,
                     ResourceName.FOOD
             ),
             new ResourceSource("Mushrooms",
