@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -17,6 +18,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
@@ -32,6 +35,8 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.item.ItemEvent;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -220,6 +225,26 @@ public class UnitServerEvents {
             creeperUnit.explodeCreeper();
     }
 
+    @SubscribeEvent
+    public static void onDropItem(LivingDropsEvent evt) {
+        if (ResourceSources.isHuntableAnimal(evt.getEntity()) &&
+            !evt.getSource().isProjectile() &&
+            evt.getSource().getEntity() instanceof Unit unit &&
+            !Unit.atMaxResources(unit)) {
+
+            evt.setCanceled(true);
+            for (ItemEntity itemEntity :  evt.getDrops()) {
+                ResourceSource res = ResourceSources.getFromItem(itemEntity.getItem().getItem());
+                if (res != null) {
+                    unit.getItems().add(itemEntity.getItem());
+                }
+            }
+            if (Unit.atMaxResources(unit))
+                unit.getReturnResourcesGoal().returnToClosestBuilding();
+        }
+    }
+
+
     // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns null
     // remember to always reset targets so that users' actions always overwrite any existing action
     @SubscribeEvent
@@ -260,15 +285,11 @@ public class UnitServerEvents {
                 }
             }
         }
-
-
         synchronized (unitActionQueue) {
             for (UnitActionItem actionItem : unitActionQueue)
                 actionItem.action(evt.level);
             unitActionQueue.clear();
         }
-
-
     }
 
     @SubscribeEvent

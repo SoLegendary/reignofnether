@@ -10,8 +10,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public interface WorkerUnit {
 
-    // damage animals should always take from workers
-    int DAMAGE_TO_ANIMALS = 3;
+    // damage animals should always take from workers (so we ignore held weapon damage)
+    int DAMAGE_TO_ANIMALS = 1;
 
     public BuildRepairGoal getBuildRepairGoal();
     public GatherResourcesGoal getGatherResourceGoal();
@@ -28,9 +28,9 @@ public interface WorkerUnit {
         LivingEntity entity = (LivingEntity) unit;
         ItemStack mainHandItem = entity.getItemBySlot(EquipmentSlot.MAINHAND);
 
-        if (unit.getBuildRepairGoal().isBuilding() &&
-                !mainHandItem.is(Items.IRON_SHOVEL)) {
-            entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
+        if (unit.getBuildRepairGoal().isBuilding()) {
+            if (!mainHandItem.is(Items.IRON_SHOVEL))
+                entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
         }
         else if (unit.getGatherResourceGoal().isGathering()) {
             switch (unit.getGatherResourceGoal().getTargetResourceName()) {
@@ -55,8 +55,7 @@ public interface WorkerUnit {
                 ResourceSources.isHuntableAnimal(((Unit) entity).getTargetGoal().getTarget())) {
             if (!mainHandItem.is(Items.STONE_SWORD))
                 entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.STONE_SWORD));
-        }
-        else {
+        } else {
             if (!mainHandItem.is(Items.AIR))
                 entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.AIR));
         }

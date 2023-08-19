@@ -9,17 +9,11 @@ TODO bugs/features:
 
 - Tutorial documentation/gifs
 
-Arrows bounce off enemies if multiple hit at the same time
+- Arrows bounce off enemies if multiple hit at the same time
 
 
 
-
-
-
-SERVER ISSUES
-UnitServerEvents line 258 comodificationException
-    - make everything threadsafe??
-    - apply the same synchronized() fix to the allcheats feature and test in local server
+- does attack speed stat actually work for melee units?
 
 - on server, checkpoint on a farm isn't centred
 
@@ -34,7 +28,7 @@ TODO test in remote server
 - measure gather times
 - zombie villager temporary sunlight immunity
 - worker hunting/attacking
-- synchonized cheats/research
+- synchonized cheats/research/actionItems
 
 
 TODO tutorial docs
