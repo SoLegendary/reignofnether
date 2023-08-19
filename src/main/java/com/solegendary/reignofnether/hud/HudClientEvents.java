@@ -524,15 +524,17 @@ public class HudClientEvents {
 
             if (hudSelectedEntity instanceof AttackerUnit)
                 actionButtons.add(ActionButtons.ATTACK);
-            if (hudSelectedEntity instanceof WorkerUnit)
+            if (hudSelectedEntity instanceof WorkerUnit) {
+                actionButtons.add(ActionButtons.BUILD_REPAIR);
                 actionButtons.add(ActionButtons.GATHER);
-
+            }
             if (unit.canGarrison() && Garrisonable.getGarrison(unit) == null)
                 actionButtons.add(ActionButtons.GARRISON);
             else if (Garrisonable.getGarrison(unit) != null)
                 actionButtons.add(ActionButtons.UNGARRISON);
 
-            actionButtons.add(ActionButtons.HOLD);
+            if (!(hudSelectedEntity instanceof WorkerUnit))
+                actionButtons.add(ActionButtons.HOLD);
             actionButtons.add(ActionButtons.STOP);
 
             for (Button actionButton : actionButtons) {
@@ -554,7 +556,7 @@ public class HudClientEvents {
                 blitX += iconFrameSize;
             }
             blitX = 0;
-            blitY = screenHeight - (iconFrameSize * 2);
+            blitY = screenHeight - (iconFrameSize * 2) - 4;
 
             // includes worker building buttons
             for (LivingEntity livingEntity : selUnits) {

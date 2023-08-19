@@ -29,7 +29,7 @@ public class ActionButtons {
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.BUILD_REPAIR),
             null,
-            List.of(FormattedCharSequence.forward("Build", Style.EMPTY))
+            List.of(FormattedCharSequence.forward("Build/Repair", Style.EMPTY))
     );
     public static final Button GATHER = new Button(
             "Gather",
