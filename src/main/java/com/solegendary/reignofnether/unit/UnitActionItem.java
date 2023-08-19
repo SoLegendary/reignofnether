@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
@@ -103,8 +104,14 @@ public class UnitActionItem {
                     boolean inBuilding = BuildingUtils.isPosInsideAnyBuilding(((Entity) unit).level.isClientSide(), preselectedBlockPos);
 
                     if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE && !inBuilding) {
-                        workerUnit.getGatherResourceGoal().setTargetResourceName(resName);
-                        workerUnit.getGatherResourceGoal().setMoveTarget(preselectedBlockPos);
+                        GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
+                        goal.setTargetResourceName(resName);
+                        goal.setMoveTarget(preselectedBlockPos);
+                        if (Unit.atMaxResources((Unit) workerUnit)) {
+                            if (level.isClientSide())
+                                HudClientEvents.showTemporaryMessage("Worker inventory full, dropping off first...");
+                            goal.saveAndReturnResources();
+                        }
                     }
                     else
                         unit.setMoveTarget(preselectedBlockPos);
@@ -164,8 +171,14 @@ public class UnitActionItem {
                             goal.setTargetResourceName(ResourceName.FOOD);
                             goal.setMoveTarget(preselectedBlockPos);
                             Building building = BuildingUtils.findBuilding(level.isClientSide(), preselectedBlockPos);
-                            if (building != null && building.name.contains(" Farm"))
+                            if (building != null && building.name.contains(" Farm")) {
                                 goal.setTargetFarm(building);
+                                if (Unit.atMaxResources((Unit) workerUnit)) {
+                                    if (level.isClientSide())
+                                        HudClientEvents.showTemporaryMessage("Worker inventory full, dropping off first...");
+                                    goal.saveAndReturnResources();
+                                }
+                            }
                         }
                     }
                 }
