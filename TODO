@@ -15,8 +15,6 @@ TODO bugs/features:
 
 - does attack speed stat actually work for melee units?
 
-- on server, checkpoint on a farm isn't centred
-
 
 
 
@@ -27,6 +25,7 @@ TODO test in remote server
 - spread unit productions
 - measure gather times
 - zombie villager temporary sunlight immunity
+- dropoff and autogather after stockpile built
 - worker hunting/attacking
 - synchonized cheats/research/actionItems
 

@@ -42,7 +42,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
 
 
     public boolean startNextQueuedBuilding() {
-        queuedBuildings.removeIf(b -> !BuildingUtils.isBuildingBuildable(this.mob.level, b));
+        queuedBuildings.removeIf(b -> !BuildingUtils.isBuildingBuildable(this.mob.level.isClientSide(), b));
         if (queuedBuildings.size() > 0) {
             setBuildingTarget(queuedBuildings.get(0));
             return true;
@@ -53,7 +53,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     public void tick() {
         if (buildingTarget == null)
             return;
-        if (!BuildingUtils.isBuildingBuildable(this.mob.level, buildingTarget)) {
+        if (!BuildingUtils.isBuildingBuildable(this.mob.level.isClientSide(), buildingTarget)) {
             if (!startNextQueuedBuilding()) {
                 if (buildingTarget.name.contains(" Farm") && mob instanceof WorkerUnit workerUnit) {
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetResourceName(ResourceName.FOOD);

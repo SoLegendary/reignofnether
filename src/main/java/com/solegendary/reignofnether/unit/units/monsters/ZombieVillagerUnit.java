@@ -174,7 +174,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
 
         if (level.isClientSide()) {
             AbilityButton mausoleumButton = Mausoleum.getBuildButton(Keybindings.keyQ);
-            mausoleumButton.isEnabled = () -> !BuildingUtils.doesPlayerOwnCapitol(level, getOwnerName());
+            mausoleumButton.isEnabled = () -> !BuildingUtils.doesPlayerOwnCapitol(level.isClientSide(), getOwnerName());
             this.abilityButtons.add(mausoleumButton);
             this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyW));
             this.abilityButtons.add(HauntedHouse.getBuildButton(Keybindings.keyE));
@@ -236,15 +236,13 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
         WorkerUnit.tick(this);
 
         // won't naturally burn since we've extended a Vindicator
-        if (this.isSunBurnTick())
+        if (this.isSunBurnTick() && BuildingUtils.doesPlayerOwnCapitol(this.level.isClientSide(), this.getOwnerName()))
             this.setSecondsOnFire(8);
 
         if (!this.level.isClientSide()) {
-            if (BuildingUtils.doesPlayerOwnCapitol(this.level, this.getOwnerName())) {
-                boolean isInRangeOfNightSource = BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false);
-                if (this.isOnFire() && isInRangeOfNightSource)
-                    this.setRemainingFireTicks(0);
-            }
+            boolean isInRangeOfNightSource = BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false);
+            if (this.isOnFire() && isInRangeOfNightSource)
+                this.setRemainingFireTicks(0);
         }
     }
 

@@ -200,7 +200,7 @@ public class BuildingServerEvents {
                     evt.getSpawner().getSpawnerBlockEntity() != null) {
                 BlockEntity be = evt.getSpawner().getSpawnerBlockEntity();
                 BlockPos bp = evt.getSpawner().getSpawnerBlockEntity().getBlockPos();
-                if (BuildingUtils.findBuilding(getBuildings(), bp) instanceof Dungeon)
+                if (BuildingUtils.findBuilding(false, bp) instanceof Dungeon)
                     evt.setResult(Event.Result.DENY);
             }
         }

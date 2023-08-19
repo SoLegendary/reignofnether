@@ -98,7 +98,7 @@ public class BuildingServerboundPacket {
 
             Building building = null;
             if (!List.of(BuildingAction.PLACE, BuildingAction.PLACE_AND_QUEUE).contains(this.action)) {
-                building = findBuilding(BuildingServerEvents.getBuildings(), this.buildingPos);
+                building = findBuilding(false, this.buildingPos);
                 if (building == null)
                     return;
             }

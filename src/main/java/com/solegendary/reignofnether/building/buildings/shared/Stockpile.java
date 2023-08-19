@@ -107,7 +107,7 @@ public class Stockpile extends ProductionBuilding {
                     return false;
 
                     // is not part of a building (unless farming)
-                else if (BuildingUtils.isPosInsideAnyBuilding(getLevel(), bp))
+                else if (BuildingUtils.isPosInsideAnyBuilding(getLevel().isClientSide(), bp))
                     return false;
 
                 // not covered by solid blocks

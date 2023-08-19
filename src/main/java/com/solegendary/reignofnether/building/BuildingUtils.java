@@ -20,8 +20,8 @@ import java.util.function.Predicate;
 
 public class BuildingUtils {
 
-    public static boolean isBuildingBuildable(Level level, Building building) {
-        if (level.isClientSide())
+    public static boolean isBuildingBuildable(boolean isClientSide, Building building) {
+        if (isClientSide)
             return BuildingClientEvents.getBuildings().stream().map(b -> b.originPos).toList().contains(building.originPos) &&
                     building.getBlocksPlaced() < building.getBlocksTotal();
         else
@@ -40,13 +40,8 @@ public class BuildingUtils {
         return false;
     }
 
-    public static boolean doesPlayerOwnCapitol(Level level, String playerName) {
-        List<Building> buildings;
-        if (level.isClientSide())
-            buildings = BuildingClientEvents.getBuildings();
-        else
-            buildings = BuildingServerEvents.getBuildings();
-
+    public static boolean doesPlayerOwnCapitol(boolean isClientSide, String playerName) {
+        List<Building> buildings = isClientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
         for (Building building : buildings)
             if (building.isCapitol && building.ownerName.equals(playerName))
                 return true;
@@ -109,8 +104,10 @@ public class BuildingUtils {
         return building;
     }
 
-    // note originPos may not actually be a part of the building itself
-    public static Building findBuilding(List<Building> buildings, BlockPos pos) {
+    // note originPos may be an air block
+    public static Building findBuilding(boolean isClientSide, BlockPos pos) {
+        List<Building> buildings = isClientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+
         for (Building building : buildings)
             if (building.originPos.equals(pos) || building.isPosInsideBuilding(pos))
                 return building;
@@ -172,9 +169,9 @@ public class BuildingUtils {
     }
 
     // returns whether the given pos is part of ANY building in the level
-    public static boolean isPosPartOfAnyBuilding(Level level, BlockPos bp, boolean onlyPlacedBlocks) {
+    public static boolean isPosPartOfAnyBuilding(boolean isClientSide, BlockPos bp, boolean onlyPlacedBlocks) {
         List<Building> buildings;
-        if (level.isClientSide())
+        if (isClientSide)
             buildings = BuildingClientEvents.getBuildings();
         else
             buildings = BuildingServerEvents.getBuildings();
@@ -186,9 +183,9 @@ public class BuildingUtils {
     }
 
     // returns whether the given pos is part of ANY building in the level
-    public static boolean isPosInsideAnyBuilding(Level level, BlockPos bp) {
+    public static boolean isPosInsideAnyBuilding(boolean isClientSide, BlockPos bp) {
         List<Building> buildings;
-        if (level.isClientSide())
+        if (isClientSide)
             buildings = BuildingClientEvents.getBuildings();
         else
             buildings = BuildingServerEvents.getBuildings();
@@ -199,7 +196,13 @@ public class BuildingUtils {
         return false;
     }
 
-    public static Building findClosestBuilding(ArrayList<Building> buildings, Vec3 pos, Predicate<Building> condition) {
+    public static Building findClosestBuilding(boolean isClientSide, Vec3 pos, Predicate<Building> condition) {
+        List<Building> buildings;
+        if (isClientSide)
+            buildings = BuildingClientEvents.getBuildings();
+        else
+            buildings = BuildingServerEvents.getBuildings();
+
         double closestDist = 9999;
         Building closestBuilding = null;
         for (Building building : buildings) {

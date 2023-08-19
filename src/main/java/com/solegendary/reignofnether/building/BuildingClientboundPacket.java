@@ -93,7 +93,7 @@ public class BuildingClientboundPacket {
             () -> () -> {
                 Building building = null;
                 if (this.action != BuildingAction.PLACE) {
-                    building = findBuilding(BuildingClientEvents.getBuildings(), this.buildingPos);
+                    building = findBuilding(true, this.buildingPos);
                     if (building == null)
                         return;
                 }

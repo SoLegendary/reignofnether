@@ -169,7 +169,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
         if (level.isClientSide()) {
             AbilityButton townCentreButton = TownCentre.getBuildButton(Keybindings.keyQ);
-            townCentreButton.isEnabled = () -> !BuildingUtils.doesPlayerOwnCapitol(level, getOwnerName());
+            townCentreButton.isEnabled = () -> !BuildingUtils.doesPlayerOwnCapitol(level.isClientSide(), getOwnerName());
             this.abilityButtons.add(townCentreButton);
             this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyW));
             this.abilityButtons.add(VillagerHouse.getBuildButton(Keybindings.keyE));

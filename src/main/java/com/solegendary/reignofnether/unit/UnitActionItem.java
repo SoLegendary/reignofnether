@@ -100,7 +100,7 @@ public class UnitActionItem {
                 }
                 case MOVE -> {
                     ResourceName resName = ResourceSources.getBlockResourceName(preselectedBlockPos, level);
-                    boolean inBuilding = BuildingUtils.isPosInsideAnyBuilding(((Entity) unit).level, preselectedBlockPos);
+                    boolean inBuilding = BuildingUtils.isPosInsideAnyBuilding(((Entity) unit).level.isClientSide(), preselectedBlockPos);
 
                     if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE && !inBuilding) {
                         workerUnit.getGatherResourceGoal().setTargetResourceName(resName);
@@ -150,7 +150,7 @@ public class UnitActionItem {
                 case BUILD_REPAIR -> {
                     // if the unit can't actually build/repair just treat this as a move action
                     if (unit instanceof WorkerUnit workerUnit) {
-                        Building building = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), preselectedBlockPos);
+                        Building building = BuildingUtils.findBuilding(level.isClientSide(), preselectedBlockPos);
                         if (building != null)
                             workerUnit.getBuildRepairGoal().setBuildingTarget(building);
                     }
@@ -163,7 +163,7 @@ public class UnitActionItem {
                         if (goal != null) {
                             goal.setTargetResourceName(ResourceName.FOOD);
                             goal.setMoveTarget(preselectedBlockPos);
-                            Building building = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), preselectedBlockPos);
+                            Building building = BuildingUtils.findBuilding(level.isClientSide(), preselectedBlockPos);
                             if (building != null && building.name.contains(" Farm"))
                                 goal.setTargetFarm(building);
                         }
@@ -176,7 +176,7 @@ public class UnitActionItem {
                             goal.deleteSavedState();
                     }
                     ReturnResourcesGoal returnResourcesGoal = unit.getReturnResourcesGoal();
-                    Building building = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), preselectedBlockPos);
+                    Building building = BuildingUtils.findBuilding(false, preselectedBlockPos);
                     if (returnResourcesGoal != null && building != null)
                         returnResourcesGoal.setBuildingTarget(building);
                 }
@@ -213,11 +213,7 @@ public class UnitActionItem {
         if (this.selectedBuildingPos.equals(new BlockPos(0, 0, 0)))
             return;
 
-        Building actionableBuilding;
-        if (level.isClientSide())
-            actionableBuilding = BuildingUtils.findBuilding(BuildingClientEvents.getBuildings(), this.selectedBuildingPos);
-        else
-            actionableBuilding = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), this.selectedBuildingPos);
+        Building actionableBuilding = BuildingUtils.findBuilding(level.isClientSide(), this.selectedBuildingPos);
 
         if (actionableBuilding != null) {
             for (Ability ability : actionableBuilding.getAbilities())

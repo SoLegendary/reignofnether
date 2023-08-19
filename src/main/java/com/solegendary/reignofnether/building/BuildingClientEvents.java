@@ -413,7 +413,7 @@ public class BuildingClientEvents {
 
                     for (LivingEntity entity : getSelectedUnits()) {
                         if (entity instanceof Unit unit) {
-                            unit.getCheckpoints().removeIf(bp -> !BuildingUtils.isPosInsideAnyBuilding(MC.level, bp));
+                            unit.getCheckpoints().removeIf(bp -> !BuildingUtils.isPosInsideAnyBuilding(true, bp));
                             MiscUtil.addUnitCheckpoint(unit, CursorClientEvents.getPreselectedBlockPos().above(), false);
                             if (unit instanceof WorkerUnit workerUnit)
                                 workerUnit.getBuildRepairGoal().ignoreNextCheckpoint = true;
@@ -580,7 +580,7 @@ public class BuildingClientEvents {
     // place a building clientside that has already been registered on serverside
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int numBlocksToPlace) {
         for (Building building : buildings)
-            if (BuildingUtils.isPosPartOfAnyBuilding(MC.level, pos, false))
+            if (BuildingUtils.isPosPartOfAnyBuilding(true, pos, false))
                 return; // building already exists clientside
 
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName);

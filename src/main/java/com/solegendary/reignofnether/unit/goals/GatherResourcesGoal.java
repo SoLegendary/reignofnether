@@ -92,7 +92,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 return false;
         }
         // is not part of a building (unless farming)
-        else if (targetFarm == null && BuildingUtils.isPosInsideAnyBuilding(mob.level, bp))
+        else if (targetFarm == null && BuildingUtils.isPosInsideAnyBuilding(mob.level.isClientSide(), bp))
             return false;
 
         // not covered by solid blocks

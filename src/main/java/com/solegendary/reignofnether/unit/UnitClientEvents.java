@@ -449,7 +449,7 @@ public class UnitClientEvents {
 
                     if (preSelBuilding.name.contains(" Farm") && preSelBuilding.isBuilt)
                         sendUnitCommand(UnitAction.FARM);
-                    else if (BuildingUtils.isBuildingBuildable(MC.level, preSelBuilding))
+                    else if (BuildingUtils.isBuildingBuildable(true, preSelBuilding))
                         sendUnitCommand(UnitAction.BUILD_REPAIR);
                     else
                         resolveMoveAction();

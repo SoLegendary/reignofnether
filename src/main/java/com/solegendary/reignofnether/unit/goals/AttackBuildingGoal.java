@@ -77,7 +77,7 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
     public void setBuildingTarget(BlockPos blockPos) {
         if (blockPos != null) {
             if (this.mob.level.isClientSide()) {
-                this.buildingTarget = BuildingUtils.findBuilding(BuildingClientEvents.getBuildings(), blockPos);
+                this.buildingTarget = BuildingUtils.findBuilding(true, blockPos);
                 if (this.buildingTarget != null) {
                     MiscUtil.addUnitCheckpoint(((Unit) mob), new BlockPos(
                             buildingTarget.centrePos.getX(),
@@ -88,7 +88,7 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
                 }
             }
             else
-                this.buildingTarget = BuildingUtils.findBuilding(BuildingServerEvents.getBuildings(), blockPos);
+                this.buildingTarget = BuildingUtils.findBuilding(false, blockPos);
             calcMoveTarget();
             this.start();
         }
