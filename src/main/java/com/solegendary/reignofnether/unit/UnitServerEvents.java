@@ -229,6 +229,7 @@ public class UnitServerEvents {
     public static void onDropItem(LivingDropsEvent evt) {
         if (ResourceSources.isHuntableAnimal(evt.getEntity()) &&
             !evt.getSource().isProjectile() &&
+            !evt.getSource().isMagic() &&
             evt.getSource().getEntity() instanceof Unit unit &&
             !Unit.atMaxResources(unit)) {
 
