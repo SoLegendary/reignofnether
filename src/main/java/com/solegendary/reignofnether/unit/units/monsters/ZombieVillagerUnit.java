@@ -34,6 +34,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.item.ItemStack;
@@ -217,6 +218,10 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     protected SoundEvent getHurtSound(DamageSource p_34103_) {
         return SoundEvents.ZOMBIE_VILLAGER_HURT;
     }
+    @Override
+    public boolean isLeftHanded() { return false; }
+    @Override // prevent vanilla logic for picking up items
+    protected void pickUpItem(ItemEntity pItemEntity) { }
 
     // needed as we extended a Vindicator - ensures we reverse healing/harming potions
     @Override
@@ -279,6 +284,4 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
         if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchResourceCapacity.itemName))
             this.maxResources = 100;
     }
-
-
 }

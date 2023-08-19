@@ -18,9 +18,9 @@ Arrows bounce off enemies if multiple hit at the same time
 
 
 
-make all units right handed
+villagers hunting animals
+    - prevent item drops, instead just add set amount of food directly to the killer
 
-workers can't pick up dropped items now??
 
 
 SERVER ISSUES

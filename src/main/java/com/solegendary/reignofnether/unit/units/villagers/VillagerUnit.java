@@ -31,6 +31,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.item.ItemStack;
@@ -198,7 +199,10 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     protected SoundEvent getDeathSound() { return SoundEvents.VILLAGER_DEATH; }
     @Override
     protected SoundEvent getHurtSound(DamageSource p_34103_) { return SoundEvents.VILLAGER_HURT; }
-
+    @Override
+    public boolean isLeftHanded() { return false; }
+    @Override // prevent vanilla logic for picking up items
+    protected void pickUpItem(ItemEntity pItemEntity) { }
 
     public void tick() {
         this.setCanPickUpLoot(true);
@@ -243,4 +247,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
         if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchResourceCapacity.itemName))
             this.maxResources = 100;
     }
+
+
 }
