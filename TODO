@@ -13,7 +13,6 @@ TODO bugs/features:
 
 
 
-- attack speed stat is always 0...
 
 - prevent workers getting stuck in trees
     - maybe make leaves a block to avoid?
