@@ -130,7 +130,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     }
 
     final static public float attackDamage = 1.0f;
-    final static public float attacksPerSecond = 0.3f;
+    final static public float attacksPerSecond = 0.5f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 0;
     final static public boolean willRetaliate = false; // will attack when hurt by an enemy
@@ -233,6 +233,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
         this.setCanPickUpLoot(true);
         super.tick();
         Unit.tick(this);
+        AttackerUnit.tick(this);
         WorkerUnit.tick(this);
 
         // won't naturally burn since we've extended a Vindicator

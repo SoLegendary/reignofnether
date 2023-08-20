@@ -3,7 +3,9 @@ package com.solegendary.reignofnether.unit.interfaces;
 import com.solegendary.reignofnether.building.Garrisonable;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
+import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -62,6 +64,8 @@ public interface AttackerUnit {
         Unit unit = (Unit) attackerUnit;
 
         if (!unitMob.level.isClientSide) {
+            if (attackerUnit.getAttackGoal() instanceof MeleeAttackUnitGoal meleeAttackUnitGoal)
+                meleeAttackUnitGoal.tickAttackCooldown();
 
             if (attackerUnit.getAttackBuildingGoal() != null && attackerUnit.canAttackBuildings())
                 attackerUnit.getAttackBuildingGoal().tick();

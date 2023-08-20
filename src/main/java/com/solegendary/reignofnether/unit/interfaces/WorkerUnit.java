@@ -75,7 +75,8 @@ public interface WorkerUnit {
         boolean isGatheringIdle = resGoal.isIdle();
         boolean isBuilding = unit.getBuildRepairGoal().getBuildingTarget() != null;
         boolean isFarming = resGoal.isFarming();
+        boolean isAttacking = ((Unit) unit).getTargetGoal().getTarget() != null;
 
-        return !isMoving && !isGathering && !isBuilding && isGatheringIdle && !isFarming;
+        return !isMoving && !isGathering && !isBuilding && isGatheringIdle && !isAttacking;
     }
 }

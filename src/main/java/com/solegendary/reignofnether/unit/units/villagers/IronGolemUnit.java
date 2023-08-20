@@ -102,7 +102,7 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 9.0f;
+    final static public float attackDamage = 10.0f;
     final static public float attacksPerSecond = 0.4f;
     final static public float maxHealth = 150.0f;
     final static public float armorValue = 4.0f;
