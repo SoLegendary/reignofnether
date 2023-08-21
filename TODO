@@ -11,11 +11,13 @@ TODO bugs/features:
 
 - Arrows bounce off enemies if multiple hit at the same time
 
+- fix some server startup warnings (invalid DIST for server)
 
 
 
 - prevent workers getting stuck in trees
     - maybe make leaves a block to avoid?
+
 
 
 TODO test in remote server

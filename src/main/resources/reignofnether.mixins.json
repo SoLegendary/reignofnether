@@ -6,19 +6,19 @@
     "mixins": [
         "AbstractArrowMixin",
         "EndermanMixin",
-        "EntityRenderMixin",
         "EvokerFangsMixin",
-        "FrustumMixin",
-        "OrthoViewMixin",
         "PlayerMixin",
-        "TopdownGuiMixin",
-        "WitchMixin"
+        "WitchMixin",
+        "EntityRenderMixin"
     ],
     "minVersion": "0.8",
     "client": [
         "CameraMixin",
         "ClientLevelMixin",
         "ClientPacketMixin",
+        "OrthoViewMixin",
+        "FrustumMixin",
+        "TopdownGuiMixin",
         "fogofwar.ChunkRenderDispatcherMixin",
         "fogofwar.EntityRenderDispatcherMixin",
         "fogofwar.EntityShadowMixin",
