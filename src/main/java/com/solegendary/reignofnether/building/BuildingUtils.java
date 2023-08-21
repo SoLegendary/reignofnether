@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 // class for static building functions
 
 import com.solegendary.reignofnether.building.buildings.monsters.*;
+import com.solegendary.reignofnether.building.buildings.netherlings.Portal;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import net.minecraft.core.BlockPos;
@@ -98,6 +99,7 @@ public class BuildingUtils {
             case Dungeon.buildingName -> building = new Dungeon(level, pos, rotation, ownerName);
             case Watchtower.buildingName -> building = new Watchtower(level, pos, rotation, ownerName);
             case DarkWatchtower.buildingName -> building = new DarkWatchtower(level, pos, rotation, ownerName);
+            case Portal.buildingName -> building = new Portal(level, pos, rotation, ownerName);
         }
         if (building != null)
             building.setLevel(level);

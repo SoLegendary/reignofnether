@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.unit.units.monsters.*;
+import com.solegendary.reignofnether.unit.units.netherlings.PiglinGruntUnit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -108,6 +109,12 @@ public class EntityRegistrar {
                     .sized(EntityType.ENDERMAN.getWidth(), EntityType.ENDERMAN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "enderman_unit").toString()));
+
+    public static final RegistryObject<EntityType<PiglinGruntUnit>> PIGLIN_GRUNT_UNIT = ENTITIES.register("piglin_grunt_unit",
+            () -> EntityType.Builder.of(PiglinGruntUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.PIGLIN.getWidth(), EntityType.PIGLIN.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "piglin_grunt_unit").toString()));
 
 
     public static void init() {

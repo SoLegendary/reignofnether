@@ -5,7 +5,6 @@
     "refmap": "reignofnether.refmap.json",
     "mixins": [
         "AbstractArrowMixin",
-        "EndermanMixin",
         "EvokerFangsMixin",
         "PlayerMixin",
         "WitchMixin",

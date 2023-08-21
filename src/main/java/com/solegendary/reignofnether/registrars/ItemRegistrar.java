@@ -73,6 +73,10 @@ public class ItemRegistrar {
             ITEMS.register("enderman_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.ENDERMAN_UNIT,
                     0x1E1E1E, 0x000000, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
+    public static final RegistryObject<ForgeSpawnEggItem> PIGLIN_GRUNT_UNIT_SPAWN_EGG =
+            ITEMS.register("piglin_grunt_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.PIGLIN_GRUNT_UNIT,
+                    0x925A3D, 0xC9C685, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
     public static void init() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }

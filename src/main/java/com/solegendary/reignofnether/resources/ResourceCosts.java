@@ -75,6 +75,9 @@ public class ResourceCosts {
     public static ResourceCost LIBRARY = ResourceCost.Building(0,350,100, 0);
     public static ResourceCost WATCHTOWER = ResourceCost.Building(0,100,100, 0);
 
+    // Netherlings
+    public static ResourceCost PORTAL = ResourceCost.Building(0, 200, 0, 15);
+
     // ******************* RESEARCH ******************* //
     public static ResourceCost RESEARCH_VINDICATOR_AXES = ResourceCost.Research(0,200,400, 120);
     public static ResourceCost RESEARCH_PILLAGER_CROSSBOWS = ResourceCost.Research(0,600,300, 180);

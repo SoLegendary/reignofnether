@@ -4,14 +4,14 @@ import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.registrars.ContainerRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.unit.units.modelling.PillagerUnitRenderer;
-import com.solegendary.reignofnether.unit.units.modelling.VindicatorUnitRenderer;
-import com.solegendary.reignofnether.unit.units.modelling.ZombieVillagerUnitRenderer;
+import com.solegendary.reignofnether.unit.units.modelling.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
+import com.solegendary.reignofnether.unit.units.netherlings.PiglinGruntUnit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
-import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.*;
+import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -45,6 +45,11 @@ public class CommonModEvents {
         evt.registerEntityRenderer(EntityRegistrar.WITCH_UNIT.get(), WitchRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.EVOKER_UNIT.get(), EvokerRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.ENDERMAN_UNIT.get(), EndermanRenderer::new);
+
+        // See class EntityRenderers
+        evt.registerEntityRenderer(EntityRegistrar.PIGLIN_GRUNT_UNIT.get(), (context) -> new PiglinUnitRenderer(
+            context, ModelLayers.PIGLIN, ModelLayers.PIGLIN_INNER_ARMOR, ModelLayers.PIGLIN_OUTER_ARMOR, false)
+        );
     }
 
     @SubscribeEvent
@@ -64,6 +69,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.WITCH_UNIT.get(), WitchUnit.createAttributes().build());
         evt.put(EntityRegistrar.EVOKER_UNIT.get(), EvokerUnit.createAttributes().build());
         evt.put(EntityRegistrar.ENDERMAN_UNIT.get(), EndermanUnit.createAttributes().build());
+        evt.put(EntityRegistrar.PIGLIN_GRUNT_UNIT.get(), PiglinGruntUnit.createAttributes().build());
     }
 
     @SubscribeEvent
