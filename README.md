@@ -24,7 +24,8 @@ Another core design tenet is that the gamemode is fully compatible with vanilla 
 | RTS-friendly world generation | ✔️ | Flatter world, simpler biomes and added surface ores |  
 | Unit abilities | ✔ | Cooldowns, range, channeling, etc. |  
 | Fog of war | ✔ |  |  
-| Resource collection | 🟡 | Currently lags at high volumes (30+ workers gathering) |
+| Resource collection | ✔ | Including drop offs and animations |
+| Building garrisoning | ✔ |  |
 | Villagers Race | 🟡 | TODO: Castle building and ravager units |  
 | Monsters Race | 🟡 | TODO: Stronghold building and warden units |  
 | Netherlings Race | ❌ |  |  
@@ -46,8 +47,6 @@ I don't really want to release this until it's done to a minimum level of polish
 
 Of course, since you're reading this you now have access to all my code, so feel free to run it yourself 🙂
 https://docs.minecraftforge.net/en/latest/gettingstarted/
-
-If you do run it I don't exactly have a startup guide so all I'll say is: once you're in the game, spawn in some "Villager Units" with some eggs in creative mode, press F12 and watch the magic happen.
 
 # Other stuff
 I am just working on this on and off in my free time so I don't have a strict dev schedule or roadmap. If you want to contact me directly for suggestions, advice or just to have a chat, feel free to DM me at /u/SoLegendary on Reddit.

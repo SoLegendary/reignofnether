@@ -65,4 +65,11 @@ public class Portal extends Building {
                 null
         );
     }
+
+    @Override
+    public void tick(Level tickLevel) {
+        super.tick(tickLevel);
+
+        // TODO: convert blocks to nether blocks
+    }
 }

@@ -151,22 +151,28 @@ Research: Villagers can build Iron Golems (treated as buildings but become iron 
 
 Villager faction
     Market
-        - Deposited resources become 'coins' currency to be exchanged for any resource (ore is 2x as expensive)
-        - Workers can be assigned to withdraw resources from your capitol to deposit at the market
-        - The further the distance from the capitol to the market, the better the exchange rate, ranging from 25% to 75%
+        - 50% of deposited resources become 'coins' currency to be exchanged for any resource (ore is 2x as expensive)
+        - simple deposit buttons, no unit interactions needed
     Castle
         - Villagers' final building
-        - produces ravagers (crowd control/aoe damage bruiser, should be worse at sieging than iron golems)
-        - research to add battlements and allow garrisoning
+        - produces ravagers (crowd control/aoe damage bruiser)
+        - garrisonable (holds up to 10 units)
+        - research to add the ability to promote units (adding ominous banner and gaining a speed aura)
+            - play a firework on use
+            - only one captain allowed at a time
+            - should transform the building like a laboratory
 
 Monster faction
     Sacrificial pit
-        - sacrifices units to refund 50% of their cost as any other resource
+        - sacrifices units to refund 60% of their cost as any other resource
         - accumulates 'souls' currency to be exchanged for any resource (ore is 2x as expensive)
     Stronghold
         - Monsters' final building
         - Requires a laboratory
+        - garrisonable (holds up to 10 units)
         - produces wardens
+            - blind, cannot see anything in fog of war on its own
+            - single target cooldown ability: sonic wave for direct damage
         - research to cause buildings to produce silverfish when damaged and/or destroyed
 
 Netherling faction
