@@ -220,4 +220,21 @@ public class BuildingUtils {
         }
         return closestBuilding;
     }
+
+    public boolean isInNetherRange(boolean isClientside, BlockPos bp) {
+        List<Building> buildings;
+        if (isClientside)
+            buildings = BuildingClientEvents.getBuildings();
+        else
+            buildings = BuildingServerEvents.getBuildings();
+
+        for (Building building : buildings) {
+            if (building instanceof NetherConvertingBuilding netherBuilding) {
+                double distSqr = bp.distSqr(building.centrePos);
+                if (distSqr <= Math.pow(netherBuilding.getMaxRange(), 2))
+                    return true;
+            }
+        }
+        return false;
+    }
 }

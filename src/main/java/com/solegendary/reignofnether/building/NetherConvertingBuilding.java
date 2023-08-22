@@ -9,9 +9,12 @@ import java.util.Random;
 
 public interface NetherConvertingBuilding {
 
-    int NETHER_CONVERT_TICKS_MAX = 20;
+    int NETHER_CONVERT_TICKS_MAX = 5;
+    int MAX_CONVERTS_AFTER_MAX_RANGE = 60; // to prevent continuously processing
 
     Random random = new Random();
+
+    double getMaxRange();
 
     // randomly convert nearby overworld blocks into a nether block
     // returns true if any block was converted
@@ -19,20 +22,16 @@ public interface NetherConvertingBuilding {
         if (!building.isBuilt || building.getLevel().isClientSide())
             return;
 
-        BlockPos bpOrigin = new BlockPos(
-                building.centrePos.getX(),
-                building.originPos.getY(),
-                building.centrePos.getZ()
-        );
         ArrayList<BlockPos> bps = new ArrayList<>();
         for (double x = -range; x < range; x++)
-            for (double z = -range; z < range; z++)
-                bps.add(bpOrigin.offset(x, 0, z));
+            for (double y = -range/2; y < range/2; y++)
+                for (double z = -range; z < range; z++)
+                    bps.add(building.centrePos.offset(x, y, z));
 
         for (BlockPos bp : bps) {
-            double distSqr = bp.distSqr(bpOrigin);
+            double distSqr = bp.distSqr(building.centrePos);
             double rangeSqr = range * range;
-            double rangeMaxSqr = rangeMax * rangeMax;
+            double rangeMaxSqr = getMaxRange() * getMaxRange();
             if (distSqr > rangeSqr)
                 continue;
 
@@ -41,16 +40,13 @@ public interface NetherConvertingBuilding {
             if (random.nextDouble() > chance)
                 continue;
 
-            // TODO:
-            //  go from build-height-down (keep going if leaves or wood)
-            //  don't convert plants directly but convert from ground up
-            for (int i = -3; i < 3; i++) {
-                BlockPos bpToUpdate = bp.offset(0,i,0);
-                BlockState bs = NetherBlocks.getNetherBlock(building.getLevel(), bpToUpdate);
-                if (bs != null && !BuildingUtils.isPosInsideAnyBuilding(building.getLevel().isClientSide(), bpToUpdate))
-                    building.getLevel().setBlockAndUpdate(bpToUpdate, bs);
+            BlockState bs = NetherBlocks.getNetherBlock(building.getLevel(), bp);
+            BlockState bsPlant = NetherBlocks.getNetherPlantBlock(building.getLevel(), bp.above());
+            if (bs != null && !BuildingUtils.isPosInsideAnyBuilding(building.getLevel().isClientSide(), bp)) {
+                building.getLevel().setBlockAndUpdate(bp, bs);
+                if (bsPlant != null)
+                    building.getLevel().setBlockAndUpdate(bp.above(), bsPlant);
             }
         }
     }
-
 }

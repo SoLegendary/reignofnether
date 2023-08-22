@@ -69,7 +69,8 @@ public class Portal extends Building implements NetherConvertingBuilding {
     private double netherConvertRange = 3;
     private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
     private int convertsAfterMaxRange = 0;
-    private final int MAX_CONVERTS_AFTER_MAX_RANGE = 10; // to prevent continuously processing
+
+    public double getMaxRange() { return NETHER_CONVERT_RANGE_MAX; }
 
     @Override
     public void tick(Level tickLevel) {

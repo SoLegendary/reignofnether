@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 // mappings of which overworld blocks will transform into which nether blocks when near a netherling base
 
@@ -18,59 +17,141 @@ public class NetherBlocks {
     public static BlockState getNetherBlock(Level level, BlockPos overworldBp) {
         BlockState overworldBs = level.getBlockState(overworldBp);
         if (!overworldBs.isAir())
-            for (Map.Entry<Block, List<Block>> entrySet : CONVERSION_MAPPINGS.entrySet())
+            for (Map.Entry<Block, List<Block>> entrySet : MAPPINGS.entrySet())
                 for (Block block : entrySet.getValue())
-                    if (overworldBs.getBlock().getName().getString().equals(block.getName().getString()))
+                    if (overworldBs.getBlock().equals(block))
                         return entrySet.getKey().defaultBlockState();
         return null;
     }
 
-    public static final Map<Block, List<Block>> CONVERSION_MAPPINGS = new HashMap<>();
+    public static BlockState getNetherPlantBlock(Level level, BlockPos overworldBp) {
+        BlockState overworldBs = level.getBlockState(overworldBp);
+        if (!overworldBs.isAir())
+            for (Map.Entry<Block, List<Block>> entrySet : PLANT_MAPPINGS.entrySet())
+                for (Block block : entrySet.getValue())
+                    if (overworldBs.getBlock().equals(block))
+                        return entrySet.getKey().defaultBlockState();
+        return null;
+    }
+
+    public static final Map<Block, List<Block>> MAPPINGS = new HashMap<>();
+    public static final Map<Block, List<Block>> PLANT_MAPPINGS = new HashMap<>();
 
     static {
-        CONVERSION_MAPPINGS.put(Blocks.LAVA_CAULDRON,
-            List.of(Blocks.WATER_CAULDRON)
+        MAPPINGS.put(Blocks.LAVA_CAULDRON,
+            List.of(
+                Blocks.WATER_CAULDRON,
+                Blocks.POWDER_SNOW_CAULDRON
+            )
         );
-        CONVERSION_MAPPINGS.put(Blocks.MAGMA_BLOCK,
+        MAPPINGS.put(Blocks.MAGMA_BLOCK,
             List.of(Blocks.COBBLESTONE)
         );
-        CONVERSION_MAPPINGS.put(Blocks.SHROOMLIGHT,
+        MAPPINGS.put(Blocks.SHROOMLIGHT,
             List.of(Blocks.BEE_NEST)
         );
-        CONVERSION_MAPPINGS.put(Blocks.SOUL_SOIL,
+        MAPPINGS.put(Blocks.SOUL_SOIL,
             List.of(Blocks.SAND)
         );
-        CONVERSION_MAPPINGS.put(Blocks.LAVA,
+        MAPPINGS.put(Blocks.AIR,
+            List.of(
+                Blocks.SNOW
+            ));
+        MAPPINGS.put(Blocks.LAVA,
             List.of(
                 Blocks.OBSIDIAN, // converting water -> lava alone generates a lot of obsidian
-                Blocks.WATER
+                Blocks.WATER,
+                Blocks.SEAGRASS,
+                Blocks.TALL_SEAGRASS
             ));
-        CONVERSION_MAPPINGS.put(Blocks.CRIMSON_NYLIUM,
+        MAPPINGS.put(Blocks.CRIMSON_NYLIUM,
             List.of(
                 Blocks.GRASS_BLOCK,
                 Blocks.DIRT,
                 Blocks.COARSE_DIRT,
                 Blocks.DIRT_PATH,
-                Blocks.ROOTED_DIRT
+                Blocks.ROOTED_DIRT,
+                Blocks.FARMLAND
             ));
-        CONVERSION_MAPPINGS.put(Blocks.NETHERRACK,
+        MAPPINGS.put(Blocks.NETHERRACK,
             List.of(
                 Blocks.STONE,
                 Blocks.TERRACOTTA,
-                Blocks.GRANITE
+                Blocks.GRANITE,
+                Blocks.SNOW_BLOCK,
+                Blocks.POWDER_SNOW
             ));
-        CONVERSION_MAPPINGS.put(Blocks.BASALT,
+        MAPPINGS.put(Blocks.BASALT,
             List.of(
                 Blocks.DIORITE,
                 Blocks.ANDESITE,
                 Blocks.CALCITE
             ));
-        CONVERSION_MAPPINGS.put(Blocks.BLACKSTONE,
+        MAPPINGS.put(Blocks.BLACKSTONE,
             List.of(
                 Blocks.DEEPSLATE,
                 Blocks.TUFF
             ));
-        CONVERSION_MAPPINGS.put(Blocks.WARPED_FUNGUS,
+        MAPPINGS.put(Blocks.SOUL_SAND,
+            List.of(
+                Blocks.GRAVEL,
+                Blocks.SANDSTONE,
+                Blocks.CHISELED_SANDSTONE
+            ));
+        MAPPINGS.put(Blocks.CRIMSON_HYPHAE,
+            List.of(
+                Blocks.OAK_WOOD, Blocks.BIRCH_WOOD, Blocks.ACACIA_WOOD, Blocks.DARK_OAK_WOOD,
+                Blocks.JUNGLE_WOOD, Blocks.MANGROVE_WOOD, Blocks.SPRUCE_WOOD
+            ));
+        MAPPINGS.put(Blocks.STRIPPED_CRIMSON_HYPHAE,
+            List.of(
+                Blocks.STRIPPED_OAK_WOOD, Blocks.STRIPPED_BIRCH_WOOD, Blocks.STRIPPED_ACACIA_WOOD, Blocks.STRIPPED_DARK_OAK_WOOD,
+                Blocks.STRIPPED_JUNGLE_WOOD, Blocks.STRIPPED_MANGROVE_WOOD, Blocks.STRIPPED_SPRUCE_WOOD
+            ));
+        MAPPINGS.put(Blocks.CRIMSON_STEM,
+            List.of(
+                Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG,
+                Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG
+            ));
+        MAPPINGS.put(Blocks.STRIPPED_CRIMSON_STEM,
+            List.of(
+                Blocks.STRIPPED_OAK_LOG, Blocks.STRIPPED_BIRCH_LOG, Blocks.STRIPPED_ACACIA_LOG, Blocks.STRIPPED_DARK_OAK_LOG,
+                Blocks.STRIPPED_JUNGLE_LOG, Blocks.STRIPPED_MANGROVE_LOG, Blocks.STRIPPED_SPRUCE_LOG
+            ));
+        MAPPINGS.put(Blocks.NETHER_WART_BLOCK,
+            List.of(
+                Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES,
+                Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES
+            ));
+        MAPPINGS.put(Blocks.NETHER_QUARTZ_ORE,
+            List.of(
+                Blocks.COAL_ORE,
+                Blocks.DEEPSLATE_COAL_ORE
+            ));
+        MAPPINGS.put(Blocks.NETHER_GOLD_ORE,
+            List.of(
+                Blocks.COPPER_ORE,
+                Blocks.DEEPSLATE_COPPER_ORE,
+                Blocks.IRON_ORE,
+                Blocks.LAPIS_ORE,
+                Blocks.REDSTONE_ORE,
+                Blocks.DEEPSLATE_IRON_ORE,
+                Blocks.DEEPSLATE_LAPIS_ORE,
+                Blocks.DEEPSLATE_REDSTONE_ORE
+            ));
+        MAPPINGS.put(Blocks.GILDED_BLACKSTONE,
+            List.of(
+                Blocks.GOLD_ORE,
+                Blocks.EMERALD_ORE,
+                Blocks.DEEPSLATE_GOLD_ORE,
+                Blocks.DEEPSLATE_EMERALD_ORE
+            ));
+        MAPPINGS.put(Blocks.ANCIENT_DEBRIS,
+            List.of(
+                Blocks.DIAMOND_ORE,
+                Blocks.DEEPSLATE_DIAMOND_ORE
+            ));
+        PLANT_MAPPINGS.put(Blocks.CRIMSON_FUNGUS,
             List.of(
                 Blocks.SUNFLOWER,
                 Blocks.DANDELION,
@@ -88,37 +169,23 @@ public class NetherBlocks {
                 Blocks.RED_TULIP,
                 Blocks.PINK_TULIP
             ));
-        CONVERSION_MAPPINGS.put(Blocks.SOUL_SAND,
-            List.of(
-                Blocks.SANDSTONE,
-                Blocks.CHISELED_SANDSTONE
-            ));
-        CONVERSION_MAPPINGS.put(Blocks.WARPED_STEM,
-            List.of(
-                Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG,
-                Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG
-            ));
-        CONVERSION_MAPPINGS.put(Blocks.WARPED_WART_BLOCK,
-            List.of(
-                Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES,
-                Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES
-            ));
-        CONVERSION_MAPPINGS.put(Blocks.WARPED_ROOTS,
+        PLANT_MAPPINGS.put(Blocks.CRIMSON_ROOTS,
             List.of(
                 Blocks.GRASS,
                 Blocks.TALL_GRASS
             ));
-        CONVERSION_MAPPINGS.put(Blocks.TWISTING_VINES,
-            List.of(
-                Blocks.FERN,
-                Blocks.LARGE_FERN,
-                Blocks.ROSE_BUSH,
-                Blocks.DEAD_BUSH,
-                Blocks.SWEET_BERRY_BUSH,
-                Blocks.MANGROVE_ROOTS,
-                Blocks.MUDDY_MANGROVE_ROOTS,
-                Blocks.AZALEA,
-                Blocks.FLOWERING_AZALEA
-            ));
+        PLANT_MAPPINGS.put(Blocks.WEEPING_VINES_PLANT,
+                List.of(
+                        Blocks.FERN,
+                        Blocks.LARGE_FERN,
+                        Blocks.ROSE_BUSH,
+                        Blocks.DEAD_BUSH,
+                        Blocks.SWEET_BERRY_BUSH,
+                        Blocks.MANGROVE_ROOTS,
+                        Blocks.MUDDY_MANGROVE_ROOTS,
+                        Blocks.AZALEA,
+                        Blocks.FLOWERING_AZALEA,
+                        Blocks.SUGAR_CANE
+                ));
     }
 }
