@@ -1,9 +1,8 @@
 package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.building.Garrisonable;
+import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -75,7 +74,7 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
         if (target != null && target.isAlive()) {
             this.mob.getLookControl().setLookAt(target.getX(), target.getEyeY(), target.getZ());
 
-            boolean isGarrisoned = Garrisonable.getGarrison((Unit) this.mob) != null;
+            boolean isGarrisoned = GarrisonableBuilding.getGarrison((Unit) this.mob) != null;
             boolean canSeeTarget = this.mob.getSensing().hasLineOfSight(target) || isGarrisoned;
             boolean flag = this.seeTime > 0;
             if (canSeeTarget != flag) {

@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.unit.goals;
 
 import java.util.EnumSet;
 
-import com.solegendary.reignofnether.building.Garrisonable;
+import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.world.entity.Entity;
@@ -76,7 +76,7 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
     public void tick() {
         LivingEntity target = this.mob.getTarget();
         if (target != null && target.isAlive()) {
-            boolean isGarrisoned = Garrisonable.getGarrison((Unit) this.mob) != null;
+            boolean isGarrisoned = GarrisonableBuilding.getGarrison((Unit) this.mob) != null;
             boolean canSeeTarget = this.mob.getSensing().hasLineOfSight(target) || isGarrisoned;
             boolean flag = this.seeTime > 0;
 

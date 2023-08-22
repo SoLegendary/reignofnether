@@ -6,15 +6,17 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public interface Garrisonable {
+public interface GarrisonableBuilding {
+
     // returns the relative building position units will go to when garrisoning
     BlockPos getEntryPosition();
     // returns the relative building position units will go to when ungarrisoning
     BlockPos getExitPosition();
+
+    boolean isFull();
 
     static Building getGarrison(Unit unit) {
         List<Building> buildings;
@@ -25,7 +27,7 @@ public interface Garrisonable {
 
         for (Building building : buildings) {
             if (unit.getOwnerName().equals(building.ownerName) &&
-                    building instanceof Garrisonable && building.isBuilt &&
+                    building instanceof GarrisonableBuilding && building.isBuilt &&
                     building.isPosInsideBuilding(((LivingEntity) unit).getOnPos()) &&
                     ((LivingEntity) unit).getOnPos().getY() > building.originPos.getY() + 2) {
                 return building;
@@ -33,8 +35,6 @@ public interface Garrisonable {
         }
         return null;
     }
-
-    boolean isFull();
 
     static int getNumOccupants(Building building) {
         List<LivingEntity> entities;

@@ -10,7 +10,6 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -30,7 +29,6 @@ import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -119,7 +117,7 @@ public class PlayerServerEvents {
         for (int i = -1; i <= 1; i++) {
             Entity entity = entityType.create(level);
             if (entity != null) {
-                BlockPos bp = MiscUtil.getHighestSolidBlock(level, new BlockPos(pos.x + i, 0, pos.z)).above().above();
+                BlockPos bp = MiscUtil.getHighestNonAirBlock(level, new BlockPos(pos.x + i, 0, pos.z)).above().above();
                 ((Unit) entity).setOwnerName(serverPlayer.getName().getString());
                 entity.moveTo(bp, 0,0);
                 level.addFreshEntity(entity);

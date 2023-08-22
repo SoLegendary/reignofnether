@@ -20,7 +20,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class DarkWatchtower extends Building implements Garrisonable {
+public class DarkWatchtower extends Building implements GarrisonableBuilding {
 
     public final static String buildingName = "Dark Watchtower";
     public final static String structureName = "dark_watchtower";
@@ -85,5 +85,5 @@ public class DarkWatchtower extends Building implements Garrisonable {
     }
 
     @Override
-    public boolean isFull() { return Garrisonable.getNumOccupants(this) >= MAX_OCCUPANTS; }
+    public boolean isFull() { return GarrisonableBuilding.getNumOccupants(this) >= MAX_OCCUPANTS; }
 }

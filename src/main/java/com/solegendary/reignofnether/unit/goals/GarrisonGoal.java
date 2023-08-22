@@ -2,15 +2,11 @@ package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.Random;
 
 // Move towards a building to attack it
 // will continually try to move towards the building if too far away as long as this goal is being enacted
@@ -30,7 +26,7 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
     }
 
     public void tick() {
-        if (buildingTarget instanceof Garrisonable garrisonable) {
+        if (buildingTarget instanceof GarrisonableBuilding garrisonableBuilding) {
             calcMoveTarget();
             if (buildingTarget.getBlocksPlaced() <= 0) {
                 stopGarrisoning();
@@ -41,8 +37,8 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
                     moveTarget.getZ() + 0.5f)) <= 3f) {
 
                 // teleport to garrison entry pos
-                if (!garrisonable.isFull() && buildingTarget.isBuilt) {
-                    BlockPos bp = buildingTarget.originPos.offset(garrisonable.getEntryPosition());
+                if (!garrisonableBuilding.isFull() && buildingTarget.isBuilt) {
+                    BlockPos bp = buildingTarget.originPos.offset(garrisonableBuilding.getEntryPosition());
                     this.mob.teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
                 }
                 this.stopGarrisoning();
@@ -53,7 +49,7 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
     }
 
     private void calcMoveTarget() {
-        if (this.buildingTarget instanceof Garrisonable)
+        if (this.buildingTarget instanceof GarrisonableBuilding)
             this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 1);
     }
 
@@ -61,10 +57,10 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
         if (blockPos != null) {
             if (this.mob.level.isClientSide()) {
                 this.buildingTarget = BuildingUtils.findBuilding(true, blockPos);
-                if (this.buildingTarget instanceof Garrisonable garrisonable &&
+                if (this.buildingTarget instanceof GarrisonableBuilding garrisonableBuilding &&
                         buildingTarget.ownerName.equals(((Unit) mob).getOwnerName())) {
 
-                    if (!garrisonable.isFull()) {
+                    if (!garrisonableBuilding.isFull()) {
                         MiscUtil.addUnitCheckpoint(((Unit) mob), new BlockPos(
                                 buildingTarget.centrePos.getX(),
                                 buildingTarget.originPos.getY() + 1,

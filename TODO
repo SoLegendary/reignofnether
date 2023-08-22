@@ -156,7 +156,7 @@ Villager faction
     Castle
         - Villagers' final building
         - produces ravagers (crowd control/aoe damage bruiser)
-        - garrisonable (holds up to 10 units)
+        - garrisonableBuilding (holds up to 10 units)
         - research to add the ability to promote units (adding ominous banner and gaining a speed aura)
             - play a firework on use
             - only one captain allowed at a time
@@ -169,11 +169,11 @@ Monster faction
     Stronghold
         - Monsters' final building
         - Requires a laboratory
-        - garrisonable (holds up to 10 units)
+        - garrisonableBuilding (holds up to 10 units)
         - produces wardens
             - blind, cannot see anything in fog of war on its own
             - single target cooldown ability: sonic wave for direct damage
-        - research to cause buildings to produce silverfish when damaged and/or destroyed
+        - (unlocked at lab) research to cause buildings to produce silverfish when damaged and/or destroyed
 
 Netherling faction
     All netherling buildings slowly convert non-nether blocks around them into nether counterparts:
@@ -195,7 +195,8 @@ Netherling faction
         - On its own just supports population
         - Can be upgraded to specialise (and gain appropriate decorations):
             - Military portal (red): produces military units
-            - Civilian portal (green): produces workers and can drop off resources
+            - Civilian portal (green): can drop off resources
+                - Can toggle conversion at 70% rate to currency for resource exchange
             - Transport portal (blue) (requires lategame research): can teleport units to a linked portal
     - Mushroom farm
     - Fort
@@ -208,8 +209,10 @@ Netherling faction
         - Allows wither skeletons to be produced at portals
         - Researches wither-related upgrades
     - Fortress
-
-
+        - Ghasts (long-range ranged sieger)
+            - probably needs a size decrease
+            - flies a set Y height above the ground
+        - garrisonableBuilding (holds up to 10 units)
 
 
 

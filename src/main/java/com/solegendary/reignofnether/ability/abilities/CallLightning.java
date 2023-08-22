@@ -71,7 +71,7 @@ public class CallLightning extends Ability {
             if (lab.isAbilityOffCooldown(UnitAction.CALL_LIGHTNING) && rodPos != null) {
                 BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(rodPos, targetBp, range);
                 // getXZRangeLimitedBlockPos' Y value is always the same as rodPos, but we want the first sky-exposed block
-                limitedBp = MiscUtil.getHighestSolidBlock(level, limitedBp);
+                limitedBp = MiscUtil.getHighestNonAirBlock(level, limitedBp);
 
                 LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
                 if (bolt != null) {

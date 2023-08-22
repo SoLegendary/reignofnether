@@ -510,7 +510,7 @@ public class MinimapClientEvents {
 
         double xWorld = xc_world + clicked.x * pixelsToBlocks * Math.sqrt(2);
         double zWorld = zc_world + clicked.y * pixelsToBlocks * Math.sqrt(2);
-        double yWorld = MiscUtil.getHighestSolidBlock(MC.level, new BlockPos(xWorld, 0, zWorld)).getY();
+        double yWorld = MiscUtil.getHighestNonAirBlock(MC.level, new BlockPos(xWorld, 0, zWorld)).getY();
 
         return new BlockPos(xWorld, yWorld, zWorld);
     }

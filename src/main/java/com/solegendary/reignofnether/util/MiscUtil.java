@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3d;
-import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -52,7 +51,7 @@ public class MiscUtil {
         unit.setCheckpointTicksLeft(UnitClientEvents.CHECKPOINT_TICKS_MAX);
     }
 
-    public static BlockPos getHighestSolidBlock(Level level, BlockPos blockPos) {
+    public static BlockPos getHighestNonAirBlock(Level level, BlockPos blockPos) {
         int y = level.getHeight();
         BlockState bs;
         do {

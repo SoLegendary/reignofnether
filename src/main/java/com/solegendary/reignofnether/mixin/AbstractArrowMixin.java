@@ -1,12 +1,9 @@
 package com.solegendary.reignofnether.mixin;
 
 import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.Garrisonable;
+import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -36,7 +33,7 @@ public abstract class AbstractArrowMixin extends Projectile {
     )
     public void isNoPhysics(CallbackInfoReturnable<Boolean> cir) {
         if (this.getOwner() instanceof Unit unit) {
-            Building garrison = Garrisonable.getGarrison(unit);
+            Building garrison = GarrisonableBuilding.getGarrison(unit);
             if (garrison != null && garrison.isPosInsideBuilding(this.blockPosition()) &&
                 this.blockPosition().getY() > garrison.originPos.getY() + 2)
                 cir.setReturnValue(true);

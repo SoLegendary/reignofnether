@@ -125,7 +125,7 @@ public class OrthoviewClientEvents {
             PlayerServerboundPacket.disableOrthoview();
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
             if (!MC.level.getBlockState(MC.player.getOnPos()).isAir()) {
-                BlockPos tp = MiscUtil.getHighestSolidBlock(MC.level, MC.player.getOnPos());
+                BlockPos tp = MiscUtil.getHighestNonAirBlock(MC.level, MC.player.getOnPos());
                 PlayerServerboundPacket.teleportPlayer((double) tp.getX(), (double) tp.getY() + 2, (double) tp.getZ());
             }
             else {

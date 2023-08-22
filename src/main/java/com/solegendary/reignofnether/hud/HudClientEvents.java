@@ -528,9 +528,9 @@ public class HudClientEvents {
                 actionButtons.add(ActionButtons.BUILD_REPAIR);
                 actionButtons.add(ActionButtons.GATHER);
             }
-            if (unit.canGarrison() && Garrisonable.getGarrison(unit) == null)
+            if (unit.canGarrison() && GarrisonableBuilding.getGarrison(unit) == null)
                 actionButtons.add(ActionButtons.GARRISON);
-            else if (Garrisonable.getGarrison(unit) != null)
+            else if (GarrisonableBuilding.getGarrison(unit) != null)
                 actionButtons.add(ActionButtons.UNGARRISON);
 
             if (!(hudSelectedEntity instanceof WorkerUnit))

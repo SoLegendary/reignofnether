@@ -19,7 +19,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Portal extends Building {
+public class Portal extends Building implements NetherConvertingBuilding {
 
     public final static String buildingName = "Portal";
     public final static String structureName = "portal";
@@ -66,10 +66,41 @@ public class Portal extends Building {
         );
     }
 
+    private final double NETHER_CONVERT_RANGE_MAX = 20;
+    private double netherConvertRange = 4;
+    private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
+
     @Override
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
 
         // TODO: convert blocks to nether blocks
+        netherConvertTicksLeft -= 1;
+        if (netherConvertTicksLeft <= 0) {
+            randomConvertTick(this, netherConvertRange, NETHER_CONVERT_RANGE_MAX);
+            if (netherConvertRange < NETHER_CONVERT_RANGE_MAX)
+                netherConvertRange += 0.1f;
+            netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
+        }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
