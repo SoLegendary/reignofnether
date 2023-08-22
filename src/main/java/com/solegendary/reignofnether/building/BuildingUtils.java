@@ -221,7 +221,7 @@ public class BuildingUtils {
         return closestBuilding;
     }
 
-    public boolean isInNetherRange(boolean isClientside, BlockPos bp) {
+    public static boolean isInNetherRange(boolean isClientside, BlockPos bp) {
         List<Building> buildings;
         if (isClientside)
             buildings = BuildingClientEvents.getBuildings();

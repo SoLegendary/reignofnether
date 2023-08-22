@@ -62,7 +62,9 @@ public class NetherBlocks {
                 Blocks.OBSIDIAN, // converting water -> lava alone generates a lot of obsidian
                 Blocks.WATER,
                 Blocks.SEAGRASS,
-                Blocks.TALL_SEAGRASS
+                Blocks.TALL_SEAGRASS,
+                Blocks.KELP,
+                Blocks.KELP_PLANT
             ));
         MAPPINGS.put(Blocks.CRIMSON_NYLIUM,
             List.of(

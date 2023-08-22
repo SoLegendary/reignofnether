@@ -267,7 +267,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                             // replace workers' mine ores with cobble to prevent creating potholes
                             if (targetResourceSource.resourceName == ResourceName.ORE) {
                                 BlockState replaceBs;
-                                if (bsTarget.getBlock().getName().getString().toLowerCase().contains("deepslate"))
+                                if (BuildingUtils.isInNetherRange(mob.level.isClientSide(), gatherTarget))
+                                    replaceBs = Blocks.MAGMA_BLOCK.defaultBlockState();
+                                else if (bsTarget.getBlock().getName().getString().toLowerCase().contains("deepslate"))
                                     replaceBs = Blocks.COBBLED_DEEPSLATE.defaultBlockState();
                                 else
                                     replaceBs = Blocks.COBBLESTONE.defaultBlockState();

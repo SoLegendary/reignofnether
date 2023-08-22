@@ -246,14 +246,14 @@ public class ResourceSources {
             ),
             new ResourceSource("Tier 2 Nether Ores",
                     List.of(Blocks.NETHER_GOLD_ORE),
-                    List.of(),
+                    List.of(Items.NETHER_GOLD_ORE),
                     TICKS_PER_SECOND * 30,
                     77,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 3 Nether Ores",
                     List.of(Blocks.GILDED_BLACKSTONE),
-                    List.of(),
+                    List.of(Items.GILDED_BLACKSTONE),
                     TICKS_PER_SECOND * 30,
                     110,
                     ResourceName.ORE
