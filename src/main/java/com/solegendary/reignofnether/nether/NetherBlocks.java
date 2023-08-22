@@ -28,9 +28,6 @@ public class NetherBlocks {
     public static final Map<Block, List<Block>> CONVERSION_MAPPINGS = new HashMap<>();
 
     static {
-        CONVERSION_MAPPINGS.put(Blocks.LAVA,
-            List.of(Blocks.WATER)
-        );
         CONVERSION_MAPPINGS.put(Blocks.LAVA_CAULDRON,
             List.of(Blocks.WATER_CAULDRON)
         );
@@ -43,10 +40,12 @@ public class NetherBlocks {
         CONVERSION_MAPPINGS.put(Blocks.SOUL_SOIL,
             List.of(Blocks.SAND)
         );
-        CONVERSION_MAPPINGS.put(Blocks.OBSIDIAN,
-            List.of(Blocks.CRYING_OBSIDIAN)
-        );
-        CONVERSION_MAPPINGS.put(Blocks.WARPED_NYLIUM,
+        CONVERSION_MAPPINGS.put(Blocks.LAVA,
+            List.of(
+                Blocks.OBSIDIAN, // converting water -> lava alone generates a lot of obsidian
+                Blocks.WATER
+            ));
+        CONVERSION_MAPPINGS.put(Blocks.CRIMSON_NYLIUM,
             List.of(
                 Blocks.GRASS_BLOCK,
                 Blocks.DIRT,

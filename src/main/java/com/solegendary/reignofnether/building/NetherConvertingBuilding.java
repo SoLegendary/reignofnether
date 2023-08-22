@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.nether.NetherBlocks;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -16,9 +15,9 @@ public interface NetherConvertingBuilding {
 
     // randomly convert nearby overworld blocks into a nether block
     // returns true if any block was converted
-    default boolean randomConvertTick(Building building, double range, double rangeMax) {
+    default void netherConvertTick(Building building, double range, double rangeMax) {
         if (!building.isBuilt || building.getLevel().isClientSide())
-            return false;
+            return;
 
         BlockPos bpOrigin = new BlockPos(
                 building.centrePos.getX(),
@@ -42,6 +41,9 @@ public interface NetherConvertingBuilding {
             if (random.nextDouble() > chance)
                 continue;
 
+            // TODO:
+            //  go from build-height-down (keep going if leaves or wood)
+            //  don't convert plants directly but convert from ground up
             for (int i = -3; i < 3; i++) {
                 BlockPos bpToUpdate = bp.offset(0,i,0);
                 BlockState bs = NetherBlocks.getNetherBlock(building.getLevel(), bpToUpdate);
@@ -49,7 +51,6 @@ public interface NetherConvertingBuilding {
                     building.getLevel().setBlockAndUpdate(bpToUpdate, bs);
             }
         }
-        return true;
     }
 
 }

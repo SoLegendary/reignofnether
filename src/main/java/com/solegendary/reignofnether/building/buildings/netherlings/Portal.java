@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.building.buildings.netherlings;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.core.BlockPos;
@@ -67,19 +66,22 @@ public class Portal extends Building implements NetherConvertingBuilding {
     }
 
     private final double NETHER_CONVERT_RANGE_MAX = 20;
-    private double netherConvertRange = 4;
+    private double netherConvertRange = 3;
     private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
+    private int convertsAfterMaxRange = 0;
+    private final int MAX_CONVERTS_AFTER_MAX_RANGE = 10; // to prevent continuously processing
 
     @Override
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
 
-        // TODO: convert blocks to nether blocks
         netherConvertTicksLeft -= 1;
-        if (netherConvertTicksLeft <= 0) {
-            randomConvertTick(this, netherConvertRange, NETHER_CONVERT_RANGE_MAX);
+        if (netherConvertTicksLeft <= 0 && convertsAfterMaxRange < MAX_CONVERTS_AFTER_MAX_RANGE) {
+            netherConvertTick(this, netherConvertRange, NETHER_CONVERT_RANGE_MAX);
             if (netherConvertRange < NETHER_CONVERT_RANGE_MAX)
                 netherConvertRange += 0.1f;
+            else
+                convertsAfterMaxRange += 1;
             netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
         }
     }
