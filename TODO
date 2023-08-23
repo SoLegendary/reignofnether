@@ -10,10 +10,9 @@ TODO bugs/features:
 
 - Arrows bounce off enemies if multiple hit at the same time
 
+- slow down fire/magma/suffocation damage events
 
 
-- prevent workers getting stuck in trees
-    - maybe make leaves a block to avoid?
 
 
 
