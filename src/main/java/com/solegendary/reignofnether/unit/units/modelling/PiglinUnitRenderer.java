@@ -24,7 +24,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class PiglinUnitRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
+public class PiglinUnitRenderer extends HumanoidMobRenderer<Mob, PiglinUnitModel<Mob>> {
     private static final Map<EntityType<?>, ResourceLocation> TEXTURES;
     private static final float PIGLIN_CUSTOM_HEAD_SCALE = 1.0019531F;
 
@@ -33,8 +33,8 @@ public class PiglinUnitRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob
         this.addLayer(new HumanoidArmorLayer(this, new HumanoidModel(pContext.bakeLayer(p_174346_)), new HumanoidModel(pContext.bakeLayer(p_174347_))));
     }
 
-    private static PiglinModel<Mob> createModel(EntityModelSet p_174350_, ModelLayerLocation pLayer, boolean p_174352_) {
-        PiglinModel<Mob> $$3 = new PiglinModel(p_174350_.bakeLayer(pLayer));
+    private static PiglinUnitModel<Mob> createModel(EntityModelSet p_174350_, ModelLayerLocation pLayer, boolean p_174352_) {
+        PiglinUnitModel<Mob> $$3 = new PiglinUnitModel(p_174350_.bakeLayer(pLayer));
         if (p_174352_) {
             $$3.rightEar.visible = false;
         }
@@ -49,10 +49,6 @@ public class PiglinUnitRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob
         } else {
             return $$1;
         }
-    }
-
-    protected boolean isShaking(Mob pEntity) {
-        return super.isShaking(pEntity) || pEntity instanceof AbstractPiglin && ((AbstractPiglin)pEntity).isConverting();
     }
 
     static {

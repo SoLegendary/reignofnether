@@ -20,7 +20,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
@@ -171,6 +173,11 @@ public class UnitServerEvents {
         // nerf lingering potion cloud duration
         if (evt.getEntity() instanceof AreaEffectCloud cloud)
             cloud.setDuration(WitchUnit.LINGERING_POTION_DURATION);
+
+        if (evt.getEntity() instanceof Unit &&
+            evt.getEntity() instanceof Mob mob) {
+            mob.setBaby(false);
+        }
 
         if (evt.getEntity() instanceof Unit &&
             evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {

@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.units.modelling.PiglinUnitModel;
 import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
@@ -285,7 +286,8 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
     public void setNonHeadModelVisibility(boolean visibility) {
 
-        if (model instanceof PlayerModel) { // TODO: doesn't work
+        if (model instanceof PlayerModel) { // includes piglins
+            ((PlayerModel<?>) model).body.visible = visibility;
             ((PlayerModel<?>) model).leftSleeve.visible = visibility;
             ((PlayerModel<?>) model).rightSleeve.visible = visibility;
             ((PlayerModel<?>) model).rightArm.visible = visibility;
