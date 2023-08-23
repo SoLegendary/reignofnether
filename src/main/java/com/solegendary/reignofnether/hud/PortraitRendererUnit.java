@@ -286,6 +286,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
     public void setNonHeadModelVisibility(boolean visibility) {
 
+        // TODO: doesn't work for players
         if (model instanceof PlayerModel) { // includes piglins
             ((PlayerModel<?>) model).body.visible = visibility;
             ((PlayerModel<?>) model).leftSleeve.visible = visibility;

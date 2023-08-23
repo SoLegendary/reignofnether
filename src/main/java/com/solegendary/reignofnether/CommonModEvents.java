@@ -11,7 +11,6 @@ import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.*;
-import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -45,11 +44,7 @@ public class CommonModEvents {
         evt.registerEntityRenderer(EntityRegistrar.WITCH_UNIT.get(), WitchRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.EVOKER_UNIT.get(), EvokerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.ENDERMAN_UNIT.get(), EndermanRenderer::new);
-
-        // See class EntityRenderers
-        evt.registerEntityRenderer(EntityRegistrar.PIGLIN_GRUNT_UNIT.get(), (context) -> new PiglinUnitRenderer(
-            context, ModelLayers.PIGLIN, ModelLayers.PIGLIN_INNER_ARMOR, ModelLayers.PIGLIN_OUTER_ARMOR, false)
-        );
+        evt.registerEntityRenderer(EntityRegistrar.PIGLIN_GRUNT_UNIT.get(), PiglinUnitRenderer::new);
     }
 
     @SubscribeEvent

@@ -13,6 +13,7 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PiglinModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
@@ -28,9 +29,12 @@ public class PiglinUnitRenderer extends HumanoidMobRenderer<Mob, PiglinUnitModel
     private static final Map<EntityType<?>, ResourceLocation> TEXTURES;
     private static final float PIGLIN_CUSTOM_HEAD_SCALE = 1.0019531F;
 
-    public PiglinUnitRenderer(EntityRendererProvider.Context pContext, ModelLayerLocation p_174345_, ModelLayerLocation p_174346_, ModelLayerLocation p_174347_, boolean p_174348_) {
-        super(pContext, createModel(pContext.getModelSet(), p_174345_, p_174348_), 0.5F, 1.0019531F, 1.0F, 1.0019531F);
-        this.addLayer(new HumanoidArmorLayer(this, new HumanoidModel(pContext.bakeLayer(p_174346_)), new HumanoidModel(pContext.bakeLayer(p_174347_))));
+    // See class EntityRenderers for the original code
+    public PiglinUnitRenderer(EntityRendererProvider.Context pContext) {
+        super(pContext, createModel(pContext.getModelSet(), ModelLayers.PIGLIN, false), 0.5F, 1.0019531F, 1.0F, 1.0019531F);
+        this.addLayer(new HumanoidArmorLayer(this,
+                    new HumanoidModel(pContext.bakeLayer(ModelLayers.PIGLIN_INNER_ARMOR)),
+                    new HumanoidModel(pContext.bakeLayer(ModelLayers.PIGLIN_OUTER_ARMOR))));
     }
 
     private static PiglinUnitModel<Mob> createModel(EntityModelSet p_174350_, ModelLayerLocation pLayer, boolean p_174352_) {

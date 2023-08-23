@@ -28,6 +28,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.piglin.Piglin;
@@ -189,6 +190,10 @@ public class PiglinGruntUnit extends Piglin implements Unit, WorkerUnit, Attacke
     public boolean isConverting() { return false; }
     @Override
     protected void customServerAiStep() { }
+    @Override
+    public LivingEntity getTarget() {
+        return this.targetGoal.getTarget();
+    }
 
     public void tick() {
         this.setCanPickUpLoot(true);
