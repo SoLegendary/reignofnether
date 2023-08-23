@@ -287,7 +287,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                             UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
 
                             // if at max resources, go to drop off automatically, then return to this gather goal
-                            if (Unit.atMaxResources(unit))
+                            if (Unit.atThresholdResources(unit))
                                 saveAndReturnResources();
 
                             removeGatherTarget();

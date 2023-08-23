@@ -44,7 +44,7 @@ public class EvokerProdItem extends ProductionItem {
         return new Button(
             EvokerProdItem.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker_unit.png"),
             hotkey,
             () -> false,
             () -> false,
@@ -65,7 +65,7 @@ public class EvokerProdItem extends ProductionItem {
         return new Button(
             EvokerProdItem.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker_unit.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

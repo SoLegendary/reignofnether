@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.monster.Drowned;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -23,6 +24,11 @@ public class Portal extends Building implements NetherConvertingBuilding {
     public final static String buildingName = "Portal";
     public final static String structureName = "portal";
     public final static ResourceCost cost = ResourceCosts.PORTAL;
+
+    private final double NETHER_CONVERT_RANGE_MAX = 20;
+    private double netherConvertRange = 3;
+    private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
+    private int convertsAfterMaxRange = 0;
 
     public Portal(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -64,11 +70,6 @@ public class Portal extends Building implements NetherConvertingBuilding {
                 null
         );
     }
-
-    private final double NETHER_CONVERT_RANGE_MAX = 20;
-    private double netherConvertRange = 3;
-    private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
-    private int convertsAfterMaxRange = 0;
 
     public double getMaxRange() { return NETHER_CONVERT_RANGE_MAX; }
 

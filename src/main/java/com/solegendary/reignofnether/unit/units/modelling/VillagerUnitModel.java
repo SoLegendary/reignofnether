@@ -5,8 +5,8 @@ import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import net.minecraft.client.model.*;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -90,6 +90,9 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
         }
         if (entity instanceof WorkerUnit workerUnit && workerUnit.getBuildRepairGoal().isBuilding()) {
             return ArmPose.BUILDING;
+        }
+        else if (entity instanceof EvokerUnit evokerUnit && evokerUnit.isCastingSpell()) {
+            return ArmPose.SPELLCASTING;
         }
         else if (entity instanceof PillagerUnit) {
             // CROSSBOW_HOLD
@@ -186,7 +189,7 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
             int swingTime = armSwinger.getSwingTime();
             armSwinger.setSwingTime(swingTime + 1);
 
-            if (swingTime >= armSwinger.getSwingTimeMax()) {
+            if (swingTime >= ArmSwingingUnit.SWING_TIME_MAX) {
                 armSwinger.setSwingTime(0);
                 if (armSwinger.isSwingingArmOnce())
                     armSwinger.setSwingingArmOnce(false);

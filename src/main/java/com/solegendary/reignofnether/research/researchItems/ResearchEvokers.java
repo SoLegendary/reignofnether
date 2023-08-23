@@ -44,7 +44,7 @@ public class ResearchEvokers extends ProductionItem {
         return new Button(
             ResearchEvokers.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker_unit.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
@@ -67,7 +67,7 @@ public class ResearchEvokers extends ProductionItem {
         return new Button(
                 ResearchEvokers.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker_unit.png"),
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 null,
                 () -> false,

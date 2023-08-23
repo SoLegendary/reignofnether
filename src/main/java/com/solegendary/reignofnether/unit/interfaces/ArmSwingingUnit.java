@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface ArmSwingingUnit {
 
-    int swingTimeMax = 80; // time for one full arm rotation
+    int SWING_TIME_MAX = 80; // time for one full arm rotation
 
     Float[][] armRots = {
         { 0.0f, 0.0f, 0.0f},
@@ -37,10 +37,6 @@ public interface ArmSwingingUnit {
     int getSwingTime();
 
     void setSwingTime(int time);
-
-    default int getSwingTimeMax() {
-        return swingTimeMax;
-    }
 
     boolean isSwingingArmOnce(); // based on set boolean
 

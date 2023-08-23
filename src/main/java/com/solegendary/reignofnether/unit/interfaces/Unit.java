@@ -1,9 +1,5 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingServerEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.*;
@@ -12,7 +8,6 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.util.Faction;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -124,7 +119,7 @@ public interface Unit {
 
                                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                             }
-                            if (Unit.atMaxResources(unit) && unit instanceof WorkerUnit workerUnit) {
+                            if (Unit.atThresholdResources(unit) && unit instanceof WorkerUnit workerUnit) {
                                 GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
                                 if (goal != null && goal.getTargetResourceName() != ResourceName.NONE)
                                     goal.saveAndReturnResources();
@@ -152,6 +147,10 @@ public interface Unit {
 
     public static boolean atMaxResources(Unit unit) {
         return Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() >= unit.getMaxResources();
+    }
+
+    public static boolean atThresholdResources(Unit unit) {
+        return Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() >= 50;
     }
 
     public default boolean hasLivingTarget() {

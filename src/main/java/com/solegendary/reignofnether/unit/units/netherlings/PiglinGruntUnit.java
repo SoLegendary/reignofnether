@@ -135,7 +135,7 @@ public class PiglinGruntUnit extends Piglin implements Unit, WorkerUnit, Attacke
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public int popCost = ResourceCosts.VILLAGER.population;
-    public int maxResources = 50;
+    public int maxResources = 100;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -226,12 +226,12 @@ public class PiglinGruntUnit extends Piglin implements Unit, WorkerUnit, Attacke
     @Override
     public void setupEquipmentAndUpgradesClient() {
         if (ResearchClient.hasResearch(ResearchResourceCapacity.itemName))
-            this.maxResources = 100;
+            this.maxResources = 200;
     }
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
         if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchResourceCapacity.itemName))
-            this.maxResources = 100;
+            this.maxResources = 200;
     }
 }
