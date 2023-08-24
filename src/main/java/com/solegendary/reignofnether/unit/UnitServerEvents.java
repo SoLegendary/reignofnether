@@ -334,7 +334,8 @@ public class UnitServerEvents {
     public static void onEntityDamaged(LivingDamageEvent evt) {
 
         // ignore added weapon damage
-        if (evt.getSource().getEntity() instanceof WorkerUnit && evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)
+        if (evt.getSource().getEntity() instanceof WorkerUnit &&
+            evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)
             evt.setAmount(attackerUnit.getUnitAttackDamage());
 
         if (evt.getEntity() instanceof Creeper && (evt.getSource().isExplosion()))

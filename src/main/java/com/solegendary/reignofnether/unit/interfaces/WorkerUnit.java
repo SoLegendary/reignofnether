@@ -51,7 +51,7 @@ public interface WorkerUnit {
                 }
             }
         } else if (entity instanceof AttackerUnit attackerUnit &&
-                ResourceSources.isHuntableAnimal(((Unit) entity).getTargetGoal().getTarget()) &&
+                ((Unit) entity).getTargetGoal().getTarget() != null &&
                 !(entity instanceof ZombieVillagerUnit)) {
             if (!mainHandItem.is(Items.WOODEN_SWORD))
                 entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WOODEN_SWORD));
