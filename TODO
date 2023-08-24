@@ -13,9 +13,6 @@ TODO bugs/features:
 - slow down fire/magma/suffocation damage events
 
 
-On server:
-    - villagers don't immediately start gathering the nearest resources after building a stockpile
-        (they wait 5s for the next idle check)
 
 
 
@@ -28,7 +25,6 @@ TODO test in remote server
 - spread unit productions
 - measure gather times
 - zombie villager temporary sunlight immunity
-- dropoff and autogather after stockpile built
 - worker hunting/attacking
 - synchonized cheats/research/actionItems
 - nether conversions and piglin worker

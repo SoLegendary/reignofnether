@@ -3,15 +3,14 @@ package com.solegendary.reignofnether.unit.interfaces;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface WorkerUnit {
-
-    // damage animals should always take from workers (so we ignore held weapon damage)
-    int DAMAGE_TO_ANIMALS = 1;
 
     public BuildRepairGoal getBuildRepairGoal();
     public GatherResourcesGoal getGatherResourceGoal();
@@ -52,9 +51,10 @@ public interface WorkerUnit {
                 }
             }
         } else if (entity instanceof AttackerUnit attackerUnit &&
-                ResourceSources.isHuntableAnimal(((Unit) entity).getTargetGoal().getTarget())) {
-            if (!mainHandItem.is(Items.STONE_SWORD))
-                entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.STONE_SWORD));
+                ResourceSources.isHuntableAnimal(((Unit) entity).getTargetGoal().getTarget()) &&
+                !(entity instanceof ZombieVillagerUnit)) {
+            if (!mainHandItem.is(Items.WOODEN_SWORD))
+                entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WOODEN_SWORD));
         } else {
             if (!mainHandItem.is(Items.AIR))
                 entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.AIR));

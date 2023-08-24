@@ -333,9 +333,9 @@ public class UnitServerEvents {
     @SubscribeEvent
     public static void onEntityDamaged(LivingDamageEvent evt) {
 
-        if (ResourceSources.isHuntableAnimal(evt.getEntity()) &&
-            evt.getSource().getEntity() instanceof WorkerUnit)
-            evt.setAmount(WorkerUnit.DAMAGE_TO_ANIMALS);
+        // ignore added weapon damage
+        if (evt.getSource().getEntity() instanceof WorkerUnit && evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)
+            evt.setAmount(attackerUnit.getUnitAttackDamage());
 
         if (evt.getEntity() instanceof Creeper && (evt.getSource().isExplosion()))
             evt.setCanceled(true);
