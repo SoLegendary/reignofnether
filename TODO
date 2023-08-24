@@ -8,24 +8,39 @@ TODO bugs/features:
 
 - Tutorial documentation/gifs
 
-- Arrows bounce off enemies if multiple hit at the same time
-
 - slow down fire/magma/suffocation damage events
 
 
 
 
 
+- worker tools sometimes dont move with their arms
+
+- farmers still show up as idle
+- hunters wont return resources if theyre too far away
+- remove floating trees somehow
+- dont aggro against fogged enemies
+- ranged units shouldnt knockback
+
+- evokers shouldn't need an additional research to unlock
+
+- evoker icon disappeared
+
+- creeper explosions should damage buildings more
+    - if a building block is destroyed by a creeper, randomly destroy even more blocks
+
+- increase range of abilities while garrisoned
+    - esp. witch potion range
+
+- should still be able to target garrisoned units (increase range?)
+
+- veto specific block coordinates from being destroyed randomly
+    - specifically for blocks
+
 
 
 TODO test in remote server
 
-- spider jockey movement
-- foodforthought cheat
-- spread unit productions
-- measure gather times
-- zombie villager temporary sunlight immunity
-- worker hunting/attacking
 - synchonized cheats/research/actionItems
 - nether conversions and piglin worker
 
@@ -170,6 +185,7 @@ Monster faction
         - Monsters' final building
         - Requires a laboratory
         - garrisonableBuilding (holds up to 10 units)
+        - distorts to night time (at a lower range than the mausoleum)
         - produces wardens
             - blind, cannot see anything in fog of war on its own
             - single target cooldown ability: sonic wave for direct damage
