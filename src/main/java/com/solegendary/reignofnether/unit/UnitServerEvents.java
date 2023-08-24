@@ -232,6 +232,7 @@ public class UnitServerEvents {
             creeperUnit.explodeCreeper();
     }
 
+    // villager hunting
     @SubscribeEvent
     public static void onDropItem(LivingDropsEvent evt) {
         if (ResourceSources.isHuntableAnimal(evt.getEntity()) &&
@@ -247,7 +248,7 @@ public class UnitServerEvents {
                     unit.getItems().add(itemEntity.getItem());
                 }
             }
-            if (Unit.atMaxResources(unit))
+            if (Unit.atThresholdResources(unit))
                 unit.getReturnResourcesGoal().returnToClosestBuilding();
         }
     }
