@@ -116,7 +116,7 @@ public interface AttackerUnit {
     public default boolean attackClosestEnemy(ServerLevel level) {
         float aggroRange = this.getAggroRange();
         if (GarrisonableBuilding.getGarrison((Unit) this) != null)
-            aggroRange *= 3;
+            aggroRange += GarrisonableBuilding.ATTACK_RANGE_BONUS;
 
         PathfinderMob closestMob = MiscUtil.findClosestAttackableEnemy((Mob) this, aggroRange, level);
         if (closestMob != null) {

@@ -32,7 +32,7 @@ public class ThrowLingeringHarmingPotion extends Ability {
         super(
             UnitAction.THROW_LINGERING_HARMING_POTION,
             CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,
-            WitchUnit.getPotionThrowRange(),
+            witchUnit.getPotionThrowRange(),
             0,
             true
         );
@@ -52,7 +52,7 @@ public class ThrowLingeringHarmingPotion extends Ability {
             null,
             List.of(
                 FormattedCharSequence.forward("Lingering Harming Potion", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE006  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + WitchUnit.getPotionThrowRange(), MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE006  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + witchUnit.getPotionThrowRange(), MyRenderer.iconStyle),
                 FormattedCharSequence.forward("Throw a potion that leaves a cloud of deadly gas.", Style.EMPTY)
             ),
             this

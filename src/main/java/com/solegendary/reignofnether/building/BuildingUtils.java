@@ -49,6 +49,14 @@ public class BuildingUtils {
         return false;
     }
 
+    public static boolean doesPlayerOwnBuildingType(boolean isClientSide, String playerName, String buildingName) {
+        List<Building> buildings = isClientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+        for (Building building : buildings)
+            if (building.name.equals(buildingName) && building.ownerName.equals(playerName))
+                return true;
+        return false;
+    }
+
     // returns a list of BPs that may reside in unique chunks for fog of war calcs
     public static ArrayList<BlockPos> getUniqueChunkBps(Building building) {
         AABB aabb = new AABB(

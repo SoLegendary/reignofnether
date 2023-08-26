@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.abilities.ThrowLingeringHarmingPotion;
 import com.solegendary.reignofnether.ability.abilities.ThrowLingeringHealingPotion;
+import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchServer;
@@ -144,7 +145,9 @@ public class WitchUnit extends Witch implements Unit {
         }
     }
 
-    public static int getPotionThrowRange() {
+    public int getPotionThrowRange() {
+        if (GarrisonableBuilding.getGarrison(this) != null)
+            return 16;
         return 8;
     }
 
@@ -171,11 +174,6 @@ public class WitchUnit extends Witch implements Unit {
         if (!this.isSilent())
             this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
         this.level.addFreshEntity(thrownPotion);
-
-        if (potion == Potions.HARMING)
-            this.abilities.get(0).setToMaxCooldown();
-        if (potion == Potions.HEALING)
-            this.abilities.get(1).setToMaxCooldown();
     }
 
     public static AttributeSupplier.Builder createAttributes() {

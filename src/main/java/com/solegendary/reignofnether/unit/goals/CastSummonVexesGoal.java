@@ -14,7 +14,7 @@ public class CastSummonVexesGoal extends Goal {
     private Ability ability; // used for syncing cooldown with clientside
     private int ticksCasting = 0; // how long have we spent trying to cast this spell
     public boolean isCasting() { return isCasting; }
-    public final static int TICKS_CASTING_MAX = 5 * ResourceCost.TICKS_PER_SECOND; // max time required to cast a spell
+    public final static int TICKS_CASTING_MAX = 4 * ResourceCost.TICKS_PER_SECOND; // max time required to cast a spell
     private boolean isCasting = false;
 
     public CastSummonVexesGoal(LivingEntity mob) {

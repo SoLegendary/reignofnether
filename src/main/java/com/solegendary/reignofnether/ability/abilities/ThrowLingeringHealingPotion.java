@@ -32,7 +32,7 @@ public class ThrowLingeringHealingPotion extends Ability {
         super(
             UnitAction.THROW_LINGERING_HEALING_POTION,
             CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,
-            WitchUnit.getPotionThrowRange(),
+            witchUnit.getPotionThrowRange(),
             0,
             true
         );
@@ -52,7 +52,7 @@ public class ThrowLingeringHealingPotion extends Ability {
             null,
             List.of(
                 FormattedCharSequence.forward("Lingering Healing Potion", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE007  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + WitchUnit.getPotionThrowRange(), MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE007  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + witchUnit.getPotionThrowRange(), MyRenderer.iconStyle),
                 FormattedCharSequence.forward("Throw a potion that leaves a cloud of healing vapours.", Style.EMPTY)
             ),
             this

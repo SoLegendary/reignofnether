@@ -11,6 +11,12 @@ import java.util.List;
 
 public interface GarrisonableBuilding {
 
+    // don't use this for abilities as it may not be balanced
+    int ATTACK_RANGE_BONUS = 20;
+
+    // bonus for units attacking garrisoned units
+    int EXTERNAL_ATTACK_RANGE_BONUS = 10;
+
     // returns the relative building position units will go to when garrisoning
     BlockPos getEntryPosition();
     // returns the relative building position units will go to when ungarrisoning

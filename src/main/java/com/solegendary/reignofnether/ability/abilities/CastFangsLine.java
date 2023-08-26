@@ -54,7 +54,7 @@ public class CastFangsLine extends Ability {
             null,
             List.of(
                 FormattedCharSequence.forward("Evoker Fangs (Line)", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE006  6  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + EvokerUnit.getFangsRange(), MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE006  " + EvokerUnit.getFangsDamage() + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + EvokerUnit.getFangsRange(), MyRenderer.iconStyle),
                 FormattedCharSequence.forward("After a short delay, summon a line of snapping", Style.EMPTY),
                 FormattedCharSequence.forward("fangs towards the targeted location.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),

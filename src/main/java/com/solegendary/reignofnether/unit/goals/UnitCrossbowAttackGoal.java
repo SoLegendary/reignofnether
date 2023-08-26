@@ -77,6 +77,7 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
         LivingEntity target = this.mob.getTarget();
         if (target != null && target.isAlive()) {
             boolean isGarrisoned = GarrisonableBuilding.getGarrison((Unit) this.mob) != null;
+            boolean isTargetGarrisoned = target instanceof Unit unit && GarrisonableBuilding.getGarrison(unit) != null;
             boolean canSeeTarget = this.mob.getSensing().hasLineOfSight(target) || isGarrisoned;
             boolean flag = this.seeTime > 0;
 
@@ -101,7 +102,9 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
                 }
             }
             if (isGarrisoned)
-                attackRange *= 3;
+                attackRange += GarrisonableBuilding.ATTACK_RANGE_BONUS;
+            else if (isTargetGarrisoned)
+                attackRange += GarrisonableBuilding.EXTERNAL_ATTACK_RANGE_BONUS;
 
             boolean flag2 = (distToTarget > attackRange || this.seeTime < 5) && this.attackCooldown == 0;
 

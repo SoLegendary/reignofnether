@@ -10,39 +10,114 @@ TODO bugs/features:
 
 - slow down fire/magma/suffocation damage events
 
-
-
-
-
 - worker tools sometimes dont move with their arms
 
+
+- myultiple arrows hitting the same target bounce
+    - maybe give visual-only piercing?
+    - piercing causes some sort of deadlock??
+
+
+- skeleton bows keep blinking when not in range
 - farmers still show up as idle
 - hunters wont return resources if theyre too far away
 - remove floating trees somehow
-- dont aggro against fogged enemies
-- ranged units shouldnt knockback
+- give 3-chunk vision range to garrisonables
 
-- evokers shouldn't need an additional research to unlock
-
-- evoker icon disappeared
+- spider mounting shouldn't require additional research
+    - maaaaybe give them the web ability?
 
 - creeper explosions should damage buildings more
     - if a building block is destroyed by a creeper, randomly destroy even more blocks
+    - also allowed stacked explosions to deal damage
+    - no friendly fire at all, even to other creepers
 
-- increase range of abilities while garrisoned
-    - esp. witch potion range
+- enable knockback for evoker fangs
 
-- should still be able to target garrisoned units (increase range?)
+- veto building blocks adjacent to water from being destroyed
 
-- veto specific block coordinates from being destroyed randomly
-    - specifically for blocks
+- double check that attack move still works
+
+- replace worker carry bags with an economic upgrade
+    - monsters: farms produce more food at night (excluding distortions) (and are replaced with carved pumpkins)
+        - raise farm costs to 150
+    - villagers: reseeding costs only 1 wood
 
 
 
 TODO test in remote server
 
-- synchonized cheats/research/actionItems
-- nether conversions and piglin worker
+
+
+
+TODO buildings/units (backlog)
+
+- endermen can place liquids??
+Research: Creepers explode with harming cloud effects
+Research: Villagers can build Iron Golems (treated as buildings but become iron golem units on completion)
+
+Villager faction
+    Castle
+        - Villagers' final building
+        - produces ravagers (crowd control/aoe damage bruiser)
+        - garrisonableBuilding (holds up to 10 units)
+        - research to add the ability to promote units (adding ominous banner and gaining a speed aura)
+            - play a firework on use
+            - only one captain allowed at a time
+            - should transform the building like a laboratory
+
+Monster faction
+    Stronghold
+        - Monsters' final building
+        - Requires a laboratory
+        - garrisonableBuilding (holds up to 10 units)
+        - distorts to night time (at a lower range than the mausoleum)
+        - produces wardens
+            - blind, cannot see anything in fog of war on its own
+            - single target cooldown ability: sonic wave for direct damage
+        - (unlocked at lab) research to cause buildings to produce silverfish when damaged and/or destroyed
+
+Netherling faction
+    All netherling buildings slowly convert non-nether blocks around them into nether counterparts:
+        - Grass -> nylium
+        - Sand -> soulsand
+        - Stone -> netherrack, etc.
+        - Water -> lava
+    Netherling buildings apart from the Bastion and portals can only be built on nether blocks
+
+    Netherlings do not produce their own units, but instead (like Protoss) bring units in from the nether using portals
+    - (Capitol) Bastion Portal
+        - blackstone-themed building with a decorated standard purple portal at the centre
+        - can build any unit as long as you have the appropriate supporting building/research
+        - produces units faster than any other production building
+        - only one allowed at any time
+
+    - Inactive portal
+        - Simple inactive portal on a pedestal
+        - Can be upgraded to specialise (and gain appropriate decorations):
+            - Military portal (red): produces military units
+            - Civilian portal (green): can drop off resources and supports 15 population
+            - Transport portal (blue) (requires lategame research): can teleport units to a linked portal
+    - Netherwart farm
+    - Fort
+        - Allows military piglins and hoglins (after an upgrade) to be produced at portals
+        - Researches regular upgrades
+    - Flame Sanctuary
+        - Allows magma cubes and blazes (after an upgrade) to be produced at portals
+        - Researches fire-related upgrades
+    - Wither Shrine
+        - Allows wither skeletons to be produced at portals
+        - Researches wither-related upgrades
+    - Fortress
+        - Ghasts (long-range ranged sieger)
+            - probably needs a size decrease
+            - flies a set Y height above the ground
+        - garrisonable (holds up to 10 units)
+
+
+
+
+
 
 
 TODO tutorial docs
@@ -155,80 +230,6 @@ TODO tutorial docs
 
 10. Known bugs and limitations
 
-
-
-
-
-TODO buildings/units (backlog)
-
-Research: Creepers explode with harming cloud effects
-Research: Villagers can build Iron Golems (treated as buildings but become iron golem units on completion)
-
-Villager faction
-    Market
-        - 50% of deposited resources become 'coins' currency to be exchanged for any resource (ore is 2x as expensive)
-        - simple deposit buttons, no unit interactions needed
-    Castle
-        - Villagers' final building
-        - produces ravagers (crowd control/aoe damage bruiser)
-        - garrisonableBuilding (holds up to 10 units)
-        - research to add the ability to promote units (adding ominous banner and gaining a speed aura)
-            - play a firework on use
-            - only one captain allowed at a time
-            - should transform the building like a laboratory
-
-Monster faction
-    Sacrificial pit
-        - sacrifices units to refund 60% of their cost as any other resource
-        - accumulates 'souls' currency to be exchanged for any resource (ore is 2x as expensive)
-    Stronghold
-        - Monsters' final building
-        - Requires a laboratory
-        - garrisonableBuilding (holds up to 10 units)
-        - distorts to night time (at a lower range than the mausoleum)
-        - produces wardens
-            - blind, cannot see anything in fog of war on its own
-            - single target cooldown ability: sonic wave for direct damage
-        - (unlocked at lab) research to cause buildings to produce silverfish when damaged and/or destroyed
-
-Netherling faction
-    All netherling buildings slowly convert non-nether blocks around them into nether counterparts:
-        - Grass -> nylium
-        - Sand -> soulsand
-        - Stone -> netherrack, etc.
-        - Water -> lava
-    Netherling buildings apart from the Bastion and portals can only be built on nether blocks
-
-    Netherlings do not produce their own units, but instead (like Protoss) bring units in from the nether using portals
-    - (Capitol) Bastion Portal
-        - blackstone-themed building with a decorated standard purple portal at the centre
-        - can build any unit as long as you have the appropriate supporting building/research
-        - produces units faster than any other production building
-        - only one allowed at any time
-
-    - Inactive portal
-        - Simple inactive portal on a pedestal
-        - On its own just supports population
-        - Can be upgraded to specialise (and gain appropriate decorations):
-            - Military portal (red): produces military units
-            - Civilian portal (green): can drop off resources
-                - Can toggle conversion at 70% rate to currency for resource exchange
-            - Transport portal (blue) (requires lategame research): can teleport units to a linked portal
-    - Mushroom farm
-    - Fort
-        - Allows military piglins and hoglins (after an upgrade) to be produced at portals
-        - Researches regular upgrades
-    - Flame Sanctuary
-        - Allows magma cubes and blazes (after an upgrade) to be produced at portals
-        - Researches fire-related upgrades
-    - Wither Shrine
-        - Allows wither skeletons to be produced at portals
-        - Researches wither-related upgrades
-    - Fortress
-        - Ghasts (long-range ranged sieger)
-            - probably needs a size decrease
-            - flies a set Y height above the ground
-        - garrisonableBuilding (holds up to 10 units)
 
 
 

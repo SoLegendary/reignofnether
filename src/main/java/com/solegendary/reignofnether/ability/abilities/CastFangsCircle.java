@@ -53,7 +53,7 @@ public class CastFangsCircle extends Ability {
             null,
             List.of(
                 FormattedCharSequence.forward("Evoker Fangs (Circular)", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE006  6  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + 3, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE006  " + EvokerUnit.getFangsDamage() + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + 3, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("After a short delay, summon a circle of snapping", Style.EMPTY),
                 FormattedCharSequence.forward("fangs around the caster.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),

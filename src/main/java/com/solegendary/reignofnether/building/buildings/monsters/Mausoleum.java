@@ -30,7 +30,7 @@ public class Mausoleum extends ProductionBuilding {
     public final static String structureName = "mausoleum";
     public final static ResourceCost cost = ResourceCosts.MAUSOLEUM;
     public final static int nightRange = 80;
-    private final static int TICKS_TO_HEAL_MAX = 20 * ResourceCost.TICKS_PER_SECOND;
+    private final static int TICKS_TO_HEAL_MAX = 10 * ResourceCost.TICKS_PER_SECOND;
     private int ticksToNextHeal = TICKS_TO_HEAL_MAX;
 
     public Mausoleum(Level level, BlockPos originPos, Rotation rotation, String ownerName) {

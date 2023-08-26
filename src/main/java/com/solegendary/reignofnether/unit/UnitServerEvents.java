@@ -24,7 +24,9 @@ import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -373,11 +375,16 @@ public class UnitServerEvents {
 
     public static ArrayList<Integer> knockbackIgnoreIds = new ArrayList<>();
 
-    // prevent potion damage effects from causing knockback
+
     @SubscribeEvent
     public static void onLivingDamage(LivingDamageEvent evt)  {
-       // if (evt.getSource().msgId.equals("indirectMagic"))
-       //     knockbackIgnoreIds.add(evt.getEntity().getId());
+
+        // prevent potion damage effects from causing knockback except for evoker fangs
+        if (evt.getSource().msgId.equals("indirectMagic") && !(evt.getSource().getDirectEntity() instanceof EvokerFangs))
+            knockbackIgnoreIds.add(evt.getEntity().getId());
+
+        if (evt.getSource().getDirectEntity() instanceof AbstractArrow)
+            knockbackIgnoreIds.add(evt.getEntity().getId());
     }
 
     @SubscribeEvent

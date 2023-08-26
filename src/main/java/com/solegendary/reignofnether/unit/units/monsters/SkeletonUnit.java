@@ -119,7 +119,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
     final static public float maxHealth = 40.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
-    final static public float attackRange = 10.0F; // only used by ranged units or melee building attackers
+    final static public float attackRange = 12.0F; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;

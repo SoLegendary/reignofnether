@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -24,6 +25,7 @@ public abstract class AbstractArrowMixin extends Projectile {
     }
 
     @Shadow public abstract boolean isNoPhysics();
+    @Shadow private int life;
 
     // prevent arrows from colliding with the building that a garrisoned unit is inside of
     @Inject(
@@ -40,7 +42,7 @@ public abstract class AbstractArrowMixin extends Projectile {
         }
     }
 
-    //
+    // correct angle of nophysics arrows
     @Inject(
             method = "tick",
             at = @At("TAIL")
@@ -54,5 +56,15 @@ public abstract class AbstractArrowMixin extends Projectile {
             this.setXRot(lerpRotation(this.xRotO, this.getXRot()));
             this.setYRot(lerpRotation(this.yRotO, this.getYRot()));
         }
+    }
+
+    // reduce effective life
+    @Inject(
+            method = "tickDespawn",
+            at = @At("TAIL")
+    )
+    protected void tickDespawn(CallbackInfo ci) {
+        if (this.getOwner() instanceof Unit && this.life >= 200)
+            this.discard();
     }
 }
