@@ -380,8 +380,8 @@ public class UnitServerEvents {
     public static void onLivingDamage(LivingDamageEvent evt)  {
 
         // prevent potion damage effects from causing knockback except for evoker fangs
-        if (evt.getSource().msgId.equals("indirectMagic") && !(evt.getSource().getDirectEntity() instanceof EvokerFangs))
-            knockbackIgnoreIds.add(evt.getEntity().getId());
+        //if (evt.getSource().msgId.equals("indirectMagic") && !(evt.getSource().getDirectEntity() instanceof EvokerFangs))
+        //    knockbackIgnoreIds.add(evt.getEntity().getId());
 
         if (evt.getSource().getDirectEntity() instanceof AbstractArrow)
             knockbackIgnoreIds.add(evt.getEntity().getId());

@@ -118,6 +118,13 @@ public class ResourceSources {
                     8,
                     ResourceName.FOOD
             ),
+            new ResourceSource("Carved Pumpkin",
+                    List.of(Blocks.CARVED_PUMPKIN),
+                    List.of(Items.CARVED_PUMPKIN),
+                    TICKS_PER_SECOND * 3,
+                    10,
+                    ResourceName.FOOD
+            ),
             new ResourceSource("Mushrooms",
                     List.of(Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM),
                     List.of(Items.RED_MUSHROOM, Items.BROWN_MUSHROOM),

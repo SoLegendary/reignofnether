@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.fogofwar;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -36,6 +37,7 @@ public class FogOfWarClientEvents {
     public static final float BRIGHT = 1.0f;
     public static final float DARK = 0.35f;
     public static final int CHUNK_VIEW_DIST = 1;
+    public static final int CHUNK_FAR_VIEW_DIST = 1;
     private static final Minecraft MC = Minecraft.getInstance();
     private static final int UPDATE_TICKS_MAX = 10;
     private static int updateTicksLeft = UPDATE_TICKS_MAX;
@@ -169,19 +171,30 @@ public class FogOfWarClientEvents {
             updateTicksLeft = UPDATE_TICKS_MAX;
             brightChunks.clear();
             Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
+            Set<ChunkPos> occupiedFarviewChunks = ConcurrentHashMap.newKeySet();
 
             // get chunks that have units/buildings that can see
             for (LivingEntity entity : UnitClientEvents.getAllUnits())
                 if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                     occupiedChunks.add(new ChunkPos(entity.getOnPos()));
 
-            for (Building building : BuildingClientEvents.getBuildings())
-                if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED)
-                    occupiedChunks.add(new ChunkPos(building.centrePos));
+            for (Building building : BuildingClientEvents.getBuildings()) {
+                if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED) {
+                    if (building instanceof GarrisonableBuilding)
+                        occupiedFarviewChunks.add(new ChunkPos(building.centrePos));
+                    else
+                        occupiedChunks.add(new ChunkPos(building.centrePos));
+                }
+            }
 
             for (ChunkPos chunkPos : occupiedChunks)
                 for (int x = -CHUNK_VIEW_DIST; x <= CHUNK_VIEW_DIST; x++)
                     for (int z = -CHUNK_VIEW_DIST; z <= CHUNK_VIEW_DIST; z++)
+                        brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
+
+            for (ChunkPos chunkPos : occupiedFarviewChunks)
+                for (int x = -CHUNK_FAR_VIEW_DIST; x <= CHUNK_FAR_VIEW_DIST; x++)
+                    for (int z = -CHUNK_FAR_VIEW_DIST; z <= CHUNK_FAR_VIEW_DIST; z++)
                         brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
 
             Set<ChunkPos> newlyDarkChunks = ConcurrentHashMap.newKeySet();

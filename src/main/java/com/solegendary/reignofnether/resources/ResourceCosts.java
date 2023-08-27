@@ -30,6 +30,7 @@ public class ResourceCosts {
     }
 
     public static final int REPLANT_WOOD_COST = 2;
+    public static final int REDUCED_REPLANT_WOOD_COST = 1;
     public static final int MAX_POPULATION = 100; // max possible pop you can have regardless of buildings
 
     // ******************* UNITS ******************* //
@@ -58,7 +59,7 @@ public class ResourceCosts {
     // Monsters
     public static ResourceCost MAUSOLEUM = ResourceCost.Building(0,300,150, 10);
     public static ResourceCost HAUNTED_HOUSE = ResourceCost.Building(0,100,0, 10);
-    public static ResourceCost PUMPKIN_FARM = ResourceCost.Building(0,120,0, 0);
+    public static ResourceCost PUMPKIN_FARM = ResourceCost.Building(0,150,0, 0);
     public static ResourceCost GRAVEYARD = ResourceCost.Building(0,150,0, 0);
     public static ResourceCost SPIDER_LAIR = ResourceCost.Building(0,150,100, 0);
     public static ResourceCost DUNGEON = ResourceCost.Building(0,200,100, 0);
@@ -76,17 +77,17 @@ public class ResourceCosts {
     public static ResourceCost WATCHTOWER = ResourceCost.Building(0,100,100, 0);
 
     // Netherlings
-    public static ResourceCost PORTAL = ResourceCost.Building(0, 200, 0, 15);
+    public static ResourceCost PORTAL = ResourceCost.Building(0, 200, 0, 0);
 
     // ******************* RESEARCH ******************* //
-    public static ResourceCost RESEARCH_VINDICATOR_AXES = ResourceCost.Research(0,200,400, 120);
+    public static ResourceCost RESEARCH_VINDICATOR_AXES = ResourceCost.Research(0,200,400, 180);
     public static ResourceCost RESEARCH_PILLAGER_CROSSBOWS = ResourceCost.Research(0,600,300, 180);
     public static ResourceCost RESEARCH_LAB_LIGHTNING_ROD = ResourceCost.Research(0,100,500, 120);
     public static ResourceCost RESEARCH_RESOURCE_CAPACITY = ResourceCost.Research(200,200,0, 90);
-    public static ResourceCost RESEARCH_SPIDER_JOCKEYS = ResourceCost.Research(300,300,0, 120);
-    public static ResourceCost RESEARCH_POISON_SPIDERS = ResourceCost.Research(300,0,300, 100);
-    public static ResourceCost RESEARCH_HUSKS = ResourceCost.Research(500,0,200, 120);
-    public static ResourceCost RESEARCH_STRAYS = ResourceCost.Research(500,300,0, 120);
+    public static ResourceCost RESEARCH_SPIDER_JOCKEYS = ResourceCost.Research(200,200,0, 90);
+    public static ResourceCost RESEARCH_POISON_SPIDERS = ResourceCost.Research(400,0,200, 90);
+    public static ResourceCost RESEARCH_HUSKS = ResourceCost.Research(500,0,300, 180);
+    public static ResourceCost RESEARCH_STRAYS = ResourceCost.Research(500,500,0, 180);
     public static ResourceCost RESEARCH_LINGERING_POTIONS = ResourceCost.Research(300,300,300, 150);
     public static ResourceCost RESEARCH_EVOKERS = ResourceCost.Research(500,0,300, 150);
     public static ResourceCost RESEARCH_EVOKER_VEXES = ResourceCost.Research(500,0,300, 120);

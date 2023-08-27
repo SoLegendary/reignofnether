@@ -297,11 +297,23 @@ public abstract class Building {
     public void destroyRandomBlocks(int amount) {
         if (getLevel().isClientSide())
             return;
-        ArrayList<BuildingBlock> placedBlocks = new ArrayList<>(blocks.stream().filter(b -> b.isPlaced(getLevel())).toList());
+        ArrayList<BuildingBlock> placedBlocks = new ArrayList<>(blocks.stream().filter(
+                b -> { // avoid destroying blocks adjacent to liquids
+                    if (this.level.getBlockState(b.getBlockPos().above()).getMaterial().isLiquid() ||
+                            this.level.getBlockState(b.getBlockPos().north()).getMaterial().isLiquid() ||
+                            this.level.getBlockState(b.getBlockPos().south()).getMaterial().isLiquid() ||
+                            this.level.getBlockState(b.getBlockPos().east()).getMaterial().isLiquid() ||
+                            this.level.getBlockState(b.getBlockPos().west()).getMaterial().isLiquid())
+                        return false;
+                    return b.isPlaced(getLevel());
+                }
+        ).toList());
+
         Collections.shuffle(placedBlocks);
         for (int i = 0; i < amount && i < placedBlocks.size(); i++) {
-            getLevel().destroyBlock(placedBlocks.get(i).getBlockPos(), false);
-            this.onBlockBreak((ServerLevel) getLevel(), placedBlocks.get(i).getBlockPos(), false);
+            BlockPos bp = placedBlocks.get(i).getBlockPos();
+            getLevel().destroyBlock(bp, false);
+            this.onBlockBreak((ServerLevel) getLevel(), bp, false);
         }
         if (amount > 0)
             AttackWarningClientboundPacket.sendWarning(ownerName, BuildingUtils.getCentrePos(getBlocks()));

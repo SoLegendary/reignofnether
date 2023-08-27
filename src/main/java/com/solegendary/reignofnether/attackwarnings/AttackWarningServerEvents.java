@@ -11,7 +11,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class AttackWarningServerEvents {
 
-    // prevent potion damage effects from causing knockback
     @SubscribeEvent
     public static void onLivingDamage(LivingDamageEvent evt)  {
         if (evt.getEntity().getLevel().isClientSide())

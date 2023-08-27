@@ -84,7 +84,7 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
 
         BlockPos pos = mob.getOnPos();
         Building closestBuilding = null;
-        double closestDist = 9999;
+        double closestDist = 99999;
         for (Building building : BuildingServerEvents.getBuildings()) {
             if (building.ownerName.equals(((Unit) mob).getOwnerName()) && building.canAcceptResources && building.isBuilt) {
                 BlockPos bp = building.getClosestGroundPos(pos, 1);
