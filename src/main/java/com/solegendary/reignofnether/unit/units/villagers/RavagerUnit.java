@@ -133,13 +133,13 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, RavagerUnit.attackDamage)
+                .add(Attributes.MAX_HEALTH, RavagerUnit.maxHealth)
                 .add(Attributes.MOVEMENT_SPEED, RavagerUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, RavagerUnit.attackDamage)
                 .add(Attributes.ARMOR, RavagerUnit.armorValue)
                 .add(Attributes.ATTACK_KNOCKBACK, 1.5)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.75)
-                .add(Attributes.FOLLOW_RANGE, 0);
+                .add(Attributes.FOLLOW_RANGE, 32);
     }
 
     public void tick() {

@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.units.modelling.PiglinUnitModel;
 import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
+import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -286,39 +287,58 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
     public void setNonHeadModelVisibility(boolean visibility) {
 
+        if (model instanceof RavagerModel ravagerModel) {
+            //ravagerModel.rightHindLeg.visible = visibility;
+            //ravagerModel.leftHindLeg.visible = visibility;
+            //ravagerModel.rightFrontLeg.visible = visibility;
+            //ravagerModel.leftFrontLeg.visible = visibility;
+            //ravagerModel.neck.visible = visibility;
+        }
+        else if (model instanceof WardenModel<?> wardenModel) {
+            //wardenModel.bone.visible = visibility;
+            //wardenModel.body.visible = visibility;
+            //wardenModel.rightTendril.visible = visibility;
+            //wardenModel.leftTendril.visible = visibility;
+            //wardenModel.leftLeg.visible = visibility;
+            //wardenModel.leftArm.visible = visibility;
+            //wardenModel.leftRibcage.visible = visibility;
+            //wardenModel.rightArm.visible = visibility;
+            //wardenModel.rightLeg.visible = visibility;
+            //wardenModel.rightRibcage.visible = visibility;
+        }
         // TODO: doesn't work for players
-        if (model instanceof PlayerModel) { // includes piglins
-            ((PlayerModel<?>) model).body.visible = visibility;
-            ((PlayerModel<?>) model).leftSleeve.visible = visibility;
-            ((PlayerModel<?>) model).rightSleeve.visible = visibility;
-            ((PlayerModel<?>) model).rightArm.visible = visibility;
-            ((PlayerModel<?>) model).leftArm.visible = visibility;
-            ((PlayerModel<?>) model).rightLeg.visible = visibility;
-            ((PlayerModel<?>) model).leftLeg.visible = visibility;
-            ((PlayerModel<?>) model).jacket.visible = visibility;
-            ((PlayerModel<?>) model).leftPants.visible = visibility;
-            ((PlayerModel<?>) model).rightPants.visible = visibility;
+        else if (model instanceof PlayerModel<?> playerModel) { // includes piglins
+            playerModel.body.visible = visibility;
+            playerModel.leftSleeve.visible = visibility;
+            playerModel.rightSleeve.visible = visibility;
+            playerModel.rightArm.visible = visibility;
+            playerModel.leftArm.visible = visibility;
+            playerModel.rightLeg.visible = visibility;
+            playerModel.leftLeg.visible = visibility;
+            playerModel.jacket.visible = visibility;
+            playerModel.leftPants.visible = visibility;
+            playerModel.rightPants.visible = visibility;
         }
-        else if (model instanceof HumanoidModel) {
-            ((HumanoidModel<?>) model).hat.visible = visibility;
-            ((HumanoidModel<?>) model).body.visible = visibility;
-            ((HumanoidModel<?>) model).rightArm.visible = visibility;
-            ((HumanoidModel<?>) model).leftArm.visible = visibility;
-            ((HumanoidModel<?>) model).rightLeg.visible = visibility;
-            ((HumanoidModel<?>) model).leftLeg.visible = visibility;
+        else if (model instanceof HumanoidModel<?> humanoidModel) {
+            humanoidModel.hat.visible = visibility;
+            humanoidModel.body.visible = visibility;
+            humanoidModel.rightArm.visible = visibility;
+            humanoidModel.leftArm.visible = visibility;
+            humanoidModel.rightLeg.visible = visibility;
+            humanoidModel.leftLeg.visible = visibility;
         }
-        else if (model instanceof VillagerUnitModel) {
-            ((VillagerUnitModel<?>) model).armsVisible = visibility;
+        else if (model instanceof VillagerUnitModel<?> villagerUnitModel) {
+            villagerUnitModel.armsVisible = visibility;
         }
-        else if (model instanceof IllagerModel<?>) {
-            ((IllagerModel<?>) model).arms.visible = visibility;
-            ((IllagerModel<?>) model).leftArm.visible = visibility;
-            ((IllagerModel<?>) model).rightArm.visible = visibility;
+        else if (model instanceof IllagerModel<?> illagerModel) {
+            illagerModel.arms.visible = visibility;
+            illagerModel.leftArm.visible = visibility;
+            illagerModel.rightArm.visible = visibility;
         }
 
         // hide all non-head models attached to root
-        if (model instanceof HierarchicalModel)
-            setNonHeadRootModelVisibility(((HierarchicalModel<?>) model).root(), visibility);
+        if (model instanceof HierarchicalModel<?> hierarchicalModel)
+            setNonHeadRootModelVisibility(hierarchicalModel.root(), visibility);
     }
 
     private void setNonHeadRootModelVisibility(ModelPart root, boolean visibility) {

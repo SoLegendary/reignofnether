@@ -19,7 +19,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.item.ItemStack;
@@ -140,6 +139,11 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
                 .add(Attributes.ATTACK_KNOCKBACK, 1.5);
     }
+
+    @Override
+    protected void customServerAiStep() { }
+    @Override // suppress heartbeat sounds
+    public boolean isSilent() { return true; }
 
     public void tick() {
         this.setCanPickUpLoot(false);

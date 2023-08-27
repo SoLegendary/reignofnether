@@ -44,6 +44,8 @@ public class CommonModEvents {
         evt.registerEntityRenderer(EntityRegistrar.WITCH_UNIT.get(), WitchRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.EVOKER_UNIT.get(), EvokerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.ENDERMAN_UNIT.get(), EndermanRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.WARDEN_UNIT.get(), WardenRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.RAVAGER_UNIT.get(), RavagerRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.PIGLIN_GRUNT_UNIT.get(), PiglinUnitRenderer::new);
     }
 
@@ -64,6 +66,8 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.WITCH_UNIT.get(), WitchUnit.createAttributes().build());
         evt.put(EntityRegistrar.EVOKER_UNIT.get(), EvokerUnit.createAttributes().build());
         evt.put(EntityRegistrar.ENDERMAN_UNIT.get(), EndermanUnit.createAttributes().build());
+        evt.put(EntityRegistrar.WARDEN_UNIT.get(), WardenUnit.createAttributes().build());
+        evt.put(EntityRegistrar.RAVAGER_UNIT.get(), RavagerUnit.createAttributes().build());
         evt.put(EntityRegistrar.PIGLIN_GRUNT_UNIT.get(), PiglinGruntUnit.createAttributes().build());
     }
 

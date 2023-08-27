@@ -58,7 +58,8 @@ public class RavagerUnitProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An enormous beast that can smash through hordes of enemies.", Style.EMPTY)
+                FormattedCharSequence.forward("An enormous beast that can smash through hordes of enemies.", Style.EMPTY),
+                FormattedCharSequence.forward("They can roar to knockback enemies and be mounted by pillagers.", Style.EMPTY)
             )
         );
     }
