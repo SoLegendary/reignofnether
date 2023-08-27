@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -25,6 +26,8 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BuildingServerEvents {
 
@@ -252,6 +255,19 @@ public class BuildingServerEvents {
                         isPartOfBuilding = true;
                 return !isPartOfBuilding;
             });
+        }
+
+        // apply creeper attack damage as bonus damage to buildings
+        if (evt.getExplosion().getSourceMob() instanceof CreeperUnit creeperUnit) {
+            Set<Building> affectedBuildings = new HashSet<>();
+            for (BlockPos bp : evt.getAffectedBlocks()) {
+                Building building = BuildingUtils.findBuilding(false, bp);
+                if (building != null && !building.isCapitol)
+                    affectedBuildings.add(building);
+            }
+            for (Building building : affectedBuildings) {
+                building.destroyRandomBlocks((int) creeperUnit.getUnitAttackDamage());
+            }
         }
     }
 }

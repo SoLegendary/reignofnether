@@ -109,7 +109,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 20.0f;
+    final static public float attackDamage = 14.0f;
     final static public float attacksPerSecond = 1f;
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 0.0f;

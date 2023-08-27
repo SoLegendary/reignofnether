@@ -121,7 +121,7 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
                         this.attackCooldown = this.attackCooldownMax;
                     }
                 }
-            } else if (--this.attackTime <= 0 && this.seeTime >= -60) {
+            } else if (distToTarget <= attackRange && --this.attackTime <= 0 && this.seeTime >= -60) {
                 this.mob.startUsingItem(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof BowItem));
             }
         }

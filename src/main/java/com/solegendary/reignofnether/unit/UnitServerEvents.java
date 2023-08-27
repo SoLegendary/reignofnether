@@ -30,6 +30,7 @@ import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -45,9 +46,7 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class UnitServerEvents {
@@ -340,10 +339,15 @@ public class UnitServerEvents {
             evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)
             evt.setAmount(attackerUnit.getUnitAttackDamage());
 
-        if (evt.getEntity() instanceof Creeper && (evt.getSource().isExplosion()))
+        if (evt.getEntity() instanceof CreeperUnit && (evt.getSource().isExplosion()))
             evt.setCanceled(true);
 
-        if (evt.getEntity() instanceof Creeper && (evt.getSource() == DamageSource.LIGHTNING_BOLT || evt.getSource() == DamageSource.ON_FIRE))
+        // prevent friendly fire from your own creepers (but still set off chained explosions and cause knockback)
+        if (evt.getSource().getEntity() instanceof CreeperUnit creeperUnit &&
+            getUnitToEntityRelationship(creeperUnit, evt.getEntity()) == Relationship.FRIENDLY)
+            evt.setCanceled(true);
+
+        if (evt.getEntity() instanceof CreeperUnit && (evt.getSource() == DamageSource.LIGHTNING_BOLT || evt.getSource() == DamageSource.ON_FIRE))
             evt.setCanceled(true);
 
         if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL || evt.getSource() == DamageSource.IN_FIRE))

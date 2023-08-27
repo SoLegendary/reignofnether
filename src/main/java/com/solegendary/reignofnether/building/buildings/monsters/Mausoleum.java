@@ -79,10 +79,12 @@ public class Mausoleum extends ProductionBuilding {
                 ResourceCosts.getFormattedPop(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A tomb of the dead that produces zombie villagers.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Distorts time to midnight within a " + nightRange + " block radius", Style.EMPTY),
                 FormattedCharSequence.forward("and slowly heals friendly monsters under this effect.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("You may only have one capitol building at any time.", Style.EMPTY)
+                FormattedCharSequence.forward("You may only have one capitol building at any time.", Style.EMPTY),
+                FormattedCharSequence.forward("Capitol buildings are resistant to explosions.", Style.EMPTY)
             ),
             null
         );

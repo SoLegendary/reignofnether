@@ -11,31 +11,25 @@ TODO bugs/features:
 - slow down fire/magma/suffocation damage events
 
 
-- myultiple arrows hitting the same target bounce
+- multiple arrows hitting the same target bounce
     - maybe give visual-only piercing?
     - piercing causes some sort of deadlock??
 
-
-- skeleton bows keep blinking when not in range
-- farmers still show up as idle
-- hunters wont return resources if theyre too far away
-
-- creeper explosions should damage buildings more
-    - if a building block is destroyed by a creeper, randomly destroy even more blocks
-    - also allowed stacked explosions to deal damage
-    - no friendly fire at all, even to other creepers
+- hunters wont return resources if they're too far away
 
 - double check that attack move still works
 
 - replace worker carry bags with an economic upgrade
     - monsters: farms produce more food at night (excluding distortions) (and are replaced with carved pumpkins)
-        - and replace with a monster-specific building
     - villagers: reseeding costs only 1 wood
+
+- replace stockpile with an equivalent for monsters (to be more thematic)
 
 
 
 TODO test in remote server
 
+- skeleton attack AI
 - 2-chunk vision range to garrisonables
 - removing tall trees
 - new building health formulas
