@@ -184,7 +184,7 @@ public class BuildingServerEvents {
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions
     @SubscribeEvent
-    public static void onBlockBreak(BlockEvent.BreakEvent evt) {
+    public static void onPlayerBlockBreak(BlockEvent.BreakEvent evt) {
         if (!evt.getLevel().isClientSide()) {
             for (Building building : buildings)
                 if (building.isPosPartOfBuilding(evt.getPos(), true))

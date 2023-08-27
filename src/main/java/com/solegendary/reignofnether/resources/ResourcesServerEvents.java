@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -9,6 +12,7 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class ResourcesServerEvents {
@@ -105,4 +109,67 @@ public class ResourcesServerEvents {
             evt.setResult(Event.Result.DENY);
         }
     }
+
+    @SubscribeEvent
+    public static void onPlayerBlockBreak(BlockEvent.BreakEvent evt) {
+        if (isLogBlock(evt.getState()) && !BuildingUtils.isPosInsideAnyBuilding(false, evt.getPos()))
+            breakAdjacentLogs(evt.getPos(), null, (Level) evt.getLevel());
+    }
+
+    // if a tree is touched, destroy any adjacent logs that are above the ground after some time to avoid leaving tall trees behind
+    public static void breakAdjacentLogs(BlockPos bp, BlockPos bpExcluded, Level level) {
+        BlockState bs = level.getBlockState(bp);
+
+        List<BlockPos> bpsAdj = List.of(
+                bp.north(), bp.south(), bp.east(), bp.west(), bp.above(),
+                bp.above().north(), bp.above().south(), bp.above().east(), bp.above().west(),
+                bp.north().east(), bp.north().west(), bp.south().east(), bp.south().west(),
+                bp.above().north().east(), bp.above().north().west(), bp.above().south().east(), bp.above().south().west());
+
+        for (BlockPos bpAdj : bpsAdj) {
+            BlockState bsAdj = level.getBlockState(bpAdj);
+            if (isLogBlock(bsAdj) && !bpAdj.equals(bpExcluded)) {
+                if (numAirOrLeafBlocksBelow(bpAdj, level) >= 5)
+                    level.destroyBlock(bpAdj, true);
+                breakAdjacentLogs(bpAdj, bp, level);
+            }
+        }
+    }
+
+    public static boolean isLogBlock(BlockState bs) {
+        return List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG)
+                .contains(bs.getBlock());
+    }
+    public static boolean isLeafBlock(BlockState bs) {
+        return List.of(Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES)
+                .contains(bs.getBlock());
+    }
+
+    public static int numAirOrLeafBlocksBelow(BlockPos bp, Level level) {
+        int blocks = 0;
+        for (int i = -1; i > -10; i--) {
+            BlockState bs = level.getBlockState(bp.offset(0,i,0));
+            if (bs.isAir() || isLeafBlock(bs))
+                blocks += 1;
+        }
+        return blocks;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
