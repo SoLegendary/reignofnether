@@ -11,11 +11,6 @@ TODO bugs/features:
 - slow down fire/magma/suffocation damage events
 
 
-- normalise building health
-    - for a built building, health shown should be the number of blocks above half x damage multiplier
-    - eg. a 100-block building with resistance of 0.25 should show 200 total health when built
-    - as a building is constructed, raise the number of required blocks to destroy it
-
 - myultiple arrows hitting the same target bounce
     - maybe give visual-only piercing?
     - piercing causes some sort of deadlock??
@@ -42,6 +37,8 @@ TODO bugs/features:
 TODO test in remote server
 
 - 2-chunk vision range to garrisonables
+- removing tall trees
+- new building health formulas
 
 
 TODO buildings/units (backlog)

@@ -223,7 +223,7 @@ public class ResourceSources {
                             Items.STRIPPED_OAK_LOG, Items.STRIPPED_BIRCH_LOG, Items.STRIPPED_ACACIA_LOG, Items.STRIPPED_DARK_OAK_LOG, Items.STRIPPED_JUNGLE_LOG, Items.STRIPPED_MANGROVE_LOG, Items.STRIPPED_SPRUCE_LOG,
                             Items.OAK_WOOD, Items.BIRCH_WOOD, Items.ACACIA_WOOD, Items.DARK_OAK_WOOD, Items.JUNGLE_WOOD, Items.MANGROVE_WOOD, Items.SPRUCE_WOOD,
                             Items.STRIPPED_OAK_WOOD, Items.STRIPPED_BIRCH_WOOD, Items.STRIPPED_ACACIA_WOOD, Items.STRIPPED_DARK_OAK_WOOD, Items.STRIPPED_JUNGLE_WOOD, Items.STRIPPED_MANGROVE_WOOD, Items.STRIPPED_SPRUCE_WOOD),
-                    TICKS_PER_SECOND * 8,
+                    TICKS_PER_SECOND * 10,
                     15,
                     ResourceName.WOOD
             ),

@@ -55,14 +55,14 @@ public abstract class Building {
     public int msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
 
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
-    protected float minBlocksPercent = 0.5f;
+    public final float MIN_BLOCKS_PERCENT = 0.5f;
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
     protected float explodeChance = 0.3f;
     protected float explodeRadius = 2.0f;
     protected float fireThreshold = 0.75f; // if building has less %hp than this, explosions caused can make fires
     protected float buildTimeModifier = 1.0f; // only affects non-built buildings, not repair times
-    protected int unrepairedBlocksDestroyed = 0; // ticks up on a block being destroyed, ticks down on a block being built
+    protected int highestBlockCountReached = 2; // effective max health of the building
 
     protected ArrayList<BuildingBlock> scaffoldBlocks = new ArrayList<>();
     protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
@@ -72,6 +72,7 @@ public abstract class Building {
     public int tickAge = 0; // how many ticks ago this building was placed
     public boolean canAcceptResources = false; // can workers drop off resources here?
     public int serverBlocksPlaced = 1;
+    private int totalBlocksEverBroken = 0;
 
     private long ticksToExtinguish = 0;
     private final long TICKS_TO_EXTINGUISH = 100;
@@ -96,6 +97,7 @@ public abstract class Building {
         return abilityButtons;
     }
     public ArrayList<Ability> getAbilities() { return abilities; }
+    public int getHighestBlockCountReached() { return highestBlockCountReached; }
 
     public Level getLevel() { return level; }
     public void setLevel(Level level) { this.level = level; }
@@ -132,6 +134,12 @@ public abstract class Building {
         for (BuildingBlock block : blocks)
             if (!block.isPlaced(level) && !block.getBlockState().isAir())
                 addToBlockPlaceQueue(block);
+    }
+
+    public void setServerBlocksPlaced(int blocksPlaced) {
+        this.serverBlocksPlaced = blocksPlaced;
+        if (this.getBlocksPlaced() > highestBlockCountReached)
+            highestBlockCountReached = this.getBlocksPlaced();
     }
 
     public void addToBlockPlaceQueue(BuildingBlock block) {
@@ -220,13 +228,29 @@ public abstract class Building {
 
     public int getBlocksPlaced() {
         // on clientside a building outside of render view would always be 0
-        if (!getLevel().isClientSide() || isFullyLoadedClientSide((ClientLevel) getLevel()))
-            return blocks.stream().filter(b -> b.isPlaced(getLevel()) && !b.getBlockState().isAir()).toList().size();
+        if (!getLevel().isClientSide() || isFullyLoadedClientSide((ClientLevel) getLevel())) {
+            int blocksPlaced = blocks.stream().filter(b -> b.isPlaced(getLevel()) && !b.getBlockState().isAir()).toList().size();
+            if (blocksPlaced > highestBlockCountReached)
+                highestBlockCountReached = blocksPlaced;
+            return blocksPlaced;
+        }
         else
             return this.serverBlocksPlaced;
     }
+    // % of total buildable blocks existing
     public float getBlocksPlacedPercent() {
         return (float) getBlocksPlaced() / (float) getBlocksTotal();
+    }
+    public float getUnbuiltBlocksPlacedPercent() {
+        return (float) getBlocksPlaced() / highestBlockCountReached;
+    }
+
+    // health and maxHealth are normalised to 0 being point of destruction
+    public int getHealth() {
+        return (int) (getBlocksPlaced() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached());
+    }
+    public int getMaxHealth() {
+        return (int) (getHighestBlockCountReached() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached());
     }
 
     // place blocks according to the following rules:
@@ -276,11 +300,8 @@ public abstract class Building {
             }
         }
 
-        if (validBlocks.size() > 0) {
+        if (validBlocks.size() > 0)
             this.blockPlaceQueue.add(validBlocks.get(0));
-            if (unrepairedBlocksDestroyed > 0)
-                unrepairedBlocksDestroyed -= 1;
-        }
     }
 
     private void extinguishFires(ServerLevel level) {
@@ -320,13 +341,12 @@ public abstract class Building {
     }
 
     public boolean shouldBeDestroyed() {
-        // allow some time for scaffolding and the first few blocks to be placed first before checking
         if (getBlocksPlaced() <= 0 && blockPlaceQueue.size() == 0)
             return true;
         if (isBuilt)
-            return getBlocksPlacedPercent() <= this.minBlocksPercent;
-        else
-            return unrepairedBlocksDestroyed >= 10;
+            return getBlocksPlacedPercent() <= this.MIN_BLOCKS_PERCENT;
+        else // if the building is still under construction, we instead use the highest health we've ever reached as the effective max health
+            return totalBlocksEverBroken > 0 && getUnbuiltBlocksPlacedPercent() <= this.MIN_BLOCKS_PERCENT;
     }
 
     // destroy all remaining blocks in a final big explosion
@@ -366,7 +386,7 @@ public abstract class Building {
 
     // should only be run serverside
     public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks) {
-        unrepairedBlocksDestroyed += 1;
+        totalBlocksEverBroken += 1;
 
         // when a player breaks a block that's part of the building:
         // - roll explodeChance to cause explosion effects and destroy more blocks
@@ -476,6 +496,8 @@ public abstract class Building {
                     level.levelEvent(bs.getSoundType().getPlaceSound().hashCode(), bp, Block.getId(bs));
                     blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
                     onBlockBuilt(bp, bs);
+                    if (this.getBlocksPlaced() > highestBlockCountReached)
+                        highestBlockCountReached = this.getBlocksPlaced();
                 }
             }
         }

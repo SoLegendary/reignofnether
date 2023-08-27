@@ -262,10 +262,11 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                     if (gatherTicksLeft <= 0) {
                         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
                         ResourceName resourceName = ResourceSources.getBlockResourceName(this.gatherTarget, mob.level);
-                        if (mob.level.destroyBlock(gatherTarget, false)) {
-                            if (ResourcesServerEvents.isLogBlock(this.mob.level.getBlockState(gatherTarget)))
-                                ResourcesServerEvents.breakAdjacentLogs(gatherTarget, null, this.mob.level);
 
+                        if (ResourcesServerEvents.isLogBlock(this.mob.level.getBlockState(gatherTarget)))
+                            ResourcesServerEvents.breakAdjacentLogs(gatherTarget, null, this.mob.level);
+
+                        if (mob.level.destroyBlock(gatherTarget, false)) {
                             // replace workers' mine ores with cobble to prevent creating potholes
                             if (targetResourceSource.resourceName == ResourceName.ORE) {
                                 BlockState replaceBs;

@@ -40,6 +40,9 @@ class PortraitRendererBuilding {
 
         String name = building.name;
 
+        if (!building.isBuilt)
+            name += " (" + (int) (building.getBlocksPlacedPercent() * 100) + "%)";
+
         if (rs != Relationship.OWNED)
             name += " (" + building.ownerName + ")";
 
@@ -71,7 +74,7 @@ class PortraitRendererBuilding {
 
         GuiComponent.drawCenteredString(
                 poseStack, Minecraft.getInstance().font,
-                building.getBlocksPlaced() + "/" + building.getBlocksTotal(),
+                building.getHealth() + "/" + building.getMaxHealth(),
                 x+(frameWidth/2), y+frameHeight-13,
                 0xFFFFFFFF
         );

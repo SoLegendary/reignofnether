@@ -617,7 +617,7 @@ public class BuildingClientEvents {
     public static void syncBuildingBlocks(Building serverBuilding, int blocksPlaced) {
         for (Building building : buildings)
             if (building.originPos.equals(serverBuilding.originPos))
-                building.serverBlocksPlaced = blocksPlaced;
+                building.setServerBlocksPlaced(blocksPlaced);
     }
 
     public static Relationship getPlayerToBuildingRelationship(Building building) {
