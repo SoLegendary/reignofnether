@@ -14,6 +14,8 @@
   "item.reignofnether.witch_unit_spawn_egg": "Spawn Witch Unit",
   "item.reignofnether.evoker_unit_spawn_egg": "Spawn Evoker Unit",
   "item.reignofnether.enderman_unit_spawn_egg": "Spawn Enderman Unit",
+  "item.reignofnether.ravager_unit_spawn_egg": "Spawn Ravager Unit",
+  "item.reignofnether.warden_unit_spawn_egg": "Spawn Warden Unit",
   "item.reignofnether.piglin_grunt_unit_spawn_egg": "Spawn Piglin Grunt Unit",
 
   "sounds.reignofnether.under_attack": "Under attack!"

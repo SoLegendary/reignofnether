@@ -32,7 +32,7 @@ public interface AttackerUnit {
     public AttackBuildingGoal getAttackBuildingGoal();
 
     // chase and attack the target ignoring all else until it is dead or out of sight
-    public default void setAttackTarget(@Nullable LivingEntity target) {
+    public default void setUnitAttackTarget(@Nullable LivingEntity target) {
         if (target != null) {
             MiscUtil.addUnitCheckpoint(((Unit) this), target.getId());
             ((Unit) this).setIsCheckpointGreen(false);
@@ -47,7 +47,7 @@ public interface AttackerUnit {
     }
 
     public static void resetBehaviours(AttackerUnit unit) {
-        unit.setAttackTarget(null);
+        unit.setUnitAttackTarget(null);
         unit.setAttackMoveTarget(null);
         AttackBuildingGoal attackBuildingGoal = unit.getAttackBuildingGoal();
         if (unit.canAttackBuildings() && attackBuildingGoal != null)
@@ -93,7 +93,7 @@ public interface AttackerUnit {
 
                 if (lastDSEntity instanceof PathfinderMob &&
                     (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE)) {
-                    attackerUnit.setAttackTarget((PathfinderMob) lastDSEntity);
+                    attackerUnit.setUnitAttackTarget((PathfinderMob) lastDSEntity);
                 }
 
             }
@@ -120,7 +120,7 @@ public interface AttackerUnit {
 
         PathfinderMob closestMob = MiscUtil.findClosestAttackableEnemy((Mob) this, aggroRange, level);
         if (closestMob != null) {
-            setAttackTarget(closestMob);
+            setUnitAttackTarget(closestMob);
             return true;
         }
         return false;

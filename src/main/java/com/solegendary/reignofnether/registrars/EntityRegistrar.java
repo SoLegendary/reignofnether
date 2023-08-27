@@ -110,6 +110,18 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "enderman_unit").toString()));
 
+    public static final RegistryObject<EntityType<RavagerUnit>> RAVAGER_UNIT = ENTITIES.register("ravager_unit",
+            () -> EntityType.Builder.of(RavagerUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.RAVAGER.getWidth(), EntityType.RAVAGER.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "ravager_unit").toString()));
+
+    public static final RegistryObject<EntityType<WardenUnit>> WARDEN_UNIT = ENTITIES.register("warden_unit",
+            () -> EntityType.Builder.of(WardenUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.WARDEN.getWidth(), EntityType.WARDEN.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "warden_unit").toString()));
+
     public static final RegistryObject<EntityType<PiglinGruntUnit>> PIGLIN_GRUNT_UNIT = ENTITIES.register("piglin_grunt_unit",
             () -> EntityType.Builder.of(PiglinGruntUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PIGLIN.getWidth(), EntityType.PIGLIN.getHeight())

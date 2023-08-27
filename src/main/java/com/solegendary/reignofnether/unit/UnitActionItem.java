@@ -129,7 +129,7 @@ public class UnitActionItem {
                 case ATTACK -> {
                     // if the unit can't actually attack just treat this as a follow action
                     if (unit instanceof AttackerUnit attackerUnit)
-                        attackerUnit.setAttackTarget((LivingEntity) level.getEntity(unitId));
+                        attackerUnit.setUnitAttackTarget((LivingEntity) level.getEntity(unitId));
                     else {
                         LivingEntity livingEntity = (LivingEntity) level.getEntity(unitId);
                         if (livingEntity != null) {

@@ -44,14 +44,16 @@ public class ResourceCosts {
     public static ResourceCost SPIDER = ResourceCost.Unit(80,60,0,25,2);
     public static ResourceCost POISON_SPIDER = ResourceCost.Unit(80,0,60,25,2);
     public static ResourceCost ENDERMAN = ResourceCost.Unit(100,100,100,30,3);
+    public static ResourceCost WARDEN = ResourceCost.Unit(200,0,100,35,4);
 
     // Villagers
     public static ResourceCost VILLAGER = ResourceCost.Unit(50,0,0,15,1);
-    public static ResourceCost IRON_GOLEM = ResourceCost.Unit(0,0,250,45,6);
+    public static ResourceCost IRON_GOLEM = ResourceCost.Unit(0,0,250,40,5);
     public static ResourceCost PILLAGER = ResourceCost.Unit(100,80,0,30,2);
     public static ResourceCost VINDICATOR = ResourceCost.Unit(150,0,0,30,2);
     public static ResourceCost WITCH = ResourceCost.Unit(100,100,100,35,3);
-    public static ResourceCost EVOKER = ResourceCost.Unit(150,50,150,35,3);
+    public static ResourceCost EVOKER = ResourceCost.Unit(150,0,150,35,3);
+    public static ResourceCost RAVAGER = ResourceCost.Unit(250,50,150,45,6);
 
     // ******************* BUILDINGS ******************* //
     public static ResourceCost STOCKPILE = ResourceCost.Building(0,75,0, 0);
@@ -61,10 +63,11 @@ public class ResourceCosts {
     public static ResourceCost HAUNTED_HOUSE = ResourceCost.Building(0,100,0, 10);
     public static ResourceCost PUMPKIN_FARM = ResourceCost.Building(0,150,0, 0);
     public static ResourceCost GRAVEYARD = ResourceCost.Building(0,150,0, 0);
-    public static ResourceCost SPIDER_LAIR = ResourceCost.Building(0,150,100, 0);
-    public static ResourceCost DUNGEON = ResourceCost.Building(0,200,100, 0);
+    public static ResourceCost SPIDER_LAIR = ResourceCost.Building(0,150,75, 0);
+    public static ResourceCost DUNGEON = ResourceCost.Building(0,150,75, 0);
     public static ResourceCost LABORATORY = ResourceCost.Building(0,250,150, 0);
     public static ResourceCost DARK_WATCHTOWER = ResourceCost.Building(0,100,100, 0);
+    public static ResourceCost STRONGHOLD = ResourceCost.Building(0,400,400, 0);
 
     // Villagers
     public static ResourceCost TOWN_CENTRE = ResourceCost.Building(0,300,150, 10);
@@ -75,6 +78,7 @@ public class ResourceCosts {
     public static ResourceCost ARCANE_TOWER = ResourceCost.Building(0,200,100, 0);
     public static ResourceCost LIBRARY = ResourceCost.Building(0,350,100, 0);
     public static ResourceCost WATCHTOWER = ResourceCost.Building(0,100,100, 0);
+    public static ResourceCost CASTLE = ResourceCost.Building(0,400,400, 0);
 
     // Netherlings
     public static ResourceCost PORTAL = ResourceCost.Building(0, 200, 0, 0);

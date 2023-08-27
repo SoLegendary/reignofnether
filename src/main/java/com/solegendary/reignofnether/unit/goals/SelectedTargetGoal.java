@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -39,7 +38,7 @@ public class SelectedTargetGoal<T extends LivingEntity> extends TargetGoal {
         this.mob.setTarget(this.target);
         if (this.mob.isVehicle() && this.target != null &&
             this.mob.getPassengers().get(0) instanceof AttackerUnit attackerUnit)
-            attackerUnit.setAttackTarget(this.target);
+            attackerUnit.setUnitAttackTarget(this.target);
 
         super.start();
     }
