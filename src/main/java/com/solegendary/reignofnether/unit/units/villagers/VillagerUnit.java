@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.monsters.Stronghold;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -179,6 +180,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             this.abilityButtons.add(Blacksmith.getBuildButton(Keybindings.keyU));
             this.abilityButtons.add(ArcaneTower.getBuildButton(Keybindings.keyI));
             this.abilityButtons.add(Library.getBuildButton(Keybindings.keyO));
+            this.abilityButtons.add(Castle.getBuildButton(Keybindings.keyP));
         }
     }
 

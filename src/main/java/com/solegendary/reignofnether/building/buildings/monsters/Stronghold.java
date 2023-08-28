@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.unit.units.monsters.WardenUnitProd;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -38,17 +39,18 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.REINFORCED_DEEPSLATE;
-        this.icon = new ResourceLocation("minecraft", "textures/block/reinforced_deepslate.png");
+        this.icon = new ResourceLocation("minecraft", "textures/block/reinforced_deepslate_side.png");
 
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
-        this.buildTimeModifier = 0.8f;
+        this.buildTimeModifier = 0.6f;
 
-        this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICKS);
-        this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICK_SLAB);
-        this.startingBlockTypes.add(Blocks.CRACKED_DEEPSLATE_BRICKS);
+        this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE);
+        this.startingBlockTypes.add(Blocks.DEEPSLATE_TILE_SLAB);
+        this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_WALL);
+        this.startingBlockTypes.add(Blocks.DEEPSLATE);
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
@@ -63,7 +65,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
             Stronghold.buildingName,
-            new ResourceLocation("minecraft", "textures/block/reinforced_deepslate.png"),
+            new ResourceLocation("minecraft", "textures/block/reinforced_deepslate_side.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Stronghold.class,
             () -> false,
@@ -87,13 +89,18 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
     }
 
     @Override
+    public BlockPos getIndoorSpawnPoint(ServerLevel level) {
+        return super.getIndoorSpawnPoint(level).offset(0,-7,1);
+    }
+
+    @Override
     public BlockPos getEntryPosition() {
-        return new BlockPos(2,11,2);
+        return new BlockPos(5,14,5);
     }
 
     @Override
     public BlockPos getExitPosition() {
-        return new BlockPos(2,1,2);
+        return new BlockPos(5,2,6);
     }
 
     @Override

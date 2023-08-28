@@ -132,6 +132,8 @@ public abstract class ProductionBuilding extends Building {
                 case IronGolemProdItem.itemName -> prodItem = new IronGolemProdItem(building);
                 case WitchProdItem.itemName -> prodItem = new WitchProdItem(building);
                 case EvokerProdItem.itemName -> prodItem = new EvokerProdItem(building);
+                case WardenUnitProd.itemName -> prodItem = new WardenUnitProd(building);
+                case RavagerUnitProd.itemName -> prodItem = new RavagerUnitProd(building);
 
                 case ResearchVindicatorAxes.itemName -> prodItem = new ResearchVindicatorAxes(building);
                 case ResearchPillagerCrossbows.itemName -> prodItem = new ResearchPillagerCrossbows(building);
