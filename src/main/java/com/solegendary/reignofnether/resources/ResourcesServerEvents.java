@@ -145,12 +145,15 @@ public class ResourcesServerEvents {
                 .contains(bs.getBlock());
     }
 
+
     public static int numAirOrLeafBlocksBelow(BlockPos bp, Level level) {
         int blocks = 0;
         for (int i = -1; i > -10; i--) {
             BlockState bs = level.getBlockState(bp.offset(0,i,0));
             if (bs.isAir() || isLeafBlock(bs))
                 blocks += 1;
+            else if (!isLogBlock(bs)) // stop counting if we hit a non-log solid block to avoid counting underground blocks
+                break;
         }
         return blocks;
     }

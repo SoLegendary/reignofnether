@@ -43,6 +43,8 @@ Villager faction
     Castle
         - Villagers' final building
         - produces ravagers (crowd control/aoe damage bruiser)
+            - roar to knockback and damage nearby enemies
+            - pillagers can mount by default
         - garrisonableBuilding (holds up to 10 units)
         - research to add the ability to promote units (adding ominous banner and gaining a speed aura)
             - play a firework on use
@@ -57,7 +59,7 @@ Monster faction
         - distorts to night time (at a lower range than the mausoleum)
         - produces wardens
             - blind, cannot see anything in fog of war on its own
-            - single target cooldown ability: sonic wave for direct damage
+            - single target cooldown ability: sonic wave as a piercing AOE attack
         - (unlocked at lab) research to cause buildings to produce silverfish when damaged and/or destroyed
 
 Netherling faction
