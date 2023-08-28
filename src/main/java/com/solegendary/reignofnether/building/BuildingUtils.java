@@ -33,10 +33,12 @@ public class BuildingUtils {
     public static boolean isInRangeOfNightSource(Vec3 pos, boolean clientSide) {
         List<Building> buildings = clientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
         for (Building building : buildings) {
-            if (building instanceof Mausoleum mausoleum) {
+            if (building instanceof Mausoleum mausoleum)
                 if (BuildingUtils.getCentrePos(mausoleum.getBlocks()).distToCenterSqr(pos.x, pos.y, pos.z) < Math.pow(Mausoleum.nightRange, 2))
                     return true;
-            }
+            if (building instanceof Stronghold stronghold)
+                if (BuildingUtils.getCentrePos(stronghold.getBlocks()).distToCenterSqr(pos.x, pos.y, pos.z) < Math.pow(Stronghold.nightRange, 2))
+                    return true;
         }
         return false;
     }

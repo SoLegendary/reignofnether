@@ -71,8 +71,7 @@ public class TownCentre extends ProductionBuilding {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A gazebo at the centre of your village that produces villagers.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("You may only have one capitol building at any time.", Style.EMPTY),
-                        FormattedCharSequence.forward("Capitol buildings are resistant to explosions.", Style.EMPTY)
+                        FormattedCharSequence.forward("You may only have one capitol building at any time.", Style.EMPTY)
                 ),
                 null
         );

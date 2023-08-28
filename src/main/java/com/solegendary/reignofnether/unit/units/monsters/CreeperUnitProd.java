@@ -52,8 +52,8 @@ public class CreeperUnitProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An explosive monster that can blow up units", Style.EMPTY),
-                FormattedCharSequence.forward("and buildings alike. Has no regular attack.", Style.EMPTY),
+                FormattedCharSequence.forward("An explosive monster that can blow up units and buildings.", Style.EMPTY),
+                FormattedCharSequence.forward("Deals less damage to capitol buildings.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Creepers move much more slowly under sunlight.", Style.EMPTY)
             )

@@ -31,6 +31,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
     public final static String buildingName = "Stronghold";
     public final static String structureName = "stronghold";
     public final static ResourceCost cost = ResourceCosts.STRONGHOLD;
+    public final static int nightRange = 60;
 
     private final static int MAX_OCCUPANTS = 10;
 
@@ -81,6 +82,8 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("A villainous stronghold that can produce wardens ", Style.EMPTY),
                     FormattedCharSequence.forward("and garrison up to " + MAX_OCCUPANTS + " units.", Style.EMPTY),
+                    FormattedCharSequence.forward("", Style.EMPTY),
+                    FormattedCharSequence.forward("Distorts time to midnight within a " + nightRange + " block radius", Style.EMPTY),
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("Requires a graveyard, spider lair and dungeon.", Style.EMPTY)
             ),
