@@ -45,7 +45,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     GarrisonGoal garrisonGoal;
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
-    public boolean canGarrison() { return true; }
+    public boolean canGarrison() { return false; }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};

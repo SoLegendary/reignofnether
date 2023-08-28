@@ -564,7 +564,8 @@ public class HudClientEvents {
                     List<AbilityButton> abilityButtons = ((Unit) livingEntity).getAbilityButtons();
 
                     int shownAbilities = abilityButtons.stream().filter(b -> !b.isHidden.get()).toList().size();
-                    int rowsUp = (int) Math.floor((float) shownAbilities / MAX_BUTTONS_PER_ROW);
+                    int rowsUp = (int) Math.floor((float) (shownAbilities - 1) / MAX_BUTTONS_PER_ROW);
+                    rowsUp = Math.max(0, rowsUp);
                     blitY -= iconFrameSize * rowsUp;
 
                     int i = 0;

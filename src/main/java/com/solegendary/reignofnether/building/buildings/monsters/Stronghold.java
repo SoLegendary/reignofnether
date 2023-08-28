@@ -90,7 +90,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
 
     @Override
     public BlockPos getIndoorSpawnPoint(ServerLevel level) {
-        return super.getIndoorSpawnPoint(level).offset(0,-7,1);
+        return this.originPos.offset(getExitPosition());
     }
 
     @Override
