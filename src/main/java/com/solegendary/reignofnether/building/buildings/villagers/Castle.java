@@ -50,6 +50,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
         this.startingBlockTypes.add(Blocks.STONE_BRICK_WALL);
         this.startingBlockTypes.add(Blocks.SPRUCE_SLAB);
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
+        this.startingBlockTypes.add(Blocks.DARK_OAK_PLANKS);
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(

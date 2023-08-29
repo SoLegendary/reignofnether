@@ -102,13 +102,13 @@ public abstract class Building {
     public Level getLevel() { return level; }
     public void setLevel(Level level) { this.level = level; }
 
-    public Building(Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isTownCentre) {
+    public Building(Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         this.level = level;
         this.originPos = originPos;
         this.rotation = rotation;
         this.ownerName = ownerName;
         this.blocks = blocks;
-        this.isCapitol = isTownCentre;
+        this.isCapitol = isCapitol;
 
         // get min/max/centre positions
         this.minCorner = new BlockPos(
