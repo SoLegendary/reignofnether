@@ -20,6 +20,10 @@ TODO bugs/features:
 
 - replace stockpile with an equivalent for monsters (to be more thematic)
 
+- castle upgrade for promotions
+    - should add banners - but for some reason they're invisible in
+    - can promote illager units to carry an ominous banner that provides a speed aura
+        - can only have one officer per upgraded castle
 
 
 TODO test in remote server

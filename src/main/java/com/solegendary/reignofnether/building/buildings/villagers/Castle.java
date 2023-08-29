@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.units.villagers.RavagerUnitProd;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -36,17 +37,19 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.portraitBlock = Blocks.CHISELED_STONE_BRICKS;
-        this.icon = new ResourceLocation("minecraft", "textures/block/chiseled_stone_bricks.png");
+        this.portraitBlock = Blocks.COBBLESTONE;
+        this.icon = new ResourceLocation("minecraft", "textures/block/cobblestone.png");
 
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
-        this.buildTimeModifier = 0.8f;
+        this.buildTimeModifier = 0.6f;
 
         this.startingBlockTypes.add(Blocks.STONE_BRICKS);
-        this.startingBlockTypes.add(Blocks.STONE_BRICK_SLAB);
+        this.startingBlockTypes.add(Blocks.STONE_BRICK_WALL);
+        this.startingBlockTypes.add(Blocks.SPRUCE_SLAB);
+        this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
@@ -61,7 +64,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 Castle.buildingName,
-                new ResourceLocation("minecraft", "textures/block/chiseled_stone_bricks.png"),
+                new ResourceLocation("minecraft", "textures/block/cobblestone.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Castle.class,
                 () -> false,
@@ -74,7 +77,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
                         FormattedCharSequence.forward(Castle.buildingName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A grand castle that can produce wardens ", Style.EMPTY),
+                        FormattedCharSequence.forward("A grand castle that can produce ravagers ", Style.EMPTY),
                         FormattedCharSequence.forward("and garrison up to " + MAX_OCCUPANTS + " units.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Requires an arcane tower and a barracks.", Style.EMPTY)
@@ -84,13 +87,18 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
     }
 
     @Override
+    public BlockPos getIndoorSpawnPoint(ServerLevel level) {
+        return this.originPos.offset(getExitPosition());
+    }
+
+    @Override
     public BlockPos getEntryPosition() {
-        return new BlockPos(2,11,2);
+        return new BlockPos(5,16,5);
     }
 
     @Override
     public BlockPos getExitPosition() {
-        return new BlockPos(2,1,2);
+        return new BlockPos(5,2,5);
     }
 
     @Override
