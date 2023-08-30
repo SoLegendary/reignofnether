@@ -25,7 +25,7 @@ public class ResearchSilverfish extends ProductionItem {
     public final static String itemName = "Infested Defences";
     public final static ResourceCost cost = ResourceCosts.RESEARCH_SILVERFISH;
 
-    public final static float SILVERFISH_SPAWN_CHANCE = 0.05f;
+    public final static float SILVERFISH_SPAWN_CHANCE = 0.1f;
 
     public ResearchSilverfish(ProductionBuilding building) {
         super(building, ResourceCosts.RESEARCH_SILVERFISH.ticks);

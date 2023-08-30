@@ -17,10 +17,12 @@ import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.unit.units.monsters.SilverfishUnit;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
@@ -31,12 +33,10 @@ import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.world.ForgeChunkManager;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Random;
+import java.util.*;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.*;
 import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
@@ -69,7 +69,7 @@ public abstract class Building {
     protected int highestBlockCountReached = 2; // effective max health of the building
 
     protected ArrayList<BuildingBlock> scaffoldBlocks = new ArrayList<>();
-    protected ArrayList<BuildingBlock> blocks = new ArrayList<>();
+    protected ArrayList<BuildingBlock> blocks = new ArrayList<>(); // positions are absolute
     protected ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
     public String ownerName;
     public Block portraitBlock; // block rendered in the portrait GUI to represent this building
@@ -391,23 +391,14 @@ public abstract class Building {
     // should only be run serverside
     public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks) {
         totalBlocksEverBroken += 1;
-
         Random rand = new Random();
 
-        if (ResearchServer.playerHasResearch(this.ownerName, ResearchSilverfish.itemName)) {
-            if (rand.nextFloat(1.0f) < ResearchSilverfish.SILVERFISH_SPAWN_CHANCE) {
-                Entity entity = EntityRegistrar.SILVERFISH_UNIT.get().create(level);
-                if (entity != null) {
-                    ((Unit) entity).setOwnerName(ownerName);
-                    level.addFreshEntity(entity);
-                }
-            }
-        }
+        if (ResearchServer.playerHasResearch(this.ownerName, ResearchSilverfish.itemName))
+            randomSilverfishSpawn(pos);
 
         // when a player breaks a block that's part of the building:
         // - roll explodeChance to cause explosion effects and destroy more blocks
         // - cause fire if < fireThreshold% blocksPercent
-
         if (rand.nextFloat(1.0f) < this.explodeChance) {
             level.explode(null, null, null,
                     pos.getX(),
@@ -416,6 +407,34 @@ public abstract class Building {
                     breakBlocks ? this.explodeRadius : 2.0f,
                     this.getBlocksPlacedPercent() < this.fireThreshold, // fire
                     breakBlocks ? Explosion.BlockInteraction.BREAK : Explosion.BlockInteraction.NONE);
+        }
+    }
+
+    private void randomSilverfishSpawn(BlockPos pos) {
+        Random rand = new Random();
+        if (rand.nextFloat(1.0f) < ResearchSilverfish.SILVERFISH_SPAWN_CHANCE) {
+            Entity entity = EntityRegistrar.SILVERFISH_UNIT.get().create(level);
+            if (entity instanceof SilverfishUnit silverfishUnit) {
+                ((Unit) entity).setOwnerName(ownerName);
+                level.addFreshEntity(entity);
+
+                BlockPos movePos = pos;
+                // move down so they're not stuck above ground
+                if (pos.getY() > originPos.getY() + 4) {
+                    List<BlockPos> bps = this.blocks.stream().map(b -> b.getBlockPos())
+                            .filter(bp -> bp.getY() == originPos.getY() + 1 &&
+                                (bp.getX() == originPos.getX() || bp.getX() == maxCorner.getX() ||
+                                 bp.getZ() == originPos.getZ() || bp.getZ() == maxCorner.getZ())).toList();
+
+                    movePos = bps.get(rand.nextInt(bps.size()));
+                }
+                entity.moveTo(
+                        movePos.getX() + 0.5f,
+                        movePos.getY() + 0.5f,
+                        movePos.getZ() + 0.5f
+                );
+                silverfishUnit.setLimitedLife();
+            }
         }
     }
 

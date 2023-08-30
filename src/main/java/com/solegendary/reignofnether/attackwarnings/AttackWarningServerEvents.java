@@ -1,12 +1,8 @@
 package com.solegendary.reignofnether.attackwarnings;
 
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingServerEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class AttackWarningServerEvents {
@@ -18,6 +14,7 @@ public class AttackWarningServerEvents {
 
         if (evt.getEntity() instanceof Unit unit &&
                 !evt.getSource().isFall() &&
+                evt.getSource() != DamageSource.STARVE &&
                 evt.getSource() != DamageSource.IN_WALL &&
                 evt.getSource() != DamageSource.OUT_OF_WORLD)
             AttackWarningClientboundPacket.sendWarning(unit.getOwnerName(), evt.getEntity().getOnPos());

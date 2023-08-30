@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.CastSummonVexes;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -13,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -106,7 +109,7 @@ public class SilverfishUnit extends Silverfish implements Unit, AttackerUnit {
     // endregion
 
     final static public float attackDamage = 2.0f;
-    final static public float attacksPerSecond = 0.6f;
+    final static public float attacksPerSecond = 0.5f;
     final static public float maxHealth = 10.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
@@ -125,6 +128,11 @@ public class SilverfishUnit extends Silverfish implements Unit, AttackerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
+    private final int SILVERFISH_DURATION_SECONDS = 10;
+
+    private boolean hasLimitedLife = false;
+    private int limitedLifeTicks = 0;
+
     public SilverfishUnit(EntityType<? extends Silverfish> entityType, Level level) {
         super(entityType, level);
     }
@@ -137,7 +145,8 @@ public class SilverfishUnit extends Silverfish implements Unit, AttackerUnit {
                 .add(Attributes.MOVEMENT_SPEED, SilverfishUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, SilverfishUnit.attackDamage)
                 .add(Attributes.ARMOR, SilverfishUnit.armorValue)
-                .add(Attributes.MAX_HEALTH, SilverfishUnit.maxHealth);
+                .add(Attributes.MAX_HEALTH, SilverfishUnit.maxHealth)
+                .add(Attributes.ATTACK_KNOCKBACK, 0.05d);
     }
 
     public void tick() {
@@ -146,6 +155,16 @@ public class SilverfishUnit extends Silverfish implements Unit, AttackerUnit {
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+
+        if (this.hasLimitedLife && --this.limitedLifeTicks <= 0) {
+            this.limitedLifeTicks = 20;
+            this.hurt(DamageSource.STARVE, 1.0F);
+        }
+    }
+
+    public void setLimitedLife() {
+        this.hasLimitedLife = true;
+        this.limitedLifeTicks = SILVERFISH_DURATION_SECONDS * ResourceCost.TICKS_PER_SECOND;
     }
 
     public void initialiseGoals() {

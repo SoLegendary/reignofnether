@@ -63,7 +63,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
                 RavagerUnitProd.getStartButton(this, Keybindings.keyQ),
                 ResearchCastleFlag.getStartButton(this, Keybindings.keyW)
             );
-            this.abilityButtons.add(promoteIllager.getButton(Keybindings.keyP));
+            this.abilityButtons.add(promoteIllager.getButton(Keybindings.keyW));
         }
     }
 
@@ -105,7 +105,9 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
     // check that the flag is built based on existing placed blocks
     public boolean isUpgraded() {
         for (BuildingBlock block : blocks)
-            if (block.getBlockState().getBlock() == Blocks.WHITE_WOOL)
+            if (block.getBlockState().getBlock() == Blocks.WHITE_WOOL ||
+                    block.getBlockState().getBlock() == Blocks.RED_WOOL ||
+                    block.getBlockState().getBlock() == Blocks.LIGHT_GRAY_WOOL)
                 return true;
         return false;
     }

@@ -22,13 +22,21 @@ TODO bugs/features:
 
 - prevent units falling off castles
 
-- castle upgrade for promotions
-    - adds a flag made of wool to the top
-    - can promote illager units to carry an ominous banner that provides a speed aura
-        - can only have one officer per upgraded castle
 
-- stronghold silverfish upgrade
-    - all monster buildings produce controllable limited-life silverfish when damaged at random
+
+
+- ravager/wardens portraits still not rendering
+
+- play firework effect on promotion to captain
+
+- ravagers (crowd control/aoe damage bruiser)
+    - roar to knockback and damage nearby enemies
+    - pillagers can mount by default
+
+- wardens
+    - blind, cannot see anything in fog of war on its own
+    - single target cooldown ability: sonic wave as a piercing AOE attack
+
 
 
 TODO test in remote server
@@ -56,28 +64,6 @@ Research: spiders can place webs (limit of 3 per spider lifetime)
 Research: Creepers explode with harming cloud effects
 Research: Villagers can build Iron Golems (treated as buildings but become iron golem units on completion)
 
-Villager faction
-    Castle
-        - Villagers' final building
-        - produces ravagers (crowd control/aoe damage bruiser)
-            - roar to knockback and damage nearby enemies
-            - pillagers can mount by default
-        - garrisonableBuilding (holds up to 10 units)
-        - research to add the ability to promote units (adding ominous banner and gaining a speed aura)
-            - play a firework on use
-            - only one captain allowed at a time
-            - should transform the building like a laboratory
-
-Monster faction
-    Stronghold
-        - Monsters' final building
-        - Requires a laboratory
-        - garrisonableBuilding (holds up to 10 units)
-        - distorts to night time (at a lower range than the mausoleum)
-        - produces wardens
-            - blind, cannot see anything in fog of war on its own
-            - single target cooldown ability: sonic wave as a piercing AOE attack
-        - (unlocked at lab) research to cause buildings to produce silverfish when damaged and/or destroyed
 
 Netherling faction
     All netherling buildings slowly convert non-nether blocks around them into nether counterparts:

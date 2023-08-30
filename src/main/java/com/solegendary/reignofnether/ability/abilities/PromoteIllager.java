@@ -43,26 +43,10 @@ public class PromoteIllager extends Ability {
 
     private static final int CD_MAX = 120 * ResourceCost.TICKS_PER_SECOND;
     private static final int RANGE = 20;
-    private static final int BUFF_RANGE = 8;
+    private static final int BUFF_RANGE = 10;
 
     LivingEntity promotedIllager = null;
     Castle castle;
-
-    // checks that the unit has a banner and applies the speed buff to nearby friendly units if it is
-    public static void checkAndApplyBuff(LivingEntity entity) {
-        if (!entity.level.isClientSide() && entity instanceof Unit captainUnit &&
-            entity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
-            List<PathfinderMob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
-                    new Vector3d(entity.position().x, entity.position().y, entity.position().z),
-                    BUFF_RANGE,
-                    PathfinderMob.class,
-                    entity.level);
-
-            for (PathfinderMob mob : nearbyMobs)
-                if (mob instanceof Unit unit && unit.getOwnerName().equals(captainUnit.getOwnerName()))
-                    mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 2, 0));
-        }
-    }
 
     public PromoteIllager(Castle castle) {
         super(
@@ -73,6 +57,22 @@ public class PromoteIllager extends Ability {
             true
         );
         this.castle = castle;
+    }
+
+    // checks that the unit has a banner and applies the speed buff to nearby friendly units if it is
+    public static void checkAndApplyBuff(LivingEntity entity) {
+        if (!entity.level.isClientSide() && entity instanceof Unit captainUnit &&
+                entity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
+            List<PathfinderMob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
+                    new Vector3d(entity.position().x, entity.position().y, entity.position().z),
+                    BUFF_RANGE,
+                    PathfinderMob.class,
+                    entity.level);
+
+            for (PathfinderMob mob : nearbyMobs)
+                if (mob instanceof Unit unit && unit.getOwnerName().equals(captainUnit.getOwnerName()))
+                    mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 2, 0));
+        }
     }
 
     @Override
@@ -87,13 +87,13 @@ public class PromoteIllager extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.PROMOTE_ILLAGER),
             null,
             List.of(
-                    FormattedCharSequence.forward("Call Lightning", Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward("Promote Illager", Style.EMPTY.withBold(true)),
                     FormattedCharSequence.forward("\uE004  " + CD_MAX/20 + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Promote an illager to a captain, giving it an ominous banner ", Style.EMPTY),
-                    FormattedCharSequence.forward("that provides a speed aura to all friendly units around it.", Style.EMPTY),
+                    FormattedCharSequence.forward("Promote an illager to a captain, giving it a banner that gives", Style.EMPTY),
+                    FormattedCharSequence.forward("a speed buff to all friendly units in a " + BUFF_RANGE + " block radius.", Style.EMPTY),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("You may only have one captain at a time.", Style.EMPTY)
+                    FormattedCharSequence.forward("You may only have one captain at a time per upgraded castle.", Style.EMPTY)
             ),
             this
         );
@@ -107,19 +107,23 @@ public class PromoteIllager extends Ability {
         }
         else if (targetEntity instanceof VindicatorUnit ||
             targetEntity instanceof PillagerUnit ||
-            targetEntity instanceof EvokerUnit ||
-            targetEntity instanceof WitchUnit) {
+            targetEntity instanceof EvokerUnit) {
 
+            if (targetEntity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
+                HudClientEvents.showTemporaryMessage("That unit is already a captain!");
+                return;
+            }
             // only once promotedIllager allowed at a time
-            if (promotedIllager.getId() != targetEntity.getId()) {
+            if (promotedIllager != null && promotedIllager.isAlive() &&
+                promotedIllager.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
                 promotedIllager.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.AIR));
             }
-            promotedIllager.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance());
             promotedIllager = targetEntity;
+            promotedIllager.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance());
             this.setToMaxCooldown();
         }
         else {
-            HudClientEvents.showTemporaryMessage("That unit is not an illager!");
+            HudClientEvents.showTemporaryMessage("Only Vindicators, Pillagers and Evokers may be promoted");
         }
     }
 }

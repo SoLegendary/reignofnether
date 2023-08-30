@@ -229,9 +229,14 @@ public class UnitActionItem {
         Building actionableBuilding = BuildingUtils.findBuilding(level.isClientSide(), this.selectedBuildingPos);
 
         if (actionableBuilding != null) {
-            for (Ability ability : actionableBuilding.getAbilities())
-                if (ability.action == action)
-                    ability.use(level, actionableBuilding, preselectedBlockPos);
+            for (Ability ability : actionableBuilding.getAbilities()) {
+                if (ability.action == action && ability.isOffCooldown()) {
+                    if (ability.canTargetEntities && this.unitId > 0)
+                        ability.use(level, actionableBuilding, (LivingEntity) level.getEntity(unitId));
+                    else
+                        ability.use(level, actionableBuilding, preselectedBlockPos);
+                }
+            }
         }
     }
 }

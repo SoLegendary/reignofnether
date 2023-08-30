@@ -49,7 +49,7 @@ public class ResearchCastleFlag extends ProductionItem {
                 () -> false,
                 () -> ProductionItem.itemIsBeingProduced(ResearchCastleFlag.itemName) ||
                         (prodBuilding instanceof Castle castle && castle.isUpgraded()),
-                () -> BuildingClientEvents.hasFinishedBuilding(Dungeon.buildingName),
+                () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
                 null,
                 List.of(

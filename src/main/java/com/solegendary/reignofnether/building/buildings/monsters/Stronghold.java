@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnitProd;
@@ -55,7 +56,8 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                    WardenUnitProd.getStartButton(this, Keybindings.keyQ)
+                    WardenUnitProd.getStartButton(this, Keybindings.keyQ),
+                    ResearchSilverfish.getStartButton(this, Keybindings.keyW)
             );
     }
 

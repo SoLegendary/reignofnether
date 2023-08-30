@@ -28,6 +28,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -35,7 +36,9 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
+import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -249,7 +252,8 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public void setupEquipmentAndUpgradesServer() {
         if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchResourceCapacity.itemName))
             this.maxResources = 200;
+
+        if (this.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem)
+            this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.AIR));
     }
-
-
 }

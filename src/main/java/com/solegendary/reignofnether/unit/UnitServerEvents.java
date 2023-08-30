@@ -23,6 +23,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
@@ -333,8 +334,10 @@ public class UnitServerEvents {
     // make creepers immune to lightning damage (but still get charged by them)
     @SubscribeEvent
     public static void onEntityDamaged(LivingDamageEvent evt) {
+        if (evt.getSource().getDirectEntity() instanceof AbstractArrow)
+            knockbackIgnoreIds.add(evt.getEntity().getId());
 
-        // ignore added weapon damage
+        // ignore added weapon damage for workers
         if (evt.getSource().getEntity() instanceof WorkerUnit &&
             evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)
             evt.setAmount(attackerUnit.getUnitAttackDamage());
@@ -352,10 +355,6 @@ public class UnitServerEvents {
 
         if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL || evt.getSource() == DamageSource.IN_FIRE))
             evt.setCanceled(true);
-
-        // nerf lightning damage
-        if (evt.getSource() == DamageSource.LIGHTNING_BOLT)
-            evt.setAmount(evt.getAmount() / 2);
 
         // prevent friendly fire damage from ranged units (unless specifically targeted)
         if (evt.getSource().isProjectile() && evt.getSource().getEntity() instanceof Unit unit)
@@ -378,18 +377,6 @@ public class UnitServerEvents {
     }
 
     public static ArrayList<Integer> knockbackIgnoreIds = new ArrayList<>();
-
-
-    @SubscribeEvent
-    public static void onLivingDamage(LivingDamageEvent evt)  {
-
-        // prevent potion damage effects from causing knockback except for evoker fangs
-        //if (evt.getSource().msgId.equals("indirectMagic") && !(evt.getSource().getDirectEntity() instanceof EvokerFangs))
-        //    knockbackIgnoreIds.add(evt.getEntity().getId());
-
-        if (evt.getSource().getDirectEntity() instanceof AbstractArrow)
-            knockbackIgnoreIds.add(evt.getEntity().getId());
-    }
 
     @SubscribeEvent
     public static void onLivingKnockBack(LivingKnockBackEvent evt)  {

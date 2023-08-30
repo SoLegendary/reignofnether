@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.units.modelling.PiglinUnitModel;
 import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
+import com.solegendary.reignofnether.unit.units.monsters.SilverfishUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
@@ -30,6 +31,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Ravager;
+import net.minecraft.world.entity.monster.Silverfish;
+import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 
 import java.text.DecimalFormat;
@@ -157,11 +161,17 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         int drawX = x + headOffsetX;
         int drawY = y + (int) (entity.getEyeHeight() / standardEyeHeight * headOffsetY);
 
-        if (entity instanceof EnderMan) {
+        if (entity instanceof Silverfish) {
+            drawY += 26;
+        }
+        else if (entity instanceof EnderMan) {
             if (((EnderMan) entity).isAggressive())
                 drawY -= 5;
             else
                 drawY -= 15;
+        }
+        else if (entity instanceof Ravager || entity instanceof Warden) {
+            drawY -= 100;
         }
 
         // hide all model parts except the head
@@ -286,6 +296,8 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     }
 
     public void setNonHeadModelVisibility(boolean visibility) {
+        if (model instanceof SilverfishModel)
+            return;
 
         if (model instanceof RavagerModel ravagerModel) {
             //ravagerModel.rightHindLeg.visible = visibility;
