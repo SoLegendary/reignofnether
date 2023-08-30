@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.CastFangsCircle;
 import com.solegendary.reignofnether.ability.abilities.CastFangsLine;
 import com.solegendary.reignofnether.ability.abilities.CastSummonVexes;
+import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -168,6 +169,7 @@ public class EvokerUnit extends Evoker implements Unit {
         this.castFangsLineGoal.tick();
         this.castFangsCircleGoal.tick();
         this.castSummonVexesGoal.tick();
+        PromoteIllager.checkAndApplyBuff(this);
 
         // vexes will inherit this target
         if (this.getTarget() == null && !this.level.isClientSide()) {

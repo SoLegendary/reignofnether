@@ -32,10 +32,10 @@ public class CallLightning extends Ability {
     public CallLightning(Laboratory lab) {
         super(
             UnitAction.CALL_LIGHTNING,
-                CD_MAX,
-                RANGE,
+            CD_MAX,
+            RANGE,
             0,
-                false
+            false
         );
         this.lab = lab;
     }

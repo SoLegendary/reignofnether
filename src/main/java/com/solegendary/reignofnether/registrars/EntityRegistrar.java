@@ -122,6 +122,12 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "warden_unit").toString()));
 
+    public static final RegistryObject<EntityType<SilverfishUnit>> SILVERFISH_UNIT = ENTITIES.register("silverfish_unit",
+            () -> EntityType.Builder.of(SilverfishUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.SILVERFISH.getWidth(), EntityType.SILVERFISH.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "silverfish_unit").toString()));
+
     public static final RegistryObject<EntityType<PiglinGruntUnit>> PIGLIN_GRUNT_UNIT = ENTITIES.register("piglin_grunt_unit",
             () -> EntityType.Builder.of(PiglinGruntUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PIGLIN.getWidth(), EntityType.PIGLIN.getHeight())

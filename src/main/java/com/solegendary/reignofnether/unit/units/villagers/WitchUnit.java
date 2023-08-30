@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
-import com.solegendary.reignofnether.ability.abilities.ThrowLingeringHarmingPotion;
-import com.solegendary.reignofnether.ability.abilities.ThrowLingeringHealingPotion;
+import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -10,8 +9,6 @@ import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPot
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.abilities.ThrowHarmingPotion;
-import com.solegendary.reignofnether.ability.abilities.ThrowHealingPotion;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -188,6 +185,7 @@ public class WitchUnit extends Witch implements Unit {
         super.tick();
         Unit.tick(this);
         this.throwPotionGoal.tick();
+        PromoteIllager.checkAndApplyBuff(this);
     }
 
     public void initialiseGoals() {

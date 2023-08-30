@@ -45,6 +45,7 @@ public class ResourceCosts {
     public static ResourceCost POISON_SPIDER = ResourceCost.Unit(80,0,60,25,2);
     public static ResourceCost ENDERMAN = ResourceCost.Unit(100,100,100,30,3);
     public static ResourceCost WARDEN = ResourceCost.Unit(200,0,100,35,4);
+    public static ResourceCost SILVERFISH = ResourceCost.Unit(10,0,0,10,0);
 
     // Villagers
     public static ResourceCost VILLAGER = ResourceCost.Unit(50,0,0,15,1);
@@ -95,4 +96,6 @@ public class ResourceCosts {
     public static ResourceCost RESEARCH_LINGERING_POTIONS = ResourceCost.Research(300,300,300, 150);
     public static ResourceCost RESEARCH_EVOKERS = ResourceCost.Research(500,0,300, 150);
     public static ResourceCost RESEARCH_EVOKER_VEXES = ResourceCost.Research(500,0,300, 120);
+    public static ResourceCost RESEARCH_CASTLE_FLAG = ResourceCost.Research(200,0,100, 60);
+    public static ResourceCost RESEARCH_SILVERFISH = ResourceCost.Research(0,300,300, 120);
 }

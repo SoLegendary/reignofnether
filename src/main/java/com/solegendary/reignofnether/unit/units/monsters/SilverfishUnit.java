@@ -1,25 +1,21 @@
-package com.solegendary.reignofnether.unit.units.villagers;
+package com.solegendary.reignofnether.unit.units.monsters;
 
-import com.solegendary.reignofnether.ability.abilities.Dismount;
-import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
+import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.research.ResearchServer;
-import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -27,19 +23,15 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Pillager;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
+public class SilverfishUnit extends Silverfish implements Unit, AttackerUnit {
     // region
     private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
     private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
@@ -53,13 +45,12 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public int getEntityCheckpointId() { return entityCheckpointId; };
     public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
 
-    GarrisonGoal garrisonGoal;
-    public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
-    public boolean canGarrison() { return true; }
+    public GarrisonGoal getGarrisonGoal() { return null; }
+    public boolean canGarrison() { return false; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
+    public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;}
+    public List<Ability> getAbilities() {return abilities;};
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -67,12 +58,10 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public Goal getAttackGoal() {return attackGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
-    public MountGoal getMountGoal() {return mountGoal;}
 
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
-    public MountGoal mountGoal;
 
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -89,7 +78,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
-            SynchedEntityData.defineId(PillagerUnit.class, EntityDataSerializers.STRING);
+            SynchedEntityData.defineId(SilverfishUnit.class, EntityDataSerializers.STRING);
 
     @Override
     protected void defineSynchedData() {
@@ -100,9 +89,9 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
     public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return 20f / (getAttackCooldown() + 25);} // crossbow charge time is 25 ticks
+    public float getAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
-    public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
+    public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitAttackDamage() {return attackDamage;}
@@ -116,38 +105,28 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 7.0f;
-    final static public float attacksPerSecond = 0.8f; // excludes crossbow charge time
-    final static public float maxHealth = 40.0f;
+    final static public float attackDamage = 2.0f;
+    final static public float attacksPerSecond = 0.6f;
+    final static public float maxHealth = 10.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
-    final static public float attackRange = 15.0F; // only used by ranged units or melee building attackers
-    final static public float aggroRange = 15;
+    final static public float attackRange = 2; // only used by ranged units or melee building attackers
+    final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-    final static public int popCost = ResourceCosts.PILLAGER.population;
+    final static public int popCost = ResourceCosts.SILVERFISH.population;
     final static public boolean canAttackBuildings = false;
     public int maxResources = 100;
 
-    private UnitCrossbowAttackGoal<? extends LivingEntity> attackGoal;
+    private MeleeAttackUnitGoal attackGoal;
     private AttackBuildingGoal attackBuildingGoal;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    public PillagerUnit(EntityType<? extends Pillager> entityType, Level level) {
+    public SilverfishUnit(EntityType<? extends Silverfish> entityType, Level level) {
         super(entityType, level);
-
-        //Mount mountAbility = new Mount(this);
-        Dismount dismountAbility = new Dismount(this);
-        //this.abilities.add(mountAbility);
-        this.abilities.add(dismountAbility);
-
-        if (level.isClientSide()) {
-            //this.abilityButtons.add(mountAbility.getButton(Keybindings.keyQ));
-            this.abilityButtons.add(dismountAbility.getButton(Keybindings.keyQ));
-        }
     }
 
     @Override
@@ -155,64 +134,35 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MOVEMENT_SPEED, PillagerUnit.movementSpeed)
-                .add(Attributes.MAX_HEALTH, PillagerUnit.maxHealth)
-                .add(Attributes.ARMOR, PillagerUnit.armorValue);
+                .add(Attributes.MOVEMENT_SPEED, SilverfishUnit.movementSpeed)
+                .add(Attributes.ATTACK_DAMAGE, SilverfishUnit.attackDamage)
+                .add(Attributes.ARMOR, SilverfishUnit.armorValue)
+                .add(Attributes.MAX_HEALTH, SilverfishUnit.maxHealth);
     }
 
     public void tick() {
-        this.setCanPickUpLoot(true);
+        this.setCanPickUpLoot(false);
 
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
-        this.mountGoal.tick();
-        PromoteIllager.checkAndApplyBuff(this);
     }
 
     public void initialiseGoals() {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
-        this.targetGoal = new SelectedTargetGoal<>(this, true, false);
-        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
-        this.attackGoal = new UnitCrossbowAttackGoal<>(this, getAttackCooldown());
-        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
-        this.mountGoal = new MountGoal(this);
+        this.targetGoal = new SelectedTargetGoal<>(this, true, true);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
     }
 
     @Override
     protected void registerGoals() {
         initialiseGoals();
 
+        // movegoal must be lower priority than attacks so that attack-moving works correctly
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
-        this.goalSelector.addGoal(2, returnResourcesGoal);
-        this.goalSelector.addGoal(2, mountGoal);
-        this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
-
-    }
-
-    @Override
-    public void setupEquipmentAndUpgradesServer() {
-        ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
-        if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchPillagerCrossbows.itemName))
-            cbowStack.enchant(Enchantments.MULTISHOT, 1);
-
-        this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
-    }
-
-    // override to make inaccuracy 0
-    @Override
-    public void performCrossbowAttack(LivingEntity pUser, float pVelocity) {
-        InteractionHand interactionhand = ProjectileUtil.getWeaponHoldingHand(pUser, (item) ->
-                item instanceof CrossbowItem
-        );
-        ItemStack itemstack = pUser.getItemInHand(interactionhand);
-        if (pUser.isHolding((is) -> is.getItem() instanceof CrossbowItem)) {
-            CrossbowItem.performShooting(pUser.level, pUser, interactionhand, itemstack, pVelocity, 0);
-        }
-        this.onCrossbowAttackPerformed();
     }
 }

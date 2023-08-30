@@ -23,9 +23,12 @@ TODO bugs/features:
 - prevent units falling off castles
 
 - castle upgrade for promotions
-    - should add banners - but for some reason they're invisible in
+    - adds a flag made of wool to the top
     - can promote illager units to carry an ominous banner that provides a speed aura
         - can only have one officer per upgraded castle
+
+- stronghold silverfish upgrade
+    - all monster buildings produce controllable limited-life silverfish when damaged at random
 
 
 TODO test in remote server
@@ -40,6 +43,9 @@ TODO test in remote server
 - wardens
 - castles
 - ravagers
+- silverfish unit and research
+- promotion ability
+
 
 
 TODO buildings/units (backlog)

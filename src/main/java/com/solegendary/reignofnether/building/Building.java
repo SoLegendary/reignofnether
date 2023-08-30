@@ -4,7 +4,9 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
@@ -12,12 +14,14 @@ import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.ability.Ability;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
@@ -388,10 +392,22 @@ public abstract class Building {
     public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks) {
         totalBlocksEverBroken += 1;
 
+        Random rand = new Random();
+
+        if (ResearchServer.playerHasResearch(this.ownerName, ResearchSilverfish.itemName)) {
+            if (rand.nextFloat(1.0f) < ResearchSilverfish.SILVERFISH_SPAWN_CHANCE) {
+                Entity entity = EntityRegistrar.SILVERFISH_UNIT.get().create(level);
+                if (entity != null) {
+                    ((Unit) entity).setOwnerName(ownerName);
+                    level.addFreshEntity(entity);
+                }
+            }
+        }
+
         // when a player breaks a block that's part of the building:
         // - roll explodeChance to cause explosion effects and destroy more blocks
         // - cause fire if < fireThreshold% blocksPercent
-        Random rand = new Random();
+
         if (rand.nextFloat(1.0f) < this.explodeChance) {
             level.explode(null, null, null,
                     pos.getX(),

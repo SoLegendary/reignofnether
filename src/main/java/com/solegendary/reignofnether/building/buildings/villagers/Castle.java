@@ -1,10 +1,13 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
+import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.*;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnitProd;
@@ -52,10 +55,16 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.DARK_OAK_PLANKS);
 
-        if (level.isClientSide())
+        Ability promoteIllager = new PromoteIllager(this);
+        this.abilities.add(promoteIllager);
+
+        if (level.isClientSide()) {
             this.productionButtons = Arrays.asList(
-                    RavagerUnitProd.getStartButton(this, Keybindings.keyQ)
+                RavagerUnitProd.getStartButton(this, Keybindings.keyQ),
+                ResearchCastleFlag.getStartButton(this, Keybindings.keyW)
             );
+            this.abilityButtons.add(promoteIllager.getButton(Keybindings.keyP));
+        }
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
@@ -85,6 +94,20 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
                 ),
                 null
         );
+    }
+
+    public void changeStructure(String newStructureName) {
+        ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocks(newStructureName, this.getLevel());
+        this.blocks = getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation);
+        super.refreshBlocks();
+    }
+
+    // check that the flag is built based on existing placed blocks
+    public boolean isUpgraded() {
+        for (BuildingBlock block : blocks)
+            if (block.getBlockState().getBlock() == Blocks.WHITE_WOOL)
+                return true;
+        return false;
     }
 
     @Override

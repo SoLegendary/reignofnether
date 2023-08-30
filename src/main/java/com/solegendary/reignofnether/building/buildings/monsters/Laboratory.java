@@ -57,7 +57,8 @@ public class Laboratory extends ProductionBuilding {
                 ResearchStrays.getStartButton(this, Keybindings.keyW),
                 ResearchSpiderJockeys.getStartButton(this, Keybindings.keyE),
                 ResearchPoisonSpiders.getStartButton(this, Keybindings.keyR),
-                ResearchLabLightningRod.getStartButton(this, Keybindings.keyT)
+                ResearchLabLightningRod.getStartButton(this, Keybindings.keyT),
+                ResearchSilverfish.getStartButton(this, Keybindings.keyY)
             );
             this.abilityButtons.add(callLightning.getButton(Keybindings.keyL));
         }
