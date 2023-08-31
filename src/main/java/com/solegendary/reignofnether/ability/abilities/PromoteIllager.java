@@ -47,7 +47,7 @@ import java.util.Optional;
 
 public class PromoteIllager extends Ability {
 
-    private static final int CD_MAX = 10 * ResourceCost.TICKS_PER_SECOND;
+    private static final int CD_MAX = 120 * ResourceCost.TICKS_PER_SECOND;
     private static final int RANGE = 20;
     private static final int BUFF_RANGE = 10;
 

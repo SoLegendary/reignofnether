@@ -48,13 +48,6 @@ public class VillagerHouse extends Building {
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.OAK_PLANKS);
         this.startingBlockTypes.add(Blocks.OAK_LOG);
-
-        Ability promoteIllager = new PromoteIllager(this);
-        this.abilities.add(promoteIllager);
-
-        if (level.isClientSide()) {
-            this.abilityButtons.add(promoteIllager.getButton(Keybindings.keyW));
-        }
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

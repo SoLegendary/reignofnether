@@ -29,7 +29,7 @@ public class CastFangsLine extends Ability {
         super(
             UnitAction.CAST_EVOKER_FANGS_LINE,
             CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,
-            EvokerUnit.getFangsRange(),
+            EvokerUnit.FANGS_RANGE,
             0,
             true
         );
@@ -54,7 +54,7 @@ public class CastFangsLine extends Ability {
             null,
             List.of(
                 FormattedCharSequence.forward("Evoker Fangs (Line)", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE006  " + EvokerUnit.getFangsDamage() + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + EvokerUnit.getFangsRange(), MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE006  " + EvokerUnit.FANGS_DAMAGE + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + EvokerUnit.FANGS_RANGE, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("After a short delay, summon a line of snapping", Style.EMPTY),
                 FormattedCharSequence.forward("fangs towards the targeted location.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),

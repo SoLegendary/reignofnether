@@ -115,8 +115,9 @@ public class EvokerUnit extends Evoker implements Unit {
     public CastSummonVexesGoal getCastSummonVexesGoal() {
         return castSummonVexesGoal;
     }
-    public static int getFangsRange() { return 10; }
-    public static float getFangsDamage() { return 12f; }
+
+    public static final int FANGS_RANGE = 10;
+    public static final float FANGS_DAMAGE = 12f;
 
     final static public float maxHealth = 40.0f;
     final static public float armorValue = 0.0f;
@@ -219,7 +220,7 @@ public class EvokerUnit extends Evoker implements Unit {
         double d1 = Math.max(targetPos.getY(), this.getY()) + 1.0;
         float f = (float)Mth.atan2(targetPos.getZ() - this.getZ(), targetPos.getX() - this.getX());
         int k;
-        for(k = 0; k < getFangsRange(); ++k) {
+        for(k = 0; k < FANGS_RANGE; ++k) {
             double d2 = 1.25 * (double)(k + 1);
             createEvokerFang(this.getX() + (double)Mth.cos(f) * d2, this.getZ() + (double)Mth.sin(f) * d2, d0, d1, f, k);
         }

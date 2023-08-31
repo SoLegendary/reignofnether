@@ -67,7 +67,7 @@ public class CastFangsLineGoal extends MoveToTargetBlockGoal {
             }
             else if (moveTarget != null && MyMath.distance(
                     this.mob.getX(), this.mob.getZ(),
-                    moveTarget.getX(), moveTarget.getZ()) <= EvokerUnit.getFangsRange()) {
+                    moveTarget.getX(), moveTarget.getZ()) <= EvokerUnit.FANGS_RANGE) {
                 if (moveTarget != null)
                     startCasting();
             }

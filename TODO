@@ -29,10 +29,14 @@ TODO bugs/features:
 
 - ravagers (crowd control/aoe damage bruiser)
     - roar to knockback and damage nearby enemies
+        - roaring should be done via roarTicks (that should also handle the animations and maybe sounds too?)
+        - during roarTicks, disable movement and attacks
+        - and fix the cooldown not being set!
+        - maybe add an explosion effect?
     - pillagers can mount by default
 
 - wardens
-    - attacking friendly doesnt work
+    - attacking friendly unit doesn't work
     - blind, cannot see anything in fog of war on its own
     - single target cooldown ability: sonic wave as a piercing AOE attack
 
@@ -89,6 +93,16 @@ Netherling faction
     - Fort
         - Allows military piglins and hoglins (after an upgrade) to be produced at portals
         - Researches regular upgrades
+        - piglin brute
+            - melee sword infantry
+            - can be upgraded to hold a shield and toggle to halve projectile damage and movement speed (like footmen in wc3)
+        - piglin headhunter
+            - ranged trident infantry (should reskin to red to look like pitchforks)
+            - can be upgraded to cause knockback on hit
+        - hoglin
+            - light-medium bruiser
+            - can be upgraded to be mounted by headhunters
+
     - Flame Sanctuary
         - Allows magma cubes and blazes (after an upgrade) to be produced at portals
         - Researches fire-related upgrades

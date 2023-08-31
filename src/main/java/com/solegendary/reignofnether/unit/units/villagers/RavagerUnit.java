@@ -1,33 +1,52 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.CastFangsCircle;
+import com.solegendary.reignofnether.ability.abilities.CastFangsLine;
+import com.solegendary.reignofnether.ability.abilities.CastSummonVexes;
+import com.solegendary.reignofnether.ability.abilities.Roar;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Ravager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     // region
@@ -124,8 +143,20 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
+    public final static float ROAR_DAMAGE = 6.0f;
+    public final static float ROAR_RANGE = 4.0f;
+    public final static int ROAR_SLOW_DURATION = 25;
+
+    private static final Predicate<Entity> NO_RAVAGER_AND_ALIVE = e -> e.isAlive() && !(e instanceof Ravager);
+
     public RavagerUnit(EntityType<? extends Ravager> entityType, Level level) {
         super(entityType, level);
+
+        Roar ab1 = new Roar(this);
+        this.abilities.add(ab1);
+        if (level.isClientSide()) {
+            this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
+        }
     }
 
     @Override
@@ -141,6 +172,10 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.75)
                 .add(Attributes.FOLLOW_RANGE, 32);
     }
+
+    // prevent shield blocks from stunning and triggering a roar
+    @Override
+    protected void blockedByShield(LivingEntity pEntity) { }
 
     public void tick() {
         this.setCanPickUpLoot(false);
@@ -170,5 +205,41 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+    }
+
+    private void strongKnockback(Entity pEntity) {
+        double d0 = pEntity.getX() - this.getX();
+        double d1 = pEntity.getZ() - this.getZ();
+        double d2 = Math.max(d0 * d0 + d1 * d1, 0.001);
+        pEntity.push(d0 / d2 * 4.0, 0.2, d1 / d2 * 4.0);
+    }
+
+    public void roar() {
+        if (this.isAlive() && !this.level.isClientSide()) {
+            LivingEntity livingentity;
+
+            List<PathfinderMob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
+                    new Vector3d(this.position().x, this.position().y, this.position().z),
+                    ROAR_RANGE,
+                    PathfinderMob.class,
+                    this.level);
+
+            for (PathfinderMob mob : nearbyMobs) {
+                if (mob instanceof Unit unit && UnitServerEvents.getUnitToEntityRelationship(this, mob) != Relationship.FRIENDLY) {
+                    this.strongKnockback(mob);
+                    mob.hurt(DamageSource.mobAttack(this), ROAR_DAMAGE);
+                    mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ROAR_SLOW_DURATION, 1));
+                }
+            }
+            Vec3 vec3 = this.getBoundingBox().getCenter();
+
+            for(int i = 0; i < 40; ++i) {
+                double d0 = this.random.nextGaussian() * 0.2;
+                double d1 = this.random.nextGaussian() * 0.2;
+                double d2 = this.random.nextGaussian() * 0.2;
+                this.level.addParticle(ParticleTypes.POOF, vec3.x, vec3.y, vec3.z, d0, d1, d2);
+            }
+            this.gameEvent(GameEvent.ENTITY_ROAR);
+        }
     }
 }
