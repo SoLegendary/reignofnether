@@ -27,13 +27,12 @@ TODO bugs/features:
 
 - ravager/wardens portraits still not rendering
 
-- play firework effect on promotion to captain
-
 - ravagers (crowd control/aoe damage bruiser)
     - roar to knockback and damage nearby enemies
     - pillagers can mount by default
 
 - wardens
+    - attacking friendly doesnt work
     - blind, cannot see anything in fog of war on its own
     - single target cooldown ability: sonic wave as a piercing AOE attack
 

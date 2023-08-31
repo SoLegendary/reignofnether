@@ -4,51 +4,57 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
-import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
+import com.solegendary.reignofnether.unit.units.monsters.SilverfishUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
-import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.BannerItem;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.checkerframework.checker.units.qual.C;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 public class PromoteIllager extends Ability {
 
-    private static final int CD_MAX = 120 * ResourceCost.TICKS_PER_SECOND;
+    private static final int CD_MAX = 10 * ResourceCost.TICKS_PER_SECOND;
     private static final int RANGE = 20;
     private static final int BUFF_RANGE = 10;
 
     LivingEntity promotedIllager = null;
-    Castle castle;
+    Building building;
 
-    public PromoteIllager(Castle castle) {
+    public PromoteIllager(Building building) {
         super(
             UnitAction.PROMOTE_ILLAGER,
             CD_MAX,
@@ -56,7 +62,7 @@ public class PromoteIllager extends Ability {
             0,
             true
         );
-        this.castle = castle;
+        this.building = building;
     }
 
     // checks that the unit has a banner and applies the speed buff to nearby friendly units if it is
@@ -82,7 +88,11 @@ public class PromoteIllager extends Ability {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/ominous_banner.png"),
             hotkey,
             () -> false,
-            () -> !castle.isUpgraded(),
+            () -> {
+                if (building instanceof Castle castle)
+                    return !castle.isUpgraded();
+                return false;
+            },
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.PROMOTE_ILLAGER),
             null,
@@ -103,14 +113,23 @@ public class PromoteIllager extends Ability {
     public void use(Level level, Building buildingUsing, LivingEntity targetEntity) {
         Vec3 pos = targetEntity.getEyePosition();
         if (buildingUsing.centrePos.distToCenterSqr(pos.x, pos.y, pos.z) > RANGE * RANGE) {
-            HudClientEvents.showTemporaryMessage("Unit is too far away!");
+            if (level.isClientSide())
+                HudClientEvents.showTemporaryMessage("Unit is too far away!");
         }
         else if (targetEntity instanceof VindicatorUnit ||
             targetEntity instanceof PillagerUnit ||
             targetEntity instanceof EvokerUnit) {
 
+            Unit unit = (Unit) targetEntity;
+
             if (targetEntity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
-                HudClientEvents.showTemporaryMessage("That unit is already a captain!");
+                if (level.isClientSide())
+                    HudClientEvents.showTemporaryMessage("That unit is already a captain!");
+                return;
+            }
+            if (!unit.getOwnerName().equals(this.building.ownerName)) {
+                if (level.isClientSide())
+                    HudClientEvents.showTemporaryMessage("You don't own that unit!");
                 return;
             }
             // only once promotedIllager allowed at a time
@@ -120,10 +139,37 @@ public class PromoteIllager extends Ability {
             }
             promotedIllager = targetEntity;
             promotedIllager.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance());
+
+            // spawn a firework
+            if (!level.isClientSide()) {
+                CompoundTag explosion = new CompoundTag();
+                explosion.put("Colors", new IntArrayTag(new int[]{0xF0F0F0}));
+                explosion.putByte("Type", (byte) 0b0);
+                ListTag explosions = new ListTag();
+                explosions.add(explosion);
+                CompoundTag explosionsAndFlight = new CompoundTag();
+                explosionsAndFlight.put("Explosions", explosions);
+                explosionsAndFlight.putByte("Flight", (byte) 0b1);
+
+                CompoundTag fireworks = new CompoundTag();
+                fireworks.put("Fireworks", explosionsAndFlight);
+
+                ItemStack itemStack = new ItemStack(Items.FIREWORK_ROCKET);
+                itemStack.setTag(fireworks);
+
+                FireworkRocketEntity entity = new FireworkRocketEntity(level, null,
+                        promotedIllager.getEyePosition().x,
+                        promotedIllager.getEyePosition().y,
+                        promotedIllager.getEyePosition().z,
+                        itemStack);
+                level.addFreshEntity(entity);
+                entity.moveTo(promotedIllager.getEyePosition());
+            }
             this.setToMaxCooldown();
         }
         else {
-            HudClientEvents.showTemporaryMessage("Only Vindicators, Pillagers and Evokers may be promoted");
+            if (level.isClientSide())
+                HudClientEvents.showTemporaryMessage("Only Vindicators, Pillagers and Evokers may be promoted");
         }
     }
 }

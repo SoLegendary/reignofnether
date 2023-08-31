@@ -36,6 +36,7 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
