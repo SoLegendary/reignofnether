@@ -147,6 +147,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     public final static float ROAR_DAMAGE = 6.0f;
     public final static float ROAR_RANGE = 4.0f;
+    public final static float ROAR_KNOCKBACK = 2.5f;
     public final static int ROAR_SLOW_DURATION = 5 * ResourceCost.TICKS_PER_SECOND;
 
     private static final Predicate<Entity> NO_RAVAGER_AND_ALIVE = e -> e.isAlive() && !(e instanceof Ravager);
@@ -213,7 +214,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         double d0 = pEntity.getX() - this.getX();
         double d1 = pEntity.getZ() - this.getZ();
         double d2 = Math.max(d0 * d0 + d1 * d1, 0.001);
-        pEntity.push(d0 / d2 * 4.0, 0.2, d1 / d2 * 4.0);
+        pEntity.push(d0 / d2 * ROAR_KNOCKBACK, 0.2, d1 / d2 * ROAR_KNOCKBACK);
     }
 
     public void startToRoar() {
@@ -221,8 +222,11 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         this.roarTick = 40;
     }
 
-    private void roar() {
-        if (this.isAlive() && !this.level.isClientSide()) {
+    @Override
+    public void roar() {
+        this.playSound(SoundEvents.RAVAGER_ROAR, 1.0F, 1.0F);
+
+        if (this.isAlive()) {
             LivingEntity livingentity;
 
             List<PathfinderMob> nearbyMobs = MiscUtil.getEntitiesWithinRange(

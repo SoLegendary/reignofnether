@@ -16,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +38,15 @@ import static com.solegendary.reignofnether.time.TimeClientEvents.normaliseTime;
 public class ClientLevelMixin {
 
     @Shadow @Final private Minecraft minecraft;
+
+    @Inject(
+            method = "playSeededSound(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFJ)V",
+            at = @At("HEAD")
+    )
+    public void playSeededSound(@Nullable Player pPlayer, Entity pEntity, SoundEvent pSoundEvent, SoundSource pSoundSource,
+                                float pVolume, float pPitch, long pSeed, CallbackInfo ci) {
+        System.out.println(pPlayer);
+    }
 
     // plays sounds for orthoview players as though they were on the ground near their selected units/buildings
     @Inject(

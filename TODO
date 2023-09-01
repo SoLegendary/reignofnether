@@ -23,16 +23,12 @@ TODO bugs/features:
 - prevent units falling off castles
 
 
-- fix getOrthoviewSoundPos
+- fix getOrthoviewSoundPos - sometimes cuts in and out
 
 - ravager/wardens portraits still not rendering
 
 - ravagers (crowd control/aoe damage bruiser)
-    - roar to knockback and damage nearby enemies
-        - roaring should be done via roarTicks (that should also handle the animations and maybe sounds too?)
-        - during roarTicks, disable movement and attacks
-        - and fix the cooldown not being set!
-        - maybe add an explosion effect?
+    - roar: fix the cooldown not being set!
     - pillagers can mount by default
 
 - wardens
