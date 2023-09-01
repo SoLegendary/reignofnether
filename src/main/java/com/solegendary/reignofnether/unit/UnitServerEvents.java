@@ -241,6 +241,8 @@ public class UnitServerEvents {
             !evt.getSource().isProjectile() &&
             !evt.getSource().isMagic() &&
             evt.getSource().getEntity() instanceof Unit unit &&
+            evt.getSource().getEntity() instanceof Mob mob &&
+            mob.canPickUpLoot() &&
             !Unit.atMaxResources(unit)) {
 
             evt.setCanceled(true);

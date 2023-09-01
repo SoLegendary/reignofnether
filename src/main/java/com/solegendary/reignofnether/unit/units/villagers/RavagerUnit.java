@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.ability.abilities.CastSummonVexes;
 import com.solegendary.reignofnether.ability.abilities.Roar;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -22,6 +23,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -145,7 +147,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     public final static float ROAR_DAMAGE = 6.0f;
     public final static float ROAR_RANGE = 4.0f;
-    public final static int ROAR_SLOW_DURATION = 25;
+    public final static int ROAR_SLOW_DURATION = 5 * ResourceCost.TICKS_PER_SECOND;
 
     private static final Predicate<Entity> NO_RAVAGER_AND_ALIVE = e -> e.isAlive() && !(e instanceof Ravager);
 
@@ -214,7 +216,12 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         pEntity.push(d0 / d2 * 4.0, 0.2, d1 / d2 * 4.0);
     }
 
-    public void roar() {
+    public void startToRoar() {
+        this.playSound(SoundEvents.RAVAGER_ROAR, 1.0F, 1.0F);
+        this.roarTick = 40;
+    }
+
+    private void roar() {
         if (this.isAlive() && !this.level.isClientSide()) {
             LivingEntity livingentity;
 

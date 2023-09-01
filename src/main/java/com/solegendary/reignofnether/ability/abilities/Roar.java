@@ -60,7 +60,8 @@ public class Roar extends Ability {
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        ravagerUnit.roar();
-        this.setToMaxCooldown();
+        ravagerUnit.resetBehaviours();
+        ravagerUnit.startToRoar();
+        super.setToMaxCooldown();
     }
 }
