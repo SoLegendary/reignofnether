@@ -84,7 +84,11 @@ public class UnitActionItem {
                 resetBehaviours(unit);
 
             switch (action) {
-                case STOP -> { }
+                case STOP -> {
+                    Entity passenger = ((Entity) unit).getFirstPassenger();
+                    if (passenger instanceof Unit unitPassenger)
+                        resetBehaviours(unitPassenger);
+                }
                 case HOLD -> {
                     unit.setHoldPosition(true);
                 }

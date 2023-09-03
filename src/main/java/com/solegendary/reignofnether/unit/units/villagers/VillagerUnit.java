@@ -115,7 +115,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
     public float getAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
-    public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
+    public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
     public float getUnitAttackDamage() {return attackDamage;}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }

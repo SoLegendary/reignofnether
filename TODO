@@ -18,17 +18,17 @@ TODO bugs/features:
 
 - double check that attack move still works
 
-- replace stockpile with an equivalent for monsters (to be more thematic)
-
 - prevent units falling off castles
-
-
 
 - ravager/wardens portraits still not rendering
 
-- ravagers (crowd control/aoe damage bruiser)
-    - roar: fix the cooldown not being set!
-    - pillagers can mount by default
+
+
+- ravagers
+    - fix mounted pillager AI
+        - mounting causes the ravager to move onto the same spot repeatedly even when issuing a new command
+            - because the pillager move goal didn't end?
+        - attacking a unit while mounted doesn't make the ravager go to melee it
 - wardens
     - attacking friendly unit doesn't work
     - blind, cannot see anything in fog of war on its own
@@ -36,7 +36,7 @@ TODO bugs/features:
 
 
 
-TODO test in remote server
+TODO test in next playtest
 
 - skeleton attack AI
 - 2-chunk vision range to garrisonables
@@ -48,9 +48,10 @@ TODO test in remote server
 - wardens
 - castles
 - ravagers
+    - mounting
+    - roaring
 - silverfish unit and research
 - promotion ability
-
 
 
 TODO buildings/units (backlog)

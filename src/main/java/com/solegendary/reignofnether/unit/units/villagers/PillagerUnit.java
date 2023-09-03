@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.abilities.Dismount;
+import com.solegendary.reignofnether.ability.abilities.MountRavager;
+import com.solegendary.reignofnether.ability.abilities.MountSpider;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -102,7 +104,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
     public float getAttacksPerSecond() {return 20f / (getAttackCooldown() + 25);} // crossbow charge time is 25 ticks
     public float getAggroRange() {return aggroRange;}
-    public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle;}
+    public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitAttackDamage() {return attackDamage;}
@@ -139,14 +141,11 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     public PillagerUnit(EntityType<? extends Pillager> entityType, Level level) {
         super(entityType, level);
 
-        //Mount mountAbility = new Mount(this);
-        Dismount dismountAbility = new Dismount(this);
-        //this.abilities.add(mountAbility);
-        this.abilities.add(dismountAbility);
+        MountRavager mountRavagerAbility = new MountRavager(this);
+        this.abilities.add(mountRavagerAbility);
 
         if (level.isClientSide()) {
-            //this.abilityButtons.add(mountAbility.getButton(Keybindings.keyQ));
-            this.abilityButtons.add(dismountAbility.getButton(Keybindings.keyQ));
+            this.abilityButtons.add(mountRavagerAbility.getButton(Keybindings.keyQ));
         }
     }
 
@@ -180,6 +179,11 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     }
 
     @Override
+    public void resetBehaviours() {
+        this.mountGoal.stop();
+    }
+
+    @Override
     protected void registerGoals() {
         initialiseGoals();
 
@@ -191,7 +195,6 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
-
     }
 
     @Override

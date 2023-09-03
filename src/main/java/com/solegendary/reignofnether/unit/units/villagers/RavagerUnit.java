@@ -2,10 +2,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.abilities.CastFangsCircle;
-import com.solegendary.reignofnether.ability.abilities.CastFangsLine;
-import com.solegendary.reignofnether.ability.abilities.CastSummonVexes;
-import com.solegendary.reignofnether.ability.abilities.Roar;
+import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -158,9 +155,12 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         super(entityType, level);
 
         Roar ab1 = new Roar(this);
+        Eject ab2 = new Eject(this);
         this.abilities.add(ab1);
+        this.abilities.add(ab2);
         if (level.isClientSide()) {
             this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
+            this.abilityButtons.add(ab2.getButton(Keybindings.keyW));
         }
     }
 

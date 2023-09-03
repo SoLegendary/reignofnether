@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -21,14 +22,14 @@ import java.util.List;
 
 public class Roar extends Ability {
 
-    private final int CD_MAX_SECONDS = 20;
+    private static final int CD_MAX_SECONDS = 20;
 
     private final RavagerUnit ravagerUnit;
 
     public Roar(RavagerUnit ravagerUnit) {
         super(
             UnitAction.ROAR,
-            0,
+            CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,
             0,
             0,
             false
