@@ -23,10 +23,6 @@ TODO bugs/features:
 - prevent units falling off castles
 
 
-- fix getOrthoviewSoundPos - sometimes cuts in and out
-    - step into ravager playSound to test
-    - maybe need to also mixin playSeededSound?
-    - ravagerUnit playsound doesnt go to the playsound mixin
 
 - ravager/wardens portraits still not rendering
 
