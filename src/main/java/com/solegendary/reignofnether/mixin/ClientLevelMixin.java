@@ -14,6 +14,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -21,6 +22,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.PlayLevelSoundEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,7 +48,19 @@ public class ClientLevelMixin {
     )
     public void playSeededSound(@Nullable Player pPlayer, Entity pEntity, SoundEvent pSoundEvent, SoundSource pSoundSource,
                                 float pVolume, float pPitch, long pSeed, CallbackInfo ci) {
-        System.out.println(pPlayer);
+        //System.out.println("playSeededSound1");
+    }
+
+    @Inject(
+            method = "playSeededSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFJ)V",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    public void playSeededSound(@Nullable Player pPlayer, double pX, double pY, double pZ, SoundEvent pSoundEvent, SoundSource pSoundSource, float pVolume, float pPitch, long pSeed, CallbackInfo ci) {
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
+        ci.cancel();
+        this.playSoundActual(pX, pY, pZ, pSoundEvent, pSoundSource, pVolume, pPitch, false, pSeed);
     }
 
     // plays sounds for orthoview players as though they were on the ground near their selected units/buildings
@@ -58,8 +73,14 @@ public class ClientLevelMixin {
                            float pVolume, float pPitch, boolean pDistanceDelay, long pSeed, CallbackInfo ci) {
         if (!OrthoviewClientEvents.isEnabled())
             return;
-
         ci.cancel();
+        this.playSoundActual(pX, pY, pZ, pSoundEvent, pSource, pVolume, pPitch, false, pSeed);
+    }
+
+    // not a mixin, but called by them
+    private void playSoundActual(double pX, double pY, double pZ, SoundEvent pSoundEvent, SoundSource pSource,
+                           float pVolume, float pPitch, boolean pDistanceDelay, long pSeed) {
+
         Vec3 soundPos = getOrthoviewSoundPos(new Vec3(pX, pY, pZ));
 
         double d0 = this.minecraft.gameRenderer.getMainCamera().getPosition().distanceToSqr(soundPos.x(), soundPos.y(), soundPos.z());

@@ -24,13 +24,15 @@ TODO bugs/features:
 
 
 - fix getOrthoviewSoundPos - sometimes cuts in and out
+    - step into ravager playSound to test
+    - maybe need to also mixin playSeededSound?
+    - ravagerUnit playsound doesnt go to the playsound mixin
 
 - ravager/wardens portraits still not rendering
 
 - ravagers (crowd control/aoe damage bruiser)
     - roar: fix the cooldown not being set!
     - pillagers can mount by default
-
 - wardens
     - attacking friendly unit doesn't work
     - blind, cannot see anything in fog of war on its own
