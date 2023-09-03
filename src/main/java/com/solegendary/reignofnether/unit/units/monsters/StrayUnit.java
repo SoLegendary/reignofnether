@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Dismount;
+import com.solegendary.reignofnether.ability.abilities.MountRavager;
 import com.solegendary.reignofnether.ability.abilities.MountSpider;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -143,13 +144,9 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
         super(entityType, level);
 
         MountSpider mountSpiderAbility = new MountSpider(this);
-        //Dismount dismountAbility = new Dismount(this);
         this.abilities.add(mountSpiderAbility);
-        //this.abilities.add(dismountAbility);
-
         if (level.isClientSide()) {
             this.abilityButtons.add(mountSpiderAbility.getButton(Keybindings.keyQ));
-            //this.abilityButtons.add(dismountAbility.getButton(Keybindings.keyQ));
         }
     }
 

@@ -28,6 +28,7 @@ TODO bugs/features:
     - fix mounted pillager AI
         - mounting causes the ravager to move onto the same spot repeatedly even when issuing a new command
             - because the pillager move goal didn't end?
+            - happens for skeletons mounting ravagers too, so something about the ravager...
         - attacking a unit while mounted doesn't make the ravager go to melee it
 - wardens
     - attacking friendly unit doesn't work

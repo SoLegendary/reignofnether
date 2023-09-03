@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchSpiderJockey
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import net.minecraft.network.chat.Style;
@@ -62,6 +63,8 @@ public class MountRavager extends Ability {
                 pillagerUnit.getMountGoal().setTarget(targetEntity);
             if (unitUsing instanceof SkeletonUnit skeletonUnit)
                 skeletonUnit.getMountGoal().setTarget(targetEntity);
+            if (unitUsing instanceof StrayUnit strayUnit)
+                strayUnit.getMountGoal().setTarget(targetEntity);
         }
         else if (level.isClientSide())
             HudClientEvents.showTemporaryMessage("Invalid target!");

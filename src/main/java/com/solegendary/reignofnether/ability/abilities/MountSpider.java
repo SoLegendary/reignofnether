@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -57,9 +58,11 @@ public class MountSpider extends Ability {
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
         if (targetEntity instanceof SpiderUnit) {
+            if (unitUsing instanceof PillagerUnit pillagerUnit)
+                pillagerUnit.getMountGoal().setTarget(targetEntity);
             if (unitUsing instanceof SkeletonUnit skeletonUnit)
                 skeletonUnit.getMountGoal().setTarget(targetEntity);
-            else if (unitUsing instanceof StrayUnit strayUnit)
+            if (unitUsing instanceof StrayUnit strayUnit)
                 strayUnit.getMountGoal().setTarget(targetEntity);
         }
         else if (level.isClientSide())
