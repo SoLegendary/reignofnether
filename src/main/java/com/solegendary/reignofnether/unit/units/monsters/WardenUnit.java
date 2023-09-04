@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.SonicBoom;
+import com.solegendary.reignofnether.ability.abilities.Teleport;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -9,9 +12,14 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -23,6 +31,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -105,7 +114,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
 
     final static public float attackDamage = 6.0f;
     final static public float attacksPerSecond = 0.6f;
-    final static public float maxHealth = 100.0f;
+    final static public float maxHealth = 80.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.27f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
@@ -118,13 +127,25 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
 
     private MeleeAttackUnitGoal attackGoal;
     private AttackBuildingGoal attackBuildingGoal;
+    private SonicBoomGoal sonicBoomGoal;
+
+    public SonicBoomGoal getSonicBoomGoal() { return sonicBoomGoal; }
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
+    public static final float SONIC_BOOM_DAMAGE = 10f;
+    public static final float SONIC_BOOM_RANGE = 10f;
+
     public WardenUnit(EntityType<? extends Warden> entityType, Level level) {
         super(entityType, level);
+
+        SonicBoom ab1 = new SonicBoom(this);
+        this.abilities.add(ab1);
+
+        if (level.isClientSide())
+            this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
     }
 
     @Override
@@ -142,8 +163,6 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
 
     @Override
     protected void customServerAiStep() { }
-    @Override // suppress heartbeat sounds
-    public boolean isSilent() { return true; }
 
     public void tick() {
         this.setCanPickUpLoot(false);
@@ -160,6 +179,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
         this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
         this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.sonicBoomGoal = new SonicBoomGoal(this);
     }
 
     @Override
@@ -168,11 +188,32 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
 
         // movegoal must be lower priority than attacks so that attack-moving works correctly
         this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(2, sonicBoomGoal);
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, attackBuildingGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+    }
+
+    public void doSonicBoom(LivingEntity targetEntity) {
+        Vec3 headToChestOffset = this.position().add(0, 1.6, 0);
+        Vec3 targetPos = targetEntity.getEyePosition().subtract(headToChestOffset);
+        Vec3 normTargetPos = targetPos.normalize();
+
+        if (this.level.isClientSide()) {
+            this.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 1.0F);
+        } else {
+            ServerLevel level = (ServerLevel) this.level;
+            for(int i = 1; i < Mth.floor(targetPos.length()) + 7; ++i) {
+                Vec3 particlePos = headToChestOffset.add(normTargetPos.scale(i));
+                level.sendParticles(ParticleTypes.SONIC_BOOM, particlePos.x, particlePos.y, particlePos.z, 1, 0,0,0,0);
+            }
+        }
+        targetEntity.hurt(DamageSource.sonicBoom(this), 10.0F);
+        double knockbackY = 0.5 * (1.0 - targetEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+        double knockbackXZ = 1.5 * (1.0 - targetEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+        targetEntity.push(normTargetPos.x() * knockbackXZ, normTargetPos.y() * knockbackY, normTargetPos.z() * knockbackXZ);
     }
 }

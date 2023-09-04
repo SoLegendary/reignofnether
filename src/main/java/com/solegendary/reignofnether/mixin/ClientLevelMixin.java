@@ -43,15 +43,6 @@ public class ClientLevelMixin {
     @Shadow @Final private Minecraft minecraft;
 
     @Inject(
-            method = "playSeededSound(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFJ)V",
-            at = @At("HEAD")
-    )
-    public void playSeededSound(@Nullable Player pPlayer, Entity pEntity, SoundEvent pSoundEvent, SoundSource pSoundSource,
-                                float pVolume, float pPitch, long pSeed, CallbackInfo ci) {
-        //System.out.println("playSeededSound1");
-    }
-
-    @Inject(
             method = "playSeededSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFJ)V",
             at = @At("HEAD"),
             cancellable = true
@@ -60,7 +51,8 @@ public class ClientLevelMixin {
         if (!OrthoviewClientEvents.isEnabled())
             return;
         ci.cancel();
-        this.playSoundActual(pX, pY, pZ, pSoundEvent, pSoundSource, pVolume, pPitch, false, pSeed);
+        if (!pSoundEvent.equals(SoundEvents.WARDEN_HEARTBEAT))
+            this.playSoundActual(pX, pY, pZ, pSoundEvent, pSoundSource, pVolume * 0.5f, pPitch, false, pSeed);
     }
 
     // plays sounds for orthoview players as though they were on the ground near their selected units/buildings
@@ -74,7 +66,8 @@ public class ClientLevelMixin {
         if (!OrthoviewClientEvents.isEnabled())
             return;
         ci.cancel();
-        this.playSoundActual(pX, pY, pZ, pSoundEvent, pSource, pVolume, pPitch, false, pSeed);
+        if (!pSoundEvent.equals(SoundEvents.WARDEN_HEARTBEAT))
+            this.playSoundActual(pX, pY, pZ, pSoundEvent, pSource, pVolume * 0.5f, pPitch, false, pSeed);
     }
 
     // not a mixin, but called by them
