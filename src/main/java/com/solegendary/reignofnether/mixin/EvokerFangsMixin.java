@@ -43,9 +43,9 @@ public abstract class EvokerFangsMixin extends Entity {
         LivingEntity owner = this.getOwner();
 
         // prevent friendly fire
-        //if (this.getOwner() instanceof Unit unit &&
-        //    UnitServerEvents.getUnitToEntityRelationship(unit, pTarget) == Relationship.FRIENDLY)
-        //    return;
+        if (this.getOwner() instanceof Unit unit &&
+            UnitServerEvents.getUnitToEntityRelationship(unit, pTarget) == Relationship.FRIENDLY)
+            return;
 
         // set to the damage amount we want and set us as the owner to ensure knockback
         if (pTarget.isAlive() && !pTarget.isInvulnerable() && pTarget != this.getOwner())

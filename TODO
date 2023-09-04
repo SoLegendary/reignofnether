@@ -12,6 +12,13 @@ TODO bugs/features:
 
 
 
+- unable to select units behind blocks for abilities and attacks
+
+- set only non-worker units to avoid leaves
+    - Warden constructor shows how we can set pathFindingMalus to have specific mobs avoid specific blocktypes
+
+
+
 - multiple arrows hitting the same target bounce
     - maybe give visual-only piercing?
     - piercing causes some sort of deadlock??
@@ -30,8 +37,8 @@ TODO bugs/features:
             - happens for skeletons mounting ravagers too, so something about the ravager...
 - wardens
     - attacking friendly unit doesn't work
-    - blind, cannot see anything in fog of war on its own
-    - single target cooldown ability: sonic wave as a piercing AOE attack
+    - retaliation aggression seems to override unit goals
+    - sonic boom doesnt happen serverside when having to move towards a target first
 
 
 
@@ -224,15 +231,6 @@ TODO tutorial docs
 
 
 10. Known bugs and limitations
-
-
-
-
-
-
-
-
-
 
 
 

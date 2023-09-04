@@ -117,7 +117,8 @@ public class EvokerUnit extends Evoker implements Unit {
     }
 
     public static final int FANGS_RANGE = 10;
-    public static final float FANGS_DAMAGE = 12f;
+    public static final float FANGS_DAMAGE = 6f; // can sometimes be doubled or tripled due to overlapping fang hitboxes
+    public static final int FANGS_CHANNEL_TICKS = 1 * ResourceCost.TICKS_PER_SECOND;
 
     final static public float maxHealth = 40.0f;
     final static public float armorValue = 0.0f;
@@ -185,7 +186,7 @@ public class EvokerUnit extends Evoker implements Unit {
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this, 1.0f);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
-        this.castFangsLineGoal = new CastFangsLineGoal(this);
+        this.castFangsLineGoal = new CastFangsLineGoal(this, FANGS_CHANNEL_TICKS, FANGS_RANGE, this::createEvokerFangsLine);
         this.castFangsCircleGoal = new CastFangsCircleGoal(this);
         this.castSummonVexesGoal = new CastSummonVexesGoal(this);
     }

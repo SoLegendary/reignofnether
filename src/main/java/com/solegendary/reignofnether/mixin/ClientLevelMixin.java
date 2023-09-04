@@ -42,6 +42,10 @@ public class ClientLevelMixin {
 
     @Shadow @Final private Minecraft minecraft;
 
+    private boolean isWardenSound(SoundEvent pSoundEvent) {
+        return pSoundEvent.getLocation().getPath().contains("warden");
+    }
+
     @Inject(
             method = "playSeededSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFJ)V",
             at = @At("HEAD"),
@@ -51,8 +55,10 @@ public class ClientLevelMixin {
         if (!OrthoviewClientEvents.isEnabled())
             return;
         ci.cancel();
+
+
         if (!pSoundEvent.equals(SoundEvents.WARDEN_HEARTBEAT))
-            this.playSoundActual(pX, pY, pZ, pSoundEvent, pSoundSource, pVolume * 0.5f, pPitch, false, pSeed);
+            this.playSoundActual(pX, pY, pZ, pSoundEvent, pSoundSource, pVolume * (isWardenSound(pSoundEvent) ? 0.2f : 0.5f), pPitch, false, pSeed);
     }
 
     // plays sounds for orthoview players as though they were on the ground near their selected units/buildings
@@ -67,7 +73,7 @@ public class ClientLevelMixin {
             return;
         ci.cancel();
         if (!pSoundEvent.equals(SoundEvents.WARDEN_HEARTBEAT))
-            this.playSoundActual(pX, pY, pZ, pSoundEvent, pSource, pVolume * 0.5f, pPitch, false, pSeed);
+            this.playSoundActual(pX, pY, pZ, pSoundEvent, pSource, pVolume * (isWardenSound(pSoundEvent) ? 0.2f : 0.5f), pPitch, false, pSeed);
     }
 
     // not a mixin, but called by them

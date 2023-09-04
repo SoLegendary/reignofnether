@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ability.abilities.SonicBoom;
 import com.solegendary.reignofnether.ability.abilities.Teleport;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -135,8 +136,9 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    public static final float SONIC_BOOM_DAMAGE = 10f;
-    public static final float SONIC_BOOM_RANGE = 10f;
+    public static final float SONIC_BOOM_DAMAGE = 25f;
+    public static final int SONIC_BOOM_RANGE = 10;
+    public static final int SONIC_BOOM_CHANNEL_TICKS = 2 * ResourceCost.TICKS_PER_SECOND;
 
     public WardenUnit(EntityType<? extends Warden> entityType, Level level) {
         super(entityType, level);
@@ -170,6 +172,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+        this.sonicBoomGoal.tick();
     }
 
     public void initialiseGoals() {
@@ -179,7 +182,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
         this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
         this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
         this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
-        this.sonicBoomGoal = new SonicBoomGoal(this);
+        this.sonicBoomGoal = new SonicBoomGoal(this, SONIC_BOOM_CHANNEL_TICKS, SONIC_BOOM_RANGE, this::doSonicBoom);
     }
 
     @Override
@@ -197,6 +200,12 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }
 
+    @Override
+    public void resetBehaviours() {
+        this.sonicBoomAnimationState.stop();
+        this.sonicBoomGoal.stop();
+    }
+
     public void doSonicBoom(LivingEntity targetEntity) {
         Vec3 headToChestOffset = this.position().add(0, 1.6, 0);
         Vec3 targetPos = targetEntity.getEyePosition().subtract(headToChestOffset);
@@ -211,9 +220,9 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
                 level.sendParticles(ParticleTypes.SONIC_BOOM, particlePos.x, particlePos.y, particlePos.z, 1, 0,0,0,0);
             }
         }
-        targetEntity.hurt(DamageSource.sonicBoom(this), 10.0F);
+        targetEntity.hurt(DamageSource.sonicBoom(this), SONIC_BOOM_DAMAGE);
         double knockbackY = 0.5 * (1.0 - targetEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
-        double knockbackXZ = 1.5 * (1.0 - targetEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+        double knockbackXZ = 2.0 * (1.0 - targetEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
         targetEntity.push(normTargetPos.x() * knockbackXZ, normTargetPos.y() * knockbackY, normTargetPos.z() * knockbackXZ);
     }
 }

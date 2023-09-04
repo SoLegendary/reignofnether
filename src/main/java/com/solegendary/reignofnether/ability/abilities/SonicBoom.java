@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
@@ -24,7 +25,7 @@ import static com.solegendary.reignofnether.hud.HudClientEvents.showTemporaryMes
 
 public class SonicBoom extends Ability {
 
-    public static final int CD_MAX_SECONDS = 15;
+    public static final int CD_MAX_SECONDS = 20;
 
     private final WardenUnit wardenUnit;
 
@@ -53,8 +54,8 @@ public class SonicBoom extends Ability {
                 List.of(
                         FormattedCharSequence.forward("Sonic Boom", Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE006  " + WardenUnit.SONIC_BOOM_DAMAGE + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + WardenUnit.SONIC_BOOM_RANGE, MyRenderer.iconStyle),
-                        FormattedCharSequence.forward("After a short delay, fire a targeted wave of sound at,", Style.EMPTY),
-                        FormattedCharSequence.forward("the target damaging it and anything along the way.", Style.EMPTY)
+                        FormattedCharSequence.forward("After a short delay, fire a targeted wave of sound at the", Style.EMPTY),
+                        FormattedCharSequence.forward("target, dealing heavy damage and knocking it far away.", Style.EMPTY)
                 ),
                 this
         );
@@ -68,9 +69,12 @@ public class SonicBoom extends Ability {
 
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
-        //((WardenUnit) unitUsing).getSonicBoomGoal().setAbility(this);
-        //((WardenUnit) unitUsing).getSonicBoomGoal().setTarget(targetEntity);
-
-        ((WardenUnit) unitUsing).doSonicBoom(targetEntity);
+        if (targetEntity instanceof Unit unit && unit.equals(this.wardenUnit)) {
+            if (level.isClientSide())
+                showTemporaryMessage("Must target an enemy unit!");
+            return;
+        }
+        ((WardenUnit) unitUsing).getSonicBoomGoal().setAbility(this);
+        ((WardenUnit) unitUsing).getSonicBoomGoal().setTarget(targetEntity);
     }
 }
