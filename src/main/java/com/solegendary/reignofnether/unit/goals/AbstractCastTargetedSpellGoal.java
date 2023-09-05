@@ -17,7 +17,7 @@ public abstract class AbstractCastTargetedSpellGoal extends MoveToTargetBlockGoa
     private Ability ability; // used for syncing cooldown with clientside
     protected int ticksCasting = 0; // how long have we spent trying to cast this spell
     public boolean isCasting() { return isCasting; }
-    private final int channelTicks; // max time required to cast a spell
+    protected final int channelTicks; // max time required to cast a spell
     protected boolean isCasting = false;
     private BlockPos castTarget = null; // pos that the spell will be cast at
     private final int range;

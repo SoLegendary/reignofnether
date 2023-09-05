@@ -10,18 +10,26 @@ TODO bugs/features:
 
 - Tutorial documentation/gifs
 
+- multiple arrows hitting the same target bounce
+    - maybe give visual-only piercing?
+    - piercing causes some sort of deadlock??
 
+
+
+- switch to SC2-style win-condition
+    - remove capitol explosion resistance
+    - remove 1-capitol limit
+    - reveal enemy buildings if they haven't rebuilt their capitol fast enough
 
 - unable to select units behind blocks for abilities and attacks
+    - maybe make leaves skipped by cursor hitbox like non-solid blocks?
 
 - set only non-worker units to avoid leaves
     - Warden constructor shows how we can set pathFindingMalus to have specific mobs avoid specific blocktypes
 
 
 
-- multiple arrows hitting the same target bounce
-    - maybe give visual-only piercing?
-    - piercing causes some sort of deadlock??
+
 
 - double check that attack move still works
 
@@ -35,10 +43,6 @@ TODO bugs/features:
     - fix mounted pillager AI
         - mounting causes the ravager to move onto the same spot repeatedly even when issuing a new command
             - happens for skeletons mounting ravagers too, so something about the ravager...
-- wardens
-    - attacking friendly unit doesn't work
-    - retaliation aggression seems to override unit goals
-    - sonic boom doesnt happen serverside when having to move towards a target first
 
 
 
@@ -56,6 +60,8 @@ TODO test in next playtest
 - ravagers
     - mounting
     - roaring
+- wardens
+    - sonic booms
 - silverfish unit and research
 - promotion ability
 

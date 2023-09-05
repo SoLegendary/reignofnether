@@ -18,7 +18,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -38,7 +38,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -683,7 +682,7 @@ public class UnitClientEvents {
         sendUnitCommandManual(UnitAction.DISCARD, oldUnitIds);
     }
 
-    public static void syncEvokerCasting(int entityId, boolean startCasting) {
+    public static void syncUnitCasting(int entityId, boolean startCasting) {
         for (LivingEntity entity : getAllUnits()) {
             if (entity instanceof EvokerUnit eUnit && eUnit.getId() == entityId) {
                 // skip if it's your evoker since it'll already be synced
@@ -695,6 +694,13 @@ public class UnitClientEvents {
                         eUnit.getCastFangsLineGoal().startCasting();
                     else
                         eUnit.getCastFangsLineGoal().stop();
+                }
+            } else if (entity instanceof WardenUnit wUnit && wUnit.getId() == entityId) {
+                if (wUnit.getSonicBoomGoal() != null) {
+                    if (startCasting)
+                        wUnit.startSonicBoomAnimation();
+                    else
+                        wUnit.stopSonicBoomAnimation();
                 }
             }
         }

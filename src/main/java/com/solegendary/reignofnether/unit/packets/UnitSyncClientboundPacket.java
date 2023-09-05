@@ -63,10 +63,10 @@ public class UnitSyncClientboundPacket {
         );
     }
 
-    public static void sendSyncEvokerCastingPacket(LivingEntity entity, boolean startCasting) {
+    public static void sendSyncCastingPacket(LivingEntity entity, boolean startCasting) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitSyncClientboundPacket(
-                startCasting ? UnitSyncAction.EVOKER_START_CASTING : UnitSyncAction.EVOKER_STOP_CASTING,
+                startCasting ? UnitSyncAction.START_CASTING : UnitSyncAction.STOP_CASTING,
                 entity.getId(),
                 0,0,0,0,0,0,0, "")
         );
@@ -141,8 +141,8 @@ public class UnitSyncClientboundPacket {
                         case SYNC_RESOURCES -> UnitClientEvents.syncUnitResources(
                                 this.entityId,
                                 new Resources("", this.food, this.wood, this.ore));
-                        case EVOKER_START_CASTING -> UnitClientEvents.syncEvokerCasting(this.entityId, true);
-                        case EVOKER_STOP_CASTING -> UnitClientEvents.syncEvokerCasting(this.entityId, false);
+                        case START_CASTING -> UnitClientEvents.syncUnitCasting(this.entityId, true);
+                        case STOP_CASTING -> UnitClientEvents.syncUnitCasting(this.entityId, false);
                     }
                 });
         });

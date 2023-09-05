@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
@@ -16,13 +17,14 @@ public class CastFangsLineGoal extends AbstractCastTargetedSpellGoal {
     public void startCasting() {
         super.startCasting();
         if (!this.mob.level.isClientSide())
-            UnitSyncClientboundPacket.sendSyncEvokerCastingPacket(this.mob, true);
+            UnitSyncClientboundPacket.sendSyncCastingPacket(this.mob, true);
     }
 
     @Override
     public void stopCasting() {
         super.stopCasting();
         if (!this.mob.level.isClientSide())
-            UnitSyncClientboundPacket.sendSyncEvokerCastingPacket(this.mob, false);
+            UnitSyncClientboundPacket.sendSyncCastingPacket(this.mob, false);
+        ((Unit) this.mob).getCheckpoints().clear();
     }
 }

@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
@@ -15,15 +17,16 @@ public class SonicBoomGoal extends AbstractCastTargetedSpellGoal {
     @Override
     public void startCasting() {
         super.startCasting();
-        if (this.mob instanceof WardenUnit wardenUnit && this.mob.level.isClientSide())
-            wardenUnit.sonicBoomAnimationState.start(wardenUnit.tickCount);
+        if (!this.mob.level.isClientSide())
+            UnitSyncClientboundPacket.sendSyncCastingPacket(this.mob, true);
     }
 
     @Override
     public void stopCasting() {
+        if (!this.mob.level.isClientSide() && ticksCasting < channelTicks)
+            UnitSyncClientboundPacket.sendSyncCastingPacket(this.mob, false);
         super.stopCasting();
-        if (this.mob instanceof WardenUnit wardenUnit && this.mob.level.isClientSide())
-            wardenUnit.sonicBoomAnimationState.stop();
+        ((Unit) this.mob).getCheckpoints().clear();
     }
 
     @Override

@@ -48,7 +48,7 @@ public class CastSummonVexesGoal extends Goal {
     public void startCasting() {
         this.isCasting = true;
         if (!this.mob.level.isClientSide())
-            UnitSyncClientboundPacket.sendSyncEvokerCastingPacket(this.mob, true);
+            UnitSyncClientboundPacket.sendSyncCastingPacket(this.mob, true);
     }
 
     @Override
@@ -56,6 +56,6 @@ public class CastSummonVexesGoal extends Goal {
         this.ticksCasting = 0;
         this.isCasting = false;
         if (!this.mob.level.isClientSide())
-            UnitSyncClientboundPacket.sendSyncEvokerCastingPacket(this.mob, false);
+            UnitSyncClientboundPacket.sendSyncCastingPacket(this.mob, false);
     }
 }

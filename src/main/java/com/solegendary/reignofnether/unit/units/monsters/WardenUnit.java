@@ -21,13 +21,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.item.ItemStack;
@@ -136,7 +139,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    public static final float SONIC_BOOM_DAMAGE = 25f;
+    public static final float SONIC_BOOM_DAMAGE = 30f;
     public static final int SONIC_BOOM_RANGE = 10;
     public static final int SONIC_BOOM_CHANNEL_TICKS = 2 * ResourceCost.TICKS_PER_SECOND;
 
@@ -163,8 +166,15 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
                 .add(Attributes.ATTACK_KNOCKBACK, 1.5);
     }
 
+    // override new AI types and use unit goals instead
     @Override
     protected void customServerAiStep() { }
+    @Override
+    public void increaseAngerAt(@Nullable Entity pEntity, int pOffset, boolean pPlayListeningSound) {}
+    @Override
+    public LivingEntity getTarget() { return this.targetGoal.getTarget(); }
+    @Override
+    public void setAttackTarget(LivingEntity pAttackTarget) { }
 
     public void tick() {
         this.setCanPickUpLoot(false);
@@ -224,5 +234,13 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
         double knockbackY = 0.5 * (1.0 - targetEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
         double knockbackXZ = 2.0 * (1.0 - targetEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
         targetEntity.push(normTargetPos.x() * knockbackXZ, normTargetPos.y() * knockbackY, normTargetPos.z() * knockbackXZ);
+    }
+
+    public void startSonicBoomAnimation() {
+        this.sonicBoomAnimationState.start(this.tickCount);
+    }
+
+    public void stopSonicBoomAnimation() {
+        this.sonicBoomAnimationState.stop();
     }
 }
