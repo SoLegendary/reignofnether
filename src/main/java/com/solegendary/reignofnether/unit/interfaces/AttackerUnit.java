@@ -71,13 +71,10 @@ public interface AttackerUnit {
 
             // enact attack moving - move to target but chase enemies, resuming move once dead or out of range/sight
             if (attackerUnit.getAttackMoveTarget() != null && !unit.hasLivingTarget()) {
-                boolean attacked = attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level);
+                attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level);
 
-                if (!attacked && unit.getMoveGoal().getMoveTarget() == null)
+                if (unit.getTargetGoal().getTarget() == null && unit.getMoveGoal().getMoveTarget() == null)
                     unit.setMoveTarget(attackerUnit.getAttackMoveTarget());
-
-                else if (!attacked && !unit.getMoveGoal().canContinueToUse()) // finished attack-moving
-                    AttackerUnit.resetBehaviours(attackerUnit);
             }
 
             // retaliate against a mob that damaged us UNLESS already on another command
@@ -113,17 +110,16 @@ public interface AttackerUnit {
 
     // returns true and attacks the closest enemy OR
     // returns false and does nothing if none are found
-    public default boolean attackClosestEnemy(ServerLevel level) {
+    public default void attackClosestEnemy(ServerLevel level) {
         float aggroRange = this.getAggroRange();
         if (GarrisonableBuilding.getGarrison((Unit) this) != null)
             aggroRange += GarrisonableBuilding.ATTACK_RANGE_BONUS;
 
         PathfinderMob closestMob = MiscUtil.findClosestAttackableEnemy((Mob) this, aggroRange, level);
         if (closestMob != null) {
+            ((Unit) this).getMoveGoal().stopMoving();
             setUnitAttackTarget(closestMob);
-            return true;
         }
-        return false;
     }
 
     default double getWeaponDamageModifier() { return 0; }
