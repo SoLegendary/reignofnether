@@ -31,6 +31,7 @@ public class MountGoal extends MoveToTargetBlockGoal {
                     this.mob.getX(), this.mob.getZ(),
                     moveTarget.getX(), moveTarget.getZ()) <= RANGE &&
                 unit1.getOwnerName().equals(unit2.getOwnerName())) {
+                Unit.resetBehaviours(unit1);
                 this.mob.startRiding(targetEntity);
                 this.stop();
             }

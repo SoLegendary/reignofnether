@@ -22,7 +22,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
@@ -33,7 +32,6 @@ import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.world.ForgeChunkManager;
 
 import java.util.*;
@@ -384,8 +382,8 @@ public abstract class Building {
                 serverLevel.destroyBlock(block.getBlockPos(), false);
         });
 
-        if (this.isCapitol)
-            sendMessageToAllPlayers(this.ownerName + " has lost their capitol building!");
+        if (BuildingUtils.getTotalCompletedBuildingsOwned(this.level.isClientSide(), this.ownerName) == 0)
+            sendMessageToAllPlayers(this.ownerName + " has lost their final building and has been defeated!");
     }
 
     // should only be run serverside
@@ -457,8 +455,10 @@ public abstract class Building {
         isBuilt = true;
 
         if (this.isCapitol && !this.level.isClientSide()) {
-            sendMessageToAllPlayers(this.ownerName + " has completed their capitol at: " +
-                    "x=" + originPos.getX() + " z=" + originPos.getZ());
+            if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 1) {
+                sendMessageToAllPlayers(this.ownerName + " has completed their first capitol at: " +
+                        "x=" + originPos.getX() + " z=" + originPos.getZ());
+            }
         }
     }
 

@@ -21,6 +21,16 @@ import java.util.function.Predicate;
 
 public class BuildingUtils {
 
+    public static int getTotalCompletedBuildingsOwned(boolean isClientSide, String ownerName) {
+        List<Building> buildings;
+        if (isClientSide)
+            buildings = BuildingClientEvents.getBuildings();
+        else
+            buildings = BuildingServerEvents.getBuildings();
+
+        return buildings.stream().filter(b -> b.isBuilt && b.ownerName.equals(ownerName)).toList().size();
+    }
+
     public static boolean isBuildingBuildable(boolean isClientSide, Building building) {
         if (isClientSide)
             return BuildingClientEvents.getBuildings().stream().map(b -> b.originPos).toList().contains(building.originPos) &&

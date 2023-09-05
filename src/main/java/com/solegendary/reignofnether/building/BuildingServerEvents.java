@@ -126,7 +126,7 @@ public class BuildingServerEvents {
     }
 
     public static void cancelBuilding(Building building) {
-        if (building.isCapitol)
+        if (BuildingUtils.getTotalCompletedBuildingsOwned(building.getLevel().isClientSide(), building.ownerName) == 1)
             return;
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
@@ -262,7 +262,7 @@ public class BuildingServerEvents {
             Set<Building> affectedBuildings = new HashSet<>();
             for (BlockPos bp : evt.getAffectedBlocks()) {
                 Building building = BuildingUtils.findBuilding(false, bp);
-                if (building != null && !building.isCapitol)
+                if (building != null)
                     affectedBuildings.add(building);
             }
             for (Building building : affectedBuildings) {
