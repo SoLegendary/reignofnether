@@ -19,8 +19,6 @@ TODO bugs/features:
 - switch to SC2-style win-condition
     - reveal enemy buildings if they haven't rebuilt their capitol fast enough
 
-- ravager/wardens portraits still not rendering
-
 - unable to select units behind blocks for abilities and attacks
     - maybe make leaves skipped by cursor hitbox like non-solid blocks?
         - except if hudSelectedUnit is a worker
@@ -29,7 +27,6 @@ TODO bugs/features:
     - Warden constructor shows how we can set pathFindingMalus to have specific mobs avoid specific blocktypes
 
 - prevent units falling off castles
-
 
 
 

@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
@@ -20,13 +22,17 @@ import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.model.*;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -35,10 +41,13 @@ import net.minecraft.world.entity.monster.Ravager;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.ForgeHooksClient;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.hud.HudClientEvents.getSimpleEntityName;
 
@@ -122,7 +131,55 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     // - unit name
     // Must be called from DrawScreenEvent
     public RectZone render(PoseStack poseStack, String name, int x, int y, LivingEntity entity) {
+
         Relationship rs = UnitClientEvents.getPlayerToEntityRelationship(entity);
+
+        int bgCol = 0x0;
+        switch (rs) {
+            case OWNED    -> bgCol = 0x90000000;
+            case FRIENDLY -> bgCol = 0x90009000;
+            case NEUTRAL  -> bgCol = 0x90909000;
+            case HOSTILE  -> bgCol = 0x90900000;
+        }
+        MyRenderer.renderFrameWithBg(poseStack, x, y,
+                frameWidth,
+                frameHeight,
+                bgCol);
+
+        // remember 0,0 is top left
+        int drawX = x + headOffsetX;
+        int drawY = y + (int) (entity.getEyeHeight() / standardEyeHeight * headOffsetY);
+
+        int headSizeFinal = headSize;
+
+        if (entity instanceof Silverfish) {
+            drawY += 26;
+        }
+        else if (entity instanceof EnderMan) {
+            if (((EnderMan) entity).isAggressive())
+                drawY -= 5;
+            else
+                drawY -= 15;
+        } else if (entity instanceof Warden) {
+            drawY -= 45;
+            headSizeFinal = 30;
+        } else if (entity instanceof Ravager) {
+            drawY -= 45;
+            headSizeFinal = 26;
+        }
+
+        // hide all model parts except the head
+        setNonHeadModelVisibility(false);
+        List<RenderLayer<T, M>> layers = null;
+        if (renderer != null) {
+            layers = renderer.layers;
+            renderer.layers = List.of();
+        }
+
+        drawEntityOnScreen(poseStack, entity, drawX, drawY, headSizeFinal);
+        if (renderer != null && layers != null)
+            renderer.layers = layers;
+        setNonHeadModelVisibility(true);
 
         if (entity.getPassengers().size() == 1) {
             String pName = getSimpleEntityName(entity.getPassengers().get(0)).replace("_"," ");
@@ -143,49 +200,8 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                     0xFFFFFFFF
             );
         }
-        int bgCol = 0x0;
-        switch (rs) {
-            case OWNED    -> bgCol = 0x90000000;
-            case FRIENDLY -> bgCol = 0x90009000;
-            case NEUTRAL  -> bgCol = 0x90909000;
-            case HOSTILE  -> bgCol = 0x90900000;
-        }
-        MyRenderer.renderFrameWithBg(poseStack, x, y,
-                frameWidth,
-                frameHeight,
-                bgCol);
 
         RectZone rectZone = RectZone.getZoneByLW(x, y, frameWidth, frameHeight);
-
-        // remember 0,0 is top left
-        int drawX = x + headOffsetX;
-        int drawY = y + (int) (entity.getEyeHeight() / standardEyeHeight * headOffsetY);
-
-        if (entity instanceof Silverfish) {
-            drawY += 26;
-        }
-        else if (entity instanceof EnderMan) {
-            if (((EnderMan) entity).isAggressive())
-                drawY -= 5;
-            else
-                drawY -= 15;
-        }
-        else if (entity instanceof Ravager || entity instanceof Warden) {
-            drawY -= 100;
-        }
-
-        // hide all model parts except the head
-        setNonHeadModelVisibility(false);
-        List<RenderLayer<T, M>> layers = null;
-        if (renderer != null) {
-            layers = renderer.layers;
-            renderer.layers = List.of();
-        }
-
-        drawEntityOnScreen(poseStack, entity, drawX, drawY, headSize);
-        if (renderer != null && layers != null)
-            renderer.layers = layers;
-        setNonHeadModelVisibility(true);
 
         // draw health bar and write min/max hp
         HealthBarClientEvents.renderForEntity(poseStack, entity,
@@ -199,12 +215,29 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         else
             healthText = String.valueOf(health).substring(0,3);
 
+        /*
         GuiComponent.drawCenteredString(
                 poseStack, Minecraft.getInstance().font,
                 healthText + "/" + (int) entity.getMaxHealth(),
                 x+(frameWidth/2), y+frameHeight-13,
                 0xFFFFFFFF
-        );
+        );*/
+
+        // need to render like this instead of GuiComponent.drawCenteredString, so it's layered above the portrait entity
+        Minecraft MC = Minecraft.getInstance();
+        Window window = MC.getWindow();
+        poseStack.pushPose();
+        MultiBufferSource.BufferSource multibuffersource$buffersource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        String text = healthText + "/" + (int) entity.getMaxHealth();
+        FormattedCharSequence pTooltips = FormattedCharSequence.forward(text, Style.EMPTY);
+        ClientTooltipComponent clientTooltip = ClientTooltipComponent.create(pTooltips);
+        poseStack.translate(0.0, 0.0, 400.0);
+        int x0 = x+(frameWidth/2);
+        int xC = (x0 - MC.font.width(text) / 2);
+        clientTooltip.renderText(MC.font, xC, y+frameHeight-13, poseStack.last().pose(), multibuffersource$buffersource);
+        multibuffersource$buffersource.endBatch();
+        poseStack.popPose();
+
         return rectZone;
     }
 
@@ -300,23 +333,18 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             return;
 
         if (model instanceof RavagerModel ravagerModel) {
-            //ravagerModel.rightHindLeg.visible = visibility;
-            //ravagerModel.leftHindLeg.visible = visibility;
-            //ravagerModel.rightFrontLeg.visible = visibility;
-            //ravagerModel.leftFrontLeg.visible = visibility;
-            //ravagerModel.neck.visible = visibility;
+            ravagerModel.rightHindLeg.visible = visibility;
+            ravagerModel.leftHindLeg.visible = visibility;
+            ravagerModel.rightFrontLeg.visible = visibility;
+            ravagerModel.leftFrontLeg.visible = visibility;
         }
         else if (model instanceof WardenModel<?> wardenModel) {
-            //wardenModel.bone.visible = visibility;
-            //wardenModel.body.visible = visibility;
-            //wardenModel.rightTendril.visible = visibility;
-            //wardenModel.leftTendril.visible = visibility;
-            //wardenModel.leftLeg.visible = visibility;
-            //wardenModel.leftArm.visible = visibility;
-            //wardenModel.leftRibcage.visible = visibility;
-            //wardenModel.rightArm.visible = visibility;
-            //wardenModel.rightLeg.visible = visibility;
-            //wardenModel.rightRibcage.visible = visibility;
+            wardenModel.leftLeg.visible = visibility;
+            wardenModel.leftArm.visible = visibility;
+            wardenModel.leftRibcage.visible = visibility;
+            wardenModel.rightArm.visible = visibility;
+            wardenModel.rightLeg.visible = visibility;
+            wardenModel.rightRibcage.visible = visibility;
         }
         // TODO: doesn't work for players
         else if (model instanceof PlayerModel<?> playerModel) { // includes piglins
@@ -347,9 +375,8 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             illagerModel.leftArm.visible = visibility;
             illagerModel.rightArm.visible = visibility;
         }
-
         // hide all non-head models attached to root
-        if (model instanceof HierarchicalModel<?> hierarchicalModel)
+        else if (model instanceof HierarchicalModel<?> hierarchicalModel)
             setNonHeadRootModelVisibility(hierarchicalModel.root(), visibility);
     }
 
