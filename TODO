@@ -26,8 +26,6 @@ TODO bugs/features:
 - set only non-worker units to avoid leaves
     - Warden constructor shows how we can set pathFindingMalus to have specific mobs avoid specific blocktypes
 
-- prevent units falling off castles
-
 
 
 
