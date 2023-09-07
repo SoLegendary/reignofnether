@@ -478,32 +478,6 @@ public class UnitClientEvents {
         if ((OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) ||
             (!OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS))
         {
-            for (LivingEntity entity : allUnits) {
-                if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()) ||
-                    entity.isPassenger())
-                    continue;
-
-                Relationship unitRs = getPlayerToEntityRelationship(entity);
-
-                float alpha = 0.5f;
-                if (selectedUnits.stream().map(u -> u.getId()).toList().contains(entity.getId()))
-                    alpha = 1.0f;
-
-                // draw only the bottom of the outline boxes
-                AABB entityAABB = entity.getBoundingBox();
-                entityAABB = entityAABB.setMaxY(entityAABB.minY);
-                boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
-
-                // always-shown highlights to indicate unit relationships
-                switch (unitRs) {
-                    case OWNED -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 1.0f, 0.2f, alpha, excludeMaxY);
-                    case FRIENDLY -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 0.2f, 1.0f, alpha, excludeMaxY);
-                    case HOSTILE -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.2f, 0.2f, alpha, excludeMaxY);
-                }
-            }
-        }
-
-        if (OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             ArrayList<LivingEntity> selectedUnits = getSelectedUnits();
             ArrayList<LivingEntity> preselectedUnits = getPreselectedUnits();
 
@@ -528,7 +502,32 @@ public class UnitClientEvents {
                         MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(),1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f, false);
                 }
             }
+            for (LivingEntity entity : allUnits) {
+                if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()) ||
+                        entity.isPassenger())
+                    continue;
 
+                Relationship unitRs = getPlayerToEntityRelationship(entity);
+
+                float alpha = 0.5f;
+                if (selectedUnits.stream().map(u -> u.getId()).toList().contains(entity.getId()))
+                    alpha = 1.0f;
+
+                // draw only the bottom of the outline boxes
+                AABB entityAABB = entity.getBoundingBox();
+                entityAABB = entityAABB.setMaxY(entityAABB.minY);
+                boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
+
+                // always-shown highlights to indicate unit relationships
+                switch (unitRs) {
+                    case OWNED -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 1.0f, 0.2f, alpha, excludeMaxY);
+                    case FRIENDLY -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 0.2f, 1.0f, alpha, excludeMaxY);
+                    case HOSTILE -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.2f, 0.2f, alpha, excludeMaxY);
+                }
+            }
+        }
+
+        if (OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             // draw unit checkpoints
             for (LivingEntity entity : getSelectedUnits()) {
                 if (entity instanceof Unit unit) {

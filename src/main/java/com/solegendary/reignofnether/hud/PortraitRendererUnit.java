@@ -337,6 +337,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             ravagerModel.leftHindLeg.visible = visibility;
             ravagerModel.rightFrontLeg.visible = visibility;
             ravagerModel.leftFrontLeg.visible = visibility;
+            return;
         }
         else if (model instanceof WardenModel<?> wardenModel) {
             wardenModel.leftLeg.visible = visibility;
@@ -345,6 +346,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             wardenModel.rightArm.visible = visibility;
             wardenModel.rightLeg.visible = visibility;
             wardenModel.rightRibcage.visible = visibility;
+            return;
         }
         // TODO: doesn't work for players
         else if (model instanceof PlayerModel<?> playerModel) { // includes piglins
@@ -375,8 +377,9 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             illagerModel.leftArm.visible = visibility;
             illagerModel.rightArm.visible = visibility;
         }
+
         // hide all non-head models attached to root
-        else if (model instanceof HierarchicalModel<?> hierarchicalModel)
+        if (model instanceof HierarchicalModel<?> hierarchicalModel)
             setNonHeadRootModelVisibility(hierarchicalModel.root(), visibility);
     }
 

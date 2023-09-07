@@ -26,8 +26,8 @@ Another core design tenet is that the gamemode is fully compatible with vanilla 
 | Fog of war | ✔ |  |  
 | Resource collection | ✔ | Including drop offs and animations |
 | Building garrisoning | ✔ |  |
-| Villagers Race | 🟡 | TODO: Castle building and ravager units |  
-| Monsters Race | 🟡 | TODO: Stronghold building and warden units |  
+| Villagers Race | ✔ |  |  
+| Monsters Race | ✔ |  |  
 | Netherlings Race | ❌ |  |  
 | Improved vanilla player features | ❌ | Give vanilla-mode players more interaction with their RTS teammates |
 | Teams | ❌ | Including resource trading, shared unit control, etc. |
