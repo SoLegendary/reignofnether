@@ -25,7 +25,7 @@ import static com.solegendary.reignofnether.hud.HudClientEvents.showTemporaryMes
 
 public class SonicBoom extends Ability {
 
-    public static final int CD_MAX_SECONDS = 20;
+    public static final int CD_MAX_SECONDS = 30;
 
     private final WardenUnit wardenUnit;
 

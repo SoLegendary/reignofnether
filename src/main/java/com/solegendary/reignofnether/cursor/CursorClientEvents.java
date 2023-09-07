@@ -169,7 +169,7 @@ public class CursorClientEvents {
         // ****************************************
         // Find entity moused over and/or selected
         // ****************************************
-        List<LivingEntity> nearbyEntities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 10, LivingEntity.class, MC.level);
+        List<LivingEntity> nearbyEntities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 30, LivingEntity.class, MC.level);
 
         UnitClientEvents.clearPreselectedUnits();
 
