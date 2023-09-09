@@ -131,8 +131,7 @@ public abstract class Building {
         // re-hide players if they were revealed
         if (this.isCapitol && !this.level.isClientSide()) {
             if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 1) {
-                sendMessageToAllPlayers(this.ownerName + " has started their capitol at: " +
-                        "x=" + originPos.getX() + " z=" + originPos.getZ());
+                sendMessageToAllPlayers(this.ownerName + " has placed their capitol building!");
             }
             FogOfWarClientboundPacket.revealOrHidePlayer(false, this.ownerName);
         }

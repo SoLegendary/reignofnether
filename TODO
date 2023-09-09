@@ -18,9 +18,6 @@ TODO bugs/features:
 - set only non-worker units to avoid leaves
     - Warden constructor shows how we can set pathFindingMalus to have specific mobs avoid specific blocktypes
 
-- switch to SC2-style win-condition
-    - reveal enemy buildings if they haven't rebuilt their capitol fast enough
-
 
 
 
