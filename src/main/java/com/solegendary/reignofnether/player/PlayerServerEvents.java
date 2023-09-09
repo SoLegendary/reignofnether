@@ -80,10 +80,12 @@ public class PlayerServerEvents {
             ).toList().size();
 
             if (numBuildingsOwned > 0 && numCapitolsOwned == 0) {
-                this.ticksWithoutCapitol += 1;
-                if (ticksWithoutCapitol == TICKS_TO_REVEAL) {
-                    sendMessageToAllPlayers(this.name + " has not rebuilt their capitol and is being revealed!");
-                    FogOfWarClientboundPacket.revealOrHidePlayer(true, this.name);
+                if (ticksWithoutCapitol < TICKS_TO_REVEAL) {
+                    this.ticksWithoutCapitol += 1;
+                    if (ticksWithoutCapitol == TICKS_TO_REVEAL) {
+                        sendMessageToAllPlayers(this.name + " has not rebuilt their capitol and is being revealed!");
+                        FogOfWarClientboundPacket.revealOrHidePlayer(true, this.name);
+                    }
                 }
             } else {
                 this.ticksWithoutCapitol = 0;
@@ -101,7 +103,7 @@ public class PlayerServerEvents {
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
+        if (evt.phase == TickEvent.Phase.END)
             for (RTSPlayer rtsPlayer : rtsPlayers)
                 rtsPlayer.tick();
     }
@@ -171,9 +173,9 @@ public class PlayerServerEvents {
                 ((Unit) entity).setOwnerName(serverPlayer.getName().getString());
                 entity.moveTo(bp, 0,0);
                 level.addFreshEntity(entity);
-                rtsPlayers.add(new RTSPlayer(serverPlayer));
             }
         }
+        rtsPlayers.add(new RTSPlayer(serverPlayer));
     }
 
     // commands for ops to give resources
