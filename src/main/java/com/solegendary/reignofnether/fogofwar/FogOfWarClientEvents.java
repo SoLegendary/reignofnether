@@ -52,6 +52,19 @@ public class FogOfWarClientEvents {
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = false;
 
+    private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
+
+    public static void revealOrHidePlayer(boolean reveal, String playerName) {
+        if (reveal)
+            revealedPlayerNames.add(playerName);
+        else
+            revealedPlayerNames.removeIf(p -> p.equals(playerName));
+    }
+
+    public static boolean isPlayerRevealed(String name) {
+        return revealedPlayerNames.contains(name);
+    }
+
     @SubscribeEvent
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.Key evt) {
@@ -179,7 +192,8 @@ public class FogOfWarClientEvents {
                     occupiedChunks.add(new ChunkPos(entity.getOnPos()));
 
             for (Building building : BuildingClientEvents.getBuildings()) {
-                if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED) {
+                if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED ||
+                    isPlayerRevealed(building.ownerName)) {
                     if (building instanceof GarrisonableBuilding && building.isBuilt)
                         occupiedFarviewChunks.add(new ChunkPos(building.centrePos));
                     else

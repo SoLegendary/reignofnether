@@ -14,22 +14,31 @@ import java.util.function.Supplier;
 public class FogOfWarClientboundPacket {
 
     public boolean enable;
+    public String playerName;
 
     public static void setEnabled(boolean enable) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new FogOfWarClientboundPacket(enable));
+                new FogOfWarClientboundPacket(enable, ""));
     }
 
-    public FogOfWarClientboundPacket(boolean enable) {
+    public static void revealOrHidePlayer(boolean reveal, String playerName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new FogOfWarClientboundPacket(reveal, playerName));
+    }
+
+    public FogOfWarClientboundPacket(boolean enable, String playerName) {
         this.enable = enable;
+        this.playerName = playerName;
     }
 
     public FogOfWarClientboundPacket(FriendlyByteBuf buffer) {
         this.enable = buffer.readBoolean();
+        this.playerName = buffer.readUtf();
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeBoolean(this.enable);
+        buffer.writeUtf(this.playerName);
     }
 
     // server-side packet-consuming functions
@@ -39,7 +48,10 @@ public class FogOfWarClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> {
-                    FogOfWarClientEvents.setEnabled(enable);
+                    if (playerName.isEmpty())
+                        FogOfWarClientEvents.setEnabled(enable);
+                    else
+                        FogOfWarClientEvents.revealOrHidePlayer(enable, playerName);
                     success.set(true);
                 });
         });

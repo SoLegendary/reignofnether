@@ -1,9 +1,12 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -26,6 +29,7 @@ import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
@@ -42,7 +46,9 @@ public class PlayerServerEvents {
 
     public static final ArrayList<ServerPlayer> players = new ArrayList<>();
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
-    public static final Set<Integer> rtsPlayerIds = new HashSet<>(); // players that have run /startrts
+    private static final Set<RTSPlayer> rtsPlayers = new HashSet<>(); // players that have run /startrts
+
+    public static final int TICKS_TO_REVEAL = 10 * ResourceCost.TICKS_PER_SECOND;
 
     // warpten - faster building/unit production
     // operationcwal - faster resource gathering
@@ -54,6 +60,51 @@ public class PlayerServerEvents {
     public static final List<String> singleWordCheats = List.of(
             "warpten", "operationcwal", "iseedeadpeople", "modifythephasevariance", "medievalman", "foodforthought"
     );
+
+    private static class RTSPlayer {
+        public String name;
+        public int id;
+        public int ticksWithoutCapitol = 0;
+
+        RTSPlayer(ServerPlayer player) {
+            this.name = player.getName().getString();
+            this.id = player.getId();
+        }
+
+        public void tick() {
+            int numBuildingsOwned = BuildingServerEvents.getBuildings().stream().filter(
+                    b -> b.ownerName.equals(this.name)
+            ).toList().size();
+            int numCapitolsOwned = BuildingServerEvents.getBuildings().stream().filter(
+                    b -> b.ownerName.equals(this.name) && b.isCapitol
+            ).toList().size();
+
+            if (numBuildingsOwned > 0 && numCapitolsOwned == 0) {
+                this.ticksWithoutCapitol += 1;
+                if (ticksWithoutCapitol == TICKS_TO_REVEAL) {
+                    sendMessageToAllPlayers(this.name + " has not rebuilt their capitol and is being revealed!");
+                    FogOfWarClientboundPacket.revealOrHidePlayer(true, this.name);
+                }
+            } else {
+                this.ticksWithoutCapitol = 0;
+            }
+        }
+
+        public boolean isRevealed() {
+            return this.ticksWithoutCapitol >= TICKS_TO_REVEAL;
+        }
+    }
+
+    private static boolean isRTSPlayer(int id) {
+        return rtsPlayers.stream().filter(p -> p.id == id).toList().size() > 0;
+    }
+
+    @SubscribeEvent
+    public static void onServerTick(TickEvent.ServerTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END)
+            for (RTSPlayer rtsPlayer : rtsPlayers)
+                rtsPlayer.tick();
+    }
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
@@ -74,7 +125,7 @@ public class PlayerServerEvents {
             orthoviewPlayers.add((ServerPlayer) evt.getEntity());
         }
 
-        if (!rtsPlayerIds.contains(serverPlayer.getId())) {
+        if (!isRTSPlayer(serverPlayer.getId())) {
             serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
             serverPlayer.sendSystemMessage(Component.literal("Use /startrts <faction_name> to get started"));
             serverPlayer.sendSystemMessage(Component.literal("Make sure to be in a good base location first!"));
@@ -87,7 +138,6 @@ public class PlayerServerEvents {
             serverPlayer.sendSystemMessage(Component.literal("/fog enable | disable"));
             serverPlayer.sendSystemMessage(Component.literal("/startrts (unlimited use)"));
         }
-
     }
 
     @SubscribeEvent
@@ -105,7 +155,7 @@ public class PlayerServerEvents {
 
         if (serverPlayer == null)
             return;
-        if (rtsPlayerIds.contains(playerId) && !serverPlayer.hasPermissions(4))
+        if (isRTSPlayer(serverPlayer.getId()) && !serverPlayer.hasPermissions(4))
             return;
 
         EntityType<? extends Unit> entityType = switch(faction) {
@@ -121,7 +171,7 @@ public class PlayerServerEvents {
                 ((Unit) entity).setOwnerName(serverPlayer.getName().getString());
                 entity.moveTo(bp, 0,0);
                 level.addFreshEntity(entity);
-                rtsPlayerIds.add(serverPlayer.getId());
+                rtsPlayers.add(new RTSPlayer(serverPlayer));
             }
         }
     }

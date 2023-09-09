@@ -2,15 +2,14 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
-import com.solegendary.reignofnether.resources.ResourceName;
-import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
-import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
@@ -128,6 +127,15 @@ public abstract class Building {
             (float) (this.minCorner.getY() + this.maxCorner.getY()) / 2,
             (float) (this.minCorner.getZ() + this.maxCorner.getZ()) / 2
         );
+
+        // re-hide players if they were revealed
+        if (this.isCapitol && !this.level.isClientSide()) {
+            if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 1) {
+                sendMessageToAllPlayers(this.ownerName + " has completed their capitol at: " +
+                        "x=" + originPos.getX() + " z=" + originPos.getZ());
+            }
+            FogOfWarClientboundPacket.revealOrHidePlayer(false, this.ownerName);
+        }
     }
 
     // fully repairs and rebuilds all the blocks in the building
@@ -382,7 +390,11 @@ public abstract class Building {
                 serverLevel.destroyBlock(block.getBlockPos(), false);
         });
 
-        if (BuildingUtils.getTotalCompletedBuildingsOwned(this.level.isClientSide(), this.ownerName) == 0)
+        if (!this.level.isClientSide() && this.isCapitol)
+            sendMessageToAllPlayers(this.ownerName + " has lost their capitol and will be revealed in " +
+                    PlayerServerEvents.TICKS_TO_REVEAL / ResourceCost.TICKS_PER_SECOND + " seconds unless they rebuild it!");
+
+        if (!this.level.isClientSide() && BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 0)
             sendMessageToAllPlayers(this.ownerName + " has lost their final building and has been defeated!");
     }
 
@@ -419,7 +431,7 @@ public abstract class Building {
                 BlockPos movePos = pos;
                 // move down so they're not stuck above ground
                 if (pos.getY() > originPos.getY() + 4) {
-                    List<BlockPos> bps = this.blocks.stream().map(b -> b.getBlockPos())
+                    List<BlockPos> bps = this.blocks.stream().map(BuildingBlock::getBlockPos)
                             .filter(bp -> bp.getY() == originPos.getY() + 1 &&
                                 (bp.getX() == originPos.getX() || bp.getX() == maxCorner.getX() ||
                                  bp.getZ() == originPos.getZ() || bp.getZ() == maxCorner.getZ())).toList();
@@ -454,12 +466,7 @@ public abstract class Building {
     public void onBuilt() {
         isBuilt = true;
 
-        if (this.isCapitol && !this.level.isClientSide()) {
-            if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 1) {
-                sendMessageToAllPlayers(this.ownerName + " has completed their first capitol at: " +
-                        "x=" + originPos.getX() + " z=" + originPos.getZ());
-            }
-        }
+
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) { }

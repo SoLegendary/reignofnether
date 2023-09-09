@@ -734,23 +734,6 @@ public class HudClientEvents {
         for (Button button : renderedButtons)
             if (button.isMouseOver(mouseX, mouseY))
                 button.renderTooltip(evt.getPoseStack(), mouseX, mouseY);
-
-        // -------------------------
-        // No buildings left warning
-        // -------------------------
-        int numOwnedBuildings = 0;
-        for (Building building : BuildingClientEvents.getBuildings())
-            if (MC.player != null && building.ownerName.equals(MC.player.getName().getString()))
-                numOwnedBuildings += 1;
-        if (numOwnedBuildings == 0) {
-            /*
-            GuiComponent.drawString(evt.getPoseStack(), MC.font,
-                    "You have no buildings!",
-                    screenWidth - 115,
-                    5,
-                    0xFFFFFFFF);
-             */
-        }
     }
 
     public static boolean isMouseOverAnyButton() {
