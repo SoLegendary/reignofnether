@@ -147,6 +147,13 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit {
                 .add(Attributes.MAX_HEALTH, SpiderUnit.maxHealth);
     }
 
+    // for some reason this.getNavigation().stop(); doesn't stop spider units from moving
+    @Override
+    public void resetBehaviours() {
+        this.getMoveGoal().setMoveTarget(this.getOnPos());
+        this.getCheckpoints().clear();
+    }
+
     public void tick() {
         this.setCanPickUpLoot(false);
 

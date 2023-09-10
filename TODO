@@ -17,10 +17,6 @@ TODO bugs/features:
     - setPathfindingMalus doesn't seem to work?
     - Implement this after netherlings faction since it's needed for fire-immune mobs to freely walk over magma
 
-- spiders and poison spiders (even when not mounted) don't stop movement on S
-    - mob.getNavigation().stop() doesn't seem to affect them, even though it sets isDone() and !isInProgress()
-
-
 
 
 TODO test in next playtest

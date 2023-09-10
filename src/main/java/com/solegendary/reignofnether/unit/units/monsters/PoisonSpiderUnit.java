@@ -140,6 +140,12 @@ public class PoisonSpiderUnit extends CaveSpider implements Unit, AttackerUnit {
                 .add(Attributes.MAX_HEALTH, PoisonSpiderUnit.maxHealth);
     }
 
+    @Override
+    public void resetBehaviours() {
+        this.getMoveGoal().setMoveTarget(this.getOnPos());
+        this.getCheckpoints().clear();
+    }
+
     public void tick() {
         this.setCanPickUpLoot(false);
 
