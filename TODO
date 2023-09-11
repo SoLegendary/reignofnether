@@ -17,6 +17,18 @@ TODO bugs/features:
     - setPathfindingMalus doesn't seem to work?
     - Implement this after netherlings faction since it's needed for fire-immune mobs to freely walk over magma
 
+- test compatibility with a performance improvement mod (eg. optifine)
+
+
+
+
+- remove setNonHeadModelVisibility and make an editor for the portrait model for xyz/scale settings to set for each model
+
+- selecting any single mob (even non-units) and then doubling clicking the hotkey to move to a faraway unit control group will crash the game
+    - could also be related to setNonHeadModelVisibility staying active after deselecting a unit
+    - almost certainly caused by PortraitRendererUnit.drawEntityOnScreen
+
+
 
 
 TODO test in next playtest
@@ -42,6 +54,7 @@ TODO test in next playtest
     - destroying last building
     - building first capitol
     - being revealed after 1min of destroying a capitol and not rebuilding
+
 
 
 TODO buildings/units (backlog)

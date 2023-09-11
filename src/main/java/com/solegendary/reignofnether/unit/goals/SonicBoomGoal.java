@@ -33,7 +33,7 @@ public class SonicBoomGoal extends AbstractCastTargetedSpellGoal {
     public void stop() {
         // hack fix to stop a weird bug where it gets stopped unexpectedly (serverside)
         // happens when needing to move towards the target first
-        if (this.ticksCasting <= 2)
+        if (this.ticksCasting <= 2 && isInRange())
             return;
         super.stop();
     }

@@ -55,7 +55,7 @@ public class Roar extends Ability {
                 FormattedCharSequence.forward("Emit a deafening roar, knocking away, damaging", Style.EMPTY),
                 FormattedCharSequence.forward("and briefly slowing down all nearby enemies. ", Style.EMPTY)
             ),
-            null
+            this
         );
     }
 
@@ -63,6 +63,7 @@ public class Roar extends Ability {
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
         ravagerUnit.resetBehaviours();
         ravagerUnit.startToRoar();
-        super.setToMaxCooldown();
+        this.setToMaxCooldown();
+        System.out.println(this.getCooldown());
     }
 }

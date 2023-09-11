@@ -143,10 +143,10 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    public final static float ROAR_DAMAGE = 6.0f;
+    public final static float ROAR_DAMAGE = 8.0f;
     public final static float ROAR_RANGE = 4.0f;
-    public final static float ROAR_KNOCKBACK = 2.5f;
-    public final static int ROAR_SLOW_DURATION = 5 * ResourceCost.TICKS_PER_SECOND;
+    public final static float ROAR_KNOCKBACK = 3f;
+    public final static int ROAR_SLOW_DURATION = 10 * ResourceCost.TICKS_PER_SECOND;
 
     private static final Predicate<Entity> NO_RAVAGER_AND_ALIVE = e -> e.isAlive() && !(e instanceof Ravager);
 
@@ -243,12 +243,13 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
             }
             Vec3 vec3 = this.getBoundingBox().getCenter();
 
-            for(int i = 0; i < 40; ++i) {
+            for(int i = 0; i < 80; ++i) {
                 double d0 = this.random.nextGaussian() * 0.2;
                 double d1 = this.random.nextGaussian() * 0.2;
                 double d2 = this.random.nextGaussian() * 0.2;
                 this.level.addParticle(ParticleTypes.POOF, vec3.x, vec3.y, vec3.z, d0, d1, d2);
             }
+            this.playSound(SoundEvents.GENERIC_EXPLODE, 1.0F, 1.0F);
             this.gameEvent(GameEvent.ENTITY_ROAR);
         }
     }

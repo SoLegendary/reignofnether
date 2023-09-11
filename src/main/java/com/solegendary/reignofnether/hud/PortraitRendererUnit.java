@@ -169,7 +169,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         }
 
         // hide all model parts except the head
-        setNonHeadModelVisibility(false);
+        //setNonHeadModelVisibility(false);
         List<RenderLayer<T, M>> layers = null;
         if (renderer != null) {
             layers = renderer.layers;
@@ -179,7 +179,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         drawEntityOnScreen(poseStack, entity, drawX, drawY, headSizeFinal);
         if (renderer != null && layers != null)
             renderer.layers = layers;
-        setNonHeadModelVisibility(true);
+        //setNonHeadModelVisibility(true);
 
         if (entity.getPassengers().size() == 1) {
             String pName = getSimpleEntityName(entity.getPassengers().get(0)).replace("_"," ");

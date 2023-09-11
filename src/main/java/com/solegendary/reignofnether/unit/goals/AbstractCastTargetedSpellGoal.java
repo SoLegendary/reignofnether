@@ -47,7 +47,7 @@ public abstract class AbstractCastTargetedSpellGoal extends MoveToTargetBlockGoa
         this.ability = ability;
     }
 
-    private boolean isInRange() {
+    protected boolean isInRange() {
         if (moveTarget != null && MyMath.distance(
                 this.mob.getX(), this.mob.getZ(),
                 moveTarget.getX(), moveTarget.getZ()) <= range)
