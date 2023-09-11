@@ -194,7 +194,7 @@ public class FogOfWarClientEvents {
             for (Building building : BuildingClientEvents.getBuildings()) {
                 if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED ||
                     isPlayerRevealed(building.ownerName)) {
-                    if (building instanceof GarrisonableBuilding && building.isBuilt)
+                    if (building instanceof GarrisonableBuilding && GarrisonableBuilding.getNumOccupants(building) > 0 && building.isBuilt)
                         occupiedFarviewChunks.add(new ChunkPos(building.centrePos));
                     else
                         occupiedChunks.add(new ChunkPos(building.centrePos));
