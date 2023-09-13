@@ -27,7 +27,7 @@ public class PortraitRendererModifiers {
             yOffset = -15;
             scale = -15;
         } else if (entity instanceof Pig) {
-            yOffset = -10;
+            yOffset = 10;
         } else if (entity instanceof IronGolem) {
             yOffset = -54;
             scale = -17;
@@ -73,6 +73,9 @@ public class PortraitRendererModifiers {
             yOffset = 26;
         } else if (entity instanceof EnderMan) {
             yOffset = -15;
+        } else if (entity instanceof Ravager) {
+            yOffset = -54;
+            scale = -25;
         }
 
         return new Pair<>(yOffset, scale);

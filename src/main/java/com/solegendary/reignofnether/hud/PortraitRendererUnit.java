@@ -145,15 +145,6 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         drawY += yAndScaleOffsets.getFirst();
         sizeFinal += yAndScaleOffsets.getSecond();
 
-        /*
-        else if (entity instanceof Warden) {
-            drawY -= 45;
-            headSizeFinal = 30;
-        } else if (entity instanceof Ravager) {
-            drawY -= 45;
-            headSizeFinal = 26;
-        } */
-
         drawEntityOnScreen(poseStack, entity, drawX, drawY, sizeFinal);
 
         if (entity.getPassengers().size() == 1) {

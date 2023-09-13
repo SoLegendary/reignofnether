@@ -892,36 +892,4 @@ public class HudClientEvents {
             }
         }
     }
-
-
-
-
-    public static int portraitXOffset = 0;
-    public static int portraitYOffset = 0;
-    public static int portraitScale = 0;
-
-    @SubscribeEvent
-    public static void onKeyPress(ScreenEvent.KeyPressed.KeyPressed.Post evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT)
-            portraitXOffset -= 1;
-        else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT)
-            portraitXOffset += 1;
-        else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP)
-            portraitYOffset -= 1;
-        else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN)
-            portraitYOffset += 1;
-        else if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT_BRACKET)
-            portraitScale -= 1;
-        else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT_BRACKET)
-            portraitScale += 1;
-    }
-
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "x: " + portraitXOffset,
-                "y: " + portraitYOffset,
-                "scale: " + portraitScale,
-        });
-    }
 }

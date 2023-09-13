@@ -4,7 +4,7 @@ TODO bugs/features:
 - slow down fire/magma/suffocation damage events
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - workers are not marked as idle until 10-15s after stopping gathering
-- strays sometimes just all lose their clothing layers
+- don't render ominous banners in portrait
 
 - Tutorial documentation/gifs
 
@@ -21,8 +21,6 @@ TODO bugs/features:
 
 
 
-
-- make an editor for the portrait model for xyz/scale settings to set for each model
 
 
 TODO test in next playtest
