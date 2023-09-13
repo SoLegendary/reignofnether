@@ -17,6 +17,7 @@
         "ClientPacketMixin",
         "EntityRenderMixin",
         "FrustumMixin",
+        "MobRendererMixin",
         "OrthoViewMixin",
         "TopdownGuiMixin",
         "fogofwar.ChunkRenderDispatcherMixin",

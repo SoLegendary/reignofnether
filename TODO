@@ -22,13 +22,7 @@ TODO bugs/features:
 
 
 
-- remove setNonHeadModelVisibility and make an editor for the portrait model for xyz/scale settings to set for each model
-
-- selecting any single mob (even non-units) and then doubling clicking the hotkey to move to a faraway unit control group will crash the game
-    - could also be related to setNonHeadModelVisibility staying active after deselecting a unit
-    - almost certainly caused by PortraitRendererUnit.drawEntityOnScreen
-
-
+- make an editor for the portrait model for xyz/scale settings to set for each model
 
 
 TODO test in next playtest

@@ -100,7 +100,7 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.Render evt) {
+    public static void onDrawScreen(ScreenEvent.Render.Post evt) {
         if (!OrthoviewClientEvents.isEnabled() || !(evt.getScreen() instanceof TopdownGui))
             return;
         if (MC.level == null)
@@ -435,12 +435,13 @@ public class HudClientEvents {
                     iconSize,
                     new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png"),
                     unit,
-                    () -> getSimpleEntityName(hudSelectedEntity).equals(unitName),
+                    () -> hudSelectedEntity == null || getSimpleEntityName(hudSelectedEntity).equals(unitName),
                     () -> false,
                     () -> true,
                     () -> {
                         // click to select this unit type as a group
-                        if (getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
+                        if (hudSelectedEntity == null &&
+                            getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
                             UnitClientEvents.clearSelectedUnits();
                             UnitClientEvents.addSelectedUnit(unit);
                         } else { // select this one specific unit
@@ -803,7 +804,7 @@ public class HudClientEvents {
 
     @SubscribeEvent
     // hudSelectedEntity and portraitRendererUnit should be assigned in the same event to avoid desyncs
-    public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
+    public static void onRenderLivingEntity(RenderLivingEvent.Post<? extends LivingEntity, ? extends Model> evt) {
 
         ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
 
@@ -816,7 +817,6 @@ public class HudClientEvents {
             hudSelectedEntity = units.get(0);
 
         if (hudSelectedEntity == null) {
-            portraitRendererUnit.setNonHeadModelVisibility(true);
             portraitRendererUnit.model = null;
             portraitRendererUnit.renderer = null;
         }
@@ -850,7 +850,7 @@ public class HudClientEvents {
         }
 
         // initialise with empty arrays
-        if (controlGroups.size() <= 0)
+        if (controlGroups.size() == 0)
             for (Keybinding keybinding : Keybindings.nums)
                 controlGroups.add(new ControlGroup());
 
@@ -891,5 +891,37 @@ public class HudClientEvents {
                 }
             }
         }
+    }
+
+
+
+
+    public static int portraitXOffset = 0;
+    public static int portraitYOffset = 0;
+    public static int portraitScale = 0;
+
+    @SubscribeEvent
+    public static void onKeyPress(ScreenEvent.KeyPressed.KeyPressed.Post evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT)
+            portraitXOffset -= 1;
+        else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT)
+            portraitXOffset += 1;
+        else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP)
+            portraitYOffset -= 1;
+        else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN)
+            portraitYOffset += 1;
+        else if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT_BRACKET)
+            portraitScale -= 1;
+        else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT_BRACKET)
+            portraitScale += 1;
+    }
+
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+                "x: " + portraitXOffset,
+                "y: " + portraitYOffset,
+                "scale: " + portraitScale,
+        });
     }
 }
