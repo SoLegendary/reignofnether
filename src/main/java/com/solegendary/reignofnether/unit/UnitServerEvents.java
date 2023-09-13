@@ -373,9 +373,16 @@ public class UnitServerEvents {
         if (evt.getRayTraceResult().getType() == HitResult.Type.ENTITY)
             hit = ((EntityHitResult) evt.getRayTraceResult()).getEntity();
 
-        if (owner instanceof Unit unit && hit != null)
-            if (getUnitToEntityRelationship(unit, hit) == Relationship.FRIENDLY && unit.getTargetGoal().getTarget() != hit)
+        if (owner instanceof Unit unit && hit != null) {
+            if (getUnitToEntityRelationship(unit, hit) == Relationship.FRIENDLY &&
+                unit.getTargetGoal().getTarget() != hit
+            ) {
+                // for some reason, if we try to cancel a pierced arrow, it loops here forever
+                if (evt.getProjectile() instanceof AbstractArrow arrow && arrow.getPierceLevel() > 0)
+                    return;
                 evt.setCanceled(true);
+            }
+        }
     }
 
     public static ArrayList<Integer> knockbackIgnoreIds = new ArrayList<>();

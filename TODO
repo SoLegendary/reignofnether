@@ -2,20 +2,12 @@
 TODO bugs/features:
 
 - slow down fire/magma/suffocation damage events
+    - don't prevent units walking over magma
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - workers are not marked as idle until 10-15s after stopping gathering
 - don't render ominous banners in portrait
 
 - Tutorial documentation/gifs
-
-- multiple arrows hitting the same target bounce
-    - maybe give visual-only piercing?
-    - piercing causes some sort of deadlock??
-
-- set only non-worker units to avoid leaves
-    - Warden constructor shows how we can set pathFindingMalus to have specific mobs avoid specific blocktypes
-    - setPathfindingMalus doesn't seem to work?
-    - Implement this after netherlings faction since it's needed for fire-immune mobs to freely walk over magma
 
 - test compatibility with a performance improvement mod (eg. optifine)
 
@@ -25,27 +17,6 @@ TODO bugs/features:
 
 TODO test in next playtest
 
-- skeleton attack AI
-- 2-chunk vision range to garrisonables
-- removing tall trees
-- new building health formulas
-- creeper building damage
-- strongholds
-    - including night range
-- wardens
-- castles
-- ravagers
-    - mounting
-    - roaring
-- wardens
-    - sonic booms
-- silverfish unit and research
-- promotion ability
-
-- building messages
-    - destroying last building
-    - building first capitol
-    - being revealed after 1min of destroying a capitol and not rebuilding
 
 
 
