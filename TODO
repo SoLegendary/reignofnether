@@ -5,7 +5,6 @@ TODO bugs/features:
     - don't prevent units walking over magma
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - workers are not marked as idle until 10-15s after stopping gathering
-- don't render ominous banners in portrait
 
 - Tutorial documentation/gifs
 

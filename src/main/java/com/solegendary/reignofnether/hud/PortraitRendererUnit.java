@@ -28,10 +28,14 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BannerItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -145,8 +149,16 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         drawY += yAndScaleOffsets.getFirst();
         sizeFinal += yAndScaleOffsets.getSecond();
 
+        ItemStack itemStack = entity.getItemBySlot(EquipmentSlot.HEAD);
+        if (itemStack.getItem() instanceof BannerItem)
+            entity.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+
         drawEntityOnScreen(poseStack, entity, drawX, drawY, sizeFinal);
 
+        if (itemStack.getItem() instanceof BannerItem) {
+            entity.setItemSlot(EquipmentSlot.HEAD, itemStack);
+            name += " Captain";
+        }
         if (entity.getPassengers().size() == 1) {
             String pName = getSimpleEntityName(entity.getPassengers().get(0)).replace("_"," ");
             String nameCap = pName.substring(0, 1).toUpperCase() + pName.substring(1);
