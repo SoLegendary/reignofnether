@@ -4,7 +4,7 @@ TODO bugs/features:
 - slow down fire/magma/suffocation damage events
     - don't prevent units walking over magma
 - time set causes desyncs when done with /gamerule dodaynightcycle false
-- workers are not marked as idle until 10-15s after stopping gathering
+- workers are not marked as idle until 15s after stopping gathering
 
 - Tutorial documentation/gifs
 
@@ -16,9 +16,8 @@ TODO bugs/features:
 - zombie villager stopped hunting a sheep
     - because it went out of view?
 
-- count of how many villagers are assigned to each resource type
-
 - can't double click garrisoned units
+
 
 
 TODO test in next playtest
@@ -29,7 +28,7 @@ mute sounds originating from fog of war
 right click to find nearest mountable
 new lingering potion upgrades
 check garrisoned range unit isAggressive, especially in castles (pillagers didn't aggro against attackers)
-
+gathering worker counts
 
 
 TODO buildings/units (backlog)

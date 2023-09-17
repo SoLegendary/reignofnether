@@ -8,6 +8,8 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -604,22 +606,28 @@ public class HudClientEvents {
             for (String resourceName : new String[]{ "food", "wood", "ore", "pop" }) {
                 String rlPath = "";
                 String resValueStr = "";
+                ResourceName resName;
+
                 switch (resourceName) {
                     case "food" -> {
                         rlPath = "textures/icons/items/wheat.png";
                         resValueStr = String.valueOf(resources.food);
+                        resName = ResourceName.FOOD;
                     }
                     case "wood" -> {
                         rlPath = "textures/icons/items/wood.png";
                         resValueStr = String.valueOf(resources.wood);
+                        resName = ResourceName.WOOD;
                     }
                     case "ore" -> {
                         rlPath = "textures/icons/items/iron_ore.png";
                         resValueStr = String.valueOf(resources.ore);
+                        resName = ResourceName.ORE;
                     }
-                    case "pop" -> {
+                    default -> {
                         rlPath = "textures/icons/items/bed.png";
                         resValueStr = UnitClientEvents.getCurrentPopulation() + "/" + BuildingClientEvents.getTotalPopulationSupply();
+                        resName = ResourceName.NONE;
                     }
                 }
                 hudZones.add(MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX + iconFrameSize - 1, blitY,
@@ -637,6 +645,28 @@ public class HudClientEvents {
                 );
                 GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, resValueStr,
                         blitX + (iconFrameSize) + 24 , blitY + (iconSize / 2) + 1, 0xFFFFFF);
+
+                // worker count assigned to each resource
+                if (resName != ResourceName.NONE) {
+                    int numWorkersAssigned = UnitClientEvents.getAllUnits().stream().filter(
+                            u -> u instanceof WorkerUnit wu && !UnitClientEvents.idleWorkerIds.contains(u.getId()) &&
+                                    wu.getGatherResourceGoal().getTargetResourceName().equals(resName)
+                    ).toList().size();
+                    int numWorkersHunting = UnitClientEvents.getAllUnits().stream().filter(
+                            u -> u instanceof WorkerUnit wu && u instanceof Unit unit &&
+                                    ResourceSources.isHuntableAnimal(unit.getTargetGoal().getTarget())
+                    ).toList().size();
+                    if (resName == ResourceName.FOOD)
+                        numWorkersAssigned += numWorkersHunting;
+
+                    hudZones.add(MyRenderer.renderIconFrameWithBg(evt.getPoseStack(),
+                            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                            blitX + 69, blitY, iconFrameSize, iconBgColour));
+
+                    GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, String.valueOf(numWorkersAssigned),
+                            blitX + 69 + (iconFrameSize / 2) , blitY + (iconSize / 2) + 1, 0xFFFFFF);
+                }
+
                 blitY += iconFrameSize - 1;
             }
         }
@@ -715,12 +745,13 @@ public class HudClientEvents {
         // Attack warning button
         // ---------------------
         Button attackWarningButton = AttackWarningClientEvents.getWarningButton();
-        if (!attackWarningButton.isHidden.get())
+        if (!attackWarningButton.isHidden.get()) {
             attackWarningButton.render(evt.getPoseStack(),
                     screenWidth - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 14,
                     screenHeight - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) - 2,
                     mouseX, mouseY);
-        renderedButtons.add(attackWarningButton);
+            renderedButtons.add(attackWarningButton);
+        }
 
         // ----------------------
         // Map size toggle button
