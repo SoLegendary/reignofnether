@@ -64,8 +64,15 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Hoglin || entity instanceof Zoglin) {
             yOffset = -12;
             scale = -18;
-        } else if (entity instanceof Slime) { // largest size only
-            yOffset = -35;
+        } else if (entity instanceof Slime slime) { // largest size only
+            if (slime.getSize() == 4)
+                yOffset = -35;
+            else if (slime.getSize() == 3)
+                yOffset = -18;
+            else if (slime.getSize() == 2)
+                yOffset = -1;
+            else if (slime.getSize() == 1)
+                yOffset = 16;
             scale = -28;
         } else if (entity instanceof Wolf) {
             yOffset = 12;
@@ -76,6 +83,12 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Ravager) {
             yOffset = -54;
             scale = -25;
+        } else if (entity instanceof Dolphin) {
+            yOffset = 20;
+            scale = -5;
+        } else if (entity instanceof Bee) {
+            yOffset = 20;
+            scale = -5;
         }
 
         return new Pair<>(yOffset, scale);

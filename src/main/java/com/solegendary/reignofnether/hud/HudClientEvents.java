@@ -99,6 +99,11 @@ public class HudClientEvents {
         tempMsg = msg;
     }
 
+    public static void removeFromControlGroups(int entityId) {
+        for (ControlGroup controlGroup : controlGroups)
+            controlGroup.entityIds.removeIf(id -> id == entityId);
+    }
+
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
         if (!OrthoviewClientEvents.isEnabled() || !(evt.getScreen() instanceof TopdownGui))

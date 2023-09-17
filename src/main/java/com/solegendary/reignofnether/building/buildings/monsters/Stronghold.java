@@ -47,7 +47,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
         this.woodCost = cost.wood;
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
-        this.buildTimeModifier = 0.6f;
+        this.buildTimeModifier = 0.5f;
 
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE);
         this.startingBlockTypes.add(Blocks.DEEPSLATE_TILE_SLAB);
@@ -56,8 +56,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                    WardenUnitProd.getStartButton(this, Keybindings.keyQ),
-                    ResearchSilverfish.getStartButton(this, Keybindings.keyW)
+                WardenUnitProd.getStartButton(this, Keybindings.keyQ)
             );
     }
 

@@ -176,6 +176,11 @@ public class PlayerServerEvents {
             }
         }
         rtsPlayers.add(new RTSPlayer(serverPlayer));
+
+        if (faction == Faction.MONSTERS) {
+            level.setDayTime(13000);
+        }
+        sendMessageToAllPlayers(serverPlayer.getName().getString() + " has started the game!");
     }
 
     // commands for ops to give resources

@@ -29,7 +29,7 @@ public class ResourceCosts {
         return FormattedCharSequence.forward("\uE004  " + resCost.ticks/ResourceCost.TICKS_PER_SECOND + "s", MyRenderer.iconStyle);
     }
 
-    public static final int REPLANT_WOOD_COST = 2;
+    public static final int REPLANT_WOOD_COST = 1;
     public static final int REDUCED_REPLANT_WOOD_COST = 1;
     public static final int MAX_POPULATION = 100; // max possible pop you can have regardless of buildings
 
@@ -49,12 +49,12 @@ public class ResourceCosts {
 
     // Villagers
     public static ResourceCost VILLAGER = ResourceCost.Unit(50,0,0,15,1);
-    public static ResourceCost IRON_GOLEM = ResourceCost.Unit(0,0,250,40,5);
+    public static ResourceCost IRON_GOLEM = ResourceCost.Unit(0,0,250,40,4);
     public static ResourceCost PILLAGER = ResourceCost.Unit(100,80,0,30,2);
     public static ResourceCost VINDICATOR = ResourceCost.Unit(150,0,0,30,2);
     public static ResourceCost WITCH = ResourceCost.Unit(100,100,100,35,3);
     public static ResourceCost EVOKER = ResourceCost.Unit(150,0,150,35,3);
-    public static ResourceCost RAVAGER = ResourceCost.Unit(250,50,150,45,6);
+    public static ResourceCost RAVAGER = ResourceCost.Unit(300,50,150,45,6);
 
     // ******************* BUILDINGS ******************* //
     public static ResourceCost STOCKPILE = ResourceCost.Building(0,75,0, 0);

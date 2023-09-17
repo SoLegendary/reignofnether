@@ -50,7 +50,7 @@ public class ResearchEvokerVexes extends ProductionItem {
             () -> false,
             () -> ProductionItem.itemIsBeingProduced(ResearchEvokerVexes.itemName) ||
                     ResearchClient.hasResearch(ResearchEvokerVexes.itemName),
-            () -> ResearchClient.hasResearch(ResearchEvokers.itemName),
+            () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(

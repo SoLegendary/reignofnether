@@ -9,7 +9,6 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchEvokerVexes;
-import com.solegendary.reignofnether.research.researchItems.ResearchEvokers;
 import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPotions;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -56,7 +55,6 @@ public class Library extends ProductionBuilding {
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
                 ResearchLingeringPotions.getStartButton(this, Keybindings.keyQ),
-                ResearchEvokers.getStartButton(this, Keybindings.keyW),
                 ResearchEvokerVexes.getStartButton(this, Keybindings.keyE)
             );
     }

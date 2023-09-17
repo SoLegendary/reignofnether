@@ -47,7 +47,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
         this.woodCost = cost.wood;
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
-        this.buildTimeModifier = 0.6f;
+        this.buildTimeModifier = 0.5f;
 
         this.startingBlockTypes.add(Blocks.STONE_BRICKS);
         this.startingBlockTypes.add(Blocks.STONE_BRICK_WALL);

@@ -464,8 +464,6 @@ public abstract class Building {
 
     public void onBuilt() {
         isBuilt = true;
-
-
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) { }

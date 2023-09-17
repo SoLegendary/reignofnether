@@ -81,6 +81,8 @@ public class UnitClientEvents {
     public static void addSelectedUnit(LivingEntity unit) {
         if (!FogOfWarClientEvents.isInBrightChunk(unit.getOnPos()))
             return;
+        if (unit.isPassenger())
+            return;
         selectedUnits.add(unit);
         selectedUnits.sort(Comparator.comparing(HudClientEvents::getSimpleEntityName));
         selectedUnits.sort(Comparator.comparing(Entity::getId));

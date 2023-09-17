@@ -80,6 +80,9 @@ public class ClientLevelMixin {
     private void playSoundActual(double pX, double pY, double pZ, SoundEvent pSoundEvent, SoundSource pSource,
                            float pVolume, float pPitch, boolean pDistanceDelay, long pSeed) {
 
+        if (!FogOfWarClientEvents.isInBrightChunk(new BlockPos(pX + 0.5f, pY + 0.5f, pZ + 0.5f)))
+            return;
+
         Vec3 soundPos = getOrthoviewSoundPos(new Vec3(pX, pY, pZ));
 
         double d0 = this.minecraft.gameRenderer.getMainCamera().getPosition().distanceToSqr(soundPos.x(), soundPos.y(), soundPos.z());

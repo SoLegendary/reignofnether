@@ -13,11 +13,30 @@ TODO bugs/features:
 
 
 
+- should be able to right click animals to attack
+- zombie villager stopped hutning a sheep
+    - because it went out of view?
+
+- count of how many villagers are assigned to each resource type
+
+- can't double click garrisoned units
+
+- check garrisoned range unit isAggressive, especially in castles (pillagers didn't aggro against attackers)
+
+- don't destroy garrisonable building fence/walls/floors (or else units can fall off)
+
+- buff potion damage
+    - double potion damage if it originated from a witchUnit
+
+
+
 
 TODO test in next playtest
 
-
-
+researchEvokers removed
+selecting passengers via control groups or double clicking
+mute sounds originating from fog of war
+right click to find nearest mountable
 
 TODO buildings/units (backlog)
 

@@ -125,7 +125,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     final static public float attackDamage = 6.0f;
     final static public float attacksPerSecond = 0.6f;
-    final static public float maxHealth = 100.0f;
+    final static public float maxHealth = 200.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.27f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
@@ -145,7 +145,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     public final static float ROAR_DAMAGE = 8.0f;
     public final static float ROAR_RANGE = 4.0f;
-    public final static float ROAR_KNOCKBACK = 3f;
+    public final static float ROAR_KNOCKBACK = 4f;
     public final static int ROAR_SLOW_DURATION = 10 * ResourceCost.TICKS_PER_SECOND;
 
     private static final Predicate<Entity> NO_RAVAGER_AND_ALIVE = e -> e.isAlive() && !(e instanceof Ravager);
