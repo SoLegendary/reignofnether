@@ -20,8 +20,6 @@ TODO bugs/features:
 
 - can't double click garrisoned units
 
-- don't destroy garrisonable building fence/walls/floors (or else units can fall off)
-
 
 TODO test in next playtest
 
@@ -31,6 +29,8 @@ mute sounds originating from fog of war
 right click to find nearest mountable
 new lingering potion upgrades
 check garrisoned range unit isAggressive, especially in castles (pillagers didn't aggro against attackers)
+
+
 
 TODO buildings/units (backlog)
 

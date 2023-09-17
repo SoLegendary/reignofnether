@@ -69,6 +69,11 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 
+    public boolean canDestroyBlock(BlockPos relativeBp) {
+        return relativeBp.getY() != 13 &&
+                relativeBp.getY() != 14;
+    }
+
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
             Stronghold.buildingName,

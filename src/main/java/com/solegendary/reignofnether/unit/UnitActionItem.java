@@ -97,9 +97,10 @@ public class UnitActionItem {
                         unit.getGarrisonGoal().setBuildingTarget(preselectedBlockPos);
                 }
                 case UNGARRISON -> {
-                    if (GarrisonableBuilding.getGarrison(unit) instanceof GarrisonableBuilding garrisonableBuilding) {
-                        Building building = (Building) garrisonableBuilding;
-                        BlockPos bp = building.originPos.offset(garrisonableBuilding.getExitPosition());
+                    GarrisonableBuilding garr = GarrisonableBuilding.getGarrison(unit);
+                    if (garr != null) {
+                        Building building = (Building) garr;
+                        BlockPos bp = building.originPos.offset(garr.getExitPosition());
                         ((LivingEntity) unit).teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
                     }
                 }

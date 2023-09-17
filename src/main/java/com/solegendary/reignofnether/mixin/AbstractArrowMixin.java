@@ -53,11 +53,15 @@ public abstract class AbstractArrowMixin extends Projectile {
     )
     public void isNoPhysics(CallbackInfoReturnable<Boolean> cir) {
         if (this.getOwner() instanceof Unit unit) {
-            Building garrison = GarrisonableBuilding.getGarrison(unit);
-            if (garrison != null && garrison.isPosInsideBuilding(this.blockPosition()) &&
-                this.blockPosition().getY() > garrison.originPos.getY() + 5) {
+            GarrisonableBuilding garr = GarrisonableBuilding.getGarrison(unit);
+
+            if (garr != null ) {
+                Building building = (Building) garr;
+
                 // only have nophysics at a high Y value so we can still attack enemies at the base of the building
-                cir.setReturnValue(true);
+                if (building.isPosInsideBuilding(this.blockPosition()) &&
+                    this.blockPosition().getY() > building.originPos.getY() + 5)
+                    cir.setReturnValue(true);
             }
         }
     }

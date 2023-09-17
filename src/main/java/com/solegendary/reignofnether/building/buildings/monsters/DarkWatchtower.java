@@ -55,6 +55,11 @@ public class DarkWatchtower extends Building implements GarrisonableBuilding {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 
+    public boolean canDestroyBlock(BlockPos relativeBp) {
+        return relativeBp.getY() != 10 &&
+                relativeBp.getY() != 11;
+    }
+
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
             DarkWatchtower.buildingName,

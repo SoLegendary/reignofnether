@@ -340,6 +340,8 @@ public abstract class Building {
                             this.level.getBlockState(b.getBlockPos().east()).getMaterial().isLiquid() ||
                             this.level.getBlockState(b.getBlockPos().west()).getMaterial().isLiquid())
                         return false;
+                    if (!canDestroyBlock(b.getBlockPos().offset(-originPos.getX(), -originPos.getY(), -originPos.getZ())))
+                        return false;
                     return b.isPlaced(getLevel());
                 }
         ).toList());
@@ -441,6 +443,16 @@ public abstract class Building {
                                  bp.getZ() == originPos.getZ() || bp.getZ() == maxCorner.getZ())).toList();
 
                     movePos = bps.get(rand.nextInt(bps.size()));
+                }
+                if (!this.level.getBlockState(movePos).isAir()) {
+                    if (this.level.getBlockState(movePos.north()).isAir())
+                        movePos = movePos.north();
+                    else if (this.level.getBlockState(movePos.south()).isAir())
+                        movePos = movePos.south();
+                    else if (this.level.getBlockState(movePos.east()).isAir())
+                        movePos = movePos.east();
+                    else if (this.level.getBlockState(movePos.west()).isAir())
+                        movePos = movePos.west();
                 }
                 entity.moveTo(
                         movePos.getX() + 0.5f,
