@@ -426,7 +426,8 @@ public class UnitClientEvents {
                 // right click -> attack unfriendly unit
                 if (preselectedUnits.size() == 1 &&
                     !targetingSelf() &&
-                    getPlayerToEntityRelationship(preselectedUnits.get(0)) == Relationship.HOSTILE) {
+                    (getPlayerToEntityRelationship(preselectedUnits.get(0)) == Relationship.HOSTILE ||
+                     ResourceSources.isHuntableAnimal(preselectedUnits.get(0)))) {
 
                     sendUnitCommand(UnitAction.ATTACK);
                 }

@@ -57,7 +57,7 @@ public class ResearchLingeringPotions extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Causes witches' potions to create lingering clouds.", Style.EMPTY)
+                FormattedCharSequence.forward("Doubles the duration of witches' potion clouds.", Style.EMPTY)
             )
         );
     }

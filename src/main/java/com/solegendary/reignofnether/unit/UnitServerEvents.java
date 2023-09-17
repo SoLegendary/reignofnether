@@ -11,11 +11,13 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Chicken;
@@ -172,9 +174,6 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
-        // nerf lingering potion cloud duration
-        if (evt.getEntity() instanceof AreaEffectCloud cloud)
-            cloud.setDuration(WitchUnit.LINGERING_POTION_DURATION);
 
         if (evt.getEntity() instanceof Unit &&
             evt.getEntity() instanceof Mob mob) {
@@ -336,7 +335,9 @@ public class UnitServerEvents {
     // make creepers immune to lightning damage (but still get charged by them)
     @SubscribeEvent
     public static void onEntityDamaged(LivingDamageEvent evt) {
-        if (evt.getSource().getDirectEntity() instanceof AbstractArrow)
+        if (evt.getSource().getDirectEntity() instanceof AbstractArrow ||
+            evt.getSource().isMagic() && evt.getSource() instanceof IndirectEntityDamageSource &&
+            (!(evt.getSource().getEntity() instanceof EvokerUnit)))
             knockbackIgnoreIds.add(evt.getEntity().getId());
 
         // ignore added weapon damage for workers

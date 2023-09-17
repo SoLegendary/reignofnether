@@ -24,7 +24,7 @@ import java.util.List;
 
 public class ThrowHarmingPotion extends Ability {
 
-    public static final int CD_MAX_SECONDS = 15;
+    public static final int CD_MAX_SECONDS = 10;
 
     private final WitchUnit witchUnit;
 
@@ -46,7 +46,7 @@ public class ThrowHarmingPotion extends Ability {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/splash_potion_harming.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_HARMING_POTION,
-            () -> ResearchClient.hasResearch(ResearchLingeringPotions.itemName),
+            () -> true, //ResearchClient.hasResearch(ResearchLingeringPotions.itemName),
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_HARMING_POTION),
             null,

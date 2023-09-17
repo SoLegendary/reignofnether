@@ -10,16 +10,25 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.PrioritizeChunkUpdates;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.chunk.RenderRegionCache;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
@@ -30,6 +39,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -174,6 +184,34 @@ public abstract class LevelRendererMixin {
                     pPoseStack.popPose();
                 }
             }
+        }
+    }
+
+    // increase render distance for particles
+    @Shadow private ParticleStatus calculateParticleLevel(boolean pDecreased) { return null; }
+
+    @Inject(
+            method = "addParticleInternal(Lnet/minecraft/core/particles/ParticleOptions;ZZDDDDDD)Lnet/minecraft/client/particle/Particle;",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    public void addParticleInternal(ParticleOptions pOptions, boolean pForce, boolean pDecreased, double pX, double pY, double pZ,
+                                    double pXSpeed, double pYSpeed, double pZSpeed, CallbackInfoReturnable<Particle> cir) {
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
+
+        Camera camera = this.minecraft.gameRenderer.getMainCamera();
+        if (this.minecraft != null && camera.isInitialized() && this.minecraft.particleEngine != null) {
+            ParticleStatus particlestatus = this.calculateParticleLevel(pDecreased);
+            if (pForce) {
+                cir.setReturnValue(this.minecraft.particleEngine.createParticle(pOptions, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed));
+            } else if (camera.getPosition().distanceToSqr(pX, pY, pZ) > 4096) {
+                cir.setReturnValue(null);
+            } else {
+                cir.setReturnValue(particlestatus == ParticleStatus.MINIMAL ? null : this.minecraft.particleEngine.createParticle(pOptions, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed));
+            }
+        } else {
+            cir.setReturnValue(null);
         }
     }
 }

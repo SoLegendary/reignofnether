@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPotions;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -117,6 +118,7 @@ public class WitchUnit extends Witch implements Unit {
     public int maxResources = 100;
 
     final static public int LINGERING_POTION_DURATION = 5 * ResourceCost.TICKS_PER_SECOND;
+    final static public int LINGERING_POTION_DURATION_EXTENDED = 10 * ResourceCost.TICKS_PER_SECOND;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -125,20 +127,14 @@ public class WitchUnit extends Witch implements Unit {
     public WitchUnit(EntityType<? extends Witch> entityType, Level level) {
         super(entityType, level);
 
-        ThrowHarmingPotion ab1 = new ThrowHarmingPotion(this);
-        ThrowHealingPotion ab2 = new ThrowHealingPotion(this);
-        ThrowLingeringHarmingPotion ab3 = new ThrowLingeringHarmingPotion(this);
-        ThrowLingeringHealingPotion ab4 = new ThrowLingeringHealingPotion(this);
+        ThrowLingeringHarmingPotion ab1 = new ThrowLingeringHarmingPotion(this);
+        ThrowLingeringHealingPotion ab2 = new ThrowLingeringHealingPotion(this);
         this.abilities.add(ab1);
         this.abilities.add(ab2);
-        this.abilities.add(ab3);
-        this.abilities.add(ab4);
 
         if (level.isClientSide()) {
             this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
             this.abilityButtons.add(ab2.getButton(Keybindings.keyW));
-            this.abilityButtons.add(ab3.getButton(Keybindings.keyQ));
-            this.abilityButtons.add(ab4.getButton(Keybindings.keyW));
         }
     }
 
@@ -154,13 +150,7 @@ public class WitchUnit extends Witch implements Unit {
     public void throwPotion(Vec3 targetBp, Potion potion) {
         ThrownPotion thrownPotion = new ThrownPotion(this.level, this);
 
-        ItemStack potionItem;
-        if (ResearchServer.playerHasResearch(getOwnerName(), ResearchLingeringPotions.itemName))
-            potionItem = new ItemStack(Items.LINGERING_POTION);
-        else
-            potionItem = new ItemStack(Items.SPLASH_POTION);
-
-        thrownPotion.setItem(PotionUtils.setPotion(potionItem, potion));
+        thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.LINGERING_POTION), potion));
 
         Vec3 dMove = targetBp.subtract(this.getEyePosition())
                 .multiply(1,0,1)

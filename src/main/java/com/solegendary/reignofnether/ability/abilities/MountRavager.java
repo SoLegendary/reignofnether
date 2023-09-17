@@ -47,7 +47,7 @@ public class MountRavager extends Ability {
             "Mount Ravager",
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/ravager.png"),
             hotkey,
-            () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_RAVAGER || getMountGoal().autofind,
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_RAVAGER,
             () -> entity.isPassenger() || !ResearchClient.hasResearch(ResearchRavagerCavalry.itemName),
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_RAVAGER),

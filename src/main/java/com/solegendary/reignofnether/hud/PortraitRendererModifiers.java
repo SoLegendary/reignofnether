@@ -85,7 +85,7 @@ public class PortraitRendererModifiers {
             scale = -25;
         } else if (entity instanceof Dolphin) {
             yOffset = 20;
-            scale = -5;
+            scale = -10;
         } else if (entity instanceof Bee) {
             yOffset = 20;
             scale = -5;
