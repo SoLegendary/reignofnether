@@ -74,8 +74,14 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
         if (target != null && target.isAlive()) {
             this.mob.getLookControl().setLookAt(target.getX(), target.getEyeY(), target.getZ());
 
-            boolean isGarrisoned = GarrisonableBuilding.getGarrison((Unit) this.mob) != null;
-            boolean isTargetGarrisoned = target instanceof Unit unit && GarrisonableBuilding.getGarrison(unit) != null;
+            GarrisonableBuilding garr = GarrisonableBuilding.getGarrison((Unit) this.mob);
+            GarrisonableBuilding targetGarr = null;
+            if (target instanceof Unit unit)
+                targetGarr = GarrisonableBuilding.getGarrison(unit);
+
+            boolean isGarrisoned = garr != null;
+            boolean isTargetGarrisoned = targetGarr != null;
+
             boolean canSeeTarget = this.mob.getSensing().hasLineOfSight(target) || isGarrisoned || isTargetGarrisoned;
             boolean flag = this.seeTime > 0;
             if (canSeeTarget != flag) {
@@ -90,9 +96,9 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
             float attackRange = ((AttackerUnit) this.mob).getAttackRange();
 
             if (isGarrisoned)
-                attackRange += GarrisonableBuilding.ATTACK_RANGE_BONUS;
+                attackRange += garr.getAttackRangeBonus();
             else if (isTargetGarrisoned)
-                attackRange += GarrisonableBuilding.EXTERNAL_ATTACK_RANGE_BONUS;
+                attackRange += targetGarr.getExternalAttackRangeBonus();
 
             double distToTarget = this.mob.distanceTo(target);
 

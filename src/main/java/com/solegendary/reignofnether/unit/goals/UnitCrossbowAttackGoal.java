@@ -76,9 +76,16 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
     public void tick() {
         LivingEntity target = this.mob.getTarget();
         if (target != null && target.isAlive()) {
-            boolean isGarrisoned = GarrisonableBuilding.getGarrison((Unit) this.mob) != null;
-            boolean isTargetGarrisoned = target instanceof Unit unit && GarrisonableBuilding.getGarrison(unit) != null;
-            boolean canSeeTarget = this.mob.getSensing().hasLineOfSight(target) || isGarrisoned;
+
+            GarrisonableBuilding garr = GarrisonableBuilding.getGarrison((Unit) this.mob);
+            GarrisonableBuilding targetGarr = null;
+            if (target instanceof Unit unit)
+                targetGarr = GarrisonableBuilding.getGarrison(unit);
+
+            boolean isGarrisoned = garr != null;
+            boolean isTargetGarrisoned = targetGarr != null;
+
+            boolean canSeeTarget = this.mob.getSensing().hasLineOfSight(target) || isGarrisoned || isTargetGarrisoned;
             boolean flag = this.seeTime > 0;
 
             if (canSeeTarget != flag) {
@@ -102,9 +109,9 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
                 }
             }
             if (isGarrisoned)
-                attackRange += GarrisonableBuilding.ATTACK_RANGE_BONUS;
+                attackRange += garr.getAttackRangeBonus();
             else if (isTargetGarrisoned)
-                attackRange += GarrisonableBuilding.EXTERNAL_ATTACK_RANGE_BONUS;
+                attackRange += targetGarr.getExternalAttackRangeBonus();
 
             boolean flag2 = (distToTarget > attackRange || this.seeTime < 5) && this.attackCooldown == 0;
 

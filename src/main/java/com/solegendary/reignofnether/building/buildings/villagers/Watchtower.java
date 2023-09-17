@@ -45,6 +45,11 @@ public class Watchtower extends Building implements GarrisonableBuilding {
         this.startingBlockTypes.add(Blocks.STONE_BRICK_SLAB);
     }
 
+    // don't use this for abilities as it may not be balanced
+    public int getAttackRangeBonus() { return 20; }
+    // bonus for units attacking garrisoned units
+    public int getExternalAttackRangeBonus() { return 10; }
+
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }

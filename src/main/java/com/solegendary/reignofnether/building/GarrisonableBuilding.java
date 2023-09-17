@@ -12,10 +12,9 @@ import java.util.List;
 public interface GarrisonableBuilding {
 
     // don't use this for abilities as it may not be balanced
-    int ATTACK_RANGE_BONUS = 20;
-
+    public int getAttackRangeBonus();
     // bonus for units attacking garrisoned units
-    int EXTERNAL_ATTACK_RANGE_BONUS = 10;
+    public int getExternalAttackRangeBonus();
 
     // returns the relative building position units will go to when garrisoning
     BlockPos getEntryPosition();
@@ -24,7 +23,7 @@ public interface GarrisonableBuilding {
 
     boolean isFull();
 
-    static Building getGarrison(Unit unit) {
+    static GarrisonableBuilding getGarrison(Unit unit) {
         List<Building> buildings;
         if (((Entity) unit).getLevel().isClientSide())
             buildings = BuildingClientEvents.getBuildings();
@@ -33,10 +32,10 @@ public interface GarrisonableBuilding {
 
         for (Building building : buildings) {
             if (unit.getOwnerName().equals(building.ownerName) &&
-                    building instanceof GarrisonableBuilding && building.isBuilt &&
+                    building instanceof GarrisonableBuilding garr && building.isBuilt &&
                     building.isPosInsideBuilding(((LivingEntity) unit).getOnPos()) &&
                     ((LivingEntity) unit).getOnPos().getY() > building.originPos.getY() + 2) {
-                return building;
+                return garr;
             }
         }
         return null;

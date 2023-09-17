@@ -324,6 +324,11 @@ public abstract class Building {
                         level.destroyBlock(new BlockPos(x,y,z), false);
     }
 
+    // are we allowed to destroy this blockPos using
+    public boolean canDestroyBlock(BlockPos relativeBp) {
+        return true;
+    }
+
     public void destroyRandomBlocks(int amount) {
         if (getLevel().isClientSide())
             return;
