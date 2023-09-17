@@ -467,7 +467,7 @@ public class BuildingClientEvents {
                             getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED) {
                         addSelectedBuilding(preSelBuilding);
                     }
-                    else if (!deselected) { // select a single building - this should be the only code path that allows you to select a non-owned building
+                    else if (!deselected && UnitClientEvents.getPreselectedUnits().size() == 0) { // select a single building - this should be the only code path that allows you to select a non-owned building
                         clearSelectedBuildings();
                         addSelectedBuilding(preSelBuilding);
                     }
