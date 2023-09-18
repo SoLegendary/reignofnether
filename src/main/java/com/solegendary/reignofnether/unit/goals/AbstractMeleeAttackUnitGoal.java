@@ -72,7 +72,12 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
         } else if (!this.mob.isWithinRestriction(livingentity.blockPosition())) {
             return false;
         } else {
-            return !(livingentity instanceof Player) || !livingentity.isSpectator() && !((Player)livingentity).isCreative();
+            boolean canContinue = !(livingentity instanceof Player) || !livingentity.isSpectator() && !((Player)livingentity).isCreative();
+            if (canContinue) {
+                this.path = this.mob.getNavigation().createPath(livingentity, 0);
+                this.mob.getNavigation().moveTo(this.path, this.speedModifier);
+            }
+            return canContinue;
         }
     }
 
@@ -103,7 +108,14 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
             this.mob.getLookControl().setLookAt(livingentity, 30.0F, 30.0F);
             double d0 = this.mob.distanceToSqr(livingentity.getX(), livingentity.getY(), livingentity.getZ());
             if (!((Unit) this.mob).getHoldPosition()) {
-                if ((this.followingTargetEvenIfNotSeen || this.mob.getSensing().hasLineOfSight(livingentity)) && this.ticksUntilNextPathRecalculation <= 0 && (this.pathedTargetX == 0.0D && this.pathedTargetY == 0.0D && this.pathedTargetZ == 0.0D || livingentity.distanceToSqr(this.pathedTargetX, this.pathedTargetY, this.pathedTargetZ) >= 1.0D || this.mob.getRandom().nextFloat() < 0.05F)) {
+                if ((this.followingTargetEvenIfNotSeen || this.mob.getSensing().hasLineOfSight(livingentity)) &&
+                        this.ticksUntilNextPathRecalculation <= 0 &&
+                        (this.pathedTargetX == 0.0D &&
+                            this.pathedTargetY == 0.0D &&
+                            this.pathedTargetZ == 0.0D ||
+                            livingentity.distanceToSqr(this.pathedTargetX, this.pathedTargetY, this.pathedTargetZ) >= 1.0D ||
+                            this.mob.getRandom().nextFloat() < 0.05F))
+                {
                     this.pathedTargetX = livingentity.getX();
                     this.pathedTargetY = livingentity.getY();
                     this.pathedTargetZ = livingentity.getZ();
