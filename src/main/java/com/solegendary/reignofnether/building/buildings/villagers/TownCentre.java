@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerProdItem;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.core.BlockPos;
@@ -46,7 +46,7 @@ public class TownCentre extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = List.of(
-                VillagerProdItem.getStartButton(this, Keybindings.keyQ)
+                VillagerProd.getStartButton(this, Keybindings.keyQ)
             );
     }
 

@@ -3,8 +3,14 @@ package com.solegendary.reignofnether.building.buildings.netherlings;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteProd;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinGruntProd;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterProd;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerProd;
+import com.solegendary.reignofnether.unit.units.villagers.VindicatorProd;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -15,11 +21,12 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Portal extends Building implements NetherConvertingBuilding {
+public class Portal extends ProductionBuilding implements NetherConvertingBuilding {
 
     public final static String buildingName = "Portal";
     public final static String structureName = "portal";
@@ -44,6 +51,13 @@ public class Portal extends Building implements NetherConvertingBuilding {
         this.buildTimeModifier = 0.8f;
 
         this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
+
+        if (level.isClientSide())
+            this.productionButtons = Arrays.asList(
+                    PiglinGruntProd.getStartButton(this, Keybindings.keyQ),
+                    PiglinBruteProd.getStartButton(this, Keybindings.keyW),
+                    PiglinHeadhunterProd.getStartButton(this, Keybindings.keyE)
+            );
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

@@ -1,9 +1,7 @@
-package com.solegendary.reignofnether.unit.units.villagers;
+package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.BuildingServerboundPacket;
-import com.solegendary.reignofnether.building.ProductionBuilding;
-import com.solegendary.reignofnether.building.ProductionItem;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -17,16 +15,16 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class IronGolemProdItem extends ProductionItem {
+public class SpiderProd extends ProductionItem {
 
-    public final static String itemName = "Iron Golem";
-    public final static ResourceCost cost = ResourceCosts.IRON_GOLEM;
+    public final static String itemName = "Spider";
+    public final static ResourceCost cost = ResourceCosts.SPIDER;
 
-    public IronGolemProdItem(ProductionBuilding building) {
+    public SpiderProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.IRON_GOLEM_UNIT.get(), building.ownerName, false);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.SPIDER_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -35,42 +33,45 @@ public class IronGolemProdItem extends ProductionItem {
     }
 
     public String getItemName() {
-        return IronGolemProdItem.itemName;
+        return SpiderProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            IronGolemProdItem.itemName,
+            SpiderProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
-                hotkey,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/spider.png"),
+            hotkey,
             () -> false,
             () -> false,
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(IronGolemProdItem.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(SpiderProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A hulking golem of metal with a powerful melee attack.", Style.EMPTY)
+                FormattedCharSequence.forward("A giant spider that is nimble but frail.", Style.EMPTY),
+                FormattedCharSequence.forward("Can be upgraded to allow skeletons to ride them.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Spiders move much more slowly under sunlight.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            IronGolemProdItem.itemName,
-            14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
-            (Keybinding) null,
-            () -> false,
-            () -> false,
-            () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, itemName, first),
-            null,
-            null
+                SpiderProd.itemName,
+                14,
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/spider.png"),
+                (Keybinding) null,
+                () -> false,
+                () -> false,
+                () -> true,
+                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, itemName, first),
+                null,
+                null
         );
     }
 }

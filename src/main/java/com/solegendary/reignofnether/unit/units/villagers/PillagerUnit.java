@@ -120,11 +120,11 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
 
     final static public float attackDamage = 7.0f;
     final static public float attacksPerSecond = 0.8f; // excludes crossbow charge time
-    final static public float maxHealth = 40.0f;
+    final static public float maxHealth = 35.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
-    final static public float attackRange = 15.0F; // only used by ranged units or melee building attackers
-    final static public float aggroRange = 15;
+    final static public float attackRange = 16.0F; // only used by ranged units or melee building attackers
+    final static public float aggroRange = 16;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.PILLAGER.population;

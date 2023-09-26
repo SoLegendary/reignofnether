@@ -20,16 +20,16 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VindicatorProdItem extends ProductionItem {
+public class PillagerProd extends ProductionItem {
 
-    public final static String itemName = "Vindicator";
-    public final static ResourceCost cost = ResourceCosts.VINDICATOR;
+    public final static String itemName = "Pillager";
+    public final static ResourceCost cost = ResourceCosts.PILLAGER;
 
-    public VindicatorProdItem(ProductionBuilding building) {
+    public PillagerProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.VINDICATOR_UNIT.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.PILLAGER_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -38,26 +38,26 @@ public class VindicatorProdItem extends ProductionItem {
     }
 
     public String getItemName() {
-        return VindicatorProdItem.itemName;
+        return PillagerProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-                FormattedCharSequence.forward(VindicatorProdItem.itemName, Style.EMPTY.withBold(true)),
-                ResourceCosts.getFormattedCost(cost),
-                ResourceCosts.getFormattedPopAndTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A villager armed with an axe for melee combat.", Style.EMPTY)
+            FormattedCharSequence.forward(PillagerProd.itemName, Style.EMPTY.withBold(true)),
+            ResourceCosts.getFormattedCost(cost),
+            ResourceCosts.getFormattedPopAndTime(cost),
+            FormattedCharSequence.forward("", Style.EMPTY),
+            FormattedCharSequence.forward("A villager armed with a crossbow for ranged combat.", Style.EMPTY)
         ));
         if (ResearchClient.hasResearch(ResearchVindicatorAxes.itemName)) {
             tooltipLines.add(FormattedCharSequence.forward("", Style.EMPTY));
-            tooltipLines.add(FormattedCharSequence.forward("Upgraded with diamond axes that deal +2 damage", Style.EMPTY.withBold(true)));
+            tooltipLines.add(FormattedCharSequence.forward("Upgraded with multishot crossbows that fire triple arrows", Style.EMPTY.withBold(true)));
         }
+
         return new Button(
-            VindicatorProdItem.itemName,
+            PillagerProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/pillager.png"),
             hotkey,
             () -> false,
             () -> false,
@@ -70,9 +70,9 @@ public class VindicatorProdItem extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            VindicatorProdItem.itemName,
+            PillagerProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/pillager.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

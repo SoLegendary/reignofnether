@@ -7,8 +7,8 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.units.monsters.PoisonSpiderUnitProd;
-import com.solegendary.reignofnether.unit.units.monsters.SpiderUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.PoisonSpiderProd;
+import com.solegendary.reignofnether.unit.units.monsters.SpiderProd;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -48,8 +48,8 @@ public class SpiderLair extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                SpiderUnitProd.getStartButton(this, Keybindings.keyQ),
-                PoisonSpiderUnitProd.getStartButton(this, Keybindings.keyW)
+                SpiderProd.getStartButton(this, Keybindings.keyQ),
+                PoisonSpiderProd.getStartButton(this, Keybindings.keyW)
             );
     }
 

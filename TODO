@@ -1,8 +1,6 @@
 
 TODO bugs/features:
 
-- slow down fire/magma/suffocation damage events
-    - don't prevent units walking over magma
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - workers are not marked as idle until 15s after stopping gathering
 
@@ -13,6 +11,13 @@ TODO bugs/features:
 
 
 
+piglins
+    - ensure portals dont actually send people to the nether
+        - maybe make a custom block so we can also customise colour?
+    - apply leaf disappearance logic to mycelium leaves
+    - apply the tall-tree felling logic to mycelium trees
+    - slow down fire/magma/suffocation damage events
+        - don't prevent units walking over magma
 
 
 TODO test in next playtest
@@ -26,7 +31,9 @@ check garrisoned range unit isAggressive, especially in castles (pillagers didn'
 gathering worker counts
 
 
-TODO buildings/units (backlog)
+
+
+TODO weird ideas
 
 - endermen can place liquids??
 Research: spiders can place webs (limit of 3 per spider lifetime)
@@ -34,16 +41,21 @@ Research: spiders can place webs (limit of 3 per spider lifetime)
 Research: Creepers explode with harming cloud effects
 Research: Villagers can build Iron Golems (treated as buildings but become iron golem units on completion)
 
+Monsters: static defense that curses a unit with insomnia - causes phantoms to encircle them and attack periodically
 
-Netherling faction
-    All netherling buildings slowly convert non-nether blocks around them into nether counterparts:
+
+TODO buildings/units (backlog)
+
+
+Piglins faction
+    All piglin buildings slowly convert non-nether blocks around them into nether counterparts:
         - Grass -> nylium
         - Sand -> soulsand
         - Stone -> netherrack, etc.
         - Water -> lava
-    Netherling buildings apart from the Bastion and portals can only be built on nether blocks
+    Piglin buildings apart from the Bastion and portals can only be built on nether blocks
 
-    Netherlings do not produce their own units, but instead (like Protoss) bring units in from the nether using portals
+    Piglins do not produce their own units, but instead (like Protoss) bring units in from the nether using portals
     - (Capitol) Bastion Portal
         - blackstone-themed building with a decorated standard purple portal at the centre
         - can build any unit as long as you have the appropriate supporting building/research
@@ -66,18 +78,19 @@ Netherling faction
         - piglin headhunter
             - ranged trident infantry (should reskin to red to look like pitchforks)
             - can be upgraded to cause knockback on hit
-        - hoglin
+
+    - Hoglin Ranch
+        - Allows hoglins to be produced at military portals
             - light-medium bruiser
             - can be upgraded to be mounted by headhunters
-
     - Flame Sanctuary
-        - Allows magma cubes and blazes (after an upgrade) to be produced at portals
+        - Allows magma cubes and blazes (after an upgrade) to be produced at military portals
         - Researches fire-related upgrades
     - Wither Shrine
-        - Allows wither skeletons to be produced at portals
+        - Allows wither skeletons to be produced at military portals
         - Researches wither-related upgrades
     - Fortress
-        - Ghasts (long-range ranged sieger)
+        - Allows Ghasts to be produced at military portals (long-range ranged sieger)
             - probably needs a size decrease
             - flies a set Y height above the ground
         - garrisonable (holds up to 10 units)

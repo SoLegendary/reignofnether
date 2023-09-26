@@ -10,8 +10,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.*;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.units.monsters.WardenUnitProd;
-import com.solegendary.reignofnether.unit.units.villagers.RavagerUnitProd;
+import com.solegendary.reignofnether.unit.units.villagers.RavagerProd;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -60,7 +59,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
 
         if (level.isClientSide()) {
             this.productionButtons = Arrays.asList(
-                RavagerUnitProd.getStartButton(this, Keybindings.keyQ),
+                RavagerProd.getStartButton(this, Keybindings.keyQ),
                 ResearchCastleFlag.getStartButton(this, Keybindings.keyW)
             );
             this.abilityButtons.add(promoteIllager.getButton(Keybindings.keyW));

@@ -17,12 +17,12 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class WitchProdItem extends ProductionItem {
+public class WitchProd extends ProductionItem {
 
     public final static String itemName = "Witch";
     public final static ResourceCost cost = ResourceCosts.WITCH;
 
-    public WitchProdItem(ProductionBuilding building) {
+    public WitchProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
@@ -35,12 +35,12 @@ public class WitchProdItem extends ProductionItem {
     }
 
     public String getItemName() {
-        return WitchProdItem.itemName;
+        return WitchProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            WitchProdItem.itemName,
+            WitchProd.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/witch.png"),
             hotkey,
@@ -50,7 +50,7 @@ public class WitchProdItem extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(WitchProdItem.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(WitchProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
@@ -61,7 +61,7 @@ public class WitchProdItem extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            WitchProdItem.itemName,
+            WitchProd.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/witch.png"),
             (Keybinding) null,

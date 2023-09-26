@@ -1,11 +1,14 @@
-package com.solegendary.reignofnether.unit.units.villagers;
+package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.villagers.Library;
+import com.solegendary.reignofnether.building.BuildingServerboundPacket;
+import com.solegendary.reignofnether.building.ProductionBuilding;
+import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchStrays;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Style;
@@ -16,16 +19,16 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class EvokerProdItem extends ProductionItem {
+public class StrayProd extends ProductionItem {
 
-    public final static String itemName = "Evoker";
-    public final static ResourceCost cost = ResourceCosts.EVOKER;
+    public final static String itemName = "Stray";
+    public final static ResourceCost cost = ResourceCosts.STRAY;
 
-    public EvokerProdItem(ProductionBuilding building) {
+    public StrayProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.EVOKER_UNIT.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.STRAY_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -34,37 +37,37 @@ public class EvokerProdItem extends ProductionItem {
     }
 
     public String getItemName() {
-        return EvokerProdItem.itemName;
+        return StrayProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            EvokerProdItem.itemName,
+            StrayProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
             hotkey,
             () -> false,
-            () -> false,
-            () -> BuildingClientEvents.hasFinishedBuilding(Library.buildingName),
+            () -> !ResearchClient.hasResearch(ResearchStrays.itemName),
+            () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(EvokerProdItem.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(StrayProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A learned wizard that can cast combat spells.", Style.EMPTY),
+                FormattedCharSequence.forward("An chilling variant of the skeleton that fires slowing arrows.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a library.", Style.EMPTY)
+                FormattedCharSequence.forward("Strays will burn under sunlight.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            EvokerProdItem.itemName,
+            StrayProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

@@ -182,17 +182,6 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     }
 
     @Override
-    public double getWeaponDamageModifier() {
-        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-
-        if (!itemStack.isEmpty())
-            for(AttributeModifier attr : itemStack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE))
-                if (attr.getOperation() == AttributeModifier.Operation.ADDITION)
-                    return attr.getAmount();
-        return 0;
-    }
-
-    @Override
     public void setupEquipmentAndUpgradesServer() {
         // weapon is purely visual, damage is based solely on entity attribute ATTACK_DAMAGE
         Item axe = Items.IRON_AXE;

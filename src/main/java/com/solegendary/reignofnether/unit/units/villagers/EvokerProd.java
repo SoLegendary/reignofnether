@@ -1,7 +1,8 @@
-package com.solegendary.reignofnether.unit.units.monsters;
+package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -15,16 +16,16 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class CreeperUnitProd extends ProductionItem {
+public class EvokerProd extends ProductionItem {
 
-    public final static String itemName = "Creeper";
-    public final static ResourceCost cost = ResourceCosts.CREEPER;
+    public final static String itemName = "Evoker";
+    public final static ResourceCost cost = ResourceCosts.EVOKER;
 
-    public CreeperUnitProd(ProductionBuilding building) {
+    public EvokerProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.CREEPER_UNIT.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.EVOKER_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -33,43 +34,42 @@ public class CreeperUnitProd extends ProductionItem {
     }
 
     public String getItemName() {
-        return CreeperUnitProd.itemName;
+        return EvokerProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            CreeperUnitProd.itemName,
+            EvokerProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker.png"),
             hotkey,
             () -> false,
             () -> false,
-            () -> true,
+            () -> BuildingClientEvents.hasFinishedBuilding(Library.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(CreeperUnitProd.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(EvokerProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An explosive monster that can blow up units and buildings.", Style.EMPTY),
-                FormattedCharSequence.forward("Deals less damage to capitol buildings.", Style.EMPTY),
+                FormattedCharSequence.forward("A learned wizard that can cast combat spells.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Creepers move much more slowly under sunlight.", Style.EMPTY)
+                FormattedCharSequence.forward("Requires a library.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            CreeperUnitProd.itemName,
+            EvokerProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/evoker.png"),
             (Keybinding) null,
             () -> false,
             () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, itemName, first),
             null,
             null
         );

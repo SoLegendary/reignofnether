@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.unit.units.villagers;
+package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
+import com.solegendary.reignofnether.research.researchItems.ResearchHusks;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Style;
@@ -17,19 +17,18 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class PillagerProdItem extends ProductionItem {
+public class HuskProd extends ProductionItem {
 
-    public final static String itemName = "Pillager";
-    public final static ResourceCost cost = ResourceCosts.PILLAGER;
+    public final static String itemName = "Husk";
+    public final static ResourceCost cost = ResourceCosts.HUSK;
 
-    public PillagerProdItem(ProductionBuilding building) {
+    public HuskProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.PILLAGER_UNIT.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.HUSK_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -38,41 +37,37 @@ public class PillagerProdItem extends ProductionItem {
     }
 
     public String getItemName() {
-        return PillagerProdItem.itemName;
+        return HuskProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-        List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-            FormattedCharSequence.forward(PillagerProdItem.itemName, Style.EMPTY.withBold(true)),
-            ResourceCosts.getFormattedCost(cost),
-            ResourceCosts.getFormattedPopAndTime(cost),
-            FormattedCharSequence.forward("", Style.EMPTY),
-            FormattedCharSequence.forward("A villager armed with a crossbow for ranged combat.", Style.EMPTY)
-        ));
-        if (ResearchClient.hasResearch(ResearchVindicatorAxes.itemName)) {
-            tooltipLines.add(FormattedCharSequence.forward("", Style.EMPTY));
-            tooltipLines.add(FormattedCharSequence.forward("Upgraded with multishot crossbows that fire triple arrows", Style.EMPTY.withBold(true)));
-        }
-
         return new Button(
-            PillagerProdItem.itemName,
+            HuskProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/pillager.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
             hotkey,
             () -> false,
-            () -> false,
+            () -> !ResearchClient.hasResearch(ResearchHusks.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            tooltipLines
+            List.of(
+                FormattedCharSequence.forward(HuskProd.itemName, Style.EMPTY.withBold(true)),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedPopAndTime(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("A hardy variant of the zombie with tougher skin.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Husks DO NOT burn under sunlight.", Style.EMPTY)
+            )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            PillagerProdItem.itemName,
+            HuskProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/pillager.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

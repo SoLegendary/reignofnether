@@ -7,8 +7,8 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.units.villagers.EvokerProdItem;
-import com.solegendary.reignofnether.unit.units.villagers.WitchProdItem;
+import com.solegendary.reignofnether.unit.units.villagers.EvokerProd;
+import com.solegendary.reignofnether.unit.units.villagers.WitchProd;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -52,8 +52,8 @@ public class ArcaneTower extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                WitchProdItem.getStartButton(this, Keybindings.keyQ),
-                EvokerProdItem.getStartButton(this, Keybindings.keyW)
+                WitchProd.getStartButton(this, Keybindings.keyQ),
+                EvokerProd.getStartButton(this, Keybindings.keyW)
             );
     }
 

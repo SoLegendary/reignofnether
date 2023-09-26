@@ -9,7 +9,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCros
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.units.villagers.IronGolemProdItem;
+import com.solegendary.reignofnether.unit.units.villagers.IronGolemProd;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -48,7 +48,7 @@ public class Blacksmith extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                IronGolemProdItem.getStartButton(this, Keybindings.keyQ),
+                IronGolemProd.getStartButton(this, Keybindings.keyQ),
                 ResearchVindicatorAxes.getStartButton(this, Keybindings.keyW),
                 ResearchPillagerCrossbows.getStartButton(this, Keybindings.keyE)
             );

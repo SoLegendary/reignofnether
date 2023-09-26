@@ -6,8 +6,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
-import com.solegendary.reignofnether.research.researchItems.ResearchStrays;
+import com.solegendary.reignofnether.research.researchItems.ResearchPoisonSpiders;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Style;
@@ -18,20 +17,16 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class SkeletonUnitProd extends ProductionItem {
+public class PoisonSpiderProd extends ProductionItem {
 
-    public final static String itemName = "Skeleton";
-    public final static ResourceCost cost = ResourceCosts.SKELETON;
+    public final static String itemName = "Poison Spider";
+    public final static ResourceCost cost = ResourceCosts.POISON_SPIDER;
 
-    public SkeletonUnitProd(ProductionBuilding building) {
+    public PoisonSpiderProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (!level.isClientSide()) {
-                if (ResearchServer.playerHasResearch(this.building.ownerName, ResearchStrays.itemName))
-                    building.produceUnit((ServerLevel) level, EntityRegistrar.STRAY_UNIT.get(), building.ownerName, true);
-                else
-                    building.produceUnit((ServerLevel) level, EntityRegistrar.SKELETON_UNIT.get(), building.ownerName, true);
-            }
+            if (!level.isClientSide())
+                building.produceUnit((ServerLevel) level, EntityRegistrar.POISON_SPIDER_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -40,41 +35,38 @@ public class SkeletonUnitProd extends ProductionItem {
     }
 
     public String getItemName() {
-        return SkeletonUnitProd.itemName;
+        return PoisonSpiderProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            SkeletonUnitProd.itemName,
+            PoisonSpiderProd.itemName,
             14,
-            ResearchClient.hasResearch(ResearchStrays.itemName) ?
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/stray.png") :
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
             hotkey,
             () -> false,
-            () -> ResearchClient.hasResearch(ResearchStrays.itemName),
-            () -> true,
+            () -> false,
+            () -> ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(SkeletonUnitProd.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(PoisonSpiderProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An undead soldier with a bow and arrows.", Style.EMPTY),
+                FormattedCharSequence.forward("A spider fanged with deadly poison.", Style.EMPTY),
+                FormattedCharSequence.forward("Too small to ride but good for hit and run tactics.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Skeletons will burn under sunlight.", Style.EMPTY)
+                FormattedCharSequence.forward("Spiders move much more slowly under sunlight.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            ResearchClient.hasResearch(ResearchStrays.itemName) ? "Stray" : "Skeleton",
+            PoisonSpiderProd.itemName,
             14,
-            ResearchClient.hasResearch(ResearchStrays.itemName) ?
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/stray.png") :
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

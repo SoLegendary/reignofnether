@@ -7,9 +7,6 @@ import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
-import com.solegendary.reignofnether.research.researchItems.ResearchStrays;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Style;
@@ -20,17 +17,16 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class RavagerUnitProd extends ProductionItem {
+public class VillagerProd extends ProductionItem {
 
-    public final static String itemName = "Ravager";
-    public final static ResourceCost cost = ResourceCosts.RAVAGER;
+    public final static String itemName = "Villager";
+    public final static ResourceCost cost = ResourceCosts.VILLAGER;
 
-    public RavagerUnitProd(ProductionBuilding building) {
+    public VillagerProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (!level.isClientSide()) {
-                building.produceUnit((ServerLevel) level, EntityRegistrar.RAVAGER_UNIT.get(), building.ownerName, true);
-            }
+            if (!level.isClientSide())
+                building.produceUnit((ServerLevel) level, EntityRegistrar.VILLAGER_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -39,14 +35,14 @@ public class RavagerUnitProd extends ProductionItem {
     }
 
     public String getItemName() {
-        return RavagerUnitProd.itemName;
+        return VillagerProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            RavagerUnitProd.itemName,
+            VillagerProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/ravager.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
             hotkey,
             () -> false,
             () -> false,
@@ -54,21 +50,21 @@ public class RavagerUnitProd extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(RavagerUnitProd.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(VillagerProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An enormous beast that can smash through hordes of enemies.", Style.EMPTY),
-                FormattedCharSequence.forward("They can roar to knockback enemies and be mounted by pillagers.", Style.EMPTY)
+                FormattedCharSequence.forward("A worker that can construct and repair", Style.EMPTY),
+                FormattedCharSequence.forward("buildings and gather resources.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            RavagerUnitProd.itemName,
+            VillagerProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/ravager.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

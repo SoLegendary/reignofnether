@@ -7,9 +7,6 @@ import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
-import com.solegendary.reignofnether.research.researchItems.ResearchStrays;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Style;
@@ -20,12 +17,12 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class WardenUnitProd extends ProductionItem {
+public class WardenProd extends ProductionItem {
 
     public final static String itemName = "Warden";
     public final static ResourceCost cost = ResourceCosts.WARDEN;
 
-    public WardenUnitProd(ProductionBuilding building) {
+    public WardenProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide()) {
@@ -39,12 +36,12 @@ public class WardenUnitProd extends ProductionItem {
     }
 
     public String getItemName() {
-        return WardenUnitProd.itemName;
+        return WardenProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-                WardenUnitProd.itemName,
+                WardenProd.itemName,
                 14,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/warden.png"),
                 hotkey,
@@ -54,7 +51,7 @@ public class WardenUnitProd extends ProductionItem {
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(WardenUnitProd.itemName, Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(WardenProd.itemName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPopAndTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
@@ -65,7 +62,7 @@ public class WardenUnitProd extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-                WardenUnitProd.itemName,
+                WardenProd.itemName,
                 14,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/warden.png"),
                 (Keybinding) null,

@@ -2,6 +2,9 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.research.researchItems.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteProd;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinGruntProd;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterProd;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
@@ -118,22 +121,26 @@ public abstract class ProductionBuilding extends Building {
         if (building != null) {
             ProductionItem prodItem = null;
             switch(itemName) {
-                case CreeperUnitProd.itemName -> prodItem = new CreeperUnitProd(building);
-                case SkeletonUnitProd.itemName -> prodItem = new SkeletonUnitProd(building);
-                case ZombieUnitProd.itemName -> prodItem = new ZombieUnitProd(building);
-                case StrayUnitProd.itemName -> prodItem = new StrayUnitProd(building);
-                case HuskUnitProd.itemName -> prodItem = new HuskUnitProd(building);
-                case SpiderUnitProd.itemName -> prodItem = new SpiderUnitProd(building);
-                case PoisonSpiderUnitProd.itemName -> prodItem = new PoisonSpiderUnitProd(building);
-                case VillagerProdItem.itemName -> prodItem = new VillagerProdItem(building);
-                case ZombieVillagerUnitProd.itemName -> prodItem = new ZombieVillagerUnitProd(building);
-                case VindicatorProdItem.itemName -> prodItem = new VindicatorProdItem(building);
-                case PillagerProdItem.itemName -> prodItem = new PillagerProdItem(building);
-                case IronGolemProdItem.itemName -> prodItem = new IronGolemProdItem(building);
-                case WitchProdItem.itemName -> prodItem = new WitchProdItem(building);
-                case EvokerProdItem.itemName -> prodItem = new EvokerProdItem(building);
-                case WardenUnitProd.itemName -> prodItem = new WardenUnitProd(building);
-                case RavagerUnitProd.itemName -> prodItem = new RavagerUnitProd(building);
+                case CreeperProd.itemName -> prodItem = new CreeperProd(building);
+                case SkeletonProd.itemName -> prodItem = new SkeletonProd(building);
+                case ZombieProd.itemName -> prodItem = new ZombieProd(building);
+                case StrayProd.itemName -> prodItem = new StrayProd(building);
+                case HuskProd.itemName -> prodItem = new HuskProd(building);
+                case SpiderProd.itemName -> prodItem = new SpiderProd(building);
+                case PoisonSpiderProd.itemName -> prodItem = new PoisonSpiderProd(building);
+                case VillagerProd.itemName -> prodItem = new VillagerProd(building);
+                case ZombieVillagerProd.itemName -> prodItem = new ZombieVillagerProd(building);
+                case VindicatorProd.itemName -> prodItem = new VindicatorProd(building);
+                case PillagerProd.itemName -> prodItem = new PillagerProd(building);
+                case IronGolemProd.itemName -> prodItem = new IronGolemProd(building);
+                case WitchProd.itemName -> prodItem = new WitchProd(building);
+                case EvokerProd.itemName -> prodItem = new EvokerProd(building);
+                case WardenProd.itemName -> prodItem = new WardenProd(building);
+                case RavagerProd.itemName -> prodItem = new RavagerProd(building);
+
+                case PiglinGruntProd.itemName -> prodItem = new PiglinGruntProd(building);
+                case PiglinBruteProd.itemName -> prodItem = new PiglinBruteProd(building);
+                case PiglinHeadhunterProd.itemName -> prodItem = new PiglinHeadhunterProd(building);
 
                 case ResearchVindicatorAxes.itemName -> prodItem = new ResearchVindicatorAxes(building);
                 case ResearchPillagerCrossbows.itemName -> prodItem = new ResearchPillagerCrossbows(building);

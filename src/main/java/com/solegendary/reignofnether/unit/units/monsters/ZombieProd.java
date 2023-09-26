@@ -1,12 +1,13 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.BuildingServerboundPacket;
-import com.solegendary.reignofnether.building.ProductionBuilding;
-import com.solegendary.reignofnether.building.ProductionItem;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchHusks;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Style;
@@ -17,16 +18,20 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class ZombieVillagerUnitProd extends ProductionItem {
+public class ZombieProd extends ProductionItem {
 
-    public final static String itemName = "Zombie Villager";
-    public final static ResourceCost cost = ResourceCosts.ZOMBIE_VILLAGER;
+    public final static String itemName = "Zombie";
+    public final static ResourceCost cost = ResourceCosts.ZOMBIE;
 
-    public ZombieVillagerUnitProd(ProductionBuilding building) {
+    public ZombieProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), building.ownerName, true);
+            if (!level.isClientSide()) {
+                if (ResearchServer.playerHasResearch(this.building.ownerName, ResearchHusks.itemName))
+                    building.produceUnit((ServerLevel) level, EntityRegistrar.HUSK_UNIT.get(), building.ownerName, true);
+                else
+                    building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get(), building.ownerName, true);
+            }
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -35,38 +40,41 @@ public class ZombieVillagerUnitProd extends ProductionItem {
     }
 
     public String getItemName() {
-        return ZombieVillagerUnitProd.itemName;
+        return ZombieProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            ZombieVillagerUnitProd.itemName,
+            ZombieProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png"),
+            ResearchClient.hasResearch(ResearchHusks.itemName) ?
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png") :
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
             hotkey,
             () -> false,
-            () -> false,
+            () -> ResearchClient.hasResearch(ResearchHusks.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(ZombieVillagerUnitProd.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(ZombieProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An undead worker that can construct and", Style.EMPTY),
-                FormattedCharSequence.forward("repair buildings and gather resources.", Style.EMPTY),
+                FormattedCharSequence.forward("An undead monster with a basic melee attack.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Zombie villagers will burn under sunlight.", Style.EMPTY)
+                FormattedCharSequence.forward("Zombies will burn under sunlight.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            ZombieVillagerUnitProd.itemName,
+            ResearchClient.hasResearch(ResearchHusks.itemName) ? "Husk" : "Zombie",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png"),
+            ResearchClient.hasResearch(ResearchHusks.itemName) ?
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png") :
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

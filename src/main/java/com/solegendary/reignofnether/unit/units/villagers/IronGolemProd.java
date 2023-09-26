@@ -17,16 +17,16 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class VillagerProdItem extends ProductionItem {
+public class IronGolemProd extends ProductionItem {
 
-    public final static String itemName = "Villager";
-    public final static ResourceCost cost = ResourceCosts.VILLAGER;
+    public final static String itemName = "Iron Golem";
+    public final static ResourceCost cost = ResourceCosts.IRON_GOLEM;
 
-    public VillagerProdItem(ProductionBuilding building) {
+    public IronGolemProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.VILLAGER_UNIT.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.IRON_GOLEM_UNIT.get(), building.ownerName, false);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -35,36 +35,35 @@ public class VillagerProdItem extends ProductionItem {
     }
 
     public String getItemName() {
-        return VillagerProdItem.itemName;
+        return IronGolemProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            VillagerProdItem.itemName,
+            IronGolemProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
-            hotkey,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
+                hotkey,
             () -> false,
             () -> false,
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(VillagerProdItem.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(IronGolemProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A worker that can construct and repair", Style.EMPTY),
-                FormattedCharSequence.forward("buildings and gather resources.", Style.EMPTY)
+                FormattedCharSequence.forward("A hulking golem of metal with a powerful melee attack.", Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            VillagerProdItem.itemName,
+            IronGolemProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

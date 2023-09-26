@@ -38,7 +38,7 @@ public class PlayerServerboundPacket {
             PlayerAction playerAction = switch (faction) {
                 case VILLAGERS -> PlayerAction.START_RTS_VILLAGERS;
                 case MONSTERS -> PlayerAction.START_RTS_MONSTERS;
-                case NETHERLINGS -> PlayerAction.START_RTS_NETHERLINGS;
+                case PIGLINS -> PlayerAction.START_RTS_PIGLINS;
             };
             PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
                     playerAction, MC.player.getId(),
@@ -83,7 +83,7 @@ public class PlayerServerboundPacket {
                 case DISABLE_ORTHOVIEW -> PlayerServerEvents.disableOrthoview(this.playerId);
                 case START_RTS_VILLAGERS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.VILLAGERS);
                 case START_RTS_MONSTERS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.MONSTERS);
-                case START_RTS_NETHERLINGS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.NETHERLINGS);
+                case START_RTS_PIGLINS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.PIGLINS);
             }
             success.set(true);
         });

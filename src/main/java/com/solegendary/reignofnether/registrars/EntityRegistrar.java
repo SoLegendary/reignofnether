@@ -2,7 +2,9 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.unit.units.monsters.*;
-import com.solegendary.reignofnether.unit.units.netherlings.PiglinGruntUnit;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinGruntUnit;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -133,6 +135,18 @@ public class EntityRegistrar {
                     .sized(EntityType.PIGLIN.getWidth(), EntityType.PIGLIN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "piglin_grunt_unit").toString()));
+
+    public static final RegistryObject<EntityType<PiglinBruteUnit>> PIGLIN_BRUTE_UNIT = ENTITIES.register("piglin_brute_unit",
+            () -> EntityType.Builder.of(PiglinBruteUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.PIGLIN_BRUTE.getWidth(), EntityType.PIGLIN_BRUTE.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "piglin_brute_unit").toString()));
+
+    public static final RegistryObject<EntityType<PiglinHeadhunterUnit>> PIGLIN_HEADHUNTER_UNIT = ENTITIES.register("piglin_headhunter_unit",
+            () -> EntityType.Builder.of(PiglinHeadhunterUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.PIGLIN_BRUTE.getWidth(), EntityType.PIGLIN_BRUTE.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "piglin_headhunter_unit").toString()));
 
 
     public static void init() {

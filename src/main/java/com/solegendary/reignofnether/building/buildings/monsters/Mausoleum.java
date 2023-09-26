@@ -6,7 +6,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
@@ -55,7 +55,7 @@ public class Mausoleum extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = List.of(
-                ZombieVillagerUnitProd.getStartButton(this, Keybindings.keyQ)
+                ZombieVillagerProd.getStartButton(this, Keybindings.keyQ)
             );
     }
 

@@ -56,6 +56,11 @@ public class ResourceCosts {
     public static ResourceCost EVOKER = ResourceCost.Unit(150,0,150,35,3);
     public static ResourceCost RAVAGER = ResourceCost.Unit(300,50,150,45,6);
 
+    // Piglins
+    public static ResourceCost PIGLIN_GRUNT = ResourceCost.Unit(50,0,0,15,1);
+    public static ResourceCost PIGLIN_BRUTE = ResourceCost.Unit(125,0,0,25,2);
+    public static ResourceCost PIGLIN_HEADHUNTER = ResourceCost.Unit(90,70,0,25,2);
+
     // ******************* BUILDINGS ******************* //
     public static ResourceCost STOCKPILE = ResourceCost.Building(0,75,0, 0);
 
@@ -81,7 +86,7 @@ public class ResourceCosts {
     public static ResourceCost WATCHTOWER = ResourceCost.Building(0,100,100, 0);
     public static ResourceCost CASTLE = ResourceCost.Building(0,400,300, 0);
 
-    // Netherlings
+    // Piglins
     public static ResourceCost PORTAL = ResourceCost.Building(0, 200, 0, 0);
 
     // ******************* RESEARCH ******************* //
