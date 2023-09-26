@@ -35,13 +35,15 @@ gathering worker counts
 
 TODO weird ideas
 
-- endermen can place liquids??
+Endermen: can place liquids??
 Research: spiders can place webs (limit of 3 per spider lifetime)
     - if implemented, remove research to mount?
-Research: Creepers explode with harming cloud effects
-Research: Villagers can build Iron Golems (treated as buildings but become iron golem units on completion)
+
+Monsters Research: Creepers explode with harming cloud effects
+Monsters Research: Villagers can build Iron Golems (treated as buildings but become iron golem units on completion)
 
 Monsters: static defense that curses a unit with insomnia - causes phantoms to encircle them and attack periodically
+Monsters: some ability (for zombies?) that converts enemies into zombie villagers/zombie pigmen
 
 
 TODO buildings/units (backlog)

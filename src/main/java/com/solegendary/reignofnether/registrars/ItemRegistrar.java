@@ -90,11 +90,11 @@ public class ItemRegistrar {
                     0x925A3D, 0xC9C685, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
     public static final RegistryObject<ForgeSpawnEggItem> PIGLIN_BRUTE_UNIT_SPAWN_EGG =
-            ITEMS.register("piglin_grunt_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.PIGLIN_BRUTE_UNIT,
+            ITEMS.register("piglin_brute_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.PIGLIN_BRUTE_UNIT,
                     0x57290f, 0xC9C685, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
     public static final RegistryObject<ForgeSpawnEggItem> PIGLIN_HEADHUNTER_UNIT_SPAWN_EGG =
-            ITEMS.register("piglin_grunt_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.PIGLIN_HEADHUNTER_UNIT,
+            ITEMS.register("piglin_headhunter_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.PIGLIN_HEADHUNTER_UNIT,
                     0x57290f, 0xC9C685, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
     public static void init() {
