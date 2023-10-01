@@ -110,10 +110,6 @@ public class PiglinHeadhunterUnit extends PiglinBrute implements Unit, AttackerU
 
     // endregion
 
-    public BlockState getReplantBlockState() {
-        return Blocks.WHEAT.defaultBlockState();
-    }
-
     final static public float attackDamage = 4.0f;
     final static public float attacksPerSecond = 0.5f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
@@ -167,11 +163,11 @@ public class PiglinHeadhunterUnit extends PiglinBrute implements Unit, AttackerU
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
-        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
-        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.garrisonGoal = new GarrisonGoal(this);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), false);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }
 
     @Override

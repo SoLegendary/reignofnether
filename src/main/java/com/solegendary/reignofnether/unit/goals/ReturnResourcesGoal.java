@@ -23,8 +23,8 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
 
     private Building buildingTarget;
 
-    public ReturnResourcesGoal(PathfinderMob mob, double speedModifier) {
-        super(mob, true, speedModifier, 0);
+    public ReturnResourcesGoal(PathfinderMob mob) {
+        super(mob, true, 0);
     }
 
     public void depositItems() {

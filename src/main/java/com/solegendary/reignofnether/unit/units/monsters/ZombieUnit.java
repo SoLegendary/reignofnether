@@ -152,12 +152,12 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
-        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
-        this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
-        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.garrisonGoal = new GarrisonGoal(this);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), false);
+        this.attackBuildingGoal = new AttackBuildingGoal(this);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }
 
     @Override

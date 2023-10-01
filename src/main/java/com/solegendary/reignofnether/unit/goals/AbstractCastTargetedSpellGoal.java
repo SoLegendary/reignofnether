@@ -25,7 +25,7 @@ public abstract class AbstractCastTargetedSpellGoal extends MoveToTargetBlockGoa
     boolean targetsGround;
 
     public AbstractCastTargetedSpellGoal(PathfinderMob mob, int channelTicks, int range, boolean targetsGround, Consumer onCast) {
-        super(mob, false, 1.0f, 0);
+        super(mob, false, 0);
         this.channelTicks = channelTicks;
         this.range = range;
         this.targetsGround = targetsGround; // if true, onCast provides a BlockPos, else it provides LivingEntity

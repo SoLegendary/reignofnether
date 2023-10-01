@@ -32,6 +32,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -721,6 +722,63 @@ public class UnitClientEvents {
                     UnitClientEvents.idleWorkerIds.add(id);
             }
         }
-
     }
+
+
+
+
+
+    /*
+    public static int option = 0;
+
+    public static double arm_x_rot = 0;
+    public static double arm_y_rot = 0;
+    public static double arm_z_rot = 0;
+    public static int xp_rot = -90;
+    public static int yp_rot = 180;
+    public static double x_pos = 16.0f;
+    public static double y_pos = 0.125f;
+    public static double z_pos = -0.625f;
+
+    @SubscribeEvent
+    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT || evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
+            int mult = evt.getKeyCode() == GLFW.GLFW_KEY_LEFT ? -1 : 1;
+            switch (option) {
+                case 0 -> arm_x_rot += mult * 0.1;
+                case 1 -> arm_y_rot += mult * 0.1;
+                case 2 -> arm_z_rot += mult * 0.1;
+                case 3 -> xp_rot += mult * 5;
+                case 4 -> yp_rot += mult * 5;
+                case 5 -> x_pos += mult * 0.1;
+                case 6 -> y_pos += mult * 0.1;
+                case 7 -> z_pos += mult * 0.1;
+            }
+        }
+        else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
+            option -= 1;
+            if (option < 0)
+                option = 7;
+        }
+        else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
+            option += 1;
+            if (option > 7)
+                option = 0;
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+                "arm_x_rot: " + arm_x_rot + (option == 0 ? " <" : ""),
+                "arm_y_rot: " + arm_y_rot + (option == 1 ? " <" : ""),
+                "arm_z_rot: " + arm_z_rot + (option == 2 ? " <" : ""),
+                "xp_rot: " + xp_rot + (option == 3 ? " <" : ""),
+                "yp_rot: " + yp_rot + (option == 4 ? " <" : ""),
+                "x_pos: " + x_pos + (option == 5 ? " <" : ""),
+                "y_pos: " + y_pos + (option == 6 ? " <" : ""),
+                "z_pos: " + z_pos + (option == 7 ? " <" : ""),
+        });
+    }
+     */
 }

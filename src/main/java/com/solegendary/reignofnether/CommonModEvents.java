@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.units.modelling.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinGruntUnit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -72,8 +73,8 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.RAVAGER_UNIT.get(), RavagerUnit.createAttributes().build());
         evt.put(EntityRegistrar.SILVERFISH_UNIT.get(), SilverfishUnit.createAttributes().build());
         evt.put(EntityRegistrar.PIGLIN_GRUNT_UNIT.get(), PiglinGruntUnit.createAttributes().build());
-        evt.put(EntityRegistrar.PIGLIN_HEADHUNTER_UNIT.get(), PiglinGruntUnit.createAttributes().build());
-        evt.put(EntityRegistrar.PIGLIN_BRUTE_UNIT.get(), SilverfishUnit.createAttributes().build());
+        evt.put(EntityRegistrar.PIGLIN_HEADHUNTER_UNIT.get(), PiglinBruteUnit.createAttributes().build());
+        evt.put(EntityRegistrar.PIGLIN_BRUTE_UNIT.get(), PiglinBruteUnit.createAttributes().build());
     }
 
     @SubscribeEvent

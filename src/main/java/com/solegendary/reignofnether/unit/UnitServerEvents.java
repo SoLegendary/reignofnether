@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -344,6 +345,9 @@ public class UnitServerEvents {
         if (evt.getSource().getEntity() instanceof WorkerUnit &&
             evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)
             evt.setAmount(attackerUnit.getUnitAttackDamage());
+
+        if (evt.getEntity() instanceof PiglinBruteUnit brute && brute.isHoldingUpShield && (evt.getSource().isProjectile()))
+            evt.setAmount(evt.getAmount() / 2);
 
         if (evt.getEntity() instanceof CreeperUnit && (evt.getSource().isExplosion()))
             evt.setCanceled(true);

@@ -1,11 +1,11 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
@@ -15,7 +15,6 @@ import java.util.EnumSet;
 // based on MeleeAttackGoal
 public abstract class AbstractMeleeAttackUnitGoal extends Goal {
     protected final PathfinderMob mob;
-    private final double speedModifier;
     private final boolean followingTargetEvenIfNotSeen;
     private Path path;
     private double pathedTargetX;
@@ -26,10 +25,9 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
     private final int attackInterval;
     private long lastCanUseCheck;
 
-    public AbstractMeleeAttackUnitGoal(PathfinderMob mob, int attackInterval, double speedModifier, boolean followingTargetEvenIfNotSeen) {
+    public AbstractMeleeAttackUnitGoal(PathfinderMob mob, int attackInterval, boolean followingTargetEvenIfNotSeen) {
         this.mob = mob;
         this.attackInterval = attackInterval;
-        this.speedModifier = speedModifier;
         this.followingTargetEvenIfNotSeen = followingTargetEvenIfNotSeen;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
@@ -75,7 +73,7 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
             boolean canContinue = !(livingentity instanceof Player) || !livingentity.isSpectator() && !((Player)livingentity).isCreative();
             if (canContinue) {
                 this.path = this.mob.getNavigation().createPath(livingentity, 0);
-                this.mob.getNavigation().moveTo(this.path, this.speedModifier);
+                this.mob.getNavigation().moveTo(this.path,  Unit.getSpeedModifier((Unit) this.mob));
             }
             return canContinue;
         }
@@ -83,7 +81,7 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
 
     public void start() {
         if (!((Unit) this.mob).getHoldPosition())
-            this.mob.getNavigation().moveTo(this.path, this.speedModifier);
+            this.mob.getNavigation().moveTo(this.path,  Unit.getSpeedModifier((Unit) this.mob));
         this.mob.setAggressive(true);
         this.ticksUntilNextPathRecalculation = 0;
     }

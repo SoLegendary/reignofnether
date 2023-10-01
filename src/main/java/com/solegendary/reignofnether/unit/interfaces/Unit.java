@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -189,4 +190,11 @@ public interface Unit {
 
     // equipment only needs to be done serverside, but mod-specific fields need to be done clientside too
     default void setupEquipmentAndUpgradesClient() { }
+
+    public static float getSpeedModifier(Unit unit) {
+        if (unit instanceof PiglinBruteUnit brute && brute.isHoldingUpShield) {
+            return 0.7f;
+        }
+        return 1.0f;
+    }
 }

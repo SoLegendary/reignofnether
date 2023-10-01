@@ -1,12 +1,10 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Path;
 
 import javax.annotation.Nullable;
@@ -15,15 +13,13 @@ import java.util.EnumSet;
 public class MoveToTargetBlockGoal extends Goal {
 
     protected final PathfinderMob mob;
-    protected final double speedModifier;
     protected BlockPos moveTarget = null;
     protected boolean persistent; // will keep trying to move back to the target if moved externally
     protected int moveReachRange = 0; // how far away from the target block to stop moving (manhattan distance)
 
-    public MoveToTargetBlockGoal(PathfinderMob mob, boolean persistent, double speedModifier, int reachRange) {
+    public MoveToTargetBlockGoal(PathfinderMob mob, boolean persistent, int reachRange) {
         this.mob = mob;
         this.persistent = persistent;
-        this.speedModifier = speedModifier;
         this.moveReachRange = reachRange;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE));
     }
@@ -53,7 +49,7 @@ public class MoveToTargetBlockGoal extends Goal {
         if (moveTarget != null) {
             // move to exact goal instead of 1 block away
             Path path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
-            this.mob.getNavigation().moveTo(path, speedModifier);
+            this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier((Unit) this.mob));
         }
         else
             this.mob.getNavigation().stop();

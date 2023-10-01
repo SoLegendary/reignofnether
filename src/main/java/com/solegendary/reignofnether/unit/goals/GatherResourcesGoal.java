@@ -123,8 +123,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     };
 
     // set move goal as range -1, so we aren't slightly out of range
-    public GatherResourcesGoal(PathfinderMob mob, double speedModifier) {
-        super(mob, true, speedModifier, REACH_RANGE - 1);
+    public GatherResourcesGoal(PathfinderMob mob) {
+        super(mob, true, REACH_RANGE - 1);
     }
 
     public void syncFromServer(ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {

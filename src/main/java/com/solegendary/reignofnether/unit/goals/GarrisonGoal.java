@@ -21,8 +21,8 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
 
     private Building buildingTarget;
 
-    public GarrisonGoal(PathfinderMob mob, double speedModifier) {
-        super(mob, true, speedModifier, 0);
+    public GarrisonGoal(PathfinderMob mob) {
+        super(mob, true, 0);
     }
 
     public void tick() {

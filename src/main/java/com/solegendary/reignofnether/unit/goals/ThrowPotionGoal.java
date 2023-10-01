@@ -17,7 +17,7 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
     private Ability ability; // used for syncing cooldown with clientside
 
     public ThrowPotionGoal(PathfinderMob mob) {
-        super(mob, false, 1.0f, 0);
+        super(mob, false, 0);
     }
 
     public void setPotion(Potion potion) {

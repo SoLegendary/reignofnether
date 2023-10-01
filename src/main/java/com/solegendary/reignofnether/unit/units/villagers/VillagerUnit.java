@@ -219,13 +219,13 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
-        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, true);
-        this.buildRepairGoal = new BuildRepairGoal(this, 1.0f);
-        this.gatherResourcesGoal = new GatherResourcesGoal(this, 1.0f);
-        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.garrisonGoal = new GarrisonGoal(this);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), true);
+        this.buildRepairGoal = new BuildRepairGoal(this);
+        this.gatherResourcesGoal = new GatherResourcesGoal(this);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }
 
     @Override

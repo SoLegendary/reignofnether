@@ -184,11 +184,11 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
-        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
+        this.garrisonGoal = new GarrisonGoal(this);
         this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown());
-        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
         this.mountGoal = new MountGoal(this);
     }
 

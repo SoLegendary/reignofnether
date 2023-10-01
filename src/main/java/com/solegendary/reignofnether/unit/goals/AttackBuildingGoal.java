@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
@@ -27,8 +28,8 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
 
     private Building buildingTarget;
 
-    public AttackBuildingGoal(PathfinderMob mob, double speedModifier) {
-        super(mob, true, speedModifier, 0);
+    public AttackBuildingGoal(PathfinderMob mob) {
+        super(mob, true, 0);
     }
 
     public void tick() {
@@ -50,6 +51,9 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
                     AttackerUnit unit = (AttackerUnit) mob;
                     ticksToNextBlockBreak = unit.getAttackCooldown();
                     double damageFloat = unit.getUnitAttackDamage() * buildingTarget.MELEE_DAMAGE_MULTIPLIER;
+                    if (unit instanceof IronGolemUnit)
+                        damageFloat *= 2;
+
                     double damageFloor = Math.floor(damageFloat);
                     int damageInt = (int) damageFloor;
                     if (new Random().nextDouble(1.0f) < damageFloat - damageFloor)

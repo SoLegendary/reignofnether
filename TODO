@@ -12,6 +12,8 @@ TODO bugs/features:
 
 
 piglins
+    - leave piglin headhunters to later, get blazes done first and see if they fill the basic ranged role well
+
     - ensure portals dont actually send people to the nether
         - maybe make a custom block so we can also customise colour?
     - apply leaf disappearance logic to mycelium leaves

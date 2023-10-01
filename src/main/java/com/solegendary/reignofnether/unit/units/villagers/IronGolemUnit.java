@@ -102,7 +102,7 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 10.0f;
+    final static public float attackDamage = 9.0f;
     final static public float attacksPerSecond = 0.4f;
     final static public float maxHealth = 150.0f;
     final static public float armorValue = 0.0f;
@@ -147,11 +147,11 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
-        this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
-        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), false);
+        this.attackBuildingGoal = new AttackBuildingGoal(this);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }
 
     @Override

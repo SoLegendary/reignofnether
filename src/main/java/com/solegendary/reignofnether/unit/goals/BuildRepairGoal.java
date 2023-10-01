@@ -31,8 +31,8 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
 
     private Boolean isBuildingServerside = false;
 
-    public BuildRepairGoal(PathfinderMob mob, double speedModifier) {
-        super(mob, true, speedModifier, 0);
+    public BuildRepairGoal(PathfinderMob mob) {
+        super(mob, true, 0);
     }
 
     public void setIsBuildingServerside(boolean isBuilding) {

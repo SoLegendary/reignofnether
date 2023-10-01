@@ -168,9 +168,9 @@ public class SilverfishUnit extends Silverfish implements Unit, AttackerUnit {
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), false);
     }
 
     @Override

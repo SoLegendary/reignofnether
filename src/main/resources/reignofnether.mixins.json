@@ -18,6 +18,7 @@
         "ClientPacketMixin",
         "EntityRenderMixin",
         "FrustumMixin",
+        "ItemInHandLayerMixin",
         "MobRendererMixin",
         "OrthoViewMixin",
         "TopdownGuiMixin",

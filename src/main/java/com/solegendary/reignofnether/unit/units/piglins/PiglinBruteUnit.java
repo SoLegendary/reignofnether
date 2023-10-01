@@ -1,7 +1,12 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.CastFangsCircle;
+import com.solegendary.reignofnether.ability.abilities.CastFangsLine;
+import com.solegendary.reignofnether.ability.abilities.CastSummonVexes;
+import com.solegendary.reignofnether.ability.abilities.ToggleShield;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -90,7 +95,7 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     }
 
     // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
+    public float getMovementSpeed() {return isHoldingUpShield ? movementSpeed * 0.5f : movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
     public int getPopCost() {return popCost;}
@@ -110,10 +115,6 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
 
     // endregion
 
-    public BlockState getReplantBlockState() {
-        return Blocks.WHEAT.defaultBlockState();
-    }
-
     final static public float attackDamage = 4.0f;
     final static public float attacksPerSecond = 0.5f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
@@ -127,12 +128,20 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     final static public int popCost = ResourceCosts.PIGLIN_BRUTE.population;
     public int maxResources = 100;
 
+    public boolean isHoldingUpShield = true;
+
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
     public PiglinBruteUnit(EntityType<? extends PiglinBrute> entityType, Level level) {
         super(entityType, level);
+
+        ToggleShield ab1 = new ToggleShield(this);
+        this.abilities.add(ab1);
+        if (level.isClientSide()) {
+            this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
+        }
     }
 
     @Override
@@ -167,11 +176,11 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
-        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
-        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.garrisonGoal = new GarrisonGoal(this);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), false);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }
 
     @Override
@@ -198,5 +207,8 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
         AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
         axeStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
         this.setItemSlot(EquipmentSlot.MAINHAND, axeStack);
+
+        ItemStack shieldStack = new ItemStack(Items.SHIELD);
+        this.setItemSlot(EquipmentSlot.OFFHAND, shieldStack);
     }
 }

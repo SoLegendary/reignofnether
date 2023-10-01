@@ -180,10 +180,10 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
-        this.attackGoal = new CreeperAttackUnitGoal(this, getAttackCooldown(), 1.0f, false);
+        this.garrisonGoal = new GarrisonGoal(this);
+        this.attackGoal = new CreeperAttackUnitGoal(this, getAttackCooldown(), false);
     }
 
     @Override

@@ -27,7 +27,7 @@ public class MountGoal extends MoveToTargetBlockGoal {
     public boolean autofind = false;
 
     public MountGoal(PathfinderMob mob) {
-        super(mob, false, 1.0f, 0);
+        super(mob, false, 0);
     }
 
     public void setTarget(LivingEntity entity) {

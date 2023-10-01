@@ -179,10 +179,10 @@ public class WitchUnit extends Witch implements Unit {
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
-        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.garrisonGoal = new GarrisonGoal(this);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
         this.throwPotionGoal = new ThrowPotionGoal(this);
     }
 
