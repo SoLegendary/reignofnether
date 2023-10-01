@@ -2,10 +2,7 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.unit.units.monsters.*;
-import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinGruntUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterUnit;
+import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -154,6 +151,12 @@ public class EntityRegistrar {
                     .sized(EntityType.HOGLIN.getWidth(), EntityType.HOGLIN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "hoglin_unit").toString()));
+
+    public static final RegistryObject<EntityType<BlazeUnit>> BLAZE_UNIT = ENTITIES.register("blaze_unit",
+            () -> EntityType.Builder.of(BlazeUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.BLAZE.getWidth(), EntityType.BLAZE.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "blaze_unit").toString()));
 
 
     public static void init() {

@@ -117,7 +117,7 @@ public class SilverfishUnit extends Silverfish implements Unit, AttackerUnit {
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-    final static public int popCost = ResourceCosts.SILVERFISH.population;
+    final static public int popCost = 0;
     final static public boolean canAttackBuildings = false;
     public int maxResources = 100;
 

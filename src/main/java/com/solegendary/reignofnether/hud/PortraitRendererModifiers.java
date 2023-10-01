@@ -50,6 +50,7 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Chicken) {
             yOffset = 14;
         } else if (entity instanceof Blaze) {
+            yOffset = -8;
             scale = -5;
         } else if (entity instanceof MushroomCow) {
             scale = -5;
@@ -62,7 +63,7 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Vex) {
             yOffset = 5;
         } else if (entity instanceof Hoglin || entity instanceof Zoglin) {
-            yOffset = -12;
+            yOffset = -16;
             scale = -18;
         } else if (entity instanceof Slime slime) { // largest size only
             if (slime.getSize() == 4)

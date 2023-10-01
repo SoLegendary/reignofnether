@@ -4,6 +4,8 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -11,7 +13,9 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.piglins.BlazeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -28,10 +32,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
-import net.minecraft.world.entity.projectile.EvokerFangs;
-import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -320,12 +321,27 @@ public class UnitServerEvents {
         }
     }
 
+    private static boolean shouldIgnoreKnockback(LivingDamageEvent evt) {
+        Entity projectile = evt.getSource().getDirectEntity();
+        Entity shooter = evt.getSource().getEntity();
+
+        if (shooter instanceof PiglinHeadhunterUnit headhunterUnit && projectile instanceof ThrownTrident) {
+            return !ResearchServer.playerHasResearch(headhunterUnit.getOwnerName(), ResearchHeavyTridents.itemName);
+        }
+        if (projectile instanceof Fireball && shooter instanceof BlazeUnit)
+            return true;
+
+        if (projectile instanceof AbstractArrow)
+            return true;
+
+        return evt.getSource().isMagic() && evt.getSource() instanceof IndirectEntityDamageSource &&
+                (!(shooter instanceof EvokerUnit));
+    }
+
     // make creepers immune to lightning damage (but still get charged by them)
     @SubscribeEvent
     public static void onEntityDamaged(LivingDamageEvent evt) {
-        if (evt.getSource().getDirectEntity() instanceof AbstractArrow ||
-            evt.getSource().isMagic() && evt.getSource() instanceof IndirectEntityDamageSource &&
-            (!(evt.getSource().getEntity() instanceof EvokerUnit)))
+        if (shouldIgnoreKnockback(evt))
             knockbackIgnoreIds.add(evt.getEntity().getId());
 
         // ensure projectiles from units do the damage of the unit, not the item

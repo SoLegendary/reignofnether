@@ -18,16 +18,16 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PiglinHeadhunterProd extends ProductionItem {
+public class BlazeProd extends ProductionItem {
 
-    public final static String itemName = "Piglin Headhunter";
-    public final static ResourceCost cost = ResourceCosts.PIGLIN_HEADHUNTER;
+    public final static String itemName = "Blaze";
+    public final static ResourceCost cost = ResourceCosts.BLAZE;
 
-    public PiglinHeadhunterProd(ProductionBuilding building) {
+    public BlazeProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.PIGLIN_HEADHUNTER_UNIT.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.BLAZE_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -36,22 +36,22 @@ public class PiglinHeadhunterProd extends ProductionItem {
     }
 
     public String getItemName() {
-        return PiglinHeadhunterProd.itemName;
+        return BlazeProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-                FormattedCharSequence.forward(PiglinHeadhunterProd.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(BlazeProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A piglin that throws tridents in battle.", Style.EMPTY)
+                FormattedCharSequence.forward("A fiery elemental that shoots fireballs from afar.", Style.EMPTY)
         ));
 
         return new Button(
-                PiglinHeadhunterProd.itemName,
+                BlazeProd.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/blaze.png"),
                 hotkey,
                 () -> false,
                 () -> false,
@@ -64,9 +64,9 @@ public class PiglinHeadhunterProd extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-                PiglinHeadhunterProd.itemName,
+                BlazeProd.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/blaze.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,

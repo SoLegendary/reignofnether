@@ -6,10 +6,7 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.units.modelling.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
-import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinGruntUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterUnit;
+import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.entity.*;
@@ -53,6 +50,7 @@ public class CommonModEvents {
         evt.registerEntityRenderer(EntityRegistrar.PIGLIN_BRUTE_UNIT.get(), PiglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.PIGLIN_HEADHUNTER_UNIT.get(), PiglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.HOGLIN_UNIT.get(), HoglinRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.BLAZE_UNIT.get(), BlazeRenderer::new);
     }
 
     @SubscribeEvent
@@ -79,6 +77,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.PIGLIN_HEADHUNTER_UNIT.get(), PiglinHeadhunterUnit.createAttributes().build());
         evt.put(EntityRegistrar.PIGLIN_BRUTE_UNIT.get(), PiglinBruteUnit.createAttributes().build());
         evt.put(EntityRegistrar.HOGLIN_UNIT.get(), HoglinUnit.createAttributes().build());
+        evt.put(EntityRegistrar.BLAZE_UNIT.get(), BlazeUnit.createAttributes().build());
     }
 
     @SubscribeEvent

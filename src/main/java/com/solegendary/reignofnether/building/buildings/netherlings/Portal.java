@@ -5,12 +5,11 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.researchItems.ResearchBruteShields;
+import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
 import com.solegendary.reignofnether.research.researchItems.ResearchHoglinCavalry;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteProd;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinGruntProd;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterProd;
+import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerProd;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorProd;
 import net.minecraft.core.BlockPos;
@@ -59,8 +58,11 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
                     PiglinGruntProd.getStartButton(this, Keybindings.keyQ),
                     PiglinBruteProd.getStartButton(this, Keybindings.keyW),
                     PiglinHeadhunterProd.getStartButton(this, Keybindings.keyE),
-                    ResearchBruteShields.getStartButton(this, Keybindings.keyR),
-                    ResearchHoglinCavalry.getStartButton(this, Keybindings.keyR)
+                    HoglinProd.getStartButton(this, Keybindings.keyR),
+                    BlazeProd.getStartButton(this, Keybindings.keyT),
+                    ResearchBruteShields.getStartButton(this, Keybindings.keyU),
+                    ResearchHoglinCavalry.getStartButton(this, Keybindings.keyI),
+                    ResearchHeavyTridents.getStartButton(this, Keybindings.keyO)
             );
     }
 

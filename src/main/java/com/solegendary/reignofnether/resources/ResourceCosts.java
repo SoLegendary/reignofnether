@@ -37,15 +37,14 @@ public class ResourceCosts {
     // Monsters
     public static ResourceCost ZOMBIE_VILLAGER = ResourceCost.Unit(50,0,0,15,1);
     public static ResourceCost CREEPER = ResourceCost.Unit(50,0,100,35,2);
-    public static ResourceCost SKELETON = ResourceCost.Unit(70,50,0,20,1);
+    public static ResourceCost SKELETON = ResourceCost.Unit(70,35,0,20,1);
     public static ResourceCost STRAY = ResourceCost.Unit(70,50,0,20,1);
     public static ResourceCost ZOMBIE = ResourceCost.Unit(90,0,0,20,1);
     public static ResourceCost HUSK = ResourceCost.Unit(90,0,0,20,1);
     public static ResourceCost SPIDER = ResourceCost.Unit(80,60,0,25,2);
     public static ResourceCost POISON_SPIDER = ResourceCost.Unit(80,0,60,25,2);
     public static ResourceCost ENDERMAN = ResourceCost.Unit(100,100,100,30,3);
-    public static ResourceCost WARDEN = ResourceCost.Unit(200,0,100,35,4);
-    public static ResourceCost SILVERFISH = ResourceCost.Unit(10,0,0,10,0);
+    public static ResourceCost WARDEN = ResourceCost.Unit(250,0,125,40,4);
 
     // Villagers
     public static ResourceCost VILLAGER = ResourceCost.Unit(50,0,0,15,1);
@@ -54,13 +53,16 @@ public class ResourceCosts {
     public static ResourceCost VINDICATOR = ResourceCost.Unit(150,0,0,30,2);
     public static ResourceCost WITCH = ResourceCost.Unit(100,100,100,35,3);
     public static ResourceCost EVOKER = ResourceCost.Unit(150,0,150,35,3);
-    public static ResourceCost RAVAGER = ResourceCost.Unit(300,50,150,45,6);
+    public static ResourceCost RAVAGER = ResourceCost.Unit(300,50,150,50,6);
 
     // Piglins
     public static ResourceCost PIGLIN_GRUNT = ResourceCost.Unit(50,0,0,15,1);
     public static ResourceCost PIGLIN_BRUTE = ResourceCost.Unit(125,0,0,25,2);
     public static ResourceCost PIGLIN_HEADHUNTER = ResourceCost.Unit(90,70,0,25,2);
     public static ResourceCost HOGLIN = ResourceCost.Unit(150,0,50,30,2);
+    public static ResourceCost BLAZE = ResourceCost.Unit(50,50,100,30,2);
+    public static ResourceCost WITHER_SKELETON = ResourceCost.Unit(200,0,100,35,3);
+    public static ResourceCost GHAST = ResourceCost.Unit(100,150,200,45,5);
 
     // ******************* BUILDINGS ******************* //
     public static ResourceCost STOCKPILE = ResourceCost.Building(0,75,0, 0);
@@ -107,4 +109,5 @@ public class ResourceCosts {
     public static ResourceCost RESEARCH_RAVAGER_CAVALRY = ResourceCost.Research(250,250,0, 90);
     public static ResourceCost RESEARCH_BRUTE_SHIELDS = ResourceCost.Research(0,300,300, 150);
     public static ResourceCost RESEARCH_HOGLIN_CAVALRY = ResourceCost.Research(150,150,0, 60);
+    public static ResourceCost RESEARCH_HEAVY_TRIDENTS = ResourceCost.Research(0, 250, 250, 140);
 }
