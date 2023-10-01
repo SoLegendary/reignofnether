@@ -117,7 +117,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
 
     final static public float attackDamage = 4.0f;
     final static public float attacksPerSecond = 0.35f;
-    final static public float maxHealth = 30.0f;
+    final static public float maxHealth = 35.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 12.0F; // only used by ranged units or melee building attackers

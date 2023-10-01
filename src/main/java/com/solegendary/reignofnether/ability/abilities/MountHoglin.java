@@ -7,17 +7,16 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.researchItems.ResearchRavagerCavalry;
-import com.solegendary.reignofnether.research.researchItems.ResearchSpiderJockeys;
+import com.solegendary.reignofnether.research.researchItems.ResearchHoglinCavalry;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.MountGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
+import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -27,13 +26,13 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class MountRavager extends Ability {
+public class MountHoglin extends Ability {
 
     private final LivingEntity entity;
 
-    public MountRavager(LivingEntity entity) {
+    public MountHoglin(LivingEntity entity) {
         super(
-            UnitAction.MOUNT_RAVAGER,
+            UnitAction.MOUNT_HOGLIN,
             0,
             0,
             0,
@@ -45,16 +44,16 @@ public class MountRavager extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Mount Ravager",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/ravager.png"),
+            "Mount Hoglin",
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/hoglin.png"),
             hotkey,
-            () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_RAVAGER,
-            () -> entity.isPassenger() || !ResearchClient.hasResearch(ResearchRavagerCavalry.itemName),
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_HOGLIN,
+            () -> entity.isPassenger() || !ResearchClient.hasResearch(ResearchHoglinCavalry.itemName),
             () -> true,
-            () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_RAVAGER),
-            () -> UnitClientEvents.sendUnitCommand(UnitAction.MOUNT_RAVAGER),
+            () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_HOGLIN),
+            () -> UnitClientEvents.sendUnitCommand(UnitAction.MOUNT_HOGLIN),
             List.of(
-                FormattedCharSequence.forward("Mount Ravager (Right click to auto-find)", Style.EMPTY)
+                FormattedCharSequence.forward("Mount Hoglin (Right click to auto-find)", Style.EMPTY)
             ),
             this
         );
@@ -81,7 +80,7 @@ public class MountRavager extends Ability {
 
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
-        if (targetEntity instanceof RavagerUnit) {
+        if (targetEntity instanceof HoglinUnit) {
             getMountGoal().setTarget(targetEntity);
         }
         else if (level.isClientSide())

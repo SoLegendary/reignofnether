@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.MountHoglin;
+import com.solegendary.reignofnether.ability.abilities.MountSpider;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -120,7 +123,7 @@ public class PiglinHeadhunterUnit extends PiglinBrute implements Unit, AttackerU
     final static public float attacksPerSecond = 0.3f;
     final static public float attackRange = 10; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
-    final static public boolean willRetaliate = false; // will attack when hurt by an enemy
+    final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public boolean canAttackBuildings = false;
     final static public float maxHealth = 40.0f;
@@ -135,6 +138,12 @@ public class PiglinHeadhunterUnit extends PiglinBrute implements Unit, AttackerU
 
     public PiglinHeadhunterUnit(EntityType<? extends PiglinBrute> entityType, Level level) {
         super(entityType, level);
+
+        MountHoglin mountHoglinAbility = new MountHoglin(this);
+        this.abilities.add(mountHoglinAbility);
+        if (level.isClientSide()) {
+            this.abilityButtons.add(mountHoglinAbility.getButton(Keybindings.keyQ));
+        }
     }
 
     @Override

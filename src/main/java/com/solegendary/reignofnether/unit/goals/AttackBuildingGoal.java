@@ -6,10 +6,12 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.monster.hoglin.Hoglin;
 
 import java.util.Random;
 
@@ -53,6 +55,8 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
                     double damageFloat = unit.getUnitAttackDamage() * buildingTarget.MELEE_DAMAGE_MULTIPLIER;
                     if (unit instanceof IronGolemUnit)
                         damageFloat *= 2;
+                    else if (unit instanceof HoglinUnit)
+                        damageFloat *= 1.5f;
 
                     double damageFloor = Math.floor(damageFloat);
                     int damageInt = (int) damageFloor;

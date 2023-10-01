@@ -8,6 +8,8 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
+import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -44,7 +46,8 @@ public class MountGoal extends MoveToTargetBlockGoal {
             return false;
         else return (this.mob instanceof PillagerUnit pillager && m instanceof RavagerUnit ravager) ||
                     (this.mob instanceof SkeletonUnit skeleton && m instanceof SpiderUnit) ||
-                    (this.mob instanceof StrayUnit stray && m instanceof SpiderUnit);
+                    (this.mob instanceof StrayUnit stray && m instanceof SpiderUnit) ||
+                    (this.mob instanceof PiglinHeadhunterUnit headhunter && m instanceof HoglinUnit);
     }
 
     public void setNearestTarget() {

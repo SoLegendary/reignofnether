@@ -107,7 +107,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit {
     final static public float attacksPerSecond = 0.6f;
     final static public float maxHealth = 40.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.27f;
+    final static public float movementSpeed = 0.28f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy

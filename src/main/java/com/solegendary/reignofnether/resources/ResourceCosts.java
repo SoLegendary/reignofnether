@@ -60,6 +60,7 @@ public class ResourceCosts {
     public static ResourceCost PIGLIN_GRUNT = ResourceCost.Unit(50,0,0,15,1);
     public static ResourceCost PIGLIN_BRUTE = ResourceCost.Unit(125,0,0,25,2);
     public static ResourceCost PIGLIN_HEADHUNTER = ResourceCost.Unit(90,70,0,25,2);
+    public static ResourceCost HOGLIN = ResourceCost.Unit(150,0,50,30,2);
 
     // ******************* BUILDINGS ******************* //
     public static ResourceCost STOCKPILE = ResourceCost.Building(0,75,0, 0);
@@ -105,4 +106,5 @@ public class ResourceCosts {
     public static ResourceCost RESEARCH_SILVERFISH = ResourceCost.Research(0,300,300, 120);
     public static ResourceCost RESEARCH_RAVAGER_CAVALRY = ResourceCost.Research(250,250,0, 90);
     public static ResourceCost RESEARCH_BRUTE_SHIELDS = ResourceCost.Research(0,300,300, 150);
+    public static ResourceCost RESEARCH_HOGLIN_CAVALRY = ResourceCost.Research(150,150,0, 60);
 }

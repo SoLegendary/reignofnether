@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.abilities.Eject;
-import com.solegendary.reignofnether.ability.abilities.Teleport;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -131,7 +130,6 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit {
 
         Eject ab1 = new Eject(this);
         this.abilities.add(ab1);
-
         if (level.isClientSide())
             this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
     }

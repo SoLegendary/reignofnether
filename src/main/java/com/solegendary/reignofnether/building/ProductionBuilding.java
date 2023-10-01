@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.research.researchItems.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
+import com.solegendary.reignofnether.unit.units.piglins.HoglinProd;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteProd;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinGruntProd;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterProd;
@@ -141,6 +142,7 @@ public abstract class ProductionBuilding extends Building {
                 case PiglinGruntProd.itemName -> prodItem = new PiglinGruntProd(building);
                 case PiglinBruteProd.itemName -> prodItem = new PiglinBruteProd(building);
                 case PiglinHeadhunterProd.itemName -> prodItem = new PiglinHeadhunterProd(building);
+                case HoglinProd.itemName -> prodItem = new HoglinProd(building);
 
                 case ResearchVindicatorAxes.itemName -> prodItem = new ResearchVindicatorAxes(building);
                 case ResearchPillagerCrossbows.itemName -> prodItem = new ResearchPillagerCrossbows(building);
@@ -156,6 +158,7 @@ public abstract class ProductionBuilding extends Building {
                 case ResearchCastleFlag.itemName -> prodItem = new ResearchCastleFlag(building);
                 case ResearchRavagerCavalry.itemName -> prodItem = new ResearchRavagerCavalry(building);
                 case ResearchBruteShields.itemName -> prodItem = new ResearchBruteShields(building);
+                case ResearchHoglinCavalry.itemName -> prodItem = new ResearchHoglinCavalry(building);
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside
