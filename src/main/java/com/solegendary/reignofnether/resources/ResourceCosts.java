@@ -104,4 +104,5 @@ public class ResourceCosts {
     public static ResourceCost RESEARCH_CASTLE_FLAG = ResourceCost.Research(200,0,100, 60);
     public static ResourceCost RESEARCH_SILVERFISH = ResourceCost.Research(0,300,300, 120);
     public static ResourceCost RESEARCH_RAVAGER_CAVALRY = ResourceCost.Research(250,250,0, 90);
+    public static ResourceCost RESEARCH_BRUTE_SHIELDS = ResourceCost.Research(0,300,300, 150);
 }

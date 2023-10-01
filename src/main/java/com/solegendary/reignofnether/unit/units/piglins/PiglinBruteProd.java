@@ -36,12 +36,12 @@ public class PiglinBruteProd extends ProductionItem {
     }
 
     public String getItemName() {
-        return PiglinGruntProd.itemName;
+        return PiglinBruteProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-                FormattedCharSequence.forward(PiglinGruntProd.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(PiglinBruteProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
@@ -49,7 +49,7 @@ public class PiglinBruteProd extends ProductionItem {
         ));
 
         return new Button(
-                PiglinGruntProd.itemName,
+                PiglinBruteProd.itemName,
                 14,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin.png"),
                 hotkey,
@@ -64,7 +64,7 @@ public class PiglinBruteProd extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-                PiglinGruntProd.itemName,
+                PiglinBruteProd.itemName,
                 14,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin.png"),
                 (Keybinding) null,

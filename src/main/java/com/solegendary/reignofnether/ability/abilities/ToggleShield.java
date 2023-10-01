@@ -4,6 +4,9 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchBruteShields;
+import com.solegendary.reignofnether.research.researchItems.ResearchEvokerVexes;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -45,7 +48,7 @@ public class ToggleShield extends Ability {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shield.png"),
                 hotkey,
                 () -> bruteUnit.isHoldingUpShield,
-                () -> false,
+                () -> !ResearchClient.hasResearch(ResearchBruteShields.itemName),
                 () -> true,
                 () -> UnitClientEvents.sendUnitCommand(UnitAction.TOGGLE_SHIELD),
                 null,

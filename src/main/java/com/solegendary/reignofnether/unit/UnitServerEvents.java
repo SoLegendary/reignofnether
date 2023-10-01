@@ -31,6 +31,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.EvokerFangs;
+import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -191,20 +192,6 @@ public class UnitServerEvents {
             ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
             forcedUnitChunks.add(new Pair<>(entity.getId(), chunk));
         }
-        // --------------------------- //
-        // Projectile damage balancing //
-        // --------------------------- //
-        // damage should be based only on the unit attack damage + enchantments not based weapon damage
-        if (evt.getEntity() instanceof Arrow arrow) {
-            if (arrow.getOwner() instanceof AttackerUnit unit &&
-                arrow.getOwner() instanceof LivingEntity lEntity) {
-
-                if (lEntity.getItemBySlot(EquipmentSlot.MAINHAND).getItem() == Items.BOW)
-                    arrow.setBaseDamage(unit.getUnitAttackDamage() - 2);
-                else if (lEntity.getItemBySlot(EquipmentSlot.MAINHAND).getItem() == Items.CROSSBOW)
-                    arrow.setBaseDamage(unit.getUnitAttackDamage() - 2.5);
-            }
-        }
     }
 
     @SubscribeEvent
@@ -340,6 +327,10 @@ public class UnitServerEvents {
             evt.getSource().isMagic() && evt.getSource() instanceof IndirectEntityDamageSource &&
             (!(evt.getSource().getEntity() instanceof EvokerUnit)))
             knockbackIgnoreIds.add(evt.getEntity().getId());
+
+        // ensure projectiles from units do the damage of the unit, not the item
+        if (evt.getSource().isProjectile() && evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)
+            evt.setAmount(attackerUnit.getUnitAttackDamage());
 
         // ignore added weapon damage for workers
         if (evt.getSource().getEntity() instanceof WorkerUnit &&

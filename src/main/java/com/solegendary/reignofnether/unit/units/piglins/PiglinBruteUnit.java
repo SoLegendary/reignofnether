@@ -7,6 +7,9 @@ import com.solegendary.reignofnether.ability.abilities.CastSummonVexes;
 import com.solegendary.reignofnether.ability.abilities.ToggleShield;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchBruteShields;
+import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -118,17 +121,17 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     final static public float attackDamage = 4.0f;
     final static public float attacksPerSecond = 0.5f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
-    final static public float aggroRange = 0;
+    final static public float aggroRange = 10;
     final static public boolean willRetaliate = false; // will attack when hurt by an enemy
-    final static public boolean aggressiveWhenIdle = false;
-    final static public boolean canAttackBuildings = false;
+    final static public boolean aggressiveWhenIdle = true;
+    final static public boolean canAttackBuildings = true;
     final static public float maxHealth = 50.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public int popCost = ResourceCosts.PIGLIN_BRUTE.population;
     public int maxResources = 100;
 
-    public boolean isHoldingUpShield = true;
+    public boolean isHoldingUpShield = false;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -208,7 +211,9 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
         axeStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
         this.setItemSlot(EquipmentSlot.MAINHAND, axeStack);
 
-        ItemStack shieldStack = new ItemStack(Items.SHIELD);
-        this.setItemSlot(EquipmentSlot.OFFHAND, shieldStack);
+        if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchBruteShields.itemName)) {
+            ItemStack shieldStack = new ItemStack(Items.SHIELD);
+            this.setItemSlot(EquipmentSlot.OFFHAND, shieldStack);
+        }
     }
 }

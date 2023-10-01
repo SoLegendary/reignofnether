@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
@@ -43,7 +44,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StrayUnit extends Stray implements Unit, AttackerUnit {
+public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttackerUnit {
     // region
     private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
     private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
@@ -121,11 +122,11 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
     // endregion
 
     final static public float attackDamage = 4.0f;
-    final static public float attacksPerSecond = 0.3f;
-    final static public float maxHealth = 40.0f;
+    final static public float attacksPerSecond = 0.35f;
+    final static public float maxHealth = 35.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
-    final static public float attackRange = 10.0F; // only used by ranged units or melee building attackers
+    final static public float attackRange = 12.0F; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
@@ -223,7 +224,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
 
     // override to make inaccuracy 0
     @Override
-    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
+    public void performUnitRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
         ItemStack itemstack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this,
                 (item) -> item instanceof BowItem
         )));

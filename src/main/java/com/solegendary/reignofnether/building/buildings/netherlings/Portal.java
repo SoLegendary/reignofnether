@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.researchItems.ResearchBruteShields;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteProd;
@@ -56,7 +57,8 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
             this.productionButtons = Arrays.asList(
                     PiglinGruntProd.getStartButton(this, Keybindings.keyQ),
                     PiglinBruteProd.getStartButton(this, Keybindings.keyW),
-                    PiglinHeadhunterProd.getStartButton(this, Keybindings.keyE)
+                    PiglinHeadhunterProd.getStartButton(this, Keybindings.keyE),
+                    ResearchBruteShields.getStartButton(this, Keybindings.keyR)
             );
     }
 

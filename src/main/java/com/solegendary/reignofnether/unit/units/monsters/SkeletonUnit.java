@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
@@ -37,7 +38,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
+public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, RangedAttackerUnit {
     // region
     private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
     private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
@@ -208,7 +209,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit {
 
     // override to make inaccuracy 0
     @Override
-    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
+    public void performUnitRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
         ItemStack itemstack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this,
                 (item) -> item instanceof BowItem
         )));

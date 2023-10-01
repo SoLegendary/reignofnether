@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -9,6 +10,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.TridentItem;
 
 import java.util.EnumSet;
 
@@ -19,7 +21,9 @@ import java.util.EnumSet;
 // - faces the target
 // - does not require the user to wind up bow attacks, instead using RTS-like attack cooldowns
 
-public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & RangedAttackMob> extends Goal {
+// can set a flag to use for tridents instead of bows
+
+public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends Goal {
     private final T mob;
     private final int attackWindupTime = 5; // time to wind up a bow attack
     private int attackCooldownMax;
@@ -38,16 +42,24 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
             this.attackCooldown -= 1;
     }
 
-    public boolean canUse() { return this.mob.getTarget() != null && this.isHoldingBow(); }
+    public boolean canUse() { return this.mob.getTarget() != null && this.isHoldingRangedWeapon(); }
 
-    protected boolean isHoldingBow() {
+    private boolean isHoldingBow() {
         return this.mob.isHolding(is -> is.getItem() instanceof BowItem);
+    }
+
+    private boolean isHoldingTrident() {
+        return this.mob.isHolding(is -> is.getItem() instanceof TridentItem);
+    }
+
+    protected boolean isHoldingRangedWeapon() {
+        return isHoldingBow() || isHoldingTrident();
     }
 
     public boolean canContinueToUse() {
         Entity target = this.mob.getTarget();
 
-        if (target == null || !target.isAlive() || !this.isHoldingBow())
+        if (target == null || !target.isAlive() || !this.isHoldingRangedWeapon())
             return false;
         if (!this.canUse() && this.mob.getNavigation().isDone())
             return false;
@@ -122,13 +134,22 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob & Ranged
                     int i = this.mob.getTicksUsingItem();
                     if (i >= attackWindupTime && attackCooldown <= 0) {
                         this.mob.stopUsingItem();
-                        this.mob.performRangedAttack(target, BowItem.getPowerForTime(i));
+
+                        float velocity = 0;
+                        if (isHoldingBow())
+                            velocity = BowItem.getPowerForTime(i);
+                        else if (isHoldingTrident())
+                            velocity = 20;
+
+                        if (mob instanceof RangedAttackerUnit rangedAttackerUnit)
+                            rangedAttackerUnit.performUnitRangedAttack(target, velocity);
+
                         this.attackTime = this.attackWindupTime;
                         this.attackCooldown = this.attackCooldownMax;
                     }
                 }
             } else if (distToTarget <= attackRange && --this.attackTime <= 0 && this.seeTime >= -60) {
-                this.mob.startUsingItem(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof BowItem));
+                this.mob.startUsingItem(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof BowItem || item instanceof TridentItem));
             }
         }
     }
