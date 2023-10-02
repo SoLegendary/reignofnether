@@ -19,6 +19,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -215,6 +216,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
         ItemStack itemstack = pUser.getItemInHand(interactionhand);
         if (pUser.isHolding((is) -> is.getItem() instanceof CrossbowItem)) {
             CrossbowItem.performShooting(pUser.level, pUser, interactionhand, itemstack, pVelocity, 0);
+            this.playSound(SoundEvents.CROSSBOW_SHOOT, 3.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
         }
         this.onCrossbowAttackPerformed();
     }

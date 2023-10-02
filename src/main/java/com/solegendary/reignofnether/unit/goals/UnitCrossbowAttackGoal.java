@@ -146,7 +146,6 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
                 CrossbowItem.setCharged(itemstack1, false);
                 this.crossbowState = UnitCrossbowAttackGoal.CrossbowState.UNCHARGED;
             }
-
         }
     }
 

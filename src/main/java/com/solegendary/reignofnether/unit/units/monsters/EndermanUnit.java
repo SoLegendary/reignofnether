@@ -205,7 +205,7 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
         this.moveTo(new Vec3(bpTarget.getX(), bpTarget.getY(), bpTarget.getZ()));
         if (!this.isSilent()) {
             this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
-            this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
+            this.playSound(SoundEvents.ENDERMAN_TELEPORT, 3.0F, 1.0F);
         }
     }
 }

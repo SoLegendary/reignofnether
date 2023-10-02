@@ -219,7 +219,7 @@ public class PiglinHeadhunterUnit extends PiglinBrute implements Unit, AttackerU
         double $$5 = pTarget.getZ() - this.getZ();
         double $$6 = Math.sqrt($$3 * $$3 + $$5 * $$5);
         $$2.shoot($$3, $$4 + $$6 * 0.20000000298023224, $$5, 1.6F, 0);
-        this.playSound(SoundEvents.DROWNED_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.playSound(SoundEvents.DROWNED_SHOOT, 3.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
         this.level.addFreshEntity($$2);
     }
 

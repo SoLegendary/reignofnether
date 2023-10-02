@@ -28,6 +28,7 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -200,7 +201,18 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     @Override
     public void performUnitRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
-
+        LivingEntity target = this.getTarget();
+        if (target != null) {
+            double x = target.getX() - this.getX();
+            double y = target.getY(0.5) - this.getY(0.5);
+            double z = target.getZ() - this.getZ();
+            double distSqr = this.distanceToSqr(target);
+            double dist = Math.sqrt(Math.sqrt(distSqr)) * 0.5;
+            SmallFireball fireball = new SmallFireball(this.level, this, x, y, z);
+            fireball.setPos(fireball.getX(), this.getY(0.5) + 0.5, fireball.getZ());
+            this.playSound(SoundEvents.BLAZE_SHOOT, 3.0F, 1.0F);
+            this.level.addFreshEntity(fireball);
+        }
     }
 
     @Override
@@ -210,5 +222,6 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
+        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
     }
 }
