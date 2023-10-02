@@ -27,7 +27,7 @@ public class WitherSkeletonProd extends ProductionItem {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.WITHER_SKELETON.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.WITHER_SKELETON_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;

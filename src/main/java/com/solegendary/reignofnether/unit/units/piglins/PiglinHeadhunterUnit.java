@@ -121,8 +121,8 @@ public class PiglinHeadhunterUnit extends PiglinBrute implements Unit, AttackerU
 
     final static public float attackDamage = 6.0f;
     final static public float attacksPerSecond = 0.3f;
-    final static public float attackRange = 10; // only used by ranged units or melee building attackers
-    final static public float aggroRange = 10;
+    final static public float attackRange = 12; // only used by ranged units or melee building attackers
+    final static public float aggroRange = 12;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public boolean canAttackBuildings = false;

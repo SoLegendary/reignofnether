@@ -18,16 +18,16 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlazeProd extends ProductionItem {
+public class GhastProd extends ProductionItem {
 
-    public final static String itemName = "Blaze";
-    public final static ResourceCost cost = ResourceCosts.BLAZE;
+    public final static String itemName = "Ghast";
+    public final static ResourceCost cost = ResourceCosts.GHAST;
 
-    public BlazeProd(ProductionBuilding building) {
+    public GhastProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.BLAZE_UNIT.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.GHAST_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -36,23 +36,25 @@ public class BlazeProd extends ProductionItem {
     }
 
     public String getItemName() {
-        return BlazeProd.itemName;
+        return GhastProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-                FormattedCharSequence.forward(BlazeProd.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(GhastProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A fiery elemental that shoots fireballs from afar.", Style.EMPTY),
-                FormattedCharSequence.forward("Attacks are fast and ignite enemies but inaccurate.", Style.EMPTY)
+                FormattedCharSequence.forward("A massive flying creature that fires explosive fireballs", Style.EMPTY),
+                FormattedCharSequence.forward("from a great distance to siege units and buildings.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Fragile, but can only be targeted by ranged units.", Style.EMPTY)
         ));
 
         return new Button(
-                BlazeProd.itemName,
+                GhastProd.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/blaze.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/ghast.png"),
                 hotkey,
                 () -> false,
                 () -> false,
@@ -65,9 +67,9 @@ public class BlazeProd extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-                BlazeProd.itemName,
+                GhastProd.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/blaze.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/ghast.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,

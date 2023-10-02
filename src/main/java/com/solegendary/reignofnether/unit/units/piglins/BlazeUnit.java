@@ -118,9 +118,9 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     // endregion
 
     final static public float attackDamage = 2.0f;
-    final static public float attacksPerSecond = 0.4f;
+    final static public float attacksPerSecond = 1.0f;
     final static public float attackRange = 12; // only used by ranged units or melee building attackers
-    final static public float aggroRange = 10;
+    final static public float aggroRange = 12;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public boolean canAttackBuildings = false;
@@ -136,11 +136,6 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     public BlazeUnit(EntityType<? extends Blaze> entityType, Level level) {
         super(entityType, level);
-    }
-
-    @Override
-    public void resetBehaviours() {
-        this.mountGoal.stop();
     }
 
     @Override
@@ -168,7 +163,6 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
-        this.mountGoal.tick();
 
         // need to do this outside the goal so it ticks down while not attacking
         // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
@@ -181,8 +175,6 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this);
         this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown());
-        this.returnResourcesGoal = new ReturnResourcesGoal(this);
-        this.mountGoal = new MountGoal(this);
     }
 
     @Override
@@ -191,8 +183,6 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
-        this.goalSelector.addGoal(2, returnResourcesGoal);
-        this.goalSelector.addGoal(2, mountGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
@@ -208,8 +198,14 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
             double z = target.getZ() - this.getZ();
             double distSqr = this.distanceToSqr(target);
             double dist = Math.sqrt(Math.sqrt(distSqr)) * 0.5;
-            SmallFireball fireball = new SmallFireball(this.level, this, x, y, z);
+            SmallFireball fireball = new SmallFireball(this.level, this,
+                    this.getRandom().triangle(x, 2.297 * dist), y,
+                    this.getRandom().triangle(z, 2.297 * dist));
+
+            //new SmallFireball(this.level, this, x, y, z);
+
             fireball.setPos(fireball.getX(), this.getY(0.5) + 0.5, fireball.getZ());
+
             this.playSound(SoundEvents.BLAZE_SHOOT, 3.0F, 1.0F);
             this.level.addFreshEntity(fireball);
         }

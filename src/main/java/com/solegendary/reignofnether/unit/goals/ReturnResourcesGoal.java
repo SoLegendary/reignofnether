@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 
 import javax.annotation.Nullable;
@@ -23,7 +24,7 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
 
     private Building buildingTarget;
 
-    public ReturnResourcesGoal(PathfinderMob mob) {
+    public ReturnResourcesGoal(Mob mob) {
         super(mob, true, 0);
     }
 

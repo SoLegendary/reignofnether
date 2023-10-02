@@ -158,11 +158,17 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "blaze_unit").toString()));
 
-    public static final RegistryObject<EntityType<WitherSkeletonUnit>> WITHER_SKELETON = ENTITIES.register("wither_skeleton_unit",
+    public static final RegistryObject<EntityType<WitherSkeletonUnit>> WITHER_SKELETON_UNIT = ENTITIES.register("wither_skeleton_unit",
             () -> EntityType.Builder.of(WitherSkeletonUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.WITHER_SKELETON.getWidth(), EntityType.WITHER_SKELETON.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "wither_skeleton_unit").toString()));
+
+    public static final RegistryObject<EntityType<GhastUnit>> GHAST_UNIT = ENTITIES.register("ghast_unit",
+            () -> EntityType.Builder.of(GhastUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.GHAST.getWidth(), EntityType.GHAST.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "ghast_unit").toString()));
 
     public static void init() {
         ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());

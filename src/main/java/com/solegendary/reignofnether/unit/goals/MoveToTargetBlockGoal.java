@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.pathfinder.Path;
@@ -12,12 +13,12 @@ import java.util.EnumSet;
 
 public class MoveToTargetBlockGoal extends Goal {
 
-    protected final PathfinderMob mob;
+    protected final Mob mob;
     protected BlockPos moveTarget = null;
     protected boolean persistent; // will keep trying to move back to the target if moved externally
     protected int moveReachRange = 0; // how far away from the target block to stop moving (manhattan distance)
 
-    public MoveToTargetBlockGoal(PathfinderMob mob, boolean persistent, int reachRange) {
+    public MoveToTargetBlockGoal(Mob mob, boolean persistent, int reachRange) {
         this.mob = mob;
         this.persistent = persistent;
         this.moveReachRange = reachRange;
