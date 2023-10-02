@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.horse.*;
@@ -50,7 +51,7 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Chicken) {
             yOffset = 14;
         } else if (entity instanceof Blaze) {
-            yOffset = -8;
+            yOffset = -10;
             scale = -5;
         } else if (entity instanceof MushroomCow) {
             scale = -5;
@@ -63,7 +64,7 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Vex) {
             yOffset = 5;
         } else if (entity instanceof Hoglin || entity instanceof Zoglin) {
-            yOffset = -16;
+            yOffset = -18;
             scale = -18;
         } else if (entity instanceof Slime slime) { // largest size only
             if (slime.getSize() == 4)
@@ -90,6 +91,12 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Bee) {
             yOffset = 20;
             scale = -5;
+        } else if (entity instanceof WitherSkeleton) {
+            yOffset = -15;
+            scale = -4;
+        } else if (entity instanceof Ghast) {
+            yOffset = -118;
+            scale = -39;
         }
 
         return new Pair<>(yOffset, scale);

@@ -57,7 +57,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return true; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
+    public Faction getFaction() {return Faction.PIGLINS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
     public List<Ability> getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
@@ -164,7 +164,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     }
 
     public void tick() {
-        this.setCanPickUpLoot(true);
+        this.setCanPickUpLoot(false);
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);

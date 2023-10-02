@@ -184,7 +184,7 @@ public class MiscUtil {
     //MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
     //});
     public static void drawDebugStrings(PoseStack stack, Font font, String[] strings) {
-        int y = 320 - (strings.length * 20);
+        int y = 200 - (strings.length * 10);
         for (String str : strings) {
             GuiComponent.drawString(stack, font, str, 0,y, 0xFFFFFF);
             y += 10;

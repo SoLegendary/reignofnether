@@ -105,6 +105,10 @@ public class ItemRegistrar {
             ITEMS.register("blaze_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.BLAZE_UNIT,
                     16167425, 16775294, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
+    public static final RegistryObject<ForgeSpawnEggItem> WITHER_SKELETON_UNIT_SPAWN_EGG =
+            ITEMS.register("wither_skeleton_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WITHER_SKELETON,
+                    1315860, 4672845, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
     public static void init() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }

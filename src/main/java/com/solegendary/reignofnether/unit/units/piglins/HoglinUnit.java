@@ -59,7 +59,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return true; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
+    public Faction getFaction() {return Faction.PIGLINS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
     public List<Ability> getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
@@ -117,7 +117,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
     // endregion
 
     final static public float attackDamage = 6.0f;
-    final static public float attacksPerSecond = 0.4f;
+    final static public float attacksPerSecond = 0.3f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy

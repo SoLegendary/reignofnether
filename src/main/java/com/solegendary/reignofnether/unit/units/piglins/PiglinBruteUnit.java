@@ -61,7 +61,7 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return true; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
+    public Faction getFaction() {return Faction.PIGLINS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
     public List<Ability> getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};

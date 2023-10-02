@@ -51,6 +51,7 @@ public class CommonModEvents {
         evt.registerEntityRenderer(EntityRegistrar.PIGLIN_HEADHUNTER_UNIT.get(), PiglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.HOGLIN_UNIT.get(), HoglinRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.BLAZE_UNIT.get(), BlazeRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.WITHER_SKELETON.get(), WitherSkeletonRenderer::new);
     }
 
     @SubscribeEvent
@@ -78,6 +79,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.PIGLIN_BRUTE_UNIT.get(), PiglinBruteUnit.createAttributes().build());
         evt.put(EntityRegistrar.HOGLIN_UNIT.get(), HoglinUnit.createAttributes().build());
         evt.put(EntityRegistrar.BLAZE_UNIT.get(), BlazeUnit.createAttributes().build());
+        evt.put(EntityRegistrar.WITHER_SKELETON.get(), WitherSkeletonUnit.createAttributes().build());
     }
 
     @SubscribeEvent

@@ -141,6 +141,7 @@ public abstract class ProductionBuilding extends Building {
                 case PiglinHeadhunterProd.itemName -> prodItem = new PiglinHeadhunterProd(building);
                 case HoglinProd.itemName -> prodItem = new HoglinProd(building);
                 case BlazeProd.itemName -> prodItem = new BlazeProd(building);
+                case WitherSkeletonProd.itemName -> prodItem = new WitherSkeletonProd(building);
 
                 case ResearchVindicatorAxes.itemName -> prodItem = new ResearchVindicatorAxes(building);
                 case ResearchPillagerCrossbows.itemName -> prodItem = new ResearchPillagerCrossbows(building);

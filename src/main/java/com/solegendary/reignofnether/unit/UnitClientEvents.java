@@ -725,7 +725,29 @@ public class UnitClientEvents {
     }
 
 
+    public static int yOffset = 0;
+    public static int scale = 0;
 
+    @SubscribeEvent
+    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT) {
+            scale -= 1;
+        } else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
+            scale += 1;
+        } else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
+            yOffset += 1;
+        } else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
+            yOffset -= 1;
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+                "yoffset: " + yOffset,
+                "scale: " + scale,
+        });
+    }
 
 
     /*
