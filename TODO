@@ -9,11 +9,17 @@ TODO bugs/features:
 - test compatibility with a performance improvement mod (eg. optifine)
 
 
+Ghasts:
+    - set limit to rotation speed in tick(), refer to LookControl for how
+    - do facial animation for when ghast shoots fireball
+    - fireballs should be able to friendly fire
+    - fireballs should set area on fire and have aoe
 
+Blazes:
+    - make sure they can't abuse shooting down trees to burn them
+    - find some upgrade active ability to implement (short range flamethrower?)
 
 piglins
-    - leave piglin headhunters to later, get blazes done first and see if they fill the basic ranged role well
-
     - ensure portals dont actually send people to the nether
         - maybe make a custom block so we can also customise colour?
     - apply leaf disappearance logic to mycelium leaves

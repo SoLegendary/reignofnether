@@ -13,6 +13,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,6 +23,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.Monster;
@@ -163,10 +166,25 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
         if (attackGoal != null)
             attackGoal.tickCooldown();
+
+        if (this.getTarget() == null) {
+            Vec3 $$0 = this.getDeltaMovement();
+            this.setYRot(-((float) Mth.atan2($$0.x, $$0.z)) * 57.295776F);
+            this.yBodyRot = this.getYRot();
+        } else {
+            LivingEntity $$1 = this.getTarget();
+            double $$2 = 64.0;
+            if ($$1.distanceToSqr(this) < 4096.0) {
+                double $$3 = $$1.getX() - this.getX();
+                double $$4 = $$1.getZ() - this.getZ();
+                this.setYRot(-((float)Mth.atan2($$3, $$4)) * 57.295776F);
+                this.yBodyRot = this.getYRot();
+            }
+        }
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
+        this.moveGoal = new FlyingMoveToTargetGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown());
     }
@@ -194,6 +212,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
             }
             LargeFireball fireball = new LargeFireball(this.level, this, x, y, z, this.getExplosionPower());
             fireball.setPos(this.getX() + viewVec.x * 4.0, this.getY(0.5) + 0.5, fireball.getZ() + viewVec.z * 4.0);
+            this.playSound(SoundEvents.GHAST_WARN, 3.0F, 1.0F);
             this.level.addFreshEntity(fireball);
         }
     }

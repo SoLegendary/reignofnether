@@ -52,7 +52,7 @@ public class CommonModEvents {
         evt.registerEntityRenderer(EntityRegistrar.HOGLIN_UNIT.get(), HoglinRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.BLAZE_UNIT.get(), BlazeRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WITHER_SKELETON_UNIT.get(), WitherSkeletonRenderer::new);
-        evt.registerEntityRenderer(EntityRegistrar.GHAST_UNIT.get(), GhastRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.GHAST_UNIT.get(), GhastUnitRenderer::new);
     }
 
     @SubscribeEvent

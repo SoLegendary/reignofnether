@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.unit.units.modelling.GhastUnitRenderer;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
@@ -166,7 +167,7 @@ public class EntityRegistrar {
 
     public static final RegistryObject<EntityType<GhastUnit>> GHAST_UNIT = ENTITIES.register("ghast_unit",
             () -> EntityType.Builder.of(GhastUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.GHAST.getWidth(), EntityType.GHAST.getHeight())
+                    .sized(EntityType.GHAST.getWidth() * GhastUnitRenderer.SCALE_MULT, EntityType.GHAST.getHeight() * GhastUnitRenderer.SCALE_MULT)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "ghast_unit").toString()));
 

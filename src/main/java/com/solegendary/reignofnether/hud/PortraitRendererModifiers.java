@@ -96,7 +96,7 @@ public class PortraitRendererModifiers {
             scale = -4;
         } else if (entity instanceof Ghast) {
             yOffset = -118;
-            scale = -39;
+            scale = -37;
         }
 
         return new Pair<>(yOffset, scale);
