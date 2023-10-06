@@ -1,12 +1,12 @@
 package com.solegendary.reignofnether.unit.goals;
 
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Mob;
 
 public class MeleeAttackUnitGoal extends AbstractMeleeAttackUnitGoal {
-    private final PathfinderMob mob;
+    private final Mob mob;
     private int raiseArmTicks; // for zombies
 
-    public MeleeAttackUnitGoal(PathfinderMob mob, int attackInterval, boolean followingTargetEvenIfNotSeen) {
+    public MeleeAttackUnitGoal(Mob mob, int attackInterval, boolean followingTargetEvenIfNotSeen) {
         super(mob, attackInterval, followingTargetEvenIfNotSeen);
         this.mob = mob;
     }

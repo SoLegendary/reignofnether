@@ -10,8 +10,7 @@ import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.monster.hoglin.Hoglin;
+import net.minecraft.world.entity.Mob;
 
 import java.util.Random;
 
@@ -30,7 +29,7 @@ public class AttackBuildingGoal extends MoveToTargetBlockGoal {
 
     private Building buildingTarget;
 
-    public AttackBuildingGoal(PathfinderMob mob) {
+    public AttackBuildingGoal(Mob mob) {
         super(mob, true, 0);
     }
 

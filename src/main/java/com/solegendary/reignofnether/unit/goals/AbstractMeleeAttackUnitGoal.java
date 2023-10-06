@@ -1,11 +1,10 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
@@ -14,7 +13,7 @@ import java.util.EnumSet;
 
 // based on MeleeAttackGoal
 public abstract class AbstractMeleeAttackUnitGoal extends Goal {
-    protected final PathfinderMob mob;
+    protected final Mob mob;
     private final boolean followingTargetEvenIfNotSeen;
     private Path path;
     private double pathedTargetX;
@@ -25,7 +24,7 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
     private final int attackInterval;
     private long lastCanUseCheck;
 
-    public AbstractMeleeAttackUnitGoal(PathfinderMob mob, int attackInterval, boolean followingTargetEvenIfNotSeen) {
+    public AbstractMeleeAttackUnitGoal(Mob mob, int attackInterval, boolean followingTargetEvenIfNotSeen) {
         this.mob = mob;
         this.attackInterval = attackInterval;
         this.followingTargetEvenIfNotSeen = followingTargetEvenIfNotSeen;

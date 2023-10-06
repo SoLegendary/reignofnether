@@ -226,13 +226,13 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         if (this.isAlive()) {
             LivingEntity livingentity;
 
-            List<PathfinderMob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
+            List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
                     new Vector3d(this.position().x, this.position().y, this.position().z),
                     ROAR_RANGE,
-                    PathfinderMob.class,
+                    Mob.class,
                     this.level);
 
-            for (PathfinderMob mob : nearbyMobs) {
+            for (Mob mob : nearbyMobs) {
                 if (mob instanceof Unit unit && UnitServerEvents.getUnitToEntityRelationship(this, mob) != Relationship.FRIENDLY) {
                     this.strongKnockback(mob);
                     mob.hurt(DamageSource.mobAttack(this), ROAR_DAMAGE);

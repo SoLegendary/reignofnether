@@ -19,6 +19,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -705,6 +706,8 @@ public class UnitClientEvents {
                     else
                         wUnit.stopSonicBoomAnimation();
                 }
+            } else if (entity instanceof GhastUnit ghastUnit) {
+                ghastUnit.showShootingFace();
             }
         }
     }

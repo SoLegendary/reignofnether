@@ -88,9 +88,9 @@ public interface AttackerUnit {
                 Entity lastDSEntity = unitMob.getLastDamageSource().getEntity();
                 Relationship rs = UnitServerEvents.getUnitToEntityRelationship(unit, lastDSEntity);
 
-                if (lastDSEntity instanceof PathfinderMob &&
+                if (lastDSEntity instanceof LivingEntity &&
                     (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE)) {
-                    attackerUnit.setUnitAttackTarget((PathfinderMob) lastDSEntity);
+                    attackerUnit.setUnitAttackTarget((LivingEntity) lastDSEntity);
                 }
 
             }
@@ -116,7 +116,7 @@ public interface AttackerUnit {
         if (garr != null)
             aggroRange += garr.getAttackRangeBonus();
 
-        PathfinderMob closestMob = MiscUtil.findClosestAttackableEnemy((Mob) this, aggroRange, level);
+        Mob closestMob = MiscUtil.findClosestAttackableEnemy((Mob) this, aggroRange, level);
         if (closestMob != null) {
             ((Unit) this).getMoveGoal().stopMoving();
             setUnitAttackTarget(closestMob);

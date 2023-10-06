@@ -70,7 +70,7 @@ public interface WorkerUnit {
     public static boolean isIdle(WorkerUnit unit) {
         GatherResourcesGoal resGoal = unit.getGatherResourceGoal();
 
-        boolean isMoving = !((PathfinderMob) unit).getNavigation().isDone();
+        boolean isMoving = !((Mob) unit).getNavigation().isDone();
         boolean isGathering = resGoal.isGathering();
         boolean isGatheringIdle = resGoal.isIdle();
         boolean isBuilding = unit.getBuildRepairGoal().getBuildingTarget() != null;

@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -20,10 +21,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.Monster;
@@ -132,6 +131,13 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
+    public static final int ATTACKER_RANGE_BONUS = 5; // range bonus that attackers get when targeting a ghast
+
+    private static final int SHOOTING_TICKS_MAX = 10;
+    private int shootingFaceTicksLeft = 0;
+    public boolean isShooting() { return shootingFaceTicksLeft > 0; }
+    public void showShootingFace() { shootingFaceTicksLeft = SHOOTING_TICKS_MAX; }
+
     public GhastUnit(EntityType<? extends Ghast> entityType, Level level) {
         super(entityType, level);
     }
@@ -166,6 +172,9 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
         if (attackGoal != null)
             attackGoal.tickCooldown();
+
+        if (shootingFaceTicksLeft > 0)
+            shootingFaceTicksLeft -= 1;
 
         if (this.getTarget() == null) {
             Vec3 $$0 = this.getDeltaMovement();
@@ -214,6 +223,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
             fireball.setPos(this.getX() + viewVec.x * 4.0, this.getY(0.5) + 0.5, fireball.getZ() + viewVec.z * 4.0);
             this.playSound(SoundEvents.GHAST_WARN, 3.0F, 1.0F);
             this.level.addFreshEntity(fireball);
+            UnitSyncClientboundPacket.sendSyncCastingAnimationPacket(this, true);
         }
     }
 

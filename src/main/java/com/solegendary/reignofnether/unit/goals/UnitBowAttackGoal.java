@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -111,6 +112,8 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
                 attackRange += garr.getAttackRangeBonus();
             else if (isTargetGarrisoned)
                 attackRange += targetGarr.getExternalAttackRangeBonus();
+            else if (target instanceof GhastUnit)
+                attackRange += GhastUnit.ATTACKER_RANGE_BONUS;
 
             double distToTarget = this.mob.distanceTo(target);
 

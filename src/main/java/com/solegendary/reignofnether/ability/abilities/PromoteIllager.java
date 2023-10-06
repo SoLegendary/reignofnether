@@ -69,13 +69,13 @@ public class PromoteIllager extends Ability {
     public static void checkAndApplyBuff(LivingEntity entity) {
         if (!entity.level.isClientSide() && entity instanceof Unit captainUnit &&
                 entity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
-            List<PathfinderMob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
+            List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
                     new Vector3d(entity.position().x, entity.position().y, entity.position().z),
                     BUFF_RANGE,
-                    PathfinderMob.class,
+                    Mob.class,
                     entity.level);
 
-            for (PathfinderMob mob : nearbyMobs)
+            for (Mob mob : nearbyMobs)
                 if (mob instanceof Unit unit && unit.getOwnerName().equals(captainUnit.getOwnerName()))
                     mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 2, 0));
         }

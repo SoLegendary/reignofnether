@@ -6,6 +6,7 @@
 package com.solegendary.reignofnether.unit.units.modelling;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.client.model.GhastModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -30,8 +31,10 @@ public class GhastUnitRenderer extends MobRenderer<Ghast, GhastModel<Ghast>> {
         super(p_174129_, new GhastModel(p_174129_.bakeLayer(ModelLayers.GHAST)), 1.5F);
     }
 
-    public ResourceLocation getTextureLocation(Ghast pEntity) {
-        return pEntity.isCharging() ? GHAST_SHOOTING_LOCATION : GHAST_LOCATION;
+    public ResourceLocation getTextureLocation(Ghast ghast) {
+        if (ghast instanceof GhastUnit ghastUnit)
+            return ghastUnit.isShooting() ? GHAST_SHOOTING_LOCATION : GHAST_LOCATION;
+        return ghast.isCharging() ? GHAST_SHOOTING_LOCATION : GHAST_LOCATION;
     }
 
     protected void scale(Ghast pLivingEntity, PoseStack pMatrixStack, float pPartialTickTime) {

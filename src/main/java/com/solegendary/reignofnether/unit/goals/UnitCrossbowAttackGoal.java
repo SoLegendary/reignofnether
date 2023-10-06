@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -112,6 +113,8 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
                 attackRange += garr.getAttackRangeBonus();
             else if (isTargetGarrisoned)
                 attackRange += targetGarr.getExternalAttackRangeBonus();
+            else if (target instanceof GhastUnit)
+                attackRange += GhastUnit.ATTACKER_RANGE_BONUS;
 
             boolean flag2 = (distToTarget > attackRange || this.seeTime < 5) && this.attackCooldown == 0;
 

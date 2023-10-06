@@ -11,7 +11,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -123,7 +123,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     };
 
     // set move goal as range -1, so we aren't slightly out of range
-    public GatherResourcesGoal(PathfinderMob mob) {
+    public GatherResourcesGoal(Mob mob) {
         super(mob, true, REACH_RANGE - 1);
     }
 

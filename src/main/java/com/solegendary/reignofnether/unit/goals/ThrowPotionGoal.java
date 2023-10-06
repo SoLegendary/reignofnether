@@ -6,7 +6,7 @@ import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.phys.Vec3;
 
@@ -16,7 +16,7 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
     private LivingEntity targetEntity = null;
     private Ability ability; // used for syncing cooldown with clientside
 
-    public ThrowPotionGoal(PathfinderMob mob) {
+    public ThrowPotionGoal(Mob mob) {
         super(mob, false, 0);
     }
 

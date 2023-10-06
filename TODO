@@ -11,12 +11,13 @@ TODO bugs/features:
 
 Ghasts:
     - set limit to rotation speed in tick(), refer to LookControl for how
-    - do facial animation for when ghast shoots fireball
-    - fireballs should be able to friendly fire
     - fireballs should set area on fire and have aoe
+    - if target is in range but can't be seen, still try moving towards it
+    - move towards an unseen target
+    - shoot at ground ability
+    - remove ability to reflect fireballs
 
 Blazes:
-    - make sure they can't abuse shooting down trees to burn them
     - find some upgrade active ability to implement (short range flamethrower?)
 
 piglins

@@ -2,12 +2,10 @@ package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
-import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
-import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Mob;
 
 import java.util.function.Consumer;
 
@@ -24,7 +22,7 @@ public abstract class AbstractCastTargetedSpellGoal extends MoveToTargetBlockGoa
     public Consumer onCast;
     boolean targetsGround;
 
-    public AbstractCastTargetedSpellGoal(PathfinderMob mob, int channelTicks, int range, boolean targetsGround, Consumer onCast) {
+    public AbstractCastTargetedSpellGoal(Mob mob, int channelTicks, int range, boolean targetsGround, Consumer onCast) {
         super(mob, false, 0);
         this.channelTicks = channelTicks;
         this.range = range;

@@ -16,7 +16,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -130,24 +129,24 @@ public class MiscUtil {
         return retBps;
     }
 
-    public static PathfinderMob findClosestAttackableEnemy(Mob unitMob, float range, ServerLevel level) {
-        List<PathfinderMob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
+    public static Mob findClosestAttackableEnemy(Mob unitMob, float range, ServerLevel level) {
+        List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
                 new Vector3d(unitMob.position().x, unitMob.position().y, unitMob.position().z),
                 range,
-                PathfinderMob.class,
+                Mob.class,
                 level);
 
-        List<PathfinderMob> nearbyHostileMobs = new ArrayList<>();
+        List<Mob> nearbyHostileMobs = new ArrayList<>();
 
-        for (PathfinderMob pfMob : nearbyMobs) {
+        for (Mob pfMob : nearbyMobs) {
             Relationship rs = UnitServerEvents.getUnitToEntityRelationship((Unit) unitMob, pfMob);
             if (rs == Relationship.HOSTILE && pfMob.getId() != unitMob.getId() && unitMob.hasLineOfSight(pfMob))
                 nearbyHostileMobs.add(pfMob);
         }
         // find the closest mob
         double closestDist = range;
-        PathfinderMob closestMob = null;
-        for (PathfinderMob pfMob : nearbyHostileMobs) {
+        Mob closestMob = null;
+        for (Mob pfMob : nearbyHostileMobs) {
             double dist = unitMob.position().distanceTo(pfMob.position());
             if (dist < closestDist) {
                 closestDist = unitMob.position().distanceTo(pfMob.position());

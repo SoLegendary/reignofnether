@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 
 // Move towards a building to attack it
@@ -21,7 +21,7 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
 
     private Building buildingTarget;
 
-    public GarrisonGoal(PathfinderMob mob) {
+    public GarrisonGoal(Mob mob) {
         super(mob, true, 0);
     }
 

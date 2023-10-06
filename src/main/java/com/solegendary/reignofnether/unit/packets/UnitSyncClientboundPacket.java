@@ -63,12 +63,12 @@ public class UnitSyncClientboundPacket {
         );
     }
 
-    public static void sendSyncCastingPacket(LivingEntity entity, boolean startCasting) {
+    public static void sendSyncCastingAnimationPacket(LivingEntity entity, boolean startCasting) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new UnitSyncClientboundPacket(
-                startCasting ? UnitSyncAction.START_CASTING : UnitSyncAction.STOP_CASTING,
-                entity.getId(),
-                0,0,0,0,0,0,0, "")
+                new UnitSyncClientboundPacket(
+                        startCasting ? UnitSyncAction.START_CASTING : UnitSyncAction.STOP_CASTING,
+                        entity.getId(),
+                        0,0,0,0,0,0,0, "")
         );
     }
 

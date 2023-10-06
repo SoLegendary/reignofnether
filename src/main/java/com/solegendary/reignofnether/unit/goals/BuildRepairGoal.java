@@ -11,7 +11,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Mob;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -31,15 +31,13 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
 
     private Boolean isBuildingServerside = false;
 
-    public BuildRepairGoal(PathfinderMob mob) {
+    public BuildRepairGoal(Mob mob) {
         super(mob, true, 0);
     }
 
     public void setIsBuildingServerside(boolean isBuilding) {
         this.isBuildingServerside = isBuilding;
     }
-
-
 
     public boolean startNextQueuedBuilding() {
         queuedBuildings.removeIf(b -> !BuildingUtils.isBuildingBuildable(this.mob.level.isClientSide(), b));
