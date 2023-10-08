@@ -24,6 +24,8 @@ import java.util.EnumSet;
 
 // can set a flag to use for tridents instead of bows
 
+// can also be used for generic projectile attacks as long as the mob 'technically' is holding a bow, eg. Blazes and ghasts
+
 public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends Goal {
     private final T mob;
     private final int attackWindupTime = 5; // time to wind up a bow attack
@@ -62,7 +64,7 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
 
         if (target == null || !target.isAlive() || !this.isHoldingRangedWeapon())
             return false;
-        if (!this.canUse() && this.mob.getNavigation().isDone())
+        if (!this.canUse() && this.isDoneMoving())
             return false;
 
         return true;
@@ -123,9 +125,9 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
             if (!this.mob.isPassenger()) {
                 if ((distToTarget > attackRange - 1 || !canSeeTarget) &&
                     !((Unit) this.mob).getHoldPosition()) {
-                    this.mob.getNavigation().moveTo(target, 1.0f);
+                    this.moveTo(target);
                 } else {
-                    this.mob.getNavigation().stop();
+                    this.stopMoving();
                 }
             }
 
@@ -155,5 +157,30 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
                 this.mob.startUsingItem(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof BowItem || item instanceof TridentItem));
             }
         }
+    }
+
+    // moveGoal controllers
+    private boolean isDoneMoving() {
+        Unit unit = (Unit) this.mob;
+        if (unit.getMoveGoal() instanceof FlyingMoveToTargetGoal flyingMoveGoal)
+            return flyingMoveGoal.isAtDestination();
+        else
+            return this.mob.getNavigation().isDone();
+    }
+
+    private void stopMoving() {
+        Unit unit = (Unit) this.mob;
+        if (unit.getMoveGoal() instanceof FlyingMoveToTargetGoal flyingMoveGoal)
+            flyingMoveGoal.stopMoving();
+        else
+            this.mob.getNavigation().stop();
+    }
+
+    private void moveTo(LivingEntity target) {
+        Unit unit = (Unit) this.mob;
+        if (unit.getMoveGoal() instanceof FlyingMoveToTargetGoal flyingMoveGoal)
+            flyingMoveGoal.setMoveTarget(target.getOnPos());
+        else
+            this.mob.getNavigation().moveTo(target, 1.0f);
     }
 }

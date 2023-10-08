@@ -10,11 +10,12 @@ import javax.annotation.Nullable;
 
 public class FlyingMoveToTargetGoal extends MoveToTargetBlockGoal {
 
-    public FlyingMoveToTargetGoal(Mob mob, boolean persistent, int reachRange) {
-        super(mob, persistent, reachRange);
+    public FlyingMoveToTargetGoal(Mob mob, int reachRange) {
+        super(mob, false, reachRange);
     }
 
-    private boolean isAtDestination() {
+    @Override
+    public boolean isAtDestination() {
         if (moveTarget == null)
             return true;
         return this.mob.distanceToSqr(moveTarget.getX() + 0.5f, moveTarget.getY() + 0.5f, moveTarget.getZ() + 0.5f) < 4;

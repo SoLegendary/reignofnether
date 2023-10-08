@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
+import com.solegendary.reignofnether.unit.goals.FlyingMoveToTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -86,13 +87,21 @@ public interface AttackerUnit {
                     unit.getFollowTarget() == null) {
 
                 Entity lastDSEntity = unitMob.getLastDamageSource().getEntity();
+
+                boolean isMeleeAttackedByFlying = false;
+                if (lastDSEntity instanceof Unit unitDS &&
+                    unitDS.getMoveGoal() instanceof FlyingMoveToTargetGoal &&
+                    attackerUnit.getAttackGoal() instanceof MeleeAttackUnitGoal) {
+                    isMeleeAttackedByFlying = true;
+                }
+
                 Relationship rs = UnitServerEvents.getUnitToEntityRelationship(unit, lastDSEntity);
 
-                if (lastDSEntity instanceof LivingEntity &&
+                if (!isMeleeAttackedByFlying &&
+                    lastDSEntity instanceof LivingEntity &&
                     (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE)) {
                     attackerUnit.setUnitAttackTarget((LivingEntity) lastDSEntity);
                 }
-
             }
             // enact aggression when idle
             if (attackerUnit.isIdle() && attackerUnit.getAggressiveWhenIdle())

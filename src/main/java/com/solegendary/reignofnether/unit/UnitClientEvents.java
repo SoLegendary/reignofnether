@@ -706,8 +706,8 @@ public class UnitClientEvents {
                     else
                         wUnit.stopSonicBoomAnimation();
                 }
-            } else if (entity instanceof GhastUnit ghastUnit) {
-                ghastUnit.showShootingFace();
+            } else if (entity instanceof GhastUnit gUnit && gUnit.getId() == entityId) {
+                gUnit.showShootingFace();
             }
         }
     }

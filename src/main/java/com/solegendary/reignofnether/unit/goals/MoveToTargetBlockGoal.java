@@ -24,6 +24,12 @@ public class MoveToTargetBlockGoal extends Goal {
         this.setFlags(EnumSet.of(Goal.Flag.MOVE));
     }
 
+    public boolean isAtDestination() {
+        if (moveTarget == null)
+            return true;
+        return mob.getNavigation().isDone();
+    }
+
     public boolean canUse() {
         return moveTarget != null;
     }

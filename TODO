@@ -10,12 +10,10 @@ TODO bugs/features:
 
 
 Ghasts:
-    - set limit to rotation speed in tick(), refer to LookControl for how
+    - for some reason when finishing movement always face towards one direction
     - fireballs should set area on fire and have aoe
-    - if target is in range but can't be seen, still try moving towards it
-    - move towards an unseen target
     - shoot at ground ability
-    - remove ability to reflect fireballs
+        - use the same goal logic for attacking buildings
 
 Blazes:
     - find some upgrade active ability to implement (short range flamethrower?)

@@ -131,15 +131,16 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    public static final int ATTACKER_RANGE_BONUS = 5; // range bonus that attackers get when targeting a ghast
+    public static final int ATTACKER_RANGE_BONUS = 4; // range bonus that attackers get when targeting a ghast
 
-    private static final int SHOOTING_TICKS_MAX = 10;
+    private static final int SHOOTING_TICKS_MAX = 14;
     private int shootingFaceTicksLeft = 0;
     public boolean isShooting() { return shootingFaceTicksLeft > 0; }
     public void showShootingFace() { shootingFaceTicksLeft = SHOOTING_TICKS_MAX; }
 
     public GhastUnit(EntityType<? extends Ghast> entityType, Level level) {
         super(entityType, level);
+        this.moveControl = new GhastUnitMoveControl(this);
     }
 
     @Override
@@ -193,7 +194,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new FlyingMoveToTargetGoal(this, false, 0);
+        this.moveGoal = new FlyingMoveToTargetGoal(this, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown());
     }
@@ -220,6 +221,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
                 this.level.levelEvent(null, 1016, this.blockPosition(), 0);
             }
             LargeFireball fireball = new LargeFireball(this.level, this, x, y, z, this.getExplosionPower());
+            fireball.setInvulnerable(true);
             fireball.setPos(this.getX() + viewVec.x * 4.0, this.getY(0.5) + 0.5, fireball.getZ() + viewVec.z * 4.0);
             this.playSound(SoundEvents.GHAST_WARN, 3.0F, 1.0F);
             this.level.addFreshEntity(fireball);
