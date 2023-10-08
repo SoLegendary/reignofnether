@@ -7,14 +7,15 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
@@ -27,6 +28,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public class BuildingServerEvents {
@@ -236,9 +238,37 @@ public class BuildingServerEvents {
     @SubscribeEvent
     public static void onExplosion(ExplosionEvent.Detonate evt) {
         Explosion exp = evt.getExplosion();
+        GhastUnit ghastUnit = null;
+        CreeperUnit creeperUnit = null;
+
+
+        if (evt.getExplosion().getSourceMob() instanceof CreeperUnit cUnit)
+            creeperUnit = cUnit;
+        else {
+            for (Entity entity : evt.getAffectedEntities()) {
+                if (entity instanceof LargeFireball fireball &&
+                        fireball.getOwner() instanceof GhastUnit gUnit)
+                    ghastUnit = gUnit;
+            }
+        }
+
+        // set fire to random blocks from a ghast fireball
+        if (ghastUnit != null) {
+            for (BlockPos bp : evt.getAffectedBlocks()) {
+                BlockState bs = evt.getLevel().getBlockState(bp);
+                BlockState bsAbove = evt.getLevel().getBlockState(bp.above());
+                if (new Random().nextDouble(1.0f) < GhastUnit.FIREBALL_FIRE_CHANCE &&
+                    (bs.getMaterial().isSolidBlocking() && bsAbove.isAir() ||
+                    bsAbove.getBlock() instanceof TallGrassBlock ||
+                    bsAbove.getBlock() instanceof RootsBlock)) {
+                    evt.getLevel().setBlockAndUpdate(bp.above(), Blocks.FIRE.defaultBlockState());
+                }
+            }
+        }
 
         if (exp.getExploder() == null && exp.getSourceMob() == null) {
-            evt.getAffectedEntities().clear();
+            if (ghastUnit == null)
+                evt.getAffectedEntities().clear();
             evt.getAffectedBlocks().removeIf((BlockPos bp) -> {
                 boolean isPartOfBuilding = false;
                 for (Building building : buildings)
@@ -258,7 +288,7 @@ public class BuildingServerEvents {
         }
 
         // apply creeper attack damage as bonus damage to buildings
-        if (evt.getExplosion().getSourceMob() instanceof CreeperUnit creeperUnit) {
+        if (creeperUnit != null || ghastUnit != null) {
             Set<Building> affectedBuildings = new HashSet<>();
             for (BlockPos bp : evt.getAffectedBlocks()) {
                 Building building = BuildingUtils.findBuilding(false, bp);
@@ -266,7 +296,10 @@ public class BuildingServerEvents {
                     affectedBuildings.add(building);
             }
             for (Building building : affectedBuildings) {
-                building.destroyRandomBlocks((int) creeperUnit.getUnitAttackDamage());
+                if (creeperUnit != null)
+                    building.destroyRandomBlocks((int) creeperUnit.getUnitAttackDamage());
+                else
+                    building.destroyRandomBlocks((int) ghastUnit.getUnitAttackDamage());
             }
         }
     }

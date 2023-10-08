@@ -135,6 +135,9 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     public static final int ATTACKER_RANGE_BONUS = 4; // range bonus that attackers get when targeting a ghast
 
+    public static final int EXPLOSION_POWER = 1;
+    public static final float FIREBALL_FIRE_CHANCE = 0.2f;
+
     private static final int SHOOTING_TICKS_MAX = 14;
     private int shootingFaceTicksLeft = 0;
     public boolean isShooting() { return shootingFaceTicksLeft > 0; }
@@ -251,7 +254,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         if (!this.isSilent()) {
             this.level.levelEvent(null, 1016, this.blockPosition(), 0);
         }
-        LargeFireball fireball = new LargeFireball(this.level, this, tx, ty, tz, this.getExplosionPower());
+        LargeFireball fireball = new LargeFireball(this.level, this, tx, ty, tz, EXPLOSION_POWER);
         fireball.setInvulnerable(true);
         fireball.setPos(this.getX() + viewVec.x * 4.0, this.getY(0.5) + 0.5, fireball.getZ() + viewVec.z * 4.0);
         this.playSound(SoundEvents.GHAST_WARN, 3.0F, 1.0F);

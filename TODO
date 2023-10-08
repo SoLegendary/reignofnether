@@ -9,9 +9,12 @@ TODO bugs/features:
 - test compatibility with a performance improvement mod (eg. optifine)
 
 
+
+slow down fire/magma damage
+    - also don't make undead fire immune when near base, just prevent sunlight reapplying fire
+
 Ghasts:
-    - fireballs should set area on fire and have aoe
-    - fireballs should actually destroy building blocks
+    - test that multiple fireballs exploding together doesnt bug out the explosionEvent code
 
 Blazes:
     - find some upgrade active ability to implement (short range flamethrower?)
