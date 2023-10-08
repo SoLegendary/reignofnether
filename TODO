@@ -10,10 +10,8 @@ TODO bugs/features:
 
 
 Ghasts:
-    - for some reason when finishing movement always face towards one direction
     - fireballs should set area on fire and have aoe
-    - shoot at ground ability
-        - use the same goal logic for attacking buildings
+    - fireballs should actually destroy building blocks
 
 Blazes:
     - find some upgrade active ability to implement (short range flamethrower?)
@@ -65,7 +63,7 @@ Piglins faction
     Piglin buildings apart from the Bastion and portals can only be built on nether blocks
 
     Piglins do not produce their own units, but instead (like Protoss) bring units in from the nether using portals
-    - (Capitol) Bastion Portal
+    - (Capitol) Central Portal
         - blackstone-themed building with a decorated standard purple portal at the centre
         - can build any unit as long as you have the appropriate supporting building/research
         - produces units faster than any other production building
@@ -78,7 +76,7 @@ Piglins faction
             - Civilian portal (green): can drop off resources and supports 15 population
             - Transport portal (blue) (requires lategame research): can teleport units to a linked portal
     - Netherwart farm
-    - Fort
+    - Bastion
         - Allows military piglins and hoglins (after an upgrade) to be produced at portals
         - Researches regular upgrades
         - piglin brute
@@ -103,6 +101,7 @@ Piglins faction
             - probably needs a size decrease
             - flies a set Y height above the ground
         - garrisonable (holds up to 10 units)
+        - upgrade to allow construction of transport portals
 
 
 

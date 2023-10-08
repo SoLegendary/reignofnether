@@ -62,7 +62,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
-    public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
+    public MeleeAttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
     public Goal getAttackGoal() {return attackGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
@@ -129,7 +129,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     public int maxResources = 100;
 
     private UnitBowAttackGoal<? extends LivingEntity> attackGoal;
-    private AttackBuildingGoal attackBuildingGoal;
+    private MeleeAttackBuildingGoal attackBuildingGoal;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -209,11 +209,11 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
 
     // override to make inaccuracy 0
     @Override
-    public void performUnitRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
+    public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
         ItemStack itemstack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this,
                 (item) -> item instanceof BowItem
         )));
-        AbstractArrow abstractarrow = this.getArrow(itemstack, pDistanceFactor);
+        AbstractArrow abstractarrow = this.getArrow(itemstack, velocity);
         if (this.getMainHandItem().getItem() instanceof BowItem) {
             abstractarrow = ((BowItem)this.getMainHandItem().getItem()).customArrow(abstractarrow);
         }

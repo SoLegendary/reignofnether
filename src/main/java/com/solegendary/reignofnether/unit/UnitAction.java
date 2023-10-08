@@ -21,6 +21,7 @@ public enum UnitAction {
     RETURN_RESOURCES_TO_CLOSEST, // drops off resources to the nearest building that accepts resources
     DELETE, // instantly kills this unit
     DISCARD, // instantly removes this unit from the level without any death animation/event
+    ATTACK_GROUND,
 
     // special abilities - these can also be assigned to cursor actions
     EXPLODE,

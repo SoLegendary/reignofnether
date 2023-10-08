@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit.interfaces;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
+import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
 import com.solegendary.reignofnether.unit.goals.FlyingMoveToTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -30,7 +30,7 @@ public interface AttackerUnit {
     public boolean canAttackBuildings();
 
     public Goal getAttackGoal(); // not necessarily the same goal, eg. could be melee or ranged
-    public AttackBuildingGoal getAttackBuildingGoal();
+    public MeleeAttackBuildingGoal getAttackBuildingGoal();
 
     // chase and attack the target ignoring all else until it is dead or out of sight
     public default void setUnitAttackTarget(@Nullable LivingEntity target) {
@@ -42,7 +42,7 @@ public interface AttackerUnit {
     }
     // move to a building and start attacking it
     public default void setAttackBuildingTarget(BlockPos preselectedBlockPos) {
-        AttackBuildingGoal attackBuildingGoal = this.getAttackBuildingGoal();
+        MeleeAttackBuildingGoal attackBuildingGoal = this.getAttackBuildingGoal();
         if (attackBuildingGoal != null)
             attackBuildingGoal.setBuildingTarget(preselectedBlockPos);
     }
@@ -50,7 +50,7 @@ public interface AttackerUnit {
     public static void resetBehaviours(AttackerUnit unit) {
         unit.setUnitAttackTarget(null);
         unit.setAttackMoveTarget(null);
-        AttackBuildingGoal attackBuildingGoal = unit.getAttackBuildingGoal();
+        MeleeAttackBuildingGoal attackBuildingGoal = unit.getAttackBuildingGoal();
         if (unit.canAttackBuildings() && attackBuildingGoal != null)
             attackBuildingGoal.stopAttacking();
     }

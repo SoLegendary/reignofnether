@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.MountHoglin;
-import com.solegendary.reignofnether.ability.abilities.MountSpider;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -33,8 +32,6 @@ import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -111,7 +108,7 @@ public class PiglinHeadhunterUnit extends PiglinBrute implements Unit, AttackerU
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return canAttackBuildings;}
     public Goal getAttackGoal() { return attackGoal; }
-    public AttackBuildingGoal getAttackBuildingGoal() { return null; }
+    public MeleeAttackBuildingGoal getAttackBuildingGoal() { return null; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
@@ -212,7 +209,7 @@ public class PiglinHeadhunterUnit extends PiglinBrute implements Unit, AttackerU
     }
 
     @Override
-    public void performUnitRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
+    public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
         ThrownTrident $$2 = new ThrownTrident(this.level, this, new ItemStack(Items.TRIDENT));
         double $$3 = pTarget.getX() - this.getX();
         double $$4 = pTarget.getY(0.3333333333333333) - $$2.getY();

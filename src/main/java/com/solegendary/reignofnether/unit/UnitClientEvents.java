@@ -727,6 +727,7 @@ public class UnitClientEvents {
         }
     }
 
+    /*
 
     public static int yOffset = 0;
     public static int scale = 0;
@@ -744,6 +745,7 @@ public class UnitClientEvents {
         }
     }
 
+
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
         MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
@@ -753,7 +755,7 @@ public class UnitClientEvents {
     }
 
 
-    /*
+
     public static int option = 0;
 
     public static double arm_x_rot = 0;

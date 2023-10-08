@@ -1,9 +1,12 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.AttackGround;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.controls.GhastUnitMoveControl;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
@@ -22,7 +25,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.Monster;
@@ -106,7 +108,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return canAttackBuildings;}
     public Goal getAttackGoal() { return attackGoal; }
-    public AttackBuildingGoal getAttackBuildingGoal() { return null; }
+    public MeleeAttackBuildingGoal getAttackBuildingGoal() { return null; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
@@ -116,8 +118,8 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     final static public float attackDamage = 5.0f;
     final static public float attacksPerSecond = 0.2f;
-    final static public float attackRange = 24; // only used by ranged units or melee building attackers
-    final static public float aggroRange = 24;
+    final static public float attackRange = 30; // only used by ranged units or melee building attackers
+    final static public float aggroRange = 30;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public boolean canAttackBuildings = false;
@@ -138,9 +140,20 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     public boolean isShooting() { return shootingFaceTicksLeft > 0; }
     public void showShootingFace() { shootingFaceTicksLeft = SHOOTING_TICKS_MAX; }
 
+    private RangedAttackGroundGoal<?> attackGroundGoal;
+    @Override
+    public RangedAttackGroundGoal<?> getRangedAttackGroundGoal() {
+        return attackGroundGoal;
+    }
+
     public GhastUnit(EntityType<? extends Ghast> entityType, Level level) {
         super(entityType, level);
         this.moveControl = new GhastUnitMoveControl(this);
+
+        AttackGround ab1 = new AttackGround(this);
+        this.abilities.add(ab1);
+        if (level.isClientSide())
+            this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
     }
 
     @Override
@@ -173,23 +186,36 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
         if (attackGoal != null)
             attackGoal.tickCooldown();
+        if (attackGroundGoal != null)
+            attackGroundGoal.tick();
 
         if (shootingFaceTicksLeft > 0)
             shootingFaceTicksLeft -= 1;
 
-        if (this.getTarget() == null) {
-            Vec3 $$0 = this.getDeltaMovement();
-            this.setYRot(-((float) Mth.atan2($$0.x, $$0.z)) * 57.295776F);
+        updateRotation();
+    }
+
+    public void updateRotation() {
+        LivingEntity target = this.getTarget();
+        BlockPos groundTarget = this.getRangedAttackGroundGoal().getGroundTarget();
+        Vec3 dMove = this.getDeltaMovement();
+        double x = 0;
+        double z = 0;
+
+        if (target != null) {
+            x = target.getX() - this.getX();
+            z = target.getZ() - this.getZ();
+        } else if (groundTarget != null) {
+            x = groundTarget.getX() - this.getX();
+            z = groundTarget.getZ() - this.getZ();
+        } else if (dMove.distanceTo(new Vec3(0,0,0)) > 0) {
+            x = dMove.x();
+            z = dMove.z();
+        }
+
+        if (Math.abs(x) > 0.05f || Math.abs(z) > 0.05f) {
+            this.setYRot(-((float)Mth.atan2(x, z)) * 57.295776F);
             this.yBodyRot = this.getYRot();
-        } else {
-            LivingEntity $$1 = this.getTarget();
-            double $$2 = 64.0;
-            if ($$1.distanceToSqr(this) < 4096.0) {
-                double $$3 = $$1.getX() - this.getX();
-                double $$4 = $$1.getZ() - this.getZ();
-                this.setYRot(-((float)Mth.atan2($$3, $$4)) * 57.295776F);
-                this.yBodyRot = this.getYRot();
-            }
         }
     }
 
@@ -197,36 +223,40 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         this.moveGoal = new FlyingMoveToTargetGoal(this, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown());
+        this.attackGroundGoal = new RangedAttackGroundGoal<>(this, this.attackGoal);
     }
 
     @Override
     protected void registerGoals() {
         initialiseGoals();
 
+        this.goalSelector.addGoal(2, attackGroundGoal);
         this.goalSelector.addGoal(2, attackGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
-        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+    }
+
+    // for some reason this.getNavigation().stop(); doesn't stop spider units from moving
+    @Override
+    public void resetBehaviours() {
+        this.getRangedAttackGroundGoal().stop();
     }
 
     @Override
-    public void performUnitRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
-        LivingEntity target = this.getTarget();
-        if (target != null) {
-            Vec3 viewVec = this.getViewVector(1.0F);
-            double x = target.getX() - (this.getX() + viewVec.x * 4.0);
-            double y = target.getY(0.5) - (0.5 + this.getY(0.5));
-            double z = target.getZ() - (this.getZ() + viewVec.z * 4.0);
-            if (!this.isSilent()) {
-                this.level.levelEvent(null, 1016, this.blockPosition(), 0);
-            }
-            LargeFireball fireball = new LargeFireball(this.level, this, x, y, z, this.getExplosionPower());
-            fireball.setInvulnerable(true);
-            fireball.setPos(this.getX() + viewVec.x * 4.0, this.getY(0.5) + 0.5, fireball.getZ() + viewVec.z * 4.0);
-            this.playSound(SoundEvents.GHAST_WARN, 3.0F, 1.0F);
-            this.level.addFreshEntity(fireball);
-            UnitSyncClientboundPacket.sendSyncCastingAnimationPacket(this, true);
+    public void performUnitRangedAttack(double x, double y, double z, float velocity) {
+        Vec3 viewVec = this.getViewVector(1.0F);
+        double tx = x - (this.getX() + viewVec.x * 4.0);
+        double ty = y - (0.5 + this.getY(0.5));
+        double tz = z - (this.getZ() + viewVec.z * 4.0);
+        if (!this.isSilent()) {
+            this.level.levelEvent(null, 1016, this.blockPosition(), 0);
         }
+        LargeFireball fireball = new LargeFireball(this.level, this, tx, ty, tz, this.getExplosionPower());
+        fireball.setInvulnerable(true);
+        fireball.setPos(this.getX() + viewVec.x * 4.0, this.getY(0.5) + 0.5, fireball.getZ() + viewVec.z * 4.0);
+        this.playSound(SoundEvents.GHAST_WARN, 3.0F, 1.0F);
+        this.level.addFreshEntity(fireball);
+        UnitSyncClientboundPacket.sendSyncCastingAnimationPacket(this, true);
     }
 
     @Override

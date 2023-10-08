@@ -54,7 +54,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit {
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
-    public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
+    public MeleeAttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
     public Goal getAttackGoal() {return attackGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
@@ -119,7 +119,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit {
     public int maxResources = 100;
 
     private MeleeAttackUnitGoal attackGoal;
-    private AttackBuildingGoal attackBuildingGoal;
+    private MeleeAttackBuildingGoal attackBuildingGoal;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -168,7 +168,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), false);
-        this.attackBuildingGoal = new AttackBuildingGoal(this);
+        this.attackBuildingGoal = new MeleeAttackBuildingGoal(this);
     }
 
     @Override

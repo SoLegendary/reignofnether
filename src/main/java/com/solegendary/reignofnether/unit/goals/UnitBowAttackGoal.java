@@ -45,6 +45,14 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
             this.attackCooldown -= 1;
     }
 
+    public int getAttackCooldown() {
+        return attackCooldown;
+    }
+
+    public void setToMaxAttackCooldown() {
+        this.attackCooldown = this.attackCooldownMax;
+    }
+
     public boolean canUse() { return this.mob.getTarget() != null && this.isHoldingRangedWeapon(); }
 
     private boolean isHoldingBow() {
@@ -55,7 +63,7 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
         return this.mob.isHolding(is -> is.getItem() instanceof TridentItem);
     }
 
-    protected boolean isHoldingRangedWeapon() {
+    public boolean isHoldingRangedWeapon() {
         return isHoldingBow() || isHoldingTrident();
     }
 
@@ -150,7 +158,7 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
                             rangedAttackerUnit.performUnitRangedAttack(target, velocity);
 
                         this.attackTime = this.attackWindupTime;
-                        this.attackCooldown = this.attackCooldownMax;
+                        this.setToMaxAttackCooldown();
                     }
                 }
             } else if (distToTarget <= attackRange && --this.attackTime <= 0 && this.seeTime >= -60) {

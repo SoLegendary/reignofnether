@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -23,13 +21,13 @@ import java.util.Random;
 
 // TODO: add arm animations for specific models
 
-public class AttackBuildingGoal extends MoveToTargetBlockGoal {
+public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
 
     private int ticksToNextBlockBreak = ((AttackerUnit) mob).getAttackCooldown();
 
     private Building buildingTarget;
 
-    public AttackBuildingGoal(Mob mob) {
+    public MeleeAttackBuildingGoal(Mob mob) {
         super(mob, true, 0);
     }
 

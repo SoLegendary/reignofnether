@@ -240,7 +240,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
         statStrings.add(String.valueOf((int) (unit.getUnitArmorValue())));
         AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
-        statStrings.add(ms != null ? String.valueOf((int) (ms.getValue() * 100)) : "0");
+        statStrings.add(ms != null ? String.valueOf((int) (ms.getValue() * 101)) : "0"); // prevent rounding errors
 
         // render based on prepped strings/icons
         for (int i = 0; i < statStrings.size(); i++) {
