@@ -21,6 +21,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
@@ -416,7 +417,7 @@ public abstract class Building {
         // - roll explodeChance to cause explosion effects and destroy more blocks
         // - cause fire if < fireThreshold% blocksPercent
         if (rand.nextFloat(1.0f) < this.explodeChance) {
-            level.explode(null, null, null,
+            level.explode(null, DamageSource.GENERIC, null,
                     pos.getX(),
                     pos.getY(),
                     pos.getZ(),

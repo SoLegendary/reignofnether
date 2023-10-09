@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
 import com.solegendary.reignofnether.unit.goals.FlyingMoveToTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
+import com.solegendary.reignofnether.unit.goals.RangedFlyingAttackBuildingGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -30,7 +31,7 @@ public interface AttackerUnit {
     public boolean canAttackBuildings();
 
     public Goal getAttackGoal(); // not necessarily the same goal, eg. could be melee or ranged
-    public MeleeAttackBuildingGoal getAttackBuildingGoal();
+    public Goal getAttackBuildingGoal();
 
     // chase and attack the target ignoring all else until it is dead or out of sight
     public default void setUnitAttackTarget(@Nullable LivingEntity target) {
@@ -42,17 +43,22 @@ public interface AttackerUnit {
     }
     // move to a building and start attacking it
     public default void setAttackBuildingTarget(BlockPos preselectedBlockPos) {
-        MeleeAttackBuildingGoal attackBuildingGoal = this.getAttackBuildingGoal();
-        if (attackBuildingGoal != null)
-            attackBuildingGoal.setBuildingTarget(preselectedBlockPos);
+        Goal attackBuildingGoal = this.getAttackBuildingGoal();
+        if (attackBuildingGoal instanceof RangedFlyingAttackBuildingGoal<?> rabg)
+            rabg.setBuildingTarget(preselectedBlockPos);
+        else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
+            mabg.setBuildingTarget(preselectedBlockPos);
     }
 
     public static void resetBehaviours(AttackerUnit unit) {
         unit.setUnitAttackTarget(null);
         unit.setAttackMoveTarget(null);
-        MeleeAttackBuildingGoal attackBuildingGoal = unit.getAttackBuildingGoal();
-        if (unit.canAttackBuildings() && attackBuildingGoal != null)
-            attackBuildingGoal.stopAttacking();
+
+        Goal attackBuildingGoal = unit.getAttackBuildingGoal();
+        if (attackBuildingGoal instanceof RangedFlyingAttackBuildingGoal<?> rabg)
+            rabg.stop();
+        else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
+            mabg.stopAttacking();
     }
 
     // this setter sets a Unit field and so can't be defaulted
@@ -78,10 +84,17 @@ public interface AttackerUnit {
                     unit.setMoveTarget(attackerUnit.getAttackMoveTarget());
             }
 
+            boolean isAttackingBuilding = false;
+            Goal attackBuildingGoal = attackerUnit.getAttackBuildingGoal();
+            if (attackBuildingGoal instanceof RangedFlyingAttackBuildingGoal<?> rabg)
+                isAttackingBuilding = rabg.getBuildingTarget() != null;
+            else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
+                isAttackingBuilding = mabg.getBuildingTarget() != null;
+
             // retaliate against a mob that damaged us UNLESS already on another command
             if (unitMob.getLastDamageSource() != null &&
                     attackerUnit.getWillRetaliate() &&
-                    (attackerUnit.getAttackBuildingGoal() == null || attackerUnit.getAttackBuildingGoal().getBuildingTarget() == null) &&
+                    !isAttackingBuilding &&
                     unit.getTargetGoal().getTarget() == null &&
                     (unit.getMoveGoal().getMoveTarget() == null || unit.getHoldPosition()) &&
                     unit.getFollowTarget() == null) {

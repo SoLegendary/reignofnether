@@ -104,7 +104,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return canAttackBuildings;}
     public Goal getAttackGoal() { return attackGoal; }
-    public MeleeAttackBuildingGoal getAttackBuildingGoal() { return null; }
+    public Goal getAttackBuildingGoal() { return null; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 

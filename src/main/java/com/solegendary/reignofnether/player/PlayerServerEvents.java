@@ -48,7 +48,7 @@ public class PlayerServerEvents {
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
     private static final Set<RTSPlayer> rtsPlayers = new HashSet<>(); // players that have run /startrts
 
-    public static final int TICKS_TO_REVEAL = 10 * ResourceCost.TICKS_PER_SECOND;
+    public static final int TICKS_TO_REVEAL = 30 * ResourceCost.TICKS_PER_SECOND;
 
     // warpten - faster building/unit production
     // operationcwal - faster resource gathering

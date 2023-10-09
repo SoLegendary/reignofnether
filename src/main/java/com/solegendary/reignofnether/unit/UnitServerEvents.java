@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BlazeUnit;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
@@ -384,6 +385,11 @@ public class UnitServerEvents {
         Entity hit = null;
         if (evt.getRayTraceResult().getType() == HitResult.Type.ENTITY)
             hit = ((EntityHitResult) evt.getRayTraceResult()).getEntity();
+
+        // prevent fireballs actually directly hitting anything,
+        //  instead just relying on splash damage and fire creation
+        if (owner instanceof GhastUnit && hit != null)
+            evt.setCanceled(true);
 
         if (owner instanceof Unit unit && hit != null) {
             if (getUnitToEntityRelationship(unit, hit) == Relationship.FRIENDLY &&

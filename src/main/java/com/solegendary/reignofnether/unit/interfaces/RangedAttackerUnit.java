@@ -1,11 +1,11 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
-import com.solegendary.reignofnether.unit.goals.RangedAttackGroundGoal;
+import com.solegendary.reignofnether.unit.goals.RangedFlyingAttackGroundGoal;
 import net.minecraft.world.entity.LivingEntity;
 
 public interface RangedAttackerUnit {
 
-    default RangedAttackGroundGoal<?> getRangedAttackGroundGoal() { return null; }
+    default RangedFlyingAttackGroundGoal<?> getRangedAttackGroundGoal() { return null; }
 
     default void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
         double x = pTarget.getX();

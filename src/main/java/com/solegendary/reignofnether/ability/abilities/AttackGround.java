@@ -1,27 +1,19 @@
 package com.solegendary.reignofnether.ability.abilities;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.goals.RangedAttackGroundGoal;
+import com.solegendary.reignofnether.unit.goals.RangedFlyingAttackGroundGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.util.MiscUtil;
-import com.solegendary.reignofnether.util.MyMath;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
@@ -63,7 +55,7 @@ public class AttackGround extends Ability {
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        RangedAttackGroundGoal<?> attackGroundGoal = this.rangedAttackerUnit.getRangedAttackGroundGoal();
+        RangedFlyingAttackGroundGoal<?> attackGroundGoal = this.rangedAttackerUnit.getRangedAttackGroundGoal();
         if (attackGroundGoal != null)
             attackGroundGoal.setGroundTarget(targetBp);
     }

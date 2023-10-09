@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.projectile.LargeFireball;
@@ -26,10 +27,7 @@ import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class BuildingServerEvents {
 
@@ -238,13 +236,14 @@ public class BuildingServerEvents {
     @SubscribeEvent
     public static void onExplosion(ExplosionEvent.Detonate evt) {
         Explosion exp = evt.getExplosion();
+
         GhastUnit ghastUnit = null;
         CreeperUnit creeperUnit = null;
 
-
-        if (evt.getExplosion().getSourceMob() instanceof CreeperUnit cUnit)
+        if (evt.getExplosion().getSourceMob() instanceof CreeperUnit cUnit) {
             creeperUnit = cUnit;
-        else {
+        } // generic means it was from random blocks broken, so don't consider it or we might keep chaining
+        else if (exp.getDamageSource() != DamageSource.GENERIC) {
             for (Entity entity : evt.getAffectedEntities()) {
                 if (entity instanceof LargeFireball fireball &&
                         fireball.getOwner() instanceof GhastUnit gUnit)
@@ -254,41 +253,29 @@ public class BuildingServerEvents {
 
         // set fire to random blocks from a ghast fireball
         if (ghastUnit != null) {
-            for (BlockPos bp : evt.getAffectedBlocks()) {
+
+            List<BlockPos> flammableBps = evt.getAffectedBlocks().stream().filter(bp -> {
                 BlockState bs = evt.getLevel().getBlockState(bp);
                 BlockState bsAbove = evt.getLevel().getBlockState(bp.above());
-                if (new Random().nextDouble(1.0f) < GhastUnit.FIREBALL_FIRE_CHANCE &&
-                    (bs.getMaterial().isSolidBlocking() && bsAbove.isAir() ||
-                    bsAbove.getBlock() instanceof TallGrassBlock ||
-                    bsAbove.getBlock() instanceof RootsBlock)) {
+                return bs.getMaterial().isSolidBlocking() && bsAbove.isAir() ||
+                        bsAbove.getBlock() instanceof TallGrassBlock ||
+                        bsAbove.getBlock() instanceof RootsBlock;
+            }).toList();
+
+            if (flammableBps.size() > 0) {
+                Random rand = new Random();
+                for (int i = 0; i < GhastUnit.FIREBALL_FIRE_BLOCKS; i++) {
+                    BlockPos bp = flammableBps.get(rand.nextInt(flammableBps.size()));
                     evt.getLevel().setBlockAndUpdate(bp.above(), Blocks.FIRE.defaultBlockState());
                 }
             }
         }
 
-        if (exp.getExploder() == null && exp.getSourceMob() == null) {
-            if (ghastUnit == null)
-                evt.getAffectedEntities().clear();
-            evt.getAffectedBlocks().removeIf((BlockPos bp) -> {
-                boolean isPartOfBuilding = false;
-                for (Building building : buildings)
-                    if (building.isPosPartOfBuilding(bp, true))
-                        isPartOfBuilding = true;
-                return !isPartOfBuilding;
-            });
-        }
-        else {
-            evt.getAffectedBlocks().removeIf((BlockPos bp) -> {
-                boolean isPartOfBuilding = false;
-                for (Building building : buildings)
-                    if (building.isPosPartOfBuilding(bp, true))
-                        isPartOfBuilding = true;
-                return !isPartOfBuilding;
-            });
-        }
+        if (exp.getExploder() == null && exp.getSourceMob() == null && ghastUnit == null)
+            evt.getAffectedEntities().clear();
 
         // apply creeper attack damage as bonus damage to buildings
-        if (creeperUnit != null || ghastUnit != null) {
+        if (creeperUnit != null) {
             Set<Building> affectedBuildings = new HashSet<>();
             for (BlockPos bp : evt.getAffectedBlocks()) {
                 Building building = BuildingUtils.findBuilding(false, bp);
@@ -296,11 +283,18 @@ public class BuildingServerEvents {
                     affectedBuildings.add(building);
             }
             for (Building building : affectedBuildings) {
-                if (creeperUnit != null)
-                    building.destroyRandomBlocks((int) creeperUnit.getUnitAttackDamage());
-                else
-                    building.destroyRandomBlocks((int) ghastUnit.getUnitAttackDamage());
+                building.destroyRandomBlocks((int) creeperUnit.getUnitAttackDamage());
+            }
+        } // apply ghast attack damage as bonus damage to buildings
+        else if (ghastUnit != null) {
+            BlockPos centreBp = new BlockPos(evt.getExplosion().getPosition());
+            Building affectedBuilding = BuildingUtils.findBuilding(false, centreBp);
+            if (affectedBuilding != null) {
+                affectedBuilding.destroyRandomBlocks((int) ghastUnit.getUnitAttackDamage());
             }
         }
+
+        // don't do any block damage apart from the scripted building damage above
+        evt.getAffectedBlocks().clear();
     }
 }

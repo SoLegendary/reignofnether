@@ -1,25 +1,64 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Random;
 
-// allows use of the AttackGroundAbility
-// dependent on the unit having a UnitBowAttackGoal
 
-public class RangedAttackGroundGoal<T extends net.minecraft.world.entity.Mob> extends Goal {
+public class RangedFlyingAttackBuildingGoal<T extends net.minecraft.world.entity.Mob> extends Goal {
     private final T mob;
     private BlockPos groundTarget = null;
     private final UnitBowAttackGoal<?> bowAttackGoal;
+    private Building buildingTarget = null;
 
-    public RangedAttackGroundGoal(T mob, UnitBowAttackGoal<?> bowAttackGoal) {
+    public RangedFlyingAttackBuildingGoal(T mob, UnitBowAttackGoal<?> bowAttackGoal) {
         this.mob = mob;
         this.bowAttackGoal = bowAttackGoal;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+    }
+
+    private void setNextGroundTarget() {
+        if (this.buildingTarget != null && !buildingTarget.getBlocks().isEmpty()) {
+            Random rand = new Random();
+            List<BuildingBlock> nonAirBlocks = buildingTarget.getBlocks().stream().filter(b -> b.isPlaced(this.mob.level)).toList();
+            BuildingBlock block = nonAirBlocks.get(rand.nextInt(nonAirBlocks.size()));
+            this.groundTarget = block.getBlockPos();
+        }
+    }
+
+    public void setBuildingTarget(BlockPos blockPos) {
+        if (blockPos != null) {
+            if (this.mob.level.isClientSide()) {
+                this.buildingTarget = BuildingUtils.findBuilding(true, blockPos);
+                if (this.buildingTarget != null) {
+                    MiscUtil.addUnitCheckpoint(((Unit) mob), new BlockPos(
+                            buildingTarget.centrePos.getX(),
+                            buildingTarget.originPos.getY() + 1,
+                            buildingTarget.centrePos.getZ())
+                    );
+                    ((Unit) mob).setIsCheckpointGreen(false);
+                }
+            }
+            else {
+                this.buildingTarget = BuildingUtils.findBuilding(false, blockPos);
+                setNextGroundTarget();
+            }
+            this.start();
+        }
+    }
+
+    public Building getBuildingTarget() {
+        return buildingTarget;
     }
 
     public boolean canUse() {
@@ -32,7 +71,6 @@ public class RangedAttackGroundGoal<T extends net.minecraft.world.entity.Mob> ex
         return true;
     }
 
-
     public void start() {
         super.start();
         this.mob.setAggressive(true);
@@ -40,20 +78,15 @@ public class RangedAttackGroundGoal<T extends net.minecraft.world.entity.Mob> ex
 
     public void stop() {
         super.stop();
-        this.setGroundTarget(null);
+        groundTarget = null;
+        buildingTarget = null;
         this.mob.setAggressive(false);
     }
 
-    public BlockPos getGroundTarget() {
-        return this.groundTarget;
-    }
-
-    public void setGroundTarget(BlockPos groundTarget) {
-        this.groundTarget = groundTarget;
-    }
-
     public void tick() {
-
+        if (buildingTarget != null && buildingTarget.getBlocksPlaced() <= 0) {
+            stop();
+        }
         if (groundTarget != null) {
             float tx = groundTarget.getX() + 0.5f;
             float ty = groundTarget.getY() + 0.5f;
@@ -79,6 +112,7 @@ public class RangedAttackGroundGoal<T extends net.minecraft.world.entity.Mob> ex
                     if (mob instanceof RangedAttackerUnit rangedAttackerUnit)
                         rangedAttackerUnit.performUnitRangedAttack(tx, ty, tz, 20);
                     bowAttackGoal.setToMaxAttackCooldown();
+                    setNextGroundTarget();
                 }
             }
         }

@@ -10,11 +10,9 @@ TODO bugs/features:
 
 
 
-slow down fire/magma damage
-    - also don't make undead fire immune when near base, just prevent sunlight reapplying fire
-
-Ghasts:
-    - test that multiple fireballs exploding together doesnt bug out the explosionEvent code
+- instead of relying on explosions to create building fires, just force random fire creations
+- when removing fire on repair, make sure to check above the top Y level too
+- check that retaliate doesnt redirect melee and ghasts from attacking a building
 
 Blazes:
     - find some upgrade active ability to implement (short range flamethrower?)
@@ -26,7 +24,8 @@ piglins
     - apply the tall-tree felling logic to mycelium trees
     - slow down fire/magma/suffocation damage events
         - don't prevent units walking over magma
-
+        - also don't make undead fire immune when near base, just prevent sunlight reapplying fire
+        - fire blocks should not last forever
 
 TODO test in next playtest
 

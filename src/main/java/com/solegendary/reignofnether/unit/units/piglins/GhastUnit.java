@@ -108,7 +108,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return canAttackBuildings;}
     public Goal getAttackGoal() { return attackGoal; }
-    public MeleeAttackBuildingGoal getAttackBuildingGoal() { return null; }
+    public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
@@ -116,13 +116,13 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     // endregion
 
-    final static public float attackDamage = 5.0f;
+    final static public float attackDamage = 4.0f;
     final static public float attacksPerSecond = 0.2f;
     final static public float attackRange = 30; // only used by ranged units or melee building attackers
     final static public float aggroRange = 30;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-    final static public boolean canAttackBuildings = false;
+    final static public boolean canAttackBuildings = true;
     final static public float maxHealth = 30.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
@@ -136,18 +136,18 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     public static final int ATTACKER_RANGE_BONUS = 4; // range bonus that attackers get when targeting a ghast
 
     public static final int EXPLOSION_POWER = 1;
-    public static final float FIREBALL_FIRE_CHANCE = 0.2f;
+    public static final int FIREBALL_FIRE_BLOCKS = 1;
 
     private static final int SHOOTING_TICKS_MAX = 14;
     private int shootingFaceTicksLeft = 0;
     public boolean isShooting() { return shootingFaceTicksLeft > 0; }
     public void showShootingFace() { shootingFaceTicksLeft = SHOOTING_TICKS_MAX; }
 
-    private RangedAttackGroundGoal<?> attackGroundGoal;
-    @Override
-    public RangedAttackGroundGoal<?> getRangedAttackGroundGoal() {
+    private RangedFlyingAttackGroundGoal<?> attackGroundGoal;
+    @Override public RangedFlyingAttackGroundGoal<?> getRangedAttackGroundGoal() {
         return attackGroundGoal;
     }
+    private RangedFlyingAttackBuildingGoal<?> attackBuildingGoal;
 
     public GhastUnit(EntityType<? extends Ghast> entityType, Level level) {
         super(entityType, level);
@@ -226,13 +226,15 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         this.moveGoal = new FlyingMoveToTargetGoal(this, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown());
-        this.attackGroundGoal = new RangedAttackGroundGoal<>(this, this.attackGoal);
+        this.attackGroundGoal = new RangedFlyingAttackGroundGoal<>(this, this.attackGoal);
+        this.attackBuildingGoal = new RangedFlyingAttackBuildingGoal<>(this, this.attackGoal);
     }
 
     @Override
     protected void registerGoals() {
         initialiseGoals();
 
+        this.goalSelector.addGoal(2, attackBuildingGoal);
         this.goalSelector.addGoal(2, attackGroundGoal);
         this.goalSelector.addGoal(2, attackGoal);
         this.targetSelector.addGoal(2, targetGoal);
