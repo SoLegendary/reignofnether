@@ -8,8 +8,11 @@
         "EvokerFangsMixin",
         "PlayerMixin",
         "ThrownPotionMixin",
-        "WalkNodeEvaluatorMixin",
-        "WitchMixin"
+        "WitchMixin",
+        "firedamage.BaseFireBlockMixin",
+        "firedamage.FireBlockMixin",
+        "firedamage.MagmaBlockMixin",
+        "firedamage.WalkNodeEvaluatorMixin"
     ],
     "minVersion": "0.8",
     "client": [

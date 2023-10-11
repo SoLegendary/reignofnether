@@ -368,7 +368,7 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof CreeperUnit && (evt.getSource() == DamageSource.LIGHTNING_BOLT || evt.getSource() == DamageSource.ON_FIRE))
             evt.setCanceled(true);
 
-        if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL || evt.getSource() == DamageSource.IN_FIRE))
+        if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL))
             evt.setCanceled(true);
 
         // prevent friendly fire damage from ranged units (unless specifically targeted)

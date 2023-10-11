@@ -3,6 +3,8 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.*;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -39,7 +41,9 @@ import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
@@ -233,6 +237,21 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
                     mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ROAR_SLOW_DURATION, 1));
                 }
             }
+
+            Set<Building> affectedBuildings = new HashSet<>();
+            for (double x = this.position().x - ROAR_RANGE; x < this.position().x + ROAR_RANGE; x++) {
+                for (double y = this.position().y - ROAR_RANGE; y < this.position().y + ROAR_RANGE; y++) {
+                    for (double z = this.position().z - ROAR_RANGE; z < this.position().z + ROAR_RANGE; z++) {
+                        BlockPos bp = new BlockPos(x,y,z);
+                        Building building = BuildingUtils.findBuilding(false, bp);
+                        if (building != null)
+                            affectedBuildings.add(building);
+                    }
+                }
+            }
+            for (Building building : affectedBuildings)
+                building.destroyRandomBlocks((int) ROAR_DAMAGE);
+
             Vec3 vec3 = this.getBoundingBox().getCenter();
 
             for(int i = 0; i < 80; ++i) {

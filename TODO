@@ -10,9 +10,13 @@ TODO bugs/features:
 
 
 
-- instead of relying on explosions to create building fires, just force random fire creations
-- when removing fire on repair, make sure to check above the top Y level too
+
+Make creepers should explode from being set on fire but prevent lightning from settings things on fire
+Make a FireBlockMixin to prevent fire tick damage (instead just light mobs on fire) and spread, but still set a lifetime (remove gamerule doFireTick false)
+let mobs walk on magma and fire
+
 - check that retaliate doesnt redirect melee and ghasts from attacking a building
+- bonus range when attacking ghasts should be based on difference in Y pos values (~4 @ height 10, but not linear...)
 
 Blazes:
     - find some upgrade active ability to implement (short range flamethrower?)
@@ -36,8 +40,8 @@ right click to find nearest mountable
 new lingering potion upgrades
 check garrisoned range unit isAggressive, especially in castles (pillagers didn't aggro against attackers)
 gathering worker counts
-
-
+creepers do double damage to buildings when charged
+ravager roars damage buildings
 
 
 TODO weird ideas

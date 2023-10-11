@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.ReportedException;
@@ -230,7 +231,10 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sword.png")); // DAMAGE
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sparkler.png")); // ATTACK SPEED
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/bow.png")); // RANGE
-            statStrings.add(String.valueOf((int) attackerUnit.getUnitAttackDamage() + (int) AttackerUnit.getWeaponDamageModifier(attackerUnit)));
+            int atkDmg = (int) attackerUnit.getUnitAttackDamage() + (int) AttackerUnit.getWeaponDamageModifier(attackerUnit);
+            if (unit instanceof CreeperUnit cUnit && cUnit.isPowered())
+                atkDmg *= 2;
+            statStrings.add(String.valueOf(atkDmg));
             DecimalFormat df = new DecimalFormat("###.##");
             statStrings.add(String.valueOf(df.format(attackerUnit.getAttacksPerSecond()))); // attacks per second
             statStrings.add(String.valueOf((int) (attackerUnit.getAttackRange())));

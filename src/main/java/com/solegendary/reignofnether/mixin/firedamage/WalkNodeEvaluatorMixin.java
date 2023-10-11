@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.mixin;
+package com.solegendary.reignofnether.mixin.firedamage;
 
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
@@ -39,8 +39,8 @@ public abstract class WalkNodeEvaluatorMixin extends NodeEvaluator {
 
     private static boolean isBurningBlock2(BlockState pState) {
         return CampfireBlock.isLitCampfire(pState) ||
-                pState.is(BlockTags.FIRE) ||
-                pState.is(Blocks.LAVA) || // removed magma
+                pState.is(Blocks.WATER) ||
+                pState.is(Blocks.LAVA) || // removed magma and fire
                 pState.is(Blocks.LAVA_CAULDRON) ||
                 pState.is(Blocks.ACACIA_LEAVES) || // adding leaves to prevent workers getting stuck in trees
                 pState.is(Blocks.BIRCH_LEAVES) || // leaving out jungle/azalea leaves since they can be on the floor

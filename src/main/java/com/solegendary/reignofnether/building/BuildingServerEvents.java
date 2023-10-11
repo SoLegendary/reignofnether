@@ -283,7 +283,10 @@ public class BuildingServerEvents {
                     affectedBuildings.add(building);
             }
             for (Building building : affectedBuildings) {
-                building.destroyRandomBlocks((int) creeperUnit.getUnitAttackDamage());
+                int atkDmg = (int) creeperUnit.getUnitAttackDamage();
+                if (creeperUnit.isPowered())
+                    atkDmg *= 2;
+                building.destroyRandomBlocks(atkDmg);
             }
         } // apply ghast attack damage as bonus damage to buildings
         else if (ghastUnit != null) {
