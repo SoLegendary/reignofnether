@@ -113,8 +113,8 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
                 attackRange += garr.getAttackRangeBonus();
             else if (isTargetGarrisoned)
                 attackRange += targetGarr.getExternalAttackRangeBonus();
-            else if (target instanceof GhastUnit)
-                attackRange += GhastUnit.ATTACKER_RANGE_BONUS;
+            else if (target instanceof GhastUnit ghastUnit)
+                attackRange += ghastUnit.getAttackerRangeBonus(this.mob);
 
             boolean flag2 = (distToTarget > attackRange || this.seeTime < 5) && this.attackCooldown == 0;
 

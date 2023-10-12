@@ -22,6 +22,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -132,8 +134,6 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
-
-    public static final int ATTACKER_RANGE_BONUS = 4; // range bonus that attackers get when targeting a ghast
 
     public static final int EXPLOSION_POWER = 1;
     public static final int FIREBALL_FIRE_BLOCKS = 1;
@@ -262,6 +262,20 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         this.playSound(SoundEvents.GHAST_WARN, 3.0F, 1.0F);
         this.level.addFreshEntity(fireball);
         UnitSyncClientboundPacket.sendSyncCastingAnimationPacket(this, true);
+    }
+
+    // range bonus that an attacker gets when targeting this ghast, so that we can't just float high up out of range
+    public int getAttackerRangeBonus(Mob attacker) {
+        Vec2 attackerPos = new Vec2((float) attacker.getX(), (float) attacker.getZ());
+        Vec2 ghastPos = new Vec2((float) this.getX(), (float) this.getZ());
+        double horizDist = Math.sqrt(attackerPos.distanceToSqr(ghastPos));
+        double vertiDist = Math.max(0, this.getY() - attacker.getY());
+
+        // if we're directly under the ghast, just allow anything to attack it
+        if (horizDist < 2)
+            return (int) vertiDist;
+        else
+            return (int) (vertiDist * 0.4f);
     }
 
     @Override

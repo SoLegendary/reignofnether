@@ -13,7 +13,6 @@ TODO bugs/features:
 let mobs walk on magma and fire
 
 - check that retaliate doesnt redirect melee and ghasts from attacking a building
-- bonus range when attacking ghasts should be based on difference in Y pos values (~4 @ height 10, but not linear...)
 
 Blazes:
     - find some upgrade active ability to implement (short range flamethrower?)
