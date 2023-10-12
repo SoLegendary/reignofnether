@@ -46,6 +46,7 @@ import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.item.ItemEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
@@ -365,8 +366,12 @@ public class UnitServerEvents {
             getUnitToEntityRelationship(creeperUnit, evt.getEntity()) == Relationship.FRIENDLY)
             evt.setCanceled(true);
 
-        if (evt.getEntity() instanceof CreeperUnit && (evt.getSource() == DamageSource.LIGHTNING_BOLT || evt.getSource() == DamageSource.ON_FIRE))
-            evt.setCanceled(true);
+        if (evt.getSource() == DamageSource.LIGHTNING_BOLT) {
+            if (evt.getEntity() instanceof CreeperUnit)
+                evt.setCanceled(true);
+            else
+                evt.setAmount(evt.getAmount() / 2);
+        }
 
         if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL))
             evt.setCanceled(true);
@@ -375,6 +380,12 @@ public class UnitServerEvents {
         if (evt.getSource().isProjectile() && evt.getSource().getEntity() instanceof Unit unit)
             if (getUnitToEntityRelationship(unit, evt.getEntity()) == Relationship.FRIENDLY && unit.getTargetGoal().getTarget() != evt.getEntity())
                 evt.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void onLightningStrike(EntityStruckByLightningEvent evt) {
+        if (evt.getEntity() instanceof CreeperUnit creeperUnit)
+            creeperUnit.setSecondsOnFire(0);
     }
 
     // prevent friendly fire from ranged units (unless specifically targeted)

@@ -10,9 +10,6 @@ TODO bugs/features:
 
 
 
-
-Make creepers should explode from being set on fire but prevent lightning from settings things on fire
-Make a FireBlockMixin to prevent fire tick damage (instead just light mobs on fire) and spread, but still set a lifetime (remove gamerule doFireTick false)
 let mobs walk on magma and fire
 
 - check that retaliate doesnt redirect melee and ghasts from attacking a building

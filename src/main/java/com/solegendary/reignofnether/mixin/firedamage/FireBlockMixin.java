@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(FireBlock.class)
 public abstract class FireBlockMixin {
 
-    // prevent fire spreading, and ensure that there is a consistent lifetime to the fire
+    // prevent fire spreading, and ensure that there is a short lifetime to the fire
 
     @Inject(
             method = "tick",
