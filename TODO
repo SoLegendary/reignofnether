@@ -23,10 +23,7 @@ piglins
         - maybe make a custom block so we can also customise colour?
     - apply leaf disappearance logic to mycelium leaves
     - apply the tall-tree felling logic to mycelium trees
-    - slow down fire/magma/suffocation damage events
-        - don't prevent units walking over magma
-        - also don't make undead fire immune when near base, just prevent sunlight reapplying fire
-        - fire blocks should not last forever
+
 
 TODO test in next playtest
 

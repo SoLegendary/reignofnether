@@ -176,10 +176,12 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
         // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
         if (attackGoal != null)
             attackGoal.tickCooldown();
+    }
 
-        if (!this.level.isClientSide() && this.isOnFire() &&
-                BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false))
-            this.setRemainingFireTicks(0);
+    @Override
+    protected boolean isSunBurnTick() {
+        return super.isSunBurnTick() &&
+                !BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false);
     }
 
     public void initialiseGoals() {

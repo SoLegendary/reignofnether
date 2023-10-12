@@ -238,14 +238,15 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
         WorkerUnit.tick(this);
 
         // won't naturally burn since we've extended a Vindicator
-        if (this.isSunBurnTick() && BuildingUtils.doesPlayerOwnCapitol(this.level.isClientSide(), this.getOwnerName()))
+        if (this.isSunBurnTick())
             this.setSecondsOnFire(8);
+    }
 
-        if (!this.level.isClientSide()) {
-            boolean isInRangeOfNightSource = BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false);
-            if (this.isOnFire() && isInRangeOfNightSource)
-                this.setRemainingFireTicks(0);
-        }
+    @Override
+    protected boolean isSunBurnTick() {
+        return super.isSunBurnTick() &&
+                BuildingUtils.doesPlayerOwnCapitol(this.level.isClientSide(), this.getOwnerName()) &&
+                !BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false);
     }
 
     public void initialiseGoals() {
