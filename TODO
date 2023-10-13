@@ -10,15 +10,15 @@ TODO bugs/features:
 
 
 
-- is it possible for ghasts to hide above a thick layer of trees to escape ranged fire?
-    - YES
 
-let mobs walk on magma and fire
+- wither skeletons attack a bit too fast
+- check poison spiders and wither skeleton attacks are correct and set the correct duration
 
-- check that retaliate doesnt redirect melee and ghasts from attacking a building
+Blazes: upgrade ideas
+    - short range flamethrower toggle?
 
-Blazes:
-    - find some upgrade active ability to implement (short range flamethrower?)
+Wither skeletons: upgrade ideas
+    - enemies killed under wither effects explode in a cloud of wither
 
 piglins
     - ensure portals dont actually send people to the nether
@@ -39,6 +39,7 @@ gathering worker counts
 creepers do double damage to buildings when charged
 ravager roars damage buildings
 ghast attacker range bonuses
+- check that retaliate doesnt redirect melee and ghasts from attacking a building
 
 TODO weird ideas
 

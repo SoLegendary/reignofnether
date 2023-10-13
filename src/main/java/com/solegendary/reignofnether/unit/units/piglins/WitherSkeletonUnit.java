@@ -12,6 +12,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,6 +30,7 @@ import net.minecraft.world.entity.monster.WitherSkeleton;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -190,5 +194,18 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
         AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
         axeStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
         this.setItemSlot(EquipmentSlot.MAINHAND, axeStack);
+    }
+
+    private static final int WITHER_SECONDS = 7;
+
+    @Override
+    public boolean doHurtTarget(@NotNull Entity pEntity) {
+        if (!super.doHurtTarget(pEntity)) {
+            return false;
+        } else {
+            if (pEntity instanceof LivingEntity)
+                ((LivingEntity)pEntity).addEffect(new MobEffectInstance(MobEffects.WITHER, WITHER_SECONDS * 20), this);
+            return true;
+        }
     }
 }

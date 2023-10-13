@@ -4,8 +4,11 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
+import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPotions;
+import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -13,18 +16,17 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.piglins.BlazeUnit;
-import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterUnit;
+import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -36,9 +38,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -53,6 +58,7 @@ import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -183,6 +189,7 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof Unit &&
             evt.getEntity() instanceof Mob mob) {
             mob.setBaby(false);
+            mob.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 0);
         }
 
         if (evt.getEntity() instanceof Unit &&
@@ -222,6 +229,21 @@ public class UnitServerEvents {
         }
         if (evt.getEntity() instanceof CreeperUnit creeperUnit)
             creeperUnit.explodeCreeper();
+
+        if (evt.getEntity().getLastHurtByMob() instanceof WitherSkeletonUnit wsUnit &&
+            ResearchServer.playerHasResearch(wsUnit.getOwnerName(), ResearchWitherClouds.itemName)) {
+
+            AreaEffectCloud aec = new AreaEffectCloud(wsUnit.level, wsUnit.getX(), wsUnit.getY(), wsUnit.getZ());
+            aec.setOwner(wsUnit);
+            aec.setRadius(3.0F);
+            aec.setRadiusOnUse(0);
+            aec.setDurationOnUse(0);
+            aec.setWaitTime(10);
+            aec.setDuration(5 * 20);
+            aec.setRadiusPerTick(-aec.getRadius() / (float)aec.getDuration());
+            aec.addEffect(new MobEffectInstance(MobEffects.WITHER));
+            wsUnit.level.addFreshEntity(aec);
+        }
     }
 
     // villager hunting
@@ -345,6 +367,10 @@ public class UnitServerEvents {
     public static void onEntityDamaged(LivingDamageEvent evt) {
         if (shouldIgnoreKnockback(evt))
             knockbackIgnoreIds.add(evt.getEntity().getId());
+
+        // double wither damage since we are playing with (average) doubled mob health
+        if (evt.getSource() == DamageSource.WITHER)
+            evt.setAmount(evt.getAmount() * 2);
 
         // ensure projectiles from units do the damage of the unit, not the item
         if (evt.getSource().isProjectile() && evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)

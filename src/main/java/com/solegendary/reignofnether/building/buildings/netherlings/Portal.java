@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.researchItems.ResearchBruteShields;
 import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
 import com.solegendary.reignofnether.research.researchItems.ResearchHoglinCavalry;
+import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.piglins.*;
@@ -55,15 +56,17 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                    PiglinGruntProd.getStartButton(this, Keybindings.keyQ),
-                    PiglinBruteProd.getStartButton(this, Keybindings.keyW),
-                    PiglinHeadhunterProd.getStartButton(this, Keybindings.keyE),
-                    HoglinProd.getStartButton(this, Keybindings.keyR),
-                    BlazeProd.getStartButton(this, Keybindings.keyT),
+                    //PiglinGruntProd.getStartButton(this, Keybindings.keyQ),
+                    //PiglinBruteProd.getStartButton(this, Keybindings.keyW),
+                    //PiglinHeadhunterProd.getStartButton(this, Keybindings.keyE),
+                    //HoglinProd.getStartButton(this, Keybindings.keyR),
+                    //BlazeProd.getStartButton(this, Keybindings.keyT),
                     WitherSkeletonProd.getStartButton(this, Keybindings.keyU),
-                    ResearchBruteShields.getStartButton(this, Keybindings.keyI),
-                    ResearchHoglinCavalry.getStartButton(this, Keybindings.keyO),
-                    ResearchHeavyTridents.getStartButton(this, Keybindings.keyP)
+                    GhastProd.getStartButton(this, Keybindings.keyI),
+                    //ResearchBruteShields.getStartButton(this, Keybindings.keyI),
+                    //ResearchHoglinCavalry.getStartButton(this, Keybindings.keyO),
+                    //ResearchHeavyTridents.getStartButton(this, Keybindings.keyP),
+                    ResearchWitherClouds.getStartButton(this, Keybindings.keyP)
             );
     }
 

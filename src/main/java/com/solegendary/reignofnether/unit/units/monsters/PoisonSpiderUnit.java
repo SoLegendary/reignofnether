@@ -178,7 +178,7 @@ public class PoisonSpiderUnit extends CaveSpider implements Unit, AttackerUnit {
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
     }
 
-    private static final int POISON_SECONDS = 7;
+    private static final int POISON_SECONDS = 15;
 
     @Override
     public boolean doHurtTarget(@NotNull Entity pEntity) {
