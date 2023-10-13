@@ -10,6 +10,9 @@ TODO bugs/features:
 
 
 
+- is it possible for ghasts to hide above a thick layer of trees to escape ranged fire?
+    - YES
+
 let mobs walk on magma and fire
 
 - check that retaliate doesnt redirect melee and ghasts from attacking a building
@@ -35,7 +38,7 @@ check garrisoned range unit isAggressive, especially in castles (pillagers didn'
 gathering worker counts
 creepers do double damage to buildings when charged
 ravager roars damage buildings
-
+ghast attacker range bonuses
 
 TODO weird ideas
 
