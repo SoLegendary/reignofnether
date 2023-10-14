@@ -156,6 +156,7 @@ public class EntityRegistrar {
     public static final RegistryObject<EntityType<BlazeUnit>> BLAZE_UNIT = ENTITIES.register("blaze_unit",
             () -> EntityType.Builder.of(BlazeUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.BLAZE.getWidth(), EntityType.BLAZE.getHeight())
+                    .fireImmune()
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "blaze_unit").toString()));
 
