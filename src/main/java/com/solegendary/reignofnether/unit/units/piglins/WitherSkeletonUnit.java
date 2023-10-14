@@ -145,6 +145,10 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     }
 
     @Override
+    public void reassessWeaponGoal() { }
+    @Override
+    public boolean isSunBurnTick() { return false; }
+    @Override
     public boolean isLeftHanded() { return false; }
     @Override // prevent vanilla logic for picking up items
     protected void pickUpItem(ItemEntity pItemEntity) { }
@@ -190,14 +194,15 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
-        ItemStack axeStack = new ItemStack(Items.NETHERITE_SWORD);
+        ItemStack swordStack = new ItemStack(Items.NETHERITE_SWORD);
         AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
-        axeStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
-        this.setItemSlot(EquipmentSlot.MAINHAND, axeStack);
+        swordStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+        this.setItemSlot(EquipmentSlot.MAINHAND, swordStack);
     }
 
     private static final int WITHER_SECONDS = 7;
 
+    /*
     @Override
     public boolean doHurtTarget(@NotNull Entity pEntity) {
         if (!super.doHurtTarget(pEntity)) {
@@ -207,5 +212,5 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
                 ((LivingEntity)pEntity).addEffect(new MobEffectInstance(MobEffects.WITHER, WITHER_SECONDS * 20), this);
             return true;
         }
-    }
+    }*/
 }

@@ -11,14 +11,8 @@ TODO bugs/features:
 
 
 
-- wither skeletons attack a bit too fast
-- check poison spiders and wither skeleton attacks are correct and set the correct duration
-
 Blazes: upgrade ideas
     - short range flamethrower toggle?
-
-Wither skeletons: upgrade ideas
-    - enemies killed under wither effects explode in a cloud of wither
 
 piglins
     - ensure portals dont actually send people to the nether
@@ -226,3 +220,13 @@ TODO tutorial docs
 
 
 
+TODO vanilla player balancing/interaction (backlog)
+- Balance strong player actions using food:
+    - sprinting (very high)
+    - attacking (medium)
+    - gathering (low)
+    - walking and jumping (low)
+- Attacking any melee unit that's targeting a player should immediately deal its melee damage to them
+- Punching disabled, combat and resource gathering can only be done if the player has tools/weapons
+- Tools/weapons provided by the RTS player using resources
+- Turned into a ghost on death - must walk back to a capitol building to be resurrected for a resource cost

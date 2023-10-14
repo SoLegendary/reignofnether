@@ -230,20 +230,19 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof CreeperUnit creeperUnit)
             creeperUnit.explodeCreeper();
 
-        // TODO: death by wither alone doesnt seem to do anything, also allow death from other mobs to count if under wither
-        if (evt.getEntity().getLastHurtByMob() instanceof WitherSkeletonUnit wsUnit &&
-            ResearchServer.playerHasResearch(wsUnit.getOwnerName(), ResearchWitherClouds.itemName)) {
+        if (evt.getEntity().getLastHurtByMob() instanceof Unit unit &&
+            (evt.getEntity().getLastHurtByMob() instanceof WitherSkeletonUnit || evt.getSource().getMsgId().equals("wither")) &&
+            ResearchServer.playerHasResearch(unit.getOwnerName(), ResearchWitherClouds.itemName)) {
 
             AreaEffectCloud aec = new AreaEffectCloud(evt.getEntity().level, evt.getEntity().getX(), evt.getEntity().getY(), evt.getEntity().getZ());
-            aec.setOwner(wsUnit);
-            aec.setRadius(2.5F);
+            aec.setOwner(evt.getEntity());
+            aec.setRadius(3.0F);
             aec.setRadiusOnUse(0);
             aec.setDurationOnUse(0);
-            aec.setWaitTime(10);
-            aec.setDuration(5 * 20);
+            aec.setDuration(10 * 20);
             aec.setRadiusPerTick(-aec.getRadius() / (float)aec.getDuration());
-            aec.addEffect(new MobEffectInstance(MobEffects.WITHER));
-            wsUnit.level.addFreshEntity(aec);
+            aec.addEffect(new MobEffectInstance(MobEffects.WITHER, 10 * 20));
+            evt.getEntity().level.addFreshEntity(aec);
         }
     }
 
