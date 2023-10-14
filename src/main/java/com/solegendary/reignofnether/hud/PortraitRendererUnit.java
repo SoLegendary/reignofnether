@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.ReportedException;
@@ -244,7 +245,11 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
         statStrings.add(String.valueOf((int) (unit.getUnitArmorValue())));
         AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
-        statStrings.add(ms != null ? String.valueOf((int) (ms.getValue() * 101)) : "0"); // prevent rounding errors
+
+        int msInt = ms != null ? (int) (ms.getValue() * 101) : 0;
+        if (unit instanceof PiglinBruteUnit pbUnit && pbUnit.isHoldingUpShield)
+            msInt *= 0.5f;
+        statStrings.add(String.valueOf(msInt)); // prevent rounding errors
 
         // render based on prepped strings/icons
         for (int i = 0; i < statStrings.size(); i++) {
