@@ -39,7 +39,7 @@ public class AttackGround extends Ability {
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
                 "Attack Ground",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/bow.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/fireball.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK_GROUND,
                 () -> false,

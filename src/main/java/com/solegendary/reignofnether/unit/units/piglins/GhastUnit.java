@@ -118,8 +118,8 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     // endregion
 
-    final static public float attackDamage = 4.0f;
-    final static public float attacksPerSecond = 0.2f;
+    final static public float attackDamage = 6.0f;
+    final static public float attacksPerSecond = 0.15f;
     final static public float attackRange = 40; // only used by ranged units or melee building attackers
     final static public float aggroRange = 30;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -135,13 +135,13 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    public static final int EXPLOSION_POWER = 1;
-    public static final int FIREBALL_FIRE_BLOCKS = 1;
+    public static final int EXPLOSION_POWER = 2;
+    public static final int FIREBALL_FIRE_BLOCKS = 2;
 
-    private static final int SHOOTING_TICKS_MAX = 14;
+    private static final int SHOOTING_FACE_TICKS_MAX = 14;
     private int shootingFaceTicksLeft = 0;
     public boolean isShooting() { return shootingFaceTicksLeft > 0; }
-    public void showShootingFace() { shootingFaceTicksLeft = SHOOTING_TICKS_MAX; }
+    public void showShootingFace() { shootingFaceTicksLeft = SHOOTING_FACE_TICKS_MAX; }
 
     private RangedFlyingAttackGroundGoal<?> attackGroundGoal;
     @Override public RangedFlyingAttackGroundGoal<?> getRangedAttackGroundGoal() {
