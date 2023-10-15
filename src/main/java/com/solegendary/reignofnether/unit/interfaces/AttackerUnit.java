@@ -14,6 +14,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
@@ -101,17 +102,17 @@ public interface AttackerUnit {
 
                 Entity lastDSEntity = unitMob.getLastDamageSource().getEntity();
 
-                boolean isMeleeAttackedByFlying = false;
+                boolean isMeleeAttackedByFlyingOrGarrisoned = false;
                 if (lastDSEntity instanceof Unit unitDS &&
-                    unitDS.getMoveGoal() instanceof FlyingMoveToTargetGoal &&
+                    (unitDS.getMoveGoal() instanceof FlyingMoveToTargetGoal || GarrisonableBuilding.getGarrison(unitDS) != null) &&
                     attackerUnit.getAttackGoal() instanceof MeleeAttackUnitGoal) {
-                    isMeleeAttackedByFlying = true;
+                    isMeleeAttackedByFlyingOrGarrisoned = true;
                 }
-
                 Relationship rs = UnitServerEvents.getUnitToEntityRelationship(unit, lastDSEntity);
 
-                if (!isMeleeAttackedByFlying &&
+                if (!isMeleeAttackedByFlyingOrGarrisoned &&
                     lastDSEntity instanceof LivingEntity &&
+                    !(lastDSEntity instanceof Player player && player.isCreative()) &&
                     (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE)) {
                     attackerUnit.setUnitAttackTarget((LivingEntity) lastDSEntity);
                 }
@@ -136,7 +137,7 @@ public interface AttackerUnit {
         float aggroRange = this.getAggroRange();
         GarrisonableBuilding garr = GarrisonableBuilding.getGarrison((Unit) this);
         if (garr != null)
-            aggroRange += garr.getAttackRangeBonus();
+            aggroRange  = garr.getAttackRange();
 
         Mob closestMob = MiscUtil.findClosestAttackableEnemy((Mob) this, aggroRange, level);
         if (closestMob != null) {

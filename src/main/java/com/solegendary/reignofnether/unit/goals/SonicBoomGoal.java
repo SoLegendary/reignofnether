@@ -17,13 +17,13 @@ public class SonicBoomGoal extends AbstractCastTargetedSpellGoal {
     public void startCasting() {
         super.startCasting();
         if (!this.mob.level.isClientSide())
-            UnitSyncClientboundPacket.sendSyncCastingAnimationPacket(this.mob, true);
+            UnitSyncClientboundPacket.sendSyncAnimationPacket(this.mob, true);
     }
 
     @Override
     public void stopCasting() {
         if (!this.mob.level.isClientSide() && ticksCasting < channelTicks)
-            UnitSyncClientboundPacket.sendSyncCastingAnimationPacket(this.mob, false);
+            UnitSyncClientboundPacket.sendSyncAnimationPacket(this.mob, false);
         super.stopCasting();
         ((Unit) this.mob).getCheckpoints().clear();
     }

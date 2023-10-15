@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -238,7 +239,12 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             statStrings.add(String.valueOf(atkDmg));
             DecimalFormat df = new DecimalFormat("###.##");
             statStrings.add(String.valueOf(df.format(attackerUnit.getAttacksPerSecond()))); // attacks per second
-            statStrings.add(String.valueOf((int) (attackerUnit.getAttackRange())));
+
+            GarrisonableBuilding garr = GarrisonableBuilding.getGarrison(unit);
+            if (garr != null)
+                statStrings.add(String.valueOf(garr.getAttackRange()));
+            else
+                statStrings.add(String.valueOf((int) (attackerUnit.getAttackRange())));
         }
         textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"));
         textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/boots.png"));

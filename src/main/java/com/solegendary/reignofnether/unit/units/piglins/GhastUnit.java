@@ -120,7 +120,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     final static public float attackDamage = 4.0f;
     final static public float attacksPerSecond = 0.2f;
-    final static public float attackRange = 30; // only used by ranged units or melee building attackers
+    final static public float attackRange = 40; // only used by ranged units or melee building attackers
     final static public float aggroRange = 30;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
@@ -261,7 +261,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         fireball.setPos(this.getX() + viewVec.x * 4.0, this.getY(0.5) + 0.5, fireball.getZ() + viewVec.z * 4.0);
         this.playSound(SoundEvents.GHAST_WARN, 3.0F, 1.0F);
         this.level.addFreshEntity(fireball);
-        UnitSyncClientboundPacket.sendSyncCastingAnimationPacket(this, true);
+        UnitSyncClientboundPacket.sendSyncAnimationPacket(this, true);
     }
 
     // range bonus that an attacker gets when targeting this ghast, so that we can't just float high up out of range

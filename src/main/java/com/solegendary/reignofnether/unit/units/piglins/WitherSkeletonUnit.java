@@ -68,6 +68,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
     private MeleeAttackUnitGoal attackGoal;
+    private MeleeAttackBuildingGoal attackBuildingGoal;
 
     public LivingEntity getFollowTarget() { return followTarget; }
     public boolean getHoldPosition() { return holdPosition; }
@@ -106,7 +107,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return canAttackBuildings;}
     public Goal getAttackGoal() { return attackGoal; }
-    public Goal getAttackBuildingGoal() { return null; }
+    public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
@@ -172,6 +173,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
         this.garrisonGoal = new GarrisonGoal(this);
         this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), false);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
+        this.attackBuildingGoal = new MeleeAttackBuildingGoal(this);
     }
 
     @Override
@@ -180,6 +182,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
+        this.goalSelector.addGoal(2, attackBuildingGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
@@ -202,7 +205,6 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
 
     private static final int WITHER_SECONDS = 7;
 
-    /*
     @Override
     public boolean doHurtTarget(@NotNull Entity pEntity) {
         if (!super.doHurtTarget(pEntity)) {
@@ -212,5 +214,5 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
                 ((LivingEntity)pEntity).addEffect(new MobEffectInstance(MobEffects.WITHER, WITHER_SECONDS * 20), this);
             return true;
         }
-    }*/
+    }
 }

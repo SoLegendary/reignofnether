@@ -11,7 +11,12 @@ TODO bugs/features:
 
 
 
+blazes should get an attack ground option (targets the block above the targeted one)
+
 Stop passengers looking at their last target after a stop action
+
+ghast shots sometimes dont damage buildings
+
 
 Blazes: upgrade ideas
     - short range flamethrower toggle?
@@ -25,17 +30,13 @@ piglins
 
 TODO test in next playtest
 
-researchEvokers removed
-selecting passengers via control groups or double clicking
-mute sounds originating from fog of war
-right click to find nearest mountable
-new lingering potion upgrades
-check garrisoned range unit isAggressive, especially in castles (pillagers didn't aggro against attackers)
-gathering worker counts
-creepers do double damage to buildings when charged
+- ghasts should have higher vision range
 ravager roars damage buildings
 ghast attacker range bonuses
 - check that retaliate doesnt redirect melee and ghasts from attacking a building
+- ranged units should be able to aggro properly in and against garrisons'
+- melee unit should not retaliate against garrisoned units or flying units
+
 
 TODO weird ideas
 

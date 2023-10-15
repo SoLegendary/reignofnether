@@ -68,6 +68,7 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
     private MeleeAttackUnitGoal attackGoal;
+    private MeleeAttackBuildingGoal attackBuildingGoal;
 
     public LivingEntity getFollowTarget() { return followTarget; }
     public boolean getHoldPosition() { return holdPosition; }
@@ -106,7 +107,7 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return canAttackBuildings;}
     public Goal getAttackGoal() { return attackGoal; }
-    public Goal getAttackBuildingGoal() { return null; }
+    public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
@@ -177,7 +178,9 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this);
         this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), false);
+        this.attackBuildingGoal = new MeleeAttackBuildingGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
+
     }
 
     @Override

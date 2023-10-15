@@ -62,6 +62,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
     private MeleeAttackUnitGoal attackGoal;
+    private MeleeAttackBuildingGoal attackBuildingGoal;
 
     public LivingEntity getFollowTarget() { return followTarget; }
     public boolean getHoldPosition() { return holdPosition; }
@@ -100,7 +101,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return canAttackBuildings;}
     public Goal getAttackGoal() { return attackGoal; }
-    public Goal getAttackBuildingGoal() { return null; }
+    public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
@@ -165,6 +166,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), false);
+        this.attackBuildingGoal = new MeleeAttackBuildingGoal(this);
     }
 
     @Override
@@ -173,6 +175,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
+        this.goalSelector.addGoal(2, attackBuildingGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));

@@ -112,7 +112,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     // endregion
 
-    final static public float attackDamage = 2.0f;
+    final static public float attackDamage = 1.0f;
     final static public float attacksPerSecond = 1.0f;
     final static public float attackRange = 12; // only used by ranged units or melee building attackers
     final static public float aggroRange = 12;
@@ -193,7 +193,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
             double z = target.getZ() - this.getZ();
             double distSqr = this.distanceToSqr(target);
             double dist = Math.sqrt(Math.sqrt(distSqr)) * 0.5;
-            SmallFireball fireball = new SmallFireball(this.level, this,
+            BlazeUnitFireball fireball = new BlazeUnitFireball(this.level, this,
                     this.getRandom().triangle(x, 2.297 * dist), y,
                     this.getRandom().triangle(z, 2.297 * dist));
 

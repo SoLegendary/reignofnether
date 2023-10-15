@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitSyncAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
@@ -21,6 +22,7 @@ public class UnitSyncClientboundPacket {
 
     private final UnitSyncAction syncAction;
     private final int entityId;
+    private final int targetId;
     private final float health;
     private final double posX;
     private final double posY;
@@ -33,7 +35,7 @@ public class UnitSyncClientboundPacket {
     public static void sendLeavePacket(LivingEntity entity) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitSyncClientboundPacket(UnitSyncAction.LEAVE_LEVEL,
-                entity.getId(),0,0,0,0,0,0,0, "")
+                entity.getId(),0,0,0,0,0,0,0,0, "")
         );
     }
 
@@ -47,7 +49,7 @@ public class UnitSyncClientboundPacket {
 
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitSyncClientboundPacket(UnitSyncAction.SYNC_STATS,
-                entity.getId(),
+                entity.getId(), 0,
                 entity.getHealth(),
                 entity.getX(), entity.getY(), entity.getZ(),
                 0,0,0, owner)
@@ -58,17 +60,35 @@ public class UnitSyncClientboundPacket {
         Resources res = Resources.getTotalResourcesFromItems(unit.getItems());
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitSyncClientboundPacket(UnitSyncAction.SYNC_RESOURCES,
-                ((LivingEntity) unit).getId(), 0,0,0,0,
+                ((LivingEntity) unit).getId(), 0,0,0,0,0,
                 res.food, res.wood, res.ore, "")
         );
     }
 
-    public static void sendSyncCastingAnimationPacket(LivingEntity entity, boolean startCasting) {
+    public static void sendSyncAnimationPacket(LivingEntity entity, boolean startAnimation) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitSyncClientboundPacket(
-                        startCasting ? UnitSyncAction.START_CASTING : UnitSyncAction.STOP_CASTING,
-                        entity.getId(),
+                        startAnimation ? UnitSyncAction.START_ANIMATION : UnitSyncAction.STOP_ANIMATION,
+                        entity.getId(),0,
                         0,0,0,0,0,0,0, "")
+        );
+    }
+
+    public static void sendSyncAnimationPacket(LivingEntity entity, LivingEntity target, boolean startAnimation) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new UnitSyncClientboundPacket(
+                        startAnimation ? UnitSyncAction.START_ANIMATION : UnitSyncAction.STOP_ANIMATION,
+                        entity.getId(), target.getId(),
+                        0,0,0,0,0,0,0, "")
+        );
+    }
+
+    public static void sendSyncAnimationPacket(LivingEntity entity, BlockPos bp, boolean startAnimation) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new UnitSyncClientboundPacket(
+                        startAnimation ? UnitSyncAction.START_ANIMATION : UnitSyncAction.STOP_ANIMATION,
+                        entity.getId(), 0,
+                        0, bp.getX(), bp.getY(), bp.getZ(),0,0,0, "")
         );
     }
 
@@ -76,6 +96,7 @@ public class UnitSyncClientboundPacket {
     public UnitSyncClientboundPacket(
         UnitSyncAction syncAction,
         int unitId,
+        int targetId,
         float health,
         double posX,
         double posY,
@@ -88,6 +109,7 @@ public class UnitSyncClientboundPacket {
         // filter out non-owned entities so we can't control them
         this.syncAction = syncAction;
         this.entityId = unitId;
+        this.targetId = targetId;
         this.health = health;
         this.posX = posX;
         this.posY = posY;
@@ -101,6 +123,7 @@ public class UnitSyncClientboundPacket {
     public UnitSyncClientboundPacket(FriendlyByteBuf buffer) {
         this.syncAction = buffer.readEnum(UnitSyncAction.class);
         this.entityId = buffer.readInt();
+        this.targetId = buffer.readInt();
         this.health = buffer.readFloat();
         this.posX = buffer.readDouble();
         this.posY = buffer.readDouble();
@@ -114,6 +137,7 @@ public class UnitSyncClientboundPacket {
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(this.syncAction);
         buffer.writeInt(this.entityId);
+        buffer.writeInt(this.targetId);
         buffer.writeFloat(this.health);
         buffer.writeDouble(this.posX);
         buffer.writeDouble(this.posY);
@@ -141,8 +165,8 @@ public class UnitSyncClientboundPacket {
                         case SYNC_RESOURCES -> UnitClientEvents.syncUnitResources(
                                 this.entityId,
                                 new Resources("", this.food, this.wood, this.ore));
-                        case START_CASTING -> UnitClientEvents.syncUnitCasting(this.entityId, true);
-                        case STOP_CASTING -> UnitClientEvents.syncUnitCasting(this.entityId, false);
+                        case START_ANIMATION -> UnitClientEvents.syncUnitAnimation(this.entityId, this.targetId, new BlockPos(this.posX, this.posY, this.posZ), true);
+                        case STOP_ANIMATION -> UnitClientEvents.syncUnitAnimation(this.entityId, this.targetId, null, false);
                     }
                 });
         });

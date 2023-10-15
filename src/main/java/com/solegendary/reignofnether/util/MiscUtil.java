@@ -2,12 +2,14 @@ package com.solegendary.reignofnether.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -138,10 +140,10 @@ public class MiscUtil {
 
         List<Mob> nearbyHostileMobs = new ArrayList<>();
 
-        for (Mob pfMob : nearbyMobs) {
-            Relationship rs = UnitServerEvents.getUnitToEntityRelationship((Unit) unitMob, pfMob);
-            if (rs == Relationship.HOSTILE && pfMob.getId() != unitMob.getId() && unitMob.hasLineOfSight(pfMob))
-                nearbyHostileMobs.add(pfMob);
+        for (Mob tMob : nearbyMobs) {
+            Relationship rs = UnitServerEvents.getUnitToEntityRelationship((Unit) unitMob, tMob);
+            if (rs == Relationship.HOSTILE && tMob.getId() != unitMob.getId() && hasLineOfSightForAttacks(unitMob, tMob))
+                nearbyHostileMobs.add(tMob);
         }
         // find the closest mob
         double closestDist = range;
@@ -154,6 +156,11 @@ public class MiscUtil {
             }
         }
         return closestMob;
+    }
+
+    private static boolean hasLineOfSightForAttacks(Mob mob, Mob targetMob) {
+        return mob.hasLineOfSight(targetMob) || mob instanceof GhastUnit ||
+                (mob instanceof Unit unit && GarrisonableBuilding.getGarrison((Unit) mob) != null);
     }
 
     public static <T extends Entity> List<T> getEntitiesWithinRange(Vector3d pos, float range, Class<T> entityType, Level level) {

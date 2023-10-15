@@ -11,8 +11,8 @@ import java.util.List;
 
 public interface GarrisonableBuilding {
 
-    // don't use this for abilities as it may not be balanced
-    public int getAttackRangeBonus();
+    // set range for all garrisoned units don't use this for abilities as it may not be balanced
+    public int getAttackRange();
     // bonus for units attacking garrisoned units
     public int getExternalAttackRangeBonus();
 

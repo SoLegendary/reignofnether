@@ -446,12 +446,11 @@ public class HudClientEvents {
                     () -> false,
                     () -> true,
                     () -> {
-                        // click to select this unit type as a group
-                        if (hudSelectedEntity == null &&
-                            getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
+                        // select this one specific unit
+                        if (getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
                             UnitClientEvents.clearSelectedUnits();
                             UnitClientEvents.addSelectedUnit(unit);
-                        } else { // select this one specific unit
+                        } else { // click to select this unit type as a group
                             hudSelectedEntity = unit;
                         }
                     },
@@ -650,10 +649,12 @@ public class HudClientEvents {
                 if (resName != ResourceName.NONE) {
                     int numWorkersAssigned = UnitClientEvents.getAllUnits().stream().filter(
                             u -> u instanceof WorkerUnit wu && !UnitClientEvents.idleWorkerIds.contains(u.getId()) &&
+                                    UnitClientEvents.getPlayerToEntityRelationship(u) == Relationship.OWNED &&
                                     wu.getGatherResourceGoal().getTargetResourceName().equals(resName)
                     ).toList().size();
                     int numWorkersHunting = UnitClientEvents.getAllUnits().stream().filter(
                             u -> u instanceof WorkerUnit wu && u instanceof Unit unit &&
+                                    UnitClientEvents.getPlayerToEntityRelationship(u) == Relationship.OWNED &&
                                     ResourceSources.isHuntableAnimal(unit.getTargetGoal().getTarget())
                     ).toList().size();
                     if (resName == ResourceName.FOOD)

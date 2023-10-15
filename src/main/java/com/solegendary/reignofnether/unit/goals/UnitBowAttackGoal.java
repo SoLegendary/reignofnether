@@ -8,7 +8,6 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.TridentItem;
@@ -118,12 +117,14 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
 
             float attackRange = ((AttackerUnit) this.mob).getAttackRange();
 
-            if (isGarrisoned)
-                attackRange += garr.getAttackRangeBonus();
-            else if (isTargetGarrisoned)
-                attackRange += targetGarr.getExternalAttackRangeBonus();
-            else if (target instanceof GhastUnit ghastUnit)
-                attackRange += ghastUnit.getAttackerRangeBonus(this.mob);
+            if (!(this.mob instanceof GhastUnit)) {
+                if (isGarrisoned)
+                    attackRange = garr.getAttackRange();
+                else if (isTargetGarrisoned)
+                    attackRange += targetGarr.getExternalAttackRangeBonus();
+                else if (target instanceof GhastUnit ghastUnit)
+                    attackRange += ghastUnit.getAttackerRangeBonus(this.mob);
+            }
 
             double distToTarget = this.mob.distanceTo(target);
 

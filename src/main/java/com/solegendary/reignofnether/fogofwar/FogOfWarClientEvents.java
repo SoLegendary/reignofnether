@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.commands.Commands;
@@ -187,10 +188,14 @@ public class FogOfWarClientEvents {
             Set<ChunkPos> occupiedFarviewChunks = ConcurrentHashMap.newKeySet();
 
             // get chunks that have units/buildings that can see
-            for (LivingEntity entity : UnitClientEvents.getAllUnits())
-                if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED)
-                    occupiedChunks.add(new ChunkPos(entity.getOnPos()));
-
+            for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+                if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED) {
+                    if (entity instanceof GhastUnit)
+                        occupiedFarviewChunks.add(new ChunkPos(entity.getOnPos()));
+                    else
+                        occupiedChunks.add(new ChunkPos(entity.getOnPos()));
+                }
+            }
             for (Building building : BuildingClientEvents.getBuildings()) {
                 if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED ||
                     isPlayerRevealed(building.ownerName)) {

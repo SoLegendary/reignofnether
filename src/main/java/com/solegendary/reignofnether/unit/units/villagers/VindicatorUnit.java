@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -10,6 +11,7 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -138,6 +140,29 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
 
+    // all for animation syncing...
+    @Override
+    public void setUnitAttackTarget(@Nullable LivingEntity target) {
+        AttackerUnit.super.setUnitAttackTarget(target);
+        if (!this.level.isClientSide()) {
+            if (target != null)
+                UnitSyncClientboundPacket.sendSyncAnimationPacket(this, target, true);
+            else
+                UnitSyncClientboundPacket.sendSyncAnimationPacket(this, false);
+        }
+    }
+    @Override
+    public void setAttackBuildingTarget(BlockPos preselectedBlockPos) {
+        AttackerUnit.super.setAttackBuildingTarget(preselectedBlockPos);
+        if (!this.level.isClientSide())
+             UnitSyncClientboundPacket.sendSyncAnimationPacket(this, preselectedBlockPos, true);
+    }
+    @Override
+    public void resetBehaviours() {
+        if (!this.level.isClientSide())
+            UnitSyncClientboundPacket.sendSyncAnimationPacket(this, false);
+    }
+
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MOVEMENT_SPEED, VindicatorUnit.movementSpeed)
@@ -175,6 +200,15 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         this.targetSelector.addGoal(2, targetGoal);
         this.targetSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+    }
+
+    @Override
+    public void setupEquipmentAndUpgradesClient() {
+        // weapon is purely visual, damage is based solely on entity attribute ATTACK_DAMAGE
+        Item axe = Items.IRON_AXE;
+        if (ResearchClient.hasResearch(ResearchVindicatorAxes.itemName))
+            axe = Items.DIAMOND_AXE;
+        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(axe));
     }
 
     @Override

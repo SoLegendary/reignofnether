@@ -80,9 +80,12 @@ public class UnitActionItem {
                     }
                 }
             }
-            else
-                resetBehaviours(unit);
-
+            else {
+                // if we are issuing a redundant unit attack command then don't resetBehaviours or else the unit will pause unnecessarily
+                if (action != UnitAction.ATTACK || unit.getTargetGoal().getTarget() == null ||
+                    unit.getTargetGoal().getTarget().getId() != unitId)
+                    resetBehaviours(unit);
+            }
             switch (action) {
                 case STOP -> {
                     Entity passenger = ((Entity) unit).getFirstPassenger();

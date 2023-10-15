@@ -58,9 +58,9 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
     }
 
     // don't use this for abilities as it may not be balanced
-    public int getAttackRangeBonus() { return 30; }
+    public int getAttackRange() { return 27; }
     // bonus for units attacking garrisoned units
-    public int getExternalAttackRangeBonus() { return 20; }
+    public int getExternalAttackRangeBonus() { return 15; }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);

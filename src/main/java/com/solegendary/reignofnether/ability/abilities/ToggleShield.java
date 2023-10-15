@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
@@ -65,5 +66,7 @@ public class ToggleShield extends Ability {
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
         bruteUnit.isHoldingUpShield = !bruteUnit.isHoldingUpShield;
+        if (!level.isClientSide())
+            UnitSyncClientboundPacket.sendSyncAnimationPacket(this.bruteUnit, bruteUnit.isHoldingUpShield);
     }
 }

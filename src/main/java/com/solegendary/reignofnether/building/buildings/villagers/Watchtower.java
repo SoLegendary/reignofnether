@@ -46,7 +46,7 @@ public class Watchtower extends Building implements GarrisonableBuilding {
     }
 
     // don't use this for abilities as it may not be balanced
-    public int getAttackRangeBonus() { return 20; }
+    public int getAttackRange() { return 20; }
     // bonus for units attacking garrisoned units
     public int getExternalAttackRangeBonus() { return 10; }
 

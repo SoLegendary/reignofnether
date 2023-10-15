@@ -14,26 +14,29 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -686,7 +689,7 @@ public class UnitClientEvents {
         sendUnitCommandManual(UnitAction.DISCARD, oldUnitIds);
     }
 
-    public static void syncUnitCasting(int entityId, boolean startCasting) {
+    public static void syncUnitAnimation(int entityId, int targetId, BlockPos buildingBp, boolean startAnimation) {
         for (LivingEntity entity : getAllUnits()) {
             if (entity instanceof EvokerUnit eUnit && eUnit.getId() == entityId) {
                 // skip if it's your evoker since it'll already be synced
@@ -694,20 +697,41 @@ public class UnitClientEvents {
                     return;
 
                 if (eUnit.getCastFangsLineGoal() != null) {
-                    if (startCasting)
+                    if (startAnimation)
                         eUnit.getCastFangsLineGoal().startCasting();
                     else
                         eUnit.getCastFangsLineGoal().stop();
                 }
             } else if (entity instanceof WardenUnit wUnit && wUnit.getId() == entityId) {
                 if (wUnit.getSonicBoomGoal() != null) {
-                    if (startCasting)
+                    if (startAnimation)
                         wUnit.startSonicBoomAnimation();
                     else
                         wUnit.stopSonicBoomAnimation();
                 }
-            } else if (entity instanceof GhastUnit gUnit && gUnit.getId() == entityId) {
+            } else if (entity instanceof GhastUnit gUnit && gUnit.getId() == entityId && startAnimation) {
                 gUnit.showShootingFace();
+            } else if (entity instanceof PiglinBruteUnit bUnit && bUnit.getId() == entityId) {
+                bUnit.isHoldingUpShield = startAnimation;
+            } else if (entity instanceof WorkerUnit wUnit && entity instanceof AttackerUnit aUnit && entity.getId() == entityId) {
+                if (startAnimation && MC.level != null) {
+                    entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WOODEN_SWORD));
+                    aUnit.setUnitAttackTarget((LivingEntity) MC.level.getEntity(targetId)); // set itself as a target just for animation purposes, doesn't tick clientside anyway
+                } else {
+                    entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.AIR));
+                    aUnit.setUnitAttackTarget(null);
+                }
+            } else if (entity instanceof VindicatorUnit vUnit && entity.getId() == entityId) {
+                if (startAnimation && MC.level != null) {
+                    if (targetId > 0) {
+                        vUnit.setUnitAttackTarget((LivingEntity) MC.level.getEntity(targetId)); // set itself as a target just for animation purposes, doesn't tick clientside anyway
+                    } else {
+                        vUnit.setAttackBuildingTarget(buildingBp);
+                    }
+                } else {
+                    vUnit.setUnitAttackTarget(null);
+                    ((MeleeAttackBuildingGoal) vUnit.getAttackBuildingGoal()).stopAttacking();
+                }
             }
         }
     }
