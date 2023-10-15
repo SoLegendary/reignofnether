@@ -34,6 +34,14 @@ public class NetherBlocks {
         return null;
     }
 
+    public static boolean isNetherBlock(Level level, BlockPos bp) {
+        BlockState bs = level.getBlockState(bp);
+        for (Map.Entry<Block, List<Block>> entrySet : MAPPINGS.entrySet())
+            if (bs.getBlock().equals(entrySet.getKey()))
+                return true;
+        return false;
+    }
+
     public static final Map<Block, List<Block>> MAPPINGS = new HashMap<>();
     public static final Map<Block, List<Block>> PLANT_MAPPINGS = new HashMap<>();
 

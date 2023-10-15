@@ -2,11 +2,14 @@ package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.Minecraft;
@@ -16,11 +19,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.solegendary.reignofnether.building.BuildingUtils.isInRangeOfNightSource;
 
 // Defines method bodies for Units
 // workaround for trying to have units inherit from both their base vanilla Mob class and a Unit class
@@ -28,6 +34,9 @@ import java.util.List;
 // (including getters/setters themselves)
 
 public interface Unit {
+
+    static int PIGLIN_HEALING_TICKS = 8 * ResourceCost.TICKS_PER_SECOND;
+    static int MONSTER_HEALING_TICKS = 12 * ResourceCost.TICKS_PER_SECOND;
 
     // list of positions to draw lines between to indicate unit intents - will fade over time unless shift is held
     public ArrayList<BlockPos> getCheckpoints();
@@ -143,6 +152,22 @@ public interface Unit {
             // enact target-following, and stop followTarget being reset
             if (unit.getFollowTarget() != null)
                 unit.setMoveTarget(unit.getFollowTarget().blockPosition());
+        }
+
+
+        // slow regen for monster and piglin units
+        LivingEntity le = (LivingEntity) unit;
+
+        if (!le.level.isClientSide()) {
+            if (unit.getFaction() == Faction.MONSTERS &&
+                    le.tickCount % MONSTER_HEALING_TICKS == 0 &&
+                    (!le.level.isDay() || isInRangeOfNightSource(le.position(), le.level.isClientSide()))) {
+                le.heal(1);
+            } else if (unit.getFaction() == Faction.PIGLINS &&
+                    le.tickCount % PIGLIN_HEALING_TICKS == 0 &&
+                    (NetherBlocks.isNetherBlock(le.level, le.getOnPos()) || unit instanceof GhastUnit)) {
+                le.heal(1);
+            }
         }
     }
 
