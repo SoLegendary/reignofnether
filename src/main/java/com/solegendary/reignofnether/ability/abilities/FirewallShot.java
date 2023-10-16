@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.ability.abilities;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -67,5 +68,7 @@ public class FirewallShot extends Ability {
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
         this.blazeUnit.shootFirewallShot(targetBp);
         this.setToMaxCooldown();
+        if (!level.isClientSide())
+            AbilityClientboundPacket.sendSetCooldownPacket(this.blazeUnit.getId(), this.action, this.cooldownMax);
     }
 }
