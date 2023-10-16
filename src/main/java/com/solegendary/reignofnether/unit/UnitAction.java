@@ -46,5 +46,6 @@ public enum UnitAction {
     CAST_SUMMON_VEXES,
     CAST_SONIC_BOOM,
 
-    TOGGLE_SHIELD
+    TOGGLE_SHIELD,
+    SHOOT_FIREWALL
 }

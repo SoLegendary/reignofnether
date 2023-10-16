@@ -1,7 +1,12 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.CastFangsCircle;
+import com.solegendary.reignofnether.ability.abilities.CastFangsLine;
+import com.solegendary.reignofnether.ability.abilities.CastSummonVexes;
+import com.solegendary.reignofnether.ability.abilities.FirewallShot;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -114,8 +119,8 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     final static public float attackDamage = 1.0f;
     final static public float attacksPerSecond = 1.0f;
-    final static public float attackRange = 12; // only used by ranged units or melee building attackers
-    final static public float aggroRange = 12;
+    final static public float attackRange = 14; // only used by ranged units or melee building attackers
+    final static public float aggroRange = 14;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public boolean canAttackBuildings = false;
@@ -131,6 +136,11 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     public BlazeUnit(EntityType<? extends Blaze> entityType, Level level) {
         super(entityType, level);
+
+        FirewallShot ab1 = new FirewallShot(this);
+        this.abilities.add(ab1);
+        if (level.isClientSide())
+            this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
     }
 
     @Override
@@ -186,6 +196,11 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     @Override
     public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
+        if (!this.abilities.isEmpty() &&
+            this.abilities.get(0) instanceof FirewallShot firewallShot &&
+            !firewallShot.isOffCooldown())
+            return;
+
         LivingEntity target = this.getTarget();
         if (target != null) {
             double x = target.getX() - this.getX();
@@ -195,15 +210,21 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
             double dist = Math.sqrt(Math.sqrt(distSqr)) * 0.5;
             BlazeUnitFireball fireball = new BlazeUnitFireball(this.level, this,
                     this.getRandom().triangle(x, 2.297 * dist), y,
-                    this.getRandom().triangle(z, 2.297 * dist));
-
-            //new SmallFireball(this.level, this, x, y, z);
-
+                    this.getRandom().triangle(z, 2.297 * dist), false);
             fireball.setPos(fireball.getX(), this.getY(0.5) + 0.5, fireball.getZ());
-
             this.playSound(SoundEvents.BLAZE_SHOOT, 3.0F, 1.0F);
             this.level.addFreshEntity(fireball);
         }
+    }
+
+    public void shootFirewallShot(BlockPos bp) {
+        double x = bp.getX() - this.getX();
+        double y = bp.getY() - this.getY(0.5) + 1.5f;
+        double z = bp.getZ() - this.getZ();
+        BlazeUnitFireball fireball = new BlazeUnitFireball(this.level, this, x, y, z, true);
+        fireball.setPos(fireball.getX(), this.getY(0.5) + 0.5, fireball.getZ());
+        this.playSound(SoundEvents.BLAZE_SHOOT, 3.0F, 1.0F);
+        this.level.addFreshEntity(fireball);
     }
 
     @Override

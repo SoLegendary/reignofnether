@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.mixin.firedamage;
 
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -27,9 +29,8 @@ public abstract class BaseFireBlockMixin {
         if (!pEntity.fireImmune()) {
             pEntity.setRemainingFireTicks((8 * 20) - 1); // prevent damage from being ON fire from happening every tick
             boolean isDamageTick = pEntity.tickCount % DAMAGE_DELAY == 0;
-            if (isDamageTick)
+            if (isDamageTick && !(pEntity instanceof Unit unit && unit.getFaction() == Faction.PIGLINS))
                 pEntity.hurt(DamageSource.IN_FIRE, DAMAGE);
         }
-
     }
 }
