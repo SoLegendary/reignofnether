@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// mappings of which overworld blocks will transform into which nether blocks when near a netherling base
+// mappings of which overworld blocks will transform into which nether blocks when near a piglin base
 
 public class NetherBlocks {
 

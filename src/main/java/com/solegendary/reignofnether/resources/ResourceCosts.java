@@ -90,7 +90,14 @@ public class ResourceCosts {
     public static ResourceCost CASTLE = ResourceCost.Building(0,400,300, 0);
 
     // Piglins
-    public static ResourceCost PORTAL = ResourceCost.Building(0, 200, 0, 0);
+    public static ResourceCost CITADEL_PORTAL = ResourceCost.Building(0,300,150, 10);
+    public static ResourceCost BASIC_PORTAL = ResourceCost.Building(0, 150, 0, 0);
+    public static ResourceCost NETHERWART_FARM = ResourceCost.Building(0, 100, 0, 0);
+    public static ResourceCost BASTION = ResourceCost.Building(0, 150, 0, 0);
+    public static ResourceCost HOGLIN_RANCH = ResourceCost.Building(0, 250, 0, 0);
+    public static ResourceCost FLAME_SANCTUARY = ResourceCost.Building(0, 300, 150, 0);
+    public static ResourceCost WITHER_SHRINE = ResourceCost.Building(0, 350, 200, 0);
+    public static ResourceCost FORTRESS = ResourceCost.Building(0, 400, 300, 0);
 
     // ******************* RESEARCH ******************* //
     public static ResourceCost RESEARCH_VINDICATOR_AXES = ResourceCost.Research(0,200,400, 180);

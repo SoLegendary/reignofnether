@@ -11,10 +11,6 @@ TODO bugs/features:
 
 
 
-
-Blazes:
-    - sync no-smoke animation to other clients
-
 piglins
     - ensure portals dont actually send people to the nether
         - maybe make a custom block so we can also customise colour?
@@ -49,19 +45,14 @@ TODO buildings/units (backlog)
 
 
 Piglins faction
-    All piglin buildings slowly convert non-nether blocks around them into nether counterparts:
-        - Grass -> nylium
-        - Sand -> soulsand
-        - Stone -> netherrack, etc.
-        - Water -> lava
-    Piglin buildings apart from the Bastion and portals can only be built on nether blocks
+
+    Piglin buildings apart from the Capitol and portals can only be built on nether blocks
 
     Piglins do not produce their own units, but instead (like Protoss) bring units in from the nether using portals
-    - (Capitol) Central Portal
+    - (Capitol) Citadel Portal
         - blackstone-themed building with a decorated standard purple portal at the centre
-        - can build any unit as long as you have the appropriate supporting building/research
-        - produces units faster than any other production building
         - only one allowed at any time
+        - spreads nether
 
     - Inactive portal
         - Simple inactive portal on a pedestal
@@ -69,33 +60,31 @@ Piglins faction
             - Military portal (red): produces military units
             - Civilian portal (green): can drop off resources and supports 15 population
             - Transport portal (blue) (requires lategame research): can teleport units to a linked portal
+
     - Netherwart farm
+        - slightly smaller than other factions' farms
+
     - Bastion
-        - Allows military piglins and hoglins (after an upgrade) to be produced at portals
+        - Allows military piglins to be produced at portals
+        - Upgradeable to have battlements and garrison 5 units
         - Researches regular upgrades
-        - piglin brute
-            - melee sword infantry
-            - can be upgraded to hold a shield and toggle to halve projectile damage and movement speed (like footmen in wc3)
-        - piglin headhunter
-            - ranged trident infantry (should reskin to red to look like pitchforks)
-            - can be upgraded to cause knockback on hit
 
     - Hoglin Ranch
         - Allows hoglins to be produced at military portals
-            - light-medium bruiser
-            - can be upgraded to be mounted by headhunters
+        - Hoglin-related upgrades
+
     - Flame Sanctuary
-        - Allows magma cubes and blazes (after an upgrade) to be produced at military portals
+        - Allows blazes to be produced at military portals
         - Researches fire-related upgrades
+
     - Wither Shrine
         - Allows wither skeletons to be produced at military portals
         - Researches wither-related upgrades
+
     - Fortress
-        - Allows Ghasts to be produced at military portals (long-range ranged sieger)
-            - probably needs a size decrease
-            - flies a set Y height above the ground
+        - Allows Ghasts to be produced at military portals
         - garrisonable (holds up to 10 units)
-        - upgrade to allow construction of transport portals
+        - allows construction of transport portals
 
 
 

@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
-import com.solegendary.reignofnether.building.buildings.netherlings.Portal;
+import com.solegendary.reignofnether.building.buildings.piglins.BasicPortal;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -161,7 +161,7 @@ public class PiglinGruntUnit extends Piglin implements Unit, WorkerUnit, Attacke
         super(entityType, level);
 
         if (level.isClientSide()) {
-            this.abilityButtons.add(Portal.getBuildButton(Keybindings.keyQ));
+            this.abilityButtons.add(BasicPortal.getBuildButton(Keybindings.keyQ));
         }
     }
 
