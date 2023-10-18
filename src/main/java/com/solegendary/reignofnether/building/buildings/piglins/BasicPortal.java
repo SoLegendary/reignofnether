@@ -98,6 +98,7 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
                 this.portraitBlock = Blocks.CYAN_GLAZED_TERRACOTTA;
                 this.icon = new ResourceLocation("minecraft", "textures/block/cyan_glazed_terracotta.png");
                 newStructureName = "portal_civilian";
+                this.canAcceptResources = true;
                 popSupply = CIVILIIAN_PORTAL_POPULATION_SUPPLY;
             }
             case MILITARY -> {
