@@ -39,6 +39,7 @@ public class PlayerServerboundPacket {
                 case VILLAGERS -> PlayerAction.START_RTS_VILLAGERS;
                 case MONSTERS -> PlayerAction.START_RTS_MONSTERS;
                 case PIGLINS -> PlayerAction.START_RTS_PIGLINS;
+                case NONE -> null;
             };
             PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
                     playerAction, MC.player.getId(),

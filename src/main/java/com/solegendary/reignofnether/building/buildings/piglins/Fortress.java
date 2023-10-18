@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchAdvancedPort
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.monsters.WardenProd;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -59,6 +60,8 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
                 ResearchAdvancedPortals.getStartButton(this, Keybindings.keyQ)
             );
     }
+
+    public Faction getFaction() {return Faction.PIGLINS;}
 
     // don't use this for abilities as it may not be balanced
     public int getAttackRange() { return 27; }

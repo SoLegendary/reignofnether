@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.research.researchItems.*;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerProd;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -65,6 +66,8 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
             this.abilityButtons.add(promoteIllager.getButton(Keybindings.keyW));
         }
     }
+
+    public Faction getFaction() {return Faction.VILLAGERS;}
 
     // don't use this for abilities as it may not be balanced
     public int getAttackRange() { return 27; }

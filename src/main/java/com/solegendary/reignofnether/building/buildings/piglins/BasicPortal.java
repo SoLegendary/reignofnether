@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.piglins.*;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.core.BlockPos;
@@ -80,6 +81,8 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
         this.popSupply = cost.population;
         this.buildTimeModifier = 0.8f;
 
+        this.canSetRallyPoint = false;
+
         this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
 
         if (level.isClientSide())
@@ -89,6 +92,8 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
                     ResearchPortalForTransport.getStartButton(this, Keybindings.keyE)
             );
     }
+
+    public Faction getFaction() {return Faction.PIGLINS;}
 
     public void changeStructure(PortalType portalType) {
         String newStructureName = "";
@@ -106,6 +111,7 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
                 this.portraitBlock = Blocks.RED_GLAZED_TERRACOTTA;
                 this.icon = new ResourceLocation("minecraft", "textures/block/red_glazed_terracotta.png");
                 newStructureName = "portal_military";
+                this.canSetRallyPoint = true;
                 if (this.getLevel().isClientSide())
                     this.productionButtons = Arrays.asList(
                             PiglinBruteProd.getStartButton(this, Keybindings.keyQ),
@@ -131,7 +137,6 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
         }
     }
 
-    // check that the lightning rod is built based on existing placed blocks
     public boolean isUpgraded() {
         return portalType != PortalType.BASIC;
     }

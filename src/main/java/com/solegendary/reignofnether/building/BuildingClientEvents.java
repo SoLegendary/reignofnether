@@ -4,11 +4,15 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchAdvancedPortals;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -16,6 +20,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -78,6 +83,8 @@ public class BuildingClientEvents {
     // minimum % of blocks below a building that need to be supported by a solid block for it to be placeable
     // 1 means you can't have any gaps at all, 0 means you can place buildings in mid-air
     private static final float MIN_SUPPORTED_BLOCKS_PERCENT = 0.6f;
+
+    private static final float MIN_NETHER_BLOCKS_PERCENT = 0.8f;
 
     // can only be one preselected building as you can't box-select them like units
     public static Building getPreselectedBuilding() {
@@ -157,7 +164,7 @@ public class BuildingClientEvents {
     // draws the building with a green/red overlay (based on placement validity) at the target position
     // based on whether the location is valid or not
     // location should be 1 space above the selected spot
-    public static void drawBuildingToPlace(PoseStack matrix, BlockPos originPos) {
+    public static void drawBuildingToPlace(PoseStack matrix, BlockPos originPos) throws NoSuchFieldException {
         boolean valid = isBuildingPlacementValid(originPos);
 
         int minX = 999999;
@@ -221,11 +228,12 @@ public class BuildingClientEvents {
         return !isBuildingPlacementInAir(originPos) &&
                !isBuildingPlacementClipping(originPos) &&
                !isOverlappingAnyOtherBuilding() &&
+               isNonPiglinOrOnNetherBlocks(originPos) &&
                 FogOfWarClientEvents.isInBrightChunk(originPos);
     }
 
     // disallow any building block from clipping into any other existing blocks
-    public static boolean isBuildingPlacementClipping(BlockPos originPos) {
+    private static boolean isBuildingPlacementClipping(BlockPos originPos) {
         for (BuildingBlock block : blocksToDraw) {
             Material bm = block.getBlockState().getMaterial();
             BlockPos bp = new BlockPos(
@@ -242,7 +250,7 @@ public class BuildingClientEvents {
 
     // 90% all solid blocks at the base of the building must be on top of solid blocks to be placeable
     // excluding those under blocks which aren't solid anyway
-    public static boolean isBuildingPlacementInAir(BlockPos originPos) {
+    private static boolean isBuildingPlacementInAir(BlockPos originPos) {
         int solidBlocksBelow = 0;
         int blocksBelow = 0;
         for (BuildingBlock block : blocksToDraw) {
@@ -268,7 +276,7 @@ public class BuildingClientEvents {
 
     // disallow the building borders from overlapping any other's, even if they don't collide physical blocks
     // also allow for a 1 block gap between buildings so units can spawn and stairs don't have their blockstates messed up
-    public static boolean isOverlappingAnyOtherBuilding() {
+    private static boolean isOverlappingAnyOtherBuilding() {
 
         BlockPos origin = getOriginPos();
         Vec3i originOffset = new Vec3i(origin.getX(), origin.getY(), origin.getZ());
@@ -285,6 +293,36 @@ public class BuildingClientEvents {
             }
         }
         return false;
+    }
+
+    private static boolean isNonPiglinOrOnNetherBlocks(BlockPos originPos) {
+        String buildingName = buildingToPlace.getName().toLowerCase();
+        if (!buildingName.contains("buildings.piglins.") || buildingName.contains("citadelportal"))
+            return true;
+        if (buildingName.contains("portal") && ResearchClient.hasResearch(ResearchAdvancedPortals.itemName))
+            return true;
+
+        int netherBlocksBelow = 0;
+        int blocksBelow = 0;
+        for (BuildingBlock block : blocksToDraw) {
+            if (block.getBlockPos().getY() == 0 && MC.level != null) {
+                BlockPos bp = new BlockPos(
+                        originPos.getX() + block.getBlockPos().getX(),
+                        originPos.getY() + block.getBlockPos().getY() + 1,
+                        originPos.getZ() + block.getBlockPos().getZ()
+                );
+                BlockState bs = block.getBlockState(); // building block
+                BlockState bsBelow = MC.level.getBlockState(bp.below()); // world block
+
+                if (bs.getMaterial().isSolid()) {
+                    blocksBelow += 1;
+                    if (NetherBlocks.isNetherBlock(MC.level, bp.below()))
+                        netherBlocksBelow += 1;
+                }
+            }
+        }
+        if (blocksBelow <= 0) return false; // avoid division by 0
+        return ((float) netherBlocksBelow / (float) blocksBelow) > MIN_NETHER_BLOCKS_PERCENT;
     }
 
     // gets the cursor position rotated according to the preselected building
@@ -304,7 +342,7 @@ public class BuildingClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderLevel(RenderLevelStageEvent evt) {
+    public static void onRenderLevel(RenderLevelStageEvent evt) throws NoSuchFieldException {
         if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
             return;
         if (!OrthoviewClientEvents.isEnabled())

@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinGruntProd;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerProd;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -30,7 +31,7 @@ public class CitadelPortal extends ProductionBuilding implements NetherConvertin
     public final static String structureName = "town_centre";
     public final static ResourceCost cost = ResourceCosts.CITADEL_PORTAL;
 
-    private final double NETHER_CONVERT_RANGE_MAX = 50;
+    private final double NETHER_CONVERT_RANGE_MAX = 45;
     private double netherConvertRange = 3;
     private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
     private int convertsAfterMaxRange = 0;
@@ -75,6 +76,8 @@ public class CitadelPortal extends ProductionBuilding implements NetherConvertin
                     PiglinGruntProd.getStartButton(this, Keybindings.keyQ)
             );
     }
+
+    public Faction getFaction() {return Faction.PIGLINS;}
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);

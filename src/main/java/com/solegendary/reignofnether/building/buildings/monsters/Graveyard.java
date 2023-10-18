@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.unit.units.monsters.StrayProd;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -55,6 +56,8 @@ public class Graveyard extends ProductionBuilding {
                 StrayProd.getStartButton(this, Keybindings.keyW)
             );
     }
+
+    public Faction getFaction() {return Faction.MONSTERS;}
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);

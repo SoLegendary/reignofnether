@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.ability.abilities.CallLightning;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -63,6 +64,8 @@ public class Laboratory extends ProductionBuilding {
             this.abilityButtons.add(callLightning.getButton(Keybindings.keyL));
         }
     }
+
+    public Faction getFaction() {return Faction.MONSTERS;}
 
     // return the lightning rod is built based on existing placed blocks
     // returns null if it is not build or is damaged

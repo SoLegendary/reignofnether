@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.units.monsters.SilverfishUnit;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -137,6 +138,8 @@ public abstract class Building {
             FogOfWarClientboundPacket.revealOrHidePlayer(false, this.ownerName);
         }
     }
+
+    public Faction getFaction() {return Faction.NONE;}
 
     // fully repairs and rebuilds all the blocks in the building
     // usually used when the structure changes (like when upgrading a building)

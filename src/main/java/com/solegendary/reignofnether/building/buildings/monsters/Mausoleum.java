@@ -57,6 +57,8 @@ public class Mausoleum extends ProductionBuilding {
             );
     }
 
+    public Faction getFaction() {return Faction.MONSTERS;}
+
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }

@@ -19,5 +19,10 @@ public class PlayerClientEvents {
                     PlayerServerboundPacket.startRTS(Faction.MONSTERS);
                     return 1;
                 })));
+        evt.getDispatcher().register(Commands.literal("startrts").then(Commands.literal("piglins")
+                .executes((command) -> {
+                    PlayerServerboundPacket.startRTS(Faction.PIGLINS);
+                    return 1;
+                })));
     }
 }

@@ -59,7 +59,10 @@ public class NetherBlocks {
             List.of(Blocks.BEE_NEST)
         );
         MAPPINGS.put(Blocks.SOUL_SOIL,
-            List.of(Blocks.SAND)
+            List.of(
+                Blocks.SAND,
+                Blocks.RED_SAND
+            )
         );
         MAPPINGS.put(Blocks.AIR,
             List.of(
@@ -86,10 +89,16 @@ public class NetherBlocks {
         MAPPINGS.put(Blocks.NETHERRACK,
             List.of(
                 Blocks.STONE,
-                Blocks.TERRACOTTA,
                 Blocks.GRANITE,
                 Blocks.SNOW_BLOCK,
-                Blocks.POWDER_SNOW
+                Blocks.POWDER_SNOW,
+                Blocks.TERRACOTTA,
+                Blocks.RED_TERRACOTTA,
+                Blocks.ORANGE_TERRACOTTA,
+                Blocks.YELLOW_TERRACOTTA,
+                Blocks.BROWN_TERRACOTTA,
+                Blocks.WHITE_TERRACOTTA,
+                Blocks.LIGHT_GRAY_TERRACOTTA
             ));
         MAPPINGS.put(Blocks.BASALT,
             List.of(
@@ -106,7 +115,8 @@ public class NetherBlocks {
             List.of(
                 Blocks.GRAVEL,
                 Blocks.SANDSTONE,
-                Blocks.CHISELED_SANDSTONE
+                Blocks.CHISELED_SANDSTONE,
+                Blocks.RED_SANDSTONE
             ));
         MAPPINGS.put(Blocks.CRIMSON_HYPHAE,
             List.of(

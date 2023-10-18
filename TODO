@@ -20,7 +20,6 @@ piglins
 
 TODO test in next playtest
 
-- ghasts should have higher vision range
 ravager roars damage buildings
 ghast attacker range bonuses
 - check that retaliate doesnt redirect melee and ghasts from attacking a building
@@ -46,34 +45,15 @@ TODO buildings/units (backlog)
 
 Piglins faction
 
-    Piglin buildings apart from the Capitol can only be built on nether blocks
-
-    Piglins do not produce their own units, but instead (like Protoss) bring units in from the nether using portals
     - (Capitol) Citadel Portal
         - blackstone-themed building with a decorated standard purple portal at the centre
-        - only one allowed at any time
-        - spreads nether
 
-    - Inactive portal
-        - Simple inactive portal on a pedestal
-        - Can be upgraded to specialise (and gain appropriate decorations):
-            - Military portal (red): produces military units
-            - Civilian portal (green): can drop off resources and supports 15 population
-            - Transport portal (blue) (requires lategame research): can teleport units to a linked portal
-
-    - Netherwart farm - slightly smaller than other factions' farms
-
-    - Bastion - Allows military piglins to be produced at portals
-        - Upgradeable to have battlements and garrison 5 units
-
-    - Hoglin Ranch - Allows hoglins to be produced at military portals
-
-    - Flame Sanctuary - Allows blazes to be produced at military portals
-
-    - Wither Shrine - Allows wither skeletons to be produced at military portals
-
-    - Fortress - Allows Ghasts to be produced at military portals
-
+    - Netherwart farm
+    - Bastion
+    - Hoglin Ranch
+    - Flame Sanctuary
+    - Wither Shrine
+    - Fortress
 
 
 

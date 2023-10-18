@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -45,6 +46,8 @@ public class DarkWatchtower extends Building implements GarrisonableBuilding {
         this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICK_SLAB);
         this.startingBlockTypes.add(Blocks.CRACKED_DEEPSLATE_BRICKS);
     }
+
+    public Faction getFaction() {return Faction.MONSTERS;}
 
     // don't use this for abilities as it may not be balanced
     public int getAttackRange() { return 20; }
