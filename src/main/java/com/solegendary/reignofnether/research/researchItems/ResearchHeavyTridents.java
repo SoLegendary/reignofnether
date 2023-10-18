@@ -50,7 +50,7 @@ public class ResearchHeavyTridents extends ProductionItem {
             () -> false,
             () -> ProductionItem.itemIsBeingProduced(ResearchHeavyTridents.itemName) ||
                     ResearchClient.hasResearch(ResearchHeavyTridents.itemName),
-            () -> false,
+            () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(

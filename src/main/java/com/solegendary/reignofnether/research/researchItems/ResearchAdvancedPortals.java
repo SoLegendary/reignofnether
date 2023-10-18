@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
@@ -11,28 +10,25 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class ResearchBlazeFirewall extends ProductionItem {
+public class ResearchAdvancedPortals extends ProductionItem {
 
-    public final static String itemName = "Walls of Fire";
-    public final static ResourceCost cost = ResourceCosts.RESEARCH_BLAZE_FIRE_WALL;
+    public final static String itemName = "Advanced Portals";
+    public final static ResourceCost cost = ResourceCosts.RESEARCH_ADVANCED_PORTALS;
 
-    public ResearchBlazeFirewall(ProductionBuilding building) {
-        super(building, ResourceCosts.RESEARCH_BLAZE_FIRE_WALL.ticks);
+    public ResearchAdvancedPortals(ProductionBuilding building) {
+        super(building, ResourceCosts.RESEARCH_ADVANCED_PORTALS.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchBlazeFirewall.itemName);
+                ResearchClient.addResearch(ResearchAdvancedPortals.itemName);
             else {
-                ResearchServer.addResearch(this.building.ownerName, ResearchBlazeFirewall.itemName);
+                ResearchServer.addResearch(this.building.ownerName, ResearchAdvancedPortals.itemName);
             }
         };
         this.foodCost = cost.food;
@@ -41,38 +37,39 @@ public class ResearchBlazeFirewall extends ProductionItem {
     }
 
     public String getItemName() {
-        return ResearchBlazeFirewall.itemName;
+        return ResearchAdvancedPortals.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-                ResearchBlazeFirewall.itemName,
+                ResearchAdvancedPortals.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/fire.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png"),
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchBlazeFirewall.itemName) ||
-                        ResearchClient.hasResearch(ResearchBlazeFirewall.itemName),
+                () -> ProductionItem.itemIsBeingProduced(ResearchAdvancedPortals.itemName) ||
+                        ResearchClient.hasResearch(ResearchAdvancedPortals.itemName),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(ResearchBlazeFirewall.itemName, Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(ResearchAdvancedPortals.itemName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Allows Blazes to fire a single shot that ignites all", Style.EMPTY),
-                        FormattedCharSequence.forward("blocks in a line, but disables their attacks temporarily.", Style.EMPTY)
+                        FormattedCharSequence.forward("Allows portals to be constructed off of nether blocks", Style.EMPTY),
+                        FormattedCharSequence.forward("and enables them to be upgraded into transport portals,", Style.EMPTY),
+                        FormattedCharSequence.forward("which can instantly teleport units between them.", Style.EMPTY)
                 )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-                ResearchBlazeFirewall.itemName,
+                ResearchAdvancedPortals.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/fire.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png"),
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 null,
                 () -> false,

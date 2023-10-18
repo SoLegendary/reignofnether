@@ -52,7 +52,7 @@ public class ResearchHoglinCavalry extends ProductionItem {
             () -> false,
             () -> ProductionItem.itemIsBeingProduced(ResearchHoglinCavalry.itemName) ||
                     ResearchClient.hasResearch(ResearchHoglinCavalry.itemName),
-            () -> false,
+            () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(

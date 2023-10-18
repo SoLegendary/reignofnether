@@ -46,7 +46,7 @@ TODO buildings/units (backlog)
 
 Piglins faction
 
-    Piglin buildings apart from the Capitol and portals can only be built on nether blocks
+    Piglin buildings apart from the Capitol can only be built on nether blocks
 
     Piglins do not produce their own units, but instead (like Protoss) bring units in from the nether using portals
     - (Capitol) Citadel Portal
@@ -61,30 +61,18 @@ Piglins faction
             - Civilian portal (green): can drop off resources and supports 15 population
             - Transport portal (blue) (requires lategame research): can teleport units to a linked portal
 
-    - Netherwart farm
-        - slightly smaller than other factions' farms
+    - Netherwart farm - slightly smaller than other factions' farms
 
-    - Bastion
-        - Allows military piglins to be produced at portals
+    - Bastion - Allows military piglins to be produced at portals
         - Upgradeable to have battlements and garrison 5 units
-        - Researches regular upgrades
 
-    - Hoglin Ranch
-        - Allows hoglins to be produced at military portals
-        - Hoglin-related upgrades
+    - Hoglin Ranch - Allows hoglins to be produced at military portals
 
-    - Flame Sanctuary
-        - Allows blazes to be produced at military portals
-        - Researches fire-related upgrades
+    - Flame Sanctuary - Allows blazes to be produced at military portals
 
-    - Wither Shrine
-        - Allows wither skeletons to be produced at military portals
-        - Researches wither-related upgrades
+    - Wither Shrine - Allows wither skeletons to be produced at military portals
 
-    - Fortress
-        - Allows Ghasts to be produced at military portals
-        - garrisonable (holds up to 10 units)
-        - allows construction of transport portals
+    - Fortress - Allows Ghasts to be produced at military portals
 
 
 

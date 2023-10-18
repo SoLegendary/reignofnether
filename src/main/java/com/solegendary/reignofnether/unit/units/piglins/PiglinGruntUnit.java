@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
-import com.solegendary.reignofnether.building.buildings.piglins.BasicPortal;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.piglins.*;
+import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -161,7 +163,16 @@ public class PiglinGruntUnit extends Piglin implements Unit, WorkerUnit, Attacke
         super(entityType, level);
 
         if (level.isClientSide()) {
-            this.abilityButtons.add(BasicPortal.getBuildButton(Keybindings.keyQ));
+            AbilityButton citadelPortalButton = CitadelPortal.getBuildButton(Keybindings.keyQ);
+            citadelPortalButton.isEnabled = () -> !BuildingUtils.doesPlayerOwnCapitol(level.isClientSide(), getOwnerName());
+            this.abilityButtons.add(citadelPortalButton);
+            this.abilityButtons.add(BasicPortal.getBuildButton(Keybindings.keyW));
+            this.abilityButtons.add(NetherwartFarm.getBuildButton(Keybindings.keyE));
+            this.abilityButtons.add(Bastion.getBuildButton(Keybindings.keyR));
+            this.abilityButtons.add(HoglinRanch.getBuildButton(Keybindings.keyT));
+            this.abilityButtons.add(FlameSanctuary.getBuildButton(Keybindings.keyY));
+            this.abilityButtons.add(WitherShrine.getBuildButton(Keybindings.keyU));
+            this.abilityButtons.add(Fortress.getBuildButton(Keybindings.keyI));
         }
     }
 

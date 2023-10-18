@@ -161,6 +161,8 @@ public abstract class ProductionBuilding extends Building {
                 case ResearchHoglinCavalry.itemName -> prodItem = new ResearchHoglinCavalry(building);
                 case ResearchHeavyTridents.itemName -> prodItem = new ResearchHeavyTridents(building);
                 case ResearchBlazeFirewall.itemName -> prodItem = new ResearchBlazeFirewall(building);
+                case ResearchWitherClouds.itemName -> prodItem = new ResearchWitherClouds(building);
+                case ResearchAdvancedPortals.itemName -> prodItem = new ResearchAdvancedPortals(building);
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside

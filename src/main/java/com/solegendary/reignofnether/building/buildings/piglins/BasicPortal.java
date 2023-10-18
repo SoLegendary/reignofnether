@@ -1,9 +1,11 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -28,7 +30,7 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
     public final static String structureName = "portal";
     public final static ResourceCost cost = ResourceCosts.BASIC_PORTAL;
 
-    private final double NETHER_CONVERT_RANGE_MAX = 20;
+    private final double NETHER_CONVERT_RANGE_MAX = 25;
     private double netherConvertRange = 3;
     private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
     private int convertsAfterMaxRange = 0;
@@ -54,8 +56,8 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.portraitBlock = Blocks.OBSIDIAN;
-        this.icon = new ResourceLocation("minecraft", "textures/block/obsidian.png");
+        this.portraitBlock = Blocks.NETHER_PORTAL;
+        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png");
 
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -67,17 +69,12 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                    //PiglinGruntProd.getStartButton(this, Keybindings.keyQ),
-                    //PiglinBruteProd.getStartButton(this, Keybindings.keyW),
-                    //PiglinHeadhunterProd.getStartButton(this, Keybindings.keyE),
-                    //HoglinProd.getStartButton(this, Keybindings.keyR),
-                    //BlazeProd.getStartButton(this, Keybindings.keyT),
-                    WitherSkeletonProd.getStartButton(this, Keybindings.keyU),
-                    GhastProd.getStartButton(this, Keybindings.keyI),
-                    //ResearchBruteShields.getStartButton(this, Keybindings.keyI),
-                    //ResearchHoglinCavalry.getStartButton(this, Keybindings.keyO),
-                    //ResearchHeavyTridents.getStartButton(this, Keybindings.keyP),
-                    ResearchWitherClouds.getStartButton(this, Keybindings.keyP)
+                    PiglinBruteProd.getStartButton(this, Keybindings.keyQ),
+                    PiglinHeadhunterProd.getStartButton(this, Keybindings.keyW),
+                    HoglinProd.getStartButton(this, Keybindings.keyE),
+                    BlazeProd.getStartButton(this, Keybindings.keyR),
+                    WitherSkeletonProd.getStartButton(this, Keybindings.keyT),
+                    GhastProd.getStartButton(this, Keybindings.keyY)
             );
     }
 
@@ -88,17 +85,17 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 BasicPortal.buildingName,
-                new ResourceLocation("minecraft", "textures/block/obsidian.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == BasicPortal.class,
                 () -> false,
-                () -> true,
+                () -> BuildingClientEvents.hasFinishedBuilding(CitadelPortal.buildingName) ||
+                        ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(BasicPortal.class),
                 null,
                 List.of(
                         FormattedCharSequence.forward(BasicPortal.buildingName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedPop(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("An obsidian portal used to spread nether blocks.", Style.EMPTY),
                         FormattedCharSequence.forward("Can be upgraded for various different functions.", Style.EMPTY)

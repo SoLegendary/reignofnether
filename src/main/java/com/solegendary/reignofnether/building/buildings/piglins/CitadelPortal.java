@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
@@ -28,7 +29,7 @@ public class CitadelPortal extends ProductionBuilding implements NetherConvertin
     public final static String structureName = "town_centre";
     public final static ResourceCost cost = ResourceCosts.CITADEL_PORTAL;
 
-    private final double NETHER_CONVERT_RANGE_MAX = 20;
+    private final double NETHER_CONVERT_RANGE_MAX = 60;
     private double netherConvertRange = 3;
     private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
     private int convertsAfterMaxRange = 0;
@@ -54,8 +55,8 @@ public class CitadelPortal extends ProductionBuilding implements NetherConvertin
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), true);
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.portraitBlock = Blocks.NETHER_PORTAL;
-        this.icon = new ResourceLocation("minecraft", "textures/block/polished_granite.png");
+        this.portraitBlock = Blocks.OBSIDIAN;
+        this.icon = new ResourceLocation("minecraft", "textures/block/obsidian.png");
 
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -69,7 +70,7 @@ public class CitadelPortal extends ProductionBuilding implements NetherConvertin
         this.startingBlockTypes.add(Blocks.POLISHED_ANDESITE_STAIRS);
 
         if (level.isClientSide())
-            this.productionButtons = List.of(
+            this.productionButtons = Arrays.asList(
                     PiglinGruntProd.getStartButton(this, Keybindings.keyQ)
             );
     }
@@ -81,7 +82,7 @@ public class CitadelPortal extends ProductionBuilding implements NetherConvertin
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
                 CitadelPortal.buildingName,
-                new ResourceLocation("minecraft", "textures/block/portal.png"),
+                new ResourceLocation("minecraft", "textures/block/obsidian.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == CitadelPortal.class,
                 () -> false,
