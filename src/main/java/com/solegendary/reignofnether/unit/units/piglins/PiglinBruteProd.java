@@ -48,7 +48,9 @@ public class PiglinBruteProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A piglin armed with a sword for combat.", Style.EMPTY)
+                FormattedCharSequence.forward("A piglin armed with a sword for combat.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires a Bastion.", Style.EMPTY)
         ));
 
         return new Button(

@@ -49,7 +49,9 @@ public class WitherSkeletonProd extends ProductionItem {
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A larger and tougher variant of overworld", Style.EMPTY),
-                FormattedCharSequence.forward("skeletons that afflict wither on enemies.", Style.EMPTY)
+                FormattedCharSequence.forward("skeletons that afflict wither on enemies.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires a Wither Shrine.", Style.EMPTY)
         ));
 
         return new Button(

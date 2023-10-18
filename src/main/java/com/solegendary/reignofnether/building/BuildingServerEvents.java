@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
+import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -203,7 +205,8 @@ public class BuildingServerEvents {
                     evt.getSpawner().getSpawnerBlockEntity() != null) {
                 BlockEntity be = evt.getSpawner().getSpawnerBlockEntity();
                 BlockPos bp = evt.getSpawner().getSpawnerBlockEntity().getBlockPos();
-                if (BuildingUtils.findBuilding(false, bp) instanceof Dungeon)
+                if (BuildingUtils.findBuilding(false, bp) instanceof Dungeon ||
+                    BuildingUtils.findBuilding(false, bp) instanceof FlameSanctuary)
                     evt.setResult(Event.Result.DENY);
             }
         }
@@ -299,5 +302,11 @@ public class BuildingServerEvents {
 
         // don't do any block damage apart from the scripted building damage above
         evt.getAffectedBlocks().clear();
+    }
+
+    @SubscribeEvent
+    public static void onEntityTravelToDimension(EntityTravelToDimensionEvent evt) {
+        if (BuildingUtils.isPosInsideAnyBuilding(evt.getEntity().getLevel().isClientSide(), evt.getEntity().getOnPos()))
+            evt.setCanceled(true);
     }
 }

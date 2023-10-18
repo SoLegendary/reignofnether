@@ -48,7 +48,9 @@ public class PiglinHeadhunterProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A piglin that throws tridents in battle.", Style.EMPTY)
+                FormattedCharSequence.forward("A piglin that throws tridents in battle.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires a Bastion.", Style.EMPTY)
         ));
 
         return new Button(

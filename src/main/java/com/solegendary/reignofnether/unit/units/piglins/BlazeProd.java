@@ -49,7 +49,9 @@ public class BlazeProd extends ProductionItem {
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A fiery elemental that shoots fireballs from afar.", Style.EMPTY),
-                FormattedCharSequence.forward("Attacks are fast and ignite enemies but inaccurate.", Style.EMPTY)
+                FormattedCharSequence.forward("Attacks are fast and ignite enemies but inaccurate.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires a Flame Sanctuary.", Style.EMPTY)
         ));
 
         return new Button(

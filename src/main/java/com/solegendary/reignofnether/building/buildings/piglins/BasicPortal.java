@@ -6,10 +6,15 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchPortalForCivilian;
+import com.solegendary.reignofnether.research.researchItems.ResearchPortalForMilitary;
+import com.solegendary.reignofnether.research.researchItems.ResearchPortalForTransport;
 import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.piglins.*;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -26,14 +31,24 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBl
 
 public class BasicPortal extends ProductionBuilding implements NetherConvertingBuilding {
 
+    public final static int CIVILIIAN_PORTAL_POPULATION_SUPPLY = 15;
+
+    public enum PortalType {
+        BASIC,
+        CIVILIAN,
+        MILITARY,
+        TRANSPORT
+    }
+
     public final static String buildingName = "Basic Portal";
-    public final static String structureName = "portal";
+    public final static String structureName = "portal_basic";
     public final static ResourceCost cost = ResourceCosts.BASIC_PORTAL;
 
     private final double NETHER_CONVERT_RANGE_MAX = 25;
     private double netherConvertRange = 3;
     private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
     private int convertsAfterMaxRange = 0;
+    public PortalType portalType = PortalType.BASIC;
 
     public double getMaxRange() { return NETHER_CONVERT_RANGE_MAX; }
 
@@ -56,8 +71,8 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.portraitBlock = Blocks.NETHER_PORTAL;
-        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png");
+        this.portraitBlock = Blocks.GRAY_GLAZED_TERRACOTTA;
+        this.icon = new ResourceLocation("minecraft", "textures/block/gray_glazed_terracotta.png");
 
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -69,13 +84,55 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                    PiglinBruteProd.getStartButton(this, Keybindings.keyQ),
-                    PiglinHeadhunterProd.getStartButton(this, Keybindings.keyW),
-                    HoglinProd.getStartButton(this, Keybindings.keyE),
-                    BlazeProd.getStartButton(this, Keybindings.keyR),
-                    WitherSkeletonProd.getStartButton(this, Keybindings.keyT),
-                    GhastProd.getStartButton(this, Keybindings.keyY)
+                    ResearchPortalForCivilian.getStartButton(this, Keybindings.keyQ),
+                    ResearchPortalForMilitary.getStartButton(this, Keybindings.keyW),
+                    ResearchPortalForTransport.getStartButton(this, Keybindings.keyE)
             );
+    }
+
+    public void changeStructure(PortalType portalType) {
+        String newStructureName = "";
+        switch (portalType) {
+            case CIVILIAN -> {
+                this.name = "Civilian Portal";
+                this.portraitBlock = Blocks.CYAN_GLAZED_TERRACOTTA;
+                this.icon = new ResourceLocation("minecraft", "textures/block/cyan_glazed_terracotta.png");
+                newStructureName = "portal_civilian";
+                popSupply = CIVILIIAN_PORTAL_POPULATION_SUPPLY;
+            }
+            case MILITARY -> {
+                this.name = "Military Portal";
+                this.portraitBlock = Blocks.RED_GLAZED_TERRACOTTA;
+                this.icon = new ResourceLocation("minecraft", "textures/block/red_glazed_terracotta.png");
+                newStructureName = "portal_military";
+                if (this.getLevel().isClientSide())
+                    this.productionButtons = Arrays.asList(
+                            PiglinBruteProd.getStartButton(this, Keybindings.keyQ),
+                            PiglinHeadhunterProd.getStartButton(this, Keybindings.keyW),
+                            HoglinProd.getStartButton(this, Keybindings.keyE),
+                            BlazeProd.getStartButton(this, Keybindings.keyR),
+                            WitherSkeletonProd.getStartButton(this, Keybindings.keyT),
+                            GhastProd.getStartButton(this, Keybindings.keyY)
+                    );
+            }
+            case TRANSPORT -> {
+                this.name = "Transport Portal";
+                this.portraitBlock = Blocks.PURPLE_GLAZED_TERRACOTTA;
+                this.icon = new ResourceLocation("minecraft", "textures/block/purple_glazed_terracotta.png");
+                newStructureName = "portal_transport";
+            }
+        }
+        if (!newStructureName.isEmpty()) {
+            ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocks(newStructureName, this.getLevel());
+            this.blocks = getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation);
+            super.refreshBlocks();
+            this.portalType = portalType;
+        }
+    }
+
+    // check that the lightning rod is built based on existing placed blocks
+    public boolean isUpgraded() {
+        return portalType != PortalType.BASIC;
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

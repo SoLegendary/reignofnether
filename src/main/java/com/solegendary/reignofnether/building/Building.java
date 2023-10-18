@@ -358,7 +358,9 @@ public abstract class Building {
     }
 
     public boolean shouldBeDestroyed() {
-        if (getBlocksPlaced() <= 0 && blockPlaceQueue.size() == 0)
+        if (blockPlaceQueue.size() > 0)
+            return false;
+        if (getBlocksPlaced() <= 0)
             return true;
         if (isBuilt)
             return getBlocksPlacedPercent() <= this.MIN_BLOCKS_PERCENT;

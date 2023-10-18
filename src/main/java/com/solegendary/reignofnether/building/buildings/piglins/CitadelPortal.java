@@ -16,6 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraftforge.event.level.BlockEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +30,7 @@ public class CitadelPortal extends ProductionBuilding implements NetherConvertin
     public final static String structureName = "town_centre";
     public final static ResourceCost cost = ResourceCosts.CITADEL_PORTAL;
 
-    private final double NETHER_CONVERT_RANGE_MAX = 60;
+    private final double NETHER_CONVERT_RANGE_MAX = 50;
     private double netherConvertRange = 3;
     private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
     private int convertsAfterMaxRange = 0;

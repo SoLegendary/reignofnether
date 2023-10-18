@@ -163,6 +163,10 @@ public abstract class ProductionBuilding extends Building {
                 case ResearchBlazeFirewall.itemName -> prodItem = new ResearchBlazeFirewall(building);
                 case ResearchWitherClouds.itemName -> prodItem = new ResearchWitherClouds(building);
                 case ResearchAdvancedPortals.itemName -> prodItem = new ResearchAdvancedPortals(building);
+
+                case ResearchPortalForCivilian.itemName -> prodItem = new ResearchPortalForCivilian(building);
+                case ResearchPortalForMilitary.itemName -> prodItem = new ResearchPortalForMilitary(building);
+                case ResearchPortalForTransport.itemName -> prodItem = new ResearchPortalForTransport(building);
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside

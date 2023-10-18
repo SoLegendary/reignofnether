@@ -91,7 +91,7 @@ public class ResourceCosts {
 
     // Piglins
     public static ResourceCost CITADEL_PORTAL = ResourceCost.Building(0,300,150, 10);
-    public static ResourceCost BASIC_PORTAL = ResourceCost.Building(0, 150, 0, 0);
+    public static ResourceCost BASIC_PORTAL = ResourceCost.Building(0, 75, 0, 0);
     public static ResourceCost NETHERWART_FARM = ResourceCost.Building(0, 100, 0, 0);
     public static ResourceCost BASTION = ResourceCost.Building(0, 150, 0, 0);
     public static ResourceCost HOGLIN_RANCH = ResourceCost.Building(0, 250, 0, 0);
@@ -119,4 +119,8 @@ public class ResourceCosts {
     public static ResourceCost RESEARCH_BLAZE_FIRE_WALL = ResourceCost.Research(400, 0, 200, 150);
     public static ResourceCost RESEARCH_WITHER_CLOUDS = ResourceCost.Research(250, 0, 350, 150);
     public static ResourceCost RESEARCH_ADVANCED_PORTALS = ResourceCost.Research(0, 400, 400, 180);
+
+    public static ResourceCost RESEARCH_CIVILIAN_PORTAL = ResourceCost.Research(0, 75, 0, 20);
+    public static ResourceCost RESEARCH_MILITARY_PORTAL = ResourceCost.Research(0, 125, 0, 30);
+    public static ResourceCost RESEARCH_TRANSPORT_PORTAL = ResourceCost.Research(0, 175, 0, 40);
 }

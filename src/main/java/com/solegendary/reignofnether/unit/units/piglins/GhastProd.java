@@ -50,8 +50,9 @@ public class GhastProd extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A massive flying creature that fires explosive fireballs", Style.EMPTY),
                 FormattedCharSequence.forward("from a great distance to siege units and buildings.", Style.EMPTY),
+                FormattedCharSequence.forward("Slow and fragile, but can only be targeted by ranged units.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Slow and fragile, but can only be targeted by ranged units.", Style.EMPTY)
+                FormattedCharSequence.forward("Requires a Fortress.", Style.EMPTY)
         ));
 
         return new Button(
