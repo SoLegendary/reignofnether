@@ -70,7 +70,7 @@ public class Dungeon extends ProductionBuilding {
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Dungeon.class,
             () -> false,
-            () -> BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
+            () -> BuildingClientEvents.hasFinishedBuilding(Laboratory.buildingName) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(Dungeon.class),
             null,
@@ -78,7 +78,9 @@ public class Dungeon extends ProductionBuilding {
                 FormattedCharSequence.forward(Dungeon.buildingName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A fiery cage containing the power to create creepers.", Style.EMPTY)
+                FormattedCharSequence.forward("A fiery cage containing the power to create creepers.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires a Laboratory.", Style.EMPTY)
             ),
             null
         );

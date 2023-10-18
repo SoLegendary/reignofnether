@@ -71,7 +71,7 @@ public class ArcaneTower extends ProductionBuilding {
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == ArcaneTower.class,
             () -> false,
-            () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
+            () -> BuildingClientEvents.hasFinishedBuilding(Barracks.buildingName) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(ArcaneTower.class),
             null,
@@ -79,7 +79,9 @@ public class ArcaneTower extends ProductionBuilding {
                 FormattedCharSequence.forward(ArcaneTower.buildingName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A magical tower that is home to Witches and Evokers.", Style.EMPTY)
+                FormattedCharSequence.forward("A magical tower that is home to Witches and Evokers.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires a Barracks.", Style.EMPTY)
             ),
             null
         );
