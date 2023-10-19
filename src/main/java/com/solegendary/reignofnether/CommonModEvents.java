@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether;
 
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.piglins.BasicPortal;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.registrars.ContainerRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -9,10 +12,14 @@ import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.entity.*;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -22,6 +29,24 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 @Mod.EventBusSubscriber(modid = ReignOfNether.MOD_ID, bus = Bus.MOD)
 public class CommonModEvents {
+
+    @SubscribeEvent
+    public static void onBlockColourEvent(RegisterColorHandlersEvent.Block evt) {
+        evt.register((bs, blockAndTintGetter, bp, tintIndex) -> {
+            int tint = 0xFFFFFF;
+            if (bp != null) {
+                Building building = BuildingUtils.findBuilding(true, bp);
+                if (building instanceof BasicPortal portal) {
+                    switch (portal.portalType) {
+                        case CIVILIAN -> tint = 0x00FF00;
+                        case MILITARY -> tint = 0xFF0000;
+                        case TRANSPORT -> tint = 0x0000FF;
+                    }
+                }
+            }
+            return tint;
+        }, Blocks.NETHER_PORTAL);
+    }
 
     @SubscribeEvent
     public static void commonSetup(FMLCommonSetupEvent event) {

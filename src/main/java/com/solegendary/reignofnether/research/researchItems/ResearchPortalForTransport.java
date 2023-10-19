@@ -41,7 +41,7 @@ public class ResearchPortalForTransport extends ProductionItem {
         return new Button(
                 ResearchPortalForTransport.itemName,
                 14,
-                new ResourceLocation("minecraft", "textures/block/purple_glazed_terracotta.png"),
+                new ResourceLocation("minecraft", "textures/block/blue_glazed_terracotta.png"),
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
@@ -67,7 +67,7 @@ public class ResearchPortalForTransport extends ProductionItem {
         return new Button(
                 ResearchPortalForTransport.itemName,
                 14,
-                new ResourceLocation("minecraft", "textures/block/purple_glazed_terracotta.png"),
+                new ResourceLocation("minecraft", "textures/block/blue_glazed_terracotta.png"),
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 null,
                 () -> false,

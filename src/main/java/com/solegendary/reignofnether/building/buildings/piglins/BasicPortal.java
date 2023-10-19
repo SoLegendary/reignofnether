@@ -124,8 +124,8 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
             }
             case TRANSPORT -> {
                 this.name = "Transport Portal";
-                this.portraitBlock = Blocks.PURPLE_GLAZED_TERRACOTTA;
-                this.icon = new ResourceLocation("minecraft", "textures/block/purple_glazed_terracotta.png");
+                this.portraitBlock = Blocks.BLUE_GLAZED_TERRACOTTA;
+                this.icon = new ResourceLocation("minecraft", "textures/block/blue_glazed_terracotta.png");
                 newStructureName = "portal_transport";
             }
         }
