@@ -10,10 +10,7 @@ TODO bugs/features:
 
 
 
-- can workers still chop leaves?
 - Make sure netherwart farms actually work...
-    - Make soulsand and farmland only register as resource blocks if inside a building
-- let workers walk over soulsand without it registering as a food block
 
 TODO test in next playtest
 

@@ -28,14 +28,14 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBl
 public class NetherwartFarm extends Building {
 
     public final static String buildingName = "Netherwart Farm";
-    public final static String structureName = "wheat_farm";
+    public final static String structureName = "netherwart_farm";
     public final static ResourceCost cost = ResourceCosts.NETHERWART_FARM;
 
     public NetherwartFarm(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.portraitBlock = Blocks.NETHER_WART;
+        this.portraitBlock = Blocks.NETHER_WART_BLOCK;
         this.icon = new ResourceLocation("minecraft", "textures/block/nether_wart_stage2.png");
 
         this.foodCost = cost.food;
@@ -43,7 +43,7 @@ public class NetherwartFarm extends Building {
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
 
-        this.startingBlockTypes.add(Blocks.OAK_LOG);
+        this.startingBlockTypes.add(Blocks.WARPED_STEM);
 
         this.explodeChance = 0;
     }
