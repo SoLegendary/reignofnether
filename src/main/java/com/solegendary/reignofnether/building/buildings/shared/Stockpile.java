@@ -102,7 +102,8 @@ public class Stockpile extends ProductionBuilding {
                 ResourceSource resBlock = ResourceSources.getFromBlockPos(bp, getLevel());
 
                 // is a valid resource block and meets the target ResourceSource's blockstate condition
-                if (resBlock == null || resBlock.resourceName != resourceName || resBlock.name.equals("Leaves") || resBlock.name.equals("Farmland"))
+                if (resBlock == null || resBlock.resourceName != resourceName ||
+                    resBlock.name.equals("Farmland") || resBlock.name.equals("Soul Sand"))
                     return false;
                 if (!resBlock.blockStateTest.test(bs))
                     return false;

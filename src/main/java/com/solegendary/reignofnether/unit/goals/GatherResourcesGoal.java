@@ -87,8 +87,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         if (targetFarm != null && !targetFarm.isPosInsideBuilding(bp))
             return false;
 
-        if (bs.getBlock() == Blocks.FARMLAND) {
-            if (!bsAbove.isAir() || !canAffordReplant())
+        if (bs.getBlock() == Blocks.FARMLAND || bs.getBlock() == Blocks.SOUL_SAND) {
+            if (!bsAbove.isAir() || !canAffordReplant() || !BuildingUtils.isPosInsideAnyBuilding(mob.level.isClientSide(), bp))
                 return false;
         }
         // is not part of a building (unless farming)
@@ -239,7 +239,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 BlockState bsTarget = mob.level.getBlockState(gatherTarget);
 
                 // replant crops on empty farmland
-                if (bsTarget.getBlock() == Blocks.FARMLAND) {
+                if (bsTarget.getBlock() == Blocks.FARMLAND || bsTarget.getBlock() == Blocks.SOUL_SAND) {
                     gatherTicksLeft -= (TICK_CD / 2);
                     gatherTicksLeft = Math.min(gatherTicksLeft, ResourceSources.REPLANT_TICKS_MAX);
                     if (gatherTicksLeft <= 0) {

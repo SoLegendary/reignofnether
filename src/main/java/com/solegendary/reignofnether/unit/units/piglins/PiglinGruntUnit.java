@@ -118,7 +118,7 @@ public class PiglinGruntUnit extends Piglin implements Unit, WorkerUnit, Attacke
     // endregion
 
     public BlockState getReplantBlockState() {
-        return Blocks.WHEAT.defaultBlockState();
+        return Blocks.NETHER_WART.defaultBlockState();
     }
 
     final static public float attackDamage = 1.0f;

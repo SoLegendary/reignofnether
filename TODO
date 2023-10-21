@@ -10,11 +10,10 @@ TODO bugs/features:
 
 
 
-
-piglins
-    - apply leaf disappearance logic to mycelium leaves
-        - need to mixin LeavesBlock.getDistanceAt to also count wart stems
-
+- can workers still chop leaves?
+- Make sure netherwart farms actually work...
+    - Make soulsand and farmland only register as resource blocks if inside a building
+- let workers walk over soulsand without it registering as a food block
 
 TODO test in next playtest
 
@@ -45,13 +44,16 @@ Piglins faction
 
     - (Capitol) Citadel Portal
         - blackstone-themed building with a decorated standard purple portal at the centre
-
+    - Transport portal
+        - needs to be able to link to another transport portal
     - Netherwart farm
     - Bastion
+        - needs to be upgradeable to a garrisonable structure that holds 5 units
     - Hoglin Ranch
     - Flame Sanctuary
     - Wither Shrine
     - Fortress
+        - garrisonable structure that holds 10 units
 
 
 

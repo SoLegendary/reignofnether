@@ -42,7 +42,7 @@ public interface NetherConvertingBuilding {
 
             BlockState bs = NetherBlocks.getNetherBlock(building.getLevel(), bp);
             BlockState bsPlant = NetherBlocks.getNetherPlantBlock(building.getLevel(), bp.above());
-            if (bs != null && !BuildingUtils.isPosPartOfAnyBuilding(building.getLevel().isClientSide(), bp, false)) {
+            if (bs != null && !BuildingUtils.isPosPartOfAnyBuilding(building.getLevel().isClientSide(), bp, true)) {
                 building.getLevel().setBlockAndUpdate(bp, bs);
                 if (bsPlant != null)
                     building.getLevel().setBlockAndUpdate(bp.above(), bsPlant);

@@ -80,6 +80,21 @@ public class ResourceSources {
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.MOISTURE) == 7
             ),
+            new ResourceSource("Soul Sand",
+                    List.of(Blocks.SOUL_SAND),
+                    List.of(),
+                    0,
+                    0,
+                    ResourceName.FOOD
+            ),
+            new ResourceSource("Netherwart",
+                    List.of(Blocks.NETHER_WART),
+                    List.of(Items.NETHER_WART),
+                    TICKS_PER_SECOND * 2,
+                    6,
+                    ResourceName.FOOD,
+                    (bs) -> bs.getValue(BlockStateProperties.AGE_3) == 3
+            ),
             new ResourceSource("Wheat",
                     List.of(Blocks.WHEAT),
                     List.of(Items.WHEAT),
