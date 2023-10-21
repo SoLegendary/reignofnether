@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -87,9 +88,7 @@ public class FlyingMoveToTargetGoal extends MoveToTargetBlockGoal {
     private boolean isGroundBlock(BlockPos bp) {
         BlockState bs = this.mob.level.getBlockState(bp);
         Block block = bs.getBlock();
-        if (block instanceof LeavesBlock || bs.isAir() ||
-            bs.getMaterial().equals(Material.WOOD) ||
-            bs.getMaterial().equals(Material.NETHER_WOOD) ||
+        if (ResourcesServerEvents.isLogBlock(bs) || ResourcesServerEvents.isLeafBlock(bs) || bs.isAir() ||
             BuildingUtils.isPosInsideAnyBuilding(this.mob.level.isClientSide(), bp))
             return false;
         return true;

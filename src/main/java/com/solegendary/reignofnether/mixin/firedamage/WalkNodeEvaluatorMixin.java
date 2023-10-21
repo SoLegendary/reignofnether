@@ -1,11 +1,13 @@
 package com.solegendary.reignofnether.mixin.firedamage;
 
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
@@ -31,14 +33,15 @@ public abstract class WalkNodeEvaluatorMixin extends NodeEvaluator {
         if (!(this.mob instanceof Unit))
             return;
 
-        Block blockBelow = pLevel.getBlockState(new BlockPos(pX, pY, pZ).below()).getBlock();
+        BlockState blockStateBelow = pLevel.getBlockState(new BlockPos(pX, pY, pZ).below());
+        Block blockBelow = blockStateBelow.getBlock();
         Block block = pLevel.getBlockState(new BlockPos(pX, pY, pZ)).getBlock();
 
         // allow units to walk on fire and magma but not leaves (to prevent workers getting stuck in trees)
         if (block == Blocks.FIRE || blockBelow == Blocks.FIRE ||
             block == Blocks.MAGMA_BLOCK || blockBelow == Blocks.MAGMA_BLOCK)
             cir.setReturnValue(BlockPathTypes.WALKABLE);
-        else if (blockBelow instanceof LeavesBlock)
+        else if (ResourcesServerEvents.isLeafBlock(blockStateBelow))
             cir.setReturnValue(BlockPathTypes.DAMAGE_FIRE);
         else {
             BlockPathTypes bpt = getBlockPathTypeStatic(pLevel, new BlockPos.MutableBlockPos(pX, pY, pZ));
