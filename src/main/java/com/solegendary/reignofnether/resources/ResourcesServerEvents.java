@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
@@ -144,10 +145,9 @@ public class ResourcesServerEvents {
     }
     public static boolean isLeafBlock(BlockState bs) {
         return List.of(Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES,
-                        Blocks.NETHER_WART_BLOCK, Blocks.WARPED_WART_BLOCK)
+                        BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get(), BlockRegistrar.DECAYABLE_WARPED_WART_BLOCK.get())
                 .contains(bs.getBlock());
     }
-
 
     public static int numAirOrLeafBlocksBelow(BlockPos bp, Level level) {
         int blocks = 0;

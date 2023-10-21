@@ -1,17 +1,15 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.DropExperienceBlock;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -24,9 +22,18 @@ public class BlockRegistrar {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(ForgeRegistries.BLOCKS, ReignOfNether.MOD_ID);
 
-    public static final RegistryObject<Block> ZIRCON_BLOCK = registerBlock("decayable_netherwart_block",
-            () -> new Block(BlockBehaviour.Properties.of(Material.GRASS, MaterialColor.COLOR_RED)
+    public static final RegistryObject<Block> DECAYABLE_NETHER_WART_BLOCK = registerBlock("decayable_nether_wart_block",
+            () -> new LeavesBlock(BlockBehaviour.Properties.of(Material.LEAVES, MaterialColor.COLOR_RED)
                     .strength(1.0F)
+                    .randomTicks()
+                    .sound(SoundType.WART_BLOCK)),
+            CreativeModeTab.TAB_BUILDING_BLOCKS
+    );
+
+    public static final RegistryObject<Block> DECAYABLE_WARPED_WART_BLOCK = registerBlock("decayable_warped_wart_block",
+            () -> new LeavesBlock(BlockBehaviour.Properties.of(Material.LEAVES, MaterialColor.WARPED_WART_BLOCK)
+                    .strength(1.0F)
+                    .randomTicks()
                     .sound(SoundType.WART_BLOCK)),
             CreativeModeTab.TAB_BUILDING_BLOCKS
     );

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.nether;
 
+import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -138,7 +139,7 @@ public class NetherBlocks {
                 Blocks.STRIPPED_OAK_LOG, Blocks.STRIPPED_BIRCH_LOG, Blocks.STRIPPED_ACACIA_LOG, Blocks.STRIPPED_DARK_OAK_LOG,
                 Blocks.STRIPPED_JUNGLE_LOG, Blocks.STRIPPED_MANGROVE_LOG, Blocks.STRIPPED_SPRUCE_LOG
             ));
-        MAPPINGS.put(Blocks.NETHER_WART_BLOCK,
+        MAPPINGS.put(BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get(),
             List.of(
                 Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES,
                 Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES
