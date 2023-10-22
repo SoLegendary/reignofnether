@@ -11,8 +11,6 @@ TODO bugs/features:
 
 
 - Transport portals
-    - should remove their destination if it's destroyed
-    - should show their connection with a line when selected
     - give all ground units a goal to use a portal to teleport to the other side when the portal is reached
         - try actually making them walk into the portal if possible
 

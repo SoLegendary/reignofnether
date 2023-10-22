@@ -72,6 +72,19 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
         }
     }
 
+    @Override
+    public boolean shouldBeDestroyed() {
+        boolean shouldBeDestroyed = super.shouldBeDestroyed();
+        if (shouldBeDestroyed) {
+            if (destination != null) {
+                Building targetBuilding = BuildingUtils.findBuilding(getLevel().isClientSide(), destination);
+                if (targetBuilding instanceof Portal targetPortal && portalType == Portal.PortalType.TRANSPORT)
+                    targetPortal.destination = null;
+            }
+        }
+        return shouldBeDestroyed;
+    }
+
     public Portal(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
@@ -402,8 +403,15 @@ public class BuildingClientEvents {
                         selProdBuilding.getRallyPoint(),
                         0, 1, 0, a);
                 MyRenderer.drawLine(evt.getPoseStack(),
-                        selProdBuilding.centrePos.offset(0,0,0),
+                        selProdBuilding.centrePos,
                         selProdBuilding.getRallyPoint(),
+                        0, 1, 0, a);
+            }
+            if (selBuilding instanceof Portal portal && portal.destination != null) {
+                float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
+                MyRenderer.drawLine(evt.getPoseStack(),
+                        portal.centrePos,
+                        portal.destination,
                         0, 1, 0, a);
             }
         }
