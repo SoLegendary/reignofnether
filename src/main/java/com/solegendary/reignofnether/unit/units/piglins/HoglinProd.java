@@ -29,7 +29,7 @@ public class HoglinProd extends ProductionItem {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.PIGLIN_BRUTE_UNIT.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.BRUTE_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -48,7 +48,7 @@ public class HoglinProd extends ProductionItem {
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A beast trained for war. Deals 50% more damage to buildings.", Style.EMPTY),
-                FormattedCharSequence.forward("Can be upgraded to be mountable by Piglin Headhunters.", Style.EMPTY),
+                FormattedCharSequence.forward("Can be upgraded to be mountable by Headhunters.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Requires a Hoglin Ranch.", Style.EMPTY)
         ));

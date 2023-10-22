@@ -4,10 +4,8 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
-import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPotions;
 import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -18,30 +16,19 @@ import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.AbstractIllager;
-import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.EntityHitResult;
@@ -53,12 +40,9 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.item.ItemEvent;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -349,7 +333,7 @@ public class UnitServerEvents {
         Entity projectile = evt.getSource().getDirectEntity();
         Entity shooter = evt.getSource().getEntity();
 
-        if (shooter instanceof PiglinHeadhunterUnit headhunterUnit && projectile instanceof ThrownTrident) {
+        if (shooter instanceof HeadhunterUnit headhunterUnit && projectile instanceof ThrownTrident) {
             return !ResearchServer.playerHasResearch(headhunterUnit.getOwnerName(), ResearchHeavyTridents.itemName);
         }
         if (projectile instanceof Fireball && shooter instanceof BlazeUnit)
@@ -381,7 +365,7 @@ public class UnitServerEvents {
             evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)
             evt.setAmount(attackerUnit.getUnitAttackDamage());
 
-        if (evt.getEntity() instanceof PiglinBruteUnit brute && brute.isHoldingUpShield && (evt.getSource().isProjectile()))
+        if (evt.getEntity() instanceof BruteUnit brute && brute.isHoldingUpShield && (evt.getSource().isProjectile()))
             evt.setAmount(evt.getAmount() / 2);
 
         if (evt.getEntity() instanceof CreeperUnit && (evt.getSource().isExplosion()))

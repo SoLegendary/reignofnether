@@ -20,8 +20,8 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
+import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -84,6 +84,7 @@ public class UnitClientEvents {
         preselectedUnits.add(unit);
     }
     public static void addSelectedUnit(LivingEntity unit) {
+        CursorClientEvents.setLeftClickAction(null);
         if (!FogOfWarClientEvents.isInBrightChunk(unit.getOnPos()))
             return;
         if (unit.isPassenger())
@@ -711,7 +712,7 @@ public class UnitClientEvents {
                 }
             } else if (entity instanceof GhastUnit gUnit && gUnit.getId() == entityId && startAnimation) {
                 gUnit.showShootingFace();
-            } else if (entity instanceof PiglinBruteUnit bUnit && bUnit.getId() == entityId) {
+            } else if (entity instanceof BruteUnit bUnit && bUnit.getId() == entityId) {
                 bUnit.isHoldingUpShield = startAnimation;
             } else if (entity instanceof WorkerUnit wUnit && entity instanceof AttackerUnit aUnit && entity.getId() == entityId) {
                 if (startAnimation && MC.level != null) {

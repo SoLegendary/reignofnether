@@ -115,7 +115,7 @@ public class BuildingUtils {
             case Stronghold.buildingName -> building = new Stronghold(level, pos, rotation, ownerName);
 
             case CitadelPortal.buildingName -> building = new CitadelPortal(level, pos, rotation, ownerName);
-            case BasicPortal.buildingName -> building = new BasicPortal(level, pos, rotation, ownerName);
+            case Portal.buildingName -> building = new Portal(level, pos, rotation, ownerName);
             case NetherwartFarm.buildingName -> building = new NetherwartFarm(level, pos, rotation, ownerName);
             case Bastion.buildingName -> building = new Bastion(level, pos, rotation, ownerName);
             case HoglinRanch.buildingName -> building = new HoglinRanch(level, pos, rotation, ownerName);

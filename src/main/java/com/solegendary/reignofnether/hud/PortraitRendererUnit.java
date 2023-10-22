@@ -16,7 +16,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
+import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.ReportedException;
@@ -31,14 +31,12 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BannerItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -253,7 +251,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
 
         int msInt = ms != null ? (int) (ms.getValue() * 101) : 0;
-        if (unit instanceof PiglinBruteUnit pbUnit && pbUnit.isHoldingUpShield)
+        if (unit instanceof BruteUnit pbUnit && pbUnit.isHoldingUpShield)
             msInt *= 0.5f;
         statStrings.add(String.valueOf(msInt)); // prevent rounding errors
 

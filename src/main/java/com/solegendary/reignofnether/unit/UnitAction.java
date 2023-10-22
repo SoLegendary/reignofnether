@@ -47,5 +47,8 @@ public enum UnitAction {
     CAST_SONIC_BOOM,
 
     TOGGLE_SHIELD,
-    SHOOT_FIREWALL
+    SHOOT_FIREWALL,
+
+    CONNECT_PORTAL,
+    DISCONNECT_PORTAL
 }

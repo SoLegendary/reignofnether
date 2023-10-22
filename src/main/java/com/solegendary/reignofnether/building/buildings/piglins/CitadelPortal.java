@@ -6,8 +6,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinGruntProd;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerProd;
+import com.solegendary.reignofnether.unit.units.piglins.GruntProd;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -17,7 +16,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraftforge.event.level.BlockEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +29,7 @@ public class CitadelPortal extends ProductionBuilding implements NetherConvertin
     public final static String structureName = "town_centre";
     public final static ResourceCost cost = ResourceCosts.CITADEL_PORTAL;
 
-    private final double NETHER_CONVERT_RANGE_MAX = 45;
+    private final double NETHER_CONVERT_RANGE_MAX = 40;
     private double netherConvertRange = 3;
     private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
     private int convertsAfterMaxRange = 0;
@@ -73,7 +71,7 @@ public class CitadelPortal extends ProductionBuilding implements NetherConvertin
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                    PiglinGruntProd.getStartButton(this, Keybindings.keyQ)
+                    GruntProd.getStartButton(this, Keybindings.keyQ)
             );
     }
 

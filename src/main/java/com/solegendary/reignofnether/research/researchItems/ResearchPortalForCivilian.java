@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
-import com.solegendary.reignofnether.building.buildings.piglins.BasicPortal;
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -24,8 +24,8 @@ public class ResearchPortalForCivilian extends ProductionItem {
     public ResearchPortalForCivilian(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (this.building instanceof BasicPortal portal)
-                portal.changeStructure(BasicPortal.PortalType.CIVILIAN);
+            if (this.building instanceof Portal portal)
+                portal.changeStructure(Portal.PortalType.CIVILIAN);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -45,7 +45,7 @@ public class ResearchPortalForCivilian extends ProductionItem {
                 hotkey,
                 () -> false,
                 () -> prodBuilding.productionQueue.size() > 0 ||
-                        (prodBuilding instanceof BasicPortal portal && portal.isUpgraded()),
+                        (prodBuilding instanceof Portal portal && portal.isUpgraded()),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
                 null,

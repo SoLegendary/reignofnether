@@ -5,12 +5,11 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
+import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -19,7 +18,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -217,7 +215,7 @@ public interface Unit {
     default void setupEquipmentAndUpgradesClient() { }
 
     public static float getSpeedModifier(Unit unit) {
-        if (unit instanceof PiglinBruteUnit brute && brute.isHoldingUpShield) {
+        if (unit instanceof BruteUnit brute && brute.isHoldingUpShield) {
             return 0.7f;
         }
         return 1.0f;

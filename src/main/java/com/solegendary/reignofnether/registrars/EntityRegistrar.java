@@ -129,23 +129,23 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "silverfish_unit").toString()));
 
-    public static final RegistryObject<EntityType<PiglinGruntUnit>> PIGLIN_GRUNT_UNIT = ENTITIES.register("piglin_grunt_unit",
-            () -> EntityType.Builder.of(PiglinGruntUnit::new, MobCategory.CREATURE)
+    public static final RegistryObject<EntityType<GruntUnit>> GRUNT_UNIT = ENTITIES.register("grunt_unit",
+            () -> EntityType.Builder.of(GruntUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PIGLIN.getWidth(), EntityType.PIGLIN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "piglin_grunt_unit").toString()));
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "grunt_unit").toString()));
 
-    public static final RegistryObject<EntityType<PiglinBruteUnit>> PIGLIN_BRUTE_UNIT = ENTITIES.register("piglin_brute_unit",
-            () -> EntityType.Builder.of(PiglinBruteUnit::new, MobCategory.CREATURE)
+    public static final RegistryObject<EntityType<BruteUnit>> BRUTE_UNIT = ENTITIES.register("brute_unit",
+            () -> EntityType.Builder.of(BruteUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PIGLIN_BRUTE.getWidth(), EntityType.PIGLIN_BRUTE.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "piglin_brute_unit").toString()));
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "brute_unit").toString()));
 
-    public static final RegistryObject<EntityType<PiglinHeadhunterUnit>> PIGLIN_HEADHUNTER_UNIT = ENTITIES.register("piglin_headhunter_unit",
-            () -> EntityType.Builder.of(PiglinHeadhunterUnit::new, MobCategory.CREATURE)
+    public static final RegistryObject<EntityType<HeadhunterUnit>> HEADHUNTER_UNIT = ENTITIES.register("headhunter_unit",
+            () -> EntityType.Builder.of(HeadhunterUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PIGLIN_BRUTE.getWidth(), EntityType.PIGLIN_BRUTE.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "piglin_headhunter_unit").toString()));
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "headhunter_unit").toString()));
 
     public static final RegistryObject<EntityType<HoglinUnit>> HOGLIN_UNIT = ENTITIES.register("hoglin_unit",
             () -> EntityType.Builder.of(HoglinUnit::new, MobCategory.CREATURE)

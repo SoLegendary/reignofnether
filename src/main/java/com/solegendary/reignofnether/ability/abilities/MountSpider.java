@@ -15,7 +15,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinHeadhunterUnit;
+import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -66,7 +66,7 @@ public class MountSpider extends Ability {
             return strayUnit.getMountGoal();
         if (entity instanceof SkeletonUnit skeletonUnit)
             return skeletonUnit.getMountGoal();
-        if (entity instanceof PiglinHeadhunterUnit headhunterUnit)
+        if (entity instanceof HeadhunterUnit headhunterUnit)
             return headhunterUnit.getMountGoal();
         return null;
     }

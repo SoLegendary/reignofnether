@@ -163,7 +163,7 @@ public class PlayerServerEvents {
         EntityType<? extends Unit> entityType = switch(faction) {
             case VILLAGERS -> EntityRegistrar.VILLAGER_UNIT.get();
             case MONSTERS -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
-            case PIGLINS -> EntityRegistrar.PIGLIN_GRUNT_UNIT.get();
+            case PIGLINS -> EntityRegistrar.GRUNT_UNIT.get();
             case NONE -> null;
         };
         ServerLevel level = serverPlayer.getLevel();

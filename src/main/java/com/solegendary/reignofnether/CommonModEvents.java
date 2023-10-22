@@ -2,7 +2,7 @@ package com.solegendary.reignofnether;
 
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.piglins.BasicPortal;
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.registrars.ContainerRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -12,12 +12,8 @@ import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.entity.*;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.DoublePlantBlock;
-import net.minecraft.world.level.block.FireBlock;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -36,7 +32,7 @@ public class CommonModEvents {
             int tint = 0xFFFFFF;
             if (bp != null) {
                 Building building = BuildingUtils.findBuilding(true, bp);
-                if (building instanceof BasicPortal portal) {
+                if (building instanceof Portal portal) {
                     switch (portal.portalType) {
                         case CIVILIAN -> tint = 0x00FF00;
                         case MILITARY -> tint = 0xFF0000;
@@ -73,9 +69,9 @@ public class CommonModEvents {
         evt.registerEntityRenderer(EntityRegistrar.WARDEN_UNIT.get(), WardenRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.RAVAGER_UNIT.get(), RavagerRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.SILVERFISH_UNIT.get(), SilverfishRenderer::new);
-        evt.registerEntityRenderer(EntityRegistrar.PIGLIN_GRUNT_UNIT.get(), PiglinUnitRenderer::new);
-        evt.registerEntityRenderer(EntityRegistrar.PIGLIN_BRUTE_UNIT.get(), PiglinUnitRenderer::new);
-        evt.registerEntityRenderer(EntityRegistrar.PIGLIN_HEADHUNTER_UNIT.get(), PiglinUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.GRUNT_UNIT.get(), PiglinUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.BRUTE_UNIT.get(), PiglinUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.HEADHUNTER_UNIT.get(), PiglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.HOGLIN_UNIT.get(), HoglinRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.BLAZE_UNIT.get(), BlazeRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WITHER_SKELETON_UNIT.get(), WitherSkeletonRenderer::new);
@@ -102,9 +98,9 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.WARDEN_UNIT.get(), WardenUnit.createAttributes().build());
         evt.put(EntityRegistrar.RAVAGER_UNIT.get(), RavagerUnit.createAttributes().build());
         evt.put(EntityRegistrar.SILVERFISH_UNIT.get(), SilverfishUnit.createAttributes().build());
-        evt.put(EntityRegistrar.PIGLIN_GRUNT_UNIT.get(), PiglinGruntUnit.createAttributes().build());
-        evt.put(EntityRegistrar.PIGLIN_HEADHUNTER_UNIT.get(), PiglinHeadhunterUnit.createAttributes().build());
-        evt.put(EntityRegistrar.PIGLIN_BRUTE_UNIT.get(), PiglinBruteUnit.createAttributes().build());
+        evt.put(EntityRegistrar.GRUNT_UNIT.get(), GruntUnit.createAttributes().build());
+        evt.put(EntityRegistrar.HEADHUNTER_UNIT.get(), HeadhunterUnit.createAttributes().build());
+        evt.put(EntityRegistrar.BRUTE_UNIT.get(), BruteUnit.createAttributes().build());
         evt.put(EntityRegistrar.HOGLIN_UNIT.get(), HoglinUnit.createAttributes().build());
         evt.put(EntityRegistrar.BLAZE_UNIT.get(), BlazeUnit.createAttributes().build());
         evt.put(EntityRegistrar.WITHER_SKELETON_UNIT.get(), WitherSkeletonUnit.createAttributes().build());

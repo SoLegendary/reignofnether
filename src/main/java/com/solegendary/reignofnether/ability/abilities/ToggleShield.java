@@ -6,17 +6,12 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchBruteShields;
-import com.solegendary.reignofnether.research.researchItems.ResearchEvokerVexes;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
-import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
+import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -29,9 +24,9 @@ public class ToggleShield extends Ability {
 
     private static final int CD_MAX_SECONDS = 0;
 
-    private final PiglinBruteUnit bruteUnit;
+    private final BruteUnit bruteUnit;
 
-    public ToggleShield(PiglinBruteUnit bruteUnit) {
+    public ToggleShield(BruteUnit bruteUnit) {
         super(
                 UnitAction.TOGGLE_SHIELD,
                 CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,

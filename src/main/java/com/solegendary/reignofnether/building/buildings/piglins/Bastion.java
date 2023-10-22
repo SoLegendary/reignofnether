@@ -72,7 +72,7 @@ public class Bastion extends ProductionBuilding {
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Bastion.class,
                 () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(BasicPortal.buildingName) ||
+                () -> BuildingClientEvents.hasFinishedBuilding(Portal.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(Bastion.class),
                 null,

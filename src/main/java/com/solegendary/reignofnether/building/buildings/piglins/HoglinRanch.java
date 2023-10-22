@@ -70,7 +70,7 @@ public class HoglinRanch extends ProductionBuilding {
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == HoglinRanch.class,
             () -> false,
-            () -> BuildingClientEvents.hasFinishedBuilding(BasicPortal.buildingName) ||
+            () -> BuildingClientEvents.hasFinishedBuilding(Portal.buildingName) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(HoglinRanch.class),
             null,

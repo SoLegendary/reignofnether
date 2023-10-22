@@ -56,9 +56,9 @@ public class ResourceCosts {
     public static ResourceCost RAVAGER = ResourceCost.Unit(300,50,150,50,6);
 
     // Piglins
-    public static ResourceCost PIGLIN_GRUNT = ResourceCost.Unit(50,0,0,15,1);
-    public static ResourceCost PIGLIN_BRUTE = ResourceCost.Unit(125,0,0,25,2);
-    public static ResourceCost PIGLIN_HEADHUNTER = ResourceCost.Unit(90,70,0,25,2);
+    public static ResourceCost GRUNT = ResourceCost.Unit(50,0,0,15,1);
+    public static ResourceCost BRUTE = ResourceCost.Unit(125,0,0,25,2);
+    public static ResourceCost HEADHUNTER = ResourceCost.Unit(90,70,0,25,2);
     public static ResourceCost HOGLIN = ResourceCost.Unit(150,0,50,30,2);
     public static ResourceCost BLAZE = ResourceCost.Unit(50,50,100,30,2);
     public static ResourceCost WITHER_SKELETON = ResourceCost.Unit(200,0,100,35,3);

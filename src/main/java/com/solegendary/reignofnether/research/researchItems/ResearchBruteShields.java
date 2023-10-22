@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
@@ -12,7 +11,7 @@ import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinBruteUnit;
+import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -34,7 +33,7 @@ public class ResearchBruteShields extends ProductionItem {
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchBruteShields.itemName);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())
-                    if (unit instanceof PiglinBruteUnit vUnit && vUnit.getOwnerName().equals(building.ownerName))
+                    if (unit instanceof BruteUnit vUnit && vUnit.getOwnerName().equals(building.ownerName))
                         vUnit.setupEquipmentAndUpgradesServer();
             }
         };
@@ -65,7 +64,7 @@ public class ResearchBruteShields extends ProductionItem {
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Allows Piglin Brutes to raise a shield to halve", Style.EMPTY),
+                        FormattedCharSequence.forward("Allows Brutes to raise a shield to halve", Style.EMPTY),
                         FormattedCharSequence.forward("their movement speed and projectile damage taken.", Style.EMPTY)
                 )
         );

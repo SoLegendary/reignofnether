@@ -18,16 +18,16 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PiglinGruntProd extends ProductionItem {
+public class GruntProd extends ProductionItem {
 
-    public final static String itemName = "Piglin Grunt";
-    public final static ResourceCost cost = ResourceCosts.PIGLIN_GRUNT;
+    public final static String itemName = "Grunt";
+    public final static ResourceCost cost = ResourceCosts.GRUNT;
 
-    public PiglinGruntProd(ProductionBuilding building) {
+    public GruntProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.PIGLIN_GRUNT_UNIT.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.GRUNT_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -36,12 +36,12 @@ public class PiglinGruntProd extends ProductionItem {
     }
 
     public String getItemName() {
-        return PiglinGruntProd.itemName;
+        return GruntProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-            FormattedCharSequence.forward(PiglinGruntProd.itemName, Style.EMPTY.withBold(true)),
+            FormattedCharSequence.forward(GruntProd.itemName, Style.EMPTY.withBold(true)),
             ResourceCosts.getFormattedCost(cost),
             ResourceCosts.getFormattedPopAndTime(cost),
             FormattedCharSequence.forward("", Style.EMPTY),
@@ -50,7 +50,7 @@ public class PiglinGruntProd extends ProductionItem {
         ));
 
         return new Button(
-            PiglinGruntProd.itemName,
+            GruntProd.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin.png"),
             hotkey,
@@ -65,7 +65,7 @@ public class PiglinGruntProd extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            PiglinGruntProd.itemName,
+            GruntProd.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin.png"),
             (Keybinding) null,

@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
+public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     // region
     private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
     private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
@@ -84,7 +84,7 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
-            SynchedEntityData.defineId(PiglinBruteUnit.class, EntityDataSerializers.STRING);
+            SynchedEntityData.defineId(BruteUnit.class, EntityDataSerializers.STRING);
 
     @Override
     protected void defineSynchedData() {
@@ -123,7 +123,7 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     final static public float maxHealth = 50.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.28f;
-    final static public int popCost = ResourceCosts.PIGLIN_BRUTE.population;
+    final static public int popCost = ResourceCosts.BRUTE.population;
     public int maxResources = 100;
 
     public boolean isHoldingUpShield = false;
@@ -132,7 +132,7 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    public PiglinBruteUnit(EntityType<? extends PiglinBrute> entityType, Level level) {
+    public BruteUnit(EntityType<? extends PiglinBrute> entityType, Level level) {
         super(entityType, level);
 
         ToggleShield ab1 = new ToggleShield(this);
@@ -147,10 +147,10 @@ public class PiglinBruteUnit extends PiglinBrute implements Unit, AttackerUnit {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.ATTACK_DAMAGE, PiglinBruteUnit.attackDamage)
-                .add(Attributes.MOVEMENT_SPEED, PiglinBruteUnit.movementSpeed)
-                .add(Attributes.MAX_HEALTH, PiglinBruteUnit.maxHealth)
-                .add(Attributes.ARMOR, PiglinBruteUnit.armorValue);
+                .add(Attributes.ATTACK_DAMAGE, BruteUnit.attackDamage)
+                .add(Attributes.MOVEMENT_SPEED, BruteUnit.movementSpeed)
+                .add(Attributes.MAX_HEALTH, BruteUnit.maxHealth)
+                .add(Attributes.ARMOR, BruteUnit.armorValue);
     }
 
     @Override

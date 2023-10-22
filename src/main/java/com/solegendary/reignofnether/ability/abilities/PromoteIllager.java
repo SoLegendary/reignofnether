@@ -91,7 +91,7 @@ public class PromoteIllager extends Ability {
             () -> {
                 if (building instanceof Castle castle)
                     return !castle.isUpgraded();
-                return false;
+                return true;
             },
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.PROMOTE_ILLAGER),

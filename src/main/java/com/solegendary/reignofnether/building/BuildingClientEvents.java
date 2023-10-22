@@ -103,6 +103,8 @@ public class BuildingClientEvents {
         selectedBuildings.clear();
     }
     public static void addSelectedBuilding(Building building) {
+        CursorClientEvents.setLeftClickAction(null);
+
         if (!FogOfWarClientEvents.isBuildingInBrightChunk(building))
             return;
 

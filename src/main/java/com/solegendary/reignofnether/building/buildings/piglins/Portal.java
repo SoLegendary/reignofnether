@@ -1,6 +1,10 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.ConnectPortal;
+import com.solegendary.reignofnether.ability.abilities.DisconnectPortal;
+import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -9,19 +13,17 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchPortalForCivilian;
 import com.solegendary.reignofnether.research.researchItems.ResearchPortalForMilitary;
 import com.solegendary.reignofnether.research.researchItems.ResearchPortalForTransport;
-import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.util.Faction;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import java.util.ArrayList;
@@ -30,7 +32,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class BasicPortal extends ProductionBuilding implements NetherConvertingBuilding {
+public class Portal extends ProductionBuilding implements NetherConvertingBuilding {
 
     public final static int CIVILIIAN_PORTAL_POPULATION_SUPPLY = 15;
 
@@ -45,11 +47,13 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
     public final static String structureName = "portal_basic";
     public final static ResourceCost cost = ResourceCosts.BASIC_PORTAL;
 
-    private final double NETHER_CONVERT_RANGE_MAX = 25;
+    private final double NETHER_CONVERT_RANGE_MAX = 20;
     private double netherConvertRange = 3;
     private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
     private int convertsAfterMaxRange = 0;
     public PortalType portalType = PortalType.BASIC;
+
+    public BlockPos destination; // for transport portals
 
     public double getMaxRange() { return NETHER_CONVERT_RANGE_MAX; }
 
@@ -68,7 +72,7 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
         }
     }
 
-    public BasicPortal(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
+    public Portal(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
@@ -85,12 +89,26 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
 
         this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
 
-        if (level.isClientSide())
+        Ability connectPortal = new ConnectPortal(this);
+        this.abilities.add(connectPortal);
+        Ability disconnectPortal = new DisconnectPortal(this);
+        this.abilities.add(disconnectPortal);
+
+        if (level.isClientSide()) {
+            this.abilityButtons.add(connectPortal.getButton(Keybindings.keyQ));
+            this.abilityButtons.add(disconnectPortal.getButton(Keybindings.keyW));
             this.productionButtons = Arrays.asList(
                     ResearchPortalForCivilian.getStartButton(this, Keybindings.keyQ),
                     ResearchPortalForMilitary.getStartButton(this, Keybindings.keyW),
                     ResearchPortalForTransport.getStartButton(this, Keybindings.keyE)
             );
+        }
+    }
+
+    public boolean canDestroyBlock(BlockPos relativeBp) {
+        BlockPos worldBp = relativeBp.offset(relativeBp);
+        Block block = this.getLevel().getBlockState(worldBp).getBlock();
+        return block != Blocks.OBSIDIAN && block != Blocks.NETHER_PORTAL;
     }
 
     public Faction getFaction() {return Faction.PIGLINS;}
@@ -114,8 +132,8 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
                 this.canSetRallyPoint = true;
                 if (this.getLevel().isClientSide())
                     this.productionButtons = Arrays.asList(
-                            PiglinBruteProd.getStartButton(this, Keybindings.keyQ),
-                            PiglinHeadhunterProd.getStartButton(this, Keybindings.keyW),
+                            BruteProd.getStartButton(this, Keybindings.keyQ),
+                            HeadhunterProd.getStartButton(this, Keybindings.keyW),
                             HoglinProd.getStartButton(this, Keybindings.keyE),
                             BlazeProd.getStartButton(this, Keybindings.keyR),
                             WitherSkeletonProd.getStartButton(this, Keybindings.keyT),
@@ -147,17 +165,17 @@ public class BasicPortal extends ProductionBuilding implements NetherConvertingB
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
-                BasicPortal.buildingName,
+                Portal.buildingName,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png"),
                 hotkey,
-                () -> BuildingClientEvents.getBuildingToPlace() == BasicPortal.class,
+                () -> BuildingClientEvents.getBuildingToPlace() == Portal.class,
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(CitadelPortal.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(BasicPortal.class),
+                () -> BuildingClientEvents.setBuildingToPlace(Portal.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(BasicPortal.buildingName, Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(Portal.buildingName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("An obsidian portal used to spread nether blocks.", Style.EMPTY),
