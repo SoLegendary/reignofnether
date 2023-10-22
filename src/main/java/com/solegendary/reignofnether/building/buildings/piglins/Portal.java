@@ -106,7 +106,7 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
     }
 
     public boolean canDestroyBlock(BlockPos relativeBp) {
-        BlockPos worldBp = relativeBp.offset(relativeBp);
+        BlockPos worldBp = relativeBp.offset(this.originPos);
         Block block = this.getLevel().getBlockState(worldBp).getBlock();
         return block != Blocks.OBSIDIAN && block != Blocks.NETHER_PORTAL;
     }
