@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
 
 import java.util.Random;
@@ -47,6 +48,8 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
                 // eg. if a unit with 3 damage attacks a building with 0.5 multiplier, always destroy 1 block + 50% chance to destroy 2 blocks
                 ticksToNextBlockBreak -= 1;
                 if (ticksToNextBlockBreak <= 0) {
+                    this.mob.swing(InteractionHand.MAIN_HAND);
+
                     AttackerUnit unit = (AttackerUnit) mob;
                     ticksToNextBlockBreak = unit.getAttackCooldown();
                     double damageFloat = unit.getUnitAttackDamage() * buildingTarget.MELEE_DAMAGE_MULTIPLIER;
