@@ -46,7 +46,11 @@ public class PoisonSpiderUnit extends CaveSpider implements Unit, AttackerUnit {
     public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
 
     public GarrisonGoal getGarrisonGoal() { return null; }
-    public boolean canGarrison() { return false; }
+    public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UsePortalGoal usePortalGoal;
+    public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
+    public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -98,7 +102,7 @@ public class PoisonSpiderUnit extends CaveSpider implements Unit, AttackerUnit {
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
     public int getPopCost() {return popCost;}
-    public boolean canAttackBuildings() {return canAttackBuildings;}
+    public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -115,7 +119,7 @@ public class PoisonSpiderUnit extends CaveSpider implements Unit, AttackerUnit {
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.POISON_SPIDER.population;
-    final static public boolean canAttackBuildings = true;
+
     public int maxResources = 100;
 
     private MeleeAttackUnitGoal attackGoal;
@@ -159,6 +163,7 @@ public class PoisonSpiderUnit extends CaveSpider implements Unit, AttackerUnit {
     }
 
     public void initialiseGoals() {
+        this.usePortalGoal = new UsePortalGoal(this);
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), false);
@@ -168,6 +173,7 @@ public class PoisonSpiderUnit extends CaveSpider implements Unit, AttackerUnit {
     @Override
     protected void registerGoals() {
         initialiseGoals();
+        this.goalSelector.addGoal(2, usePortalGoal);
 
         // movegoal must be lower priority than attacks so that attack-moving works correctly
         this.goalSelector.addGoal(1, new FloatGoal(this));

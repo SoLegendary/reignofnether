@@ -65,14 +65,16 @@ public class ConnectPortal extends Ability {
     public void use(Level level, Building buildingUsing, BlockPos targetBp) {
 
         if (building instanceof Portal portal && portal.portalType == Portal.PortalType.TRANSPORT) {
+            portal.disconnectPortal();
 
             Building targetBuilding = BuildingUtils.findBuilding(level.isClientSide(), targetBp);
             if (targetBuilding instanceof Portal targetPortal && targetPortal.portalType == Portal.PortalType.TRANSPORT &&
-                targetBuilding != building) {
-                targetPortal.destination = BuildingUtils.getCentrePos(portal.getBlocks());
-                portal.destination = BuildingUtils.getCentrePos(targetPortal.getBlocks());
+                targetBuilding != building && targetBuilding.isBuilt) {
+                targetPortal.disconnectPortal();
+                targetPortal.destination = portal.centrePos;
+                portal.destination = targetPortal.centrePos;
             } else if (level.isClientSide())
-                HudClientEvents.showTemporaryMessage("Must target another transport portal.");
+                HudClientEvents.showTemporaryMessage("Must target another completed transport portal.");
         }
     }
 }

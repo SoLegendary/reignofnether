@@ -50,5 +50,6 @@ public enum UnitAction {
     SHOOT_FIREWALL,
 
     CONNECT_PORTAL,
-    DISCONNECT_PORTAL
+    DISCONNECT_PORTAL,
+    GOTO_PORTAL,
 }

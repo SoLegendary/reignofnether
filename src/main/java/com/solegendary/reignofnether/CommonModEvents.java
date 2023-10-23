@@ -14,6 +14,8 @@ import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.entity.*;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -27,6 +29,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 public class CommonModEvents {
 
     @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
     public static void onBlockColourEvent(RegisterColorHandlersEvent.Block evt) {
         evt.register((bs, blockAndTintGetter, bp, tintIndex) -> {
             int tint = 0xFFFFFF;

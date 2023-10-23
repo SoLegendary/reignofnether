@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.ConnectPortal;
 import com.solegendary.reignofnether.ability.abilities.DisconnectPortal;
+import com.solegendary.reignofnether.ability.abilities.GotoPortal;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -20,6 +21,7 @@ import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -75,14 +77,15 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
     @Override
     public boolean shouldBeDestroyed() {
         boolean shouldBeDestroyed = super.shouldBeDestroyed();
-        if (shouldBeDestroyed) {
-            if (destination != null) {
-                Building targetBuilding = BuildingUtils.findBuilding(getLevel().isClientSide(), destination);
-                if (targetBuilding instanceof Portal targetPortal && portalType == Portal.PortalType.TRANSPORT)
-                    targetPortal.destination = null;
-            }
-        }
+        if (shouldBeDestroyed)
+            disconnectPortal();
         return shouldBeDestroyed;
+    }
+
+    @Override
+    public void destroy(ServerLevel serverLevel) {
+        disconnectPortal();
+        super.destroy(serverLevel);
     }
 
     public Portal(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
@@ -104,18 +107,30 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
 
         Ability connectPortal = new ConnectPortal(this);
         this.abilities.add(connectPortal);
+        Ability gotoPortal = new GotoPortal(this);
+        this.abilities.add(gotoPortal);
         Ability disconnectPortal = new DisconnectPortal(this);
         this.abilities.add(disconnectPortal);
 
         if (level.isClientSide()) {
             this.abilityButtons.add(connectPortal.getButton(Keybindings.keyQ));
-            this.abilityButtons.add(disconnectPortal.getButton(Keybindings.keyW));
+            this.abilityButtons.add(gotoPortal.getButton(Keybindings.keyW));
+            this.abilityButtons.add(disconnectPortal.getButton(Keybindings.keyE));
             this.productionButtons = Arrays.asList(
                     ResearchPortalForCivilian.getStartButton(this, Keybindings.keyQ),
                     ResearchPortalForMilitary.getStartButton(this, Keybindings.keyW),
                     ResearchPortalForTransport.getStartButton(this, Keybindings.keyE)
             );
         }
+    }
+
+    public void disconnectPortal() {
+        if (destination != null) {
+            Building targetBuilding = BuildingUtils.findBuilding(getLevel().isClientSide(), destination);
+            if (targetBuilding instanceof Portal targetPortal && portalType == Portal.PortalType.TRANSPORT)
+                targetPortal.destination = null;
+        }
+        destination = null;
     }
 
     public boolean canDestroyBlock(BlockPos relativeBp) {

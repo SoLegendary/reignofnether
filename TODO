@@ -8,15 +8,20 @@ TODO bugs/features:
 
 - test compatibility with a performance improvement mod (eg. optifine)
 
+- add arm animations for melee units attacking a building
 
 
-- Transport portals
-    - give all ground units a goal to use a portal to teleport to the other side when the portal is reached
-        - try actually making them walk into the portal if possible
+
+- remove suffocation damage event entirely
+
 
 
 TODO test in next playtest
 
+all units can still garrison and attack buildings correctly;
+warden sonic boom sound should be heard by other players
+
+transport portals
 ravager roars damage buildings
 ghast attacker range bonuses
 - check that retaliate doesnt redirect melee and ghasts from attacking a building

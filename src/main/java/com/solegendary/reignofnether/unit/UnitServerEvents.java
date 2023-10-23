@@ -346,7 +346,6 @@ public class UnitServerEvents {
                 (!(shooter instanceof EvokerUnit));
     }
 
-    // make creepers immune to lightning damage (but still get charged by them)
     @SubscribeEvent
     public static void onEntityDamaged(LivingDamageEvent evt) {
         if (shouldIgnoreKnockback(evt))

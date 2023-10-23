@@ -21,7 +21,7 @@
         "CameraMixin",
         "ClientLevelMixin",
         "ClientPacketMixin",
-        "EntityRenderMixin",
+        "EntityMixin",
         "FrustumMixin",
         "ItemInHandLayerMixin",
         "MobRendererMixin",

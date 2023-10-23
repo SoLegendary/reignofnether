@@ -1,38 +1,44 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.sounds.SoundAction;
+import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 
-public class GarrisonGoal extends MoveToTargetBlockGoal {
+public class UsePortalGoal extends MoveToTargetBlockGoal {
 
     private Building buildingTarget;
 
-    public GarrisonGoal(Mob mob) {
+    public UsePortalGoal(Mob mob) {
         super(mob, true, 0);
     }
 
     public void tick() {
-        if (buildingTarget instanceof GarrisonableBuilding garrisonableBuilding) {
+        if (buildingTarget instanceof Portal portal) {
             calcMoveTarget();
             if (buildingTarget.getBlocksPlaced() <= 0) {
-                stopGarrisoning();
+                stopUsingPortal();
             }
             if (this.mob.distanceToSqr(new Vec3(
                     moveTarget.getX() + 0.5f,
                     moveTarget.getY() + 0.5f,
                     moveTarget.getZ() + 0.5f)) <= 3f) {
 
-                // teleport to garrison entry pos
-                if (!garrisonableBuilding.isFull() && buildingTarget.isBuilt) {
-                    BlockPos bp = buildingTarget.originPos.offset(garrisonableBuilding.getEntryPosition());
-                    this.mob.teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
+                // teleport to destination
+                if (portal.destination != null && buildingTarget.isBuilt) {
+                    BlockPos bp = portal.destination;
+                    SoundClientboundPacket.playSoundOnClient(SoundAction.USE_PORTAL, bp);
+                    mob.teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
+                    SoundClientboundPacket.playSoundOnClient(SoundAction.USE_PORTAL, portal.destination);
                 }
-                this.stopGarrisoning();
+                this.stopUsingPortal();
             }
         }
         else
@@ -40,18 +46,18 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
     }
 
     private void calcMoveTarget() {
-        if (this.buildingTarget instanceof GarrisonableBuilding)
-            this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 1);
+        if (this.buildingTarget instanceof Portal)
+            this.moveTarget = this.buildingTarget.centrePos;
     }
 
     public void setBuildingTarget(BlockPos blockPos) {
         if (blockPos != null) {
             if (this.mob.level.isClientSide()) {
                 this.buildingTarget = BuildingUtils.findBuilding(true, blockPos);
-                if (this.buildingTarget instanceof GarrisonableBuilding garrisonableBuilding &&
+                if (this.buildingTarget instanceof Portal portal &&
                         buildingTarget.ownerName.equals(((Unit) mob).getOwnerName())) {
 
-                    if (!garrisonableBuilding.isFull()) {
+                    if (portal.destination != null) {
                         MiscUtil.addUnitCheckpoint(((Unit) mob), new BlockPos(
                                 buildingTarget.centrePos.getX(),
                                 buildingTarget.originPos.getY() + 1,
@@ -59,10 +65,8 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
                         );
                         ((Unit) mob).setIsCheckpointGreen(true);
                     } else {
-                        HudClientEvents.showTemporaryMessage("That building is full!");
+                        HudClientEvents.showTemporaryMessage("That portal has no destination!");
                     }
-                } else if (this.buildingTarget == null) {
-                    HudClientEvents.showTemporaryMessage("That building is not garrisonable");
                 }
             }
             else
@@ -75,7 +79,7 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
     public Building getBuildingTarget() { return buildingTarget; }
 
     // if we override stop() it for some reason is called after start() and we can never begin this goal...
-    public void stopGarrisoning() {
+    public void stopUsingPortal() {
         buildingTarget = null;
         super.stopMoving();
     }

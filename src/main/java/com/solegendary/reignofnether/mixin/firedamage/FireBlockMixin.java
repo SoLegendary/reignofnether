@@ -169,7 +169,7 @@ public abstract class FireBlockMixin {
         fireblock.setFlammable(Blocks.BLACK_CARPET, 0, 20);
         fireblock.setFlammable(Blocks.DRIED_KELP_BLOCK, 0, 60);
         fireblock.setFlammable(Blocks.BAMBOO, 0, 60);
-        fireblock.setFlammable(Blocks.SCAFFOLDING, 0, 60);
+        fireblock.setFlammable(Blocks.SCAFFOLDING, 0, 0);
         fireblock.setFlammable(Blocks.LECTERN, 0, 20);
         fireblock.setFlammable(Blocks.COMPOSTER, 0, 20);
         fireblock.setFlammable(Blocks.SWEET_BERRY_BUSH, 0, 100);

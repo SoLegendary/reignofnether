@@ -57,7 +57,11 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
 
     GarrisonGoal garrisonGoal;
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
-    public boolean canGarrison() { return false; }
+    public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UsePortalGoal usePortalGoal;
+    public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
+    public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -109,7 +113,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
     public int getPopCost() {return popCost;}
-    public boolean canAttackBuildings() {return canAttackBuildings;}
+    public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -126,7 +130,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.WARDEN.population;
-    final static public boolean canAttackBuildings = true;
+
     public int maxResources = 100;
 
     private MeleeAttackUnitGoal attackGoal;
@@ -190,6 +194,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
     }
 
     public void initialiseGoals() {
+        this.usePortalGoal = new UsePortalGoal(this);
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this);
@@ -202,6 +207,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
     @Override
     protected void registerGoals() {
         initialiseGoals();
+        this.goalSelector.addGoal(2, usePortalGoal);
 
         // movegoal must be lower priority than attacks so that attack-moving works correctly
         this.goalSelector.addGoal(1, new FloatGoal(this));
@@ -225,9 +231,8 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
         Vec3 targetPos = targetEntity.getEyePosition().subtract(headToChestOffset);
         Vec3 normTargetPos = targetPos.normalize();
 
-        if (this.level.isClientSide()) {
-            this.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 1.0F);
-        } else {
+        this.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 1.0F);
+        if (!this.level.isClientSide()) {
             ServerLevel level = (ServerLevel) this.level;
             for(int i = 1; i < Mth.floor(targetPos.length()) + 7; ++i) {
                 Vec3 particlePos = headToChestOffset.add(normTargetPos.scale(i));

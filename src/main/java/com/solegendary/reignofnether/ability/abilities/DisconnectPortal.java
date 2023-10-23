@@ -20,9 +20,8 @@ import java.util.List;
 
 public class DisconnectPortal extends Ability {
 
-    private static final int CD_MAX = 120 * ResourceCost.TICKS_PER_SECOND;
-    private static final int RANGE = 20;
-    private static final int BUFF_RANGE = 10;
+    private static final int CD_MAX = 0;
+    private static final int RANGE = 0;
 
     Building building;
 
@@ -65,13 +64,7 @@ public class DisconnectPortal extends Ability {
 
     @Override
     public void use(Level level, Building buildingUsing, BlockPos targetBp) {
-        if (building instanceof Portal portal && portal.portalType == Portal.PortalType.TRANSPORT) {
-            if (portal.destination != null) {
-                Building targetBuilding = BuildingUtils.findBuilding(level.isClientSide(), portal.destination);
-                if (targetBuilding instanceof Portal targetPortal && portal.portalType == Portal.PortalType.TRANSPORT)
-                    targetPortal.destination = null;
-            }
-            portal.destination = null;
-        }
+        if (building instanceof Portal portal)
+            portal.disconnectPortal();
     }
 }

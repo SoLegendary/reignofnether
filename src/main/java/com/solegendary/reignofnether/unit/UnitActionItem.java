@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.ResourceName;
@@ -109,17 +110,20 @@ public class UnitActionItem {
                 }
                 case MOVE -> {
                     ResourceName resName = ResourceSources.getBlockResourceName(preselectedBlockPos, level);
-                    boolean inBuilding = BuildingUtils.isPosInsideAnyBuilding(((Entity) unit).level.isClientSide(), preselectedBlockPos);
+                    Building buildingAtPos = BuildingUtils.findBuilding(((Entity) unit).level.isClientSide(), preselectedBlockPos);
 
-                    if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE && !inBuilding) {
+                    if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE && buildingAtPos == null) {
                         GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
                         goal.setTargetResourceName(resName);
-                        goal.setMoveTarget(preselectedBlockPos);
                         if (Unit.atMaxResources((Unit) workerUnit)) {
                             if (level.isClientSide())
                                 HudClientEvents.showTemporaryMessage("Worker inventory full, dropping off first...");
                             goal.saveAndReturnResources();
                         }
+                    } else if (buildingAtPos instanceof Portal portal &&
+                            portal.portalType == Portal.PortalType.TRANSPORT &&
+                            unit.canUsePortal()) {
+                        unit.getUsePortalGoal().setBuildingTarget(preselectedBlockPos);
                     }
                     else
                         unit.setMoveTarget(preselectedBlockPos);

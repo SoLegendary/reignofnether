@@ -58,7 +58,11 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
 
     GarrisonGoal garrisonGoal;
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
-    public boolean canGarrison() { return true; }
+    public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UsePortalGoal usePortalGoal;
+    public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
+    public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -112,7 +116,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
     public int getPopCost() {return popCost;}
-    public boolean canAttackBuildings() {return canAttackBuildings;}
+    public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -129,7 +133,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.STRAY.population;
-    final static public boolean canAttackBuildings = false;
+
     public int maxResources = 100;
 
     private UnitBowAttackGoal<? extends LivingEntity> attackGoal;
@@ -185,6 +189,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
     }
 
     public void initialiseGoals() {
+        this.usePortalGoal = new UsePortalGoal(this);
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
         this.garrisonGoal = new GarrisonGoal(this);
@@ -196,6 +201,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
     @Override
     protected void registerGoals() {
         initialiseGoals();
+        this.goalSelector.addGoal(2, usePortalGoal);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);

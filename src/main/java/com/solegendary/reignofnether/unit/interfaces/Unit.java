@@ -48,6 +48,9 @@ public interface Unit {
     public GarrisonGoal getGarrisonGoal();
     public boolean canGarrison();
 
+    public UsePortalGoal getUsePortalGoal();
+    public boolean canUsePortal();
+
     public Faction getFaction();
     public List<AbilityButton> getAbilityButtons();
     public List<Ability> getAbilities();
@@ -191,6 +194,8 @@ public interface Unit {
         unit.setHoldPosition(false);
         if (unit.canGarrison())
             unit.getGarrisonGoal().stopGarrisoning();
+        if (unit.canUsePortal())
+            unit.getUsePortalGoal().stopUsingPortal();
     }
 
     // can be overridden in the Unit's class to do additional logic on a reset
