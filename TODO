@@ -16,7 +16,7 @@ TODO test in next playtest
 
 all units can still garrison and attack buildings correctly;
 
-ravager roars damage buildings
+ravager roars works properly
 ghast attacker range bonuses
 - check that retaliate doesnt redirect melee and ghasts from attacking a building
 - ranged units should be able to aggro properly in and against garrisons'

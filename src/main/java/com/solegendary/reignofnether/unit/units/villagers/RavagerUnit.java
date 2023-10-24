@@ -227,7 +227,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     @Override
     public void roar() {
-        if (this.isAlive()) {
+        if (this.isAlive() && !level.isClientSide()) {
             LivingEntity livingentity;
 
             List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
@@ -250,7 +250,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
                     for (double z = this.position().z - ROAR_RANGE; z < this.position().z + ROAR_RANGE; z++) {
                         BlockPos bp = new BlockPos(x,y,z);
                         Building building = BuildingUtils.findBuilding(false, bp);
-                        if (building != null)
+                        if (building != null && !building.ownerName.equals(this.getOwnerName()))
                             affectedBuildings.add(building);
                     }
                 }
