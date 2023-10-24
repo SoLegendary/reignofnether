@@ -207,7 +207,7 @@ public class WitchUnit extends Witch implements Unit {
         this.goalSelector.addGoal(2, throwPotionGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
         this.goalSelector.addGoal(3, moveGoal);
-        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
     @Override

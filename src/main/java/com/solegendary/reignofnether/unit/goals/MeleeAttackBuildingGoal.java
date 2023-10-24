@@ -4,12 +4,17 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
+import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
+import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Zombie;
 
 import java.util.Random;
 
@@ -19,8 +24,6 @@ import java.util.Random;
 // similar to BuildRepairGoal but to damage instead of repair
 // unlike BuildRepairGoal the ticks and destroy logic is on the goal side since units have different damage and
 // attack speed amounts stats the building is not damaged in unison
-
-// TODO: add arm animations for specific models
 
 public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
 
@@ -48,7 +51,16 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
                 // eg. if a unit with 3 damage attacks a building with 0.5 multiplier, always destroy 1 block + 50% chance to destroy 2 blocks
                 ticksToNextBlockBreak -= 1;
                 if (ticksToNextBlockBreak <= 0) {
-                    this.mob.swing(InteractionHand.MAIN_HAND);
+
+                    if (mob instanceof IronGolemUnit ||
+                        mob instanceof HoglinUnit ||
+                        mob instanceof RavagerUnit ||
+                        mob instanceof WardenUnit) {
+                        mob.handleEntityEvent((byte) 4);
+                        UnitSyncClientboundPacket.sendAttackBuildingAnimationPacket(mob);
+                    }
+                    else
+                        this.mob.swing(InteractionHand.MAIN_HAND);
 
                     AttackerUnit unit = (AttackerUnit) mob;
                     ticksToNextBlockBreak = unit.getAttackCooldown();

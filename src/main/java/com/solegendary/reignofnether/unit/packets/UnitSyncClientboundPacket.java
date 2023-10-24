@@ -92,6 +92,15 @@ public class UnitSyncClientboundPacket {
         );
     }
 
+    public static void sendAttackBuildingAnimationPacket(LivingEntity entity) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new UnitSyncClientboundPacket(
+                        UnitSyncAction.ATTACK_BUILDING_ANIMATION,
+                        entity.getId(), 0,
+                        0, 0,0,0,0,0,0, "")
+        );
+    }
+
     // packet-handler functions
     public UnitSyncClientboundPacket(
         UnitSyncAction syncAction,
@@ -167,6 +176,7 @@ public class UnitSyncClientboundPacket {
                                 new Resources("", this.food, this.wood, this.ore));
                         case START_ANIMATION -> UnitClientEvents.syncUnitAnimation(this.entityId, this.targetId, new BlockPos(this.posX, this.posY, this.posZ), true);
                         case STOP_ANIMATION -> UnitClientEvents.syncUnitAnimation(this.entityId, this.targetId, null, false);
+                        case ATTACK_BUILDING_ANIMATION -> UnitClientEvents.playAttackBuildingAnimation(this.entityId);
                     }
                 });
         });

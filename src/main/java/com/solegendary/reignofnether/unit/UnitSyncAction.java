@@ -5,5 +5,6 @@ public enum UnitSyncAction {
     SYNC_STATS, // sync general stats like position, health, held item etc.
     SYNC_RESOURCES, // syncs resources held and targeted resource
     START_ANIMATION, // syncs a unit's spell goals so other clients can see the casting animation (eg. evokers, wardens)
-    STOP_ANIMATION
+    STOP_ANIMATION,
+    ATTACK_BUILDING_ANIMATION
 }

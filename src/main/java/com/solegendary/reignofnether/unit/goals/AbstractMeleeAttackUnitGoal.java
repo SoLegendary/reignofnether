@@ -124,16 +124,8 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
     }
 
     protected void checkAndPerformAttack(LivingEntity p_25557_, double p_25558_) {
-
-        if (this.mob instanceof WitherSkeletonUnit wsu) {
-            System.out.println(this.ticksUntilNextAttack);
-        }
-
         double d0 = this.getAttackReachSqr(p_25557_);
         if (p_25558_ <= d0 && this.ticksUntilNextAttack <= 0) {
-            if (this.mob instanceof WitherSkeletonUnit wsu) {
-                System.out.println("attacking!");
-            }
             this.ticksUntilNextAttack = this.adjustedTickDelay(attackInterval);
             this.mob.swing(InteractionHand.MAIN_HAND);
             this.mob.doHurtTarget(p_25557_);

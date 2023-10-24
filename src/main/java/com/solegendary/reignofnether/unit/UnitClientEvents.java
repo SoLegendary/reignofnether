@@ -22,7 +22,10 @@ import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
+import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -732,6 +735,19 @@ public class UnitClientEvents {
                 } else {
                     vUnit.setUnitAttackTarget(null);
                     ((MeleeAttackBuildingGoal) vUnit.getAttackBuildingGoal()).stopAttacking();
+                }
+            }
+        }
+    }
+
+    public static void playAttackBuildingAnimation(int entityId) {
+        for (LivingEntity entity : getAllUnits()) {
+            if (entity.getId() == entityId) {
+                if (entity instanceof IronGolemUnit ||
+                    entity instanceof HoglinUnit ||
+                    entity instanceof RavagerUnit ||
+                    entity instanceof WardenUnit) {
+                    entity.handleEntityEvent((byte) 4);
                 }
             }
         }
