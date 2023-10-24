@@ -118,7 +118,7 @@ public interface AttackerUnit {
                 }
             }
             // enact aggression when idle
-            if (attackerUnit.isIdle() && attackerUnit.getAggressiveWhenIdle())
+            if (attackerUnit.isIdle() && !isAttackingBuilding && attackerUnit.getAggressiveWhenIdle())
                 attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level);
         }
     }

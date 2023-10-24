@@ -10,15 +10,14 @@ TODO bugs/features:
 
 
 
+- ghast fireball explosions aren't tied back to them as the damage source so enemies can't retaliate
 
 
 
 TODO test in next playtest
 
 all units can still garrison and attack buildings correctly;
-warden sonic boom sound should be heard by other players
 
-transport portals
 ravager roars damage buildings
 ghast attacker range bonuses
 - check that retaliate doesnt redirect melee and ghasts from attacking a building
@@ -46,8 +45,6 @@ Piglins faction
 
     - (Capitol) Citadel Portal
         - blackstone-themed building with a decorated standard purple portal at the centre
-    - Transport portal
-        - needs to be able to link to another transport portal
     - Bastion
         - needs to be upgradeable to a garrisonable structure that holds 5 units
     - Hoglin Ranch

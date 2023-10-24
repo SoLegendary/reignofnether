@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.projectile.LargeFireball;
@@ -249,8 +250,10 @@ public class BuildingServerEvents {
         else if (exp.getDamageSource() != DamageSource.GENERIC) {
             for (Entity entity : evt.getAffectedEntities()) {
                 if (entity instanceof LargeFireball fireball &&
-                        fireball.getOwner() instanceof GhastUnit gUnit)
+                        fireball.getOwner() instanceof GhastUnit gUnit) {
                     ghastUnit = gUnit;
+                    exp.damageSource = new EntityDamageSource("explosion", ghastUnit);
+                }
             }
         }
 
