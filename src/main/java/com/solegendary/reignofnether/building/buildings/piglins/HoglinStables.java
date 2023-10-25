@@ -48,8 +48,6 @@ public class HoglinStables extends ProductionBuilding {
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
 
-        this.startingBlockTypes.add(Blocks.RED_NETHER_BRICKS);
-        this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
         this.startingBlockTypes.add(Blocks.NETHER_BRICK_FENCE);
 
         this.explodeChance = 0.2f;

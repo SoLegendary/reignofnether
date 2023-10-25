@@ -53,7 +53,7 @@ public class FlameSanctuary extends ProductionBuilding {
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
 
-        this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICK_STAIRS);
+        this.startingBlockTypes.add(Blocks.RED_NETHER_BRICK_STAIRS);
 
         this.explodeChance = 0.2f;
 
