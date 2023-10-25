@@ -94,7 +94,7 @@ public class ResourceCosts {
     public static ResourceCost BASIC_PORTAL = ResourceCost.Building(0, 75, 0, 0);
     public static ResourceCost NETHERWART_FARM = ResourceCost.Building(0, 100, 0, 0);
     public static ResourceCost BASTION = ResourceCost.Building(0, 150, 0, 0);
-    public static ResourceCost HOGLIN_RANCH = ResourceCost.Building(0, 250, 0, 0);
+    public static ResourceCost HOGLIN_STABLES = ResourceCost.Building(0, 250, 0, 0);
     public static ResourceCost FLAME_SANCTUARY = ResourceCost.Building(0, 300, 150, 0);
     public static ResourceCost WITHER_SHRINE = ResourceCost.Building(0, 350, 200, 0);
     public static ResourceCost FORTRESS = ResourceCost.Building(0, 400, 300, 0);

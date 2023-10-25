@@ -36,8 +36,8 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBl
 public class FlameSanctuary extends ProductionBuilding {
 
     public final static String buildingName = "Flame Sanctuary";
-    public final static String structureName = "dungeon";
-    public final static ResourceCost cost = ResourceCosts.DUNGEON;
+    public final static String structureName = "flame_sanctuary";
+    public final static ResourceCost cost = ResourceCosts.FLAME_SANCTUARY;
 
     public FlameSanctuary(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -76,7 +76,7 @@ public class FlameSanctuary extends ProductionBuilding {
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == FlameSanctuary.class,
             () -> false,
-            () -> BuildingClientEvents.hasFinishedBuilding(HoglinRanch.buildingName) ||
+            () -> BuildingClientEvents.hasFinishedBuilding(HoglinStables.buildingName) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(FlameSanctuary.class),
             null,
@@ -84,10 +84,10 @@ public class FlameSanctuary extends ProductionBuilding {
                 FormattedCharSequence.forward(FlameSanctuary.buildingName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Scorching pillars of lava and brick to shelter blazes,", Style.EMPTY),
+                FormattedCharSequence.forward("Scorching pillars of lava and brick to keep blazes,", Style.EMPTY),
                 FormattedCharSequence.forward("enabling their production at military portals.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Hoglin Ranch.", Style.EMPTY)
+                FormattedCharSequence.forward("Requires Hoglin Stables.", Style.EMPTY)
             ),
             null
         );
@@ -102,10 +102,5 @@ public class FlameSanctuary extends ProductionBuilding {
                     sbe.getSpawner().setEntityId(EntityType.BLAZE);
             }
         }
-    }
-
-    @Override
-    public BlockPos getIndoorSpawnPoint(ServerLevel level) {
-        return super.getIndoorSpawnPoint(level).offset(-1,0,0);
     }
 }

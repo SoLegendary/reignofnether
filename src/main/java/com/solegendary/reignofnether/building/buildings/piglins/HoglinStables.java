@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -27,18 +28,18 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class HoglinRanch extends ProductionBuilding {
+public class HoglinStables extends ProductionBuilding {
 
-    public final static String buildingName = "Hoglin Ranch";
-    public final static String structureName = "graveyard";
-    public final static ResourceCost cost = ResourceCosts.HOGLIN_RANCH;
+    public final static String buildingName = "Hoglin Stables";
+    public final static String structureName = "hoglin_stables";
+    public final static ResourceCost cost = ResourceCosts.HOGLIN_STABLES;
 
-    public HoglinRanch(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
+    public HoglinStables(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.portraitBlock = Blocks.NETHER_BRICK_FENCE;
-        this.icon = new ResourceLocation("minecraft", "textures/block/nether_bricks.png");
+        this.portraitBlock = Blocks.CRIMSON_STEM;
+        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/crimson_stem.png");
 
         this.canSetRallyPoint = false;
 
@@ -47,7 +48,9 @@ public class HoglinRanch extends ProductionBuilding {
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
 
-        this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICKS);
+        this.startingBlockTypes.add(Blocks.RED_NETHER_BRICKS);
+        this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
+        this.startingBlockTypes.add(Blocks.NETHER_BRICK_FENCE);
 
         this.explodeChance = 0.2f;
 
@@ -65,23 +68,23 @@ public class HoglinRanch extends ProductionBuilding {
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
-            HoglinRanch.buildingName,
-            new ResourceLocation("minecraft", "textures/block/nether_bricks.png"),
+            HoglinStables.buildingName,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/crimson_stem.png"),
             hotkey,
-            () -> BuildingClientEvents.getBuildingToPlace() == HoglinRanch.class,
+            () -> BuildingClientEvents.getBuildingToPlace() == HoglinStables.class,
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Portal.buildingName) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(HoglinRanch.class),
+            () -> BuildingClientEvents.setBuildingToPlace(HoglinStables.class),
             null,
             List.of(
-                FormattedCharSequence.forward(HoglinRanch.buildingName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(HoglinStables.buildingName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A pasture of land to herd Hoglins in the overworld,", Style.EMPTY),
+                FormattedCharSequence.forward("A shelter to keep Hoglins stabled in the overworld,", Style.EMPTY),
                 FormattedCharSequence.forward("enabling their production at military portals.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Basic Portal", Style.EMPTY)
+                FormattedCharSequence.forward("Requires a Portal", Style.EMPTY)
             ),
             null
         );

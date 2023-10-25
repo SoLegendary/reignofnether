@@ -85,7 +85,7 @@ public class Bastion extends ProductionBuilding {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Can be upgraded to be garrisonable.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Requires a Basic Portal", Style.EMPTY)
+                        FormattedCharSequence.forward("Requires a Portal", Style.EMPTY)
                 ),
                 null
         );

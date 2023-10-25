@@ -21,8 +21,10 @@ public abstract class FireBlockMixin {
             at = @At("TAIL")
     )
     public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom, CallbackInfo ci) {
+        if (pLevel.getBlockState(pPos.below()).getBlock() == Blocks.NETHERRACK)
+            return;
         int age = pState.getValue(FireBlock.AGE);
-        if (age > 1 && pLevel.getBlockState(pPos.below()).getBlock() != Blocks.NETHERRACK)
+        if (age > 1)
             pLevel.removeBlock(pPos, false);
         else
             pState.setValue(FireBlock.AGE, age + 1);

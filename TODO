@@ -15,10 +15,7 @@ TODO bugs/features:
 TODO test in next playtest
 
 all units can still garrison and attack buildings correctly;
-
-ravager roars works properly
 ghast attacker range bonuses
-- check that retaliate doesnt redirect melee and ghasts from attacking a building
 - ranged units should be able to aggro properly in and against garrisons'
 - melee unit should not retaliate against garrisoned units or flying units
 
@@ -45,7 +42,6 @@ Piglins faction
         - blackstone-themed building with a decorated standard purple portal at the centre
     - Bastion
         - needs to be upgradeable to a garrisonable structure that holds 5 units
-    - Hoglin Ranch
     - Flame Sanctuary
     - Wither Shrine
     - Fortress

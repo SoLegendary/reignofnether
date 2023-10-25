@@ -45,7 +45,7 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
         TRANSPORT
     }
 
-    public final static String buildingName = "Basic Portal";
+    public final static String buildingName = "Portal";
     public final static String structureName = "portal_basic";
     public final static ResourceCost cost = ResourceCosts.BASIC_PORTAL;
 

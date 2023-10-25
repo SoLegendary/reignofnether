@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
-import com.solegendary.reignofnether.building.buildings.piglins.HoglinRanch;
+import com.solegendary.reignofnether.building.buildings.piglins.HoglinStables;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -50,7 +50,7 @@ public class HoglinProd extends ProductionItem {
                 FormattedCharSequence.forward("A beast trained for war. Deals 50% more damage to buildings.", Style.EMPTY),
                 FormattedCharSequence.forward("Can be upgraded to be mountable by Headhunters.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Hoglin Ranch.", Style.EMPTY)
+                FormattedCharSequence.forward("Requires Hoglin Stables.", Style.EMPTY)
         ));
 
         return new Button(
@@ -60,7 +60,7 @@ public class HoglinProd extends ProductionItem {
                 hotkey,
                 () -> false,
                 () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(HoglinRanch.buildingName),
+                () -> BuildingClientEvents.hasFinishedBuilding(HoglinStables.buildingName),
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
                 null,
                 tooltipLines
