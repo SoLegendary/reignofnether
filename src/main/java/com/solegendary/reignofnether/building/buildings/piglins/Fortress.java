@@ -73,9 +73,8 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
     }
 
     public boolean canDestroyBlock(BlockPos relativeBp) {
-        return relativeBp.getY() != 14 &&
-                relativeBp.getY() != 15 &&
-                relativeBp.getY() != 16;
+        return relativeBp.getY() != 16 &&
+                relativeBp.getY() != 17;
     }
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {

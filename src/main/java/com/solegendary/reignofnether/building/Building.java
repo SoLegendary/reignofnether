@@ -244,7 +244,8 @@ public abstract class Building {
     public int getBlocksPlaced() {
         // on clientside a building outside of render view would always be 0
         if (!getLevel().isClientSide() || isFullyLoadedClientSide((ClientLevel) getLevel())) {
-            int blocksPlaced = blocks.stream().filter(b -> b.isPlaced(getLevel()) && !b.getBlockState().isAir()).toList().size();
+            int blocksPlaced = blocks.stream().filter(b -> b.isPlaced(getLevel()) &&
+                    !b.getBlockState().isAir()).toList().size();
             if (blocksPlaced > highestBlockCountReached)
                 highestBlockCountReached = blocksPlaced;
             return blocksPlaced;
@@ -417,7 +418,7 @@ public abstract class Building {
         totalBlocksEverBroken += 1;
         Random rand = new Random();
 
-        if (ResearchServer.playerHasResearch(this.ownerName, ResearchSilverfish.itemName))
+        if (this.getFaction() == Faction.MONSTERS && ResearchServer.playerHasResearch(this.ownerName, ResearchSilverfish.itemName))
             randomSilverfishSpawn(pos);
 
         // when a player breaks a block that's part of the building:
