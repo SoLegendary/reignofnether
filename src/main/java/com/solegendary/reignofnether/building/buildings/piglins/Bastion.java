@@ -1,9 +1,6 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
-import com.solegendary.reignofnether.building.BuildingBlock;
-import com.solegendary.reignofnether.building.BuildingBlockData;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.ProductionBuilding;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -28,11 +25,13 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Bastion extends ProductionBuilding {
+public class Bastion extends ProductionBuilding implements GarrisonableBuilding {
 
     public final static String buildingName = "Bastion";
-    public final static String structureName = "barracks";
+    public final static String structureName = "bastion";
     public final static ResourceCost cost = ResourceCosts.BASTION;
+
+    private final static int MAX_OCCUPANTS = 5;
 
     public Bastion(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -48,7 +47,9 @@ public class Bastion extends ProductionBuilding {
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
 
-        this.startingBlockTypes.add(Blocks.POLISHED_ANDESITE_STAIRS);
+        this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE);
+        this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_BRICKS);
+        this.startingBlockTypes.add(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS);
 
         this.explodeChance = 0.2f;
 
@@ -60,6 +61,16 @@ public class Bastion extends ProductionBuilding {
     }
 
     public Faction getFaction() {return Faction.PIGLINS;}
+
+    // don't use this for abilities as it may not be balanced
+    public int getAttackRange() { return 20; }
+    // bonus for units attacking garrisoned units
+    public int getExternalAttackRangeBonus() { return 10; }
+
+    public boolean canDestroyBlock(BlockPos relativeBp) {
+        return relativeBp.getY() != 10 &&
+                relativeBp.getY() != 11;
+    }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
@@ -83,11 +94,22 @@ public class Bastion extends ProductionBuilding {
                         FormattedCharSequence.forward("A fortified barracks to house military piglins,", Style.EMPTY),
                         FormattedCharSequence.forward("enabling them to be produced at military portals.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Can be upgraded to be garrisonable.", Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Requires a Portal", Style.EMPTY)
                 ),
                 null
         );
     }
+
+    @Override
+    public BlockPos getEntryPosition() {
+        return new BlockPos(2,11,2);
+    }
+
+    @Override
+    public BlockPos getExitPosition() {
+        return new BlockPos(2,1,2);
+    }
+
+    @Override
+    public boolean isFull() { return GarrisonableBuilding.getNumOccupants(this) >= MAX_OCCUPANTS; }
 }

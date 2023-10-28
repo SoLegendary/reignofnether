@@ -54,13 +54,13 @@ public class DarkWatchtower extends Building implements GarrisonableBuilding {
     // bonus for units attacking garrisoned units
     public int getExternalAttackRangeBonus() { return 10; }
 
-    public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
-        return BuildingBlockData.getBuildingBlocks(structureName, level);
-    }
-
     public boolean canDestroyBlock(BlockPos relativeBp) {
         return relativeBp.getY() != 10 &&
                 relativeBp.getY() != 11;
+    }
+
+    public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
+        return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {

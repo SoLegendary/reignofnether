@@ -85,6 +85,8 @@ public abstract class ProductionBuilding extends Building {
 
             if (spawnIndoors) {
                 BlockPos spawnPoint = getIndoorSpawnPoint(level);
+                if (entity instanceof GhastUnit)
+                    spawnPoint = spawnPoint.offset(0,10,0);
                 entity.moveTo(new Vec3(
                         spawnPoint.getX() + 0.5f,
                         spawnPoint.getY() + 0.5f,

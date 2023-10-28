@@ -10,6 +10,9 @@ TODO bugs/features:
 
 
 
+- ghast units produced at portals don't seem to exist clientside?
+
+- make fortress and bastion top floors nondestructible
 
 
 TODO test in next playtest
@@ -40,12 +43,9 @@ Piglins faction
 
     - (Capitol) Citadel Portal
         - blackstone-themed building with a decorated standard purple portal at the centre
-    - Bastion
-        - needs to be upgradeable to a garrisonable structure that holds 5 units
-    - Flame Sanctuary
     - Wither Shrine
-    - Fortress
-        - garrisonable structure that holds 10 units
+        - centrepiece should be a diagonal-facing wither statue with 3 wither skulls
+        - include a lot of soulfires
 
 
 
@@ -174,5 +174,12 @@ TODO vanilla player balancing/interaction (backlog)
     - walking and jumping (low)
 - Attacking any melee unit that's targeting a player should immediately deal its melee damage to them
 - Punching disabled, combat and resource gathering can only be done if the player has tools/weapons
-- Tools/weapons provided by the RTS player using resources
 - Turned into a ghost on death - must walk back to a capitol building to be resurrected for a resource cost
+- Tools/weapons provided by the RTS player using resources
+- Items/utilities for non-RTS players should be produced at existing buildings:
+    - (Villagers)
+        - Stockpile - Wooden axe/pickaxe/shovel/hoe
+        - Barracks - Stone+ sword/axe
+        - Blacksmith - Armour
+        - Arcane Tower - Potions
+        - Library - Enchanting table

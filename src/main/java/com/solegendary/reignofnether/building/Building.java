@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
@@ -521,7 +522,7 @@ public abstract class Building {
             if (blocksPlaced < blocksTotal && builderCount > 0) {
                 this.ticksToExtinguish += 1;
                 if (ticksToExtinguish >= TICKS_TO_EXTINGUISH) {
-                    if (!(this instanceof FlameSanctuary))
+                    if (!(this instanceof FlameSanctuary) && !(this instanceof Fortress))
                         extinguishFires(serverLevel);
                     ticksToExtinguish = 0;
                 }

@@ -32,7 +32,7 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBl
 public class Fortress extends ProductionBuilding implements GarrisonableBuilding {
 
     public final static String buildingName = "Fortress";
-    public final static String structureName = "stronghold";
+    public final static String structureName = "fortress";
     public final static ResourceCost cost = ResourceCosts.FORTRESS;
 
     private final static int MAX_OCCUPANTS = 10;
@@ -50,10 +50,10 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
         this.popSupply = cost.population;
         this.buildTimeModifier = 0.5f;
 
-        this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE);
-        this.startingBlockTypes.add(Blocks.DEEPSLATE_TILE_SLAB);
-        this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_WALL);
-        this.startingBlockTypes.add(Blocks.DEEPSLATE);
+        this.startingBlockTypes.add(Blocks.NETHERRACK);
+        this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
+        this.startingBlockTypes.add(Blocks.POLISHED_BASALT);
+        this.startingBlockTypes.add(Blocks.NETHER_BRICK_STAIRS);
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
@@ -73,8 +73,9 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
     }
 
     public boolean canDestroyBlock(BlockPos relativeBp) {
-        return relativeBp.getY() != 13 &&
-                relativeBp.getY() != 14;
+        return relativeBp.getY() != 14 &&
+                relativeBp.getY() != 15 &&
+                relativeBp.getY() != 16;
     }
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {
