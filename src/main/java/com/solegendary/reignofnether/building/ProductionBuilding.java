@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.researchItems.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.piglins.*;
@@ -16,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
@@ -71,44 +73,41 @@ public abstract class ProductionBuilding extends Building {
     }
 
     public void produceUnit(ServerLevel level, EntityType<? extends Unit> entityType, String ownerName, boolean spawnIndoors) {
-        Entity entity = entityType.create(level);
-        if (entity != null) {
-            ((Unit) entity).setOwnerName(ownerName);
-            level.addFreshEntity(entity);
 
-            BlockPos defaultRallyPoint = getMinCorner(this.blocks).offset(
-                    0.5f - spawnRadiusOffset,
-                    0.5f,
-                    0.5f - spawnRadiusOffset);
+        BlockPos spawnPoint;
+        if (spawnIndoors) {
+            spawnPoint = getIndoorSpawnPoint(level);
+            if (entityType == EntityRegistrar.GHAST_UNIT.get())
+                spawnPoint = spawnPoint.offset(0,5,0);
+        }
+        else
+            spawnPoint = getMinCorner(this.blocks).offset(spawnRadiusOffset, 0, spawnRadiusOffset);
 
-            BlockPos rallyPoint = this.rallyPoint == null ? defaultRallyPoint : this.rallyPoint;
+        Entity entity = entityType.spawn(level, null,
+                null,
+                spawnPoint,
+                MobSpawnType.SPAWNER,
+                true,
+                false
+        );
+        BlockPos defaultRallyPoint = getMinCorner(this.blocks).offset(
+                0.5f - spawnRadiusOffset,
+                0.5f,
+                0.5f - spawnRadiusOffset);
 
-            if (spawnIndoors) {
-                BlockPos spawnPoint = getIndoorSpawnPoint(level);
-                if (entity instanceof GhastUnit)
-                    spawnPoint = spawnPoint.offset(0,10,0);
-                entity.moveTo(new Vec3(
-                        spawnPoint.getX() + 0.5f,
-                        spawnPoint.getY() + 0.5f,
-                        spawnPoint.getZ() + 0.5f
-                ));
-            }
-            else {
-                BlockPos spawnPoint = getMinCorner(this.blocks);
-                entity.moveTo(new Vec3(
-                        spawnPoint.getX() + 0.5f - spawnRadiusOffset,
-                        spawnPoint.getY() + 0.5f,
-                        spawnPoint.getZ() + 0.5f - spawnRadiusOffset
-                ));
-            }
+        BlockPos rallyPoint = this.rallyPoint == null ? defaultRallyPoint : this.rallyPoint;
+
+        if (entity instanceof Unit unit) {
+            unit.setOwnerName(ownerName);
+
             CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
                 UnitServerEvents.addActionItem(
-                    this.ownerName,
-                    UnitAction.MOVE,
-                    -1,
-                    new int[] { entity.getId() },
-                    rallyPoint,
-                    new BlockPos(0,0,0)
+                        this.ownerName,
+                        UnitAction.MOVE,
+                        -1,
+                        new int[] { entity.getId() },
+                        rallyPoint,
+                        new BlockPos(0,0,0)
                 );
             });
         }
