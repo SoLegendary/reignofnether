@@ -109,12 +109,12 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
 
     @Override
     public BlockPos getEntryPosition() {
-        return new BlockPos(5,14,5);
+        return new BlockPos(5,17,5);
     }
 
     @Override
     public BlockPos getExitPosition() {
-        return new BlockPos(5,2,6);
+        return new BlockPos(5,1,5);
     }
 
     @Override

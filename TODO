@@ -10,14 +10,10 @@ TODO bugs/features:
 
 
 
-- ghast units produced at portals don't seem to exist clientside?
-
-- make fortress and bastion top floors nondestructible
 
 
 TODO test in next playtest
 
-- check ghast spawns and iron golem spawns work correctly
 all units can still garrison and attack buildings correctly;
 ghast attacker range bonuses
 - ranged units should be able to aggro properly in and against garrisons'
