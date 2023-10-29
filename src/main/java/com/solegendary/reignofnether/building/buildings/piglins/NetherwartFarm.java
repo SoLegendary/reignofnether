@@ -61,7 +61,7 @@ public class NetherwartFarm extends Building {
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == NetherwartFarm.class,
                 () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(CitadelPortal.buildingName) ||
+                () -> BuildingClientEvents.hasFinishedBuilding(CentralPortal.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(NetherwartFarm.class),
                 null,

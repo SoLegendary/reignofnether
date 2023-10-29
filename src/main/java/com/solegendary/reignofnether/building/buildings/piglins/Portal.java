@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.ConnectPortal;
 import com.solegendary.reignofnether.ability.abilities.DisconnectPortal;
 import com.solegendary.reignofnether.ability.abilities.GotoPortal;
-import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -99,7 +98,7 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
         this.woodCost = cost.wood;
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
-        this.buildTimeModifier = 0.8f;
+        this.buildTimeModifier = 1.2f;
 
         this.canSetRallyPoint = false;
 
@@ -133,6 +132,14 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
         destination = null;
     }
 
+    @Override
+    public void onBuilt() {
+        super.onBuilt();
+        if (!this.getLevel().isClientSide())
+            this.getLevel().setBlockAndUpdate(this.centrePos, Blocks.FIRE.defaultBlockState());
+    }
+
+    @Override
     public boolean canDestroyBlock(BlockPos relativeBp) {
         BlockPos worldBp = relativeBp.offset(this.originPos);
         Block block = this.getLevel().getBlockState(worldBp).getBlock();
@@ -198,7 +205,7 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Portal.class,
                 () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(CitadelPortal.buildingName) ||
+                () -> BuildingClientEvents.hasFinishedBuilding(CentralPortal.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(Portal.class),
                 null,

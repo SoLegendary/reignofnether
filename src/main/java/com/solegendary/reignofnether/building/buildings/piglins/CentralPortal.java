@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
@@ -23,11 +24,11 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class CitadelPortal extends ProductionBuilding implements NetherConvertingBuilding {
+public class CentralPortal extends ProductionBuilding implements NetherConvertingBuilding {
 
-    public final static String buildingName = "Citadel Portal";
-    public final static String structureName = "town_centre";
-    public final static ResourceCost cost = ResourceCosts.CITADEL_PORTAL;
+    public final static String buildingName = "Central Portal";
+    public final static String structureName = "central_portal";
+    public final static ResourceCost cost = ResourceCosts.CENTRAL_PORTAL;
 
     private final double NETHER_CONVERT_RANGE_MAX = 40;
     private double netherConvertRange = 3;
@@ -51,7 +52,7 @@ public class CitadelPortal extends ProductionBuilding implements NetherConvertin
         }
     }
 
-    public CitadelPortal(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
+    public CentralPortal(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), true);
         this.name = buildingName;
         this.ownerName = ownerName;
@@ -65,14 +66,19 @@ public class CitadelPortal extends ProductionBuilding implements NetherConvertin
         this.buildTimeModifier = 0.8f;
         this.canAcceptResources = true;
 
-        this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);
-        this.startingBlockTypes.add(Blocks.GRASS_BLOCK);
-        this.startingBlockTypes.add(Blocks.POLISHED_ANDESITE_STAIRS);
+        this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
                     GruntProd.getStartButton(this, Keybindings.keyQ)
             );
+    }
+
+    @Override
+    public boolean canDestroyBlock(BlockPos relativeBp) {
+        BlockPos worldBp = relativeBp.offset(this.originPos);
+        Block block = this.getLevel().getBlockState(worldBp).getBlock();
+        return block != Blocks.OBSIDIAN && block != Blocks.NETHER_PORTAL;
     }
 
     public Faction getFaction() {return Faction.PIGLINS;}
@@ -81,18 +87,25 @@ public class CitadelPortal extends ProductionBuilding implements NetherConvertin
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 
+    @Override
+    public void onBuilt() {
+        super.onBuilt();
+        if (!this.getLevel().isClientSide())
+            this.getLevel().setBlockAndUpdate(this.centrePos.offset(-1,0,0), Blocks.FIRE.defaultBlockState());
+    }
+
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         return new AbilityButton(
-                CitadelPortal.buildingName,
+                CentralPortal.buildingName,
                 new ResourceLocation("minecraft", "textures/block/obsidian.png"),
                 hotkey,
-                () -> BuildingClientEvents.getBuildingToPlace() == CitadelPortal.class,
+                () -> BuildingClientEvents.getBuildingToPlace() == CentralPortal.class,
                 () -> false,
                 () -> true,
-                () -> BuildingClientEvents.setBuildingToPlace(CitadelPortal.class),
+                () -> BuildingClientEvents.setBuildingToPlace(CentralPortal.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(CitadelPortal.buildingName + " (Capitol)", Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(CentralPortal.buildingName + " (Capitol)", Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPop(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),

@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BuildingBlock {
@@ -31,9 +32,15 @@ public class BuildingBlock {
     }
 
     public boolean isPlaced(Level level) {
+        BlockState bs;
         if (level.isClientSide())
-            return !this.blockState.isAir() && Minecraft.getInstance().level.getBlockState(this.blockPos) == this.blockState;
+            bs = Minecraft.getInstance().level.getBlockState(this.blockPos);
         else
-            return !this.blockState.isAir() && level.getBlockState(this.blockPos) == this.blockState;
+            bs = level.getBlockState(this.blockPos);
+
+        // wall blockstates don't match unless the block above them is placed
+        boolean isMatchingWallBlock = this.blockState.getBlock() instanceof WallBlock && bs.getBlock() == this.blockState.getBlock();
+
+        return !this.blockState.isAir() && (bs == this.blockState || isMatchingWallBlock);
     }
 }
