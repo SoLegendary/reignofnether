@@ -33,7 +33,7 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBl
 public class WitherShrine extends ProductionBuilding {
 
     public final static String buildingName = "Wither Shrine";
-    public final static String structureName = "library";
+    public final static String structureName = "wither_shrine";
     public final static ResourceCost cost = ResourceCosts.WITHER_SHRINE;
 
     public WitherShrine(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
@@ -50,8 +50,7 @@ public class WitherShrine extends ProductionBuilding {
 
         this.canSetRallyPoint = false;
 
-        this.startingBlockTypes.add(Blocks.OAK_LOG);
-        this.startingBlockTypes.add(Blocks.SPRUCE_STAIRS);
+        this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_STAIRS);
 
         this.explodeChance = 0.2f;
 

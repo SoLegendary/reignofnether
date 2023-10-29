@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -115,5 +116,10 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
                 ),
                 null
         );
+    }
+
+    @Override
+    public BlockPos getIndoorSpawnPoint(ServerLevel level) {
+        return super.getIndoorSpawnPoint(level).offset(0,-5,0);
     }
 }

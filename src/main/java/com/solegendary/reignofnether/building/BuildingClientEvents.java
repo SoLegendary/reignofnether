@@ -326,7 +326,10 @@ public class BuildingClientEvents {
             }
         }
         if (blocksBelow <= 0) return false; // avoid division by 0
-        return ((float) netherBlocksBelow / (float) blocksBelow) > MIN_NETHER_BLOCKS_PERCENT;
+        boolean result = ((float) netherBlocksBelow / (float) blocksBelow) > MIN_NETHER_BLOCKS_PERCENT;
+        if (!result)
+            HudClientEvents.showTemporaryMessage("Must be built on nether terrain");
+        return result;
     }
 
     // gets the cursor position rotated according to the preselected building

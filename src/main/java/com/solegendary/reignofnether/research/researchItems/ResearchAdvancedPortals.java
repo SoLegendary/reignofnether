@@ -58,7 +58,7 @@ public class ResearchAdvancedPortals extends ProductionItem {
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Allows portals to be constructed off of nether blocks", Style.EMPTY),
+                        FormattedCharSequence.forward("Allows portals to be constructed off of nether terrain", Style.EMPTY),
                         FormattedCharSequence.forward("and enables them to be upgraded into transport portals,", Style.EMPTY),
                         FormattedCharSequence.forward("which can instantly teleport units between them.", Style.EMPTY)
                 )
