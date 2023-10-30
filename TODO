@@ -10,10 +10,44 @@ TODO bugs/features:
 
 
 
+- logging out of a server should remove all clientside units and buildings
 
-- right clicking a resource block doesn't make the worker immediately mine it, but only sets the resource search type
+- worker didn't automatically start planting after finishing a farm
 
 - measure all farms' food/min speed and initial wait times
+
+- crimson
+- convert animals into nether equivalents
+
+- nether wart growth too slow
+
+- remove spawn egg logic
+    - grunts are spawning with armor
+    - remove chance to become a baby on spawn
+
+- bastions take too long to build
+    - allow brutes to be built without a bastion
+
+- portals have a chance to be deleted on otyher clients when upgraded
+
+- other players are given the temporary UI message when your upgrade completes
+
+- hoglins have trouble going up 1 high blocks
+
+- transport portals are not making sounds (on server)
+
+- piglins shouldbnt be 100% fire immune when INSIDE fire (thats stupid)
+
+- let ghast fireballs destroy leaves
+
+- up stats of withers (+ damage, + health, + wither cloud size)
+
+- flame sanctuary spawner should not spawn neutral blazes
+
+- up brute damage to 5
+
+
+
 
 
 
