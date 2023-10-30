@@ -32,7 +32,7 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
     public final static ResourceCost cost = ResourceCosts.CENTRAL_PORTAL;
 
     private final double NETHER_CONVERT_RANGE_MAX = 30;
-    private double netherConvertRange = 5;
+    private double netherConvertRange = 6;
     private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
     private int convertsAfterMaxRange = 0;
 
