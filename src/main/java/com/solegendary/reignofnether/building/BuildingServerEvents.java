@@ -203,12 +203,12 @@ public class BuildingServerEvents {
     public static void onLivingSpawn(LivingSpawnEvent.SpecialSpawn evt) {
         if (evt.getSpawnReason() == MobSpawnType.SPAWNER) {
             if (evt.getSpawner() != null &&
-                    evt.getSpawner().getSpawnerBlockEntity() != null) {
+                evt.getSpawner().getSpawnerBlockEntity() != null) {
                 BlockEntity be = evt.getSpawner().getSpawnerBlockEntity();
                 BlockPos bp = evt.getSpawner().getSpawnerBlockEntity().getBlockPos();
                 if (BuildingUtils.findBuilding(false, bp) instanceof Dungeon ||
                     BuildingUtils.findBuilding(false, bp) instanceof FlameSanctuary)
-                    evt.setResult(Event.Result.DENY);
+                    evt.getEntity().discard();
             }
         }
     }
@@ -304,7 +304,14 @@ public class BuildingServerEvents {
         }
 
         // don't do any block damage apart from the scripted building damage above
-        evt.getAffectedBlocks().clear();
+        if (ghastUnit == null)
+            evt.getAffectedBlocks().clear();
+        else {
+            evt.getAffectedBlocks().removeIf(bp -> {
+                BlockState bs = evt.getLevel().getBlockState(bp);
+                return !(bs.getBlock() instanceof LeavesBlock);
+            });
+        }
     }
 
     @SubscribeEvent

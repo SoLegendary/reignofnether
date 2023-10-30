@@ -10,54 +10,30 @@ TODO bugs/features:
 
 
 
-- logging out of a server should remove all clientside units and buildings
 
-- worker didn't automatically start planting after finishing a farm
 
-- measure all farms' food/min speed and initial wait times
-
-- crimson
-- convert animals into nether equivalents
-
-- nether wart growth too slow
-
-- remove spawn egg logic
-    - grunts are spawning with armor
-    - remove chance to become a baby on spawn
-
-- bastions take too long to build
-    - allow brutes to be built without a bastion
-
-- portals have a chance to be deleted on otyher clients when upgraded
-
-- other players are given the temporary UI message when your upgrade completes
+- isMeleeAttackedByFlying not working
 
 - hoglins have trouble going up 1 high blocks
+    - apply same movement logic ravagers have (smooth movement up 1-block heights)
 
-- transport portals are not making sounds (on server)
+- up stats of wither cloud sizes
 
-- piglins shouldbnt be 100% fire immune when INSIDE fire (thats stupid)
-
-- let ghast fireballs destroy leaves
-
-- up stats of withers (+ damage, + health, + wither cloud size)
-
-- flame sanctuary spawner should not spawn neutral blazes
-
-- up brute damage to 5
-
-
+- measure all farms' food/min speed and initial wait times
 
 
 
 
 TODO test in next playtest
 
-all units can still garrison and attack buildings correctly;
-ghast attacker range bonuses
-- ranged units should be able to aggro properly in and against garrisons'
-- melee unit should not retaliate against garrisoned units or flying units
+logging out of a server should remove all clientside buildings
+piglins should still tick damage inside fire
+flame sanctuary builds at normal speed correctly and doesn't spawn neutral blazes
+grunts should not spawn with any equipment
+ghast fireballs destroy leaves
 
+worker didn't automatically start planting after finishing a farm
+    - only for Tim?
 
 TODO weird ideas
 

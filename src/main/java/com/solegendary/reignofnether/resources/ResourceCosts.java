@@ -38,9 +38,9 @@ public class ResourceCosts {
     public static ResourceCost ZOMBIE_VILLAGER = ResourceCost.Unit(50,0,0,15,1);
     public static ResourceCost CREEPER = ResourceCost.Unit(50,0,100,35,2);
     public static ResourceCost SKELETON = ResourceCost.Unit(70,35,0,20,1);
-    public static ResourceCost STRAY = ResourceCost.Unit(70,50,0,20,1);
-    public static ResourceCost ZOMBIE = ResourceCost.Unit(90,0,0,20,1);
-    public static ResourceCost HUSK = ResourceCost.Unit(90,0,0,20,1);
+    public static ResourceCost STRAY = ResourceCost.Unit(70,35,0,20,1);
+    public static ResourceCost ZOMBIE = ResourceCost.Unit(85,0,0,20,1);
+    public static ResourceCost HUSK = ResourceCost.Unit(85,0,0,20,1);
     public static ResourceCost SPIDER = ResourceCost.Unit(80,60,0,25,2);
     public static ResourceCost POISON_SPIDER = ResourceCost.Unit(80,0,60,25,2);
     public static ResourceCost ENDERMAN = ResourceCost.Unit(100,100,100,30,3);

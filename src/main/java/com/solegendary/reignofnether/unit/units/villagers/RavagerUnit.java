@@ -125,7 +125,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 6.0f;
+    final static public float attackDamage = 7.0f;
     final static public float attacksPerSecond = 0.6f;
     final static public float maxHealth = 200.0f;
     final static public float armorValue = 0.0f;

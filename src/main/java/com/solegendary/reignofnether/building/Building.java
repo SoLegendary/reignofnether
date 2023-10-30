@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
@@ -364,6 +365,8 @@ public abstract class Building {
     }
 
     public boolean shouldBeDestroyed() {
+        //if (this instanceof Portal portal && portal.portalType != Portal.PortalType.BASIC && tickAge < 20)
+        //    return false;
         if (blockPlaceQueue.size() > 0)
             return false;
         if (getBlocksPlaced() <= 0)

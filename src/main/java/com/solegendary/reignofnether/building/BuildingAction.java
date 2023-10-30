@@ -10,5 +10,6 @@ public enum BuildingAction {
     START_PRODUCTION, // start ProductionItem
     CANCEL_PRODUCTION, // remove ProductionItem from front of queue
     CANCEL_BACK_PRODUCTION, // remove ProductionItem from back of queue
-    CHECK_STOCKPILE_CHEST // check stockpile chests for resources to consume
+    CHECK_STOCKPILE_CHEST, // check stockpile chests for resources to consume
+    CHANGE_PORTAL // changes a portal clientside to match server when another player upgrades it
 }

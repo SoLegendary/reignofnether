@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class BaseFireBlockMixin {
 
     private static final int DAMAGE_DELAY = 20; // higher == damage less often
+    private static final int DAMAGE_FOR_PIGLINS = 1;
     private static final int DAMAGE = 3;
 
     @Inject(
@@ -27,10 +28,13 @@ public abstract class BaseFireBlockMixin {
     public void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity, CallbackInfo ci) {
         ci.cancel();
         if (!pEntity.fireImmune()) {
-            pEntity.setRemainingFireTicks((8 * 20) - 1); // prevent damage from being ON fire from happening every tick
+            if (pEntity.getRemainingFireTicks() < (7 * 20) - 1)
+                pEntity.setRemainingFireTicks((8 * 20) - 1); // prevent damage from being ON fire from happening every tick
             boolean isDamageTick = pEntity.tickCount % DAMAGE_DELAY == 0;
-            if (isDamageTick && !(pEntity instanceof Unit unit && unit.getFaction() == Faction.PIGLINS))
-                pEntity.hurt(DamageSource.IN_FIRE, DAMAGE);
+            if (isDamageTick) {
+                boolean isPiglinFaction = pEntity instanceof Unit unit && unit.getFaction() == Faction.PIGLINS;
+                pEntity.hurt(DamageSource.IN_FIRE, isPiglinFaction ? DAMAGE_FOR_PIGLINS : DAMAGE);
+            }
         }
     }
 }

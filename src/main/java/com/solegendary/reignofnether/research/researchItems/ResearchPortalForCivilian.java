@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
@@ -24,8 +25,12 @@ public class ResearchPortalForCivilian extends ProductionItem {
     public ResearchPortalForCivilian(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (this.building instanceof Portal portal)
-                portal.changeStructure(Portal.PortalType.CIVILIAN);
+            if (this.building instanceof Portal portal) {
+                if (!level.isClientSide()) {
+                    portal.changeStructure(Portal.PortalType.CIVILIAN);
+                    BuildingClientboundPacket.changePortal(this.building.originPos, Portal.PortalType.CIVILIAN.name());
+                }
+            }
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;

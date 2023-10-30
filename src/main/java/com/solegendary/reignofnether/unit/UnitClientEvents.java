@@ -311,6 +311,8 @@ public class UnitClientEvents {
             idleWorkerIds.clear();
             ResearchClient.removeAllResearch();
             ResearchClient.removeAllCheats();
+            BuildingClientEvents.getSelectedBuildings().clear();
+            BuildingClientEvents.getBuildings().clear();
         }
     }
 

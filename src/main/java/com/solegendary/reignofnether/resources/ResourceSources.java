@@ -245,6 +245,13 @@ public class ResourceSources {
                     15,
                     ResourceName.WOOD
             ),
+            new ResourceSource("Logs",
+                    List.of(Blocks.CRIMSON_STEM, Blocks.WARPED_STEM, Blocks.STRIPPED_CRIMSON_STEM, Blocks.STRIPPED_WARPED_STEM),
+                    List.of(Items.CRIMSON_STEM, Items.WARPED_STEM, Items.STRIPPED_CRIMSON_STEM, Items.STRIPPED_WARPED_STEM),
+                    TICKS_PER_SECOND * 10,
+                    17,
+                    ResourceName.WOOD
+            ),
             new ResourceSource("Leaves", // can't actually gather but can be targeted to begin wood gathering
                     List.of(Blocks.ACACIA_LEAVES, Blocks.AZALEA_LEAVES, Blocks.BIRCH_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.DARK_OAK_LEAVES,
                             Blocks.MANGROVE_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES, BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get(), BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get()),

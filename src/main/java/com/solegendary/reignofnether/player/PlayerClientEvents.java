@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.player;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.commands.Commands;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class PlayerClientEvents {

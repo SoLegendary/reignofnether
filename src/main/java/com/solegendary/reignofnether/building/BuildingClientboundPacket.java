@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -48,9 +49,15 @@ public class BuildingClientboundPacket {
     }
     public static void cancelProduction(BlockPos buildingPos, String itemName, boolean frontItem) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new BuildingClientboundPacket(
-            frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
-            itemName, buildingPos, Rotation.NONE, "", 0, 0));
+                new BuildingClientboundPacket(
+                        frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
+                        itemName, buildingPos, Rotation.NONE, "", 0, 0));
+    }
+    public static void changePortal(BlockPos buildingPos, String portalType) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new BuildingClientboundPacket(
+                        BuildingAction.CHANGE_PORTAL, portalType, buildingPos,
+                        Rotation.NONE, "", 0, 0));
     }
 
     public BuildingClientboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, Rotation rotation,
@@ -109,6 +116,10 @@ public class BuildingClientboundPacket {
                     }
                     case CANCEL_BACK_PRODUCTION -> {
                         ProductionBuilding.cancelProductionItem((ProductionBuilding) building, this.itemName, this.buildingPos, false);
+                    }
+                    case CHANGE_PORTAL -> {
+                        if (building instanceof Portal portal)
+                            portal.changeStructure(Portal.PortalType.valueOf(itemName));
                     }
                 }
                 success.set(true);

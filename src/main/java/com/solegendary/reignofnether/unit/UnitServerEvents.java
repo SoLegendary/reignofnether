@@ -220,7 +220,7 @@ public class UnitServerEvents {
 
             AreaEffectCloud aec = new AreaEffectCloud(evt.getEntity().level, evt.getEntity().getX(), evt.getEntity().getY(), evt.getEntity().getZ());
             aec.setOwner(evt.getEntity());
-            aec.setRadius(3.0F);
+            aec.setRadius(4.0F);
             aec.setRadiusOnUse(0);
             aec.setDurationOnUse(0);
             aec.setDuration(10 * 20);
@@ -351,7 +351,14 @@ public class UnitServerEvents {
         if (shouldIgnoreKnockback(evt))
             knockbackIgnoreIds.add(evt.getEntity().getId());
 
-        // double wither damage since we are playing with (average) doubled mob health
+        // wither skeletons deal up to double damage to enemies with less health left
+        if (evt.getSource().getEntity() instanceof WitherSkeletonUnit) {
+            float maxHp = evt.getEntity().getMaxHealth();
+            float hp = evt.getEntity().getHealth();
+            float damageMult = 2.0f - (hp / maxHp);
+            evt.setAmount(evt.getAmount() * damageMult);
+        }
+        // increase wither damage since we are playing with (average) doubled mob health
         if (evt.getSource() == DamageSource.WITHER)
             evt.setAmount(evt.getAmount() * 2);
 

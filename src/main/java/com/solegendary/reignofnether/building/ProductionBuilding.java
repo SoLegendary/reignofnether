@@ -17,7 +17,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
@@ -99,6 +101,10 @@ public abstract class ProductionBuilding extends Building {
 
         if (entity instanceof Unit unit) {
             unit.setOwnerName(ownerName);
+            unit.setupEquipmentAndUpgradesServer();
+            entity.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+            entity.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
+            entity.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY);
 
             CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
                 UnitServerEvents.addActionItem(

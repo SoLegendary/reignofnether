@@ -47,9 +47,7 @@ public class BruteProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A piglin armed with a sword for combat.", Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Bastion.", Style.EMPTY)
+                FormattedCharSequence.forward("A piglin armed with a sword for combat.", Style.EMPTY)
         ));
 
         return new Button(
@@ -59,7 +57,7 @@ public class BruteProd extends ProductionItem {
                 hotkey,
                 () -> false,
                 () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(Bastion.buildingName),
+                () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
                 null,
                 tooltipLines
