@@ -115,6 +115,7 @@ public class UnitActionItem {
                     if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE && buildingAtPos == null) {
                         GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
                         goal.setTargetResourceName(resName);
+                        goal.setMoveTarget(preselectedBlockPos);
                         if (Unit.atMaxResources((Unit) workerUnit)) {
                             if (level.isClientSide())
                                 HudClientEvents.showTemporaryMessage("Worker inventory full, dropping off first...");
