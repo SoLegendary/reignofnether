@@ -301,7 +301,7 @@ public class BuildingClientEvents {
 
     private static boolean isNonPiglinOrOnNetherBlocks(BlockPos originPos) {
         String buildingName = buildingToPlace.getName().toLowerCase();
-        if (!buildingName.contains("buildings.piglins.") || buildingName.contains("central portal"))
+        if (!buildingName.contains("buildings.piglins.") || buildingName.contains("centralportal"))
             return true;
         if (buildingName.contains("portal") && ResearchClient.hasResearch(ResearchAdvancedPortals.itemName))
             return true;
@@ -326,10 +326,7 @@ public class BuildingClientEvents {
             }
         }
         if (blocksBelow <= 0) return false; // avoid division by 0
-        boolean result = ((float) netherBlocksBelow / (float) blocksBelow) > MIN_NETHER_BLOCKS_PERCENT;
-        if (!result)
-            HudClientEvents.showTemporaryMessage("Must be built on nether terrain");
-        return result;
+        return ((float) netherBlocksBelow / (float) blocksBelow) > MIN_NETHER_BLOCKS_PERCENT;
     }
 
     // gets the cursor position rotated according to the preselected building

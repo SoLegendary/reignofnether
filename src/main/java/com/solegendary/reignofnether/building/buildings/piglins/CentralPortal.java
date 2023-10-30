@@ -31,8 +31,8 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
     public final static String structureName = "central_portal";
     public final static ResourceCost cost = ResourceCosts.CENTRAL_PORTAL;
 
-    private final double NETHER_CONVERT_RANGE_MAX = 40;
-    private double netherConvertRange = 3;
+    private final double NETHER_CONVERT_RANGE_MAX = 30;
+    private double netherConvertRange = 5;
     private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
     private int convertsAfterMaxRange = 0;
 
@@ -42,14 +42,16 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
 
-        netherConvertTicksLeft -= 1;
-        if (netherConvertTicksLeft <= 0 && convertsAfterMaxRange < MAX_CONVERTS_AFTER_MAX_RANGE) {
-            netherConvertTick(this, netherConvertRange, NETHER_CONVERT_RANGE_MAX);
-            if (netherConvertRange < NETHER_CONVERT_RANGE_MAX)
-                netherConvertRange += 0.1f;
-            else
-                convertsAfterMaxRange += 1;
-            netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
+        if (isBuilt) {
+            netherConvertTicksLeft -= 1;
+            if (netherConvertTicksLeft <= 0 && convertsAfterMaxRange < MAX_CONVERTS_AFTER_MAX_RANGE) {
+                netherConvertTick(this, netherConvertRange, NETHER_CONVERT_RANGE_MAX);
+                if (netherConvertRange < NETHER_CONVERT_RANGE_MAX)
+                    netherConvertRange += 0.1f;
+                else
+                    convertsAfterMaxRange += 1;
+                netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
+            }
         }
     }
 

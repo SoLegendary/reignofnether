@@ -11,6 +11,11 @@ TODO bugs/features:
 
 
 
+- right clicking a resource block doesn't make the worker immediately mine it, but only sets the resource search type
+
+- measure all farms' food/min speed and initial wait times
+
+
 
 TODO test in next playtest
 

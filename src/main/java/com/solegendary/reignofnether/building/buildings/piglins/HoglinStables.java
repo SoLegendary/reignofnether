@@ -72,6 +72,8 @@ public class HoglinStables extends ProductionBuilding {
             () -> BuildingClientEvents.getBuildingToPlace() == HoglinStables.class,
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Portal.buildingName) ||
+                    BuildingClientEvents.hasFinishedBuilding("Civilian Portal") ||
+                    BuildingClientEvents.hasFinishedBuilding("Military Portal") ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(HoglinStables.class),
             null,
@@ -82,7 +84,7 @@ public class HoglinStables extends ProductionBuilding {
                 FormattedCharSequence.forward("A shelter to keep Hoglins stabled in the overworld,", Style.EMPTY),
                 FormattedCharSequence.forward("enabling their production at military portals.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Portal", Style.EMPTY)
+                FormattedCharSequence.forward("Requires a Basic Portal", Style.EMPTY)
             ),
             null
         );

@@ -100,6 +100,9 @@ public class ResourcesServerEvents {
         else if (block instanceof StemBlock && blockState.getValue(BlockStateProperties.AGE_7) == 7) {
             evt.setResult(Event.Result.ALLOW);
         }
+        else if (block instanceof NetherWartBlock && blockState.getValue(BlockStateProperties.AGE_3) == 3) {
+            evt.setResult(Event.Result.ALLOW);
+        }
         // prevent natural growth, use our algorithm instead
         else if (block instanceof CropBlock || block instanceof StemBlock) {
             int newAge = blockState.getValue(BlockStateProperties.AGE_7) + (random.nextFloat() > 0.6f ? 1 : 2);

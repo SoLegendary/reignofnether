@@ -44,7 +44,7 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
         TRANSPORT
     }
 
-    public final static String buildingName = "Portal";
+    public final static String buildingName = "Basic Portal";
     public final static String structureName = "portal_basic";
     public final static ResourceCost cost = ResourceCosts.BASIC_PORTAL;
 
@@ -62,14 +62,16 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
 
-        netherConvertTicksLeft -= 1;
-        if (netherConvertTicksLeft <= 0 && convertsAfterMaxRange < MAX_CONVERTS_AFTER_MAX_RANGE) {
-            netherConvertTick(this, netherConvertRange, NETHER_CONVERT_RANGE_MAX);
-            if (netherConvertRange < NETHER_CONVERT_RANGE_MAX)
-                netherConvertRange += 0.1f;
-            else
-                convertsAfterMaxRange += 1;
-            netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
+        if (isBuilt) {
+            netherConvertTicksLeft -= 1;
+            if (netherConvertTicksLeft <= 0 && convertsAfterMaxRange < MAX_CONVERTS_AFTER_MAX_RANGE) {
+                netherConvertTick(this, netherConvertRange, NETHER_CONVERT_RANGE_MAX);
+                if (netherConvertRange < NETHER_CONVERT_RANGE_MAX)
+                    netherConvertRange += 0.1f;
+                else
+                    convertsAfterMaxRange += 1;
+                netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
+            }
         }
     }
 
