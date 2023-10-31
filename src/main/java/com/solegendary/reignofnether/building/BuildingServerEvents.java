@@ -303,15 +303,11 @@ public class BuildingServerEvents {
             }
         }
 
-        // don't do any block damage apart from the scripted building damage above
-        if (ghastUnit == null)
-            evt.getAffectedBlocks().clear();
-        else {
-            evt.getAffectedBlocks().removeIf(bp -> {
-                BlockState bs = evt.getLevel().getBlockState(bp);
-                return !(bs.getBlock() instanceof LeavesBlock);
-            });
-        }
+        // don't do any block damage apart from the scripted building damage above or damage to leaves
+        evt.getAffectedBlocks().removeIf(bp -> {
+            BlockState bs = evt.getLevel().getBlockState(bp);
+            return !(bs.getBlock() instanceof LeavesBlock);
+        });
     }
 
     @SubscribeEvent

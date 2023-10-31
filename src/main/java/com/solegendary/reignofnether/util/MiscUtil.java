@@ -8,6 +8,10 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.goals.FlyingMoveToTargetGoal;
+import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
+import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.client.Minecraft;
@@ -142,6 +146,10 @@ public class MiscUtil {
 
         for (Mob tMob : nearbyMobs) {
             Relationship rs = UnitServerEvents.getUnitToEntityRelationship((Unit) unitMob, tMob);
+            // don't let melee units aggro against flying units
+            if (tMob instanceof Unit unit && unit.getMoveGoal() instanceof FlyingMoveToTargetGoal &&
+                unitMob instanceof AttackerUnit attackerUnit && attackerUnit.getAttackGoal() instanceof MeleeAttackUnitGoal)
+                continue;
             if (rs == Relationship.HOSTILE && tMob.getId() != unitMob.getId() && hasLineOfSightForAttacks(unitMob, tMob))
                 nearbyHostileMobs.add(tMob);
         }

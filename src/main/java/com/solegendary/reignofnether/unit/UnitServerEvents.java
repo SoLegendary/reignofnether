@@ -416,10 +416,11 @@ public class UnitServerEvents {
         if (evt.getRayTraceResult().getType() == HitResult.Type.ENTITY)
             hit = ((EntityHitResult) evt.getRayTraceResult()).getEntity();
 
-        // prevent fireballs actually directly hitting anything,
+        // prevent fireballs actually directly hitting anything, except other ghasts
         //  instead just relying on splash damage and fire creation
         if (owner instanceof GhastUnit && hit != null)
-            evt.setCanceled(true);
+            if (!(hit instanceof GhastUnit))
+                evt.setCanceled(true);
 
         if (owner instanceof Unit unit && hit != null) {
             if (getUnitToEntityRelationship(unit, hit) == Relationship.FRIENDLY &&
