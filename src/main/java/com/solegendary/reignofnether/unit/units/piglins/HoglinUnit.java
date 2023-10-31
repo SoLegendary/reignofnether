@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -26,9 +27,15 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraftforge.event.ForgeEventFactory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
@@ -134,6 +141,33 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
         this.abilities.add(ab1);
         if (level.isClientSide())
             this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+
+        // smooth travel up 1-high blocks from Ravager aiStep()s
+        if (this.horizontalCollision) {
+            boolean flag = false;
+            AABB aabb = this.getBoundingBox().inflate(0.2);
+            Iterator var8 = BlockPos.betweenClosed(Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ)).iterator();
+            label62:
+            while(true) {
+                BlockPos blockpos;
+                Block block;
+                do {
+                    if (!var8.hasNext()) {
+                        if (!flag && this.onGround)
+                            this.jumpFromGround();
+                        break label62;
+                    }
+                    blockpos = (BlockPos)var8.next();
+                    BlockState blockstate = this.level.getBlockState(blockpos);
+                    block = blockstate.getBlock();
+                } while(!(block instanceof LeavesBlock));
+            }
+        }
     }
 
     @Override

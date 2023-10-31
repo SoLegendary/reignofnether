@@ -11,9 +11,6 @@ TODO bugs/features:
 
 
 
-- hoglins have trouble going up 1 high blocks
-    - apply same movement logic ravagers have (smooth movement up 1-block heights)
-
 - up stats of wither cloud sizes
 
 - measure all farms' food/min speed and initial wait times
