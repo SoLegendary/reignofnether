@@ -38,7 +38,7 @@ public class TownCentre extends ProductionBuilding {
         this.woodCost = cost.wood;
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
-        this.buildTimeModifier = 0.8f;
+        this.buildTimeModifier = 0.4f;
         this.canAcceptResources = true;
 
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);

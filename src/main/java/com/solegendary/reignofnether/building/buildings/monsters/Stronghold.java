@@ -96,7 +96,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("Distorts time to midnight within a " + nightRange + " block radius", Style.EMPTY),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Requires a graveyard, spider lair and dungeon.", Style.EMPTY)
+                    FormattedCharSequence.forward("Requires a Graveyard, Spider Lair and Dungeon.", Style.EMPTY)
             ),
             null
         );

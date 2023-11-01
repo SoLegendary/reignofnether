@@ -79,7 +79,7 @@ public class ResearchHusks extends ProductionItem {
                 FormattedCharSequence.forward("Transforms all existing and future zombies into husks,", Style.EMPTY),
                 FormattedCharSequence.forward("granting them +" + (int) (HuskUnit.maxHealth - ZombieUnit.maxHealth) + " health and immunity to sunlight.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a graveyard.", Style.EMPTY)
+                FormattedCharSequence.forward("Requires a Graveyard.", Style.EMPTY)
             )
         );
     }

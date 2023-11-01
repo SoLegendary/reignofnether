@@ -62,7 +62,7 @@ public class ResearchPoisonSpiders extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Allows your spider lairs to create poison spiders.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a spider lair.", Style.EMPTY)
+                FormattedCharSequence.forward("Requires a Spider Lair.", Style.EMPTY)
             )
         );
     }

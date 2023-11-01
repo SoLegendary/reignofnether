@@ -78,7 +78,7 @@ public class ResearchStrays extends ProductionItem {
                 FormattedCharSequence.forward("Transforms all existing and future skeletons", Style.EMPTY),
                 FormattedCharSequence.forward("into strays which fire slowing arrows.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a graveyard.", Style.EMPTY)
+                FormattedCharSequence.forward("Requires a Graveyard.", Style.EMPTY)
             )
         );
     }

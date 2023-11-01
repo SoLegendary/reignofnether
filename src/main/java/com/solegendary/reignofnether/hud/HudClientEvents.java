@@ -50,7 +50,7 @@ public class HudClientEvents {
     private static int tempMsgTicksLeft = 0;
     private static final int TEMP_MSG_TICKS_FADE = 50; // ticks left when the msg starts to fade
     private static final int TEMP_MSG_TICKS_MAX = 150; // ticks to show the msg for
-    private static final int MAX_BUTTONS_PER_ROW = 5;
+    private static final int MAX_BUTTONS_PER_ROW = 6;
 
     private static final ArrayList<ControlGroup> controlGroups = new ArrayList<>(10);
     private static final ArrayList<Button> buildingButtons = new ArrayList<>();
@@ -117,7 +117,7 @@ public class HudClientEvents {
         mouseY = evt.getMouseY();
 
         // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
-        int hudStartingXPos = Button.iconFrameSize * 6;
+        int hudStartingXPos = Button.iconFrameSize * 6 + (Button.iconFrameSize / 2);
 
         ArrayList<LivingEntity> selUnits = UnitClientEvents.getSelectedUnits();
         ArrayList<Building> selBuildings = BuildingClientEvents.getSelectedBuildings();
@@ -342,20 +342,35 @@ public class HudClientEvents {
             }
             else if (hudSelBuildingOwned) {
 
+                List<AbilityButton> buildingAbilities = List.of();
+                if (hudSelectedBuilding != null)
+                    buildingAbilities = hudSelectedBuilding.getAbilityButtons().stream().filter(b -> !b.isHidden.get()).toList();
+                if (buildingAbilities.size() > 0)
+                    blitY -= Button.iconFrameSize;
+
                 // production buttons on bottom row
                 if (hudSelectedBuilding instanceof ProductionBuilding selProdBuilding) {
-                    for (Button productionButton : selProdBuilding.productionButtons) {
-                        if (!productionButton.isHidden.get()) {
-                            productionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
-                            productionButtons.add(productionButton);
-                            renderedButtons.add(productionButton);
-                            blitX += iconFrameSize;
+                    List<Button> visibleProdButtons = selProdBuilding.productionButtons.stream().filter(b -> !b.isHidden.get()).toList();
+                    if (visibleProdButtons.size() > MAX_BUTTONS_PER_ROW)
+                        blitY -= Button.iconFrameSize;
+
+                    int rowButtons = 0;
+                    for (Button prodButton : visibleProdButtons) {
+                        rowButtons += 1;
+                        if (rowButtons > MAX_BUTTONS_PER_ROW) {
+                            rowButtons = 0;
+                            blitX = 0;
+                            blitY += Button.iconFrameSize;
                         }
+                        prodButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                        productionButtons.add(prodButton);
+                        renderedButtons.add(prodButton);
+                        blitX += iconFrameSize;
                     }
                 }
-                blitY -= Button.iconFrameSize;
+                blitY += Button.iconFrameSize;
                 blitX = 0;
-                for (AbilityButton abilityButton : hudSelectedBuilding.getAbilityButtons()) {
+                for (AbilityButton abilityButton : buildingAbilities) {
                     if (!abilityButton.isHidden.get()) {
                         abilityButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                         renderedButtons.add(abilityButton);

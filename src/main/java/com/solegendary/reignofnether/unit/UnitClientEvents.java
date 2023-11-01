@@ -624,18 +624,6 @@ public class UnitClientEvents {
             Entity oldEntity = MC.level.getEntity(oldUnitIds[i]);
             Entity newEntity = MC.level.getEntity(newUnitIds[i]);
 
-            /* TODO: this doesn't work when the entities are out of client render range
-            // TODO: but it also doesn't work by getAllUnits() since units don't enter the client list until in render range
-            LivingEntity oldEntity = null;
-            LivingEntity newEntity = null;
-
-            for (LivingEntity entity : getAllUnits()) {
-                if (entity.getId() == oldUnitIds[i])
-                    oldEntity = entity;
-                else if (entity.getId() == newUnitIds[i])
-                    newEntity = entity;
-            }*/
-
             if (oldEntity instanceof Unit oldUnit &&
                 newEntity instanceof Unit newUnit) {
 

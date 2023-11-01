@@ -11,7 +11,6 @@ TODO bugs/features:
 
 
 
-- up stats of wither cloud sizes
 
 - measure all farms' food/min speed and initial wait times
 
@@ -29,30 +28,32 @@ ghast fireballs destroy leaves
 worker didn't automatically start planting after finishing a farm
     - only for Tim?
 
-TODO weird ideas
+TODO Research ideas
 
-Endermen: can place liquids??
-Research: spiders can place webs (limit of 3 per spider lifetime)
-    - if implemented, remove research to mount?
+-----------------
+Monsters Research
+-----------------
+Zombies can convert enemies into zombies:
+    - grunts/brutes/headhunters -> zombie piglins
+    - hoglins -> zombie hoglins
+    - villagers -> zombie villagers
+    - pillagers/vindicators/witches/evokers -> zombies
 
-Monsters Research: Creepers explode with harming cloud effects
-Monsters Research: Villagers can build Iron Golems (treated as buildings but become iron golem units on completion)
+------------------
+Villagers Research
+------------------
+Villagers can build Iron Golems (treated as buildings but become iron golem units on completion)
+    - Larger structure with scaffolding or a 'mould' that breaks apart to become an iron golem on completion
 
-Monsters: static defense that curses a unit with insomnia - causes phantoms to encircle them and attack periodically
-Monsters: some ability (for zombies?) that converts enemies into zombie villagers/zombie pigmen
+Vindicators get a bloodlust ability which gives them 10 seconds of Strength II but hurts them for 10 damage (stimpacks!)
+    - Replace diamond axes
+    - Maybe too many actives?
 
+----------------
+Piglins Research
+----------------
 
-TODO buildings/units (backlog)
-
-
-Piglins faction
-
-    - Wither Shrine
-        - centrepiece should be a diagonal-facing wither statue with 3 wither skulls
-        - include a lot of soulfires
-
-
-
+All of your units become fire immune (except from lava)
 
 
 

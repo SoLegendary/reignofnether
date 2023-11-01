@@ -43,7 +43,7 @@ public class Mausoleum extends ProductionBuilding {
         this.woodCost = cost.wood;
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
-        this.buildTimeModifier = 0.66f;
+        this.buildTimeModifier = 0.33f;
         this.canAcceptResources = true;
 
         this.startingBlockTypes.add(Blocks.STONE);

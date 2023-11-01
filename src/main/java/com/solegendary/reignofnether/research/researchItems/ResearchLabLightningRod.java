@@ -59,7 +59,7 @@ public class ResearchLabLightningRod extends ProductionItem {
                 FormattedCharSequence.forward("Adds a lightning rod to this lab that can be activated ", Style.EMPTY),
                 FormattedCharSequence.forward("to call lightning to charge creepers and damage enemies.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a dungeon.", Style.EMPTY)
+                FormattedCharSequence.forward("Requires a Dungeon.", Style.EMPTY)
             )
         );
     }

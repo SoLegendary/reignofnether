@@ -55,7 +55,7 @@ public class EvokerProd extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A learned wizard that can cast combat spells.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a library.", Style.EMPTY)
+                FormattedCharSequence.forward("Requires a Library.", Style.EMPTY)
             )
         );
     }
