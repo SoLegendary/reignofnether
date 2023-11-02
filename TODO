@@ -20,7 +20,8 @@ TODO bugs/features:
 
 TODO test in next playtest
 
-check poison spider upgrades work
+fire resistance upgrade
+check poison spider upgrades work (with 'test spiders')
     - synced goals
     - synced passenger/vehicle
 logging out of a server should remove all clientside buildings
@@ -44,24 +45,6 @@ Zombies can convert enemies into zombies:
     - hoglins -> zombie hoglins
     - villagers -> zombie villagers
     - pillagers/vindicators/witches/evokers -> zombies
-
-------------------
-Villagers Research
-------------------
-Villagers can build Iron Golems (treated as buildings but become iron golem units on completion)
-    - Larger structure with scaffolding or a 'mould' that breaks apart to become an iron golem on completion
-
-MAYBE
-Vindicators get a bloodlust ability which gives them 10 seconds of Strength II but hurts them for 10 damage (stimpacks!)
-    - Replace diamond axes
-    - Maybe too many actives?
-
-----------------
-Piglins Research
-----------------
-
-All of your units become fire immune (except from lava and standing directly in fire)
-
 
 
 TODO tutorial docs

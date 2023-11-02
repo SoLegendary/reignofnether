@@ -10,6 +10,8 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchBlazeFirewall;
+import com.solegendary.reignofnether.research.researchItems.ResearchFireResistance;
+import com.solegendary.reignofnether.research.researchItems.ResearchPoisonSpiders;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
@@ -59,7 +61,8 @@ public class FlameSanctuary extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                ResearchBlazeFirewall.getStartButton(this, Keybindings.keyQ)
+                    ResearchBlazeFirewall.getStartButton(this, Keybindings.keyQ),
+                    ResearchFireResistance.getStartButton(this, Keybindings.keyW)
             );
     }
 

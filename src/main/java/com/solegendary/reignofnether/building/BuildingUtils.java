@@ -104,6 +104,7 @@ public class BuildingUtils {
             case HauntedHouse.buildingName -> building = new HauntedHouse(level, pos, rotation, ownerName);
             case Blacksmith.buildingName -> building = new Blacksmith(level, pos, rotation, ownerName);
             case TownCentre.buildingName -> building = new TownCentre(level, pos, rotation, ownerName);
+            case IronGolemBuilding.buildingName -> building = new IronGolemBuilding(level, pos, rotation, ownerName);
             case Mausoleum.buildingName -> building = new Mausoleum(level, pos, rotation, ownerName);
             case SpiderLair.buildingName -> building = new SpiderLair(level, pos, rotation, ownerName);
             case ArcaneTower.buildingName -> building = new ArcaneTower(level, pos, rotation, ownerName);

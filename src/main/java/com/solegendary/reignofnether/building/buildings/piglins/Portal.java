@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchPortalForCivilian;
 import com.solegendary.reignofnether.research.researchItems.ResearchPortalForMilitary;
 import com.solegendary.reignofnether.research.researchItems.ResearchPortalForTransport;
+import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.piglins.*;
@@ -160,6 +161,11 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
                 newStructureName = "portal_civilian";
                 this.canAcceptResources = true;
                 popSupply = CIVILIIAN_PORTAL_POPULATION_SUPPLY;
+                if (this.getLevel().isClientSide()) {
+                    this.productionButtons = Arrays.asList(
+                            ResearchResourceCapacity.getStartButton(this, Keybindings.keyQ)
+                    );
+                }
             }
             case MILITARY -> {
                 this.name = "Military Portal";

@@ -3,6 +3,9 @@ package com.solegendary.reignofnether.unit.interfaces;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchFireResistance;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -153,6 +156,11 @@ public interface Unit {
             // enact target-following, and stop followTarget being reset
             if (unit.getFollowTarget() != null)
                 unit.setMoveTarget(unit.getFollowTarget().blockPosition());
+
+            // remove fire from piglin units if they have research
+            boolean hasImmunityResearch = ResearchServer.playerHasResearch(unit.getOwnerName(), ResearchFireResistance.itemName);
+            if (hasImmunityResearch && unit.getFaction() == Faction.PIGLINS)
+                unitMob.setRemainingFireTicks(0);
         }
 
 

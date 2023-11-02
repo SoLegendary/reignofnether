@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.mixin.firedamage;
 
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchFireResistance;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
@@ -29,13 +32,19 @@ public abstract class MagmaBlockMixin {
     public void stepOn(Level pLevel, BlockPos pPos, BlockState pState, Entity pEntity, CallbackInfo ci) {
         ci.cancel();
 
+        boolean hasImmunityResearch = false;
+        if (pLevel.isClientSide())
+            hasImmunityResearch = ResearchClient.hasResearch(ResearchFireResistance.itemName);
+        else if (pEntity instanceof Unit unit)
+            hasImmunityResearch = ResearchServer.playerHasResearch(unit.getOwnerName(), ResearchFireResistance.itemName);
+
         boolean isPiglinFaction = pEntity instanceof Unit unit && unit.getFaction() == Faction.PIGLINS;
         boolean isDamageTick = pEntity.tickCount % DAMAGE_DELAY == 0;
 
         if (!pEntity.isSteppingCarefully() &&
             pEntity instanceof LivingEntity &&
             !EnchantmentHelper.hasFrostWalker((LivingEntity)pEntity) &&
-            !isPiglinFaction && isDamageTick) {
+            !(isPiglinFaction && hasImmunityResearch) && isDamageTick) {
             pEntity.hurt(DamageSource.HOT_FLOOR, DAMAGE);
         }
     }
