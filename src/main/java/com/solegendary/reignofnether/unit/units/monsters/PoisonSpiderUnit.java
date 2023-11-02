@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.ability.abilities.Eject;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -109,11 +111,11 @@ public class PoisonSpiderUnit extends CaveSpider implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 1.0f;
+    final static public float attackDamage = 3.0f;
     final static public float attacksPerSecond = 0.6f;
-    final static public float maxHealth = 25.0f;
+    final static public float maxHealth = 30.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.32f;
+    final static public float movementSpeed = 0.33f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -131,6 +133,11 @@ public class PoisonSpiderUnit extends CaveSpider implements Unit, AttackerUnit {
 
     public PoisonSpiderUnit(EntityType<? extends CaveSpider> entityType, Level level) {
         super(entityType, level);
+
+        Eject ab1 = new Eject(this);
+        this.abilities.add(ab1);
+        if (level.isClientSide())
+            this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
     }
 
     @Override
@@ -184,7 +191,7 @@ public class PoisonSpiderUnit extends CaveSpider implements Unit, AttackerUnit {
         this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
-    private static final int POISON_SECONDS = 15;
+    private static final int POISON_SECONDS = 10;
 
     @Override
     public boolean doHurtTarget(@NotNull Entity pEntity) {

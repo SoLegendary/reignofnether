@@ -14,11 +14,15 @@ TODO bugs/features:
 
 - measure all farms' food/min speed and initial wait times
 
-
+- difficult to click a vehicle unit when mounted
+    - if preselectedUnit == passenger, replace it with the vehicle instead
 
 
 TODO test in next playtest
 
+check poison spider upgrades work
+    - synced goals
+    - synced passenger/vehicle
 logging out of a server should remove all clientside buildings
 piglins should still tick damage inside fire
 flame sanctuary builds at normal speed correctly and doesn't spawn neutral blazes
@@ -27,6 +31,8 @@ ghast fireballs destroy leaves
 
 worker didn't automatically start planting after finishing a farm
     - only for Tim?
+
+
 
 TODO Research ideas
 
@@ -45,6 +51,7 @@ Villagers Research
 Villagers can build Iron Golems (treated as buildings but become iron golem units on completion)
     - Larger structure with scaffolding or a 'mould' that breaks apart to become an iron golem on completion
 
+MAYBE
 Vindicators get a bloodlust ability which gives them 10 seconds of Strength II but hurts them for 10 damage (stimpacks!)
     - Replace diamond axes
     - Maybe too many actives?
@@ -53,7 +60,7 @@ Vindicators get a bloodlust ability which gives them 10 seconds of Strength II b
 Piglins Research
 ----------------
 
-All of your units become fire immune (except from lava)
+All of your units become fire immune (except from lava and standing directly in fire)
 
 
 

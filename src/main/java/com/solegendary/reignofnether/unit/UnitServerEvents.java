@@ -104,6 +104,13 @@ public class UnitServerEvents {
             oldEntity.stopRiding();
             newEntity.startRiding(vehicle, true);
         }
+        if (oldEntity.isVehicle()) {
+            Entity passenger = oldEntity.getFirstPassenger();
+            if (passenger != null) {
+                passenger.stopRiding();
+                passenger.startRiding(newEntity, true);
+            }
+        }
         newEntity.setYRot(oldEntity.getYRot());
 
         // discard with a reflected packet so the client has a chance to sync goals, command groups and selections

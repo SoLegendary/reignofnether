@@ -653,7 +653,8 @@ public class UnitClientEvents {
                         new int[] { newEntity.getId() },
                         oldUnit.getMoveGoal().getMoveTarget()
                     );
-                if (oldUnit.getReturnResourcesGoal().getBuildingTarget() != null)
+                if (oldUnit.getReturnResourcesGoal() != null &&
+                    oldUnit.getReturnResourcesGoal().getBuildingTarget() != null)
                     sendUnitCommandManual(
                         UnitAction.RETURN_RESOURCES, -1,
                         new int[] { newEntity.getId() },

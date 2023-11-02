@@ -4,6 +4,7 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.PoisonSpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
@@ -43,8 +44,8 @@ public class MountGoal extends MoveToTargetBlockGoal {
         else if (!unit.getOwnerName().equals(((Unit) this.mob).getOwnerName()))
             return false;
         else return (this.mob instanceof PillagerUnit pillager && m instanceof RavagerUnit ravager) ||
-                    (this.mob instanceof SkeletonUnit skeleton && m instanceof SpiderUnit) ||
-                    (this.mob instanceof StrayUnit stray && m instanceof SpiderUnit) ||
+                    (this.mob instanceof SkeletonUnit skeleton && (m instanceof SpiderUnit || m instanceof PoisonSpiderUnit)) ||
+                    (this.mob instanceof StrayUnit stray && (m instanceof SpiderUnit || m instanceof PoisonSpiderUnit)) ||
                     (this.mob instanceof HeadhunterUnit headhunter && m instanceof HoglinUnit);
     }
 

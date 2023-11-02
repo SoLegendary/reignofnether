@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -188,14 +189,14 @@ public class PlayerServerEvents {
     @SubscribeEvent
     public static void onPlayerChat(ServerChatEvent.Submitted evt) {
 
-        if (evt.getMessage().getString().equals("test strays")) {
+        if (evt.getMessage().getString().equals("test spiders")) {
             UnitServerEvents.convertAllToUnit(
                     evt.getPlayer().getName().getString(),
                     evt.getPlayer().getLevel(),
                     (LivingEntity entity) ->
-                            entity instanceof SkeletonUnit zUnit &&
-                                    zUnit.getOwnerName().equals(evt.getPlayer().getName().getString()),
-                    EntityRegistrar.STRAY_UNIT.get()
+                            entity instanceof SpiderUnit sUnit &&
+                                    sUnit.getOwnerName().equals(evt.getPlayer().getName().getString()),
+                    EntityRegistrar.POISON_SPIDER_UNIT.get()
             );
         }
 

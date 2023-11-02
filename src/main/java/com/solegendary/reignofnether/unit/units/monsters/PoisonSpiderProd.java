@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchHusks;
 import com.solegendary.reignofnether.research.researchItems.ResearchPoisonSpiders;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -19,7 +20,7 @@ import java.util.List;
 
 public class PoisonSpiderProd extends ProductionItem {
 
-    public final static String itemName = "Poison Spider";
+    public final static String itemName = "Cave Spider";
     public final static ResourceCost cost = ResourceCosts.POISON_SPIDER;
 
     public PoisonSpiderProd(ProductionBuilding building) {
@@ -45,8 +46,8 @@ public class PoisonSpiderProd extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
             hotkey,
             () -> false,
-            () -> false,
-            () -> ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
+            () -> !ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
+            () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
@@ -55,7 +56,6 @@ public class PoisonSpiderProd extends ProductionItem {
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A spider fanged with deadly poison.", Style.EMPTY),
-                FormattedCharSequence.forward("Too small to ride but good for hit and run tactics.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Spiders move much more slowly under sunlight.", Style.EMPTY)
             )
