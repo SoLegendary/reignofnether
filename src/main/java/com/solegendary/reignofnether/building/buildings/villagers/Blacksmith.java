@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchGolemSmithing;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -51,7 +52,8 @@ public class Blacksmith extends ProductionBuilding {
             this.productionButtons = Arrays.asList(
                 IronGolemProd.getStartButton(this, Keybindings.keyQ),
                 ResearchVindicatorAxes.getStartButton(this, Keybindings.keyW),
-                ResearchPillagerCrossbows.getStartButton(this, Keybindings.keyE)
+                ResearchPillagerCrossbows.getStartButton(this, Keybindings.keyE),
+                ResearchGolemSmithing.getStartButton(this, Keybindings.keyR)
             );
     }
 
