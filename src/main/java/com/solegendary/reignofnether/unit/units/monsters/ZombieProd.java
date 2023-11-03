@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchDrowned;
 import com.solegendary.reignofnether.research.researchItems.ResearchHusks;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -29,6 +30,8 @@ public class ZombieProd extends ProductionItem {
             if (!level.isClientSide()) {
                 if (ResearchServer.playerHasResearch(this.building.ownerName, ResearchHusks.itemName))
                     building.produceUnit((ServerLevel) level, EntityRegistrar.HUSK_UNIT.get(), building.ownerName, true);
+                else if (ResearchServer.playerHasResearch(this.building.ownerName, ResearchDrowned.itemName))
+                    building.produceUnit((ServerLevel) level, EntityRegistrar.DROWNED_UNIT.get(), building.ownerName, true);
                 else
                     building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get(), building.ownerName, true);
             }
@@ -43,16 +46,32 @@ public class ZombieProd extends ProductionItem {
         return ZombieProd.itemName;
     }
 
+    private static ResourceLocation getIcon() {
+        if (ResearchClient.hasResearch(ResearchHusks.itemName))
+            return new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png");
+        else if (ResearchClient.hasResearch(ResearchDrowned.itemName))
+            return new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/drowned.png");
+        else
+            return new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png");
+    }
+
+    private static String getCancelName() {
+        if (ResearchClient.hasResearch(ResearchHusks.itemName))
+            return "Husk";
+        else if (ResearchClient.hasResearch(ResearchDrowned.itemName))
+            return "Drowned";
+        else
+            return "Zombie";
+    }
+
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
             ZombieProd.itemName,
             14,
-            ResearchClient.hasResearch(ResearchHusks.itemName) ?
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png") :
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
+            getIcon(),
             hotkey,
             () -> false,
-            () -> ResearchClient.hasResearch(ResearchHusks.itemName),
+            () -> ResearchClient.hasResearch(ResearchHusks.itemName) || ResearchClient.hasResearch(ResearchDrowned.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
@@ -70,11 +89,9 @@ public class ZombieProd extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            ResearchClient.hasResearch(ResearchHusks.itemName) ? "Husk" : "Zombie",
+            getCancelName(),
             14,
-            ResearchClient.hasResearch(ResearchHusks.itemName) ?
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png") :
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
+            getIcon(),
             (Keybinding) null,
             () -> false,
             () -> false,

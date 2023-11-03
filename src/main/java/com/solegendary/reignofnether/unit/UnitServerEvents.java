@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
 import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
@@ -14,9 +15,10 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.DrownedUnit;
 import com.solegendary.reignofnether.unit.units.monsters.HuskUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
-import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -235,6 +237,40 @@ public class UnitServerEvents {
             aec.setRadiusPerTick(-aec.getRadius() / (float)aec.getDuration());
             aec.addEffect(new MobEffectInstance(MobEffects.WITHER, 10 * 20));
             evt.getEntity().level.addFreshEntity(aec);
+        }
+
+        if (evt.getEntity().getLastHurtByMob() instanceof Unit unit &&
+            (evt.getEntity().getLastHurtByMob() instanceof DrownedUnit)) {
+
+            EntityType<? extends Unit> entityType = null;
+
+            if (evt.getEntity() instanceof GruntUnit ||
+                evt.getEntity() instanceof BruteUnit ||
+                evt.getEntity() instanceof HeadhunterUnit)
+                entityType = EntityRegistrar.ZOMBIE_PIGLIN_UNIT.get();
+            else if (evt.getEntity() instanceof HoglinUnit)
+                entityType = EntityRegistrar.ZOGLIN_UNIT.get();
+            else if (evt.getEntity() instanceof VillagerUnit)
+                entityType = EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
+            else if (evt.getEntity() instanceof VindicatorUnit ||
+                    evt.getEntity() instanceof PillagerUnit ||
+                    evt.getEntity() instanceof EvokerUnit ||
+                    evt.getEntity() instanceof WitchUnit)
+                entityType = EntityRegistrar.ZOMBIE_UNIT.get();
+
+            if (entityType != null && evt.getEntity().getLevel() instanceof ServerLevel serverLevel) {
+                Entity entity = entityType.spawn(serverLevel, null,
+                        null,
+                        evt.getEntity().getOnPos(),
+                        MobSpawnType.SPAWNER,
+                        true,
+                        false
+                );
+                if (entity instanceof Unit zUnit) {
+                    zUnit.setOwnerName(unit.getOwnerName());
+                    entity.setYRot(evt.getEntity().getYRot());
+                }
+            }
         }
     }
 
