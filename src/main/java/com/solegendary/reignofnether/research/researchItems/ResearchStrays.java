@@ -26,7 +26,7 @@ import java.util.List;
 
 public class ResearchStrays extends ProductionItem {
 
-    public final static String itemName = "Strays";
+    public final static String itemName = "Stray Skeletons";
     public final static ResourceCost cost = ResourceCosts.RESEARCH_STRAYS;
 
     public ResearchStrays(ProductionBuilding building) {
@@ -75,8 +75,8 @@ public class ResearchStrays extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Transforms all existing and future skeletons", Style.EMPTY),
-                FormattedCharSequence.forward("into strays which fire slowing arrows.", Style.EMPTY),
+                FormattedCharSequence.forward("Transforms all of your skeletons into", Style.EMPTY),
+                FormattedCharSequence.forward("strays which fire slowing arrows.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Requires a Graveyard.", Style.EMPTY)
             )

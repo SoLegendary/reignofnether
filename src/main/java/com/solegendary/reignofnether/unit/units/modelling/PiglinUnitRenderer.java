@@ -57,7 +57,8 @@ public class PiglinUnitRenderer extends HumanoidMobRenderer<Mob, PiglinUnitModel
         TEXTURES = ImmutableMap.of(
             EntityRegistrar.GRUNT_UNIT.get(), new ResourceLocation("textures/entity/piglin/piglin.png"),
             EntityRegistrar.BRUTE_UNIT.get(), new ResourceLocation("textures/entity/piglin/piglin_brute.png"),
-            EntityRegistrar.HEADHUNTER_UNIT.get(), new ResourceLocation("textures/entity/piglin/piglin_brute.png")
+            EntityRegistrar.HEADHUNTER_UNIT.get(), new ResourceLocation("textures/entity/piglin/piglin_brute.png"),
+            EntityRegistrar.ZOMBIE_PIGLIN_UNIT.get(), new ResourceLocation("textures/entity/piglin/zombified_piglin.png")
         );
     }
 }

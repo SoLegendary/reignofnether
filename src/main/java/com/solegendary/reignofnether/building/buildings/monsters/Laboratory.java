@@ -55,11 +55,12 @@ public class Laboratory extends ProductionBuilding {
         if (level.isClientSide()) {
             this.productionButtons = Arrays.asList(
                 ResearchHusks.getStartButton(this, Keybindings.keyQ),
-                ResearchStrays.getStartButton(this, Keybindings.keyW),
-                ResearchSpiderJockeys.getStartButton(this, Keybindings.keyE),
-                ResearchPoisonSpiders.getStartButton(this, Keybindings.keyR),
-                ResearchLabLightningRod.getStartButton(this, Keybindings.keyT),
-                ResearchSilverfish.getStartButton(this, Keybindings.keyY)
+                ResearchDrowned.getStartButton(this, Keybindings.keyW),
+                ResearchStrays.getStartButton(this, Keybindings.keyE),
+                ResearchSpiderJockeys.getStartButton(this, Keybindings.keyR),
+                ResearchPoisonSpiders.getStartButton(this, Keybindings.keyT),
+                ResearchLabLightningRod.getStartButton(this, Keybindings.keyY),
+                ResearchSilverfish.getStartButton(this, Keybindings.keyU)
             );
             this.abilityButtons.add(callLightning.getButton(Keybindings.keyL));
         }

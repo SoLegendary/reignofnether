@@ -39,12 +39,16 @@ public class ResourceCosts {
     public static ResourceCost CREEPER = ResourceCost.Unit(50,0,100,35,2);
     public static ResourceCost SKELETON = ResourceCost.Unit(70,35,0,20,1);
     public static ResourceCost STRAY = ResourceCost.Unit(70,35,0,20,1);
-    public static ResourceCost ZOMBIE = ResourceCost.Unit(85,0,0,20,1);
-    public static ResourceCost HUSK = ResourceCost.Unit(85,0,0,20,1);
+    public static ResourceCost ZOMBIE = ResourceCost.Unit(90,0,0,20,1);
+    public static ResourceCost HUSK = ResourceCost.Unit(90,0,0,20,1);
+    public static ResourceCost DROWNED = ResourceCost.Unit(90,0,0,20,1);
     public static ResourceCost SPIDER = ResourceCost.Unit(80,25,25,25,2);
     public static ResourceCost POISON_SPIDER = ResourceCost.Unit(80,25,25,25,2);
     public static ResourceCost ENDERMAN = ResourceCost.Unit(100,100,100,30,3);
     public static ResourceCost WARDEN = ResourceCost.Unit(250,0,125,40,4);
+
+    public static ResourceCost ZOMBIE_PIGLIN = ResourceCost.Unit(0,0,0,10,1);
+    public static ResourceCost ZOGLIN = ResourceCost.Unit(0,0,0,10,2);
 
     // Villagers
     public static ResourceCost VILLAGER = ResourceCost.Unit(50,0,0,15,1);
@@ -109,6 +113,7 @@ public class ResourceCosts {
     public static ResourceCost RESEARCH_SPIDER_JOCKEYS = ResourceCost.Research(150,150,0, 60);
     public static ResourceCost RESEARCH_POISON_SPIDERS = ResourceCost.Research(400,0,250, 150);
     public static ResourceCost RESEARCH_HUSKS = ResourceCost.Research(500,0,300, 180);
+    public static ResourceCost RESEARCH_DROWNED = ResourceCost.Research(500,0,300, 180);
     public static ResourceCost RESEARCH_STRAYS = ResourceCost.Research(500,500,0, 180);
     public static ResourceCost RESEARCH_LINGERING_POTIONS = ResourceCost.Research(300,300,300, 150);
     public static ResourceCost RESEARCH_EVOKER_VEXES = ResourceCost.Research(500,0,300, 120);

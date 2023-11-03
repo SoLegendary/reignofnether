@@ -20,6 +20,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
@@ -736,6 +737,7 @@ public class UnitClientEvents {
             if (entity.getId() == entityId) {
                 if (entity instanceof IronGolemUnit ||
                     entity instanceof HoglinUnit ||
+                    entity instanceof ZoglinUnit ||
                     entity instanceof RavagerUnit ||
                     entity instanceof WardenUnit) {
                     entity.handleEntityEvent((byte) 4);

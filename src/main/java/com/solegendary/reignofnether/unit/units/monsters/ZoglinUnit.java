@@ -1,7 +1,8 @@
-package com.solegendary.reignofnether.unit.units.piglins;
+package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.abilities.*;
+import com.solegendary.reignofnether.ability.abilities.Eject;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -21,9 +22,9 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -31,14 +32,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.ForgeEventFactory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
+public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
     // region
     private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
     private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
@@ -88,7 +88,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
-            SynchedEntityData.defineId(HoglinUnit.class, EntityDataSerializers.STRING);
+            SynchedEntityData.defineId(ZoglinUnit.class, EntityDataSerializers.STRING);
 
     @Override
     protected void defineSynchedData() {
@@ -117,14 +117,14 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 6.0f;
+    final static public float attackDamage = 5.0f;
     final static public float attacksPerSecond = 0.4f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
 
-    final static public float maxHealth = 60.0f;
+    final static public float maxHealth = 45.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.30f;
     final static public int popCost = ResourceCosts.HOGLIN.population;
@@ -134,7 +134,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    public HoglinUnit(EntityType<? extends Hoglin> entityType, Level level) {
+    public ZoglinUnit(EntityType<? extends Zoglin> entityType, Level level) {
         super(entityType, level);
 
         Eject ab1 = new Eject(this);
@@ -175,16 +175,14 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.ATTACK_DAMAGE, HoglinUnit.attackDamage)
-                .add(Attributes.MOVEMENT_SPEED, HoglinUnit.movementSpeed)
-                .add(Attributes.MAX_HEALTH, HoglinUnit.maxHealth)
-                .add(Attributes.ARMOR, HoglinUnit.armorValue);
+                .add(Attributes.ATTACK_DAMAGE, ZoglinUnit.attackDamage)
+                .add(Attributes.MOVEMENT_SPEED, ZoglinUnit.movementSpeed)
+                .add(Attributes.MAX_HEALTH, ZoglinUnit.maxHealth)
+                .add(Attributes.ARMOR, ZoglinUnit.armorValue);
     }
 
     @Override // prevent vanilla logic for picking up items
     protected void pickUpItem(ItemEntity pItemEntity) { }
-    @Override
-    public boolean isConverting() { return false; }
     @Override
     protected void customServerAiStep() { }
     @Override
@@ -192,11 +190,20 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit {
         return this.targetGoal.getTarget();
     }
 
+    @Override
+    protected boolean isSunBurnTick() {
+        return super.isSunBurnTick() &&
+                !BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false);
+    }
+
     public void tick() {
         this.setCanPickUpLoot(false);
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+
+        if (isSunBurnTick())
+            this.setSecondsOnFire(8);
     }
 
     public void initialiseGoals() {

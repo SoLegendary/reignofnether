@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchDrowned;
 import com.solegendary.reignofnether.research.researchItems.ResearchHusks;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -19,16 +20,16 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class HuskProd extends ProductionItem {
+public class DrownedProd extends ProductionItem {
 
-    public final static String itemName = "Husk";
-    public final static ResourceCost cost = ResourceCosts.HUSK;
+    public final static String itemName = "Drowned Zombies";
+    public final static ResourceCost cost = ResourceCosts.DROWNED;
 
-    public HuskProd(ProductionBuilding building) {
+    public DrownedProd(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
-                building.produceUnit((ServerLevel) level, EntityRegistrar.HUSK_UNIT.get(), building.ownerName, true);
+                building.produceUnit((ServerLevel) level, EntityRegistrar.DROWNED_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -37,28 +38,29 @@ public class HuskProd extends ProductionItem {
     }
 
     public String getItemName() {
-        return HuskProd.itemName;
+        return DrownedProd.itemName;
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         return new Button(
-            HuskProd.itemName,
+            DrownedProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/drowned.png"),
             hotkey,
             () -> false,
             () -> false,
-            () -> ResearchClient.hasResearch(ResearchHusks.itemName),
+            () -> ResearchClient.hasResearch(ResearchDrowned.itemName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(HuskProd.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(DrownedProd.itemName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A hardy variant of the zombie with tougher skin.", Style.EMPTY),
+                FormattedCharSequence.forward("An infectious variant of the zombie which zombifies", Style.EMPTY),
+                FormattedCharSequence.forward("villagers and piglins after killing them.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Husks DO NOT burn under sunlight.", Style.EMPTY),
+                FormattedCharSequence.forward("Drowned will burn under sunlight.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Requires an upgrade at the Laboratory.", Style.EMPTY)
             )
@@ -67,9 +69,9 @@ public class HuskProd extends ProductionItem {
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-            HuskProd.itemName,
+            DrownedProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/drowned.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

@@ -21,6 +21,18 @@ public class ItemRegistrar {
             ITEMS.register("husk_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.HUSK_UNIT,
                     0x71695B, 0xB7A276, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
+    public static final RegistryObject<ForgeSpawnEggItem> DROWNED_UNIT_SPAWN_EGG =
+            ITEMS.register("drowned_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.DROWNED_UNIT,
+                    9433559, 7969893, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
+    public static final RegistryObject<ForgeSpawnEggItem> ZOMBIE_PIGLIN_UNIT_SPAWN_EGG =
+            ITEMS.register("zombie_piglin_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.ZOMBIE_PIGLIN_UNIT,
+                    15373203, 5009705, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
+    public static final RegistryObject<ForgeSpawnEggItem> ZOGLIN_UNIT =
+            ITEMS.register("zoglin_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.ZOGLIN_UNIT,
+                    13004373, 15132390, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
     public static final RegistryObject<ForgeSpawnEggItem> SKELETON_UNIT_SPAWN_EGG =
             ITEMS.register("skeleton_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.SKELETON_UNIT,
                     0xa7a7a7, 0x3a3a3a, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));

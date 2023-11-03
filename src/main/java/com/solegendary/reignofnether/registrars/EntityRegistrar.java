@@ -39,6 +39,24 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "husk_unit").toString()));
 
+    public static final RegistryObject<EntityType<DrownedUnit>> DROWNED_UNIT = ENTITIES.register("drowned_unit",
+            () -> EntityType.Builder.of(DrownedUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.DROWNED.getWidth(), EntityType.DROWNED.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "drowned_unit").toString()));
+
+    public static final RegistryObject<EntityType<ZombiePiglinUnit>> ZOMBIE_PIGLIN_UNIT = ENTITIES.register("zombie_piglin_unit",
+            () -> EntityType.Builder.of(ZombiePiglinUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.ZOMBIFIED_PIGLIN.getWidth(), EntityType.ZOMBIFIED_PIGLIN.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "zombie_piglin_unit").toString()));
+
+    public static final RegistryObject<EntityType<ZoglinUnit>> ZOGLIN_UNIT = ENTITIES.register("zoglin_unit",
+            () -> EntityType.Builder.of(ZoglinUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.ZOGLIN.getWidth(), EntityType.ZOGLIN.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "zoglin_unit").toString()));
+
     public static final RegistryObject<EntityType<SkeletonUnit>> SKELETON_UNIT = ENTITIES.register("skeleton_unit",
             () -> EntityType.Builder.of(SkeletonUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())

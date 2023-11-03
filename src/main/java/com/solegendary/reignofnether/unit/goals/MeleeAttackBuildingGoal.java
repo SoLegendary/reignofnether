@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
@@ -54,6 +55,7 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
 
                     if (mob instanceof IronGolemUnit ||
                         mob instanceof HoglinUnit ||
+                        mob instanceof ZoglinUnit ||
                         mob instanceof RavagerUnit ||
                         mob instanceof WardenUnit) {
                         mob.handleEntityEvent((byte) 4);

@@ -1,6 +1,7 @@
 {
   "item.reignofnether.zombie_unit_spawn_egg": "Spawn Zombie Unit",
   "item.reignofnether.husk_unit_spawn_egg": "Spawn Husk Unit",
+  "item.reignofnether.drowned_unit_spawn_egg": "Spawn Drowned Unit",
   "item.reignofnether.skeleton_unit_spawn_egg": "Spawn Skeleton Unit",
   "item.reignofnether.stray_unit_spawn_egg": "Spawn Stray Unit",
   "item.reignofnether.creeper_unit_spawn_egg": "Spawn Creeper Unit",
@@ -24,6 +25,8 @@
   "item.reignofnether.blaze_unit_spawn_egg": "Spawn Blaze Unit",
   "item.reignofnether.wither_skeleton_unit_spawn_egg": "Spawn Wither Skeleton Unit",
   "item.reignofnether.ghast_unit_spawn_egg": "Spawn Ghast Unit",
+  "item.reignofnether.zombie_piglin_unit_spawn_egg": "Spawn Zombie Piglin Unit",
+  "item.reignofnether.zoglin_unit_spawn_egg": "Spawn Zoglin Unit",
 
   "sounds.reignofnether.under_attack": "Under attack!"
 }

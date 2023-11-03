@@ -22,7 +22,6 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,6 +130,7 @@ public abstract class ProductionBuilding extends Building {
                 case ZombieProd.itemName -> prodItem = new ZombieProd(building);
                 case StrayProd.itemName -> prodItem = new StrayProd(building);
                 case HuskProd.itemName -> prodItem = new HuskProd(building);
+                case DrownedProd.itemName -> prodItem = new DrownedProd(building);
                 case SpiderProd.itemName -> prodItem = new SpiderProd(building);
                 case PoisonSpiderProd.itemName -> prodItem = new PoisonSpiderProd(building);
                 case VillagerProd.itemName -> prodItem = new VillagerProd(building);
@@ -158,6 +158,7 @@ public abstract class ProductionBuilding extends Building {
                 case ResearchSpiderJockeys.itemName -> prodItem = new ResearchSpiderJockeys(building);
                 case ResearchPoisonSpiders.itemName -> prodItem = new ResearchPoisonSpiders(building);
                 case ResearchHusks.itemName -> prodItem = new ResearchHusks(building);
+                case ResearchDrowned.itemName -> prodItem = new ResearchDrowned(building);
                 case ResearchStrays.itemName -> prodItem = new ResearchStrays(building);
                 case ResearchLingeringPotions.itemName -> prodItem = new ResearchLingeringPotions(building);
                 case ResearchEvokerVexes.itemName -> prodItem = new ResearchEvokerVexes(building);

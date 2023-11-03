@@ -5,10 +5,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.unit.units.monsters.HuskProd;
-import com.solegendary.reignofnether.unit.units.monsters.SkeletonProd;
-import com.solegendary.reignofnether.unit.units.monsters.StrayProd;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieProd;
+import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
@@ -52,8 +49,9 @@ public class Graveyard extends ProductionBuilding {
             this.productionButtons = Arrays.asList(
                 ZombieProd.getStartButton(this, Keybindings.keyQ),
                 HuskProd.getStartButton(this, Keybindings.keyQ),
-                SkeletonProd.getStartButton(this, Keybindings.keyW),
-                StrayProd.getStartButton(this, Keybindings.keyW)
+                DrownedProd.getStartButton(this, Keybindings.keyW),
+                SkeletonProd.getStartButton(this, Keybindings.keyE),
+                StrayProd.getStartButton(this, Keybindings.keyE)
             );
     }
 

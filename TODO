@@ -18,6 +18,22 @@ TODO bugs/features:
     - if preselectedUnit == passenger, replace it with the vehicle instead
 
 
+
+Drowned -> can convert enemies into zombies:
+    - grunts/brutes/headhunters -> zombie piglins
+    - hoglins -> zombie hoglins
+    - villagers -> zombie villagers
+    - pillagers/vindicators/witches/evokers -> zombies
+
+    - Drowned prod button
+        - hide zombie prod if drowned OR husks research exists
+        - convert existing prod items in queue to drowned OR husks based on research
+        -
+
+
+
+
+
 TODO test in next playtest
 
 iron golem buildings
@@ -34,18 +50,6 @@ ghast fireballs destroy leaves
 worker didn't automatically start planting after finishing a farm
     - only for Tim?
 
-
-
-TODO Research ideas
-
------------------
-Monsters Research
------------------
-Zombies can convert enemies into zombies:
-    - grunts/brutes/headhunters -> zombie piglins
-    - hoglins -> zombie hoglins
-    - villagers -> zombie villagers
-    - pillagers/vindicators/witches/evokers -> zombies
 
 
 TODO tutorial docs

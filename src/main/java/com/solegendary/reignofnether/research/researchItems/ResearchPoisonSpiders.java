@@ -76,7 +76,7 @@ public class ResearchPoisonSpiders extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Transforms all existing and future Spiders into ,", Style.EMPTY),
+                FormattedCharSequence.forward("Transforms all of your Spiders into ,", Style.EMPTY),
                 FormattedCharSequence.forward("Cave Spiders, granting them poisonous attacks.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Requires a Spider Lair.", Style.EMPTY)
