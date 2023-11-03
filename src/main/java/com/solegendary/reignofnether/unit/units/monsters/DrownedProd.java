@@ -24,7 +24,7 @@ import java.util.List;
 
 public class DrownedProd extends ProductionItem {
 
-    public final static String itemName = "Drowned Zombies";
+    public final static String itemName = "Drowned";
     public final static ResourceCost cost = ResourceCosts.DROWNED;
 
     public DrownedProd(ProductionBuilding building) {

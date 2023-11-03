@@ -8,20 +8,25 @@ import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 
 public class ResearchDrowned extends ProductionItem {
 
-    public final static String itemName = "Drowned";
+    public final static String itemName = "Drowned Zombies";
     public final static ResourceCost cost = ResourceCosts.RESEARCH_DROWNED;
 
     public ResearchDrowned(ProductionBuilding building) {
@@ -29,8 +34,19 @@ public class ResearchDrowned extends ProductionItem {
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
                 ResearchClient.addResearch(ResearchDrowned.itemName);
-            else
+            else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchDrowned.itemName);
+
+                // convert all zombies into drowned with the same stats/inventory/etc.
+                UnitServerEvents.convertAllToUnit(
+                    this.building.ownerName,
+                    (ServerLevel) level,
+                    (LivingEntity entity) ->
+                        entity instanceof ZombieUnit zUnit &&
+                        zUnit.getOwnerName().equals(building.ownerName),
+                    EntityRegistrar.DROWNED_UNIT.get()
+                );
+            }
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
