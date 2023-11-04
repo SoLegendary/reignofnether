@@ -132,8 +132,10 @@ public class PlayerServerEvents {
             serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
             serverPlayer.sendSystemMessage(Component.literal("Use /startrts <faction_name> to get started"));
             serverPlayer.sendSystemMessage(Component.literal("Make sure to be in a good base location first!"));
+            serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS view"));
         } else {
             serverPlayer.sendSystemMessage(Component.literal("Welcome back to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
+            serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS view"));
         }
         if (serverPlayer.hasPermissions(4)) {
             serverPlayer.sendSystemMessage(Component.literal(""));
