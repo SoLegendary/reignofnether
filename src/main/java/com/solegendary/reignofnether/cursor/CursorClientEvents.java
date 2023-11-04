@@ -183,7 +183,8 @@ public class CursorClientEvents {
 
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, MiscUtil.getPlayerLookVector(MC), entityaabb)) {
                 UnitClientEvents.addPreselectedUnit(entity);
-                break; // only allow one moused-over unit at a time
+                if (UnitClientEvents.getPreselectedUnits().size() > 0)
+                    break; // only allow one moused-over unit at a time
             }
         }
 
