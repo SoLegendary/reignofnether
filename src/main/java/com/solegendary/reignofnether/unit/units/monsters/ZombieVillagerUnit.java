@@ -140,7 +140,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     final static public boolean willRetaliate = false; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
 
-    final static public float maxHealth = 20.0f;
+    final static public float maxHealth = 25.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public int popCost = ResourceCosts.ZOMBIE_VILLAGER.population;

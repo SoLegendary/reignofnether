@@ -19,23 +19,13 @@ TODO bugs/features:
 
 
 
-Drowned -> can convert enemies into zombies:
-    - grunts/brutes/headhunters -> zombie piglins
-    - hoglins -> zombie hoglins
-    - villagers -> zombie villagers
-    - pillagers/vindicators/witches/evokers -> zombies
-
-    - Drowned prod button
-        - hide zombie prod if drowned OR husks research exists
-        - convert existing prod items in queue to drowned OR husks based on research
-        -
-
 
 
 
 
 TODO test in next playtest
 
+drowned and drowned conversions
 iron golem buildings
 fire resistance upgrade
 check poison spider upgrades work (with 'test spiders')

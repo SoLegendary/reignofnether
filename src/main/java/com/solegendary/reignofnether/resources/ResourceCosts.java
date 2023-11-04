@@ -108,7 +108,7 @@ public class ResourceCosts {
     public static ResourceCost RESEARCH_VINDICATOR_AXES = ResourceCost.Research(0,200,400, 150);
     public static ResourceCost RESEARCH_PILLAGER_CROSSBOWS = ResourceCost.Research(0,600,300, 180);
     public static ResourceCost RESEARCH_GOLEM_SMITHING = ResourceCost.Research(0, 150, 150, 60);
-    public static ResourceCost RESEARCH_LAB_LIGHTNING_ROD = ResourceCost.Research(0,100,500, 120);
+    public static ResourceCost RESEARCH_LAB_LIGHTNING_ROD = ResourceCost.Research(0,0,400, 120);
     public static ResourceCost RESEARCH_RESOURCE_CAPACITY = ResourceCost.Research(200,200,0, 90);
     public static ResourceCost RESEARCH_SPIDER_JOCKEYS = ResourceCost.Research(150,150,0, 60);
     public static ResourceCost RESEARCH_POISON_SPIDERS = ResourceCost.Research(400,0,250, 150);
