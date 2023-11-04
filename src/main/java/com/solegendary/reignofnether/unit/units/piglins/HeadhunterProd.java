@@ -55,7 +55,7 @@ public class HeadhunterProd extends ProductionItem {
         return new Button(
                 HeadhunterProd.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/headhunter.png"),
                 hotkey,
                 () -> false,
                 () -> false,
@@ -70,7 +70,7 @@ public class HeadhunterProd extends ProductionItem {
         return new Button(
                 HeadhunterProd.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/headhunter.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,

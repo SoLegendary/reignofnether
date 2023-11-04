@@ -52,7 +52,7 @@ public class GruntProd extends ProductionItem {
         return new Button(
             GruntProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
             hotkey,
             () -> false,
             () -> false,
@@ -67,7 +67,7 @@ public class GruntProd extends ProductionItem {
         return new Button(
             GruntProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
             (Keybinding) null,
             () -> false,
             () -> false,

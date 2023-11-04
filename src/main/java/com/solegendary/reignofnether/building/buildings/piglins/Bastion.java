@@ -84,8 +84,8 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuilding 
                 () -> BuildingClientEvents.getBuildingToPlace() == Bastion.class,
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Portal.buildingName) ||
-                        BuildingClientEvents.hasFinishedBuilding(Portal.buildingName) ||
-                        BuildingClientEvents.hasFinishedBuilding(Portal.buildingName) ||
+                        BuildingClientEvents.hasFinishedBuilding("Civilian Portal") ||
+                        BuildingClientEvents.hasFinishedBuilding("Military Portal") ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(Bastion.class),
                 null,

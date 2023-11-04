@@ -53,7 +53,7 @@ public class BruteProd extends ProductionItem {
         return new Button(
                 BruteProd.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/brute.png"),
                 hotkey,
                 () -> false,
                 () -> false,
@@ -68,7 +68,7 @@ public class BruteProd extends ProductionItem {
         return new Button(
                 BruteProd.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/brute.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,
