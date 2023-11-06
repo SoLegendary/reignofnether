@@ -368,8 +368,12 @@ public class CursorClientEvents {
         Vec3 vectorFar = new Vec3(cursorWorldPosFar.x, cursorWorldPosFar.y, cursorWorldPosFar.z);
 
         // clip() returns the point of clip, not the clipped block giving off-by-one errors so move slightly to compensate
-        HitResult hitResult = MC.level.clip(new ClipContext(vectorNear, vectorFar, ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, null));
-        return hitResult.getLocation().add(new Vec3(-0.001,-0.001,-0.001));
+        HitResult hitResult = null;
+        if (MC.level != null)
+            hitResult = MC.level.clip(new ClipContext(vectorNear, vectorFar, ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, null));
+        if (hitResult != null)
+            return hitResult.getLocation().add(new Vec3(-0.001,-0.001,-0.001));
+        return new Vec3(0,0,0);
     }
 
     private static BlockPos getRefinedBlockPos(BlockPos bp, Vector3d cursorWorldPosNear) {

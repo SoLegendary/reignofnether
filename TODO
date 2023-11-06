@@ -9,8 +9,8 @@ TODO bugs/features:
 - test compatibility with a performance improvement mod (eg. optifine)
 
 
-
-- pillagers still have natural inaccuracy??
+- crash on rejoining a different map in RTS mode
+    - fixed?
 
 
 
