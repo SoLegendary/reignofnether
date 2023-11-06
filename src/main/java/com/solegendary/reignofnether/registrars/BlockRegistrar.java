@@ -26,6 +26,7 @@ public class BlockRegistrar {
             () -> new LeavesBlock(BlockBehaviour.Properties.of(Material.LEAVES, MaterialColor.COLOR_RED)
                     .strength(1.0F)
                     .randomTicks()
+                    .color(MaterialColor.COLOR_RED)
                     .sound(SoundType.WART_BLOCK)),
             CreativeModeTab.TAB_BUILDING_BLOCKS
     );
@@ -34,6 +35,7 @@ public class BlockRegistrar {
             () -> new LeavesBlock(BlockBehaviour.Properties.of(Material.LEAVES, MaterialColor.WARPED_WART_BLOCK)
                     .strength(1.0F)
                     .randomTicks()
+                    .color(MaterialColor.WARPED_WART_BLOCK)
                     .sound(SoundType.WART_BLOCK)),
             CreativeModeTab.TAB_BUILDING_BLOCKS
     );

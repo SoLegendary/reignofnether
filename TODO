@@ -14,10 +14,6 @@ TODO bugs/features:
 
 - measure all farms' food/min speed and initial wait times
 
-- difficult to click a vehicle unit when mounted
-    - if preselectedUnit == passenger, replace it with the vehicle instead
-
-
 
 
 

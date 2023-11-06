@@ -110,7 +110,7 @@ public class ResourcesServerEvents {
             evt.setResult(Event.Result.DENY);
         }
         else if (block instanceof NetherWartBlock) {
-            int newAge = blockState.getValue(BlockStateProperties.AGE_3) + (random.nextFloat() > 0.35f ? 0 : 1);
+            int newAge = blockState.getValue(BlockStateProperties.AGE_3) + (random.nextFloat() > 0.41f ? 0 : 1);
             if (newAge > 3)
                 newAge = 3;
             BlockState grownState = block.defaultBlockState().setValue(BlockStateProperties.AGE_3, newAge);
