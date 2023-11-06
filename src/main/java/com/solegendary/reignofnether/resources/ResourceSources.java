@@ -5,7 +5,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.goat.Goat;
+import net.minecraft.world.entity.animal.horse.Donkey;
+import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.animal.horse.Mule;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -21,12 +26,11 @@ public class ResourceSources {
     public static final int TICKS_PER_SECOND = 20;
 
     public static boolean isHuntableAnimal(LivingEntity entity) {
-        return entity instanceof Cow ||
-                entity instanceof Sheep ||
-                entity instanceof Pig ||
-                entity instanceof Chicken ||
-                entity instanceof PolarBear ||
-                entity instanceof Goat;
+        if (!(entity instanceof Animal))
+            return false;
+        if (getFoodItemsFromAnimal((Animal) entity).size() == 0)
+            return false;
+        return true;
     }
 
     public static ResourceSource getFromBlockPos(BlockPos bp, Level level) {
@@ -60,6 +64,34 @@ public class ResourceSources {
                 if (resourceSource.items.contains(item))
                     return resourceSource;
         return null;
+    }
+
+    // return a list of food items that a worker gets when killing a huntable animal to make it more consistent
+    public static List<ItemStack> getFoodItemsFromAnimal(Animal animal) {
+        if (animal instanceof PolarBear) {
+            return List.of(new ItemStack(Items.SALMON, 12)); // 300 food / 30hp
+        } else if (animal instanceof Cow) {
+            return List.of(new ItemStack(Items.BEEF, 2), new ItemStack(Items.LEATHER, 2)); // 150 food / 10hp
+        } else if (animal instanceof Pig) {
+            return List.of(new ItemStack(Items.PORKCHOP, 3)); // 150 food / 10hp
+        } else if (animal instanceof Goat) {
+            return List.of(new ItemStack(Items.MUTTON, 2), new ItemStack(Items.LEATHER, 2)); // 150 food / 10hp
+        } else if (animal instanceof Sheep) {
+            return List.of(new ItemStack(Items.MUTTON, 2), new ItemStack(Items.LEATHER, 1)); // 125 food / 8hp
+        } else if (animal instanceof Chicken) {
+            return List.of(new ItemStack(Items.CHICKEN, 1)); // 50 food / 4hp (but usually lays eggs around)
+        } else if (animal instanceof Rabbit) {
+            return List.of(new ItemStack(Items.RABBIT, 1)); // 50 food / 3hp
+        } else if (animal instanceof Horse) {
+            return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
+        } else if (animal instanceof Donkey) {
+            return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
+        } else if (animal instanceof Llama) {
+            return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
+        } else if (animal instanceof Mule) {
+            return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
+        }
+        return List.of();
     }
 
     public static final int REPLANT_TICKS_MAX = 10;
@@ -190,7 +222,7 @@ public class ResourceSources {
             ),
             new ResourceSource("Medium food item",
                     List.of(),
-                    List.of(Items.EGG, Items.APPLE, Items.BREAD, Items.HONEY_BOTTLE, Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.GLOW_BERRIES),
+                    List.of(Items.LEATHER, Items.EGG, Items.APPLE, Items.BREAD, Items.HONEY_BOTTLE, Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.GLOW_BERRIES),
                     0,
                     25,
                     ResourceName.FOOD
@@ -285,14 +317,14 @@ public class ResourceSources {
                     List.of(Blocks.GILDED_BLACKSTONE),
                     List.of(Items.GILDED_BLACKSTONE),
                     TICKS_PER_SECOND * 30,
-                    99,
+                    88,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 4 Nether Ores",
                     List.of(Blocks.ANCIENT_DEBRIS),
                     List.of(Items.ANCIENT_DEBRIS),
                     TICKS_PER_SECOND * 30,
-                    165,
+                    132,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 1 Ores",
@@ -313,14 +345,14 @@ public class ResourceSources {
                     List.of(Blocks.GOLD_ORE, Blocks.EMERALD_ORE, Blocks.DEEPSLATE_GOLD_ORE, Blocks.DEEPSLATE_EMERALD_ORE),
                     List.of(Items.RAW_GOLD, Items.EMERALD),
                     TICKS_PER_SECOND * 30,
-                    90,
+                    80,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 4 Ores",
                     List.of(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE),
                     List.of(Items.DIAMOND),
                     TICKS_PER_SECOND * 30,
-                    150,
+                    120,
                     ResourceName.ORE
             )
     );

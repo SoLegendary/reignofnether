@@ -27,6 +27,7 @@ import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.*;
@@ -46,6 +47,7 @@ import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -274,11 +276,10 @@ public class UnitServerEvents {
         }
     }
 
-    // villager hunting
+    // animal hunting
     @SubscribeEvent
     public static void onDropItem(LivingDropsEvent evt) {
         if (ResourceSources.isHuntableAnimal(evt.getEntity()) &&
-            !evt.getSource().isProjectile() &&
             !evt.getSource().isMagic() &&
             evt.getSource().getEntity() instanceof Unit unit &&
             evt.getSource().getEntity() instanceof Mob mob &&
@@ -286,10 +287,10 @@ public class UnitServerEvents {
             !Unit.atMaxResources(unit)) {
 
             evt.setCanceled(true);
-            for (ItemEntity itemEntity :  evt.getDrops()) {
-                ResourceSource res = ResourceSources.getFromItem(itemEntity.getItem().getItem());
+            for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal((Animal) evt.getEntity())) {
+                ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
                 if (res != null) {
-                    unit.getItems().add(itemEntity.getItem());
+                    unit.getItems().add(itemStack);
                 }
             }
             if (Unit.atThresholdResources(unit))
