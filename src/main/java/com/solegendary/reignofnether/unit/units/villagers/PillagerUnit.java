@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.ability.abilities.MountRavager;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -29,12 +30,14 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Pillager;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -220,8 +223,23 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
         ItemStack itemstack = pUser.getItemInHand(interactionhand);
         if (pUser.isHolding((is) -> is.getItem() instanceof CrossbowItem)) {
             CrossbowItem.performShooting(pUser.level, pUser, interactionhand, itemstack, pVelocity, 0);
-            this.playSound(SoundEvents.CROSSBOW_SHOOT, 3.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+            this.playSound(SoundEvents.CROSSBOW_SHOOT, 3.0F, 0);
         }
         this.onCrossbowAttackPerformed();
+    }
+
+    @Override
+    public void shootCrossbowProjectile(LivingEntity pUser, LivingEntity pTarget, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
+        double d0 = pTarget.getX() - pUser.getX();
+        double d1 = pTarget.getZ() - pUser.getZ();
+        double d2 = Math.sqrt(d0 * d0 + d1 * d1);
+        double d3 = pTarget.getY(0.3333333333333333) - pProjectile.getY() + d2 * 0.20000000298023224;
+
+        if (pTarget.getEyeHeight() <= 1.0f)
+            d1 -= (1.0f - pTarget.getEyeHeight());
+
+        Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
+        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, (float)(14 - pUser.level.getDifficulty().getId() * 4));
+        pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
     }
 }

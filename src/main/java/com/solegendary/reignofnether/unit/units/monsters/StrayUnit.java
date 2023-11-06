@@ -242,6 +242,10 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
         double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
         double d2 = pTarget.getZ() - this.getZ();
         double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+
+        if (pTarget.getEyeHeight() <= 1.0f)
+            d1 -= (1.0f - pTarget.getEyeHeight());
+
         abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, 0);
         this.playSound(SoundEvents.SKELETON_SHOOT, 3.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
         this.level.addFreshEntity(abstractarrow);
