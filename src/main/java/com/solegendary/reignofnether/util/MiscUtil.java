@@ -2,9 +2,11 @@ package com.solegendary.reignofnether.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -23,6 +25,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
@@ -38,6 +41,17 @@ import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
 
 public class MiscUtil {
+
+    // prevent flying mobs from floating above trees and buildings (or they're effectively unreachable)
+    // also used to move the camera Y pos up and down to prevent clipping inside of blocks
+    public static boolean isGroundBlock(Level level, BlockPos bp) {
+        BlockState bs = level.getBlockState(bp);
+        Block block = bs.getBlock();
+        if (ResourcesServerEvents.isLogBlock(bs) || ResourcesServerEvents.isLeafBlock(bs) || bs.isAir() ||
+                BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), bp))
+            return false;
+        return true;
+    }
 
     public static void addUnitCheckpoint(Unit unit, BlockPos blockPos) {
         addUnitCheckpoint(unit, blockPos, true);

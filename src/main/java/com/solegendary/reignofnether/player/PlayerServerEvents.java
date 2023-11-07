@@ -132,10 +132,8 @@ public class PlayerServerEvents {
             serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
             serverPlayer.sendSystemMessage(Component.literal("Use /startrts <faction_name> to get started"));
             serverPlayer.sendSystemMessage(Component.literal("Make sure to be in a good base location first!"));
-            serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS view"));
         } else {
             serverPlayer.sendSystemMessage(Component.literal("Welcome back to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
-            serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS view"));
         }
         if (serverPlayer.hasPermissions(4)) {
             serverPlayer.sendSystemMessage(Component.literal(""));
@@ -184,13 +182,17 @@ public class PlayerServerEvents {
         if (faction == Faction.MONSTERS) {
             level.setDayTime(13000);
         }
-        sendMessageToAllPlayers(serverPlayer.getName().getString() + " has started the game!");
+        serverPlayer.sendSystemMessage(Component.literal(""));
+        sendMessageToAllPlayers(serverPlayer.getName().getString() + " has started their game!");
+        serverPlayer.sendSystemMessage(Component.literal(""));
+        serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS view"));
     }
 
     // commands for ops to give resources
     @SubscribeEvent
     public static void onPlayerChat(ServerChatEvent.Submitted evt) {
 
+        /*
         if (evt.getMessage().getString().equals("test spiders")) {
             UnitServerEvents.convertAllToUnit(
                     evt.getPlayer().getName().getString(),
@@ -200,9 +202,7 @@ public class PlayerServerEvents {
                                     sUnit.getOwnerName().equals(evt.getPlayer().getName().getString()),
                     EntityRegistrar.POISON_SPIDER_UNIT.get()
             );
-        }
-
-
+        }*/
         if (evt.getPlayer().hasPermissions(4)) {
             String msg = evt.getMessage().getString();
             String[] words = msg.split(" ");

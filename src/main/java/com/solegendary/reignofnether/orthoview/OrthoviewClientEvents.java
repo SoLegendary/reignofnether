@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
@@ -105,6 +106,21 @@ public class OrthoviewClientEvents {
             Vec2 XZRotated = MyMath.rotateCoords(x, z, -camRotX - camRotAdjX);
             MC.player.move(MoverType.SELF, new Vec3(XZRotated.x, y, XZRotated.y));
         }
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
+        if (MC.player == null || MC.level == null)
+            return;
+
+        if (MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-5,0)) &&
+            MC.player.getOnPos().getY() <= ORTHOVIEW_PLAYER_MAX_Y)
+            panCam(0,0.5f,0);
+        if (!MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-6,0)) &&
+            MC.player.getOnPos().getY() >= ORTHOVIEW_PLAYER_BASE_Y)
+            panCam(0,-0.5f,0);
     }
 
     public static void toggleEnable() {

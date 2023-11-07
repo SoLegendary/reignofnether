@@ -63,7 +63,7 @@ public class FlyingMoveToTargetGoal extends MoveToTargetBlockGoal {
             ((Unit) mob).setIsCheckpointGreen(true);
 
             BlockPos bpGround = bp;
-            while(!isGroundBlock(bpGround))
+            while(!MiscUtil.isGroundBlock(this.mob.level, bpGround))
                 bpGround = bpGround.offset(0,-1,0);
 
             this.moveTarget = bpGround.offset(0,10,0);
@@ -82,15 +82,5 @@ public class FlyingMoveToTargetGoal extends MoveToTargetBlockGoal {
 
         if (this.mob.isVehicle() && this.mob.getPassengers().get(0) instanceof Unit unit)
             unit.getMoveGoal().stopMoving();
-    }
-
-    // // prevent flying mobs from floating above trees and buildings (or they're effectively unreachable)
-    private boolean isGroundBlock(BlockPos bp) {
-        BlockState bs = this.mob.level.getBlockState(bp);
-        Block block = bs.getBlock();
-        if (ResourcesServerEvents.isLogBlock(bs) || ResourcesServerEvents.isLeafBlock(bs) || bs.isAir() ||
-            BuildingUtils.isPosInsideAnyBuilding(this.mob.level.isClientSide(), bp))
-            return false;
-        return true;
     }
 }

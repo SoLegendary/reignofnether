@@ -9,9 +9,6 @@ TODO bugs/features:
 - test compatibility with a performance improvement mod (eg. optifine)
 
 
-- crash on rejoining a different map in RTS mode
-    - fixed?
-
 
 
 TODO test in next playtest
@@ -23,10 +20,8 @@ check poison spider upgrades work (with 'test spiders')
     - synced goals
     - synced passenger/vehicle
 logging out of a server should remove all clientside buildings
-piglins should still tick damage inside fire
 flame sanctuary builds at normal speed correctly and doesn't spawn neutral blazes
 grunts should not spawn with any equipment
-ghast fireballs destroy leaves
 
 worker didn't automatically start planting after finishing a farm
     - only for Tim?
