@@ -10,6 +10,20 @@ TODO bugs/features:
 
 
 
+proper victory/defeat conditions:
+    - only allow /startrts once (even if opped) and if the player is not already registered as RTSPlayer
+    - when defeated, remove them from RTSPlayers list and remove control of all their units/buildings
+        - set owner name to blank
+    - register a defeat if a player also lost all units without owning any buildings
+    - add in a defeat screen
+    - upon any defeat, if there is only one RTSPlayer left, give them a victory screen
+    - add command /surrender
+    - add an op-level command /resetrts to:
+        - kill all Units
+        - destroy all Buildings
+        - remove all players from RTSPlayers list
+    - while not an RTSPlayer, don't show resources
+
 
 TODO test in next playtest
 
