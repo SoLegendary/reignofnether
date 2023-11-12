@@ -12,12 +12,26 @@ TODO bugs/features:
 
 proper victory/defeat conditions:
     - add an op-level command /resetrts to:
-        - kill all Units
-        - destroy all Buildings
+        - kill all Units server and clientside
+        - destroy all Buildings server and clientside
         - remove all players from RTSPlayers list
+
+player joining the server should have the have clear all their clients' units/buildings and repopulate them from server lists
 
 automatically put players who use /startrts into orthoview?
 
+- should reset resources on /startrts
+- spectators should show population correctly
+- villagers sometimes spawn as captains
+    - all units are spawning as though they are from eggs (including piglins with armor)
+    - workers are showing damage bonuses for tools
+- remove ladders from watchtowers (units keep getting stuck)
+- make animals spawn at night
+- killing a capitol didn't kill the player??
+
+- case of the disappearing portal control (basic portal!)
+- theory: if you dont load chunks first before enabling fog they will be updated with buildings
+- select all military units button
 how to deal with ghasts being effectively unreachable when over water?
 
 
