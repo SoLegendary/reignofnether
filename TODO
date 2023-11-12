@@ -15,12 +15,19 @@ proper victory/defeat conditions:
         - kill all Units
         - destroy all Buildings
         - remove all players from RTSPlayers list
-    - while not an RTSPlayer, don't show resources
-        - instead show a mouseover help button
+
+automatically put players who use /startrts into orthoview?
+
+how to deal with ghasts being effectively unreachable when over water?
+
 
 
 TODO test in next playtest
 
+correct start/win conditions
+    - victory/defeat screens
+    - /surrender
+spectator mode
 drowned and drowned conversions
 iron golem buildings
 fire resistance upgrade

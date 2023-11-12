@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -63,6 +64,9 @@ public class FogOfWarClientEvents {
     }
 
     public static boolean isPlayerRevealed(String name) {
+        if (!PlayerClientEvents.isRTSPlayer)
+            return true;
+
         return revealedPlayerNames.contains(name);
     }
 
