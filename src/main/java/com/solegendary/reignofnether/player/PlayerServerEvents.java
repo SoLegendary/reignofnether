@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
@@ -49,7 +50,7 @@ public class PlayerServerEvents {
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
     private static final Set<RTSPlayer> rtsPlayers = new HashSet<>(); // players that have run /startrts
 
-    public static final int TICKS_TO_REVEAL = 30 * ResourceCost.TICKS_PER_SECOND;
+    public static final int TICKS_TO_REVEAL = 60 * ResourceCost.TICKS_PER_SECOND;
 
     // warpten - faster building/unit production
     // operationcwal - faster resource gathering
@@ -66,10 +67,12 @@ public class PlayerServerEvents {
         public String name;
         public int id;
         public int ticksWithoutCapitol = 0;
+        public Faction faction;
 
-        RTSPlayer(ServerPlayer player) {
+        RTSPlayer(ServerPlayer player, Faction faction) {
             this.name = player.getName().getString();
             this.id = player.getId();
+            this.faction = faction;
         }
 
         public void tick() {
@@ -98,7 +101,11 @@ public class PlayerServerEvents {
         }
     }
 
-    private static boolean isRTSPlayer(int id) {
+    public static boolean isRTSPlayer(String playerName) {
+        return rtsPlayers.stream().filter(p -> p.name.equals(playerName)).toList().size() > 0;
+    }
+
+    public static boolean isRTSPlayer(int id) {
         return rtsPlayers.stream().filter(p -> p.id == id).toList().size() > 0;
     }
 
@@ -141,6 +148,11 @@ public class PlayerServerEvents {
             serverPlayer.sendSystemMessage(Component.literal("/fog enable | disable"));
             serverPlayer.sendSystemMessage(Component.literal("/startrts (unlimited use)"));
         }
+
+        if (isRTSPlayer(playerName))
+            PlayerClientboundPacket.enableRTSStatus(playerName);
+        else
+            PlayerClientboundPacket.disableRTSStatus(playerName);
     }
 
     @SubscribeEvent
@@ -158,8 +170,12 @@ public class PlayerServerEvents {
 
         if (serverPlayer == null)
             return;
-        if (isRTSPlayer(serverPlayer.getId()) && !serverPlayer.hasPermissions(4))
+        if (isRTSPlayer(serverPlayer.getId())) {
+            serverPlayer.sendSystemMessage(Component.literal(""));
+            serverPlayer.sendSystemMessage(Component.literal("You already started your RTS match!"));
+            serverPlayer.sendSystemMessage(Component.literal(""));
             return;
+        }
 
         EntityType<? extends Unit> entityType = switch(faction) {
             case VILLAGERS -> EntityRegistrar.VILLAGER_UNIT.get();
@@ -167,6 +183,9 @@ public class PlayerServerEvents {
             case PIGLINS -> EntityRegistrar.GRUNT_UNIT.get();
             case NONE -> null;
         };
+        rtsPlayers.add(new RTSPlayer(serverPlayer, faction));
+        PlayerClientboundPacket.enableRTSStatus(serverPlayer.getName().getString());
+
         ServerLevel level = serverPlayer.getLevel();
         for (int i = -1; i <= 1; i++) {
             Entity entity = entityType.create(level);
@@ -177,8 +196,6 @@ public class PlayerServerEvents {
                 level.addFreshEntity(entity);
             }
         }
-        rtsPlayers.add(new RTSPlayer(serverPlayer));
-
         if (faction == Faction.MONSTERS) {
             level.setDayTime(13000);
         }
@@ -186,6 +203,7 @@ public class PlayerServerEvents {
         sendMessageToAllPlayers(serverPlayer.getName().getString() + " has started their game!");
         serverPlayer.sendSystemMessage(Component.literal(""));
         serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS view"));
+        serverPlayer.sendSystemMessage(Component.literal(""));
     }
 
     // commands for ops to give resources
@@ -294,7 +312,49 @@ public class PlayerServerEvents {
     }
 
     public static void sendMessageToAllPlayers(String msg) {
-        for (ServerPlayer player : players)
+        for (ServerPlayer player : players) {
+            player.sendSystemMessage(Component.literal(""));
             player.sendSystemMessage(Component.literal(msg));
+            player.sendSystemMessage(Component.literal(""));
+        }
+    }
+
+    // defeat a player, giving them a defeat screen, removing all their unit/building control and removing them from rtsPlayers
+    public static void defeat(int playerId, String reason) {
+        for (ServerPlayer player : players) {
+            if (player.getId() == playerId) {
+                defeat(player.getName().getString(), reason);
+                return;
+            }
+        }
+    }
+
+    public static void defeat(String playerName, String reason) {
+        rtsPlayers.removeIf(rtsPlayer -> {
+            if (rtsPlayer.name.equals(playerName)) {
+                sendMessageToAllPlayers(playerName + " has " + reason + " and is defeated!");
+
+                PlayerClientboundPacket.defeat(playerName);
+
+                for (LivingEntity entity : UnitServerEvents.getAllUnits())
+                    if (entity instanceof Unit unit && unit.getOwnerName().equals(playerName))
+                        unit.setOwnerName("");
+
+                for (Building building : BuildingServerEvents.getBuildings())
+                    if (building.ownerName.equals(playerName))
+                        building.ownerName = "";
+
+                return true;
+            }
+            return false;
+        });
+        // if there is only one player left, they are automatically victorious
+        // TODO: shoot fireworks from buildings they own
+        if (rtsPlayers.size() == 1) {
+            for (RTSPlayer rtsPlayer : rtsPlayers) {
+                sendMessageToAllPlayers(rtsPlayer.name + " is victorious!");
+                PlayerClientboundPacket.victory(rtsPlayer.name);
+            }
+        }
     }
 }

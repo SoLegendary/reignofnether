@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
@@ -16,7 +17,6 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.monsters.DrownedUnit;
-import com.solegendary.reignofnether.unit.units.monsters.HuskUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -28,9 +28,10 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.*;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Fireball;
+import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -47,10 +48,13 @@ import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.checkerframework.checker.units.qual.A;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
+
+import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
 
 public class UnitServerEvents {
 
@@ -213,6 +217,15 @@ public class UnitServerEvents {
             //ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, false, true);
             //forcedUnitChunks.removeIf(p -> p.getFirst() == entity.getId());
         }
+
+        // if a player has no more units, then they are defeated
+        if (evt.getEntity() instanceof Unit unit) {
+            int unitsOwned = allUnits.stream().filter(u -> (u instanceof Unit unit1 && unit1.getOwnerName().equals(unit.getOwnerName()))).toList().size();
+            if (unitsOwned == 0 && PlayerServerEvents.isRTSPlayer(unit.getOwnerName()) &&
+                BuildingUtils.getTotalCompletedBuildingsOwned(false, unit.getOwnerName()) == 0) {
+                PlayerServerEvents.defeat(unit.getOwnerName(), "lost all their units and buildings");
+            }
+        }
     }
 
     @SubscribeEvent
@@ -358,12 +371,12 @@ public class UnitServerEvents {
             Vec3 pos = entity.position();
             List<Player> nearbyPlayers = MiscUtil.getEntitiesWithinRange(
                     new Vector3d(pos.x, pos.y, pos.z),
-                    100, Player.class, evt.getEntity().level);
+                    10, Player.class, evt.getEntity().level);
 
-            float closestPlayerDist = 100;
+            float closestPlayerDist = 10;
             Player closestPlayer = null;
             for (Player player : nearbyPlayers) {
-                if (player.distanceTo(entity) < closestPlayerDist) {
+                if (player.distanceTo(entity) < closestPlayerDist && isRTSPlayer(player.getName().getString())) {
                     closestPlayerDist = player.distanceTo(entity);
                     closestPlayer = player;
                 }

@@ -20,10 +20,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -41,6 +47,24 @@ import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
 
 public class MiscUtil {
+
+    public static void shootFirework(Level level, Vec3 vec3) {
+        CompoundTag explosion = new CompoundTag();
+        explosion.put("Colors", new IntArrayTag(new int[]{0xF0F0F0}));
+        explosion.putByte("Type", (byte) 0b0);
+        ListTag explosions = new ListTag();
+        explosions.add(explosion);
+        CompoundTag explosionsAndFlight = new CompoundTag();
+        explosionsAndFlight.put("Explosions", explosions);
+        explosionsAndFlight.putByte("Flight", (byte) 0b1);
+        CompoundTag fireworks = new CompoundTag();
+        fireworks.put("Fireworks", explosionsAndFlight);
+        ItemStack itemStack = new ItemStack(Items.FIREWORK_ROCKET);
+        itemStack.setTag(fireworks);
+        FireworkRocketEntity entity = new FireworkRocketEntity(level, null, vec3.x, vec3.y(), vec3.z, itemStack);
+        level.addFreshEntity(entity);
+        entity.moveTo(vec3);
+    }
 
     // prevent flying mobs from floating above trees and buildings (or they're effectively unreachable)
     // also used to move the camera Y pos up and down to prevent clipping inside of blocks

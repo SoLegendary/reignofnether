@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
@@ -68,6 +69,10 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(PlayerServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(PlayerServerboundPacket::encode).decoder(PlayerServerboundPacket::new)
                 .consumer(PlayerServerboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(PlayerClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(PlayerClientboundPacket::encode).decoder(PlayerClientboundPacket::new)
+                .consumer(PlayerClientboundPacket::handle).add();
 
         INSTANCE.messageBuilder(FogOfWarClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(FogOfWarClientboundPacket::encode).decoder(FogOfWarClientboundPacket::new)

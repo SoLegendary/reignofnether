@@ -43,7 +43,7 @@ class PortraitRendererBuilding {
         if (!building.isBuilt)
             name += " (" + (int) (building.getBlocksPlacedPercent() * 100) + "%)";
 
-        if (rs != Relationship.OWNED)
+        if (rs != Relationship.OWNED && !building.ownerName.isBlank())
             name += " (" + building.ownerName + ")";
 
         // draw name

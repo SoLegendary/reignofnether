@@ -412,8 +412,9 @@ public abstract class Building {
             sendMessageToAllPlayers(this.ownerName + " has lost their capitol and will be revealed in " +
                     PlayerServerEvents.TICKS_TO_REVEAL / ResourceCost.TICKS_PER_SECOND + " seconds unless they rebuild it!");
 
-        if (!this.level.isClientSide() && BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 0)
-            sendMessageToAllPlayers(this.ownerName + " has lost their final building and has been defeated!");
+        if (!this.level.isClientSide() && BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 0) {
+            PlayerServerEvents.defeat(this.ownerName, "lost all their buildings");
+        }
     }
 
     // should only be run serverside

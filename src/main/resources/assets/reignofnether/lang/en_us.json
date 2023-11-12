@@ -28,5 +28,7 @@
   "item.reignofnether.zombie_piglin_unit_spawn_egg": "Spawn Zombie Piglin Unit",
   "item.reignofnether.zoglin_unit_spawn_egg": "Spawn Zoglin Unit",
 
-  "sounds.reignofnether.under_attack": "Under attack!"
+  "sounds.reignofnether.under_attack": "Under attack!",
+  "sounds.reignofnether.victory": "Victory!",
+  "sounds.reignofnether.defeat": "Defeat"
 }
