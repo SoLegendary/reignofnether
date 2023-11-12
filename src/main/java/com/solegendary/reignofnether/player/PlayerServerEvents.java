@@ -146,7 +146,6 @@ public class PlayerServerEvents {
             serverPlayer.sendSystemMessage(Component.literal(""));
             serverPlayer.sendSystemMessage(Component.literal("As a server op you may use:"));
             serverPlayer.sendSystemMessage(Component.literal("/fog enable | disable"));
-            serverPlayer.sendSystemMessage(Component.literal("/startrts (unlimited use)"));
         }
 
         if (isRTSPlayer(playerName))
@@ -200,7 +199,7 @@ public class PlayerServerEvents {
             level.setDayTime(13000);
         }
         serverPlayer.sendSystemMessage(Component.literal(""));
-        sendMessageToAllPlayers(serverPlayer.getName().getString() + " has started their game!");
+        sendMessageToAllPlayers(serverPlayer.getName().getString() + " has started their game!", true);
         sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
         serverPlayer.sendSystemMessage(Component.literal(""));
         serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS view"));
@@ -313,9 +312,16 @@ public class PlayerServerEvents {
     }
 
     public static void sendMessageToAllPlayers(String msg) {
+        sendMessageToAllPlayers(msg, false);
+    }
+
+    public static void sendMessageToAllPlayers(String msg, boolean bold) {
         for (ServerPlayer player : players) {
             player.sendSystemMessage(Component.literal(""));
-            player.sendSystemMessage(Component.literal(msg));
+            if (bold)
+                player.sendSystemMessage(Component.literal(msg).withStyle(Style.EMPTY.withBold(true)));
+            else
+                player.sendSystemMessage(Component.literal(msg));
             player.sendSystemMessage(Component.literal(""));
         }
     }
@@ -333,8 +339,8 @@ public class PlayerServerEvents {
     public static void defeat(String playerName, String reason) {
         rtsPlayers.removeIf(rtsPlayer -> {
             if (rtsPlayer.name.equals(playerName)) {
-                sendMessageToAllPlayers(playerName + " has " + reason + " and is defeated!");
-                sendMessageToAllPlayers("There are " + rtsPlayers.size() + " RTS player(s) remaining");
+                sendMessageToAllPlayers(playerName + " has " + reason + " and is defeated!", true);
+                sendMessageToAllPlayers("There are " + (rtsPlayers.size() - 1) + " RTS player(s) remaining");
 
                 PlayerClientboundPacket.defeat(playerName);
 
@@ -353,7 +359,7 @@ public class PlayerServerEvents {
         // if there is only one player left, they are automatically victorious
         if (rtsPlayers.size() == 1) {
             for (RTSPlayer rtsPlayer : rtsPlayers) {
-                sendMessageToAllPlayers(rtsPlayer.name + " is victorious!");
+                sendMessageToAllPlayers(rtsPlayer.name + " is victorious!", true);
                 PlayerClientboundPacket.victory(rtsPlayer.name);
             }
         }
