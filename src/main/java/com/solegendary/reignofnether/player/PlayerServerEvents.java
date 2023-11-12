@@ -201,6 +201,7 @@ public class PlayerServerEvents {
         }
         serverPlayer.sendSystemMessage(Component.literal(""));
         sendMessageToAllPlayers(serverPlayer.getName().getString() + " has started their game!");
+        sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
         serverPlayer.sendSystemMessage(Component.literal(""));
         serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS view"));
         serverPlayer.sendSystemMessage(Component.literal(""));
@@ -333,6 +334,7 @@ public class PlayerServerEvents {
         rtsPlayers.removeIf(rtsPlayer -> {
             if (rtsPlayer.name.equals(playerName)) {
                 sendMessageToAllPlayers(playerName + " has " + reason + " and is defeated!");
+                sendMessageToAllPlayers("There are " + rtsPlayers.size() + " RTS player(s) remaining");
 
                 PlayerClientboundPacket.defeat(playerName);
 
@@ -349,7 +351,6 @@ public class PlayerServerEvents {
             return false;
         });
         // if there is only one player left, they are automatically victorious
-        // TODO: shoot fireworks from buildings they own
         if (rtsPlayers.size() == 1) {
             for (RTSPlayer rtsPlayer : rtsPlayers) {
                 sendMessageToAllPlayers(rtsPlayer.name + " is victorious!");

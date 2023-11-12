@@ -48,7 +48,7 @@ public class PlayerClientEvents {
 
         // remove control of this player's buildings for all players' clients
         for (Building building : BuildingClientEvents.getBuildings())
-            if (building.ownerName.equals(MC.player.getName().getString()))
+            if (building.ownerName.equals(playerName))
                 building.ownerName = "";
 
         if (!MC.player.getName().getString().equals(playerName))
