@@ -48,6 +48,10 @@ public class PlayerServerboundPacket {
                     MC.player.getEyePosition().z));
         }
     }
+    public static void resetRTS() {
+        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+                PlayerAction.RESET_RTS, 0,0d,0d,0d));
+    }
     public static void surrender() {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null) {
@@ -93,6 +97,7 @@ public class PlayerServerboundPacket {
                 case START_RTS_MONSTERS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.MONSTERS);
                 case START_RTS_PIGLINS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.PIGLINS);
                 case DEFEAT -> PlayerServerEvents.defeat(this.playerId, "surrendered");
+                case RESET_RTS -> PlayerServerEvents.resetRTS();
             }
             success.set(true);
         });

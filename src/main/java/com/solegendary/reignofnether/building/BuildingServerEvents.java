@@ -227,9 +227,15 @@ public class BuildingServerEvents {
                 BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced());
         }
 
+        // need to remove from the list first as destroy() will read it to check defeats
+        List<Building> buildingsToDestroy = buildings.stream().filter(Building::shouldBeDestroyed).toList();
+        buildings.removeIf(Building::shouldBeDestroyed);
+
+        for (Building building : buildingsToDestroy)
+            building.destroy(serverLevel);
+
         for (Building building : buildings)
             building.tick(serverLevel);
-        buildings.removeIf(Building::shouldBeDestroyed);
     }
 
     // cancel all explosion damage to non-building blocks

@@ -10,24 +10,8 @@ TODO bugs/features:
 
 
 
-proper victory/defeat conditions:
-    - add an op-level command /resetrts to:
-        - kill all Units server and clientside
-        - destroy all Buildings server and clientside
-        - remove all players from RTSPlayers list
 
-player joining the server should have the have clear all their clients' units/buildings and repopulate them from server lists
-
-automatically put players who use /startrts into orthoview?
-
-- should reset resources on /startrts
-- spectators should show population correctly
-- villagers sometimes spawn as captains
-    - all units are spawning as though they are from eggs (including piglins with armor)
-    - workers are showing damage bonuses for tools
-- remove ladders from watchtowers (units keep getting stuck)
 - make animals spawn at night
-- killing a capitol didn't kill the player??
 
 - case of the disappearing portal control (basic portal!)
 - theory: if you dont load chunks first before enabling fog they will be updated with buildings
@@ -38,22 +22,11 @@ how to deal with ghasts being effectively unreachable when over water?
 
 TODO test in next playtest
 
-correct start/win conditions
-    - victory/defeat screens
-    - /surrender
-spectator mode
-drowned and drowned conversions
-iron golem buildings
-fire resistance upgrade
-check poison spider upgrades work (with 'test spiders')
-    - synced goals
-    - synced passenger/vehicle
-logging out of a server should remove all clientside buildings
-flame sanctuary builds at normal speed correctly and doesn't spawn neutral blazes
-grunts should not spawn with any equipment
-
-worker didn't automatically start planting after finishing a farm
-    - only for Tim?
+- killing a capitol didn't kill the player??
+- spectators should show population correctly
+- should reset resources on /startrts
+- /resetrts
+- concurrentmodificationexception possibility on PlayerServerEvents.rtsPlayers
 
 
 

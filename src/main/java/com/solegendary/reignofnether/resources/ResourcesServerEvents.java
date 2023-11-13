@@ -12,6 +12,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.stringtemplate.v4.ST;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,18 @@ public class ResourcesServerEvents {
     public static final int STARTING_FOOD = 100;
     public static final int STARTING_WOOD = 400;
     public static final int STARTING_ORE = 250;
+
+    public static void resetResources(String playerName) {
+        for (Resources resources : resourcesList) {
+            if (resources.ownerName.equals(playerName)) {
+                resources.food = STARTING_FOOD;
+                resources.wood = STARTING_WOOD;
+                resources.ore = STARTING_ORE;
+                ResourcesClientboundPacket.syncResources(resourcesList);
+                break;
+            }
+        }
+    }
 
     public static void addSubtractResources(Resources resourcesToAdd) {
         for (Resources resources : resourcesList) {

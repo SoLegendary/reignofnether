@@ -41,6 +41,7 @@ import net.minecraftforge.common.world.ForgeChunkManager;
 import java.util.*;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.*;
+import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
 import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
 
 public abstract class Building {
@@ -408,12 +409,14 @@ public abstract class Building {
                 serverLevel.destroyBlock(block.getBlockPos(), false);
         });
 
-        if (!this.level.isClientSide() && this.isCapitol)
-            sendMessageToAllPlayers(this.ownerName + " has lost their capitol and will be revealed in " +
-                    PlayerServerEvents.TICKS_TO_REVEAL / ResourceCost.TICKS_PER_SECOND + " seconds unless they rebuild it!");
-
-        if (!this.level.isClientSide() && BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 0) {
-            PlayerServerEvents.defeat(this.ownerName, "lost all their buildings");
+        if (!this.level.isClientSide() && isRTSPlayer(this.ownerName)) {
+            if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 0) {
+                PlayerServerEvents.defeat(this.ownerName, "lost all their buildings");
+            }
+            else if (this.isCapitol) {
+                sendMessageToAllPlayers(this.ownerName + " has lost their capitol and will be revealed in " +
+                        PlayerServerEvents.TICKS_TO_REVEAL / ResourceCost.TICKS_PER_SECOND + " seconds unless they rebuild it!");
+            }
         }
     }
 
@@ -551,9 +554,6 @@ public abstract class Building {
             } else {
                 this.ticksToExtinguish = 0;
             }
-
-            if (this.shouldBeDestroyed())
-                this.destroy(serverLevel);
 
             // blocks that will build themselves on each tick (eg. foundations from placement, upgrade sections)
             if (blockPlaceQueue.size() > 0) {

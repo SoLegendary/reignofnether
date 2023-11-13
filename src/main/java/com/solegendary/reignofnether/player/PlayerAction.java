@@ -11,5 +11,6 @@ public enum PlayerAction {
     DEFEAT,
     VICTORY,
     DISABLE_RTS,
-    ENABLE_RTS
+    ENABLE_RTS,
+    RESET_RTS
 }

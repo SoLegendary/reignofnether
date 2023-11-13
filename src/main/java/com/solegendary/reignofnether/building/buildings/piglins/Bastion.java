@@ -96,6 +96,8 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuilding 
                         FormattedCharSequence.forward("A fortified barracks to house military piglins,", Style.EMPTY),
                         FormattedCharSequence.forward("enabling them to be produced at military portals.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.forward("Also garrisons up to 5 units.", Style.EMPTY),
+                        FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Requires a Basic Portal", Style.EMPTY)
                 ),
                 null

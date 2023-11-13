@@ -670,7 +670,7 @@ public class HudClientEvents {
                     }
                     default -> {
                         rlPath = "textures/icons/items/bed.png";
-                        resValueStr = UnitClientEvents.getCurrentPopulation() + "/" + BuildingClientEvents.getTotalPopulationSupply();
+                        resValueStr = UnitClientEvents.getCurrentPopulation(selPlayerName) + "/" + BuildingClientEvents.getTotalPopulationSupply(selPlayerName);
                         resName = ResourceName.NONE;
                     }
                 }

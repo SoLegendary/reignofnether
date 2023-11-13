@@ -42,6 +42,11 @@ public class PlayerClientboundPacket {
                 new PlayerClientboundPacket(PlayerAction.VICTORY, playerName));
     }
 
+    public static void resetRTS() {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.RESET_RTS, ""));
+    }
+
     public PlayerClientboundPacket(PlayerAction playerAction, String playerName) {
         this.playerAction = playerAction;
         this.playerName = playerName;
@@ -69,6 +74,7 @@ public class PlayerClientboundPacket {
                             case VICTORY -> PlayerClientEvents.victory(playerName);
                             case DISABLE_RTS -> PlayerClientEvents.disableRTS(playerName);
                             case ENABLE_RTS -> PlayerClientEvents.enableRTS(playerName);
+                            case RESET_RTS -> PlayerClientEvents.resetRTS();
                         }
                         success.set(true);
                     });

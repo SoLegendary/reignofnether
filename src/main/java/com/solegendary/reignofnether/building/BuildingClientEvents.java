@@ -64,8 +64,12 @@ public class BuildingClientEvents {
 
     static final Minecraft MC = Minecraft.getInstance();
 
-    private static int totalPopulationSupply = 0;
-    public static int getTotalPopulationSupply() {
+    public static int getTotalPopulationSupply(String playerName) {
+        int totalPopulationSupply = 0;
+        for (Building building : buildings)
+            if (building.ownerName.equals(playerName) && building.isBuilt)
+                totalPopulationSupply += building.popSupply;
+
         return Math.min(ResourceCosts.MAX_POPULATION, totalPopulationSupply);
     }
     // clientside buildings used for tracking position (for cursor selection)
@@ -357,8 +361,6 @@ public class BuildingClientEvents {
 
         Building preselectedBuilding = getPreselectedBuilding();
 
-        totalPopulationSupply = 0;
-
         for (Building building : buildings) {
 
             boolean isInBrightChunk = FogOfWarClientEvents.isBuildingInBrightChunk(building);
@@ -382,8 +384,7 @@ public class BuildingClientEvents {
 
             Relationship buildingRs = getPlayerToBuildingRelationship(building);
 
-            if (buildingRs == Relationship.OWNED && building.isBuilt)
-                totalPopulationSupply += building.popSupply;
+
 
             if (isInBrightChunk) {
                 switch (buildingRs) {

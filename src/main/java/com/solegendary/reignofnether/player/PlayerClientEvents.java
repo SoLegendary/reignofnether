@@ -2,7 +2,10 @@ package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
@@ -27,19 +30,27 @@ public class PlayerClientEvents {
                 }));
         evt.getDispatcher().register(Commands.literal("startrts").then(Commands.literal("villagers")
                 .executes((command) -> {
+                    OrthoviewClientEvents.toggleEnable();
                     PlayerServerboundPacket.startRTS(Faction.VILLAGERS);
                     return 1;
                 })));
         evt.getDispatcher().register(Commands.literal("startrts").then(Commands.literal("monsters")
                 .executes((command) -> {
+                    OrthoviewClientEvents.toggleEnable();
                     PlayerServerboundPacket.startRTS(Faction.MONSTERS);
                     return 1;
                 })));
         evt.getDispatcher().register(Commands.literal("startrts").then(Commands.literal("piglins")
                 .executes((command) -> {
+                    OrthoviewClientEvents.toggleEnable();
                     PlayerServerboundPacket.startRTS(Faction.PIGLINS);
                     return 1;
                 })));
+        evt.getDispatcher().register(Commands.literal("resetrts")
+                .executes((command) -> {
+                    PlayerServerboundPacket.resetRTS();
+                    return 1;
+                }));
     }
 
     public static void defeat(String playerName) {
@@ -75,5 +86,25 @@ public class PlayerClientEvents {
     public static void disableRTS(String playerName) {
         if (MC.player != null && MC.player.getName().getString().equals(playerName))
             isRTSPlayer = false;
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogoutEvent(PlayerEvent.PlayerLoggedOutEvent evt) {
+        // only runs on singleplayer
+        if (MC.player != null && evt.getEntity().getId() == MC.player.getId())
+            resetRTS();
+    }
+
+    public static void resetRTS() {
+        isRTSPlayer = false;
+
+        UnitClientEvents.getSelectedUnits().clear();
+        UnitClientEvents.getPreselectedUnits().clear();
+        UnitClientEvents.getAllUnits().clear();
+        UnitClientEvents.idleWorkerIds.clear();
+        ResearchClient.removeAllResearch();
+        ResearchClient.removeAllCheats();
+        BuildingClientEvents.getSelectedBuildings().clear();
+        BuildingClientEvents.getBuildings().clear();
     }
 }

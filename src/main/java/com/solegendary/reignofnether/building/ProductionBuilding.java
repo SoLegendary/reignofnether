@@ -101,9 +101,6 @@ public abstract class ProductionBuilding extends Building {
         if (entity instanceof Unit unit) {
             unit.setOwnerName(ownerName);
             unit.setupEquipmentAndUpgradesServer();
-            entity.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
-            entity.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
-            entity.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY);
 
             CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
                 UnitServerEvents.addActionItem(

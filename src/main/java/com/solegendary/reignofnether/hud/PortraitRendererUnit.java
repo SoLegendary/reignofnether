@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.util.MyMath;
@@ -234,6 +235,9 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             int atkDmg = (int) attackerUnit.getUnitAttackDamage() + (int) AttackerUnit.getWeaponDamageModifier(attackerUnit);
             if (unit instanceof CreeperUnit cUnit && cUnit.isPowered())
                 atkDmg *= 2;
+            if (unit instanceof WorkerUnit wUnit)
+                atkDmg = (int) attackerUnit.getUnitAttackDamage();
+
             statStrings.add(String.valueOf(atkDmg));
             DecimalFormat df = new DecimalFormat("###.##");
             statStrings.add(String.valueOf(df.format(attackerUnit.getAttacksPerSecond()))); // attacks per second

@@ -122,16 +122,16 @@ public class UnitClientEvents {
             selectedUnits.removeIf(e -> e.getId() == evt.getEntityMounting().getId());
     }
 
-    public static int getCurrentPopulation() {
+    public static int getCurrentPopulation(String playerName) {
         int currentPopulation = 0;
-        if (MC.level != null && MC.player != null) {
+        if (MC.level != null) {
             for (LivingEntity entity : allUnits) {
                 if (entity instanceof Unit unit)
-                    if (unit.getOwnerName().equals(MC.player.getName().getString()))
+                    if (unit.getOwnerName().equals(playerName))
                         currentPopulation += unit.getPopCost();
             }
             for (Building building : BuildingClientEvents.getBuildings())
-                if (building.ownerName.equals(MC.player.getName().getString()))
+                if (building.ownerName.equals(playerName))
                     if (building instanceof ProductionBuilding prodBuilding)
                         for (ProductionItem prodItem : prodBuilding.productionQueue)
                             currentPopulation += prodItem.popCost;
@@ -300,21 +300,6 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
         idleWorkerIds.removeIf(id -> id == evt.getEntity().getId());
-    }
-
-    @SubscribeEvent
-    public static void onPlayerLogoutEvent(PlayerEvent.PlayerLoggedOutEvent evt) {
-        // client log out: remove all entities so we don't duplicate on logging back in
-        if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
-            selectedUnits.clear();
-            preselectedUnits.clear();
-            allUnits.clear();
-            idleWorkerIds.clear();
-            ResearchClient.removeAllResearch();
-            ResearchClient.removeAllCheats();
-            BuildingClientEvents.getSelectedBuildings().clear();
-            BuildingClientEvents.getBuildings().clear();
-        }
     }
 
     /**
