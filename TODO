@@ -10,10 +10,14 @@ TODO bugs/features:
 
 
 
-
-- make animals spawn at night
-
 - case of the disappearing portal control (basic portal!)
+    - server should periodically update clients to check all units/buildings are synced
+        - have clients periodically tell the server how many units/buildings they see
+          and if it ever is mismatched, send back a force update packet to resync
+    - do this at login too
+
+- dont let mobs pathfind into water
+
 - theory: if you dont load chunks first before enabling fog they will be updated with buildings
 - select all military units button
 how to deal with ghasts being effectively unreachable when over water?
