@@ -5,8 +5,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -31,6 +33,7 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;
 import org.spongepowered.asm.mixin.Final;
@@ -52,7 +55,8 @@ import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.*;
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
 
-    private static final int UPDATE_TICKS_MAX = 10;
+    private static final int UPDATE_TICKS_MAX = 5;
+    private static int updateTicks = UPDATE_TICKS_MAX;
 
     @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
     @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
@@ -69,6 +73,19 @@ public abstract class LevelRendererMixin {
             cancellable = true
     )
     private void compileChunks(Camera pCamera, CallbackInfo ci) {
+
+        // hiding leaves around cursor
+        updateTicks -= 1;
+        if (updateTicks <= 0) {
+            updateTicks = UPDATE_TICKS_MAX;
+            Vec3 centrePos = MiscUtil.getOrthoviewCentreWorldPos(Minecraft.getInstance());
+            for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
+                BlockPos chunkCentreBp = chunkInfo.chunk.getOrigin().offset(8.5d, 8.5d, 8.5d);
+                if (chunkCentreBp.distSqr(new BlockPos(centrePos.x, centrePos.y, centrePos.z)) < 1600)
+                    chunkInfo.chunk.setDirty(true);
+            }
+        }
+
         if (!isEnabled())
             return;
 
@@ -81,6 +98,7 @@ public abstract class LevelRendererMixin {
         Set<ChunkPos> rerenderChunksToRemove = ConcurrentHashMap.newKeySet();
 
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
+
             BlockPos originPos = chunkInfo.chunk.getOrigin();
             ChunkPos chunkPos = new ChunkPos(originPos);
 

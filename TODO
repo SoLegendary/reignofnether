@@ -10,6 +10,10 @@ TODO bugs/features:
 
 
 
+- put in a toggle for hiding leaf blocks near the cursor and units
+- make a reverse method of MiscUtil.screenPosToWorldPos so we can hide leaf blocks around units
+
+
 - case of the disappearing portal control (basic portal!)
     - server should periodically update clients to check all units/buildings are synced
         - have clients periodically tell the server how many units/buildings they see

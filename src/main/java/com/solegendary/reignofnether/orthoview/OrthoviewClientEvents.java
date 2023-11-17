@@ -23,6 +23,7 @@ import com.mojang.math.Matrix4f;
 
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 
 import static net.minecraft.util.Mth.sign;
 
@@ -33,6 +34,7 @@ import static net.minecraft.util.Mth.sign;
  */
 public class OrthoviewClientEvents {
 
+    public static boolean hideLeaves = true;
     public static int enabledCount = 0;
     public static boolean enabled = false;
     private static boolean cameraMovingByMouse = false; // excludes edgepanning
@@ -176,6 +178,9 @@ public class OrthoviewClientEvents {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
             if (evt.getKey() == Keybindings.getFnum(12).key)
                 toggleEnable();
+
+            if (evt.getKey() == Keybindings.getFnum(6).key)
+                hideLeaves = !hideLeaves;
 
             if (evt.getKey() == Keybindings.reset.key)
                 reset();
