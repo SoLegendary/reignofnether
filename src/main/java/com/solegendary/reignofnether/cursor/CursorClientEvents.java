@@ -329,7 +329,7 @@ public class CursorClientEvents {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
-        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS ||
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS ||
             HudClientEvents.isMouseOverAnyButtonOrHud())
             return;
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {

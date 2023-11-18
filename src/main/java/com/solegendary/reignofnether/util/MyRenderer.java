@@ -54,9 +54,6 @@ public class MyRenderer {
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
         double d2 = camEntity.getZ();
 
-        RenderSystem.disableDepthTest(); // enable showing lines through blocks
-        RenderSystem.depthMask(false);
-
         VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.lines());
 
         matrixStack.pushPose();
@@ -193,9 +190,6 @@ public class MyRenderer {
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
         double d2 = camEntity.getZ();
 
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(false); // disable showing lines through blocks
-
         matrixStack.pushPose();
         matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
         Matrix4f matrix4f = matrixStack.last().pose();
@@ -290,9 +284,6 @@ public class MyRenderer {
         double d0 = camEntity.getX();
         double d1 = camEntity.getY() + camEntity.getEyeHeight();
         double d2 = camEntity.getZ();
-
-        RenderSystem.disableDepthTest(); // enable showing lines through blocks
-        RenderSystem.depthMask(false);
 
         matrixStack.pushPose();
         matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera

@@ -54,6 +54,7 @@ import java.util.*;
 
 import static com.solegendary.reignofnether.cursor.CursorClientEvents.getPreselectedBlockPos;
 import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedEntity;
+import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.*;
 
 public class UnitClientEvents {
 
@@ -555,7 +556,8 @@ public class UnitClientEvents {
             }
         }
 
-        if (OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+        // AFTER_CUTOUT_BLOCKS lets us see checkpoints through leaves
+        if (OrthoviewClientEvents.isEnabled() && evt.getStage() == AFTER_CUTOUT_BLOCKS) {
             // draw unit checkpoints
             for (LivingEntity entity : getSelectedUnits()) {
                 if (entity instanceof Unit unit) {
@@ -773,6 +775,31 @@ public class UnitClientEvents {
             }
         }
     }
+
+    /*
+    public static RenderLevelStageEvent.Stage stage = AFTER_CUTOUT_BLOCKS;
+
+    @SubscribeEvent
+    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_L) {
+            if (AFTER_CUTOUT_BLOCKS.equals(stage)) {
+                stage = AFTER_TRANSLUCENT_BLOCKS;
+            } else if (AFTER_TRANSLUCENT_BLOCKS.equals(stage)) {
+                stage = AFTER_WEATHER;
+            } else if (AFTER_WEATHER.equals(stage)) {
+                stage = AFTER_SKY;
+            } else if (AFTER_SKY.equals(stage)) {
+                stage = AFTER;
+            } else if (AFTER_CUTOUT_BLOCKS.equals(stage)) {
+                stage = AFTER_TRANSLUCENT_BLOCKS;
+            } else if (AFTER_CUTOUT_BLOCKS.equals(stage)) {
+                stage = AFTER_TRANSLUCENT_BLOCKS;
+            } else if (AFTER_CUTOUT_BLOCKS.equals(stage)) {
+                stage = AFTER_TRANSLUCENT_BLOCKS;
+            }
+        }
+    }
+     */
 
     /*
 
