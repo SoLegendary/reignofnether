@@ -303,24 +303,37 @@ public class UnitClientEvents {
         }
 
         // calculate vecs used to hide leaf blocks around units
-        if (OrthoviewClientEvents.isEnabled() && MC.player != null) {
+        if (OrthoviewClientEvents.isEnabled() && MC.player != null && OrthoviewClientEvents.shouldHideLeaves()) {
             synchronized (unitWindowVecs) {
                 unitWindowVecs.clear();
-                UnitClientEvents.getAllUnits().forEach(u -> {
-                    if (u.position().distanceToSqr(MC.player.position()) < 1600)
-                        unitWindowVecs.add(MyMath.prepIsPointInsideRect3d(Minecraft.getInstance(),
-                                new Vector3d(u.getX() - WINDOW_RADIUS, u.getY(), u.getZ() - WINDOW_RADIUS), // tl
-                                new Vector3d(u.getX() - WINDOW_RADIUS, u.getY(), u.getZ() + WINDOW_RADIUS), // bl
-                                new Vector3d(u.getX() + WINDOW_RADIUS, u.getY(), u.getZ() + WINDOW_RADIUS)  // br
-                        ));
-                });
-                BlockPos bp = CursorClientEvents.getPreselectedBlockPos();
-                if (bp != null) {
+                if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.CENTRE_OF_SCREEN) {
+                    int width = MC.getWindow().getGuiScaledWidth();
+                    int height = MC.getWindow().getGuiScaledHeight();
+
+                    float borderRatio = 0.15f;
+
                     unitWindowVecs.add(MyMath.prepIsPointInsideRect3d(Minecraft.getInstance(),
-                            new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() - WINDOW_RADIUS), // tl
-                            new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS), // bl
-                            new Vector3d(bp.getX() + WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS)  // br
+                            (int) (width * borderRatio), (int) (height * borderRatio),
+                            (int) (width * borderRatio), (int) (height * (1-borderRatio)),
+                            (int) (width * (1-borderRatio)), (int) (height * (1-borderRatio))
                     ));
+                } else {
+                    UnitClientEvents.getAllUnits().forEach(u -> {
+                        if (u.position().distanceToSqr(MC.player.position()) < 1600)
+                            unitWindowVecs.add(MyMath.prepIsPointInsideRect3d(Minecraft.getInstance(),
+                                    new Vector3d(u.getX() - WINDOW_RADIUS, u.getY(), u.getZ() - WINDOW_RADIUS), // tl
+                                    new Vector3d(u.getX() - WINDOW_RADIUS, u.getY(), u.getZ() + WINDOW_RADIUS), // bl
+                                    new Vector3d(u.getX() + WINDOW_RADIUS, u.getY(), u.getZ() + WINDOW_RADIUS)  // br
+                            ));
+                    });
+                    BlockPos bp = CursorClientEvents.getPreselectedBlockPos();
+                    if (bp != null) {
+                        unitWindowVecs.add(MyMath.prepIsPointInsideRect3d(Minecraft.getInstance(),
+                                new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() - WINDOW_RADIUS), // tl
+                                new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS), // bl
+                                new Vector3d(bp.getX() + WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS)  // br
+                        ));
+                    }
                 }
             }
         }

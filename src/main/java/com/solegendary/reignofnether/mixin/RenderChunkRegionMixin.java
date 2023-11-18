@@ -40,18 +40,21 @@ public abstract class RenderChunkRegionMixin {
     )
     private void getBlockState(BlockPos pPos, CallbackInfoReturnable<BlockState> cir) {
         Level level = Minecraft.getInstance().level;
-        if (level != null && OrthoviewClientEvents.isEnabled() && OrthoviewClientEvents.hideLeaves) {
+        if (level != null && OrthoviewClientEvents.isEnabled() && OrthoviewClientEvents.shouldHideLeaves()) {
             Block block = level.getBlockState(pPos).getBlock();
+            BlockState bs = block == BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get() ?
+                    Blocks.RED_STAINED_GLASS.defaultBlockState() :
+                    Blocks.GREEN_STAINED_GLASS.defaultBlockState();
 
             if (level.getBlockState(pPos).getBlock() instanceof LeavesBlock) {
-
+                if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.ALL) {
+                    cir.setReturnValue(bs);
+                    return;
+                }
                 synchronized (UnitClientEvents.unitWindowVecs) {
                     for (ArrayList<Vec3> vecs : UnitClientEvents.unitWindowVecs) {
                         if (MyMath.isPointInsideRect3d(vecs, Vec3.atCenterOf(pPos))) {
-                            if (block == BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get())
-                                cir.setReturnValue(Blocks.RED_STAINED_GLASS.defaultBlockState());
-                            else
-                                cir.setReturnValue(Blocks.GREEN_STAINED_GLASS.defaultBlockState());
+                            cir.setReturnValue(bs);
                             return;
                         }
                     }

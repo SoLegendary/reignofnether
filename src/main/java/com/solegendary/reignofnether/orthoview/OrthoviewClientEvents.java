@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.orthoview;
 
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
@@ -35,7 +36,18 @@ import static net.minecraft.util.Mth.sign;
  */
 public class OrthoviewClientEvents {
 
-    public static boolean hideLeaves = true;
+    public enum LeafHideMethod {
+        NONE,
+        AROUND_UNITS_AND_CURSOR,
+        CENTRE_OF_SCREEN,
+        ALL
+    }
+
+    public static boolean shouldHideLeaves() {
+        return hideLeavesMethod != LeafHideMethod.NONE;
+    }
+
+    public static LeafHideMethod hideLeavesMethod = LeafHideMethod.AROUND_UNITS_AND_CURSOR;
     public static int enabledCount = 0;
     public static boolean enabled = false;
     private static boolean cameraMovingByMouse = false; // excludes edgepanning
@@ -182,9 +194,23 @@ public class OrthoviewClientEvents {
 
             if (evt.getKey() == Keybindings.getFnum(6).key) {
                 UnitClientEvents.windowUpdateTicks = 0;
-                hideLeaves = !hideLeaves;
+                if (hideLeavesMethod == LeafHideMethod.NONE) {
+                    hideLeavesMethod = LeafHideMethod.AROUND_UNITS_AND_CURSOR;
+                    HudClientEvents.showTemporaryMessage("Hiding leaves: around units and cursor");
+                }
+                else if (hideLeavesMethod == LeafHideMethod.AROUND_UNITS_AND_CURSOR) {
+                    hideLeavesMethod = LeafHideMethod.CENTRE_OF_SCREEN;
+                    HudClientEvents.showTemporaryMessage("Hiding leaves: at centre of screen");
+                }
+                else if (hideLeavesMethod == LeafHideMethod.CENTRE_OF_SCREEN) {
+                    hideLeavesMethod = LeafHideMethod.ALL;
+                    HudClientEvents.showTemporaryMessage("Hiding leaves: all");
+                }
+                else if (hideLeavesMethod == LeafHideMethod.ALL) {
+                    hideLeavesMethod = LeafHideMethod.NONE;
+                    HudClientEvents.showTemporaryMessage("Disabled hiding leaves");
+                }
             }
-
             if (evt.getKey() == Keybindings.reset.key)
                 reset();
         }

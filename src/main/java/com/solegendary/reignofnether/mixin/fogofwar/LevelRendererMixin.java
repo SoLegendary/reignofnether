@@ -76,15 +76,21 @@ public abstract class LevelRendererMixin {
         // hiding leaves around cursor
         UnitClientEvents.windowUpdateTicks -= 1;
         if (UnitClientEvents.windowUpdateTicks <= 0) {
-            if (!OrthoviewClientEvents.hideLeaves)
+            if (!OrthoviewClientEvents.shouldHideLeaves())
                 UnitClientEvents.windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX * 100;
             else
                 UnitClientEvents.windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
             Vec3 centrePos = MiscUtil.getOrthoviewCentreWorldPos(Minecraft.getInstance());
             for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
                 BlockPos chunkCentreBp = chunkInfo.chunk.getOrigin().offset(8.5d, 8.5d, 8.5d);
-                if (chunkCentreBp.distSqr(new BlockPos(centrePos.x, centrePos.y, centrePos.z)) < 1600)
+
+                if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.ALL &&
+                    chunkCentreBp.distSqr(new BlockPos(centrePos.x, centrePos.y, centrePos.z)) < 3600) {
                     chunkInfo.chunk.setDirty(true);
+                } else if (chunkCentreBp.distSqr(new BlockPos(centrePos.x, centrePos.y, centrePos.z)) < 1600 ||
+                        !OrthoviewClientEvents.shouldHideLeaves()) {
+                    chunkInfo.chunk.setDirty(true);
+                }
             }
         }
 
