@@ -63,7 +63,7 @@ public class UnitClientEvents {
     private static final int WINDOW_RADIUS = 5; // size of area to hide leaves
     public static final int WINDOW_UPDATE_TICKS_MAX = 5; // size of area to hide leaves
     public static final ArrayList<ArrayList<Vec3>> unitWindowVecs = new ArrayList<>();
-    private static int windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
+    public static int windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
 
     // list of ids that correspond to idle workers - should only be updated from server side
     public static final ArrayList<Integer> idleWorkerIds = new ArrayList<>();

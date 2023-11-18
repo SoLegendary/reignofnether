@@ -57,8 +57,6 @@ import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.*;
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
 
-    private static int windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
-
     @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
     @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
     @Final @Shadow private Minecraft minecraft;
@@ -76,12 +74,12 @@ public abstract class LevelRendererMixin {
     private void compileChunks(Camera pCamera, CallbackInfo ci) {
 
         // hiding leaves around cursor
-        windowUpdateTicks -= 1;
-        if (windowUpdateTicks <= 0) {
+        UnitClientEvents.windowUpdateTicks -= 1;
+        if (UnitClientEvents.windowUpdateTicks <= 0) {
             if (!OrthoviewClientEvents.hideLeaves)
-                windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX * 10;
+                UnitClientEvents.windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX * 100;
             else
-                windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
+                UnitClientEvents.windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
             Vec3 centrePos = MiscUtil.getOrthoviewCentreWorldPos(Minecraft.getInstance());
             for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
                 BlockPos chunkCentreBp = chunkInfo.chunk.getOrigin().offset(8.5d, 8.5d, 8.5d);

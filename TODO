@@ -10,8 +10,7 @@ TODO bugs/features:
 
 
 
-- replace leaves not drawn with transparent leaf texture (by replacing blockstate)
-
+- normalise the 1600 distance for hideleaves with zoom
 
 
 - case of the disappearing portal control (basic portal!)
