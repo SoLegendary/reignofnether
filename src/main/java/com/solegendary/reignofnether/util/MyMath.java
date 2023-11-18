@@ -72,6 +72,9 @@ public class MyMath {
     }
 
     public static boolean isPointInsideRect3d(ArrayList<Vec3> uvwp, Vec3 x) {
+        if (uvwp == null)
+            return false;
+
         Vec3 u = uvwp.get(0);
         Vec3 v = uvwp.get(1);
         Vec3 w = uvwp.get(2);

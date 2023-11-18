@@ -404,7 +404,7 @@ public class CursorClientEvents {
             double d1 = blockhitresult1 == null ? Double.MAX_VALUE : clipContext.getFrom().distanceToSqr(blockhitresult1.getLocation());
             BlockHitResult result = d0 <= d1 ? blockhitresult : blockhitresult1;
 
-            if (result != null && level.getBlockState(result.getBlockPos()).getBlock() instanceof LeavesBlock)
+            if (result != null && OrthoviewClientEvents.hideLeaves && level.getBlockState(result.getBlockPos()).getBlock() instanceof LeavesBlock)
                 result = null;
             return result;
 

@@ -10,7 +10,6 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
@@ -29,6 +28,7 @@ import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -47,7 +47,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -59,6 +58,12 @@ import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedEntit
 public class UnitClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
+
+    // list of vecs used in RenderChunkRegionMixin to replace leaf rendering
+    private static final int WINDOW_RADIUS = 5; // size of area to hide leaves
+    public static final int WINDOW_UPDATE_TICKS_MAX = 5; // size of area to hide leaves
+    public static final ArrayList<ArrayList<Vec3>> unitWindowVecs = new ArrayList<>();
+    private static int windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
 
     // list of ids that correspond to idle workers - should only be updated from server side
     public static final ArrayList<Integer> idleWorkerIds = new ArrayList<>();
@@ -294,6 +299,29 @@ public class UnitClientEvents {
 
             // prevent selection of units out of view
             selectedUnits.removeIf(e -> !FogOfWarClientEvents.isInBrightChunk(e.getOnPos()));
+        }
+
+        // calculate vecs used to hide leaf blocks around units
+        if (OrthoviewClientEvents.isEnabled() && MC.player != null) {
+            synchronized (unitWindowVecs) {
+                unitWindowVecs.clear();
+                UnitClientEvents.getAllUnits().forEach(u -> {
+                    if (u.position().distanceToSqr(MC.player.position()) < 1600)
+                        unitWindowVecs.add(MyMath.prepIsPointInsideRect3d(Minecraft.getInstance(),
+                                new Vector3d(u.getX() - WINDOW_RADIUS, u.getY(), u.getZ() - WINDOW_RADIUS), // tl
+                                new Vector3d(u.getX() - WINDOW_RADIUS, u.getY(), u.getZ() + WINDOW_RADIUS), // bl
+                                new Vector3d(u.getX() + WINDOW_RADIUS, u.getY(), u.getZ() + WINDOW_RADIUS)  // br
+                        ));
+                });
+                BlockPos bp = CursorClientEvents.getPreselectedBlockPos();
+                if (bp != null) {
+                    unitWindowVecs.add(MyMath.prepIsPointInsideRect3d(Minecraft.getInstance(),
+                            new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() - WINDOW_RADIUS), // tl
+                            new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS), // bl
+                            new Vector3d(bp.getX() + WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS)  // br
+                    ));
+                }
+            }
         }
     }
 

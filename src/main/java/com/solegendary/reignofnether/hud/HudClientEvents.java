@@ -71,8 +71,8 @@ public class HudClientEvents {
     private static RectZone unitPortraitZone = null;
     private static RectZone buildingPortraitZone = null;
 
-    private static int mouseX = 0;
-    private static int mouseY = 0;
+    public static int mouseX = 0;
+    public static int mouseY = 0;
     private static int mouseLeftDownX = 0;
     private static int mouseLeftDownY = 0;
 

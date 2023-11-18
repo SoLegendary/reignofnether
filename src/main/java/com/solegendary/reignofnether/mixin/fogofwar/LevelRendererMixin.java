@@ -8,6 +8,7 @@ import com.mojang.math.Matrix4f;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -44,6 +45,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -55,8 +57,7 @@ import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.*;
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
 
-    private static final int UPDATE_TICKS_MAX = 5;
-    private static int updateTicks = UPDATE_TICKS_MAX;
+    private static int windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
 
     @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
     @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
@@ -75,9 +76,12 @@ public abstract class LevelRendererMixin {
     private void compileChunks(Camera pCamera, CallbackInfo ci) {
 
         // hiding leaves around cursor
-        updateTicks -= 1;
-        if (updateTicks <= 0) {
-            updateTicks = UPDATE_TICKS_MAX;
+        windowUpdateTicks -= 1;
+        if (windowUpdateTicks <= 0) {
+            if (!OrthoviewClientEvents.hideLeaves)
+                windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX * 10;
+            else
+                windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
             Vec3 centrePos = MiscUtil.getOrthoviewCentreWorldPos(Minecraft.getInstance());
             for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
                 BlockPos chunkCentreBp = chunkInfo.chunk.getOrigin().offset(8.5d, 8.5d, 8.5d);
@@ -207,6 +211,8 @@ public abstract class LevelRendererMixin {
 
     // increase render distance for particles
     @Shadow private ParticleStatus calculateParticleLevel(boolean pDecreased) { return null; }
+
+    @Shadow @Nullable private PostChain entityEffect;
 
     @Inject(
             method = "addParticleInternal(Lnet/minecraft/core/particles/ParticleOptions;ZZDDDDDD)Lnet/minecraft/client/particle/Particle;",

@@ -10,8 +10,8 @@ TODO bugs/features:
 
 
 
-- put in a toggle for hiding leaf blocks near the cursor and units
-- make a reverse method of MiscUtil.screenPosToWorldPos so we can hide leaf blocks around units
+- replace leaves not drawn with transparent leaf texture (by replacing blockstate)
+
 
 
 - case of the disappearing portal control (basic portal!)

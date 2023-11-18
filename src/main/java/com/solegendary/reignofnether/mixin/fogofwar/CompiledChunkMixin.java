@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(ChunkRenderDispatcher.CompiledChunk.class)
-public abstract class ChunkRenderDispatcherMixin {
+public abstract class CompiledChunkMixin {
 
     @Shadow @Final List<BlockEntity> renderableBlockEntities = Lists.newArrayList();
 
