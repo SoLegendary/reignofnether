@@ -65,7 +65,8 @@ public class UnitClientEvents {
     // list of vecs used in RenderChunkRegionMixin to replace leaf rendering
     private static final int WINDOW_RADIUS = 5; // size of area to hide leaves
     public static final int WINDOW_UPDATE_TICKS_MAX = 5; // size of area to hide leaves
-    public static final ArrayList<ArrayList<Vec3>> unitWindowVecs = new ArrayList<>();
+    public static final List<ArrayList<Vec3>> unitWindowVecs = Collections.synchronizedList(new ArrayList<>());
+    public static final List<BlockPos> windowPositions = Collections.synchronizedList(new ArrayList<>());
     public static int windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
 
     // list of ids that correspond to idle workers - should only be updated from server side
@@ -305,37 +306,27 @@ public class UnitClientEvents {
         }
 
         // calculate vecs used to hide leaf blocks around units
-        if (OrthoviewClientEvents.isEnabled() && MC.player != null && OrthoviewClientEvents.shouldHideLeaves()) {
-            synchronized (unitWindowVecs) {
-                unitWindowVecs.clear();
-                if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.CENTRE_OF_SCREEN) {
-                    int width = MC.getWindow().getGuiScaledWidth();
-                    int height = MC.getWindow().getGuiScaledHeight();
+        if (OrthoviewClientEvents.isEnabled() && MC.player != null &&
+            OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR) {
 
-                    float borderRatio = 0.15f;
+            synchronized (windowPositions) {
+                windowPositions.clear();
+                UnitClientEvents.getAllUnits().forEach(u -> {
+                    if (FogOfWarClientEvents.isInBrightChunk(u.getOnPos()))
+                        windowPositions.add(u.getOnPos());
+                });
+                windowPositions.add(CursorClientEvents.getPreselectedBlockPos());
 
-                    unitWindowVecs.add(MyMath.prepIsPointInsideRect3d(Minecraft.getInstance(),
-                            (int) (width * borderRatio), (int) (height * borderRatio),
-                            (int) (width * borderRatio), (int) (height * (1-borderRatio)),
-                            (int) (width * (1-borderRatio)), (int) (height * (1-borderRatio))
-                    ));
-                } else {
-                    UnitClientEvents.getAllUnits().forEach(u -> {
-                        if (u.position().distanceToSqr(MC.player.position()) < 1600)
+                synchronized (unitWindowVecs) {
+                    unitWindowVecs.clear();
+                    windowPositions.forEach(bp -> {
+                        if (bp.distSqr(MC.player.getOnPos()) < 1600)
                             unitWindowVecs.add(MyMath.prepIsPointInsideRect3d(Minecraft.getInstance(),
-                                    new Vector3d(u.getX() - WINDOW_RADIUS, u.getY(), u.getZ() - WINDOW_RADIUS), // tl
-                                    new Vector3d(u.getX() - WINDOW_RADIUS, u.getY(), u.getZ() + WINDOW_RADIUS), // bl
-                                    new Vector3d(u.getX() + WINDOW_RADIUS, u.getY(), u.getZ() + WINDOW_RADIUS)  // br
+                                    new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() - WINDOW_RADIUS), // tl
+                                    new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS), // bl
+                                    new Vector3d(bp.getX() + WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS)  // br
                             ));
                     });
-                    BlockPos bp = CursorClientEvents.getPreselectedBlockPos();
-                    if (bp != null) {
-                        unitWindowVecs.add(MyMath.prepIsPointInsideRect3d(Minecraft.getInstance(),
-                                new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() - WINDOW_RADIUS), // tl
-                                new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS), // bl
-                                new Vector3d(bp.getX() + WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS)  // br
-                        ));
-                    }
                 }
             }
         }

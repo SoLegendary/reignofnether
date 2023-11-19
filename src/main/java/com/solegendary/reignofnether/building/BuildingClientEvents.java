@@ -274,7 +274,7 @@ public class BuildingClientEvents {
 
                 if (bs.getMaterial().isSolid()) {
                     blocksBelow += 1;
-                    if (bsBelow.getMaterial().isSolid() && !(bsBelow.getBlock() instanceof IceBlock))
+                    if (bsBelow.getMaterial().isSolid())
                         solidBlocksBelow += 1;
                 }
             }

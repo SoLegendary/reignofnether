@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -13,9 +12,6 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ParticleStatus;
@@ -28,13 +24,9 @@ import net.minecraft.client.renderer.chunk.RenderRegionCache;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;
 import org.spongepowered.asm.mixin.Final;
@@ -66,6 +58,8 @@ public abstract class LevelRendererMixin {
     @Shadow private ChunkRenderDispatcher chunkRenderDispatcher;
     @Shadow private ClientLevel level;
 
+    private List<BlockPos> chunksToReDirty = new ArrayList<>();
+
     @Inject(
             method = "compileChunks(Lnet/minecraft/client/Camera;)V",
             at = @At("HEAD"),
@@ -74,22 +68,27 @@ public abstract class LevelRendererMixin {
     private void compileChunks(Camera pCamera, CallbackInfo ci) {
 
         // hiding leaves around cursor
-        UnitClientEvents.windowUpdateTicks -= 1;
-        if (UnitClientEvents.windowUpdateTicks <= 0) {
-            if (!OrthoviewClientEvents.shouldHideLeaves())
-                UnitClientEvents.windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX * 100;
-            else
+        if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR) {
+            UnitClientEvents.windowUpdateTicks -= 1;
+            if (UnitClientEvents.windowUpdateTicks <= 0) {
                 UnitClientEvents.windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
-            Vec3 centrePos = MiscUtil.getOrthoviewCentreWorldPos(Minecraft.getInstance());
-            for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
-                BlockPos chunkCentreBp = chunkInfo.chunk.getOrigin().offset(8.5d, 8.5d, 8.5d);
+                Vec3 centrePos = MiscUtil.getOrthoviewCentreWorldPos(Minecraft.getInstance());
+                for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
+                    BlockPos chunkCentreBp = chunkInfo.chunk.getOrigin().offset(8.5d, 8.5d, 8.5d);
 
-                if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.ALL &&
-                    chunkCentreBp.distSqr(new BlockPos(centrePos.x, centrePos.y, centrePos.z)) < 3600) {
-                    chunkInfo.chunk.setDirty(true);
-                } else if (chunkCentreBp.distSqr(new BlockPos(centrePos.x, centrePos.y, centrePos.z)) < 1600 ||
-                        !OrthoviewClientEvents.shouldHideLeaves()) {
-                    chunkInfo.chunk.setDirty(true);
+                    // rerender each chunk a second time so we can unhide leaves as they go out of range
+                    if (chunksToReDirty.contains(chunkInfo.chunk.getOrigin())) {
+                        chunkInfo.chunk.setDirty(true);
+                        continue;
+                    }
+                    synchronized (UnitClientEvents.windowPositions) {
+                        UnitClientEvents.windowPositions.forEach(bp -> {
+                            if (chunkCentreBp.distSqr(bp) < 400) {
+                                chunkInfo.chunk.setDirty(true);
+                                chunksToReDirty.add(chunkInfo.chunk.getOrigin());
+                            }
+                        });
+                    }
                 }
             }
         }

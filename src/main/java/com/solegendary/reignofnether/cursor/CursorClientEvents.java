@@ -414,7 +414,6 @@ public class CursorClientEvents {
             double d1 = blockhitresult1 == null ? Double.MAX_VALUE : clipContext.getFrom().distanceToSqr(blockhitresult1.getLocation());
             BlockHitResult result = d0 <= d1 ? blockhitresult : blockhitresult1;
 
-
             if (result != null) {
                 Block block = level.getBlockState(result.getBlockPos()).getBlock();
                 if (OrthoviewClientEvents.shouldHideLeaves() && level.getBlockState(result.getBlockPos()).getBlock() instanceof LeavesBlock)
@@ -422,7 +421,6 @@ public class CursorClientEvents {
                 else if (block instanceof SnowLayerBlock)
                     result = null;
             }
-
             return result;
 
         }, (p_151372_) -> {
