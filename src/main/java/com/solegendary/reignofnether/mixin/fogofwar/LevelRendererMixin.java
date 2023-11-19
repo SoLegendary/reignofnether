@@ -58,7 +58,7 @@ public abstract class LevelRendererMixin {
     @Shadow private ChunkRenderDispatcher chunkRenderDispatcher;
     @Shadow private ClientLevel level;
 
-    private List<BlockPos> chunksToReDirty = new ArrayList<>();
+    private final List<BlockPos> chunksToReDirty = new ArrayList<>();
 
     @Inject(
             method = "compileChunks(Lnet/minecraft/client/Camera;)V",
@@ -83,7 +83,7 @@ public abstract class LevelRendererMixin {
                     }
                     synchronized (UnitClientEvents.windowPositions) {
                         UnitClientEvents.windowPositions.forEach(bp -> {
-                            if (chunkCentreBp.distSqr(bp) < 400) {
+                            if (chunkCentreBp.distSqr(bp) < 225) {
                                 chunkInfo.chunk.setDirty(true);
                                 chunksToReDirty.add(chunkInfo.chunk.getOrigin());
                             }

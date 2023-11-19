@@ -315,12 +315,13 @@ public class UnitClientEvents {
                     if (FogOfWarClientEvents.isInBrightChunk(u.getOnPos()))
                         windowPositions.add(u.getOnPos());
                 });
-                windowPositions.add(CursorClientEvents.getPreselectedBlockPos());
+                BlockPos cursorBp = CursorClientEvents.getPreselectedBlockPos();
+                windowPositions.add(cursorBp);
 
                 synchronized (unitWindowVecs) {
                     unitWindowVecs.clear();
                     windowPositions.forEach(bp -> {
-                        if (bp.distSqr(MC.player.getOnPos()) < 1600)
+                        if (bp.distSqr(MC.player.getOnPos()) < Math.pow(OrthoviewClientEvents.getZoom() + 10, 2))
                             unitWindowVecs.add(MyMath.prepIsPointInsideRect3d(Minecraft.getInstance(),
                                     new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() - WINDOW_RADIUS), // tl
                                     new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS), // bl
