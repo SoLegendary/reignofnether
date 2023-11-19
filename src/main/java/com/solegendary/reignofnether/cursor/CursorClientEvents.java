@@ -477,7 +477,7 @@ public class CursorClientEvents {
 
     @SubscribeEvent
     public static void onKeyRelease(ScreenEvent.KeyPressed.KeyPressed.Post evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT_SHIFT && preselectedBlockPos != null) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT_SHIFT && preselectedBlockPos != null && MC.level != null && MC.player != null) {
             MC.level.destroyBlockProgress(MC.player.getId(), preselectedBlockPos, progress);
             progress += 1;
             if (progress > 10)

@@ -53,7 +53,7 @@ public class HudClientEvents {
     private static final int TEMP_MSG_TICKS_MAX = 150; // ticks to show the msg for
     private static final int MAX_BUTTONS_PER_ROW = 6;
 
-    private static final ArrayList<ControlGroup> controlGroups = new ArrayList<>(10);
+    public static final ArrayList<ControlGroup> controlGroups = new ArrayList<>(10);
     private static final ArrayList<Button> buildingButtons = new ArrayList<>();
     private static final ArrayList<Button> unitButtons = new ArrayList<>();
     private static final ArrayList<Button> productionButtons = new ArrayList<>();
@@ -947,12 +947,7 @@ public class HudClientEvents {
     }
 
 
-    @SubscribeEvent
-    public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
-        // SINGLEPLAYER ONLY - client log out: remove control groups
-        if (MC.player != null && evt.getEntity().getId() == MC.player.getId())
-            controlGroups.clear();
-    }
+
 
     // newUnitIds are replacing oldUnitIds - replace them in every control group while retaining their index
     public static void convertControlGroups(int[] oldUnitIds, int[] newUnitIds) {

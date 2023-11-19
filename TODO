@@ -10,10 +10,12 @@ TODO bugs/features:
 
 
 
-- normalise the 1600 distance for hideleaves with zoom
+- should not be able to build on ice?
 
 
 - case of the disappearing portal control (basic portal!)
+    - only disappeared on clientside
+
     - server should periodically update clients to check all units/buildings are synced
         - have clients periodically tell the server how many units/buildings they see
           and if it ever is mismatched, send back a force update packet to resync

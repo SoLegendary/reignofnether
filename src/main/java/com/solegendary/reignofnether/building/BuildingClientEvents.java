@@ -605,15 +605,6 @@ public class BuildingClientEvents {
         }
     }
 
-    @SubscribeEvent
-    public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
-        // SINGLEPLAYER ONLY - client log out: remove buildings so we don't duplicate on logging back in
-        if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
-            buildings.clear();
-            selectedBuildings.clear();
-        }
-    }
-
     public static ArrayList<Building> getBuildingsWithinRange(Vec3 pos, float range, String buildingName) {
         ArrayList<Building> retBuildings = new ArrayList<>();
         for (Building building : buildings) {
