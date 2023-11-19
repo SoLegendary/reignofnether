@@ -31,7 +31,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.*;
@@ -367,8 +369,16 @@ public class CursorClientEvents {
                 BuildingClientEvents.getPreselectedBuilding() == null &&
                 !buildingTargetedByWorker && !buildingTargetedByAttacker) {
 
-                MyRenderer.drawBox(evt.getPoseStack(), preselectedBlockPos, 1, 1, 1, rightClickDown ? 0.3f : 0.15f);
-                MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
+                if (MC.level.getBlockState(getPreselectedBlockPos().offset(0,1,0)).getBlock() instanceof SnowLayerBlock) {
+                    AABB aabb = new AABB(preselectedBlockPos);
+                    aabb = aabb.setMaxY(aabb.maxY + 0.13f);
+                    MyRenderer.drawSolidBox(evt.getPoseStack(), aabb, null, 1, 1, 1, rightClickDown ? 0.3f : 0.15f, new ResourceLocation("forge:textures/white.png"));
+                    aabb = new AABB(preselectedBlockPos).move(0,0.13,0);
+                    MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f,1.0f,1.0f, rightClickDown ? 1.0f : 0.5f);
+                } else {
+                    MyRenderer.drawBox(evt.getPoseStack(), preselectedBlockPos, 1, 1, 1, rightClickDown ? 0.3f : 0.15f);
+                    MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
+                }
             }
         }
     }
@@ -404,8 +414,15 @@ public class CursorClientEvents {
             double d1 = blockhitresult1 == null ? Double.MAX_VALUE : clipContext.getFrom().distanceToSqr(blockhitresult1.getLocation());
             BlockHitResult result = d0 <= d1 ? blockhitresult : blockhitresult1;
 
-            if (result != null && OrthoviewClientEvents.shouldHideLeaves() && level.getBlockState(result.getBlockPos()).getBlock() instanceof LeavesBlock)
-                result = null;
+
+            if (result != null) {
+                Block block = level.getBlockState(result.getBlockPos()).getBlock();
+                if (OrthoviewClientEvents.shouldHideLeaves() && level.getBlockState(result.getBlockPos()).getBlock() instanceof LeavesBlock)
+                    result = null;
+                else if (block instanceof SnowLayerBlock)
+                    result = null;
+            }
+
             return result;
 
         }, (p_151372_) -> {
@@ -461,8 +478,10 @@ public class CursorClientEvents {
                 if (HudClientEvents.hudSelectedEntity instanceof Unit workerUnit)
                     isBlockSelectableResource = ResourceSources.getFromBlockPos(block, MC.level) != null;
 
-                if ((MC.level.getBlockState(block).getMaterial().isSolidBlocking() || isBlockSelectableResource) &&
-                    !(MC.level.getBlockState(block).getBlock() instanceof LeavesBlock) &&
+                BlockState bs = MC.level.getBlockState(block);
+                if ((bs.getMaterial().isSolidBlocking() || isBlockSelectableResource) &&
+                    (!(bs.getBlock() instanceof LeavesBlock) || !OrthoviewClientEvents.shouldHideLeaves()) &&
+                    !(bs.getBlock() instanceof SnowLayerBlock) &&
                     MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, lookVector, new AABB(block)) &&
                     dist < smallestDist ) {
                     smallestDist = dist;

@@ -10,8 +10,6 @@ TODO bugs/features:
 
 
 
-- should not be able to build on ice?
-
 
 - case of the disappearing portal control (basic portal!)
     - only disappeared on clientside

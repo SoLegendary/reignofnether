@@ -38,6 +38,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.IceBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
@@ -273,7 +274,7 @@ public class BuildingClientEvents {
 
                 if (bs.getMaterial().isSolid()) {
                     blocksBelow += 1;
-                    if (bsBelow.getMaterial().isSolid())
+                    if (bsBelow.getMaterial().isSolid() && !(bsBelow.getBlock() instanceof IceBlock))
                         solidBlocksBelow += 1;
                 }
             }

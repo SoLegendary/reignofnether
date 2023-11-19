@@ -18,6 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -42,19 +43,25 @@ public abstract class RenderChunkRegionMixin {
         Level level = Minecraft.getInstance().level;
         if (level != null && OrthoviewClientEvents.isEnabled() && OrthoviewClientEvents.shouldHideLeaves()) {
             Block block = level.getBlockState(pPos).getBlock();
-            BlockState bs = block == BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get() ?
-                    Blocks.RED_STAINED_GLASS.defaultBlockState() :
-                    Blocks.GREEN_STAINED_GLASS.defaultBlockState();
+            Block blockBelow = level.getBlockState(pPos.below()).getBlock();
+            BlockState replacementBs = null;
 
-            if (level.getBlockState(pPos).getBlock() instanceof LeavesBlock) {
+            if (block == BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get())
+                replacementBs = Blocks.RED_STAINED_GLASS.defaultBlockState();
+            else if (block instanceof LeavesBlock)
+                replacementBs = Blocks.GREEN_STAINED_GLASS.defaultBlockState();
+            else if (block instanceof SnowLayerBlock && blockBelow instanceof LeavesBlock)
+                replacementBs = Blocks.AIR.defaultBlockState();
+
+            if (replacementBs != null) {
                 if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.ALL) {
-                    cir.setReturnValue(bs);
+                    cir.setReturnValue(replacementBs);
                     return;
                 }
                 synchronized (UnitClientEvents.unitWindowVecs) {
                     for (ArrayList<Vec3> vecs : UnitClientEvents.unitWindowVecs) {
                         if (MyMath.isPointInsideRect3d(vecs, Vec3.atCenterOf(pPos))) {
-                            cir.setReturnValue(bs);
+                            cir.setReturnValue(replacementBs);
                             return;
                         }
                     }
