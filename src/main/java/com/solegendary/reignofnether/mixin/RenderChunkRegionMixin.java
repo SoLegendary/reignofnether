@@ -41,7 +41,7 @@ public abstract class RenderChunkRegionMixin {
     )
     private void getBlockState(BlockPos pPos, CallbackInfoReturnable<BlockState> cir) {
         Level level = Minecraft.getInstance().level;
-        if (level != null && OrthoviewClientEvents.isEnabled() && OrthoviewClientEvents.shouldHideLeaves()) {
+        if (level != null && OrthoviewClientEvents.shouldHideLeaves()) {
             Block block = level.getBlockState(pPos).getBlock();
             Block blockBelow = level.getBlockState(pPos.below()).getBlock();
             BlockState replacementBs = null;

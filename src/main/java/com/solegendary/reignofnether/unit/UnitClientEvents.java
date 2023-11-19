@@ -306,8 +306,8 @@ public class UnitClientEvents {
         }
 
         // calculate vecs used to hide leaf blocks around units
-        if (OrthoviewClientEvents.isEnabled() && MC.player != null &&
-            OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR) {
+        if (MC.player != null && OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR &&
+            OrthoviewClientEvents.isEnabled()) {
 
             synchronized (windowPositions) {
                 windowPositions.clear();
@@ -329,6 +329,13 @@ public class UnitClientEvents {
                             ));
                     });
                 }
+            }
+        } else {
+            synchronized (windowPositions) {
+                windowPositions.clear();
+            }
+            synchronized (unitWindowVecs) {
+                unitWindowVecs.clear();
             }
         }
     }

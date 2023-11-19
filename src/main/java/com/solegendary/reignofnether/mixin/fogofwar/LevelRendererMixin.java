@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -58,7 +59,7 @@ public abstract class LevelRendererMixin {
     @Shadow private ChunkRenderDispatcher chunkRenderDispatcher;
     @Shadow private ClientLevel level;
 
-    private final List<BlockPos> chunksToReDirty = new ArrayList<>();
+    private List<Pair<BlockPos, Integer>> chunksToReDirty = new ArrayList<>();
 
     @Inject(
             method = "compileChunks(Lnet/minecraft/client/Camera;)V",
@@ -68,7 +69,8 @@ public abstract class LevelRendererMixin {
     private void compileChunks(Camera pCamera, CallbackInfo ci) {
 
         // hiding leaves around cursor
-        if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR) {
+        if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR &&
+            OrthoviewClientEvents.isEnabled()) {
             UnitClientEvents.windowUpdateTicks -= 1;
             if (UnitClientEvents.windowUpdateTicks <= 0) {
                 UnitClientEvents.windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
@@ -76,16 +78,27 @@ public abstract class LevelRendererMixin {
                 for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
                     BlockPos chunkCentreBp = chunkInfo.chunk.getOrigin().offset(8.5d, 8.5d, 8.5d);
 
+                    List<Pair<BlockPos, Integer>> newChunksToReDirty = new ArrayList<>();
+
                     // rerender each chunk a second time so we can unhide leaves as they go out of range
-                    if (chunksToReDirty.contains(chunkInfo.chunk.getOrigin())) {
-                        chunkInfo.chunk.setDirty(true);
-                        continue;
-                    }
                     synchronized (UnitClientEvents.windowPositions) {
+                        for (Pair<BlockPos, Integer> pair : chunksToReDirty) {
+                            int times = pair.getSecond();
+                            if (pair.getFirst().equals(chunkInfo.chunk.getOrigin())) {
+                                chunkInfo.chunk.setDirty(true);
+                                times -= 1;
+                            }
+                            if (times > 0)
+                                newChunksToReDirty.add(new Pair<>(pair.getFirst(), times));
+                        }
+                        chunksToReDirty.clear();
+                        chunksToReDirty.addAll(newChunksToReDirty);
+
+
                         UnitClientEvents.windowPositions.forEach(bp -> {
                             if (chunkCentreBp.distSqr(bp) < 225) {
                                 chunkInfo.chunk.setDirty(true);
-                                chunksToReDirty.add(chunkInfo.chunk.getOrigin());
+                                chunksToReDirty.add(new Pair<>(chunkInfo.chunk.getOrigin(), 10));
                             }
                         });
                     }
