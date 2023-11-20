@@ -94,7 +94,6 @@ public abstract class LevelRendererMixin {
                         chunksToReDirty.clear();
                         chunksToReDirty.addAll(newChunksToReDirty);
 
-
                         UnitClientEvents.windowPositions.forEach(bp -> {
                             if (chunkCentreBp.distSqr(bp) < 225) {
                                 chunkInfo.chunk.setDirty(true);

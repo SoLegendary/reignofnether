@@ -129,7 +129,7 @@ public class BuildingServerEvents {
     }
 
     public static void cancelBuilding(Building building) {
-        if (building.isCapitol)
+        if (building == null || building.isCapitol)
             return;
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
@@ -320,5 +320,20 @@ public class BuildingServerEvents {
     public static void onEntityTravelToDimension(EntityTravelToDimensionEvent evt) {
         if (BuildingUtils.isPosInsideAnyBuilding(evt.getEntity().getLevel().isClientSide(), evt.getEntity().getOnPos()))
             evt.setCanceled(true);
+    }
+
+    public static void replaceClientBuilding(BlockPos buildingPos) {
+        for (Building building : buildings) {
+            if (building.originPos.equals(buildingPos)) {
+                BuildingClientboundPacket.placeBuilding(
+                        building.originPos,
+                        building.name,
+                        building.rotation,
+                        building.ownerName,
+                        building.blockPlaceQueue.size()
+                );
+                return;
+            }
+        }
     }
 }

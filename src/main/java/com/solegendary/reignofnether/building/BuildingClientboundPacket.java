@@ -101,8 +101,16 @@ public class BuildingClientboundPacket {
                 Building building = null;
                 if (this.action != BuildingAction.PLACE) {
                     building = findBuilding(true, this.buildingPos);
-                    if (building == null)
+                    if (building == null) {
+
+                        // if the client was missing a building, replace it
+                        if (this.action == BuildingAction.SYNC_BLOCKS) {
+                            BuildingServerboundPacket.requestReplacement(this.buildingPos);
+                            System.out.println("Missing building");
+                        }
                         return;
+                    }
+
                 }
                 switch (action) {
                     case PLACE -> BuildingClientEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.numQueuedBlocks);
