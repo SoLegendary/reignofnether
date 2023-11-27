@@ -143,7 +143,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
 
-    public static final float SONIC_BOOM_DAMAGE = 30f;
+    public static final float SONIC_BOOM_DAMAGE = 60f;
     public static final int SONIC_BOOM_RANGE = 10;
     public static final int SONIC_BOOM_CHANNEL_TICKS = 2 * ResourceCost.TICKS_PER_SECOND;
 

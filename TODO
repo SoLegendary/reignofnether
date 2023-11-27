@@ -10,23 +10,23 @@ TODO bugs/features:
 
 
 
-- placing building on ice over 2+ layers of water causes scaffolding to be placed all underneath
+
+- let ghasts destroy leaves they pass through like ravagers
+
+- mounted ravagers should still attack with melee when right clicking
+
+- if a RenderChunk contains an opponents' building, it should not ever be rerendered
+    - even with F8/F3+A
+    - even when moving out of client render range
+
+
+
 
 - dont let mobs pathfind into water
-
-- theory: if you dont load chunks first before enabling fog they will be updated with buildings
 - select all military units button
-how to deal with ghasts being effectively unreachable when over water?
-
 
 
 TODO test in next playtest
-
-- killing a capitol didn't kill the player??
-- spectators should show population correctly
-- should reset resources on /startrts
-- /resetrts
-- concurrentmodificationexception possibility on PlayerServerEvents.rtsPlayers
 
 
 
