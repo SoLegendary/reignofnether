@@ -66,7 +66,8 @@ public abstract class LevelRendererMixin {
         ArrayList<BlockPos> origins = new ArrayList<>();
         for (FrozenChunk frozenChunk : frozenChunks)
             if (frozenChunk.chunkInfo != null)
-                origins.add(frozenChunk.chunkInfo.chunk.getOrigin());
+                if (!FogOfWarClientEvents.isInBrightChunk(frozenChunk.chunkInfo.chunk.getOrigin()))
+                    origins.add(frozenChunk.chunkInfo.chunk.getOrigin());
         return origins;
     }
 
@@ -89,7 +90,7 @@ public abstract class LevelRendererMixin {
 
             for (LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunkStorage.get().renderChunks) {
                 if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()) &&
-                        !getFrozenChunkOrigins().contains(chunkInfo.chunk.getOrigin())) {
+                    !getFrozenChunkOrigins().contains(chunkInfo.chunk.getOrigin())) {
                     this.renderChunksInFrustum.add(chunkInfo);
                 }
                 for (FrozenChunk frozenChunk : frozenChunks) {
@@ -99,7 +100,9 @@ public abstract class LevelRendererMixin {
                     }
                 }
             }
-            this.renderChunksInFrustum.addAll(frozenChunks.stream().map(fc -> fc.chunkInfo).toList());
+            for (FrozenChunk frozenChunk : frozenChunks)
+                if (frozenChunk.chunkInfo != null)
+                    this.renderChunksInFrustum.add(frozenChunk.chunkInfo);
 
             this.minecraft.getProfiler().pop();
         }
@@ -162,15 +165,15 @@ public abstract class LevelRendererMixin {
 
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
 
-            boolean replacedChunk = false;
             BlockPos originPos = chunkInfo.chunk.getOrigin();
+            boolean isFrozenChunk = getFrozenChunkOrigins().contains(originPos);
             ChunkPos chunkPos = new ChunkPos(originPos);
 
             if (rerenderChunks.contains(chunkPos)) {
                 FogOfWarClientEvents.updateChunkLighting(originPos);
                 rerenderChunksToRemove.add(chunkPos);
             }
-            else if (!isInBrightChunk(originPos) && !getFrozenChunkOrigins().contains(originPos)) {
+            else if (!isInBrightChunk(originPos) && !isFrozenChunk) {
                 if (semiFrozenChunks.contains(originPos))
                     continue;
                 else
@@ -189,12 +192,12 @@ public abstract class LevelRendererMixin {
                     flag = !net.minecraftforge.common.ForgeConfig.CLIENT.alwaysSetupTerrainOffThread.get() && (blockpos1.distSqr(blockpos) < 768.0D || renderChunk.isDirtyFromPlayer());
                 }
 
-                if (flag) {
+                if (flag && !isFrozenChunk) {
                     this.minecraft.getProfiler().push("build_near_sync");
                     this.chunkRenderDispatcher.rebuildChunkSync(renderChunk, renderregioncache);
                     renderChunk.setNotDirty();
                     this.minecraft.getProfiler().pop();
-                } else {
+                } else if (!isFrozenChunk) {
                     list.add(renderChunk);
                 }
             }

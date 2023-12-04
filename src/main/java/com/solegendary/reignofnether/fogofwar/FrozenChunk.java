@@ -10,9 +10,4 @@ public class FrozenChunk {
     public FrozenChunk(BlockPos origin) {
         this.origin = origin;
     }
-
-    public FrozenChunk(LevelRenderer.RenderChunkInfo chunkInfo) {
-        this.chunkInfo = chunkInfo;
-        this.origin = chunkInfo.chunk.getOrigin();
-    }
 }

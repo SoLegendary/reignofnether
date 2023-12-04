@@ -277,7 +277,7 @@ public class BuildingUtils {
                 Math.round(Math.floor(maxCorner.getZ() / 16d) * 16)
         );
         for (int x = minOrigin.getX(); x <= maxOrigin.getX(); x += 16)
-            for (int y = minOrigin.getY(); y <= maxOrigin.getY(); y += 16)
+            for (int y = minOrigin.getY() - 16; y <= maxOrigin.getY(); y += 16)
                 for (int z = minOrigin.getZ(); z <= maxOrigin.getZ(); z += 16)
                     origins.add(new BlockPos(x,y,z));
         return origins;
