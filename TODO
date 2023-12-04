@@ -19,6 +19,18 @@ TODO bugs/features:
     - even with F8/F3+A
     - even when moving out of client render range
 
+    - right now extraFrozenChunkInfos are being updated always when in fog
+        - to resolve this, reimplement applyFrustum from the old style of FogChunk
+            - see: https://github.com/SoLegendary/reignofnether/blob/2db6a457b87cd5522b2e0a83ff2e2437d63f1c09/src/main/java/com/solegendary/reignofnether/mixin/fogofwar/LevelRendererMixin.java
+
+
+
+
+
+
+
+
+
 
 
 

@@ -260,4 +260,26 @@ public class BuildingUtils {
         }
         return false;
     }
+
+    public static List<BlockPos> getRenderChunkOrigins(Building building) {
+        List<BlockPos> origins = new ArrayList<>();
+        BlockPos minCorner = getMinCorner(building.getBlocks());
+        BlockPos maxCorner = getMaxCorner(building.getBlocks());
+
+        BlockPos minOrigin = new BlockPos(
+                Math.round(Math.floor(minCorner.getX() / 16d) * 16),
+                Math.round(Math.floor(minCorner.getY() / 16d) * 16),
+                Math.round(Math.floor(minCorner.getZ() / 16d) * 16)
+        );
+        BlockPos maxOrigin = new BlockPos(
+                Math.round(Math.floor(maxCorner.getX() / 16d) * 16),
+                Math.round(Math.floor(maxCorner.getY() / 16d) * 16),
+                Math.round(Math.floor(maxCorner.getZ() / 16d) * 16)
+        );
+        for (int x = minOrigin.getX(); x <= maxOrigin.getX(); x += 16)
+            for (int y = minOrigin.getY(); y <= maxOrigin.getY(); y += 16)
+                for (int z = minOrigin.getZ(); z <= maxOrigin.getZ(); z += 16)
+                    origins.add(new BlockPos(x,y,z));
+        return origins;
+    }
 }

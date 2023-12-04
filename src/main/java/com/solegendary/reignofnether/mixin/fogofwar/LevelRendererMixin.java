@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.fogofwar.FrozenChunk;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -60,6 +61,49 @@ public abstract class LevelRendererMixin {
     @Shadow private ClientLevel level;
 
     private List<Pair<BlockPos, Integer>> chunksToReDirty = new ArrayList<>();
+
+    private List<BlockPos> getFrozenChunkOrigins() {
+        ArrayList<BlockPos> origins = new ArrayList<>();
+        for (FrozenChunk frozenChunk : frozenChunks)
+            if (frozenChunk.chunkInfo != null)
+                origins.add(frozenChunk.chunkInfo.chunk.getOrigin());
+        return origins;
+    }
+
+    @Inject(
+            method = "applyFrustum(Lnet/minecraft/client/renderer/culling/Frustum;)V",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void applyFrustum(Frustum pFrustum, CallbackInfo ci) {
+        if (!FogOfWarClientEvents.isEnabled())
+            return;
+
+        ci.cancel();
+
+        if (!Minecraft.getInstance().isSameThread()) {
+            throw new IllegalStateException("applyFrustum called from wrong thread: " + Thread.currentThread().getName());
+        } else {
+            this.minecraft.getProfiler().push("apply_frustum");
+            this.renderChunksInFrustum.clear();
+
+            for (LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunkStorage.get().renderChunks) {
+                if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()) &&
+                        !getFrozenChunkOrigins().contains(chunkInfo.chunk.getOrigin())) {
+                    this.renderChunksInFrustum.add(chunkInfo);
+                }
+                for (FrozenChunk frozenChunk : frozenChunks) {
+                    if (frozenChunk.chunkInfo == null && frozenChunk.origin.equals(chunkInfo.chunk.getOrigin())) {
+                        frozenChunk.chunkInfo = chunkInfo;
+                        System.out.println("added chunkInfo: " + chunkInfo.chunk.getOrigin());
+                    }
+                }
+            }
+            this.renderChunksInFrustum.addAll(frozenChunks.stream().map(fc -> fc.chunkInfo).toList());
+
+            this.minecraft.getProfiler().pop();
+        }
+    }
 
     @Inject(
             method = "compileChunks(Lnet/minecraft/client/Camera;)V",
@@ -118,6 +162,7 @@ public abstract class LevelRendererMixin {
 
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
 
+            boolean replacedChunk = false;
             BlockPos originPos = chunkInfo.chunk.getOrigin();
             ChunkPos chunkPos = new ChunkPos(originPos);
 
@@ -125,12 +170,11 @@ public abstract class LevelRendererMixin {
                 FogOfWarClientEvents.updateChunkLighting(originPos);
                 rerenderChunksToRemove.add(chunkPos);
             }
-            else if (!isInBrightChunk(originPos)) {
-                if (frozenChunks.contains(originPos)) {
+            else if (!isInBrightChunk(originPos) && !getFrozenChunkOrigins().contains(originPos)) {
+                if (semiFrozenChunks.contains(originPos))
                     continue;
-                } else {
-                    frozenChunks.add(originPos);
-                }
+                else
+                    semiFrozenChunks.add(originPos);
             }
             ChunkRenderDispatcher.RenderChunk renderChunk = chunkInfo.chunk;
             ChunkPos chunkpos = new ChunkPos(renderChunk.getOrigin());
