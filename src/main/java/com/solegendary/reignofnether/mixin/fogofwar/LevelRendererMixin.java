@@ -186,7 +186,7 @@ public abstract class LevelRendererMixin {
                     }
                 } else {
                     BlockPos blockpos1 = renderChunk.getOrigin().offset(8, 8, 8);
-                    flag = !net.minecraftforge.common.ForgeConfig.CLIENT.alwaysSetupTerrainOffThread.get() && (blockpos1.distSqr(blockpos) < 768.0D || renderChunk.isDirtyFromPlayer()); // the target is the else block below, so invert the forge addition to get there early
+                    flag = !net.minecraftforge.common.ForgeConfig.CLIENT.alwaysSetupTerrainOffThread.get() && (blockpos1.distSqr(blockpos) < 768.0D || renderChunk.isDirtyFromPlayer());
                 }
 
                 if (flag) {
