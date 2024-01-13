@@ -233,10 +233,11 @@ public class FogOfWarClientEvents {
                         rerenderChunks.add(new ChunkPos(cpos.x + x, cpos.z + z));
             }
             if (OrthoviewClientEvents.isEnabled())
-                semiFrozenChunks.removeIf(bp -> bp.distSqr(MC.player.getOnPos()) > Math.pow(OrthoviewClientEvents.getZoom() * 4, 2));
+                semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
+                        .distSqr(MC.player.getOnPos()) > Math.pow(OrthoviewClientEvents.getZoom() * 2, 2));
             else
-                semiFrozenChunks.removeIf(bp -> bp.distSqr(MC.player.getOnPos()) > Math.pow(MC.levelRenderer.getLastViewDistance() * 16, 2));
-
+                semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
+                        .distSqr(MC.player.getOnPos()) > Math.pow(MC.levelRenderer.getLastViewDistance() * 8, 2));
             semiFrozenChunks.removeIf(bp -> {
                 if (isInBrightChunk(bp)) {
                     updateChunkLighting(bp);
