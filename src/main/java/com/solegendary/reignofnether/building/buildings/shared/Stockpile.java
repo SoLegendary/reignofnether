@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -101,7 +102,8 @@ public class Stockpile extends ProductionBuilding {
                 ResourceSource resBlock = ResourceSources.getFromBlockPos(bp, getLevel());
 
                 // is a valid resource block and meets the target ResourceSource's blockstate condition
-                if (resBlock == null || resBlock.resourceName != resourceName || resBlock.name.equals("Leaves") || resBlock.name.equals("Farmland"))
+                if (resBlock == null || resBlock.resourceName != resourceName ||
+                    resBlock.name.equals("Farmland") || resBlock.name.equals("Soul Sand"))
                     return false;
                 if (!resBlock.blockStateTest.test(bs))
                     return false;

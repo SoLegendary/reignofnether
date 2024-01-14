@@ -49,7 +49,13 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
 
     GarrisonGoal garrisonGoal;
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
-    public boolean canGarrison() { return true; }
+    public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UsePortalGoal usePortalGoal;
+    public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
+    public boolean canUsePortal() { return getUsePortalGoal() != null; }
+
+
 
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -57,7 +63,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
-    public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
+    public Goal getAttackBuildingGoal() {return attackBuildingGoal;}
     public Goal getAttackGoal() {return attackGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
@@ -102,27 +108,27 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
     public int getPopCost() {return popCost;}
-    public boolean canAttackBuildings() {return canAttackBuildings;}
+    public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
     // endregion
 
-    final static public float attackDamage = 14.0f;
+    final static public float attackDamage = 20.0f;
     final static public float attacksPerSecond = 1f;
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.27f;
+    final static public float movementSpeed = 0.28f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
     final static public int popCost = ResourceCosts.CREEPER.population;
-    final static public boolean canAttackBuildings = false;
+
     final static public int maxResources = 0;
 
-    private AttackBuildingGoal attackBuildingGoal;
+    private MeleeAttackBuildingGoal attackBuildingGoal;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -180,22 +186,24 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.usePortalGoal = new UsePortalGoal(this);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
-        this.attackGoal = new CreeperAttackUnitGoal(this, getAttackCooldown(), 1.0f, false);
+        this.garrisonGoal = new GarrisonGoal(this);
+        this.attackGoal = new CreeperAttackUnitGoal(this, getAttackCooldown(), false);
     }
 
     @Override
     protected void registerGoals() {
         initialiseGoals();
+        this.goalSelector.addGoal(2, usePortalGoal);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
-        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
     public void startToExplode() {

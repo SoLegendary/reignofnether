@@ -60,6 +60,11 @@ public class BuildingServerboundPacket {
                 BuildingAction.CHECK_STOCKPILE_CHEST,
                 "", chestPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
     }
+    public static void requestReplacement(BlockPos buildingPos) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.REQUEST_REPLACEMENT,
+                "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
+    }
 
     public BuildingServerboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, BlockPos rallyPos, Rotation rotation, String ownerName, int[] builderUnitIds) {
         this.action = action;
@@ -113,7 +118,8 @@ public class BuildingServerboundPacket {
                     BuildingServerEvents.cancelBuilding(building);
                 }
                 case SET_RALLY_POINT -> {
-                    ((ProductionBuilding) building).setRallyPoint(rallyPos);
+                    if (building instanceof ProductionBuilding productionBuilding)
+                        productionBuilding.setRallyPoint(rallyPos);
                 }
                 case START_PRODUCTION -> {
                     boolean prodSuccess = ProductionBuilding.startProductionItem(((ProductionBuilding) building), this.itemName, this.buildingPos);
@@ -133,6 +139,9 @@ public class BuildingServerboundPacket {
                 case CHECK_STOCKPILE_CHEST -> {
                     if (building instanceof Stockpile stockpile)
                         stockpile.checkAndConsumeChestItems();
+                }
+                case REQUEST_REPLACEMENT -> {
+                    BuildingServerEvents.replaceClientBuilding(buildingPos);
                 }
             }
             success.set(true);

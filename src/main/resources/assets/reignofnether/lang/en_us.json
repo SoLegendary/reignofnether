@@ -1,6 +1,7 @@
 {
   "item.reignofnether.zombie_unit_spawn_egg": "Spawn Zombie Unit",
   "item.reignofnether.husk_unit_spawn_egg": "Spawn Husk Unit",
+  "item.reignofnether.drowned_unit_spawn_egg": "Spawn Drowned Unit",
   "item.reignofnether.skeleton_unit_spawn_egg": "Spawn Skeleton Unit",
   "item.reignofnether.stray_unit_spawn_egg": "Spawn Stray Unit",
   "item.reignofnether.creeper_unit_spawn_egg": "Spawn Creeper Unit",
@@ -17,7 +18,17 @@
   "item.reignofnether.ravager_unit_spawn_egg": "Spawn Ravager Unit",
   "item.reignofnether.warden_unit_spawn_egg": "Spawn Warden Unit",
   "item.reignofnether.silverfish_unit_spawn_egg": "Spawn Silverfish Unit",
-  "item.reignofnether.piglin_grunt_unit_spawn_egg": "Spawn Piglin Grunt Unit",
+  "item.reignofnether.grunt_unit_spawn_egg": "Spawn Grunt Unit",
+  "item.reignofnether.brute_unit_spawn_egg": "Spawn Brute Unit",
+  "item.reignofnether.headhunter_unit_spawn_egg": "Spawn Headhunter Unit",
+  "item.reignofnether.hoglin_unit_spawn_egg": "Spawn Hoglin Unit",
+  "item.reignofnether.blaze_unit_spawn_egg": "Spawn Blaze Unit",
+  "item.reignofnether.wither_skeleton_unit_spawn_egg": "Spawn Wither Skeleton Unit",
+  "item.reignofnether.ghast_unit_spawn_egg": "Spawn Ghast Unit",
+  "item.reignofnether.zombie_piglin_unit_spawn_egg": "Spawn Zombie Piglin Unit",
+  "item.reignofnether.zoglin_unit_spawn_egg": "Spawn Zoglin Unit",
 
-  "sounds.reignofnether.under_attack": "Under attack!"
+  "sounds.reignofnether.under_attack": "Under attack!",
+  "sounds.reignofnether.victory": "Victory!",
+  "sounds.reignofnether.defeat": "Defeat"
 }

@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.fogofwar;
 
-import com.solegendary.reignofnether.player.PlayerAction;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;

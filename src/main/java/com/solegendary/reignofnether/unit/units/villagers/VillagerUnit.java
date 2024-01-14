@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.monsters.Stronghold;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -17,8 +16,6 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
-import com.solegendary.reignofnether.unit.units.monsters.HuskUnit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -36,7 +33,6 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -64,7 +60,11 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
     GarrisonGoal garrisonGoal;
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
-    public boolean canGarrison() { return true; }
+    public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UsePortalGoal usePortalGoal;
+    public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
+    public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -119,9 +119,9 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public float getAttackRange() {return attackRange;}
     public float getUnitAttackDamage() {return attackDamage;}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
-    public boolean canAttackBuildings() {return canAttackBuildings;}
+    public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
     public Goal getAttackGoal() { return attackGoal; }
-    public AttackBuildingGoal getAttackBuildingGoal() { return null; }
+    public Goal getAttackBuildingGoal() { return null; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
@@ -137,7 +137,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     final static public float aggroRange = 0;
     final static public boolean willRetaliate = false; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = false;
-    final static public boolean canAttackBuildings = false;
+
     final static public float maxHealth = 25.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
@@ -185,6 +185,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             this.abilityButtons.add(ArcaneTower.getBuildButton(Keybindings.keyI));
             this.abilityButtons.add(Library.getBuildButton(Keybindings.keyO));
             this.abilityButtons.add(Castle.getBuildButton(Keybindings.keyP));
+            this.abilityButtons.add(IronGolemBuilding.getBuildButton(Keybindings.keyL));
         }
     }
 
@@ -219,18 +220,20 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.usePortalGoal = new UsePortalGoal(this);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
-        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, true);
-        this.buildRepairGoal = new BuildRepairGoal(this, 1.0f);
-        this.gatherResourcesGoal = new GatherResourcesGoal(this, 1.0f);
-        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.garrisonGoal = new GarrisonGoal(this);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), true);
+        this.buildRepairGoal = new BuildRepairGoal(this);
+        this.gatherResourcesGoal = new GatherResourcesGoal(this);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }
 
     @Override
     protected void registerGoals() {
         initialiseGoals();
+        this.goalSelector.addGoal(2, usePortalGoal);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
@@ -240,7 +243,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
         this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
-        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
     @Override

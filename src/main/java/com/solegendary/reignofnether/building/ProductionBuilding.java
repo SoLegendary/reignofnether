@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.researchItems.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
+import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
@@ -15,9 +17,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,42 +74,42 @@ public abstract class ProductionBuilding extends Building {
     }
 
     public void produceUnit(ServerLevel level, EntityType<? extends Unit> entityType, String ownerName, boolean spawnIndoors) {
-        Entity entity = entityType.create(level);
-        if (entity != null) {
-            ((Unit) entity).setOwnerName(ownerName);
-            level.addFreshEntity(entity);
 
-            BlockPos defaultRallyPoint = getMinCorner(this.blocks).offset(
-                    0.5f - spawnRadiusOffset,
-                    0.5f,
-                    0.5f - spawnRadiusOffset);
+        BlockPos spawnPoint;
+        if (spawnIndoors) {
+            spawnPoint = getIndoorSpawnPoint(level);
+            if (entityType == EntityRegistrar.GHAST_UNIT.get())
+                spawnPoint = spawnPoint.offset(0,5,0);
+        }
+        else
+            spawnPoint = getMinCorner(this.blocks).offset(spawnRadiusOffset, 0, spawnRadiusOffset);
 
-            BlockPos rallyPoint = this.rallyPoint == null ? defaultRallyPoint : this.rallyPoint;
+        Entity entity = entityType.spawn(level, null,
+                null,
+                spawnPoint,
+                MobSpawnType.SPAWNER,
+                true,
+                false
+        );
+        BlockPos defaultRallyPoint = getMinCorner(this.blocks).offset(
+                0.5f - spawnRadiusOffset,
+                0.5f,
+                0.5f - spawnRadiusOffset);
 
-            if (spawnIndoors) {
-                BlockPos spawnPoint = getIndoorSpawnPoint(level);
-                entity.moveTo(new Vec3(
-                        spawnPoint.getX() + 0.5f,
-                        spawnPoint.getY() + 0.5f,
-                        spawnPoint.getZ() + 0.5f
-                ));
-            }
-            else {
-                BlockPos spawnPoint = getMinCorner(this.blocks);
-                entity.moveTo(new Vec3(
-                        spawnPoint.getX() + 0.5f - spawnRadiusOffset,
-                        spawnPoint.getY() + 0.5f,
-                        spawnPoint.getZ() + 0.5f - spawnRadiusOffset
-                ));
-            }
+        BlockPos rallyPoint = this.rallyPoint == null ? defaultRallyPoint : this.rallyPoint;
+
+        if (entity instanceof Unit unit) {
+            unit.setOwnerName(ownerName);
+            unit.setupEquipmentAndUpgradesServer();
+
             CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
                 UnitServerEvents.addActionItem(
-                    this.ownerName,
-                    UnitAction.MOVE,
-                    -1,
-                    new int[] { entity.getId() },
-                    rallyPoint,
-                    new BlockPos(0,0,0)
+                        this.ownerName,
+                        UnitAction.MOVE,
+                        -1,
+                        new int[] { entity.getId() },
+                        rallyPoint,
+                        new BlockPos(0,0,0)
                 );
             });
         }
@@ -118,22 +122,31 @@ public abstract class ProductionBuilding extends Building {
         if (building != null) {
             ProductionItem prodItem = null;
             switch(itemName) {
-                case CreeperUnitProd.itemName -> prodItem = new CreeperUnitProd(building);
-                case SkeletonUnitProd.itemName -> prodItem = new SkeletonUnitProd(building);
-                case ZombieUnitProd.itemName -> prodItem = new ZombieUnitProd(building);
-                case StrayUnitProd.itemName -> prodItem = new StrayUnitProd(building);
-                case HuskUnitProd.itemName -> prodItem = new HuskUnitProd(building);
-                case SpiderUnitProd.itemName -> prodItem = new SpiderUnitProd(building);
-                case PoisonSpiderUnitProd.itemName -> prodItem = new PoisonSpiderUnitProd(building);
-                case VillagerProdItem.itemName -> prodItem = new VillagerProdItem(building);
-                case ZombieVillagerUnitProd.itemName -> prodItem = new ZombieVillagerUnitProd(building);
-                case VindicatorProdItem.itemName -> prodItem = new VindicatorProdItem(building);
-                case PillagerProdItem.itemName -> prodItem = new PillagerProdItem(building);
-                case IronGolemProdItem.itemName -> prodItem = new IronGolemProdItem(building);
-                case WitchProdItem.itemName -> prodItem = new WitchProdItem(building);
-                case EvokerProdItem.itemName -> prodItem = new EvokerProdItem(building);
-                case WardenUnitProd.itemName -> prodItem = new WardenUnitProd(building);
-                case RavagerUnitProd.itemName -> prodItem = new RavagerUnitProd(building);
+                case CreeperProd.itemName -> prodItem = new CreeperProd(building);
+                case SkeletonProd.itemName -> prodItem = new SkeletonProd(building);
+                case ZombieProd.itemName -> prodItem = new ZombieProd(building);
+                case StrayProd.itemName -> prodItem = new StrayProd(building);
+                case HuskProd.itemName -> prodItem = new HuskProd(building);
+                case DrownedProd.itemName -> prodItem = new DrownedProd(building);
+                case SpiderProd.itemName -> prodItem = new SpiderProd(building);
+                case PoisonSpiderProd.itemName -> prodItem = new PoisonSpiderProd(building);
+                case VillagerProd.itemName -> prodItem = new VillagerProd(building);
+                case ZombieVillagerProd.itemName -> prodItem = new ZombieVillagerProd(building);
+                case VindicatorProd.itemName -> prodItem = new VindicatorProd(building);
+                case PillagerProd.itemName -> prodItem = new PillagerProd(building);
+                case IronGolemProd.itemName -> prodItem = new IronGolemProd(building);
+                case WitchProd.itemName -> prodItem = new WitchProd(building);
+                case EvokerProd.itemName -> prodItem = new EvokerProd(building);
+                case WardenProd.itemName -> prodItem = new WardenProd(building);
+                case RavagerProd.itemName -> prodItem = new RavagerProd(building);
+
+                case GruntProd.itemName -> prodItem = new GruntProd(building);
+                case BruteProd.itemName -> prodItem = new BruteProd(building);
+                case HeadhunterProd.itemName -> prodItem = new HeadhunterProd(building);
+                case HoglinProd.itemName -> prodItem = new HoglinProd(building);
+                case BlazeProd.itemName -> prodItem = new BlazeProd(building);
+                case WitherSkeletonProd.itemName -> prodItem = new WitherSkeletonProd(building);
+                case GhastProd.itemName -> prodItem = new GhastProd(building);
 
                 case ResearchVindicatorAxes.itemName -> prodItem = new ResearchVindicatorAxes(building);
                 case ResearchPillagerCrossbows.itemName -> prodItem = new ResearchPillagerCrossbows(building);
@@ -142,12 +155,25 @@ public abstract class ProductionBuilding extends Building {
                 case ResearchSpiderJockeys.itemName -> prodItem = new ResearchSpiderJockeys(building);
                 case ResearchPoisonSpiders.itemName -> prodItem = new ResearchPoisonSpiders(building);
                 case ResearchHusks.itemName -> prodItem = new ResearchHusks(building);
+                case ResearchDrowned.itemName -> prodItem = new ResearchDrowned(building);
                 case ResearchStrays.itemName -> prodItem = new ResearchStrays(building);
                 case ResearchLingeringPotions.itemName -> prodItem = new ResearchLingeringPotions(building);
                 case ResearchEvokerVexes.itemName -> prodItem = new ResearchEvokerVexes(building);
+                case ResearchGolemSmithing.itemName -> prodItem = new ResearchGolemSmithing(building);
                 case ResearchSilverfish.itemName -> prodItem = new ResearchSilverfish(building);
                 case ResearchCastleFlag.itemName -> prodItem = new ResearchCastleFlag(building);
                 case ResearchRavagerCavalry.itemName -> prodItem = new ResearchRavagerCavalry(building);
+                case ResearchBruteShields.itemName -> prodItem = new ResearchBruteShields(building);
+                case ResearchHoglinCavalry.itemName -> prodItem = new ResearchHoglinCavalry(building);
+                case ResearchHeavyTridents.itemName -> prodItem = new ResearchHeavyTridents(building);
+                case ResearchBlazeFirewall.itemName -> prodItem = new ResearchBlazeFirewall(building);
+                case ResearchWitherClouds.itemName -> prodItem = new ResearchWitherClouds(building);
+                case ResearchAdvancedPortals.itemName -> prodItem = new ResearchAdvancedPortals(building);
+                case ResearchFireResistance.itemName -> prodItem = new ResearchFireResistance(building);
+
+                case ResearchPortalForCivilian.itemName -> prodItem = new ResearchPortalForCivilian(building);
+                case ResearchPortalForMilitary.itemName -> prodItem = new ResearchPortalForMilitary(building);
+                case ResearchPortalForTransport.itemName -> prodItem = new ResearchPortalForTransport(building);
             }
             if (prodItem != null) {
                 // only worry about checking affordability on serverside

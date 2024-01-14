@@ -2,7 +2,11 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
+import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.fogofwar.FrozenChunk;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -17,10 +21,12 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.units.monsters.SilverfishUnit;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
@@ -36,6 +42,7 @@ import net.minecraftforge.common.world.ForgeChunkManager;
 import java.util.*;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.*;
+import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
 import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
 
 public abstract class Building {
@@ -135,7 +142,13 @@ public abstract class Building {
             }
             FogOfWarClientboundPacket.revealOrHidePlayer(false, this.ownerName);
         }
+
+        if (this.level.isClientSide)
+            for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(this))
+                FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(bp));
     }
+
+    public Faction getFaction() {return Faction.NONE;}
 
     // fully repairs and rebuilds all the blocks in the building
     // usually used when the structure changes (like when upgrading a building)
@@ -238,7 +251,8 @@ public abstract class Building {
     public int getBlocksPlaced() {
         // on clientside a building outside of render view would always be 0
         if (!getLevel().isClientSide() || isFullyLoadedClientSide((ClientLevel) getLevel())) {
-            int blocksPlaced = blocks.stream().filter(b -> b.isPlaced(getLevel()) && !b.getBlockState().isAir()).toList().size();
+            int blocksPlaced = blocks.stream().filter(b -> b.isPlaced(getLevel()) &&
+                    !b.getBlockState().isAir()).toList().size();
             if (blocksPlaced > highestBlockCountReached)
                 highestBlockCountReached = blocksPlaced;
             return blocksPlaced;
@@ -357,7 +371,11 @@ public abstract class Building {
     }
 
     public boolean shouldBeDestroyed() {
-        if (getBlocksPlaced() <= 0 && blockPlaceQueue.size() == 0)
+        //if (this instanceof Portal portal && portal.portalType != Portal.PortalType.BASIC && tickAge < 20)
+        //    return false;
+        if (blockPlaceQueue.size() > 0)
+            return false;
+        if (getBlocksPlaced() <= 0)
             return true;
         if (isBuilt)
             return getBlocksPlacedPercent() <= this.MIN_BLOCKS_PERCENT;
@@ -396,12 +414,15 @@ public abstract class Building {
                 serverLevel.destroyBlock(block.getBlockPos(), false);
         });
 
-        if (!this.level.isClientSide() && this.isCapitol)
-            sendMessageToAllPlayers(this.ownerName + " has lost their capitol and will be revealed in " +
-                    PlayerServerEvents.TICKS_TO_REVEAL / ResourceCost.TICKS_PER_SECOND + " seconds unless they rebuild it!");
-
-        if (!this.level.isClientSide() && BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 0)
-            sendMessageToAllPlayers(this.ownerName + " has lost their final building and has been defeated!");
+        if (!this.level.isClientSide() && isRTSPlayer(this.ownerName)) {
+            if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 0) {
+                PlayerServerEvents.defeat(this.ownerName, "lost all their buildings");
+            }
+            else if (this.isCapitol) {
+                sendMessageToAllPlayers(this.ownerName + " has lost their capitol and will be revealed in " +
+                        PlayerServerEvents.TICKS_TO_REVEAL / ResourceCost.TICKS_PER_SECOND + " seconds unless they rebuild it!");
+            }
+        }
     }
 
     // should only be run serverside
@@ -409,14 +430,14 @@ public abstract class Building {
         totalBlocksEverBroken += 1;
         Random rand = new Random();
 
-        if (ResearchServer.playerHasResearch(this.ownerName, ResearchSilverfish.itemName))
+        if (this.getFaction() == Faction.MONSTERS && ResearchServer.playerHasResearch(this.ownerName, ResearchSilverfish.itemName))
             randomSilverfishSpawn(pos);
 
         // when a player breaks a block that's part of the building:
         // - roll explodeChance to cause explosion effects and destroy more blocks
         // - cause fire if < fireThreshold% blocksPercent
         if (rand.nextFloat(1.0f) < this.explodeChance) {
-            level.explode(null, null, null,
+            level.explode(null, DamageSource.GENERIC, null,
                     pos.getX(),
                     pos.getY(),
                     pos.getZ(),
@@ -514,7 +535,8 @@ public abstract class Building {
             if (blocksPlaced < blocksTotal && builderCount > 0) {
                 this.ticksToExtinguish += 1;
                 if (ticksToExtinguish >= TICKS_TO_EXTINGUISH) {
-                    extinguishFires(serverLevel);
+                    if (!(this instanceof FlameSanctuary) && !(this instanceof Fortress))
+                        extinguishFires(serverLevel);
                     ticksToExtinguish = 0;
                 }
 
@@ -537,9 +559,6 @@ public abstract class Building {
             } else {
                 this.ticksToExtinguish = 0;
             }
-
-            if (this.shouldBeDestroyed())
-                this.destroy(serverLevel);
 
             // blocks that will build themselves on each tick (eg. foundations from placement, upgrade sections)
             if (blockPlaceQueue.size() > 0) {

@@ -1,23 +1,28 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
+import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -25,9 +30,7 @@ import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class BuildingServerEvents {
 
@@ -126,7 +129,7 @@ public class BuildingServerEvents {
     }
 
     public static void cancelBuilding(Building building) {
-        if (building.isCapitol)
+        if (building == null || building.isCapitol)
             return;
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
@@ -200,11 +203,12 @@ public class BuildingServerEvents {
     public static void onLivingSpawn(LivingSpawnEvent.SpecialSpawn evt) {
         if (evt.getSpawnReason() == MobSpawnType.SPAWNER) {
             if (evt.getSpawner() != null &&
-                    evt.getSpawner().getSpawnerBlockEntity() != null) {
+                evt.getSpawner().getSpawnerBlockEntity() != null) {
                 BlockEntity be = evt.getSpawner().getSpawnerBlockEntity();
                 BlockPos bp = evt.getSpawner().getSpawnerBlockEntity().getBlockPos();
-                if (BuildingUtils.findBuilding(false, bp) instanceof Dungeon)
-                    evt.setResult(Event.Result.DENY);
+                if (BuildingUtils.findBuilding(false, bp) instanceof Dungeon ||
+                    BuildingUtils.findBuilding(false, bp) instanceof FlameSanctuary)
+                    evt.getEntity().discard();
             }
         }
     }
@@ -223,9 +227,15 @@ public class BuildingServerEvents {
                 BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced());
         }
 
+        // need to remove from the list first as destroy() will read it to check defeats
+        List<Building> buildingsToDestroy = buildings.stream().filter(Building::shouldBeDestroyed).toList();
+        buildings.removeIf(Building::shouldBeDestroyed);
+
+        for (Building building : buildingsToDestroy)
+            building.destroy(serverLevel);
+
         for (Building building : buildings)
             building.tick(serverLevel);
-        buildings.removeIf(Building::shouldBeDestroyed);
     }
 
     // cancel all explosion damage to non-building blocks
@@ -237,28 +247,47 @@ public class BuildingServerEvents {
     public static void onExplosion(ExplosionEvent.Detonate evt) {
         Explosion exp = evt.getExplosion();
 
-        if (exp.getExploder() == null && exp.getSourceMob() == null) {
-            evt.getAffectedEntities().clear();
-            evt.getAffectedBlocks().removeIf((BlockPos bp) -> {
-                boolean isPartOfBuilding = false;
-                for (Building building : buildings)
-                    if (building.isPosPartOfBuilding(bp, true))
-                        isPartOfBuilding = true;
-                return !isPartOfBuilding;
-            });
-        }
-        else {
-            evt.getAffectedBlocks().removeIf((BlockPos bp) -> {
-                boolean isPartOfBuilding = false;
-                for (Building building : buildings)
-                    if (building.isPosPartOfBuilding(bp, true))
-                        isPartOfBuilding = true;
-                return !isPartOfBuilding;
-            });
+        GhastUnit ghastUnit = null;
+        CreeperUnit creeperUnit = null;
+
+        if (evt.getExplosion().getSourceMob() instanceof CreeperUnit cUnit) {
+            creeperUnit = cUnit;
+        } // generic means it was from random blocks broken, so don't consider it or we might keep chaining
+        else if (exp.getDamageSource() != DamageSource.GENERIC) {
+            for (Entity entity : evt.getAffectedEntities()) {
+                if (entity instanceof LargeFireball fireball &&
+                        fireball.getOwner() instanceof GhastUnit gUnit) {
+                    ghastUnit = gUnit;
+                    exp.damageSource = new EntityDamageSource("explosion", ghastUnit);
+                }
+            }
         }
 
+        // set fire to random blocks from a ghast fireball
+        if (ghastUnit != null) {
+
+            List<BlockPos> flammableBps = evt.getAffectedBlocks().stream().filter(bp -> {
+                BlockState bs = evt.getLevel().getBlockState(bp);
+                BlockState bsAbove = evt.getLevel().getBlockState(bp.above());
+                return bs.getMaterial().isSolidBlocking() && bsAbove.isAir() ||
+                        bsAbove.getBlock() instanceof TallGrassBlock ||
+                        bsAbove.getBlock() instanceof RootsBlock;
+            }).toList();
+
+            if (flammableBps.size() > 0) {
+                Random rand = new Random();
+                for (int i = 0; i < GhastUnit.FIREBALL_FIRE_BLOCKS; i++) {
+                    BlockPos bp = flammableBps.get(rand.nextInt(flammableBps.size()));
+                    evt.getLevel().setBlockAndUpdate(bp.above(), Blocks.FIRE.defaultBlockState());
+                }
+            }
+        }
+
+        if (exp.getExploder() == null && exp.getSourceMob() == null && ghastUnit == null)
+            evt.getAffectedEntities().clear();
+
         // apply creeper attack damage as bonus damage to buildings
-        if (evt.getExplosion().getSourceMob() instanceof CreeperUnit creeperUnit) {
+        if (creeperUnit != null) {
             Set<Building> affectedBuildings = new HashSet<>();
             for (BlockPos bp : evt.getAffectedBlocks()) {
                 Building building = BuildingUtils.findBuilding(false, bp);
@@ -266,7 +295,44 @@ public class BuildingServerEvents {
                     affectedBuildings.add(building);
             }
             for (Building building : affectedBuildings) {
-                building.destroyRandomBlocks((int) creeperUnit.getUnitAttackDamage());
+                int atkDmg = (int) creeperUnit.getUnitAttackDamage();
+                if (creeperUnit.isPowered())
+                    atkDmg *= 2;
+                building.destroyRandomBlocks(atkDmg);
+            }
+        } // apply ghast attack damage as bonus damage to buildings
+        else if (ghastUnit != null) {
+            BlockPos centreBp = new BlockPos(evt.getExplosion().getPosition());
+            Building affectedBuilding = BuildingUtils.findBuilding(false, centreBp);
+            if (affectedBuilding != null) {
+                affectedBuilding.destroyRandomBlocks((int) ghastUnit.getUnitAttackDamage());
+            }
+        }
+
+        // don't do any block damage apart from the scripted building damage above or damage to leaves
+        evt.getAffectedBlocks().removeIf(bp -> {
+            BlockState bs = evt.getLevel().getBlockState(bp);
+            return !(bs.getBlock() instanceof LeavesBlock);
+        });
+    }
+
+    @SubscribeEvent
+    public static void onEntityTravelToDimension(EntityTravelToDimensionEvent evt) {
+        if (BuildingUtils.isPosInsideAnyBuilding(evt.getEntity().getLevel().isClientSide(), evt.getEntity().getOnPos()))
+            evt.setCanceled(true);
+    }
+
+    public static void replaceClientBuilding(BlockPos buildingPos) {
+        for (Building building : buildings) {
+            if (building.originPos.equals(buildingPos)) {
+                BuildingClientboundPacket.placeBuilding(
+                        building.originPos,
+                        building.name,
+                        building.rotation,
+                        building.ownerName,
+                        building.blockPlaceQueue.size()
+                );
+                return;
             }
         }
     }

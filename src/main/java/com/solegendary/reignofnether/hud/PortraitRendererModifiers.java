@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.units.monsters.PoisonSpiderUnit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.horse.*;
@@ -39,6 +41,9 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Turtle) {
             yOffset = 14;
             scale = -14;
+        } else if (entity instanceof PoisonSpiderUnit) {
+            scale = -18;
+            yOffset = 8;
         } else if (entity instanceof CaveSpider) {
             yOffset = 9;
             scale = -11;
@@ -50,6 +55,7 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Chicken) {
             yOffset = 14;
         } else if (entity instanceof Blaze) {
+            yOffset = -10;
             scale = -5;
         } else if (entity instanceof MushroomCow) {
             scale = -5;
@@ -62,7 +68,7 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Vex) {
             yOffset = 5;
         } else if (entity instanceof Hoglin || entity instanceof Zoglin) {
-            yOffset = -12;
+            yOffset = -18;
             scale = -18;
         } else if (entity instanceof Slime slime) { // largest size only
             if (slime.getSize() == 4)
@@ -89,6 +95,12 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Bee) {
             yOffset = 20;
             scale = -5;
+        } else if (entity instanceof WitherSkeleton) {
+            yOffset = -15;
+            scale = -4;
+        } else if (entity instanceof Ghast) {
+            yOffset = -118;
+            scale = -37;
         }
 
         return new Pair<>(yOffset, scale);

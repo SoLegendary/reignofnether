@@ -7,9 +7,11 @@ import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
+import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.tps.TPSClientBoundPacket;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.unit.packets.*;
@@ -68,6 +70,10 @@ public final class PacketHandler {
                 .encoder(PlayerServerboundPacket::encode).decoder(PlayerServerboundPacket::new)
                 .consumer(PlayerServerboundPacket::handle).add();
 
+        INSTANCE.messageBuilder(PlayerClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(PlayerClientboundPacket::encode).decoder(PlayerClientboundPacket::new)
+                .consumer(PlayerClientboundPacket::handle).add();
+
         INSTANCE.messageBuilder(FogOfWarClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(FogOfWarClientboundPacket::encode).decoder(FogOfWarClientboundPacket::new)
                 .consumer(FogOfWarClientboundPacket::handle).add();
@@ -99,5 +105,9 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(AttackWarningClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(AttackWarningClientboundPacket::encode).decoder(AttackWarningClientboundPacket::new)
                 .consumer(AttackWarningClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(SoundClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SoundClientboundPacket::encode).decoder(SoundClientboundPacket::new)
+                .consumer(SoundClientboundPacket::handle).add();
     }
 }

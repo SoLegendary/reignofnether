@@ -1,15 +1,18 @@
 package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.stringtemplate.v4.ST;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,18 @@ public class ResourcesServerEvents {
     public static final int STARTING_FOOD = 100;
     public static final int STARTING_WOOD = 400;
     public static final int STARTING_ORE = 250;
+
+    public static void resetResources(String playerName) {
+        for (Resources resources : resourcesList) {
+            if (resources.ownerName.equals(playerName)) {
+                resources.food = STARTING_FOOD;
+                resources.wood = STARTING_WOOD;
+                resources.ore = STARTING_ORE;
+                ResourcesClientboundPacket.syncResources(resourcesList);
+                break;
+            }
+        }
+    }
 
     public static void addSubtractResources(Resources resourcesToAdd) {
         for (Resources resources : resourcesList) {
@@ -99,12 +114,20 @@ public class ResourcesServerEvents {
         else if (block instanceof StemBlock && blockState.getValue(BlockStateProperties.AGE_7) == 7) {
             evt.setResult(Event.Result.ALLOW);
         }
-        // prevent natural growth, use our algorithm instead
+        // prevent natural growth, use our algorithm instead to randomly speed up growth
         else if (block instanceof CropBlock || block instanceof StemBlock) {
             int newAge = blockState.getValue(BlockStateProperties.AGE_7) + (random.nextFloat() > 0.6f ? 1 : 2);
             if (newAge > 7)
                 newAge = 7;
             BlockState grownState = block.defaultBlockState().setValue(BlockStateProperties.AGE_7, newAge);
+            evt.getLevel().setBlock(evt.getPos(), grownState, 2);
+            evt.setResult(Event.Result.DENY);
+        }
+        else if (block instanceof NetherWartBlock) {
+            int newAge = blockState.getValue(BlockStateProperties.AGE_3) + (random.nextFloat() > 0.42f ? 0 : 1);
+            if (newAge > 3)
+                newAge = 3;
+            BlockState grownState = block.defaultBlockState().setValue(BlockStateProperties.AGE_3, newAge);
             evt.getLevel().setBlock(evt.getPos(), grownState, 2);
             evt.setResult(Event.Result.DENY);
         }
@@ -138,14 +161,20 @@ public class ResourcesServerEvents {
     }
 
     public static boolean isLogBlock(BlockState bs) {
-        return List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG)
+        if (bs.getMaterial() == Material.WOOD)
+            return true;
+        return List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG,
+                        Blocks.CRIMSON_STEM, Blocks.WARPED_STEM, Blocks.MUSHROOM_STEM)
                 .contains(bs.getBlock());
     }
     public static boolean isLeafBlock(BlockState bs) {
-        return List.of(Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES)
+        if (bs.getMaterial() == Material.LEAVES)
+            return true;
+        return List.of(Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES,
+                        BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get(), BlockRegistrar.DECAYABLE_WARPED_WART_BLOCK.get(),
+                        Blocks.RED_MUSHROOM_BLOCK, Blocks.BROWN_MUSHROOM_BLOCK)
                 .contains(bs.getBlock());
     }
-
 
     public static int numAirOrLeafBlocksBelow(BlockPos bp, Level level) {
         int blocks = 0;

@@ -43,7 +43,11 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
 
     public GarrisonGoal getGarrisonGoal() { return null; }
-    public boolean canGarrison() { return false; }
+    public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UsePortalGoal usePortalGoal;
+    public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
+    public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -51,7 +55,7 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
-    public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
+    public Goal getAttackBuildingGoal() {return attackBuildingGoal;}
     public Goal getAttackGoal() {return attackGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
@@ -95,14 +99,14 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
     public int getPopCost() {return popCost;}
-    public boolean canAttackBuildings() {return canAttackBuildings;}
+    public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
     // endregion
 
-    final static public float attackDamage = 10.0f;
+    final static public float attackDamage = 9.0f;
     final static public float attacksPerSecond = 0.4f;
     final static public float maxHealth = 150.0f;
     final static public float armorValue = 0.0f;
@@ -112,11 +116,11 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.IRON_GOLEM.population;
-    final static public boolean canAttackBuildings = true;
+
     final static public int maxResources = 200;
 
     private MeleeAttackUnitGoal attackGoal;
-    private AttackBuildingGoal attackBuildingGoal;
+    private MeleeAttackBuildingGoal attackBuildingGoal;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -147,16 +151,18 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.usePortalGoal = new UsePortalGoal(this);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
-        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), 1.0D, false);
-        this.attackBuildingGoal = new AttackBuildingGoal(this, 1.0D);
-        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), false);
+        this.attackBuildingGoal = new MeleeAttackBuildingGoal(this);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }
 
     @Override
     protected void registerGoals() {
         initialiseGoals();
+        this.goalSelector.addGoal(2, usePortalGoal);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
@@ -164,6 +170,6 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
         this.goalSelector.addGoal(2, returnResourcesGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
-        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 }

@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.ability.abilities.CallLightning;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -54,15 +55,18 @@ public class Laboratory extends ProductionBuilding {
         if (level.isClientSide()) {
             this.productionButtons = Arrays.asList(
                 ResearchHusks.getStartButton(this, Keybindings.keyQ),
-                ResearchStrays.getStartButton(this, Keybindings.keyW),
-                ResearchSpiderJockeys.getStartButton(this, Keybindings.keyE),
-                ResearchPoisonSpiders.getStartButton(this, Keybindings.keyR),
-                ResearchLabLightningRod.getStartButton(this, Keybindings.keyT),
-                ResearchSilverfish.getStartButton(this, Keybindings.keyY)
+                ResearchDrowned.getStartButton(this, Keybindings.keyW),
+                ResearchStrays.getStartButton(this, Keybindings.keyE),
+                ResearchSpiderJockeys.getStartButton(this, Keybindings.keyR),
+                ResearchPoisonSpiders.getStartButton(this, Keybindings.keyT),
+                ResearchLabLightningRod.getStartButton(this, Keybindings.keyY),
+                ResearchSilverfish.getStartButton(this, Keybindings.keyU)
             );
             this.abilityButtons.add(callLightning.getButton(Keybindings.keyL));
         }
     }
+
+    public Faction getFaction() {return Faction.MONSTERS;}
 
     // return the lightning rod is built based on existing placed blocks
     // returns null if it is not build or is damaged

@@ -44,6 +44,8 @@ public class SelectedTargetGoal<T extends LivingEntity> extends TargetGoal {
     }
 
     public void setTarget(@Nullable LivingEntity target) {
+        if (target != null && target.getId() == this.mob.getId())
+            return;
         this.target = target;
         this.start();
     }

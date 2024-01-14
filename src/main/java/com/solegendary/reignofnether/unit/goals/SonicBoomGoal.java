@@ -2,15 +2,14 @@ package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
-import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Mob;
 
 import java.util.function.Consumer;
 
 public class SonicBoomGoal extends AbstractCastTargetedSpellGoal {
 
-    public SonicBoomGoal(PathfinderMob mob, int channelTicks, int range, Consumer<LivingEntity> onCast) {
+    public SonicBoomGoal(Mob mob, int channelTicks, int range, Consumer<LivingEntity> onCast) {
         super(mob, channelTicks, range, false, onCast);
     }
 
@@ -18,13 +17,13 @@ public class SonicBoomGoal extends AbstractCastTargetedSpellGoal {
     public void startCasting() {
         super.startCasting();
         if (!this.mob.level.isClientSide())
-            UnitSyncClientboundPacket.sendSyncCastingPacket(this.mob, true);
+            UnitSyncClientboundPacket.sendSyncAnimationPacket(this.mob, true);
     }
 
     @Override
     public void stopCasting() {
         if (!this.mob.level.isClientSide() && ticksCasting < channelTicks)
-            UnitSyncClientboundPacket.sendSyncCastingPacket(this.mob, false);
+            UnitSyncClientboundPacket.sendSyncAnimationPacket(this.mob, false);
         super.stopCasting();
         ((Unit) this.mob).getCheckpoints().clear();
     }

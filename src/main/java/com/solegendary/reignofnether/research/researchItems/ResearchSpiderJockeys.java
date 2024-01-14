@@ -62,7 +62,7 @@ public class ResearchSpiderJockeys extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Unlocks the ability for skeletons to mount spiders.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a spider lair.", Style.EMPTY)
+                FormattedCharSequence.forward("Requires a Spider Lair.", Style.EMPTY)
             )
         );
     }

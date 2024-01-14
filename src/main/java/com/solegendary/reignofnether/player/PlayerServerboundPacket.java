@@ -38,13 +38,25 @@ public class PlayerServerboundPacket {
             PlayerAction playerAction = switch (faction) {
                 case VILLAGERS -> PlayerAction.START_RTS_VILLAGERS;
                 case MONSTERS -> PlayerAction.START_RTS_MONSTERS;
-                case NETHERLINGS -> PlayerAction.START_RTS_NETHERLINGS;
+                case PIGLINS -> PlayerAction.START_RTS_PIGLINS;
+                case NONE -> null;
             };
             PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
                     playerAction, MC.player.getId(),
                     MC.player.getEyePosition().x,
                     MC.player.getEyePosition().y,
                     MC.player.getEyePosition().z));
+        }
+    }
+    public static void resetRTS() {
+        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+                PlayerAction.RESET_RTS, 0,0d,0d,0d));
+    }
+    public static void surrender() {
+        Minecraft MC = Minecraft.getInstance();
+        if (MC.player != null) {
+            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+                    PlayerAction.DEFEAT, MC.player.getId(), 0d,0d,0d));
         }
     }
 
@@ -83,7 +95,9 @@ public class PlayerServerboundPacket {
                 case DISABLE_ORTHOVIEW -> PlayerServerEvents.disableOrthoview(this.playerId);
                 case START_RTS_VILLAGERS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.VILLAGERS);
                 case START_RTS_MONSTERS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.MONSTERS);
-                case START_RTS_NETHERLINGS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.NETHERLINGS);
+                case START_RTS_PIGLINS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.PIGLINS);
+                case DEFEAT -> PlayerServerEvents.defeat(this.playerId, "surrendered");
+                case RESET_RTS -> PlayerServerEvents.resetRTS();
             }
             success.set(true);
         });

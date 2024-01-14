@@ -7,8 +7,9 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.units.villagers.EvokerProdItem;
-import com.solegendary.reignofnether.unit.units.villagers.WitchProdItem;
+import com.solegendary.reignofnether.unit.units.villagers.EvokerProd;
+import com.solegendary.reignofnether.unit.units.villagers.WitchProd;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -52,10 +53,12 @@ public class ArcaneTower extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                WitchProdItem.getStartButton(this, Keybindings.keyQ),
-                EvokerProdItem.getStartButton(this, Keybindings.keyW)
+                WitchProd.getStartButton(this, Keybindings.keyQ),
+                EvokerProd.getStartButton(this, Keybindings.keyW)
             );
     }
+
+    public Faction getFaction() {return Faction.VILLAGERS;}
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
@@ -68,7 +71,7 @@ public class ArcaneTower extends ProductionBuilding {
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == ArcaneTower.class,
             () -> false,
-            () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
+            () -> BuildingClientEvents.hasFinishedBuilding(Barracks.buildingName) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(ArcaneTower.class),
             null,
@@ -76,7 +79,9 @@ public class ArcaneTower extends ProductionBuilding {
                 FormattedCharSequence.forward(ArcaneTower.buildingName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A magical tower that is home to Witches and Evokers.", Style.EMPTY)
+                FormattedCharSequence.forward("A magical tower that is home to Witches and Evokers.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires a Barracks.", Style.EMPTY)
             ),
             null
         );

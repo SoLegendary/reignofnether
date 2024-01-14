@@ -2,22 +2,36 @@ package com.solegendary.reignofnether.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3d;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.goals.FlyingMoveToTargetGoal;
+import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
+import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
@@ -33,6 +47,35 @@ import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
 
 public class MiscUtil {
+
+    public static void shootFirework(Level level, Vec3 vec3) {
+        CompoundTag explosion = new CompoundTag();
+        explosion.put("Colors", new IntArrayTag(new int[]{0xF0F0F0}));
+        explosion.putByte("Type", (byte) 0b0);
+        ListTag explosions = new ListTag();
+        explosions.add(explosion);
+        CompoundTag explosionsAndFlight = new CompoundTag();
+        explosionsAndFlight.put("Explosions", explosions);
+        explosionsAndFlight.putByte("Flight", (byte) 0b1);
+        CompoundTag fireworks = new CompoundTag();
+        fireworks.put("Fireworks", explosionsAndFlight);
+        ItemStack itemStack = new ItemStack(Items.FIREWORK_ROCKET);
+        itemStack.setTag(fireworks);
+        FireworkRocketEntity entity = new FireworkRocketEntity(level, null, vec3.x, vec3.y(), vec3.z, itemStack);
+        level.addFreshEntity(entity);
+        entity.moveTo(vec3);
+    }
+
+    // prevent flying mobs from floating above trees and buildings (or they're effectively unreachable)
+    // also used to move the camera Y pos up and down to prevent clipping inside of blocks
+    public static boolean isGroundBlock(Level level, BlockPos bp) {
+        BlockState bs = level.getBlockState(bp);
+        Block block = bs.getBlock();
+        if (ResourcesServerEvents.isLogBlock(bs) || ResourcesServerEvents.isLeafBlock(bs) || bs.isAir() ||
+                BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), bp))
+            return false;
+        return true;
+    }
 
     public static void addUnitCheckpoint(Unit unit, BlockPos blockPos) {
         addUnitCheckpoint(unit, blockPos, true);
@@ -130,24 +173,28 @@ public class MiscUtil {
         return retBps;
     }
 
-    public static PathfinderMob findClosestAttackableEnemy(Mob unitMob, float range, ServerLevel level) {
-        List<PathfinderMob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
+    public static Mob findClosestAttackableEnemy(Mob unitMob, float range, ServerLevel level) {
+        List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
                 new Vector3d(unitMob.position().x, unitMob.position().y, unitMob.position().z),
                 range,
-                PathfinderMob.class,
+                Mob.class,
                 level);
 
-        List<PathfinderMob> nearbyHostileMobs = new ArrayList<>();
+        List<Mob> nearbyHostileMobs = new ArrayList<>();
 
-        for (PathfinderMob pfMob : nearbyMobs) {
-            Relationship rs = UnitServerEvents.getUnitToEntityRelationship((Unit) unitMob, pfMob);
-            if (rs == Relationship.HOSTILE && pfMob.getId() != unitMob.getId() && unitMob.hasLineOfSight(pfMob))
-                nearbyHostileMobs.add(pfMob);
+        for (Mob tMob : nearbyMobs) {
+            Relationship rs = UnitServerEvents.getUnitToEntityRelationship((Unit) unitMob, tMob);
+            // don't let melee units aggro against flying units
+            if (tMob instanceof Unit unit && unit.getMoveGoal() instanceof FlyingMoveToTargetGoal &&
+                unitMob instanceof AttackerUnit attackerUnit && attackerUnit.getAttackGoal() instanceof MeleeAttackUnitGoal)
+                continue;
+            if (rs == Relationship.HOSTILE && tMob.getId() != unitMob.getId() && hasLineOfSightForAttacks(unitMob, tMob))
+                nearbyHostileMobs.add(tMob);
         }
         // find the closest mob
         double closestDist = range;
-        PathfinderMob closestMob = null;
-        for (PathfinderMob pfMob : nearbyHostileMobs) {
+        Mob closestMob = null;
+        for (Mob pfMob : nearbyHostileMobs) {
             double dist = unitMob.position().distanceTo(pfMob.position());
             if (dist < closestDist) {
                 closestDist = unitMob.position().distanceTo(pfMob.position());
@@ -155,6 +202,11 @@ public class MiscUtil {
             }
         }
         return closestMob;
+    }
+
+    private static boolean hasLineOfSightForAttacks(Mob mob, Mob targetMob) {
+        return mob.hasLineOfSight(targetMob) || mob instanceof GhastUnit ||
+                (mob instanceof Unit unit && GarrisonableBuilding.getGarrison((Unit) mob) != null);
     }
 
     public static <T extends Entity> List<T> getEntitiesWithinRange(Vector3d pos, float range, Class<T> entityType, Level level) {
@@ -184,7 +236,7 @@ public class MiscUtil {
     //MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
     //});
     public static void drawDebugStrings(PoseStack stack, Font font, String[] strings) {
-        int y = 200;
+        int y = 200 - (strings.length * 10);
         for (String str : strings) {
             GuiComponent.drawString(stack, font, str, 0,y, 0xFFFFFF);
             y += 10;

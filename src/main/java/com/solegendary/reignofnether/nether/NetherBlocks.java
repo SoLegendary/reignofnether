@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.nether;
 
+import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -10,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// mappings of which overworld blocks will transform into which nether blocks when near a netherling base
+// mappings of which overworld blocks will transform into which nether blocks when near a piglin base
 
 public class NetherBlocks {
 
@@ -34,6 +35,14 @@ public class NetherBlocks {
         return null;
     }
 
+    public static boolean isNetherBlock(Level level, BlockPos bp) {
+        BlockState bs = level.getBlockState(bp);
+        for (Map.Entry<Block, List<Block>> entrySet : MAPPINGS.entrySet())
+            if (bs.getBlock().equals(entrySet.getKey()))
+                return true;
+        return false;
+    }
+
     public static final Map<Block, List<Block>> MAPPINGS = new HashMap<>();
     public static final Map<Block, List<Block>> PLANT_MAPPINGS = new HashMap<>();
 
@@ -51,7 +60,10 @@ public class NetherBlocks {
             List.of(Blocks.BEE_NEST)
         );
         MAPPINGS.put(Blocks.SOUL_SOIL,
-            List.of(Blocks.SAND)
+            List.of(
+                Blocks.SAND,
+                Blocks.RED_SAND
+            )
         );
         MAPPINGS.put(Blocks.AIR,
             List.of(
@@ -78,10 +90,16 @@ public class NetherBlocks {
         MAPPINGS.put(Blocks.NETHERRACK,
             List.of(
                 Blocks.STONE,
-                Blocks.TERRACOTTA,
                 Blocks.GRANITE,
                 Blocks.SNOW_BLOCK,
-                Blocks.POWDER_SNOW
+                Blocks.POWDER_SNOW,
+                Blocks.TERRACOTTA,
+                Blocks.RED_TERRACOTTA,
+                Blocks.ORANGE_TERRACOTTA,
+                Blocks.YELLOW_TERRACOTTA,
+                Blocks.BROWN_TERRACOTTA,
+                Blocks.WHITE_TERRACOTTA,
+                Blocks.LIGHT_GRAY_TERRACOTTA
             ));
         MAPPINGS.put(Blocks.BASALT,
             List.of(
@@ -98,7 +116,8 @@ public class NetherBlocks {
             List.of(
                 Blocks.GRAVEL,
                 Blocks.SANDSTONE,
-                Blocks.CHISELED_SANDSTONE
+                Blocks.CHISELED_SANDSTONE,
+                Blocks.RED_SANDSTONE
             ));
         MAPPINGS.put(Blocks.CRIMSON_HYPHAE,
             List.of(
@@ -120,7 +139,7 @@ public class NetherBlocks {
                 Blocks.STRIPPED_OAK_LOG, Blocks.STRIPPED_BIRCH_LOG, Blocks.STRIPPED_ACACIA_LOG, Blocks.STRIPPED_DARK_OAK_LOG,
                 Blocks.STRIPPED_JUNGLE_LOG, Blocks.STRIPPED_MANGROVE_LOG, Blocks.STRIPPED_SPRUCE_LOG
             ));
-        MAPPINGS.put(Blocks.NETHER_WART_BLOCK,
+        MAPPINGS.put(BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get(),
             List.of(
                 Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES,
                 Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES

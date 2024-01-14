@@ -1,16 +1,14 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.villagers.ArcaneTower;
-import com.solegendary.reignofnether.building.buildings.villagers.Barracks;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.units.monsters.WardenUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.WardenProd;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -56,14 +54,16 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                WardenUnitProd.getStartButton(this, Keybindings.keyQ)
+                WardenProd.getStartButton(this, Keybindings.keyQ)
             );
     }
 
+    public Faction getFaction() {return Faction.MONSTERS;}
+
     // don't use this for abilities as it may not be balanced
-    public int getAttackRangeBonus() { return 30; }
+    public int getAttackRange() { return 27; }
     // bonus for units attacking garrisoned units
-    public int getExternalAttackRangeBonus() { return 20; }
+    public int getExternalAttackRangeBonus() { return 15; }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
@@ -96,7 +96,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward("Distorts time to midnight within a " + nightRange + " block radius", Style.EMPTY),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Requires a graveyard, spider lair and dungeon.", Style.EMPTY)
+                    FormattedCharSequence.forward("Requires a Graveyard, Spider Lair and Dungeon.", Style.EMPTY)
             ),
             null
         );

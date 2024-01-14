@@ -8,29 +8,45 @@ import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.building.buildings.monsters.SpiderLair;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 
 public class ResearchPoisonSpiders extends ProductionItem {
 
-    public final static String itemName = "Poisonous Strains";
+    public final static String itemName = "Cave Spiders";
     public final static ResourceCost cost = ResourceCosts.RESEARCH_POISON_SPIDERS;
 
     public ResearchPoisonSpiders(ProductionBuilding building) {
-        super(building, ResourceCosts.RESEARCH_POISON_SPIDERS.ticks);
+        super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
                 ResearchClient.addResearch(ResearchPoisonSpiders.itemName);
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchPoisonSpiders.itemName);
+
+                // convert all spiders into poison spiders with the same stats/inventory/etc.
+                UnitServerEvents.convertAllToUnit(
+                    this.building.ownerName,
+                    (ServerLevel) level,
+                    (LivingEntity entity) ->
+                        entity instanceof SpiderUnit zUnit &&
+                        zUnit.getOwnerName().equals(building.ownerName),
+                    EntityRegistrar.POISON_SPIDER_UNIT.get()
+                );
             }
         };
         this.foodCost = cost.food;
@@ -60,9 +76,10 @@ public class ResearchPoisonSpiders extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Allows your spider lairs to create poison spiders.", Style.EMPTY),
+                FormattedCharSequence.forward("Transforms all of your Spiders into ,", Style.EMPTY),
+                FormattedCharSequence.forward("Cave Spiders, granting them poisonous attacks.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a spider lair.", Style.EMPTY)
+                FormattedCharSequence.forward("Requires a Spider Lair.", Style.EMPTY)
             )
         );
     }

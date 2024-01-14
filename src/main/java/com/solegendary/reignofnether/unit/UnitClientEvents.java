@@ -10,26 +10,37 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZoglinUnit;
+import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
+import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -38,7 +49,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -46,10 +56,18 @@ import java.util.*;
 
 import static com.solegendary.reignofnether.cursor.CursorClientEvents.getPreselectedBlockPos;
 import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedEntity;
+import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.*;
 
 public class UnitClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
+
+    // list of vecs used in RenderChunkRegionMixin to replace leaf rendering
+    private static final int WINDOW_RADIUS = 5; // size of area to hide leaves
+    public static final int WINDOW_UPDATE_TICKS_MAX = 5; // size of area to hide leaves
+    public static final List<ArrayList<Vec3>> unitWindowVecs = Collections.synchronizedList(new ArrayList<>());
+    public static final List<BlockPos> windowPositions = Collections.synchronizedList(new ArrayList<>());
+    public static int windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
 
     // list of ids that correspond to idle workers - should only be updated from server side
     public static final ArrayList<Integer> idleWorkerIds = new ArrayList<>();
@@ -79,6 +97,7 @@ public class UnitClientEvents {
         preselectedUnits.add(unit);
     }
     public static void addSelectedUnit(LivingEntity unit) {
+        CursorClientEvents.setLeftClickAction(null);
         if (!FogOfWarClientEvents.isInBrightChunk(unit.getOnPos()))
             return;
         if (unit.isPassenger())
@@ -112,16 +131,16 @@ public class UnitClientEvents {
             selectedUnits.removeIf(e -> e.getId() == evt.getEntityMounting().getId());
     }
 
-    public static int getCurrentPopulation() {
+    public static int getCurrentPopulation(String playerName) {
         int currentPopulation = 0;
-        if (MC.level != null && MC.player != null) {
+        if (MC.level != null) {
             for (LivingEntity entity : allUnits) {
                 if (entity instanceof Unit unit)
-                    if (unit.getOwnerName().equals(MC.player.getName().getString()))
+                    if (unit.getOwnerName().equals(playerName))
                         currentPopulation += unit.getPopCost();
             }
             for (Building building : BuildingClientEvents.getBuildings())
-                if (building.ownerName.equals(MC.player.getName().getString()))
+                if (building.ownerName.equals(playerName))
                     if (building instanceof ProductionBuilding prodBuilding)
                         for (ProductionItem prodItem : prodBuilding.productionQueue)
                             currentPopulation += prodItem.popCost;
@@ -285,24 +304,45 @@ public class UnitClientEvents {
             // prevent selection of units out of view
             selectedUnits.removeIf(e -> !FogOfWarClientEvents.isInBrightChunk(e.getOnPos()));
         }
+
+        // calculate vecs used to hide leaf blocks around units
+        if (MC.player != null && OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR &&
+            OrthoviewClientEvents.isEnabled()) {
+
+            synchronized (windowPositions) {
+                windowPositions.clear();
+                UnitClientEvents.getAllUnits().forEach(u -> {
+                    if (FogOfWarClientEvents.isInBrightChunk(u.getOnPos()))
+                        windowPositions.add(u.getOnPos());
+                });
+                BlockPos cursorBp = CursorClientEvents.getPreselectedBlockPos();
+                windowPositions.add(cursorBp);
+
+                synchronized (unitWindowVecs) {
+                    unitWindowVecs.clear();
+                    windowPositions.forEach(bp -> {
+                        if (bp.distSqr(MC.player.getOnPos()) < Math.pow(OrthoviewClientEvents.getZoom() + 10, 2))
+                            unitWindowVecs.add(MyMath.prepIsPointInsideRect3d(Minecraft.getInstance(),
+                                    new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() - WINDOW_RADIUS), // tl
+                                    new Vector3d(bp.getX() - WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS), // bl
+                                    new Vector3d(bp.getX() + WINDOW_RADIUS, bp.getY(), bp.getZ() + WINDOW_RADIUS)  // br
+                            ));
+                    });
+                }
+            }
+        } else {
+            synchronized (windowPositions) {
+                windowPositions.clear();
+            }
+            synchronized (unitWindowVecs) {
+                unitWindowVecs.clear();
+            }
+        }
     }
 
     @SubscribeEvent
     public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
         idleWorkerIds.removeIf(id -> id == evt.getEntity().getId());
-    }
-
-    @SubscribeEvent
-    public static void onPlayerLogoutEvent(PlayerEvent.PlayerLoggedOutEvent evt) {
-        // client log out: remove all entities so we don't duplicate on logging back in
-        if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
-            selectedUnits.clear();
-            preselectedUnits.clear();
-            allUnits.clear();
-            idleWorkerIds.clear();
-            ResearchClient.removeAllResearch();
-            ResearchClient.removeAllCheats();
-        }
     }
 
     /**
@@ -530,7 +570,8 @@ public class UnitClientEvents {
             }
         }
 
-        if (OrthoviewClientEvents.isEnabled() && evt.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+        // AFTER_CUTOUT_BLOCKS lets us see checkpoints through leaves
+        if (OrthoviewClientEvents.isEnabled() && evt.getStage() == AFTER_CUTOUT_BLOCKS) {
             // draw unit checkpoints
             for (LivingEntity entity : getSelectedUnits()) {
                 if (entity instanceof Unit unit) {
@@ -563,7 +604,14 @@ public class UnitClientEvents {
 
                             boolean green = unit.isCheckpointGreen();
                             MyRenderer.drawLine(evt.getPoseStack(), startPos, endPos, green ? 0 : 1, green ? 1 : 0, 0, a);
-                            MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp,green ? 0 : 1, green ? 1 : 0, 0, a);
+
+                            if (MC.level.getBlockState(bp.offset(0,1,0)).getBlock() instanceof SnowLayerBlock) {
+                                AABB aabb = new AABB(bp);
+                                aabb = aabb.setMaxY(aabb.maxY + 0.13f);
+                                MyRenderer.drawSolidBox(evt.getPoseStack(), aabb, Direction.UP, green ? 0 : 1, green ? 1 : 0, 0, a, new ResourceLocation("forge:textures/white.png"));
+                            } else {
+                                MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, green ? 0 : 1, green ? 1 : 0, 0, a);
+                            }
                         }
                     }
                 }
@@ -613,18 +661,6 @@ public class UnitClientEvents {
             Entity oldEntity = MC.level.getEntity(oldUnitIds[i]);
             Entity newEntity = MC.level.getEntity(newUnitIds[i]);
 
-            /* TODO: this doesn't work when the entities are out of client render range
-            // TODO: but it also doesn't work by getAllUnits() since units don't enter the client list until in render range
-            LivingEntity oldEntity = null;
-            LivingEntity newEntity = null;
-
-            for (LivingEntity entity : getAllUnits()) {
-                if (entity.getId() == oldUnitIds[i])
-                    oldEntity = entity;
-                else if (entity.getId() == newUnitIds[i])
-                    newEntity = entity;
-            }*/
-
             if (oldEntity instanceof Unit oldUnit &&
                 newEntity instanceof Unit newUnit) {
 
@@ -654,7 +690,8 @@ public class UnitClientEvents {
                         new int[] { newEntity.getId() },
                         oldUnit.getMoveGoal().getMoveTarget()
                     );
-                if (oldUnit.getReturnResourcesGoal().getBuildingTarget() != null)
+                if (oldUnit.getReturnResourcesGoal() != null &&
+                    oldUnit.getReturnResourcesGoal().getBuildingTarget() != null)
                     sendUnitCommandManual(
                         UnitAction.RETURN_RESOURCES, -1,
                         new int[] { newEntity.getId() },
@@ -684,7 +721,7 @@ public class UnitClientEvents {
         sendUnitCommandManual(UnitAction.DISCARD, oldUnitIds);
     }
 
-    public static void syncUnitCasting(int entityId, boolean startCasting) {
+    public static void syncUnitAnimation(int entityId, int targetId, BlockPos buildingBp, boolean startAnimation) {
         for (LivingEntity entity : getAllUnits()) {
             if (entity instanceof EvokerUnit eUnit && eUnit.getId() == entityId) {
                 // skip if it's your evoker since it'll already be synced
@@ -692,17 +729,54 @@ public class UnitClientEvents {
                     return;
 
                 if (eUnit.getCastFangsLineGoal() != null) {
-                    if (startCasting)
+                    if (startAnimation)
                         eUnit.getCastFangsLineGoal().startCasting();
                     else
                         eUnit.getCastFangsLineGoal().stop();
                 }
             } else if (entity instanceof WardenUnit wUnit && wUnit.getId() == entityId) {
                 if (wUnit.getSonicBoomGoal() != null) {
-                    if (startCasting)
+                    if (startAnimation)
                         wUnit.startSonicBoomAnimation();
                     else
                         wUnit.stopSonicBoomAnimation();
+                }
+            } else if (entity instanceof GhastUnit gUnit && gUnit.getId() == entityId && startAnimation) {
+                gUnit.showShootingFace();
+            } else if (entity instanceof BruteUnit bUnit && bUnit.getId() == entityId) {
+                bUnit.isHoldingUpShield = startAnimation;
+            } else if (entity instanceof WorkerUnit wUnit && entity instanceof AttackerUnit aUnit && entity.getId() == entityId) {
+                if (startAnimation && MC.level != null) {
+                    entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WOODEN_SWORD));
+                    aUnit.setUnitAttackTarget((LivingEntity) MC.level.getEntity(targetId)); // set itself as a target just for animation purposes, doesn't tick clientside anyway
+                } else {
+                    entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.AIR));
+                    aUnit.setUnitAttackTarget(null);
+                }
+            } else if (entity instanceof VindicatorUnit vUnit && entity.getId() == entityId) {
+                if (startAnimation && MC.level != null) {
+                    if (targetId > 0) {
+                        vUnit.setUnitAttackTarget((LivingEntity) MC.level.getEntity(targetId)); // set itself as a target just for animation purposes, doesn't tick clientside anyway
+                    } else {
+                        vUnit.setAttackBuildingTarget(buildingBp);
+                    }
+                } else {
+                    vUnit.setUnitAttackTarget(null);
+                    ((MeleeAttackBuildingGoal) vUnit.getAttackBuildingGoal()).stopAttacking();
+                }
+            }
+        }
+    }
+
+    public static void playAttackBuildingAnimation(int entityId) {
+        for (LivingEntity entity : getAllUnits()) {
+            if (entity.getId() == entityId) {
+                if (entity instanceof IronGolemUnit ||
+                    entity instanceof HoglinUnit ||
+                    entity instanceof ZoglinUnit ||
+                    entity instanceof RavagerUnit ||
+                    entity instanceof WardenUnit) {
+                    entity.handleEntityEvent((byte) 4);
                 }
             }
         }
@@ -721,6 +795,112 @@ public class UnitClientEvents {
                     UnitClientEvents.idleWorkerIds.add(id);
             }
         }
-
     }
+
+    /*
+    public static RenderLevelStageEvent.Stage stage = AFTER_CUTOUT_BLOCKS;
+
+    @SubscribeEvent
+    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_L) {
+            if (AFTER_CUTOUT_BLOCKS.equals(stage)) {
+                stage = AFTER_TRANSLUCENT_BLOCKS;
+            } else if (AFTER_TRANSLUCENT_BLOCKS.equals(stage)) {
+                stage = AFTER_WEATHER;
+            } else if (AFTER_WEATHER.equals(stage)) {
+                stage = AFTER_SKY;
+            } else if (AFTER_SKY.equals(stage)) {
+                stage = AFTER;
+            } else if (AFTER_CUTOUT_BLOCKS.equals(stage)) {
+                stage = AFTER_TRANSLUCENT_BLOCKS;
+            } else if (AFTER_CUTOUT_BLOCKS.equals(stage)) {
+                stage = AFTER_TRANSLUCENT_BLOCKS;
+            } else if (AFTER_CUTOUT_BLOCKS.equals(stage)) {
+                stage = AFTER_TRANSLUCENT_BLOCKS;
+            }
+        }
+    }
+     */
+
+    /*
+
+    public static int yOffset = 0;
+    public static int scale = 0;
+
+    @SubscribeEvent
+    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT) {
+            scale -= 1;
+        } else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
+            scale += 1;
+        } else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
+            yOffset += 1;
+        } else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
+            yOffset -= 1;
+        }
+    }
+
+
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+                "yoffset: " + yOffset,
+                "scale: " + scale,
+        });
+    }
+
+
+
+    public static int option = 0;
+
+    public static double arm_x_rot = 0;
+    public static double arm_y_rot = 0;
+    public static double arm_z_rot = 0;
+    public static int xp_rot = -90;
+    public static int yp_rot = 180;
+    public static double x_pos = 16.0f;
+    public static double y_pos = 0.125f;
+    public static double z_pos = -0.625f;
+
+    @SubscribeEvent
+    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT || evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
+            int mult = evt.getKeyCode() == GLFW.GLFW_KEY_LEFT ? -1 : 1;
+            switch (option) {
+                case 0 -> arm_x_rot += mult * 0.1;
+                case 1 -> arm_y_rot += mult * 0.1;
+                case 2 -> arm_z_rot += mult * 0.1;
+                case 3 -> xp_rot += mult * 5;
+                case 4 -> yp_rot += mult * 5;
+                case 5 -> x_pos += mult * 0.1;
+                case 6 -> y_pos += mult * 0.1;
+                case 7 -> z_pos += mult * 0.1;
+            }
+        }
+        else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
+            option -= 1;
+            if (option < 0)
+                option = 7;
+        }
+        else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
+            option += 1;
+            if (option > 7)
+                option = 0;
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+                "arm_x_rot: " + arm_x_rot + (option == 0 ? " <" : ""),
+                "arm_y_rot: " + arm_y_rot + (option == 1 ? " <" : ""),
+                "arm_z_rot: " + arm_z_rot + (option == 2 ? " <" : ""),
+                "xp_rot: " + xp_rot + (option == 3 ? " <" : ""),
+                "yp_rot: " + yp_rot + (option == 4 ? " <" : ""),
+                "x_pos: " + x_pos + (option == 5 ? " <" : ""),
+                "y_pos: " + y_pos + (option == 6 ? " <" : ""),
+                "z_pos: " + z_pos + (option == 7 ? " <" : ""),
+        });
+    }
+     */
 }

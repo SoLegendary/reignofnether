@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -109,9 +110,11 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
                 }
             }
             if (isGarrisoned)
-                attackRange += garr.getAttackRangeBonus();
+                attackRange = garr.getAttackRange();
             else if (isTargetGarrisoned)
                 attackRange += targetGarr.getExternalAttackRangeBonus();
+            else if (target instanceof GhastUnit ghastUnit)
+                attackRange += ghastUnit.getAttackerRangeBonus(this.mob);
 
             boolean flag2 = (distToTarget > attackRange || this.seeTime < 5) && this.attackCooldown == 0;
 
@@ -146,7 +149,6 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
                 CrossbowItem.setCharged(itemstack1, false);
                 this.crossbowState = UnitCrossbowAttackGoal.CrossbowState.UNCHARGED;
             }
-
         }
     }
 

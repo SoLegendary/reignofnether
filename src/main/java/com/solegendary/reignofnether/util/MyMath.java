@@ -35,12 +35,14 @@ public class MyMath {
     // the 3 corners are SCREEN positions which are converted to world positions
     // usually used to check if a point is in the view camera (or part of it)
     public static ArrayList<Vec3> prepIsPointInsideRect3d(Minecraft MC, int tlx, int tly, int blx, int bly, int brx, int bry) {
-
-        Vector3d lookVector = MiscUtil.getPlayerLookVector(MC);
-
         Vector3d tl = MiscUtil.screenPosToWorldPos(MC, tlx, tly);
         Vector3d bl = MiscUtil.screenPosToWorldPos(MC, blx, bly);
         Vector3d br = MiscUtil.screenPosToWorldPos(MC, brx, bry);
+        return prepIsPointInsideRect3d(MC, tl, bl, br);
+    }
+
+    public static ArrayList<Vec3> prepIsPointInsideRect3d(Minecraft MC, Vector3d tl, Vector3d bl, Vector3d br) {
+        Vector3d lookVector = MiscUtil.getPlayerLookVector(MC);
 
         Vector3d vp5 = MyMath.addVector3d(tl, lookVector, -200);
         Vector3d vp1 = MyMath.addVector3d(bl, lookVector, -200);
@@ -70,6 +72,9 @@ public class MyMath {
     }
 
     public static boolean isPointInsideRect3d(ArrayList<Vec3> uvwp, Vec3 x) {
+        if (uvwp == null)
+            return false;
+
         Vec3 u = uvwp.get(0);
         Vec3 v = uvwp.get(1);
         Vec3 w = uvwp.get(2);

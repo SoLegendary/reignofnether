@@ -2,19 +2,20 @@ package com.solegendary.reignofnether.unit.goals;
 
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.PoisonSpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
+import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
+import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
-import org.checkerframework.checker.guieffect.qual.UI;
+import net.minecraft.world.entity.Mob;
 
 import java.util.List;
 
@@ -26,15 +27,15 @@ public class MountGoal extends MoveToTargetBlockGoal {
     private LivingEntity targetEntity = null;
     public boolean autofind = false;
 
-    public MountGoal(PathfinderMob mob) {
-        super(mob, false, 1.0f, 0);
+    public MountGoal(Mob mob) {
+        super(mob, false, 0);
     }
 
     public void setTarget(LivingEntity entity) {
         this.targetEntity = entity;
     }
 
-    private boolean isMountableUnit(PathfinderMob m) {
+    private boolean isMountableUnit(Mob m) {
         if (!(m instanceof Unit unit))
             return false;
 
@@ -43,8 +44,9 @@ public class MountGoal extends MoveToTargetBlockGoal {
         else if (!unit.getOwnerName().equals(((Unit) this.mob).getOwnerName()))
             return false;
         else return (this.mob instanceof PillagerUnit pillager && m instanceof RavagerUnit ravager) ||
-                    (this.mob instanceof SkeletonUnit skeleton && m instanceof SpiderUnit) ||
-                    (this.mob instanceof StrayUnit stray && m instanceof SpiderUnit);
+                    (this.mob instanceof SkeletonUnit skeleton && (m instanceof SpiderUnit || m instanceof PoisonSpiderUnit)) ||
+                    (this.mob instanceof StrayUnit stray && (m instanceof SpiderUnit || m instanceof PoisonSpiderUnit)) ||
+                    (this.mob instanceof HeadhunterUnit headhunter && m instanceof HoglinUnit);
     }
 
     public void setNearestTarget() {
@@ -53,15 +55,15 @@ public class MountGoal extends MoveToTargetBlockGoal {
 
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
             if (this.mob instanceof Unit) {
-                List<PathfinderMob> nearbyUnits = MiscUtil.getEntitiesWithinRange(
+                List<Mob> nearbyUnits = MiscUtil.getEntitiesWithinRange(
                         new Vector3d(this.mob.position().x, this.mob.position().y, this.mob.position().z),
-                        SEARCH_RANGE, PathfinderMob.class, this.mob.level)
+                        SEARCH_RANGE, Mob.class, this.mob.level)
                         .stream().filter(this::isMountableUnit).toList();
 
                 // find the closest mob
                 double closestDist = 999999;
-                PathfinderMob closestMob = null;
-                for (PathfinderMob pfMob : nearbyUnits) {
+                Mob closestMob = null;
+                for (Mob pfMob : nearbyUnits) {
                     double dist = mob.position().distanceTo(pfMob.position());
                     if (dist < closestDist) {
                         closestDist = mob.position().distanceTo(pfMob.position());

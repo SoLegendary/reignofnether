@@ -48,7 +48,7 @@ public class CastFangsCircleGoal extends Goal {
     public void startCasting() {
         this.isCasting = true;
         if (!this.mob.level.isClientSide())
-            UnitSyncClientboundPacket.sendSyncCastingPacket(this.mob, true);
+            UnitSyncClientboundPacket.sendSyncAnimationPacket(this.mob, true);
     }
 
     @Override
@@ -56,6 +56,6 @@ public class CastFangsCircleGoal extends Goal {
         this.ticksCasting = 0;
         this.isCasting = false;
         if (!this.mob.level.isClientSide())
-            UnitSyncClientboundPacket.sendSyncCastingPacket(this.mob, false);
+            UnitSyncClientboundPacket.sendSyncAnimationPacket(this.mob, false);
     }
 }

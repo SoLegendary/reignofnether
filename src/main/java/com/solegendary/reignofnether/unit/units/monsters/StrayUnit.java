@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.abilities.Dismount;
-import com.solegendary.reignofnether.ability.abilities.MountRavager;
 import com.solegendary.reignofnether.ability.abilities.MountSpider;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -11,6 +9,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
@@ -43,7 +42,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StrayUnit extends Stray implements Unit, AttackerUnit {
+public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttackerUnit {
     // region
     private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
     private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
@@ -59,7 +58,11 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
 
     GarrisonGoal garrisonGoal;
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
-    public boolean canGarrison() { return true; }
+    public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UsePortalGoal usePortalGoal;
+    public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
+    public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
     public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
@@ -67,7 +70,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
-    public AttackBuildingGoal getAttackBuildingGoal() {return attackBuildingGoal;}
+    public Goal getAttackBuildingGoal() {return attackBuildingGoal;}
     public Goal getAttackGoal() {return attackGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
@@ -113,7 +116,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
     public float getUnitMaxHealth() {return maxHealth;}
     public float getUnitArmorValue() {return armorValue;}
     public int getPopCost() {return popCost;}
-    public boolean canAttackBuildings() {return canAttackBuildings;}
+    public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -121,20 +124,20 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
     // endregion
 
     final static public float attackDamage = 4.0f;
-    final static public float attacksPerSecond = 0.3f;
-    final static public float maxHealth = 40.0f;
+    final static public float attacksPerSecond = 0.35f;
+    final static public float maxHealth = 30.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
-    final static public float attackRange = 10.0F; // only used by ranged units or melee building attackers
-    final static public float aggroRange = 10;
+    final static public float attackRange = 12.0F; // only used by ranged units or melee building attackers
+    final static public float aggroRange = 12;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.STRAY.population;
-    final static public boolean canAttackBuildings = false;
+
     public int maxResources = 100;
 
     private UnitBowAttackGoal<? extends LivingEntity> attackGoal;
-    private AttackBuildingGoal attackBuildingGoal;
+    private MeleeAttackBuildingGoal attackBuildingGoal;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -177,24 +180,28 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
         // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
         if (attackGoal != null)
             attackGoal.tickCooldown();
+    }
 
-        if (!this.level.isClientSide() && this.isOnFire() &&
-                BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false))
-            this.setRemainingFireTicks(0);
+    @Override
+    protected boolean isSunBurnTick() {
+        return super.isSunBurnTick() &&
+                !BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false);
     }
 
     public void initialiseGoals() {
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 1.0f, 0);
+        this.usePortalGoal = new UsePortalGoal(this);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
-        this.garrisonGoal = new GarrisonGoal(this, 1.0f);
+        this.garrisonGoal = new GarrisonGoal(this);
         this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown());
-        this.returnResourcesGoal = new ReturnResourcesGoal(this, 1.0f);
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
         this.mountGoal = new MountGoal(this);
     }
 
     @Override
     protected void registerGoals() {
         initialiseGoals();
+        this.goalSelector.addGoal(2, usePortalGoal);
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
@@ -203,7 +210,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
         this.goalSelector.addGoal(2, garrisonGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
-        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
     public static final int SLOW_SECONDS = 5;
@@ -223,11 +230,11 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
 
     // override to make inaccuracy 0
     @Override
-    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
+    public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
         ItemStack itemstack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this,
                 (item) -> item instanceof BowItem
         )));
-        AbstractArrow abstractarrow = this.getArrow(itemstack, pDistanceFactor);
+        AbstractArrow abstractarrow = this.getArrow(itemstack, velocity);
         if (this.getMainHandItem().getItem() instanceof BowItem) {
             abstractarrow = ((BowItem)this.getMainHandItem().getItem()).customArrow(abstractarrow);
         }
@@ -235,8 +242,12 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit {
         double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
         double d2 = pTarget.getZ() - this.getZ();
         double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+
+        if (pTarget.getEyeHeight() <= 1.0f)
+            d1 -= (1.0f - pTarget.getEyeHeight());
+
         abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, 0);
-        this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.playSound(SoundEvents.SKELETON_SHOOT, 3.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
         this.level.addFreshEntity(abstractarrow);
     }
 }

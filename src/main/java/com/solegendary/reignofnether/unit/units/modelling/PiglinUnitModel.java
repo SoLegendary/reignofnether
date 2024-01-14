@@ -6,6 +6,8 @@
 package com.solegendary.reignofnether.unit.units.modelling;
 
 import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
+import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
+import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -20,6 +22,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.PiglinArmPose;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -124,6 +127,17 @@ public class PiglinUnitModel<T extends Mob> extends PlayerModel<T> {
                 if (armSwinger.isSwingingArmOnce())
                     armSwinger.setSwingingArmOnce(false);
             }
+        }
+
+        if (entity instanceof HeadhunterUnit headhunter && headhunter.getTarget() != null) {
+            this.rightArm.xRot = this.rightArm.xRot * 0.5F - 3.1415927F;
+            this.rightArm.yRot = 0.0F;
+        }
+
+        if (entity instanceof BruteUnit brute &&
+            entity.getOffhandItem().getItem() == Items.SHIELD &&
+            brute.isHoldingUpShield) {
+            this.leftArm.xRot = -1.5f;
         }
     }
 

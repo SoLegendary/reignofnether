@@ -21,6 +21,7 @@ public enum UnitAction {
     RETURN_RESOURCES_TO_CLOSEST, // drops off resources to the nearest building that accepts resources
     DELETE, // instantly kills this unit
     DISCARD, // instantly removes this unit from the level without any death animation/event
+    ATTACK_GROUND,
 
     // special abilities - these can also be assigned to cursor actions
     EXPLODE,
@@ -29,6 +30,7 @@ public enum UnitAction {
     MOUNT,
     MOUNT_SPIDER,
     MOUNT_RAVAGER,
+    MOUNT_HOGLIN,
     DISMOUNT, // passenger removes itself from vehicle
     EJECT, // vehicle removes itself from passengers
     PROMOTE_ILLAGER,
@@ -42,5 +44,12 @@ public enum UnitAction {
     CAST_EVOKER_FANGS_LINE,
     CAST_EVOKER_FANGS_CIRCLE,
     CAST_SUMMON_VEXES,
-    CAST_SONIC_BOOM
+    CAST_SONIC_BOOM,
+
+    TOGGLE_SHIELD,
+    SHOOT_FIREWALL,
+
+    CONNECT_PORTAL,
+    DISCONNECT_PORTAL,
+    GOTO_PORTAL,
 }

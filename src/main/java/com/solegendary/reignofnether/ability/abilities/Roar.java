@@ -64,6 +64,5 @@ public class Roar extends Ability {
         ravagerUnit.resetBehaviours();
         ravagerUnit.startToRoar();
         this.setToMaxCooldown();
-        System.out.println(this.getCooldown());
     }
 }

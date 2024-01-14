@@ -9,6 +9,10 @@ public class ResearchServer {
 
     final private static ArrayList<Pair<String, String>> researchItems = new ArrayList<>();
 
+    public static void removeAllResearch() {
+        researchItems.clear();
+    }
+
     public static void syncResearch(String playerName) {
         for (Pair<String, String> researchItem : researchItems)
             if (playerName.equals(researchItem.getFirst()))
@@ -31,6 +35,10 @@ public class ResearchServer {
     }
 
     final private static ArrayList<Pair<String, String>> cheatItems = new ArrayList<>();
+
+    public static void removeAllCheats() {
+        cheatItems.clear();
+    }
 
     public static void syncCheats(String playerName) {
         for (Pair<String, String> cheatItem : cheatItems)

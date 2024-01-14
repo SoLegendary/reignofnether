@@ -11,7 +11,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -87,8 +87,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         if (targetFarm != null && !targetFarm.isPosInsideBuilding(bp))
             return false;
 
-        if (bs.getBlock() == Blocks.FARMLAND) {
-            if (!bsAbove.isAir() || !canAffordReplant())
+        if (bs.getBlock() == Blocks.FARMLAND || bs.getBlock() == Blocks.SOUL_SAND) {
+            if (!bsAbove.isAir() || !canAffordReplant() || !BuildingUtils.isPosInsideAnyBuilding(mob.level.isClientSide(), bp))
                 return false;
         }
         // is not part of a building (unless farming)
@@ -123,8 +123,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     };
 
     // set move goal as range -1, so we aren't slightly out of range
-    public GatherResourcesGoal(PathfinderMob mob, double speedModifier) {
-        super(mob, true, speedModifier, REACH_RANGE - 1);
+    public GatherResourcesGoal(Mob mob) {
+        super(mob, true, REACH_RANGE - 1);
     }
 
     public void syncFromServer(ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
@@ -239,7 +239,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 BlockState bsTarget = mob.level.getBlockState(gatherTarget);
 
                 // replant crops on empty farmland
-                if (bsTarget.getBlock() == Blocks.FARMLAND) {
+                if (bsTarget.getBlock() == Blocks.FARMLAND || bsTarget.getBlock() == Blocks.SOUL_SAND) {
                     gatherTicksLeft -= (TICK_CD / 2);
                     gatherTicksLeft = Math.min(gatherTicksLeft, ResourceSources.REPLANT_TICKS_MAX);
                     if (gatherTicksLeft <= 0) {

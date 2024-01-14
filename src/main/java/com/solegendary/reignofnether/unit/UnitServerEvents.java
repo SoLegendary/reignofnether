@@ -4,6 +4,11 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
+import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -11,30 +16,26 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
+import com.solegendary.reignofnether.unit.units.monsters.DrownedUnit;
+import com.solegendary.reignofnether.unit.units.piglins.*;
+import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.animal.Chicken;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.AbstractIllager;
-import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Silverfish;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
-import net.minecraft.world.entity.projectile.EvokerFangs;
+import net.minecraft.world.entity.projectile.Fireball;
+import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -42,15 +43,18 @@ import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.item.ItemEvent;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
+
+import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
 
 public class UnitServerEvents {
 
@@ -108,6 +112,13 @@ public class UnitServerEvents {
         if (vehicle != null) {
             oldEntity.stopRiding();
             newEntity.startRiding(vehicle, true);
+        }
+        if (oldEntity.isVehicle()) {
+            Entity passenger = oldEntity.getFirstPassenger();
+            if (passenger != null) {
+                passenger.stopRiding();
+                passenger.startRiding(newEntity, true);
+            }
         }
         newEntity.setYRot(oldEntity.getYRot());
 
@@ -178,6 +189,11 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof Unit &&
             evt.getEntity() instanceof Mob mob) {
             mob.setBaby(false);
+            mob.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 0);
+            mob.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+            mob.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
+            mob.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY);
+            mob.setItemSlot(EquipmentSlot.FEET, ItemStack.EMPTY);
         }
 
         if (evt.getEntity() instanceof Unit &&
@@ -189,20 +205,6 @@ public class UnitServerEvents {
             ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
             ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, true, true);
             forcedUnitChunks.add(new Pair<>(entity.getId(), chunk));
-        }
-        // --------------------------- //
-        // Projectile damage balancing //
-        // --------------------------- //
-        // damage should be based only on the unit attack damage + enchantments not based weapon damage
-        if (evt.getEntity() instanceof Arrow arrow) {
-            if (arrow.getOwner() instanceof AttackerUnit unit &&
-                arrow.getOwner() instanceof LivingEntity lEntity) {
-
-                if (lEntity.getItemBySlot(EquipmentSlot.MAINHAND).getItem() == Items.BOW)
-                    arrow.setBaseDamage(unit.getUnitAttackDamage() - 2);
-                else if (lEntity.getItemBySlot(EquipmentSlot.MAINHAND).getItem() == Items.CROSSBOW)
-                    arrow.setBaseDamage(unit.getUnitAttackDamage() - 2.5);
-            }
         }
     }
 
@@ -219,6 +221,15 @@ public class UnitServerEvents {
             //ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos().x, chunk.getPos().z, false, true);
             //forcedUnitChunks.removeIf(p -> p.getFirst() == entity.getId());
         }
+
+        // if a player has no more units, then they are defeated
+        if (evt.getEntity() instanceof Unit unit) {
+            int unitsOwned = allUnits.stream().filter(u -> (u instanceof Unit unit1 && unit1.getOwnerName().equals(unit.getOwnerName()))).toList().size();
+            if (unitsOwned == 0 && PlayerServerEvents.isRTSPlayer(unit.getOwnerName()) &&
+                BuildingUtils.getTotalCompletedBuildingsOwned(false, unit.getOwnerName()) == 0) {
+                PlayerServerEvents.defeat(unit.getOwnerName(), "lost all their units and buildings");
+            }
+        }
     }
 
     @SubscribeEvent
@@ -231,13 +242,61 @@ public class UnitServerEvents {
         }
         if (evt.getEntity() instanceof CreeperUnit creeperUnit)
             creeperUnit.explodeCreeper();
+
+        if (evt.getEntity().getLastHurtByMob() instanceof Unit unit &&
+            (evt.getEntity().getLastHurtByMob() instanceof WitherSkeletonUnit || evt.getSource().getMsgId().equals("wither")) &&
+            ResearchServer.playerHasResearch(unit.getOwnerName(), ResearchWitherClouds.itemName)) {
+
+            AreaEffectCloud aec = new AreaEffectCloud(evt.getEntity().level, evt.getEntity().getX(), evt.getEntity().getY(), evt.getEntity().getZ());
+            aec.setOwner(evt.getEntity());
+            aec.setRadius(4.0F);
+            aec.setRadiusOnUse(0);
+            aec.setDurationOnUse(0);
+            aec.setDuration(10 * 20);
+            aec.setRadiusPerTick(-aec.getRadius() / (float)aec.getDuration());
+            aec.addEffect(new MobEffectInstance(MobEffects.WITHER, 10 * 20));
+            evt.getEntity().level.addFreshEntity(aec);
+        }
+
+        if (evt.getEntity().getLastHurtByMob() instanceof Unit unit &&
+            (evt.getEntity().getLastHurtByMob() instanceof DrownedUnit)) {
+
+            EntityType<? extends Unit> entityType = null;
+
+            if (evt.getEntity() instanceof GruntUnit ||
+                evt.getEntity() instanceof BruteUnit ||
+                evt.getEntity() instanceof HeadhunterUnit)
+                entityType = EntityRegistrar.ZOMBIE_PIGLIN_UNIT.get();
+            else if (evt.getEntity() instanceof HoglinUnit)
+                entityType = EntityRegistrar.ZOGLIN_UNIT.get();
+            else if (evt.getEntity() instanceof VillagerUnit)
+                entityType = EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
+            else if (evt.getEntity() instanceof VindicatorUnit ||
+                    evt.getEntity() instanceof PillagerUnit ||
+                    evt.getEntity() instanceof EvokerUnit ||
+                    evt.getEntity() instanceof WitchUnit)
+                entityType = EntityRegistrar.ZOMBIE_UNIT.get();
+
+            if (entityType != null && evt.getEntity().getLevel() instanceof ServerLevel serverLevel) {
+                Entity entity = entityType.spawn(serverLevel, null,
+                        null,
+                        evt.getEntity().getOnPos(),
+                        MobSpawnType.SPAWNER,
+                        true,
+                        false
+                );
+                if (entity instanceof Unit zUnit) {
+                    zUnit.setOwnerName(unit.getOwnerName());
+                    entity.setYRot(evt.getEntity().getYRot());
+                }
+            }
+        }
     }
 
-    // villager hunting
+    // animal hunting
     @SubscribeEvent
     public static void onDropItem(LivingDropsEvent evt) {
         if (ResourceSources.isHuntableAnimal(evt.getEntity()) &&
-            !evt.getSource().isProjectile() &&
             !evt.getSource().isMagic() &&
             evt.getSource().getEntity() instanceof Unit unit &&
             evt.getSource().getEntity() instanceof Mob mob &&
@@ -245,10 +304,10 @@ public class UnitServerEvents {
             !Unit.atMaxResources(unit)) {
 
             evt.setCanceled(true);
-            for (ItemEntity itemEntity :  evt.getDrops()) {
-                ResourceSource res = ResourceSources.getFromItem(itemEntity.getItem().getItem());
+            for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal((Animal) evt.getEntity())) {
+                ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
                 if (res != null) {
-                    unit.getItems().add(itemEntity.getItem());
+                    unit.getItems().add(itemStack);
                 }
             }
             if (Unit.atThresholdResources(unit))
@@ -316,12 +375,12 @@ public class UnitServerEvents {
             Vec3 pos = entity.position();
             List<Player> nearbyPlayers = MiscUtil.getEntitiesWithinRange(
                     new Vector3d(pos.x, pos.y, pos.z),
-                    100, Player.class, evt.getEntity().level);
+                    10, Player.class, evt.getEntity().level);
 
-            float closestPlayerDist = 100;
+            float closestPlayerDist = 10;
             Player closestPlayer = null;
             for (Player player : nearbyPlayers) {
-                if (player.distanceTo(entity) < closestPlayerDist) {
+                if (player.distanceTo(entity) < closestPlayerDist && isRTSPlayer(player.getName().getString())) {
                     closestPlayerDist = player.distanceTo(entity);
                     closestPlayer = player;
                 }
@@ -332,18 +391,53 @@ public class UnitServerEvents {
         }
     }
 
-    // make creepers immune to lightning damage (but still get charged by them)
+    private static boolean shouldIgnoreKnockback(LivingDamageEvent evt) {
+        Entity projectile = evt.getSource().getDirectEntity();
+        Entity shooter = evt.getSource().getEntity();
+
+        if (shooter instanceof HeadhunterUnit headhunterUnit && projectile instanceof ThrownTrident) {
+            return !ResearchServer.playerHasResearch(headhunterUnit.getOwnerName(), ResearchHeavyTridents.itemName);
+        }
+        if (projectile instanceof Fireball && shooter instanceof BlazeUnit)
+            return true;
+
+        if (projectile instanceof AbstractArrow)
+            return true;
+
+        return evt.getSource().isMagic() && evt.getSource() instanceof IndirectEntityDamageSource &&
+                (!(shooter instanceof EvokerUnit));
+    }
+
     @SubscribeEvent
     public static void onEntityDamaged(LivingDamageEvent evt) {
-        if (evt.getSource().getDirectEntity() instanceof AbstractArrow ||
-            evt.getSource().isMagic() && evt.getSource() instanceof IndirectEntityDamageSource &&
-            (!(evt.getSource().getEntity() instanceof EvokerUnit)))
+        if (shouldIgnoreKnockback(evt))
             knockbackIgnoreIds.add(evt.getEntity().getId());
+
+        // wither skeletons deal up to double damage to enemies with less health left
+        if (evt.getSource().getEntity() instanceof WitherSkeletonUnit) {
+            float maxHp = evt.getEntity().getMaxHealth();
+            float hp = evt.getEntity().getHealth();
+            float damageMult = 2.0f - (hp / maxHp);
+            evt.setAmount(evt.getAmount() * damageMult);
+        }
+        // increase wither damage since we are playing with (average) doubled mob health
+        if (evt.getSource() == DamageSource.WITHER)
+            evt.setAmount(evt.getAmount() * 2);
+
+        if (evt.getSource().getEntity() instanceof GhastUnit)
+            evt.setAmount(evt.getAmount() / 2);
+
+        // ensure projectiles from units do the damage of the unit, not the item
+        if (evt.getSource().isProjectile() && evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)
+            evt.setAmount(attackerUnit.getUnitAttackDamage());
 
         // ignore added weapon damage for workers
         if (evt.getSource().getEntity() instanceof WorkerUnit &&
             evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)
             evt.setAmount(attackerUnit.getUnitAttackDamage());
+
+        if (evt.getEntity() instanceof BruteUnit brute && brute.isHoldingUpShield && (evt.getSource().isProjectile()))
+            evt.setAmount(evt.getAmount() / 2);
 
         if (evt.getEntity() instanceof CreeperUnit && (evt.getSource().isExplosion()))
             evt.setCanceled(true);
@@ -353,16 +447,26 @@ public class UnitServerEvents {
             getUnitToEntityRelationship(creeperUnit, evt.getEntity()) == Relationship.FRIENDLY)
             evt.setCanceled(true);
 
-        if (evt.getEntity() instanceof CreeperUnit && (evt.getSource() == DamageSource.LIGHTNING_BOLT || evt.getSource() == DamageSource.ON_FIRE))
-            evt.setCanceled(true);
+        if (evt.getSource() == DamageSource.LIGHTNING_BOLT) {
+            if (evt.getEntity() instanceof CreeperUnit)
+                evt.setCanceled(true);
+            else
+                evt.setAmount(evt.getAmount() / 2);
+        }
 
-        if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL || evt.getSource() == DamageSource.IN_FIRE))
+        if (evt.getEntity() instanceof Unit && (evt.getSource() == DamageSource.IN_WALL))
             evt.setCanceled(true);
 
         // prevent friendly fire damage from ranged units (unless specifically targeted)
         if (evt.getSource().isProjectile() && evt.getSource().getEntity() instanceof Unit unit)
             if (getUnitToEntityRelationship(unit, evt.getEntity()) == Relationship.FRIENDLY && unit.getTargetGoal().getTarget() != evt.getEntity())
                 evt.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void onLightningStrike(EntityStruckByLightningEvent evt) {
+        if (evt.getEntity() instanceof CreeperUnit creeperUnit)
+            creeperUnit.setSecondsOnFire(0);
     }
 
     // prevent friendly fire from ranged units (unless specifically targeted)
@@ -373,6 +477,12 @@ public class UnitServerEvents {
         Entity hit = null;
         if (evt.getRayTraceResult().getType() == HitResult.Type.ENTITY)
             hit = ((EntityHitResult) evt.getRayTraceResult()).getEntity();
+
+        // prevent fireballs actually directly hitting anything, except other ghasts
+        //  instead just relying on splash damage and fire creation
+        if (owner instanceof GhastUnit && hit != null)
+            if (!(hit instanceof GhastUnit))
+                evt.setCanceled(true);
 
         if (owner instanceof Unit unit && hit != null) {
             if (getUnitToEntityRelationship(unit, hit) == Relationship.FRIENDLY &&

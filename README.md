@@ -28,7 +28,7 @@ Another core design tenet is that the gamemode is fully compatible with vanilla 
 | Building garrisoning | ✔ |  |
 | Villagers Race | ✔ |  |  
 | Monsters Race | ✔ |  |  
-| Netherlings Race | ❌ |  |  
+| Piglins Race | ❌ |  |  
 | Improved vanilla player features | ❌ | Give vanilla-mode players more interaction with their RTS teammates |
 | Teams | ❌ | Including resource trading, shared unit control, etc. |
 
@@ -40,7 +40,7 @@ And many more that I've yet to think of...
 
 **Monsters** are the previously wild and untamed creatures of the overworld, now brought together by the forces of the end. Their base is centered around a stronghold and include ancient temples and ziggurats. Monsters shun sunlight and can only safely venture outside of their base during the night but once night falls, they should be feared just as they have been for ages past.
 
-**Netherlings** are the denizens of the nether who have come through portals to expand their empire by encroaching on the overworld. Wherever they expand the overworld is transformed into a visage of their home: dirt becomes netherrack, trees become mushrooms and sand becomes soulsand.
+**Piglins** are the denizens of the nether who have come through portals to expand their empire by encroaching on the overworld. Wherever they expand the overworld is transformed into a visage of their home: dirt becomes netherrack, trees become mushrooms and sand becomes soulsand.
 
 # Release
 I don't really want to release this until it's done to a minimum level of polish. My criteria for that is basically: *at least two players can sit down and play a fun, balanced match together without anyone crashing or experiencing debilitating bugs*.

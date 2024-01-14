@@ -7,7 +7,8 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperProd;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -52,9 +53,11 @@ public class Dungeon extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                CreeperUnitProd.getStartButton(this, Keybindings.keyQ)
+                CreeperProd.getStartButton(this, Keybindings.keyQ)
             );
     }
+
+    public Faction getFaction() {return Faction.MONSTERS;}
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
@@ -67,7 +70,7 @@ public class Dungeon extends ProductionBuilding {
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Dungeon.class,
             () -> false,
-            () -> BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
+            () -> BuildingClientEvents.hasFinishedBuilding(Laboratory.buildingName) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(Dungeon.class),
             null,
@@ -75,7 +78,9 @@ public class Dungeon extends ProductionBuilding {
                 FormattedCharSequence.forward(Dungeon.buildingName, Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A fiery cage containing the power to create creepers.", Style.EMPTY)
+                FormattedCharSequence.forward("A fiery cage containing the power to create creepers.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires a Laboratory.", Style.EMPTY)
             ),
             null
         );

@@ -45,6 +45,9 @@ public class ClientLevelMixin {
     private boolean isWardenSound(SoundEvent pSoundEvent) {
         return pSoundEvent.getLocation().getPath().contains("warden");
     }
+    private boolean isGhastHurt(SoundEvent pSoundEvent) {
+        return pSoundEvent.getLocation().getPath().contains("ghast.hurt");
+    }
 
     @Inject(
             method = "playSeededSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFJ)V",
@@ -55,10 +58,16 @@ public class ClientLevelMixin {
         if (!OrthoviewClientEvents.isEnabled())
             return;
         ci.cancel();
+        if (pSoundEvent.equals(SoundEvents.WARDEN_HEARTBEAT))
+            return;
 
+        float volumeMult = 0.5f;
+        if (isWardenSound(pSoundEvent))
+            volumeMult = 0.2f;
+        else if (isGhastHurt(pSoundEvent))
+            volumeMult = 0.1f;
 
-        if (!pSoundEvent.equals(SoundEvents.WARDEN_HEARTBEAT))
-            this.playSoundActual(pX, pY, pZ, pSoundEvent, pSoundSource, pVolume * (isWardenSound(pSoundEvent) ? 0.2f : 0.5f), pPitch, false, pSeed);
+        this.playSoundActual(pX, pY, pZ, pSoundEvent, pSoundSource, pVolume * volumeMult, pPitch, false, pSeed);
     }
 
     // plays sounds for orthoview players as though they were on the ground near their selected units/buildings
@@ -67,13 +76,21 @@ public class ClientLevelMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void playSound(double pX, double pY, double pZ, SoundEvent pSoundEvent, SoundSource pSource,
+    private void playSound(double pX, double pY, double pZ, SoundEvent pSoundEvent, SoundSource pSoundSource,
                            float pVolume, float pPitch, boolean pDistanceDelay, long pSeed, CallbackInfo ci) {
         if (!OrthoviewClientEvents.isEnabled())
             return;
         ci.cancel();
-        if (!pSoundEvent.equals(SoundEvents.WARDEN_HEARTBEAT))
-            this.playSoundActual(pX, pY, pZ, pSoundEvent, pSource, pVolume * (isWardenSound(pSoundEvent) ? 0.2f : 0.5f), pPitch, false, pSeed);
+        if (pSoundEvent.equals(SoundEvents.WARDEN_HEARTBEAT))
+            return;
+
+        float volumeMult = 0.5f;
+        if (isWardenSound(pSoundEvent))
+            volumeMult = 0.2f;
+        else if (isGhastHurt(pSoundEvent))
+            volumeMult = 0.1f;
+
+        this.playSoundActual(pX, pY, pZ, pSoundEvent, pSoundSource, pVolume * volumeMult, pPitch, false, pSeed);
     }
 
     // not a mixin, but called by them

@@ -4,15 +4,16 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.fogofwar.FrozenChunk;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ParticleStatus;
@@ -25,10 +26,7 @@ import net.minecraft.client.renderer.chunk.RenderRegionCache;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
@@ -41,6 +39,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,8 +51,6 @@ import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.*;
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
 
-    private static final int UPDATE_TICKS_MAX = 10;
-
     @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
     @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
     @Final @Shadow private Minecraft minecraft;
@@ -63,12 +60,98 @@ public abstract class LevelRendererMixin {
     @Shadow private ChunkRenderDispatcher chunkRenderDispatcher;
     @Shadow private ClientLevel level;
 
+    private List<Pair<BlockPos, Integer>> chunksToReDirty = new ArrayList<>();
+
+    private List<BlockPos> getFrozenChunkOrigins() {
+        ArrayList<BlockPos> origins = new ArrayList<>();
+        for (FrozenChunk frozenChunk : frozenChunks)
+            if (frozenChunk.chunkInfo != null)
+                if (!FogOfWarClientEvents.isInBrightChunk(frozenChunk.chunkInfo.chunk.getOrigin()))
+                    origins.add(frozenChunk.chunkInfo.chunk.getOrigin());
+        return origins;
+    }
+
+    @Inject(
+            method = "applyFrustum(Lnet/minecraft/client/renderer/culling/Frustum;)V",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void applyFrustum(Frustum pFrustum, CallbackInfo ci) {
+        if (!FogOfWarClientEvents.isEnabled())
+            return;
+
+        ci.cancel();
+
+        if (!Minecraft.getInstance().isSameThread()) {
+            throw new IllegalStateException("applyFrustum called from wrong thread: " + Thread.currentThread().getName());
+        } else {
+            this.minecraft.getProfiler().push("apply_frustum");
+            this.renderChunksInFrustum.clear();
+
+            for (LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunkStorage.get().renderChunks) {
+                if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()) &&
+                    !getFrozenChunkOrigins().contains(chunkInfo.chunk.getOrigin())) {
+                    this.renderChunksInFrustum.add(chunkInfo);
+                }
+                for (FrozenChunk frozenChunk : frozenChunks) {
+                    if (frozenChunk.chunkInfo == null && frozenChunk.origin.equals(chunkInfo.chunk.getOrigin())) {
+                        frozenChunk.chunkInfo = chunkInfo;
+                        System.out.println("added chunkInfo: " + chunkInfo.chunk.getOrigin());
+                    }
+                }
+            }
+            for (FrozenChunk frozenChunk : frozenChunks)
+                if (frozenChunk.chunkInfo != null)
+                    this.renderChunksInFrustum.add(frozenChunk.chunkInfo);
+
+            this.minecraft.getProfiler().pop();
+        }
+    }
+
     @Inject(
             method = "compileChunks(Lnet/minecraft/client/Camera;)V",
             at = @At("HEAD"),
             cancellable = true
     )
     private void compileChunks(Camera pCamera, CallbackInfo ci) {
+
+        // hiding leaves around cursor
+        if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR &&
+            OrthoviewClientEvents.isEnabled()) {
+            UnitClientEvents.windowUpdateTicks -= 1;
+            if (UnitClientEvents.windowUpdateTicks <= 0) {
+                UnitClientEvents.windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
+                Vec3 centrePos = MiscUtil.getOrthoviewCentreWorldPos(Minecraft.getInstance());
+                for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
+                    BlockPos chunkCentreBp = chunkInfo.chunk.getOrigin().offset(8.5d, 8.5d, 8.5d);
+
+                    List<Pair<BlockPos, Integer>> newChunksToReDirty = new ArrayList<>();
+
+                    // rerender each chunk a second time so we can unhide leaves as they go out of range
+                    synchronized (UnitClientEvents.windowPositions) {
+                        for (Pair<BlockPos, Integer> pair : chunksToReDirty) {
+                            int times = pair.getSecond();
+                            if (pair.getFirst().equals(chunkInfo.chunk.getOrigin())) {
+                                chunkInfo.chunk.setDirty(true);
+                                times -= 1;
+                            }
+                            if (times > 0)
+                                newChunksToReDirty.add(new Pair<>(pair.getFirst(), times));
+                        }
+                        chunksToReDirty.clear();
+                        chunksToReDirty.addAll(newChunksToReDirty);
+
+                        UnitClientEvents.windowPositions.forEach(bp -> {
+                            if (chunkCentreBp.distSqr(bp) < 225) {
+                                chunkInfo.chunk.setDirty(true);
+                                chunksToReDirty.add(new Pair<>(chunkInfo.chunk.getOrigin(), 10));
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
         if (!isEnabled())
             return;
 
@@ -81,19 +164,20 @@ public abstract class LevelRendererMixin {
         Set<ChunkPos> rerenderChunksToRemove = ConcurrentHashMap.newKeySet();
 
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
+
             BlockPos originPos = chunkInfo.chunk.getOrigin();
+            boolean isFrozenChunk = getFrozenChunkOrigins().contains(originPos);
             ChunkPos chunkPos = new ChunkPos(originPos);
 
             if (rerenderChunks.contains(chunkPos)) {
                 FogOfWarClientEvents.updateChunkLighting(originPos);
                 rerenderChunksToRemove.add(chunkPos);
             }
-            else if (!isInBrightChunk(originPos)) {
-                if (frozenChunks.contains(originPos)) {
+            else if (!isInBrightChunk(originPos) && !isFrozenChunk) {
+                if (semiFrozenChunks.contains(originPos))
                     continue;
-                } else {
-                    frozenChunks.add(originPos);
-                }
+                else
+                    semiFrozenChunks.add(originPos);
             }
             ChunkRenderDispatcher.RenderChunk renderChunk = chunkInfo.chunk;
             ChunkPos chunkpos = new ChunkPos(renderChunk.getOrigin());
@@ -105,15 +189,15 @@ public abstract class LevelRendererMixin {
                     }
                 } else {
                     BlockPos blockpos1 = renderChunk.getOrigin().offset(8, 8, 8);
-                    flag = !net.minecraftforge.common.ForgeConfig.CLIENT.alwaysSetupTerrainOffThread.get() && (blockpos1.distSqr(blockpos) < 768.0D || renderChunk.isDirtyFromPlayer()); // the target is the else block below, so invert the forge addition to get there early
+                    flag = !net.minecraftforge.common.ForgeConfig.CLIENT.alwaysSetupTerrainOffThread.get() && (blockpos1.distSqr(blockpos) < 768.0D || renderChunk.isDirtyFromPlayer());
                 }
 
-                if (flag) {
+                if (flag && !isFrozenChunk) {
                     this.minecraft.getProfiler().push("build_near_sync");
                     this.chunkRenderDispatcher.rebuildChunkSync(renderChunk, renderregioncache);
                     renderChunk.setNotDirty();
                     this.minecraft.getProfiler().pop();
-                } else {
+                } else if (!isFrozenChunk) {
                     list.add(renderChunk);
                 }
             }
@@ -189,6 +273,8 @@ public abstract class LevelRendererMixin {
 
     // increase render distance for particles
     @Shadow private ParticleStatus calculateParticleLevel(boolean pDecreased) { return null; }
+
+    @Shadow @Nullable private PostChain entityEffect;
 
     @Inject(
             method = "addParticleInternal(Lnet/minecraft/core/particles/ParticleOptions;ZZDDDDDD)Lnet/minecraft/client/particle/Particle;",

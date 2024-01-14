@@ -5,12 +5,10 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.unit.units.monsters.HuskUnitProd;
-import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnitProd;
-import com.solegendary.reignofnether.unit.units.monsters.StrayUnitProd;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -49,12 +47,15 @@ public class Graveyard extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                ZombieUnitProd.getStartButton(this, Keybindings.keyQ),
-                HuskUnitProd.getStartButton(this, Keybindings.keyQ),
-                SkeletonUnitProd.getStartButton(this, Keybindings.keyW),
-                StrayUnitProd.getStartButton(this, Keybindings.keyW)
+                ZombieProd.getStartButton(this, Keybindings.keyQ),
+                HuskProd.getStartButton(this, Keybindings.keyQ),
+                DrownedProd.getStartButton(this, Keybindings.keyW),
+                SkeletonProd.getStartButton(this, Keybindings.keyE),
+                StrayProd.getStartButton(this, Keybindings.keyE)
             );
     }
+
+    public Faction getFaction() {return Faction.MONSTERS;}
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);

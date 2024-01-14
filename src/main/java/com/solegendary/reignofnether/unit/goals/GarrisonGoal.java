@@ -5,24 +5,15 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
-
-// Move towards a building to attack it
-// will continually try to move towards the building if too far away as long as this goal is being enacted
-
-// similar to BuildRepairGoal but to damage instead of repair
-// unlike BuildRepairGoal the ticks and destroy logic is on the goal side since units have different damage and
-// attack speed amounts stats the building is not damaged in unison
-
-// TODO: add arm animations for specific models
 
 public class GarrisonGoal extends MoveToTargetBlockGoal {
 
     private Building buildingTarget;
 
-    public GarrisonGoal(PathfinderMob mob, double speedModifier) {
-        super(mob, true, speedModifier, 0);
+    public GarrisonGoal(Mob mob) {
+        super(mob, true, 0);
     }
 
     public void tick() {

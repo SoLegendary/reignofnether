@@ -27,7 +27,7 @@ import java.util.List;
 
 public class ResearchHusks extends ProductionItem {
 
-    public final static String itemName = "Husks";
+    public final static String itemName = "Husk Zombies";
     public final static ResourceCost cost = ResourceCosts.RESEARCH_HUSKS;
 
     public ResearchHusks(ProductionBuilding building) {
@@ -76,10 +76,10 @@ public class ResearchHusks extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Transforms all existing and future zombies into husks,", Style.EMPTY),
+                FormattedCharSequence.forward("Transforms all of your zombies into husks,", Style.EMPTY),
                 FormattedCharSequence.forward("granting them +" + (int) (HuskUnit.maxHealth - ZombieUnit.maxHealth) + " health and immunity to sunlight.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a graveyard.", Style.EMPTY)
+                FormattedCharSequence.forward("Requires a Graveyard.", Style.EMPTY)
             )
         );
     }

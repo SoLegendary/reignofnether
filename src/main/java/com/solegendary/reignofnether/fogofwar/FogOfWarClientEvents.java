@@ -4,11 +4,14 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
-import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.commands.Commands;
@@ -20,15 +23,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
 
@@ -46,8 +46,11 @@ public class FogOfWarClientEvents {
     public static final Set<ChunkPos> lastBrightChunks = ConcurrentHashMap.newKeySet();
     public static final Set<ChunkPos> rerenderChunks = ConcurrentHashMap.newKeySet();
 
-    // all chunk origins that have ever been explored, including currently bright chunks
-    public static final Set<BlockPos> frozenChunks = ConcurrentHashMap.newKeySet();
+    // chunks that will not update while we are looking at them
+    public static final Set<BlockPos> semiFrozenChunks = ConcurrentHashMap.newKeySet();
+
+    // chunkInfos that should never be updated, even if the client does a reset or moves the camera out of range
+    public static final Set<FrozenChunk> frozenChunks = ConcurrentHashMap.newKeySet();
 
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = false;
@@ -62,6 +65,9 @@ public class FogOfWarClientEvents {
     }
 
     public static boolean isPlayerRevealed(String name) {
+        if (!PlayerClientEvents.isRTSPlayer)
+            return true;
+
         return revealedPlayerNames.contains(name);
     }
 
@@ -83,7 +89,7 @@ public class FogOfWarClientEvents {
     // reload chunks like player pressed F3 + A
     public static void resetFogChunks() {
         MC.levelRenderer.allChanged();
-        frozenChunks.clear();
+        semiFrozenChunks.clear();
     }
 
     public static void setEnabled(boolean value) {
@@ -187,14 +193,20 @@ public class FogOfWarClientEvents {
             Set<ChunkPos> occupiedFarviewChunks = ConcurrentHashMap.newKeySet();
 
             // get chunks that have units/buildings that can see
-            for (LivingEntity entity : UnitClientEvents.getAllUnits())
-                if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED)
-                    occupiedChunks.add(new ChunkPos(entity.getOnPos()));
-
+            for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+                if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
+                    (entity instanceof Unit unit && isPlayerRevealed(unit.getOwnerName()))) {
+                    if (entity instanceof GhastUnit)
+                        occupiedFarviewChunks.add(new ChunkPos(entity.getOnPos()));
+                    else
+                        occupiedChunks.add(new ChunkPos(entity.getOnPos()));
+                }
+            }
             for (Building building : BuildingClientEvents.getBuildings()) {
                 if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED ||
                     isPlayerRevealed(building.ownerName)) {
-                    if (building instanceof GarrisonableBuilding && GarrisonableBuilding.getNumOccupants(building) > 0 && building.isBuilt)
+                    if ((building instanceof GarrisonableBuilding && GarrisonableBuilding.getNumOccupants(building) > 0 && building.isBuilt) ||
+                        building.isCapitol)
                         occupiedFarviewChunks.add(new ChunkPos(building.centrePos));
                     else
                         occupiedChunks.add(new ChunkPos(building.centrePos));
@@ -220,7 +232,13 @@ public class FogOfWarClientEvents {
                     for (int z = -1; z <= 1; z++)
                         rerenderChunks.add(new ChunkPos(cpos.x + x, cpos.z + z));
             }
-            frozenChunks.removeIf(bp -> {
+            if (OrthoviewClientEvents.isEnabled())
+                semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
+                        .distSqr(MC.player.getOnPos()) > Math.pow(OrthoviewClientEvents.getZoom() * 2, 2));
+            else
+                semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
+                        .distSqr(MC.player.getOnPos()) > Math.pow(MC.levelRenderer.getLastViewDistance() * 8, 2));
+            semiFrozenChunks.removeIf(bp -> {
                 if (isInBrightChunk(bp)) {
                     updateChunkLighting(bp);
                     return true;

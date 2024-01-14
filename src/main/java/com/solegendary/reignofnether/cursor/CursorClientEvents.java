@@ -21,22 +21,35 @@ import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.*;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import static net.minecraft.util.Mth.*;
+import static net.minecraft.world.level.BlockGetter.traverseBlocks;
 
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Handler that implements and manages screen-to-world translations of the cursor and block/entity selection
@@ -183,7 +196,8 @@ public class CursorClientEvents {
 
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, MiscUtil.getPlayerLookVector(MC), entityaabb)) {
                 UnitClientEvents.addPreselectedUnit(entity);
-                break; // only allow one moused-over unit at a time
+                if (UnitClientEvents.getPreselectedUnits().size() > 0)
+                    break; // only allow one moused-over unit at a time
             }
         }
 
@@ -200,9 +214,9 @@ public class CursorClientEvents {
             // https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
 
             ArrayList<Vec3> uvwp = MyMath.prepIsPointInsideRect3d(MC,
-                    (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDownPos.y,
-                    (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y,
-                    (int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y
+                    (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDownPos.y, // top left
+                    (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y, // bottom left
+                    (int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y // bottom right
             );
             for (LivingEntity entity : MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, LivingEntity.class, MC.level)) {
                 if (MyMath.isPointInsideRect3d(uvwp, entity.getBoundingBox().getCenter()) &&
@@ -317,7 +331,7 @@ public class CursorClientEvents {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
-        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS ||
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS ||
             HudClientEvents.isMouseOverAnyButtonOrHud())
             return;
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
@@ -355,8 +369,16 @@ public class CursorClientEvents {
                 BuildingClientEvents.getPreselectedBuilding() == null &&
                 !buildingTargetedByWorker && !buildingTargetedByAttacker) {
 
-                MyRenderer.drawBox(evt.getPoseStack(), preselectedBlockPos, 1, 1, 1, rightClickDown ? 0.3f : 0.15f);
-                MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
+                if (MC.level.getBlockState(getPreselectedBlockPos().offset(0,1,0)).getBlock() instanceof SnowLayerBlock) {
+                    AABB aabb = new AABB(preselectedBlockPos);
+                    aabb = aabb.setMaxY(aabb.maxY + 0.13f);
+                    MyRenderer.drawSolidBox(evt.getPoseStack(), aabb, null, 1, 1, 1, rightClickDown ? 0.3f : 0.15f, new ResourceLocation("forge:textures/white.png"));
+                    aabb = new AABB(preselectedBlockPos).move(0,0.13,0);
+                    MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f,1.0f,1.0f, rightClickDown ? 1.0f : 0.5f);
+                } else {
+                    MyRenderer.drawBox(evt.getPoseStack(), preselectedBlockPos, 1, 1, 1, rightClickDown ? 0.3f : 0.15f);
+                    MyRenderer.drawBlockOutline(evt.getPoseStack(), preselectedBlockPos, rightClickDown ? 1.0f : 0.5f);
+                }
             }
         }
     }
@@ -367,8 +389,44 @@ public class CursorClientEvents {
         Vec3 vectorFar = new Vec3(cursorWorldPosFar.x, cursorWorldPosFar.y, cursorWorldPosFar.z);
 
         // clip() returns the point of clip, not the clipped block giving off-by-one errors so move slightly to compensate
-        HitResult hitResult = MC.level.clip(new ClipContext(vectorNear, vectorFar, ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, null));
-        return hitResult.getLocation().add(new Vec3(-0.001,-0.001,-0.001));
+        HitResult hitResult = null;
+        if (MC.level != null) {
+            hitResult = clip(MC.level, new ClipContext(vectorNear, vectorFar, ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, null));
+        }
+
+        if (hitResult != null)
+            return hitResult.getLocation().add(new Vec3(-0.001,-0.001,-0.001));
+        return new Vec3(0,0,0);
+    }
+
+    // from ClientLevel.clip() but added exception for leaf blocks
+    private static BlockHitResult clip(ClientLevel level, ClipContext pContext) {
+        return traverseBlocks(pContext.getFrom(), pContext.getTo(), pContext, (clipContext, blockPos) -> {
+            BlockState blockstate = level.getBlockState(blockPos);
+            FluidState fluidstate = level.getFluidState(blockPos);
+            Vec3 vec3 = clipContext.getFrom();
+            Vec3 vec31 = clipContext.getTo();
+            VoxelShape voxelshape = clipContext.getBlockShape(blockstate, level, blockPos);
+            BlockHitResult blockhitresult = level.clipWithInteractionOverride(vec3, vec31, blockPos, voxelshape, blockstate);
+            VoxelShape voxelshape1 = clipContext.getFluidShape(fluidstate, level, blockPos);
+            BlockHitResult blockhitresult1 = voxelshape1.clip(vec3, vec31, blockPos);
+            double d0 = blockhitresult == null ? Double.MAX_VALUE : clipContext.getFrom().distanceToSqr(blockhitresult.getLocation());
+            double d1 = blockhitresult1 == null ? Double.MAX_VALUE : clipContext.getFrom().distanceToSqr(blockhitresult1.getLocation());
+            BlockHitResult result = d0 <= d1 ? blockhitresult : blockhitresult1;
+
+            if (result != null) {
+                Block block = level.getBlockState(result.getBlockPos()).getBlock();
+                if (OrthoviewClientEvents.shouldHideLeaves() && level.getBlockState(result.getBlockPos()).getBlock() instanceof LeavesBlock)
+                    result = null;
+                else if (block instanceof SnowLayerBlock)
+                    result = null;
+            }
+            return result;
+
+        }, (p_151372_) -> {
+            Vec3 vec3 = p_151372_.getFrom().subtract(p_151372_.getTo());
+            return BlockHitResult.miss(p_151372_.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), new BlockPos(p_151372_.getTo()));
+        });
     }
 
     private static BlockPos getRefinedBlockPos(BlockPos bp, Vector3d cursorWorldPosNear) {
@@ -418,7 +476,10 @@ public class CursorClientEvents {
                 if (HudClientEvents.hudSelectedEntity instanceof Unit workerUnit)
                     isBlockSelectableResource = ResourceSources.getFromBlockPos(block, MC.level) != null;
 
-                if ((MC.level.getBlockState(block).getMaterial().isSolidBlocking() || isBlockSelectableResource) &&
+                BlockState bs = MC.level.getBlockState(block);
+                if ((bs.getMaterial().isSolidBlocking() || isBlockSelectableResource) &&
+                    (!(bs.getBlock() instanceof LeavesBlock) || !OrthoviewClientEvents.shouldHideLeaves()) &&
+                    !(bs.getBlock() instanceof SnowLayerBlock) &&
                     MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, lookVector, new AABB(block)) &&
                     dist < smallestDist ) {
                     smallestDist = dist;
@@ -433,7 +494,7 @@ public class CursorClientEvents {
 
     @SubscribeEvent
     public static void onKeyRelease(ScreenEvent.KeyPressed.KeyPressed.Post evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT_SHIFT && preselectedBlockPos != null) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT_SHIFT && preselectedBlockPos != null && MC.level != null && MC.player != null) {
             MC.level.destroyBlockProgress(MC.player.getId(), preselectedBlockPos, progress);
             progress += 1;
             if (progress > 10)
@@ -442,13 +503,17 @@ public class CursorClientEvents {
 
     }
 
-    /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        /*
         MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "alpha: " + MiscUtil.getOscillatingFloat(0,1),
+                "1. x: " + HudClientEvents.mouseX + " y: " + HudClientEvents.mouseY,
+                "2. x: " + (int) screenPos.x + " y: " + (int) screenPos.y,
+                "Zoom: " + OrthoviewClientEvents.getZoom(),
+                "Height: " + MC.getWindow().getGuiScaledHeight()
         });
-    }*/
+         */
+    }
 }
 
 

@@ -5,11 +5,13 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchGolemSmithing;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.units.villagers.IronGolemProdItem;
+import com.solegendary.reignofnether.unit.units.villagers.IronGolemProd;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -48,11 +50,14 @@ public class Blacksmith extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = Arrays.asList(
-                IronGolemProdItem.getStartButton(this, Keybindings.keyQ),
+                IronGolemProd.getStartButton(this, Keybindings.keyQ),
                 ResearchVindicatorAxes.getStartButton(this, Keybindings.keyW),
-                ResearchPillagerCrossbows.getStartButton(this, Keybindings.keyE)
+                ResearchPillagerCrossbows.getStartButton(this, Keybindings.keyE),
+                ResearchGolemSmithing.getStartButton(this, Keybindings.keyR)
             );
     }
+
+    public Faction getFaction() {return Faction.VILLAGERS;}
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
@@ -75,7 +80,7 @@ public class Blacksmith extends ProductionBuilding {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A smithy to forge military upgrades and iron golems.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Requires a barracks.", Style.EMPTY)
+                        FormattedCharSequence.forward("Requires a Barracks.", Style.EMPTY)
                 ),
                 null
         );

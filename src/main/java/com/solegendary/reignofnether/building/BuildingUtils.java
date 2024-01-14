@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.building;
 // class for static building functions
 
 import com.solegendary.reignofnether.building.buildings.monsters.*;
-import com.solegendary.reignofnether.building.buildings.netherlings.Portal;
+import com.solegendary.reignofnether.building.buildings.piglins.*;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import net.minecraft.core.BlockPos;
@@ -104,6 +104,7 @@ public class BuildingUtils {
             case HauntedHouse.buildingName -> building = new HauntedHouse(level, pos, rotation, ownerName);
             case Blacksmith.buildingName -> building = new Blacksmith(level, pos, rotation, ownerName);
             case TownCentre.buildingName -> building = new TownCentre(level, pos, rotation, ownerName);
+            case IronGolemBuilding.buildingName -> building = new IronGolemBuilding(level, pos, rotation, ownerName);
             case Mausoleum.buildingName -> building = new Mausoleum(level, pos, rotation, ownerName);
             case SpiderLair.buildingName -> building = new SpiderLair(level, pos, rotation, ownerName);
             case ArcaneTower.buildingName -> building = new ArcaneTower(level, pos, rotation, ownerName);
@@ -113,7 +114,15 @@ public class BuildingUtils {
             case DarkWatchtower.buildingName -> building = new DarkWatchtower(level, pos, rotation, ownerName);
             case Castle.buildingName -> building = new Castle(level, pos, rotation, ownerName);
             case Stronghold.buildingName -> building = new Stronghold(level, pos, rotation, ownerName);
+
+            case CentralPortal.buildingName -> building = new CentralPortal(level, pos, rotation, ownerName);
             case Portal.buildingName -> building = new Portal(level, pos, rotation, ownerName);
+            case NetherwartFarm.buildingName -> building = new NetherwartFarm(level, pos, rotation, ownerName);
+            case Bastion.buildingName -> building = new Bastion(level, pos, rotation, ownerName);
+            case HoglinStables.buildingName -> building = new HoglinStables(level, pos, rotation, ownerName);
+            case FlameSanctuary.buildingName -> building = new FlameSanctuary(level, pos, rotation, ownerName);
+            case WitherShrine.buildingName -> building = new WitherShrine(level, pos, rotation, ownerName);
+            case Fortress.buildingName -> building = new Fortress(level, pos, rotation, ownerName);
         }
         if (building != null)
             building.setLevel(level);
@@ -250,5 +259,27 @@ public class BuildingUtils {
             }
         }
         return false;
+    }
+
+    public static List<BlockPos> getRenderChunkOrigins(Building building) {
+        List<BlockPos> origins = new ArrayList<>();
+        BlockPos minCorner = getMinCorner(building.getBlocks());
+        BlockPos maxCorner = getMaxCorner(building.getBlocks());
+
+        BlockPos minOrigin = new BlockPos(
+                Math.round(Math.floor(minCorner.getX() / 16d) * 16),
+                Math.round(Math.floor(minCorner.getY() / 16d) * 16),
+                Math.round(Math.floor(minCorner.getZ() / 16d) * 16)
+        );
+        BlockPos maxOrigin = new BlockPos(
+                Math.round(Math.floor(maxCorner.getX() / 16d) * 16),
+                Math.round(Math.floor(maxCorner.getY() / 16d) * 16),
+                Math.round(Math.floor(maxCorner.getZ() / 16d) * 16)
+        );
+        for (int x = minOrigin.getX(); x <= maxOrigin.getX(); x += 16)
+            for (int y = minOrigin.getY() - 16; y <= maxOrigin.getY(); y += 16)
+                for (int z = minOrigin.getZ(); z <= maxOrigin.getZ(); z += 16)
+                    origins.add(new BlockPos(x,y,z));
+        return origins;
     }
 }

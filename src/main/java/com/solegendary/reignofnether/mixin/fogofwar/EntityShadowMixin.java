@@ -2,6 +2,8 @@ package com.solegendary.reignofnether.mixin.fogofwar;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
@@ -23,16 +25,18 @@ public abstract class EntityShadowMixin {
             cancellable = true
     )
     private static void onRenderShadow(PoseStack pMatrixStack, MultiBufferSource pBuffer, Entity pEntity, float pWeight, float pPartialTicks, LevelReader pLevel, float pSize, CallbackInfo ci) {
+        if (OrthoviewClientEvents.isEnabled() &&
+            pEntity == Minecraft.getInstance().player) {
+            ci.cancel();
+            return;
+        }
+
         if (!FogOfWarClientEvents.isEnabled())
             return;
 
-        boolean shouldRender = false;
         BlockPos bp = pEntity.getOnPos();
 
-        if (FogOfWarClientEvents.isInBrightChunk(pEntity.getOnPos()))
-            shouldRender = true;
-
-        if (!shouldRender)
+        if (!FogOfWarClientEvents.isInBrightChunk(pEntity.getOnPos()))
             ci.cancel();
     }
 }

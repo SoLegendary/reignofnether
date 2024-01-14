@@ -1,10 +1,16 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.goat.Goat;
+import net.minecraft.world.entity.animal.horse.Donkey;
+import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.animal.horse.Mule;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -20,12 +26,11 @@ public class ResourceSources {
     public static final int TICKS_PER_SECOND = 20;
 
     public static boolean isHuntableAnimal(LivingEntity entity) {
-        return entity instanceof Cow ||
-                entity instanceof Sheep ||
-                entity instanceof Pig ||
-                entity instanceof Chicken ||
-                entity instanceof PolarBear ||
-                entity instanceof Goat;
+        if (!(entity instanceof Animal))
+            return false;
+        if (getFoodItemsFromAnimal((Animal) entity).size() == 0)
+            return false;
+        return true;
     }
 
     public static ResourceSource getFromBlockPos(BlockPos bp, Level level) {
@@ -61,6 +66,34 @@ public class ResourceSources {
         return null;
     }
 
+    // return a list of food items that a worker gets when killing a huntable animal to make it more consistent
+    public static List<ItemStack> getFoodItemsFromAnimal(Animal animal) {
+        if (animal instanceof PolarBear) {
+            return List.of(new ItemStack(Items.SALMON, 12)); // 300 food / 30hp
+        } else if (animal instanceof Cow) {
+            return List.of(new ItemStack(Items.BEEF, 2), new ItemStack(Items.LEATHER, 2)); // 150 food / 10hp
+        } else if (animal instanceof Pig) {
+            return List.of(new ItemStack(Items.PORKCHOP, 3)); // 150 food / 10hp
+        } else if (animal instanceof Goat) {
+            return List.of(new ItemStack(Items.MUTTON, 2), new ItemStack(Items.LEATHER, 2)); // 150 food / 10hp
+        } else if (animal instanceof Sheep) {
+            return List.of(new ItemStack(Items.MUTTON, 2), new ItemStack(Items.LEATHER, 1)); // 125 food / 8hp
+        } else if (animal instanceof Chicken) {
+            return List.of(new ItemStack(Items.CHICKEN, 1)); // 50 food / 4hp (but usually lays eggs around)
+        } else if (animal instanceof Rabbit) {
+            return List.of(new ItemStack(Items.RABBIT, 1)); // 50 food / 3hp
+        } else if (animal instanceof Horse) {
+            return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
+        } else if (animal instanceof Donkey) {
+            return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
+        } else if (animal instanceof Llama) {
+            return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
+        } else if (animal instanceof Mule) {
+            return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
+        }
+        return List.of();
+    }
+
     public static final int REPLANT_TICKS_MAX = 10;
 
     public static final List<ResourceSource> FOOD_BLOCKS = List.of(
@@ -79,19 +112,44 @@ public class ResourceSources {
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.MOISTURE) == 7
             ),
+            new ResourceSource("Soul Sand",
+                    List.of(Blocks.SOUL_SAND),
+                    List.of(),
+                    0,
+                    0,
+                    ResourceName.FOOD
+            ),
+            // VILLAGER FARMS
             new ResourceSource("Wheat",
                     List.of(Blocks.WHEAT),
                     List.of(Items.WHEAT),
                     TICKS_PER_SECOND * 2,
-                    6,
+                    4,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
+            ),
+            // PIGLIN FARMS
+            new ResourceSource("Netherwart",
+                    List.of(Blocks.NETHER_WART),
+                    List.of(Items.NETHER_WART),
+                    TICKS_PER_SECOND * 2,
+                    5,
+                    ResourceName.FOOD,
+                    (bs) -> bs.getValue(BlockStateProperties.AGE_3) == 3
+            ),
+            // MONSTER FARMS
+            new ResourceSource("Gourds",
+                    List.of(Blocks.MELON, Blocks.PUMPKIN, Blocks.CARVED_PUMPKIN),
+                    List.of(Items.MELON, Items.PUMPKIN, Items.CARVED_PUMPKIN),
+                    TICKS_PER_SECOND * 3,
+                    7,
+                    ResourceName.FOOD
             ),
             new ResourceSource("Carrots",
                     List.of(Blocks.CARROTS),
                     List.of(Items.CARROT),
                     TICKS_PER_SECOND * 2,
-                    8,
+                    10,
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_7) == 7
             ),
@@ -111,20 +169,6 @@ public class ResourceSources {
                     ResourceName.FOOD,
                     (bs) -> bs.getValue(BlockStateProperties.AGE_3) == 3
             ),
-            new ResourceSource("Gourds",
-                    List.of(Blocks.MELON, Blocks.PUMPKIN),
-                    List.of(Items.MELON, Items.PUMPKIN),
-                    TICKS_PER_SECOND * 3,
-                    8,
-                    ResourceName.FOOD
-            ),
-            new ResourceSource("Carved Pumpkin",
-                    List.of(Blocks.CARVED_PUMPKIN),
-                    List.of(Items.CARVED_PUMPKIN),
-                    TICKS_PER_SECOND * 3,
-                    10,
-                    ResourceName.FOOD
-            ),
             new ResourceSource("Mushrooms",
                     List.of(Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM),
                     List.of(Items.RED_MUSHROOM, Items.BROWN_MUSHROOM),
@@ -142,21 +186,21 @@ public class ResourceSources {
             new ResourceSource("Mushroom Stem",
                     List.of(Blocks.MUSHROOM_STEM),
                     List.of(Items.MUSHROOM_STEM),
-                    TICKS_PER_SECOND * 5,
+                    TICKS_PER_SECOND * 10,
                     10,
                     ResourceName.FOOD
             ),
             new ResourceSource("Red Mushroom Block",
                     List.of(Blocks.RED_MUSHROOM_BLOCK),
                     List.of(Items.RED_MUSHROOM_BLOCK),
-                    TICKS_PER_SECOND * 5,
+                    TICKS_PER_SECOND * 10,
                     10,
                     ResourceName.FOOD
             ),
             new ResourceSource("Brown Mushroom Block",
                     List.of(Blocks.BROWN_MUSHROOM_BLOCK),
                     List.of(Items.BROWN_MUSHROOM_BLOCK),
-                    TICKS_PER_SECOND * 5,
+                    TICKS_PER_SECOND * 10,
                     10,
                     ResourceName.FOOD
             ),
@@ -178,7 +222,7 @@ public class ResourceSources {
             ),
             new ResourceSource("Medium food item",
                     List.of(),
-                    List.of(Items.EGG, Items.APPLE, Items.BREAD, Items.HONEY_BOTTLE, Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.GLOW_BERRIES),
+                    List.of(Items.LEATHER, Items.EGG, Items.APPLE, Items.BREAD, Items.HONEY_BOTTLE, Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.GLOW_BERRIES),
                     0,
                     25,
                     ResourceName.FOOD
@@ -218,19 +262,30 @@ public class ResourceSources {
                     List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG,
                             Blocks.STRIPPED_OAK_LOG, Blocks.STRIPPED_BIRCH_LOG, Blocks.STRIPPED_ACACIA_LOG, Blocks.STRIPPED_DARK_OAK_LOG, Blocks.STRIPPED_JUNGLE_LOG, Blocks.STRIPPED_MANGROVE_LOG, Blocks.STRIPPED_SPRUCE_LOG,
                             Blocks.OAK_WOOD, Blocks.BIRCH_WOOD, Blocks.ACACIA_WOOD, Blocks.DARK_OAK_WOOD, Blocks.JUNGLE_WOOD, Blocks.MANGROVE_WOOD, Blocks.SPRUCE_WOOD,
-                            Blocks.STRIPPED_OAK_WOOD, Blocks.STRIPPED_BIRCH_WOOD, Blocks.STRIPPED_ACACIA_WOOD, Blocks.STRIPPED_DARK_OAK_WOOD, Blocks.STRIPPED_JUNGLE_WOOD, Blocks.STRIPPED_MANGROVE_WOOD, Blocks.STRIPPED_SPRUCE_WOOD),
+                            Blocks.STRIPPED_OAK_WOOD, Blocks.STRIPPED_BIRCH_WOOD, Blocks.STRIPPED_ACACIA_WOOD, Blocks.STRIPPED_DARK_OAK_WOOD, Blocks.STRIPPED_JUNGLE_WOOD, Blocks.STRIPPED_MANGROVE_WOOD, Blocks.STRIPPED_SPRUCE_WOOD,
+                            Blocks.CRIMSON_STEM, Blocks.WARPED_STEM),
                     List.of(Items.OAK_LOG, Items.BIRCH_LOG, Items.ACACIA_LOG, Items.DARK_OAK_LOG, Items.JUNGLE_LOG, Items.MANGROVE_LOG, Items.SPRUCE_LOG,
                             Items.STRIPPED_OAK_LOG, Items.STRIPPED_BIRCH_LOG, Items.STRIPPED_ACACIA_LOG, Items.STRIPPED_DARK_OAK_LOG, Items.STRIPPED_JUNGLE_LOG, Items.STRIPPED_MANGROVE_LOG, Items.STRIPPED_SPRUCE_LOG,
                             Items.OAK_WOOD, Items.BIRCH_WOOD, Items.ACACIA_WOOD, Items.DARK_OAK_WOOD, Items.JUNGLE_WOOD, Items.MANGROVE_WOOD, Items.SPRUCE_WOOD,
-                            Items.STRIPPED_OAK_WOOD, Items.STRIPPED_BIRCH_WOOD, Items.STRIPPED_ACACIA_WOOD, Items.STRIPPED_DARK_OAK_WOOD, Items.STRIPPED_JUNGLE_WOOD, Items.STRIPPED_MANGROVE_WOOD, Items.STRIPPED_SPRUCE_WOOD),
-                    TICKS_PER_SECOND * 10,
+                            Items.STRIPPED_OAK_WOOD, Items.STRIPPED_BIRCH_WOOD, Items.STRIPPED_ACACIA_WOOD, Items.STRIPPED_DARK_OAK_WOOD, Items.STRIPPED_JUNGLE_WOOD, Items.STRIPPED_MANGROVE_WOOD, Items.STRIPPED_SPRUCE_WOOD,
+                            Items.CRIMSON_STEM, Items.WARPED_STEM),
+                    TICKS_PER_SECOND * 12,
                     15,
                     ResourceName.WOOD
             ),
+            new ResourceSource("Nether Logs",
+                    List.of(Blocks.CRIMSON_STEM, Blocks.WARPED_STEM, Blocks.STRIPPED_CRIMSON_STEM, Blocks.STRIPPED_WARPED_STEM),
+                    List.of(Items.CRIMSON_STEM, Items.WARPED_STEM, Items.STRIPPED_CRIMSON_STEM, Items.STRIPPED_WARPED_STEM),
+                    TICKS_PER_SECOND * 12,
+                    17,
+                    ResourceName.WOOD
+            ),
             new ResourceSource("Leaves", // can't actually gather but can be targeted to begin wood gathering
-                    List.of(Blocks.ACACIA_LEAVES, Blocks.AZALEA_LEAVES, Blocks.BIRCH_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES),
-                    List.of(Items.ACACIA_LEAVES, Items.AZALEA_LEAVES, Items.BIRCH_LEAVES, Items.FLOWERING_AZALEA_LEAVES, Items.JUNGLE_LEAVES, Items.DARK_OAK_LEAVES, Items.MANGROVE_LEAVES, Items.OAK_LEAVES, Items.SPRUCE_LEAVES),
-                    10,
+                    List.of(Blocks.ACACIA_LEAVES, Blocks.AZALEA_LEAVES, Blocks.BIRCH_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.DARK_OAK_LEAVES,
+                            Blocks.MANGROVE_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES, BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get(), BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get()),
+                    List.of(Items.ACACIA_LEAVES, Items.AZALEA_LEAVES, Items.BIRCH_LEAVES, Items.FLOWERING_AZALEA_LEAVES, Items.JUNGLE_LEAVES, Items.DARK_OAK_LEAVES,
+                            Items.MANGROVE_LEAVES, Items.OAK_LEAVES, Items.SPRUCE_LEAVES),
+                    8,
                     1,
                     ResourceName.WOOD
             )
@@ -248,56 +303,56 @@ public class ResourceSources {
                     List.of(Blocks.NETHER_QUARTZ_ORE),
                     List.of(Items.QUARTZ),
                     TICKS_PER_SECOND * 30,
-                    55,
+                    48,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 2 Nether Ores",
                     List.of(Blocks.NETHER_GOLD_ORE),
                     List.of(Items.NETHER_GOLD_ORE),
                     TICKS_PER_SECOND * 30,
-                    77,
+                    72,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 3 Nether Ores",
                     List.of(Blocks.GILDED_BLACKSTONE),
                     List.of(Items.GILDED_BLACKSTONE),
                     TICKS_PER_SECOND * 30,
-                    110,
+                    96,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 4 Nether Ores",
                     List.of(Blocks.ANCIENT_DEBRIS),
                     List.of(Items.ANCIENT_DEBRIS),
                     TICKS_PER_SECOND * 30,
-                    220,
+                    144,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 1 Ores",
                     List.of(Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE),
                     List.of(Items.COAL),
                     TICKS_PER_SECOND * 30,
-                    50,
+                    40,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 2 Ores",
                     List.of(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.IRON_ORE, Blocks.LAPIS_ORE, Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.DEEPSLATE_LAPIS_ORE, Blocks.DEEPSLATE_REDSTONE_ORE),
                     List.of(Items.RAW_IRON, Items.RAW_COPPER, Items.LAPIS_LAZULI, Items.REDSTONE),
                     TICKS_PER_SECOND * 30,
-                    70,
+                    60,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 3 Ores",
                     List.of(Blocks.GOLD_ORE, Blocks.EMERALD_ORE, Blocks.DEEPSLATE_GOLD_ORE, Blocks.DEEPSLATE_EMERALD_ORE),
                     List.of(Items.RAW_GOLD, Items.EMERALD),
                     TICKS_PER_SECOND * 30,
-                    100,
+                    80,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 4 Ores",
                     List.of(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE),
                     List.of(Items.DIAMOND),
                     TICKS_PER_SECOND * 30,
-                    200,
+                    120,
                     ResourceName.ORE
             )
     );

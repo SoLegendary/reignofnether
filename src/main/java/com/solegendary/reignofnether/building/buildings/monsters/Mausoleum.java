@@ -6,7 +6,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnitProd;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
@@ -30,8 +30,6 @@ public class Mausoleum extends ProductionBuilding {
     public final static String structureName = "mausoleum";
     public final static ResourceCost cost = ResourceCosts.MAUSOLEUM;
     public final static int nightRange = 80;
-    private final static int TICKS_TO_HEAL_MAX = 10 * ResourceCost.TICKS_PER_SECOND;
-    private int ticksToNextHeal = TICKS_TO_HEAL_MAX;
 
     public Mausoleum(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), true);
@@ -45,7 +43,7 @@ public class Mausoleum extends ProductionBuilding {
         this.woodCost = cost.wood;
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
-        this.buildTimeModifier = 0.66f;
+        this.buildTimeModifier = 0.33f;
         this.canAcceptResources = true;
 
         this.startingBlockTypes.add(Blocks.STONE);
@@ -55,9 +53,11 @@ public class Mausoleum extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = List.of(
-                ZombieVillagerUnitProd.getStartButton(this, Keybindings.keyQ)
+                ZombieVillagerProd.getStartButton(this, Keybindings.keyQ)
             );
     }
+
+    public Faction getFaction() {return Faction.MONSTERS;}
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
@@ -80,25 +80,11 @@ public class Mausoleum extends ProductionBuilding {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A tomb of the dead that produces zombie villagers.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Distorts time to midnight within a " + nightRange + " block radius", Style.EMPTY),
-                FormattedCharSequence.forward("and slowly heals friendly monsters under this effect.", Style.EMPTY),
+                FormattedCharSequence.forward("Distorts time to midnight within a " + nightRange + " block radius.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("You may only have one capitol building at any time.", Style.EMPTY)
             ),
             null
         );
-    }
-
-    public void tick(Level tickLevel) {
-        super.tick(tickLevel);
-        if (!tickLevel.isClientSide()) {
-            ticksToNextHeal -= 1;
-            if (ticksToNextHeal <= 0) {
-                ticksToNextHeal = TICKS_TO_HEAL_MAX;
-                for (LivingEntity entity : UnitServerEvents.getAllUnits())
-                    if (entity instanceof Unit unit && unit.getFaction() == Faction.MONSTERS)
-                        entity.heal(1);
-            }
-        }
     }
 }

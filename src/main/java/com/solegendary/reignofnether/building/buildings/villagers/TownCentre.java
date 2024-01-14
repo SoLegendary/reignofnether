@@ -4,9 +4,10 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerProdItem;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +38,7 @@ public class TownCentre extends ProductionBuilding {
         this.woodCost = cost.wood;
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
-        this.buildTimeModifier = 0.8f;
+        this.buildTimeModifier = 0.4f;
         this.canAcceptResources = true;
 
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);
@@ -46,9 +47,11 @@ public class TownCentre extends ProductionBuilding {
 
         if (level.isClientSide())
             this.productionButtons = List.of(
-                VillagerProdItem.getStartButton(this, Keybindings.keyQ)
+                VillagerProd.getStartButton(this, Keybindings.keyQ)
             );
     }
+
+    public Faction getFaction() {return Faction.VILLAGERS;}
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);

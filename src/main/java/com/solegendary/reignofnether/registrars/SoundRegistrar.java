@@ -17,6 +17,14 @@ public class SoundRegistrar {
             SOUND_EVENTS.register("under_attack", () ->
                     new SoundEvent(new ResourceLocation(ReignOfNether.MOD_ID, "under_attack")));
 
+    public static final RegistryObject<SoundEvent> VICTORY_SOUND =
+            SOUND_EVENTS.register("victory", () ->
+                    new SoundEvent(new ResourceLocation(ReignOfNether.MOD_ID, "victory")));
+
+    public static final RegistryObject<SoundEvent> DEFEAT_SOUND =
+            SOUND_EVENTS.register("defeat", () ->
+                    new SoundEvent(new ResourceLocation(ReignOfNether.MOD_ID, "defeat")));
+
     public static void init() {
         SOUND_EVENTS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }

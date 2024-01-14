@@ -8,12 +8,16 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.ReportedException;
@@ -34,8 +38,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BannerItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -52,7 +56,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     public final int frameWidth = 60;
     public final int frameHeight = 60;
 
-    public final int statsWidth = 42;
+    public final int statsWidth = 45;
     public final int statsHeight = 60;
 
     private final int size = 46;
@@ -164,6 +168,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             String nameCap = pName.substring(0, 1).toUpperCase() + pName.substring(1);
             name += " & " + nameCap;
         }
+        name = WordUtils.capitalize(name);
 
         if (rs != Relationship.OWNED && entity instanceof Unit unit && unit.getOwnerName().length() > 0)
             name += " (" + unit.getOwnerName() + ")";
@@ -227,17 +232,32 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sword.png")); // DAMAGE
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sparkler.png")); // ATTACK SPEED
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/bow.png")); // RANGE
-            statStrings.add(String.valueOf((int) attackerUnit.getUnitAttackDamage() + (int) attackerUnit.getWeaponDamageModifier()));
+            int atkDmg = (int) attackerUnit.getUnitAttackDamage() + (int) AttackerUnit.getWeaponDamageModifier(attackerUnit);
+            if (unit instanceof CreeperUnit cUnit && cUnit.isPowered())
+                atkDmg *= 2;
+            if (unit instanceof WorkerUnit wUnit)
+                atkDmg = (int) attackerUnit.getUnitAttackDamage();
+
+            statStrings.add(String.valueOf(atkDmg));
             DecimalFormat df = new DecimalFormat("###.##");
             statStrings.add(String.valueOf(df.format(attackerUnit.getAttacksPerSecond()))); // attacks per second
-            statStrings.add(String.valueOf((int) (attackerUnit.getAttackRange())));
+
+            GarrisonableBuilding garr = GarrisonableBuilding.getGarrison(unit);
+            if (garr != null)
+                statStrings.add(String.valueOf(garr.getAttackRange()));
+            else
+                statStrings.add(String.valueOf((int) (attackerUnit.getAttackRange())));
         }
         textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"));
         textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/boots.png"));
 
         statStrings.add(String.valueOf((int) (unit.getUnitArmorValue())));
         AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
-        statStrings.add(ms != null ? String.valueOf((int) (ms.getValue() * 100)) : "0");
+
+        int msInt = ms != null ? (int) (ms.getValue() * 101) : 0;
+        if (unit instanceof BruteUnit pbUnit && pbUnit.isHoldingUpShield)
+            msInt *= 0.5f;
+        statStrings.add(String.valueOf(msInt)); // prevent rounding errors
 
         // render based on prepped strings/icons
         for (int i = 0; i < statStrings.size(); i++) {

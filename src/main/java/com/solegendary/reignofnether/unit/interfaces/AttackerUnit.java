@@ -3,16 +3,19 @@ package com.solegendary.reignofnether.unit.interfaces;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.unit.goals.AttackBuildingGoal;
+import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
+import com.solegendary.reignofnether.unit.goals.FlyingMoveToTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
+import com.solegendary.reignofnether.unit.goals.RangedFlyingAttackBuildingGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 
@@ -29,7 +32,7 @@ public interface AttackerUnit {
     public boolean canAttackBuildings();
 
     public Goal getAttackGoal(); // not necessarily the same goal, eg. could be melee or ranged
-    public AttackBuildingGoal getAttackBuildingGoal();
+    public Goal getAttackBuildingGoal();
 
     // chase and attack the target ignoring all else until it is dead or out of sight
     public default void setUnitAttackTarget(@Nullable LivingEntity target) {
@@ -41,17 +44,22 @@ public interface AttackerUnit {
     }
     // move to a building and start attacking it
     public default void setAttackBuildingTarget(BlockPos preselectedBlockPos) {
-        AttackBuildingGoal attackBuildingGoal = this.getAttackBuildingGoal();
-        if (attackBuildingGoal != null)
-            attackBuildingGoal.setBuildingTarget(preselectedBlockPos);
+        Goal attackBuildingGoal = this.getAttackBuildingGoal();
+        if (attackBuildingGoal instanceof RangedFlyingAttackBuildingGoal<?> rabg)
+            rabg.setBuildingTarget(preselectedBlockPos);
+        else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
+            mabg.setBuildingTarget(preselectedBlockPos);
     }
 
     public static void resetBehaviours(AttackerUnit unit) {
         unit.setUnitAttackTarget(null);
         unit.setAttackMoveTarget(null);
-        AttackBuildingGoal attackBuildingGoal = unit.getAttackBuildingGoal();
-        if (unit.canAttackBuildings() && attackBuildingGoal != null)
-            attackBuildingGoal.stopAttacking();
+
+        Goal attackBuildingGoal = unit.getAttackBuildingGoal();
+        if (attackBuildingGoal instanceof RangedFlyingAttackBuildingGoal<?> rabg)
+            rabg.stop();
+        else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
+            mabg.stopAttacking();
     }
 
     // this setter sets a Unit field and so can't be defaulted
@@ -77,25 +85,40 @@ public interface AttackerUnit {
                     unit.setMoveTarget(attackerUnit.getAttackMoveTarget());
             }
 
+            boolean isAttackingBuilding = false;
+            Goal attackBuildingGoal = attackerUnit.getAttackBuildingGoal();
+            if (attackBuildingGoal instanceof RangedFlyingAttackBuildingGoal<?> rabg)
+                isAttackingBuilding = rabg.getBuildingTarget() != null;
+            else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
+                isAttackingBuilding = mabg.getBuildingTarget() != null;
+
             // retaliate against a mob that damaged us UNLESS already on another command
             if (unitMob.getLastDamageSource() != null &&
                     attackerUnit.getWillRetaliate() &&
-                    (attackerUnit.getAttackBuildingGoal() == null || attackerUnit.getAttackBuildingGoal().getBuildingTarget() == null) &&
+                    !isAttackingBuilding &&
                     unit.getTargetGoal().getTarget() == null &&
                     (unit.getMoveGoal().getMoveTarget() == null || unit.getHoldPosition()) &&
                     unit.getFollowTarget() == null) {
 
                 Entity lastDSEntity = unitMob.getLastDamageSource().getEntity();
+
+                boolean isMeleeAttackedByFlyingOrGarrisoned = false;
+                if (lastDSEntity instanceof Unit unitDS &&
+                    (unitDS.getMoveGoal() instanceof FlyingMoveToTargetGoal || GarrisonableBuilding.getGarrison(unitDS) != null) &&
+                    attackerUnit.getAttackGoal() instanceof MeleeAttackUnitGoal) {
+                    isMeleeAttackedByFlyingOrGarrisoned = true;
+                }
                 Relationship rs = UnitServerEvents.getUnitToEntityRelationship(unit, lastDSEntity);
 
-                if (lastDSEntity instanceof PathfinderMob &&
+                if (!isMeleeAttackedByFlyingOrGarrisoned &&
+                    lastDSEntity instanceof LivingEntity &&
+                    !(lastDSEntity instanceof Player player && player.isCreative()) &&
                     (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE)) {
-                    attackerUnit.setUnitAttackTarget((PathfinderMob) lastDSEntity);
+                    attackerUnit.setUnitAttackTarget((LivingEntity) lastDSEntity);
                 }
-
             }
             // enact aggression when idle
-            if (attackerUnit.isIdle() && attackerUnit.getAggressiveWhenIdle())
+            if (attackerUnit.isIdle() && !isAttackingBuilding && attackerUnit.getAggressiveWhenIdle())
                 attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level);
         }
     }
@@ -114,14 +137,22 @@ public interface AttackerUnit {
         float aggroRange = this.getAggroRange();
         GarrisonableBuilding garr = GarrisonableBuilding.getGarrison((Unit) this);
         if (garr != null)
-            aggroRange += garr.getAttackRangeBonus();
+            aggroRange  = garr.getAttackRange();
 
-        PathfinderMob closestMob = MiscUtil.findClosestAttackableEnemy((Mob) this, aggroRange, level);
+        Mob closestMob = MiscUtil.findClosestAttackableEnemy((Mob) this, aggroRange, level);
         if (closestMob != null) {
             ((Unit) this).getMoveGoal().stopMoving();
             setUnitAttackTarget(closestMob);
         }
     }
 
-    default double getWeaponDamageModifier() { return 0; }
+    public static double getWeaponDamageModifier(AttackerUnit attackerUnit) {
+        ItemStack itemStack = ((LivingEntity) attackerUnit).getItemBySlot(EquipmentSlot.MAINHAND);
+
+        if (!itemStack.isEmpty())
+            for(AttributeModifier attr : itemStack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE))
+                if (attr.getOperation() == AttributeModifier.Operation.ADDITION)
+                    return attr.getAmount();
+        return 0;
+    }
 }

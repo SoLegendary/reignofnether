@@ -1,10 +1,13 @@
 package com.solegendary.reignofnether.orthoview;
 
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.CloudStatus;
@@ -15,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
@@ -22,6 +26,7 @@ import com.mojang.math.Matrix4f;
 
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 
 import static net.minecraft.util.Mth.sign;
 
@@ -32,6 +37,17 @@ import static net.minecraft.util.Mth.sign;
  */
 public class OrthoviewClientEvents {
 
+    public enum LeafHideMethod {
+        NONE,
+        AROUND_UNITS_AND_CURSOR, // requires threaded video option
+        ALL
+    }
+
+    public static boolean shouldHideLeaves() {
+        return hideLeavesMethod != LeafHideMethod.NONE;
+    }
+
+    public static LeafHideMethod hideLeavesMethod = LeafHideMethod.NONE;
     public static int enabledCount = 0;
     public static boolean enabled = false;
     private static boolean cameraMovingByMouse = false; // excludes edgepanning
@@ -107,6 +123,21 @@ public class OrthoviewClientEvents {
         }
     }
 
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
+        if (MC.player == null || MC.level == null)
+            return;
+
+        if (MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-5,0)) &&
+            MC.player.getOnPos().getY() <= ORTHOVIEW_PLAYER_MAX_Y)
+            panCam(0,0.5f,0);
+        if (!MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-6,0)) &&
+            MC.player.getOnPos().getY() >= ORTHOVIEW_PLAYER_BASE_Y)
+            panCam(0,-0.5f,0);
+    }
+
     public static void toggleEnable() {
         if (MC.level == null || MC.player == null)
             return;
@@ -161,6 +192,23 @@ public class OrthoviewClientEvents {
             if (evt.getKey() == Keybindings.getFnum(12).key)
                 toggleEnable();
 
+            if (evt.getKey() == Keybindings.getFnum(6).key) {
+                FogOfWarClientEvents.resetFogChunks();
+
+                UnitClientEvents.windowUpdateTicks = 0;
+                if (hideLeavesMethod == LeafHideMethod.NONE) {
+                    hideLeavesMethod = LeafHideMethod.AROUND_UNITS_AND_CURSOR;
+                    HudClientEvents.showTemporaryMessage("Hiding leaves: around units and cursor");
+                }
+                else if (hideLeavesMethod == LeafHideMethod.AROUND_UNITS_AND_CURSOR) {
+                    hideLeavesMethod = LeafHideMethod.ALL;
+                    HudClientEvents.showTemporaryMessage("Hiding leaves: all");
+                }
+                else if (hideLeavesMethod == LeafHideMethod.ALL) {
+                    hideLeavesMethod = LeafHideMethod.NONE;
+                    HudClientEvents.showTemporaryMessage("Disabled hiding leaves");
+                }
+            }
             if (evt.getKey() == Keybindings.reset.key)
                 reset();
         }
