@@ -33,11 +33,17 @@ import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.ForgeEventFactory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttackerUnit {
@@ -174,8 +180,30 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     @Override // prevent vanilla logic for picking up items
     protected void pickUpItem(ItemEntity pItemEntity) { }
-    @Override
-    protected void customServerAiStep() { }
+
+    @Override // destroy touching leaves, copied from Ravager AI
+    protected void customServerAiStep() {
+        if (this.isAlive() && this.horizontalCollision && ForgeEventFactory.getMobGriefingEvent(this.level, this)) {
+            boolean flag = false;
+            AABB aabb = this.getBoundingBox().inflate(0.2);
+            Iterator var8 = BlockPos.betweenClosed(Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ)).iterator();
+
+            label62:
+            while(true) {
+                BlockPos blockpos;
+                Block block;
+                do {
+                    if (!var8.hasNext())
+                        break label62;
+                    blockpos = (BlockPos)var8.next();
+                    BlockState blockstate = this.level.getBlockState(blockpos);
+                    block = blockstate.getBlock();
+                } while(!(block instanceof LeavesBlock));
+
+                flag = this.level.destroyBlock(blockpos, true, this) || flag;
+            }
+        }
+    }
     @Override
     public LivingEntity getTarget() {
         return this.targetGoal.getTarget();

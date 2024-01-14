@@ -11,19 +11,14 @@ TODO bugs/features:
 
 
 
-- let ghasts destroy leaves they pass through like ravagers
-
-- mounted ravagers should still attack with melee when right clicking
-
-- if a RenderChunk contains an opponents' building, it should not ever be rerendered
-    - even with F8/F3+A
-    - even when moving out of client render range
-
-
-
-
 - dont let mobs pathfind into water
 - select all military units button
+
+Known issues:
+    - when moving far away at fast speeds, we can sometimes end up with semi-frozen chunks that are not rendered at all
+        - if we can detect which chunks are unrendered, we can try rerendering them
+    - as a workaround, just press F8 to reset chunks
+        - as an additional workaround, chunks with enemy buildings are always hidden and not rendered
 
 
 TODO test in next playtest

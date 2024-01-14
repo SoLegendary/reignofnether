@@ -273,7 +273,7 @@ public class BuildingClientEvents {
                 BlockState bs = block.getBlockState(); // building block
                 BlockState bsBelow = MC.level.getBlockState(bp.below()); // world block
 
-                if (bs.getMaterial().isSolid()) {
+                if (bs.getMaterial().isSolid() && !(bsBelow.getBlock() instanceof IceBlock)) {
                     blocksBelow += 1;
                     if (bsBelow.getMaterial().isSolid())
                         solidBlocksBelow += 1;

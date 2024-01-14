@@ -4,8 +4,9 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
-import com.solegendary.reignofnether.building.buildings.piglins.Portal;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.fogofwar.FrozenChunk;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -141,6 +142,10 @@ public abstract class Building {
             }
             FogOfWarClientboundPacket.revealOrHidePlayer(false, this.ownerName);
         }
+
+        if (this.level.isClientSide)
+            for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(this))
+                FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(bp));
     }
 
     public Faction getFaction() {return Faction.NONE;}

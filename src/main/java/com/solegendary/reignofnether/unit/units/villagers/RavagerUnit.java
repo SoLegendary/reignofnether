@@ -165,6 +165,10 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         }
     }
 
+    // prevents attack commands applying only to passengers
+    @Override
+    protected void updateControlFlags() {}
+
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
 
