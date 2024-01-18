@@ -190,6 +190,7 @@ public class UnitServerEvents {
             evt.getEntity() instanceof Mob mob) {
             mob.setBaby(false);
             mob.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 0);
+            mob.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
             mob.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
             mob.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
             mob.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY);
