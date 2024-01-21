@@ -27,7 +27,7 @@ import java.util.List;
 
 public class FirewallShot extends Ability {
 
-    public static final int CD_MAX_SECONDS = 10;
+    public static final int CD_MAX_SECONDS = 15;
     public static final int RANGE = 20;
 
     private final BlazeUnit blazeUnit;
@@ -62,6 +62,12 @@ public class FirewallShot extends Ability {
                 ),
                 this
         );
+    }
+
+    @Override
+    public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
+        BlockPos bp = targetEntity.getOnPos();
+        use(level, unitUsing, bp);
     }
 
     @Override
