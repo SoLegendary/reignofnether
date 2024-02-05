@@ -34,19 +34,22 @@ public class PlayerClientEvents {
                 }));
         evt.getDispatcher().register(Commands.literal("startrts").then(Commands.literal("villagers")
                 .executes((command) -> {
-                    OrthoviewClientEvents.toggleEnable();
+                    if (!OrthoviewClientEvents.isEnabled())
+                        OrthoviewClientEvents.toggleEnable();
                     PlayerServerboundPacket.startRTS(Faction.VILLAGERS);
                     return 1;
                 })));
         evt.getDispatcher().register(Commands.literal("startrts").then(Commands.literal("monsters")
                 .executes((command) -> {
-                    OrthoviewClientEvents.toggleEnable();
+                    if (!OrthoviewClientEvents.isEnabled())
+                        OrthoviewClientEvents.toggleEnable();
                     PlayerServerboundPacket.startRTS(Faction.MONSTERS);
                     return 1;
                 })));
         evt.getDispatcher().register(Commands.literal("startrts").then(Commands.literal("piglins")
                 .executes((command) -> {
-                    OrthoviewClientEvents.toggleEnable();
+                    if (!OrthoviewClientEvents.isEnabled())
+                        OrthoviewClientEvents.toggleEnable();
                     PlayerServerboundPacket.startRTS(Faction.PIGLINS);
                     return 1;
                 })));

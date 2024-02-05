@@ -110,6 +110,8 @@ public class ResourcesClientEvents {
     }
 
     public static void addFloatingTextsFromResources(Resources res, BlockPos pos) {
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
         if (!Minecraft.getInstance().player.getName().getString().equals(res.ownerName))
             return;
 

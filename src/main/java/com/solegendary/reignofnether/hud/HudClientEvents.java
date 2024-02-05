@@ -23,6 +23,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.model.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -943,6 +944,11 @@ public class HudClientEvents {
             // loadToSelected is handled by renderedButtons
             if (Keybindings.ctrlMod.isDown() && evt.getKeyCode() == keybinding.key)
                 controlGroups.get(index).saveFromSelected(keybinding);
+        }
+
+        // open chat while orthoview is enabled
+        if (OrthoviewClientEvents.isEnabled() && evt.getKeyCode() == Keybindings.chat.key) {
+            MC.setScreen(new ChatScreen(""));
         }
     }
 
