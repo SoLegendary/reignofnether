@@ -52,7 +52,7 @@ import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.*;
 public abstract class LevelRendererMixin {
 
     @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
-    @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
+    @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage;
     @Final @Shadow private Minecraft minecraft;
     @Final @Shadow private RenderBuffers renderBuffers;
     @Final @Shadow private Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress;
@@ -71,28 +71,35 @@ public abstract class LevelRendererMixin {
         return origins;
     }
 
+    @Shadow @Final private AtomicBoolean needsFrustumUpdate = new AtomicBoolean(false);
+
+    // always recheck chunks being in frustum - without this normally only checks when the camera moves
     @Inject(
-            method = "applyFrustum(Lnet/minecraft/client/renderer/culling/Frustum;)V",
-            at = @At("HEAD"),
-            cancellable = true
+            method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V",
+            at = @At("TAIL")
     )
-    private void applyFrustum(Frustum pFrustum, CallbackInfo ci) {
-        if (!FogOfWarClientEvents.isEnabled())
+    private void setupRender(Camera pCamera, Frustum pFrustum, boolean pHasCapturedFrustum, boolean pIsSpectator, CallbackInfo ci) {
+        if (!isEnabled())
             return;
 
-        ci.cancel();
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
 
+        applyFrustumPlus(pFrustum);
+
+        needsFrustumUpdate.set(true);
+    }
+
+    // intended to run after the original LevelRenderer.applyFrustum
+    private void applyFrustumPlus(Frustum pFrustum) {
         if (!Minecraft.getInstance().isSameThread()) {
             throw new IllegalStateException("applyFrustum called from wrong thread: " + Thread.currentThread().getName());
         } else {
             this.minecraft.getProfiler().push("apply_frustum");
-            this.renderChunksInFrustum.clear();
 
             for (LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunkStorage.get().renderChunks) {
-                if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()) &&
-                    !getFrozenChunkOrigins().contains(chunkInfo.chunk.getOrigin())) {
-                    this.renderChunksInFrustum.add(chunkInfo);
-                }
+                this.renderChunksInFrustum.removeIf(c -> getFrozenChunkOrigins().contains(chunkInfo.chunk.getOrigin()));
+
                 for (FrozenChunk frozenChunk : frozenChunks) {
                     if (frozenChunk.chunkInfo == null && frozenChunk.origin.equals(chunkInfo.chunk.getOrigin())) {
                         frozenChunk.chunkInfo = chunkInfo;
@@ -213,23 +220,6 @@ public abstract class LevelRendererMixin {
             renderChunk1.setNotDirty();
         }
         this.minecraft.getProfiler().pop();
-    }
-
-    @Shadow @Final private AtomicBoolean needsFrustumUpdate = new AtomicBoolean(false);
-
-    // always recheck chunks being in frustum - without this normally only checks when the camera moves
-    @Inject(
-            method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V",
-            at = @At("HEAD")
-    )
-    private void setupRender(Camera pCamera, Frustum pFrustum, boolean pHasCapturedFrustum, boolean pIsSpectator, CallbackInfo ci) {
-        if (!isEnabled())
-            return;
-
-        if (!OrthoviewClientEvents.isEnabled())
-            return;
-
-        needsFrustumUpdate.set(true);
     }
 
     // rerun blockDestroyProgress overlays but with range extended to between 32-256 blocks
