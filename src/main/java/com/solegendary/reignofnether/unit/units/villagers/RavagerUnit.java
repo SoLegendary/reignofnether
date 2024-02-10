@@ -31,7 +31,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Ravager;
 import net.minecraft.world.item.ItemStack;
@@ -231,47 +230,54 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     @Override
     public void roar() {
-        if (this.isAlive() && !level.isClientSide()) {
-            LivingEntity livingentity;
+        if (this.isAlive()) {
+            if (!level.isClientSide()) {
+                LivingEntity livingentity;
 
-            List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
-                    new Vector3d(this.position().x, this.position().y, this.position().z),
-                    ROAR_RANGE,
-                    Mob.class,
-                    this.level);
+                List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
+                        new Vector3d(this.position().x, this.position().y, this.position().z),
+                        ROAR_RANGE,
+                        Mob.class,
+                        this.level);
 
-            for (Mob mob : nearbyMobs) {
-                if (mob instanceof Unit unit && UnitServerEvents.getUnitToEntityRelationship(this, mob) != Relationship.FRIENDLY) {
-                    this.strongKnockback(mob);
-                    mob.hurt(DamageSource.mobAttack(this), ROAR_DAMAGE);
-                    mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ROAR_SLOW_DURATION, 1));
-                }
-            }
-
-            Set<Building> affectedBuildings = new HashSet<>();
-            for (double x = this.position().x - ROAR_RANGE; x < this.position().x + ROAR_RANGE; x++) {
-                for (double y = this.position().y - ROAR_RANGE; y < this.position().y + ROAR_RANGE; y++) {
-                    for (double z = this.position().z - ROAR_RANGE; z < this.position().z + ROAR_RANGE; z++) {
-                        BlockPos bp = new BlockPos(x,y,z);
-                        Building building = BuildingUtils.findBuilding(false, bp);
-                        if (building != null && !building.ownerName.equals(this.getOwnerName()))
-                            affectedBuildings.add(building);
+                for (Mob mob : nearbyMobs) {
+                    if (mob instanceof Unit unit && UnitServerEvents.getUnitToEntityRelationship(this, mob) != Relationship.FRIENDLY) {
+                        this.strongKnockback(mob);
+                        mob.hurt(DamageSource.mobAttack(this), ROAR_DAMAGE);
+                        mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ROAR_SLOW_DURATION, 1));
                     }
                 }
-            }
-            for (Building building : affectedBuildings)
-                building.destroyRandomBlocks((int) ROAR_DAMAGE);
 
-            Vec3 vec3 = this.getBoundingBox().getCenter();
+                Set<Building> affectedBuildings = new HashSet<>();
+                for (double x = this.position().x - ROAR_RANGE; x < this.position().x + ROAR_RANGE; x++) {
+                    for (double y = this.position().y - ROAR_RANGE; y < this.position().y + ROAR_RANGE; y++) {
+                        for (double z = this.position().z - ROAR_RANGE; z < this.position().z + ROAR_RANGE; z++) {
+                            BlockPos bp = new BlockPos(x,y,z);
+                            Building building = BuildingUtils.findBuilding(false, bp);
+                            if (building != null && !building.ownerName.equals(this.getOwnerName()))
+                                affectedBuildings.add(building);
+                        }
+                    }
+                }
+                for (Building building : affectedBuildings)
+                    building.destroyRandomBlocks((int) ROAR_DAMAGE);
 
-            for(int i = 0; i < 80; ++i) {
-                double d0 = this.random.nextGaussian() * 0.2;
-                double d1 = this.random.nextGaussian() * 0.2;
-                double d2 = this.random.nextGaussian() * 0.2;
-                this.level.addParticle(ParticleTypes.POOF, vec3.x, vec3.y, vec3.z, d0, d1, d2);
+                Vec3 vec3 = this.getBoundingBox().getCenter();
+
+                this.playSound(SoundEvents.GENERIC_EXPLODE, 1.0F, 1.0F);
+                this.gameEvent(GameEvent.ENTITY_ROAR);
             }
-            this.playSound(SoundEvents.GENERIC_EXPLODE, 1.0F, 1.0F);
-            this.gameEvent(GameEvent.ENTITY_ROAR);
+            else {
+                Vec3 vec3 = this.getBoundingBox().getCenter();
+
+                for(int i = 0; i < 80; ++i) {
+                    double d0 = this.random.nextGaussian() * 0.2;
+                    double d1 = this.random.nextGaussian() * 0.2;
+                    double d2 = this.random.nextGaussian() * 0.2;
+                    this.level.addParticle(ParticleTypes.POOF, vec3.x, vec3.y, vec3.z, d0, d1, d2);
+                }
+                this.playSound(SoundEvents.GENERIC_EXPLODE, 1.0F, 1.0F);
+            }
         }
     }
 }

@@ -6,7 +6,6 @@ TODO bugs/features:
 
 - Tutorial documentation/gifs
 
-- test compatibility with a performance improvement mod (eg. optifine)
 
 
 
@@ -17,7 +16,15 @@ Known issues:
         - if we can detect which chunks are unrendered, we can try rerendering them
     - as a workaround, just press F8 to reset chunks
         - as an additional workaround, chunks with enemy buildings are always hidden and not rendered
+    - turning on fog of war causes a crash when optifine is installed
 
+
+
+sideways villager castles don't garrison correctly
+
+- add poofs for spawning units including startrts
+
+- replace ravager poofs with small explosion
 
 
 TODO test in next playtest

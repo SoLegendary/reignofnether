@@ -33,7 +33,9 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -375,6 +377,14 @@ public class UnitClientEvents {
 
             unit.initialiseGoals(); // for clientside data tracking - server automatically does this via registerGoals();
             unit.setupEquipmentAndUpgradesClient();
+
+            RandomSource rand = RandomSource.create();
+            for(int j = 0; j < 40; ++j) {
+                double d0 = rand.nextGaussian() * 0.2;
+                double d1 = rand.nextGaussian() * 0.2;
+                double d2 = rand.nextGaussian() * 0.2;
+                evt.getLevel().addParticle(ParticleTypes.POOF, entity.getX(), entity.getY(), entity.getZ(), d0, d1, d2);
+            }
         }
     }
 
@@ -562,10 +572,12 @@ public class UnitClientEvents {
                 boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
 
                 // always-shown highlights to indicate unit relationships
-                switch (unitRs) {
-                    case OWNED -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 1.0f, 0.2f, alpha, excludeMaxY);
-                    case FRIENDLY -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 0.2f, 1.0f, alpha, excludeMaxY);
-                    case HOSTILE -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.2f, 0.2f, alpha, excludeMaxY);
+                if (OrthoviewClientEvents.isEnabled()) {
+                    switch (unitRs) {
+                        case OWNED -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 1.0f, 0.2f, alpha, excludeMaxY);
+                        case FRIENDLY -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 0.2f, 1.0f, alpha, excludeMaxY);
+                        case HOSTILE -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.2f, 0.2f, alpha, excludeMaxY);
+                    }
                 }
             }
         }
