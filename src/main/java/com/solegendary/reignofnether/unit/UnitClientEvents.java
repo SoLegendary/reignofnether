@@ -379,7 +379,7 @@ public class UnitClientEvents {
             unit.setupEquipmentAndUpgradesClient();
 
             RandomSource rand = RandomSource.create();
-            for(int j = 0; j < 40; ++j) {
+            for(int j = 0; j < 35; ++j) {
                 double d0 = rand.nextGaussian() * 0.2;
                 double d1 = rand.nextGaussian() * 0.2;
                 double d2 = rand.nextGaussian() * 0.2;
