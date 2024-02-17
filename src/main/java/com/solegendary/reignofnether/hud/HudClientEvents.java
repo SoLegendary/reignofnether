@@ -756,28 +756,28 @@ public class HudClientEvents {
         // -------------------
         if (idleWorkerIds.size() > 0) {
             Button idleButton = new Button(
-                "Idle workers",
-                iconSize,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
-                Keybindings.keyK,
-                () -> false,
-                () -> true,
-                () -> true,
-                () -> {
-                    if (idleWorkerIndex >= idleWorkerIds.size())
-                        idleWorkerIndex = 0;
-                    Entity entity = MC.level.getEntity(idleWorkerIds.get(idleWorkerIndex));
-                    if (entity instanceof WorkerUnit) {
-                        OrthoviewClientEvents.centreCameraOnPos(entity.getX(), entity.getZ());
-                        UnitClientEvents.clearSelectedUnits();
-                        UnitClientEvents.addSelectedUnit((LivingEntity) entity);
-                    }
-                    idleWorkerIndex += 1;
-                    if (idleWorkerIndex >= idleWorkerIds.size())
-                        idleWorkerIndex = 0;
-                },
-                null,
-                List.of(FormattedCharSequence.forward("Idle workers", Style.EMPTY))
+                    "Idle workers",
+                    iconSize,
+                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
+                    Keybindings.keyJ,
+                    () -> false,
+                    () -> true,
+                    () -> true,
+                    () -> {
+                        if (idleWorkerIndex >= idleWorkerIds.size())
+                            idleWorkerIndex = 0;
+                        Entity entity = MC.level.getEntity(idleWorkerIds.get(idleWorkerIndex));
+                        if (entity instanceof WorkerUnit) {
+                            OrthoviewClientEvents.centreCameraOnPos(entity.getX(), entity.getZ());
+                            UnitClientEvents.clearSelectedUnits();
+                            UnitClientEvents.addSelectedUnit((LivingEntity) entity);
+                        }
+                        idleWorkerIndex += 1;
+                        if (idleWorkerIndex >= idleWorkerIds.size())
+                            idleWorkerIndex = 0;
+                    },
+                    null,
+                    List.of(FormattedCharSequence.forward("Idle workers", Style.EMPTY))
             );
             int xi = screenWidth - (idleButton.iconSize * 2);
             int yi = screenHeight - 200;
@@ -787,6 +787,37 @@ public class HudClientEvents {
                     xi + 2, yi + idleButton.iconSize - 1, 0xFFFFFF);
 
             renderedButtons.add(idleButton);
+        }
+
+        // -------------------------
+        // Select all military units
+        // -------------------------
+        List<LivingEntity> militaryUnits = UnitClientEvents.getAllUnits().stream()
+                .filter(u -> !(u instanceof WorkerUnit)).toList();
+
+        if (militaryUnits.size() > 0) {
+            Button armyButton = new Button(
+                    "Select all military units",
+                    iconSize,
+                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sword_and_bow.png"),
+                    Keybindings.keyK,
+                    () -> false,
+                    () -> true,
+                    () -> true,
+                    () -> {
+                        UnitClientEvents.clearSelectedUnits();
+                        for (LivingEntity militaryUnit : militaryUnits)
+                            UnitClientEvents.addSelectedUnit(militaryUnit);
+                    },
+                    null,
+                    List.of(FormattedCharSequence.forward("Select all military units", Style.EMPTY))
+            );
+            int xi = screenWidth - (armyButton.iconSize * 2);
+            int yi = screenHeight - 230;
+
+            armyButton.render(evt.getPoseStack(), xi, yi, mouseX, mouseY);
+
+            renderedButtons.add(armyButton);
         }
 
         // ---------------------
