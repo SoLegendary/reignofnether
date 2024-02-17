@@ -89,12 +89,28 @@ public class DarkWatchtower extends Building implements GarrisonableBuilding {
 
     @Override
     public BlockPos getEntryPosition() {
-        return new BlockPos(2,11,2);
+        if (this.rotation == Rotation.NONE) {
+            return new BlockPos(2,11,2);
+        } else if (this.rotation == Rotation.CLOCKWISE_90) {
+            return new BlockPos(-2,11,2);
+        } else if (this.rotation == Rotation.CLOCKWISE_180) {
+            return new BlockPos(-2,11,-2);
+        } else {
+            return new BlockPos(2,11,-2);
+        }
     }
 
     @Override
     public BlockPos getExitPosition() {
-        return new BlockPos(2,1,2);
+        if (this.rotation == Rotation.NONE) {
+            return new BlockPos(2,1,2);
+        } else if (this.rotation == Rotation.CLOCKWISE_90) {
+            return new BlockPos(-2,1,2);
+        } else if (this.rotation == Rotation.CLOCKWISE_180) {
+            return new BlockPos(-2,1,-2);
+        } else {
+            return new BlockPos(2,1,-2);
+        }
     }
 
     @Override

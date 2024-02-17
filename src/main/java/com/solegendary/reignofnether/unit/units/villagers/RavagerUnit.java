@@ -34,6 +34,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Ravager;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
@@ -146,7 +147,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     public final static float ROAR_DAMAGE = 8.0f;
     public final static float ROAR_RANGE = 4.0f;
-    public final static float ROAR_KNOCKBACK = 4f;
+    public final static float ROAR_KNOCKBACK = 6f;
     public final static int ROAR_SLOW_DURATION = 10 * ResourceCost.TICKS_PER_SECOND;
 
     private static final Predicate<Entity> NO_RAVAGER_AND_ALIVE = e -> e.isAlive() && !(e instanceof Ravager);
@@ -266,6 +267,11 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
                 this.playSound(SoundEvents.GENERIC_EXPLODE, 1.0F, 1.0F);
                 this.gameEvent(GameEvent.ENTITY_ROAR);
+                this.level.explode(null, null, null,
+                        vec3.x, vec3.y, vec3.z,
+                        2.0f,
+                        false,
+                        Explosion.BlockInteraction.NONE);
             }
             else {
                 Vec3 vec3 = this.getBoundingBox().getCenter();

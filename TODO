@@ -6,11 +6,6 @@ TODO bugs/features:
 
 - Tutorial documentation/gifs
 
-
-
-
-- select all military units button
-
 Known issues:
     - when moving far away at fast speeds, we can sometimes end up with semi-frozen chunks that are not rendered at all
         - if we can detect which chunks are unrendered, we can try rerendering them
@@ -19,12 +14,10 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 
+- select all military units button
 
-sideways villager castles don't garrison correctly
+- mounted units should show a different unit icon and not be grouped with unmounted units when double clicked
 
-- add poofs for spawning units including startrts
-
-- replace ravager poofs with small explosion
 
 
 TODO test in next playtest

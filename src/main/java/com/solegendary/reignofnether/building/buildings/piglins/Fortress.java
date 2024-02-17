@@ -109,12 +109,28 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
 
     @Override
     public BlockPos getEntryPosition() {
-        return new BlockPos(5,17,5);
+        if (this.rotation == Rotation.NONE) {
+            return new BlockPos(5,17,5);
+        } else if (this.rotation == Rotation.CLOCKWISE_90) {
+            return new BlockPos(-5,17,5);
+        } else if (this.rotation == Rotation.CLOCKWISE_180) {
+            return new BlockPos(-5,17,-5);
+        } else {
+            return new BlockPos(5,17,-5);
+        }
     }
 
     @Override
     public BlockPos getExitPosition() {
-        return new BlockPos(5,1,5);
+        if (this.rotation == Rotation.NONE) {
+            return new BlockPos(5,1,5);
+        } else if (this.rotation == Rotation.CLOCKWISE_90) {
+            return new BlockPos(-5,1,5);
+        } else if (this.rotation == Rotation.CLOCKWISE_180) {
+            return new BlockPos(-5,1,-5);
+        } else {
+            return new BlockPos(5,1,-5);
+        }
     }
 
     @Override

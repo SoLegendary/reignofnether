@@ -93,8 +93,14 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
     @Override
     public void onBuilt() {
         super.onBuilt();
-        if (!this.getLevel().isClientSide())
-            this.getLevel().setBlockAndUpdate(this.centrePos.offset(-1,0,0), Blocks.FIRE.defaultBlockState());
+        if (!this.getLevel().isClientSide()) {
+            if (this.rotation == Rotation.CLOCKWISE_90 ||
+                this.rotation == Rotation.COUNTERCLOCKWISE_90) {
+                this.getLevel().setBlockAndUpdate(this.centrePos.offset(0,-1,0), Blocks.FIRE.defaultBlockState());
+            } else {
+                this.getLevel().setBlockAndUpdate(this.centrePos.offset(-1,0,0), Blocks.FIRE.defaultBlockState());
+            }
+        }
     }
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {

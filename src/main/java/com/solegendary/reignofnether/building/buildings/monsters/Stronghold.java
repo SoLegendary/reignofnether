@@ -109,12 +109,28 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
 
     @Override
     public BlockPos getEntryPosition() {
-        return new BlockPos(5,14,5);
+        if (this.rotation == Rotation.NONE) {
+            return new BlockPos(5,14,5);
+        } else if (this.rotation == Rotation.CLOCKWISE_90) {
+            return new BlockPos(-5,14,5);
+        } else if (this.rotation == Rotation.CLOCKWISE_180) {
+            return new BlockPos(-5,14,-5);
+        } else {
+            return new BlockPos(5,14,-5);
+        }
     }
 
     @Override
     public BlockPos getExitPosition() {
-        return new BlockPos(5,2,6);
+        if (this.rotation == Rotation.NONE) {
+            return new BlockPos(5,2,6);
+        } else if (this.rotation == Rotation.CLOCKWISE_90) {
+            return new BlockPos(-5,2,6);
+        } else if (this.rotation == Rotation.CLOCKWISE_180) {
+            return new BlockPos(-5,2,-6);
+        } else {
+            return new BlockPos(5,2,-6);
+        }
     }
 
     @Override
