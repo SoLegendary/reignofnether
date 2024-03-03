@@ -453,27 +453,38 @@ public class HudClientEvents {
                     unitButtons.size() < (buttonsPerRow * 2)) {
                 // mob head icon
                 String unitName = getSimpleEntityName(unit);
+                String buttonImagePath;
 
-                unitButtons.add(new Button(
-                    unitName,
-                    iconSize,
-                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png"),
-                    unit,
-                    () -> hudSelectedEntity == null || getSimpleEntityName(hudSelectedEntity).equals(unitName),
-                    () -> false,
-                    () -> true,
-                    () -> {
-                        // select this one specific unit
-                        if (getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
-                            UnitClientEvents.clearSelectedUnits();
-                            UnitClientEvents.addSelectedUnit(unit);
-                        } else { // click to select this unit type as a group
-                            hudSelectedEntity = unit;
-                        }
-                    },
-                    null,
-                    null
-                ));
+                if (unit.isVehicle())
+                    buttonImagePath = "textures/mobheads/" + unitName + "_half.png";
+                else
+                    buttonImagePath = "textures/mobheads/" + unitName + ".png";
+
+                Button button = new Button(
+                        unitName,
+                        iconSize,
+                        new ResourceLocation(ReignOfNether.MOD_ID, buttonImagePath),
+                        unit,
+                        () -> hudSelectedEntity == null || getSimpleEntityName(hudSelectedEntity).equals(unitName),
+                        () -> false,
+                        () -> true,
+                        () -> {
+                            // select this one specific unit
+                            if (getSimpleEntityName(hudSelectedEntity).equals(unitName)) {
+                                UnitClientEvents.clearSelectedUnits();
+                                UnitClientEvents.addSelectedUnit(unit);
+                            } else { // click to select this unit type as a group
+                                hudSelectedEntity = unit;
+                            }
+                        },
+                        null,
+                        null
+                );
+                if (unit.isVehicle()) {
+                    String passengerName = getSimpleEntityName(unit.getFirstPassenger());
+                    button.bgIconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/" + passengerName + ".png");
+                }
+                unitButtons.add(button);
             }
         }
 
@@ -568,7 +579,7 @@ public class HudClientEvents {
                     switch(workerUnit.getGatherResourceGoal().getTargetResourceName()) {
                         case NONE -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/no_gather.png");
                         case FOOD -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/hoe.png");
-                        case WOOD -> actionButton.iconResource =  new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/axe.png");
+                        case WOOD -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/axe.png");
                         case ORE -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/pickaxe.png");
                     }
                     actionButton.tooltipLines = List.of(
@@ -793,7 +804,7 @@ public class HudClientEvents {
         // Select all military units
         // -------------------------
         List<LivingEntity> militaryUnits = UnitClientEvents.getAllUnits().stream()
-                .filter(u -> !(u instanceof WorkerUnit)).toList();
+                .filter(u -> !(u instanceof WorkerUnit) && getPlayerToEntityRelationship(u) == Relationship.OWNED).toList();
 
         if (militaryUnits.size() > 0) {
             Button armyButton = new Button(

@@ -36,6 +36,7 @@ public class Button {
     public static int iconFrameSelectedSize = 24;
 
     public ResourceLocation iconResource;
+    public ResourceLocation bgIconResource = null; // for rendering a background icon (eg. for mounted unit passengers)
     public ResourceLocation frameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
 
     public Keybinding hotkey = null; // for action/ability buttons
@@ -147,6 +148,14 @@ public class Button {
         if (this.frameResource != null)
             MyRenderer.renderIconFrameWithBg(poseStack, this.frameResource, x, y, iconFrameSize, 0x64000000);
 
+        if (bgIconResource != null) {
+            MyRenderer.renderIcon(
+                    poseStack,
+                    bgIconResource,
+                    x+4 + (7 - iconSize/2), y+4 + (7 - iconSize/2),
+                    iconSize
+            );
+        }
         // item/unit icon
         MyRenderer.renderIcon(
                 poseStack,
@@ -156,7 +165,6 @@ public class Button {
         );
         // hotkey letter
         if (this.hotkey != null) {
-
             String hotkeyStr = hotkey.buttonLabel;
             hotkeyStr = hotkeyStr.substring(0,Math.min(3, hotkeyStr.length()));
             GuiComponent.drawCenteredString(poseStack, MC.font,
