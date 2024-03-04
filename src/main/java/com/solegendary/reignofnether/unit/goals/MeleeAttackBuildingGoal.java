@@ -38,6 +38,13 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
 
     public void tick() {
         if (buildingTarget != null) {
+
+            // for some reason, isDone() can sometimes be true even when moveTarget is nonnull and
+            // we haven't reached the target, esp. for Brutes
+            if (this.mob.getNavigation().isDone() && moveTarget != null &&
+                    this.mob.getOnPos().distSqr(moveTarget) > 1)
+                this.start();
+
             calcMoveTarget();
             if (buildingTarget.getBlocksPlaced() <= 0) {
                 stopAttacking();

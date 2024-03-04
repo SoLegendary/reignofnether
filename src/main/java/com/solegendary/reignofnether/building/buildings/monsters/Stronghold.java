@@ -61,7 +61,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
     public Faction getFaction() {return Faction.MONSTERS;}
 
     // don't use this for abilities as it may not be balanced
-    public int getAttackRange() { return 27; }
+    public int getAttackRange() { return 30; }
     // bonus for units attacking garrisoned units
     public int getExternalAttackRangeBonus() { return 15; }
 

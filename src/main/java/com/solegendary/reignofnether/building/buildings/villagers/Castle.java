@@ -70,7 +70,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
     public Faction getFaction() {return Faction.VILLAGERS;}
 
     // don't use this for abilities as it may not be balanced
-    public int getAttackRange() { return 27; }
+    public int getAttackRange() { return 30; }
     // bonus for units attacking garrisoned units
     public int getExternalAttackRangeBonus() { return 15; }
 

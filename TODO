@@ -14,9 +14,8 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 
-
-- mounted units should show a different unit icon and not be grouped with unmounted units when double clicked
-
+- units stop moving after a few seconds when ordered to attack a building
+- double check garrisoned unit aggro range
 
 
 TODO test in next playtest

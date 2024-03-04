@@ -27,6 +27,7 @@ public class MoveToTargetBlockGoal extends Goal {
     public boolean isAtDestination() {
         if (moveTarget == null)
             return true;
+
         return mob.getNavigation().isDone();
     }
 

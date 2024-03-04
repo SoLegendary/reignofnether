@@ -50,7 +50,7 @@ public class DarkWatchtower extends Building implements GarrisonableBuilding {
     public Faction getFaction() {return Faction.MONSTERS;}
 
     // don't use this for abilities as it may not be balanced
-    public int getAttackRange() { return 20; }
+    public int getAttackRange() { return 24; }
     // bonus for units attacking garrisoned units
     public int getExternalAttackRangeBonus() { return 10; }
 
