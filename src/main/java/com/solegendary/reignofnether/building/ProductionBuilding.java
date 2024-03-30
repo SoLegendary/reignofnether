@@ -42,7 +42,7 @@ public abstract class ProductionBuilding extends Building {
     // spawn point relative to building origin to spawn units
     private BlockPos rallyPoint;
     public boolean canSetRallyPoint = true;
-    protected int spawnRadiusOffset = 1;
+    protected float spawnRadiusOffset = -0.5f;
 
     public ProductionBuilding(Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(level, originPos, rotation, ownerName, blocks, isCapitol);
@@ -94,9 +94,9 @@ public abstract class ProductionBuilding extends Building {
                 false
         );
         BlockPos defaultRallyPoint = getMinCorner(this.blocks).offset(
-                0.5f - spawnRadiusOffset,
+                spawnRadiusOffset,
                 0.5f,
-                0.5f - spawnRadiusOffset);
+                spawnRadiusOffset);
 
         BlockPos rallyPoint = this.rallyPoint == null ? defaultRallyPoint : this.rallyPoint;
 

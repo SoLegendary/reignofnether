@@ -14,8 +14,10 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 
-- units stop moving after a few seconds when ordered to attack a building
-- double check garrisoned unit aggro range
+- make evokers attack like normal units (toggle ability to change fangs type)
+
+iron golems spawn indoors and can't get out if the smithy was rotated
+    - does rotation cause issues with any other building?
 
 
 TODO test in next playtest
