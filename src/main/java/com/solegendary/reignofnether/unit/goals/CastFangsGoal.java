@@ -7,9 +7,9 @@ import net.minecraft.world.entity.Mob;
 
 import java.util.function.Consumer;
 
-public class CastFangsLineGoal extends AbstractCastTargetedSpellGoal {
+public class CastFangsGoal extends AbstractCastTargetedSpellGoal {
 
-    public CastFangsLineGoal(Mob mob, int channelTicks, int range, Consumer<BlockPos> onCast) {
+    public CastFangsGoal(Mob mob, int channelTicks, int range, Consumer<BlockPos> onCast) {
         super(mob, channelTicks, range, true, onCast);
     }
 

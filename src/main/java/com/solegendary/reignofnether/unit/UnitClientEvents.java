@@ -740,11 +740,11 @@ public class UnitClientEvents {
                 if (MC.player != null && eUnit.getOwnerName().equals(MC.player.getName().getString()))
                     return;
 
-                if (eUnit.getCastFangsLineGoal() != null) {
+                if (eUnit.getCastFangsGoal() != null) {
                     if (startAnimation)
-                        eUnit.getCastFangsLineGoal().startCasting();
+                        eUnit.getCastFangsGoal().startCasting();
                     else
-                        eUnit.getCastFangsLineGoal().stop();
+                        eUnit.getCastFangsGoal().stop();
                 }
             } else if (entity instanceof WardenUnit wUnit && wUnit.getId() == entityId) {
                 if (wUnit.getSonicBoomGoal() != null) {
