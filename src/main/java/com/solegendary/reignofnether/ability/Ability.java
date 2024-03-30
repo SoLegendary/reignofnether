@@ -53,4 +53,8 @@ public class Ability {
     public AbilityButton getButton(Keybinding hotkey) {
         return null;
     }
+
+    public boolean canBypassCooldown() { return false; }
+
+    public boolean shouldResetBehaviours() { return true; }
 }

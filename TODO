@@ -14,10 +14,13 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 
-- make evokers attack like normal units (toggle ability to change fangs type)
+Evoker fangs:
 
-iron golems spawn indoors and can't get out if the smithy was rotated
-    - does rotation cause issues with any other building?
+- should not resetBehaviours and should not take 2 presses when moving to a target
+
+- sometimes is delayed before actually channelling
+    - maybe raise range for channel starting by 0.5
+
 
 
 TODO test in next playtest

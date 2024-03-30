@@ -67,6 +67,7 @@ public class UnitActionItem {
         }
 
         for (Unit unit : actionableUnits) {
+
             // have to do this before resetBehaviours so we can assign the correct resourceName first
             if (action == UnitAction.TOGGLE_GATHER_TARGET) {
                 if (unit instanceof WorkerUnit workerUnit) {
@@ -83,9 +84,19 @@ public class UnitActionItem {
             }
             else {
                 // if we are issuing a redundant unit attack command then don't resetBehaviours or else the unit will pause unnecessarily
-                if (action != UnitAction.ATTACK || unit.getTargetGoal().getTarget() == null ||
-                    unit.getTargetGoal().getTarget().getId() != unitId)
-                    resetBehaviours(unit);
+                if ((action != UnitAction.ATTACK || unit.getTargetGoal().getTarget() == null ||
+                    unit.getTargetGoal().getTarget().getId() != unitId)) {
+
+                    boolean shouldResetBehaviours = true;
+                    for (Ability ability : unit.getAbilities()) {
+                        if (ability.action == action) {
+                            shouldResetBehaviours = ability.shouldResetBehaviours();
+                            break;
+                        }
+                    }
+                    if (shouldResetBehaviours)
+                        resetBehaviours(unit);
+                }
             }
             switch (action) {
                 case STOP -> {
@@ -226,7 +237,7 @@ public class UnitActionItem {
                 // any other Ability not explicitly defined here
                 default -> {
                     for (Ability ability : unit.getAbilities()) {
-                        if (ability.action == action && ability.isOffCooldown()) {
+                        if (ability.action == action && (ability.isOffCooldown() || ability.canBypassCooldown())) {
                             if (ability.canTargetEntities && this.unitId > 0)
                                 ability.use(level, unit, (LivingEntity) level.getEntity(unitId));
                             else
@@ -243,7 +254,7 @@ public class UnitActionItem {
 
         if (actionableBuilding != null) {
             for (Ability ability : actionableBuilding.getAbilities()) {
-                if (ability.action == action && ability.isOffCooldown()) {
+                if (ability.action == action && (ability.isOffCooldown() || ability.canBypassCooldown())) {
                     if (ability.canTargetEntities && this.unitId > 0)
                         ability.use(level, actionableBuilding, (LivingEntity) level.getEntity(unitId));
                     else

@@ -8,7 +8,6 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.core.BlockPos;
@@ -29,7 +28,7 @@ public class SetFangsLine extends Ability {
         super(
             UnitAction.SET_FANGS_LINE,
             CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,
-            EvokerUnit.FANGS_RANGE,
+            EvokerUnit.FANGS_RANGE_LINE,
             0,
             true
         );
@@ -49,7 +48,7 @@ public class SetFangsLine extends Ability {
             null,
             List.of(
                 FormattedCharSequence.forward("Evoker Fangs (Line)", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE006  " + EvokerUnit.FANGS_DAMAGE * 2 + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + EvokerUnit.FANGS_RANGE, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE006  " + EvokerUnit.FANGS_DAMAGE * 2 + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + EvokerUnit.FANGS_RANGE_LINE, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("Have this evoker summon a long line of snapping", Style.EMPTY),
                 FormattedCharSequence.forward("fangs around the caster when attacking.", Style.EMPTY)
             ),
@@ -73,4 +72,10 @@ public class SetFangsLine extends Ability {
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
         evokerUnit.isUsingLineFangs = true;
     }
+
+    @Override
+    public boolean canBypassCooldown() { return true; }
+
+    @Override
+    public boolean shouldResetBehaviours() { return false; }
 }

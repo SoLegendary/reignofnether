@@ -67,4 +67,7 @@ public class ToggleShield extends Ability {
         if (!level.isClientSide())
             UnitSyncClientboundPacket.sendSyncAnimationPacket(this.bruteUnit, bruteUnit.isHoldingUpShield);
     }
+
+    @Override
+    public boolean shouldResetBehaviours() { return false; }
 }

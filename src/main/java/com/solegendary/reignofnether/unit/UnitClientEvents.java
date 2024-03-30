@@ -737,8 +737,8 @@ public class UnitClientEvents {
         for (LivingEntity entity : getAllUnits()) {
             if (entity instanceof EvokerUnit eUnit && eUnit.getId() == entityId) {
                 // skip if it's your evoker since it'll already be synced
-                if (MC.player != null && eUnit.getOwnerName().equals(MC.player.getName().getString()))
-                    return;
+                //if (MC.player != null && eUnit.getOwnerName().equals(MC.player.getName().getString()))
+                //    return;
 
                 if (eUnit.getCastFangsGoal() != null) {
                     if (startAnimation)

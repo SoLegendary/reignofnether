@@ -16,7 +16,6 @@ import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.modelling.VillagerUnitModel;
 import com.solegendary.reignofnether.util.Faction;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -112,7 +111,9 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     public float getAttacksPerSecond() {return 20f / (getAttackCooldown() + 25);}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
+    public float getAttackRange() {
+        return isUsingLineFangs ? EvokerUnit.FANGS_RANGE_LINE : EvokerUnit.FANGS_RANGE_CIRCLE;
+    }
     public float getUnitAttackDamage() {return attackDamage;}
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
 
@@ -135,14 +136,14 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         return castSummonVexesGoal;
     }
 
-    public static final int FANGS_RANGE = 10;
+    public static final int FANGS_RANGE_LINE = 10;
+    public static final int FANGS_RANGE_CIRCLE = 3;
     public static final float FANGS_DAMAGE = 6f; // can sometimes be doubled or tripled due to overlapping fang hitboxes
-    public static final int FANGS_CHANNEL_TICKS = 2 * ResourceCost.TICKS_PER_SECOND;
+    public static final int FANGS_CHANNEL_SECONDS = 2;
 
     final static public float attackDamage = FANGS_DAMAGE;
-    final static public float attacksPerSecond = 1f / SetFangsLine.CD_MAX_SECONDS;
-    final static public float attackRange = FANGS_RANGE;
-    final static public float aggroRange = FANGS_RANGE;
+    final static public float attacksPerSecond = 1f / (SetFangsLine.CD_MAX_SECONDS + FANGS_CHANNEL_SECONDS);
+    final static public float aggroRange = FANGS_RANGE_LINE;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
 
@@ -208,13 +209,6 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
         if (attackGoal != null)
             attackGoal.tickCooldown();
-
-        // vexes will inherit this target
-        if (this.getTarget() == null && !this.level.isClientSide()) {
-            Mob target = MiscUtil.findClosestAttackableEnemy(this, 10, (ServerLevel) level);
-            if (target != null)
-                this.setTarget(target);
-        }
     }
 
     public void initialiseGoals() {
@@ -224,7 +218,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         this.garrisonGoal = new GarrisonGoal(this);
         this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown());
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
-        this.castFangsGoal = new CastFangsGoal(this, FANGS_CHANNEL_TICKS, FANGS_RANGE, this::createEvokerFangs);
+        this.castFangsGoal = new CastFangsGoal(this, FANGS_CHANNEL_SECONDS * ResourceCost.TICKS_PER_SECOND, FANGS_RANGE_LINE, this::createEvokerFangs);
         this.castSummonVexesGoal = new CastSummonVexesGoal(this);
     }
 
@@ -245,6 +239,8 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     // controls whether the evoker's arms are up or not
     @Override
     public boolean isCastingSpell() {
+        if (this.getCastFangsGoal() != null && this.getCastFangsGoal().isCasting())
+            return true;
         if (this.getCastSummonVexesGoal() != null && this.getCastSummonVexesGoal().isCasting())
             return true;
         return false;
@@ -254,30 +250,32 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     @Override
     public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
         if (isUsingLineFangs) {
+            this.getCastFangsGoal().startCasting();
             this.getCastFangsGoal().setAbility(this.abilities.get(0));
             this.getCastFangsGoal().setTarget(pTarget);
         } else {
+            this.getCastFangsGoal().startCasting();
             this.getCastFangsGoal().setAbility(this.abilities.get(1));
             this.getCastFangsGoal().setTarget(pTarget);
         }
     }
 
     // actually performs the fangs attack
-    public void createEvokerFangs(BlockPos targetPos) {
+    public void createEvokerFangs(LivingEntity targetEntity) {
         if (isUsingLineFangs) {
-            createEvokerFangsLine(targetPos);
+            createEvokerFangsLine(targetEntity);
         } else {
             createEvokerFangsCircle();
         }
     }
 
     // based on Evoker.EvokerAttackSpellGoal.performSpellCasting
-    public void createEvokerFangsLine(BlockPos targetPos) {
-        double d0 = Math.min(targetPos.getY(), this.getY());
-        double d1 = Math.max(targetPos.getY(), this.getY()) + 1.0;
-        float f = (float)Mth.atan2(targetPos.getZ() - this.getZ(), targetPos.getX() - this.getX());
+    public void createEvokerFangsLine(LivingEntity targetEntity) {
+        double d0 = Math.min(targetEntity.getOnPos().getY(), this.getY());
+        double d1 = Math.max(targetEntity.getOnPos().getY(), this.getY()) + 1.0;
+        float f = (float)Mth.atan2(targetEntity.getZ() - this.getZ(), targetEntity.getX() - this.getX());
         int k;
-        for(k = 0; k < FANGS_RANGE; ++k) {
+        for(k = 0; k < FANGS_RANGE_LINE; ++k) {
             double d2 = 1.25 * (double)(k + 1);
             createEvokerFang(this.getX() + (double)Mth.cos(f) * d2, this.getZ() + (double)Mth.sin(f) * d2, d0, d1, f, k);
         }
@@ -341,6 +339,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         }
     }
 
+    // TODO: when a target is autoacquired serverside this is not updated clientside
     public VillagerUnitModel.ArmPose getEvokerArmPose() {
         Entity targetEntity = getTargetGoal().getTarget();
         if (this.isCastingSpell() || (targetEntity != null &&

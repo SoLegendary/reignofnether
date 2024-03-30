@@ -28,7 +28,7 @@ public class SetFangsCircle extends Ability {
         super(
             UnitAction.SET_FANGS_CIRCLE,
             CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,
-            EvokerUnit.FANGS_RANGE,
+            EvokerUnit.FANGS_RANGE_CIRCLE,
             0,
             true
         );
@@ -48,7 +48,7 @@ public class SetFangsCircle extends Ability {
             null,
             List.of(
                 FormattedCharSequence.forward("Evoker Fangs (Circular)", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE006  " + EvokerUnit.FANGS_DAMAGE * 2 + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + 3, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("\uE006  " + EvokerUnit.FANGS_DAMAGE * 2 + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + EvokerUnit.FANGS_RANGE_CIRCLE, MyRenderer.iconStyle),
                 FormattedCharSequence.forward("Have this evoker summon a circle of snapping", Style.EMPTY),
                 FormattedCharSequence.forward("fangs around itself when attacking.", Style.EMPTY)
             ),
@@ -72,4 +72,10 @@ public class SetFangsCircle extends Ability {
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
         evokerUnit.isUsingLineFangs = false;
     }
+
+    @Override
+    public boolean canBypassCooldown() { return true; }
+
+    @Override
+    public boolean shouldResetBehaviours() { return false; }
 }
