@@ -38,7 +38,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private static final int MAX_FAILED_SEARCHES = 3;
     private static final int TICK_CD = 20; // only tick down gather time once this many ticks to reduce processing requirements
     private int cdTicksLeft = TICK_CD;
-    public static final int NO_TARGET_TIMEOUT = 100; // if we reach this time without progressing a gather tick while having navigation done, then switch a new target
+    public static final int NO_TARGET_TIMEOUT = 50; // if we reach this time without progressing a gather tick while having navigation done, then switch a new target
     public static final int IDLE_TIMEOUT = 300; // ticks spent without a target to be considered idle
     private int ticksWithoutTarget = 0; // ticks spent without an active gather target (only increments serverside)
     private int ticksIdle = 0; // ticksWithoutTarget but never reset unless we've reacquired a target - used for idle checks
