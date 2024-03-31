@@ -4,8 +4,6 @@ TODO bugs/features:
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - workers are not marked as idle until 15s after stopping gathering
 
-- Tutorial documentation/gifs
-
 Known issues:
     - when moving far away at fast speeds, we can sometimes end up with semi-frozen chunks that are not rendered at all
         - if we can detect which chunks are unrendered, we can try rerendering them

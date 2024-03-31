@@ -195,7 +195,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     public void resetBehaviours() {
         this.castFangsGoal.stop();
         this.castSummonVexesGoal.stop();
-        if (this.abilities.get(0).isOffCooldown())
+        if (attackGoal != null && this.abilities.size() > 0 && this.abilities.get(0).isOffCooldown())
             this.attackGoal.resetCooldown();
     }
 
