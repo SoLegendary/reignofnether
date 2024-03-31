@@ -18,6 +18,12 @@ Known issues:
     - piglins: brutes, headhunters, wither skeletons
 
 
+
+
+manually setting workers autogather particular resources to look for particular resources sometimes doesn't register
+    - try with a group, some just won't go
+
+
 TODO test in next playtest
 
 

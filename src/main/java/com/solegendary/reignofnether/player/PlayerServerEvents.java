@@ -148,6 +148,7 @@ public class PlayerServerEvents {
             serverPlayer.sendSystemMessage(Component.literal("Use /startrts <faction_name> to get started"));
             serverPlayer.sendSystemMessage(Component.literal("Make sure to be in a good base location first!"));
             serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle spectator mode"));
+            serverPlayer.sendSystemMessage(Component.literal("Use /controls to see the list of all controls"));
         } else {
             serverPlayer.sendSystemMessage(Component.literal("Welcome back to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
         }
@@ -315,7 +316,7 @@ public class PlayerServerEvents {
 
     public static void closeTopdownGui(int playerId) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
-        serverPlayer.setGameMode(GameType.CREATIVE);
+        serverPlayer.setGameMode(GameType.SPECTATOR);
     }
 
     public static void movePlayer(int playerId, double x, double y, double z) {

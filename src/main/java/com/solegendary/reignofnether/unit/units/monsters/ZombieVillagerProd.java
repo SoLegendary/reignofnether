@@ -57,7 +57,7 @@ public class ZombieVillagerProd extends ProductionItem {
                 FormattedCharSequence.forward("An undead worker that can construct and", Style.EMPTY),
                 FormattedCharSequence.forward("repair buildings and gather resources.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Zombie villagers will burn under sunlight.", Style.EMPTY)
+                FormattedCharSequence.forward("Zombie villagers DO NOT burn under sunlight.", Style.EMPTY)
             )
         );
     }

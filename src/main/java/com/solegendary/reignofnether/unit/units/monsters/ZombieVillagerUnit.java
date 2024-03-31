@@ -248,9 +248,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
 
     @Override
     protected boolean isSunBurnTick() {
-        return super.isSunBurnTick() &&
-                BuildingUtils.doesPlayerOwnCapitol(this.level.isClientSide(), this.getOwnerName()) &&
-                !BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false);
+        return false;
     }
 
     public void initialiseGoals() {

@@ -25,7 +25,7 @@ public class ResourcesServerEvents {
 
     public static final int STARTING_FOOD = 100;
     public static final int STARTING_WOOD = 400;
-    public static final int STARTING_ORE = 250;
+    public static final int STARTING_ORE = 150;
 
     public static void resetResources(String playerName) {
         for (Resources resources : resourcesList) {

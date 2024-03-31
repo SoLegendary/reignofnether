@@ -58,6 +58,29 @@ public class PlayerClientEvents {
                     PlayerServerboundPacket.resetRTS();
                     return 1;
                 }));
+        evt.getDispatcher().register(Commands.literal("controls")
+                .executes((command) -> {
+                    if (MC.player != null) {
+                        MC.player.sendSystemMessage(Component.literal(" "));
+                        MC.player.sendSystemMessage(Component.literal("F12 - Toggle RTS camera"));
+                        MC.player.sendSystemMessage(Component.literal("F8 - Refresh chunks"));
+                        MC.player.sendSystemMessage(Component.literal("F7 - Toggle FPS/TPS counters"));
+                        MC.player.sendSystemMessage(Component.literal("F6 - Toggle hide leaves (experimental)"));
+                        MC.player.sendSystemMessage(Component.literal("F1 - Deselect all units and buildings"));
+                        MC.player.sendSystemMessage(Component.literal("/startrts <faction> - Begin a match and spawn in 3 workers"));
+                        MC.player.sendSystemMessage(Component.literal("/fog enable/disable - Toggle fog of war for all players"));
+                        MC.player.sendSystemMessage(Component.literal("/surrender - Concede the match"));
+                        MC.player.sendSystemMessage(Component.literal("/resetrts - Delete all units/buildings, set all to spectator"));
+                        MC.player.sendSystemMessage(Component.literal("Right click - move, attack or set rallypoint"));
+                        MC.player.sendSystemMessage(Component.literal("Ctrl + number key - Create control group"));
+                        MC.player.sendSystemMessage(Component.literal("Shift + left-click on map - recenter map"));
+                        MC.player.sendSystemMessage(Component.literal("Double left-click on unit - select all same units"));
+                        MC.player.sendSystemMessage(Component.literal("Delete - destroy selected units/buildings"));
+                        MC.player.sendSystemMessage(Component.literal("Alt + right-click - rotate camera"));
+                        MC.player.sendSystemMessage(Component.literal("Alt + scroll - zoom in/out"));
+                    }
+                    return 1;
+                }));
     }
 
     public static void defeat(String playerName) {

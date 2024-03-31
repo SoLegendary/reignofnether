@@ -650,7 +650,7 @@ public class HudClientEvents {
             if (resources != null) {
                 GuiComponent.drawString(evt.getPoseStack(), MC.font, selPlayerName + "'s resources", blitX + 5, blitY + 5, 0xFFFFFF);
             } else {
-                GuiComponent.drawString(evt.getPoseStack(), MC.font, "You are an observer", blitX + 5, blitY + 5, 0xFFFFFF);
+                GuiComponent.drawString(evt.getPoseStack(), MC.font, "You are a spectator", blitX + 5, blitY + 5, 0xFFFFFF);
                 blitY += 10;
                 GuiComponent.drawString(evt.getPoseStack(), MC.font, "Use /startrts to join", blitX + 5, blitY + 5, 0xFFFFFF);
             }

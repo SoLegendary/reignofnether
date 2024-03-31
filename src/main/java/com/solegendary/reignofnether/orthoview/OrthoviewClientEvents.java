@@ -57,7 +57,7 @@ public class OrthoviewClientEvents {
     private static final float ZOOM_STEP_SCROLL = 1;
     private static final float ZOOM_MIN = 10;
     private static final float ZOOM_MAX = 90;
-    private static final float PAN_KEY_STEP = 0.3f;
+    private static final float PAN_KEY_STEP = 0.5f;
     private static final float EDGE_CAMPAM_SENSITIVITY = 0.8f;
     private static final float CAMROTY_MAX = -20;
     private static final float CAMROTY_MIN = -90;
