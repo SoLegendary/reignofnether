@@ -147,9 +147,19 @@ TODO vanilla player balancing/interaction (backlog)
 - Turned into a ghost on death - must walk back to a capitol building to be resurrected for a resource cost
 - Tools/weapons provided by the RTS player using resources
 - Items/utilities for non-RTS players should be produced at existing buildings:
-    - (Villagers)
+    - Villagers
         - Stockpile - Wooden axe/pickaxe/shovel/hoe
-        - Barracks - Stone+ sword/axe
+        - Barracks - Weapons
         - Blacksmith - Armour
         - Arcane Tower - Potions
         - Library - Enchanting table
+    - Monsters
+        - Stockpile - Wooden axe/pickaxe/shovel/hoe
+        - Laboratory - Armour + Potions
+        - Dungeon - Weapons (via chests)
+        - Mausoleum - Enchanting table (after upgrade)
+    - Piglins
+        - Military portal - Weapons + armor
+        - Civilian Portal - Wooden axe/pickaxe/shovel/hoe
+        - Flame Sanctuary - potions
+        - Wither shrine - Enchanting table
