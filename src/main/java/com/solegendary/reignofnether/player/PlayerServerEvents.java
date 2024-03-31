@@ -1,12 +1,12 @@
 package com.solegendary.reignofnether.player;
 
+import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -15,24 +15,19 @@ import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
-import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
-import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.MenuConstructor;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
@@ -48,6 +43,9 @@ import java.util.*;
 
 public class PlayerServerEvents {
 
+    // list of what gamemode these players should be in when outside of RTS cam
+    private static final ArrayList<Pair<String, GameType>> playerDefaultGameModes = new ArrayList<>();
+    private static final GameType defaultGameMode = GameType.SPECTATOR;
     public static final ArrayList<ServerPlayer> players = new ArrayList<>();
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
     private static final List<RTSPlayer> rtsPlayers = Collections.synchronizedList(new ArrayList<>()); // players that have run /startrts
@@ -157,9 +155,7 @@ public class PlayerServerEvents {
             serverPlayer.sendSystemMessage(Component.literal("As a server op you may use:"));
             serverPlayer.sendSystemMessage(Component.literal("/fog enable | disable"));
             serverPlayer.sendSystemMessage(Component.literal("/resetrts"));
-
         }
-
         if (isRTSPlayer(playerName))
             PlayerClientboundPacket.enableRTSStatus(playerName);
         else
@@ -200,7 +196,7 @@ public class PlayerServerEvents {
 
             ServerLevel level = serverPlayer.getLevel();
             for (int i = -1; i <= 1; i++) {
-                Entity entity = entityType.create(level);
+                Entity entity = entityType != null ? entityType.create(level) : null;
                 if (entity != null) {
                     BlockPos bp = MiscUtil.getHighestNonAirBlock(level, new BlockPos(pos.x + i, 0, pos.z)).above().above();
                     ((Unit) entity).setOwnerName(serverPlayer.getName().getString());
@@ -222,7 +218,6 @@ public class PlayerServerEvents {
     // commands for ops to give resources
     @SubscribeEvent
     public static void onPlayerChat(ServerChatEvent.Submitted evt) {
-
         /*
         if (evt.getMessage().getString().equals("test spiders")) {
             UnitServerEvents.convertAllToUnit(
@@ -307,6 +302,11 @@ public class PlayerServerEvents {
             MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
             MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
             NetworkHooks.openScreen(serverPlayer, namedProvider);
+
+            String playerName = serverPlayer.getName().getString();
+            playerDefaultGameModes.removeIf(p -> p.getFirst().equals(playerName));
+            playerDefaultGameModes.add(new Pair<>(playerName, serverPlayer.gameMode.getGameModeForPlayer()));
+
             serverPlayer.setGameMode(GameType.CREATIVE); // could use spectator, but makes rendering less reliable
         }
         else {
@@ -316,7 +316,14 @@ public class PlayerServerEvents {
 
     public static void closeTopdownGui(int playerId) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
-        serverPlayer.setGameMode(GameType.SPECTATOR);
+
+        for (Pair<String, GameType> defaultGameMode : playerDefaultGameModes) {
+            if (serverPlayer.getName().getString().equals(defaultGameMode.getFirst())) {
+                serverPlayer.setGameMode(defaultGameMode.getSecond());
+                return;
+            }
+        }
+        serverPlayer.setGameMode(defaultGameMode);
     }
 
     public static void movePlayer(int playerId, double x, double y, double z) {
