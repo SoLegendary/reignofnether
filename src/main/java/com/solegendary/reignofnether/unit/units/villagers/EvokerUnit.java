@@ -140,8 +140,9 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     public static final int FANGS_RANGE_CIRCLE = 3;
     public static final float FANGS_DAMAGE = 6f; // can sometimes be doubled or tripled due to overlapping fang hitboxes
     public static final int FANGS_CHANNEL_SECONDS = 2;
+    public static final int SUMMON_VEXES_AMOUNT = 3;
 
-    final static public float attackDamage = FANGS_DAMAGE;
+    final static public float attackDamage = FANGS_DAMAGE * 2;
     final static public float attacksPerSecond = 1f / (SetFangsLine.CD_MAX_SECONDS + FANGS_CHANNEL_SECONDS);
     final static public float aggroRange = FANGS_RANGE_LINE;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -194,6 +195,8 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     public void resetBehaviours() {
         this.castFangsGoal.stop();
         this.castSummonVexesGoal.stop();
+        if (this.abilities.get(0).isOffCooldown())
+            this.attackGoal.resetCooldown();
     }
 
     public void tick() {
@@ -325,7 +328,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         if (this.level.isClientSide())
             return;
 
-        for(int i = 0; i < 3; ++i) {
+        for(int i = 0; i < SUMMON_VEXES_AMOUNT; ++i) {
             BlockPos blockpos = this.blockPosition().offset(-2 + this.random.nextInt(5), 1, -2 + this.random.nextInt(5));
             Vex vex = EntityType.VEX.create(this.level);
             if (vex != null) {

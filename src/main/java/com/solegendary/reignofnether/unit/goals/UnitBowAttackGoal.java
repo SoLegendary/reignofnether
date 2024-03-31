@@ -53,6 +53,10 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
         this.attackCooldown = this.attackCooldownMax;
     }
 
+    public void resetCooldown() {
+        this.attackCooldown = 0;
+    }
+
     public boolean canUse() { return this.mob.getTarget() != null && this.isHoldingRangedWeapon(); }
 
     private boolean isHoldingBow() {

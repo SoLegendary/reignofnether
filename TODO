@@ -14,13 +14,6 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 
-Evoker fangs:
-
-- should not resetBehaviours and should not take 2 presses when moving to a target
-
-- sometimes is delayed before actually channelling
-    - maybe raise range for channel starting by 0.5
-
 
 
 TODO test in next playtest
