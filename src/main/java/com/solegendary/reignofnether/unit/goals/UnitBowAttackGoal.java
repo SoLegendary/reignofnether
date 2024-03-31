@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -50,6 +51,10 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
 
     public void setToMaxAttackCooldown() {
         this.attackCooldown = this.attackCooldownMax;
+    }
+
+    public void resetCooldown() {
+        this.attackCooldown = 0;
     }
 
     public boolean canUse() { return this.mob.getTarget() != null && this.isHoldingRangedWeapon(); }

@@ -4,8 +4,6 @@ TODO bugs/features:
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - workers are not marked as idle until 15s after stopping gathering
 
-- Tutorial documentation/gifs
-
 Known issues:
     - when moving far away at fast speeds, we can sometimes end up with semi-frozen chunks that are not rendered at all
         - if we can detect which chunks are unrendered, we can try rerendering them
@@ -14,10 +12,10 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 
-- make evokers attack like normal units (toggle ability to change fangs type)
-
-iron golems spawn indoors and can't get out if the smithy was rotated
-    - does rotation cause issues with any other building?
+- upgrade for all factions to allow proper swimming on humanoid mobs:
+    - villagers: vindicators, pillagers, witches, evokers
+    - monsters: zombies, skeletons, creepers? (drowned should have it by default)
+    - piglins: brutes, headhunters, wither skeletons
 
 
 TODO test in next playtest
@@ -149,9 +147,19 @@ TODO vanilla player balancing/interaction (backlog)
 - Turned into a ghost on death - must walk back to a capitol building to be resurrected for a resource cost
 - Tools/weapons provided by the RTS player using resources
 - Items/utilities for non-RTS players should be produced at existing buildings:
-    - (Villagers)
+    - Villagers
         - Stockpile - Wooden axe/pickaxe/shovel/hoe
-        - Barracks - Stone+ sword/axe
+        - Barracks - Weapons
         - Blacksmith - Armour
         - Arcane Tower - Potions
         - Library - Enchanting table
+    - Monsters
+        - Stockpile - Wooden axe/pickaxe/shovel/hoe
+        - Laboratory - Armour + Potions
+        - Dungeon - Weapons (via chests)
+        - Mausoleum - Enchanting table (after upgrade)
+    - Piglins
+        - Military portal - Weapons + armor
+        - Civilian Portal - Wooden axe/pickaxe/shovel/hoe
+        - Flame Sanctuary - potions
+        - Wither shrine - Enchanting table

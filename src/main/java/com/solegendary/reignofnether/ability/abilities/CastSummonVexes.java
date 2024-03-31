@@ -57,8 +57,8 @@ public class CastSummonVexes extends Ability {
             List.of(
                 FormattedCharSequence.forward("Summon Vexes", Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE004  " + CD_MAX_SECONDS + "s", MyRenderer.iconStyle),
-                FormattedCharSequence.forward("After a long delay, summon a swarm of flying vexes that attack", Style.EMPTY),
-                FormattedCharSequence.forward("random nearby enemies. Vexes start to die off after " + VEX_DURATION_SECONDS + " seconds.", Style.EMPTY)
+                FormattedCharSequence.forward("After a long delay, summon " + EvokerUnit.SUMMON_VEXES_AMOUNT + " flying vexes that attack", Style.EMPTY),
+                FormattedCharSequence.forward("the evoker's target. Vexes start to die off after " + VEX_DURATION_SECONDS + " seconds.", Style.EMPTY)
             ),
             this
         );

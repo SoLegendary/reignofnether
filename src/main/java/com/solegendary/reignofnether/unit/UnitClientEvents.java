@@ -737,14 +737,14 @@ public class UnitClientEvents {
         for (LivingEntity entity : getAllUnits()) {
             if (entity instanceof EvokerUnit eUnit && eUnit.getId() == entityId) {
                 // skip if it's your evoker since it'll already be synced
-                if (MC.player != null && eUnit.getOwnerName().equals(MC.player.getName().getString()))
-                    return;
+                //if (MC.player != null && eUnit.getOwnerName().equals(MC.player.getName().getString()))
+                //    return;
 
-                if (eUnit.getCastFangsLineGoal() != null) {
+                if (eUnit.getCastFangsGoal() != null) {
                     if (startAnimation)
-                        eUnit.getCastFangsLineGoal().startCasting();
+                        eUnit.getCastFangsGoal().startCasting();
                     else
-                        eUnit.getCastFangsLineGoal().stop();
+                        eUnit.getCastFangsGoal().stop();
                 }
             } else if (entity instanceof WardenUnit wUnit && wUnit.getId() == entityId) {
                 if (wUnit.getSonicBoomGoal() != null) {

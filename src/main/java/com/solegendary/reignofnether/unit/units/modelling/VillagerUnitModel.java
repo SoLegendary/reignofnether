@@ -91,8 +91,8 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
         if (entity instanceof WorkerUnit workerUnit && workerUnit.getBuildRepairGoal().isBuilding()) {
             return ArmPose.BUILDING;
         }
-        else if (entity instanceof EvokerUnit evokerUnit && evokerUnit.isCastingSpell()) {
-            return ArmPose.SPELLCASTING;
+        else if (entity instanceof EvokerUnit evokerUnit) {
+            return evokerUnit.getEvokerArmPose();
         }
         else if (entity instanceof PillagerUnit) {
             // CROSSBOW_HOLD

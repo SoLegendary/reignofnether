@@ -22,31 +22,44 @@ Another core design tenet is that the gamemode is fully compatible with vanilla 
 | Minimap | ✔️ |  |  
 | Resources and population | ✔️ |  |  
 | RTS-friendly world generation | ✔️ | Flatter world, simpler biomes and added surface ores |  
-| Unit abilities | ✔ | Cooldowns, range, channeling, etc. |  
-| Fog of war | ✔ |  |  
+| Unit abilities | ✔ | Cooldowns, range, channeling, etc. |
 | Resource collection | ✔ | Including drop offs and animations |
 | Building garrisoning | ✔ |  |
 | Villagers Race | ✔ |  |  
 | Monsters Race | ✔ |  |  
-| Piglins Race | ❌ |  |  
+| Piglins Race | ✔ |  |  
+| Fog of war | 🟡 | Still has performance issues and some bugs |  
 | Improved vanilla player features | ❌ | Give vanilla-mode players more interaction with their RTS teammates |
 | Teams | ❌ | Including resource trading, shared unit control, etc. |
 
 And many more that I've yet to think of...
 
-# Races
+# Datapack
 
-**Villagers** are the desperate alliance of villagers and illagers who have banded together to protect their home against these invaders. Their base is a typical vanilla village with villagers of many types crafting armour and weapons, building defences and training soldiers and is inspired by classic medieval fantasy designs.
+https://github.com/SoLegendary/reignofnether_datapack
 
-**Monsters** are the previously wild and untamed creatures of the overworld, now brought together by the forces of the end. Their base is centered around a stronghold and include ancient temples and ziggurats. Monsters shun sunlight and can only safely venture outside of their base during the night but once night falls, they should be feared just as they have been for ages past.
+To properly play this mod, your world needs to have three things:
+1. No caves or underground structures, to prevent your units falling in holes and not being able to escape
+2. Ores generated on the surface, so that workers can gather them for building
+3. Restricted world generation, because biomes like extreme hills and jungles are really hard to play i
 
-**Piglins** are the denizens of the nether who have come through portals to expand their empire by encroaching on the overworld. Wherever they expand the overworld is transformed into a visage of their home: dirt becomes netherrack, trees become mushrooms and sand becomes soulsand.
+I've included this datapack that can be used to generate worlds with the above conditions. It also:
+
+- Increases tick speed to 12 (4x normal for farming and tree decay)
+- Removes insomnia (or else phantoms follow you all the time in RTS mode)
+- Stops rain and snow (looks really bad in RTS mode)
+
+# Factions
+
+**Villagers** are the desperate alliance of villagers and illagers who have banded together to protect their home against invaders. Their base is a typical vanilla village with villagers of many types crafting armour and weapons, building defences and training soldiers and spellcasters inspired by classic medieval fantasy designs.
+
+**Monsters** are the previously wild and untamed creatures of the overworld, now brought together by the forces of the end. Their base is centered around a stronghold and include ancient temples and graveyards. Monsters shun sunlight and can only safely venture outside of their base during the night but once night falls, they should be feared just as they have been for ages past.
+
+**Piglins** are the denizens of the nether who have come through portals to expand their empire by encroaching on the overworld. Piglins can only build on nether terrain, but wherever they expand the overworld is transformed into a visage of their home: dirt becomes netherrack, trees become mushrooms and sand becomes soulsand.
 
 # Release
-I don't really want to release this until it's done to a minimum level of polish. My criteria for that is basically: *at least two players can sit down and play a fun, balanced match together without anyone crashing or experiencing debilitating bugs*.
-
-Of course, since you're reading this you now have access to all my code, so feel free to run it yourself 🙂
-https://docs.minecraftforge.net/en/latest/gettingstarted/
+The Curseforge mod page and release files are available here:
+https://legacy.curseforge.com/minecraft/mc-mods/reign-of-nether-rts-in-minecraft
 
 # Other stuff
 I am just working on this on and off in my free time so I don't have a strict dev schedule or roadmap. If you want to contact me directly for suggestions, advice or just to have a chat, feel free to DM me at /u/SoLegendary on Reddit.

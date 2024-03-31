@@ -27,7 +27,7 @@ public class AbilityButton extends Button {
 
         Runnable originalOnLeftClick = this.onLeftClick;
         this.onLeftClick = () -> {
-            if (this.ability != null && this.ability.getCooldown() > 0)
+            if (this.ability != null && (this.ability.getCooldown() > 0 && !this.ability.canBypassCooldown()))
                 HudClientEvents.showTemporaryMessage("This ability is still on cooldown");
             else
                 originalOnLeftClick.run();
