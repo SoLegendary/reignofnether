@@ -12,6 +12,10 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 
+- upgrade for all factions to allow proper swimming on humanoid mobs:
+    - villagers: vindicators, pillagers, witches, evokers
+    - monsters: zombies, skeletons, creepers? (drowned should have it by default)
+    - piglins: brutes, headhunters, wither skeletons
 
 
 TODO test in next playtest
