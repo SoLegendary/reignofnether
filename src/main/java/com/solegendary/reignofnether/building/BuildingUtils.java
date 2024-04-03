@@ -4,6 +4,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.monsters.*;
 import com.solegendary.reignofnether.building.buildings.piglins.*;
+import com.solegendary.reignofnether.building.buildings.shared.Bridge;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import net.minecraft.core.BlockPos;
@@ -94,6 +95,7 @@ public class BuildingUtils {
     public static Building getNewBuilding(String buildingName, Level level, BlockPos pos, Rotation rotation, String ownerName) {
         Building building = null;
         switch(buildingName) {
+            case Bridge.buildingName -> building = new Bridge(level, pos, rotation, ownerName);
             case Stockpile.buildingName -> building = new Stockpile(level, pos, rotation, ownerName);
             case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation, ownerName);
             case Graveyard.buildingName -> building = new Graveyard(level, pos, rotation, ownerName);

@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.buildings.shared.Bridge;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -57,29 +58,33 @@ public class BuildingServerEvents {
                 building.forceChunk(true);
 
                 int minY = BuildingUtils.getMinCorner(building.blocks).getY();
+                if (building instanceof Bridge)
+                    minY += 1; // because fences are on the 2nd layer
 
-                for (BuildingBlock block : building.blocks) {
-                    // place scaffolding underneath all solid blocks that don't have support
-                    if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir()) {
-                        int yBelow = 0;
-                        boolean tooDeep = false;
-                        BlockState bsBelow;
-                        do {
-                            yBelow -= 1;
-                            bsBelow = serverLevel.getBlockState(block.getBlockPos().offset(0, yBelow, 0));
-                            if (yBelow < -5)
-                                tooDeep = true;
-                        }
-                        while (!bsBelow.getMaterial().isSolidBlocking());
-                        yBelow += 1;
+                if (!(building instanceof Bridge)) {
+                    for (BuildingBlock block : building.blocks) {
+                        // place scaffolding underneath all solid blocks that don't have support
+                        if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir()) {
+                            int yBelow = 0;
+                            boolean tooDeep = false;
+                            BlockState bsBelow;
+                            do {
+                                yBelow -= 1;
+                                bsBelow = serverLevel.getBlockState(block.getBlockPos().offset(0, yBelow, 0));
+                                if (yBelow < -5)
+                                    tooDeep = true;
+                            }
+                            while (!bsBelow.getMaterial().isSolidBlocking());
+                            yBelow += 1;
 
-                        if (!tooDeep) {
-                            while (yBelow < 0) {
-                                BlockPos bp = block.getBlockPos().offset(0, yBelow, 0);
-                                BuildingBlock scaffold = new BuildingBlock(bp, Blocks.SCAFFOLDING.defaultBlockState());
-                                building.getScaffoldBlocks().add(scaffold);
-                                building.addToBlockPlaceQueue(scaffold);
-                                yBelow += 1;
+                            if (!tooDeep) {
+                                while (yBelow < 0) {
+                                    BlockPos bp = block.getBlockPos().offset(0, yBelow, 0);
+                                    BuildingBlock scaffold = new BuildingBlock(bp, Blocks.SCAFFOLDING.defaultBlockState());
+                                    building.getScaffoldBlocks().add(scaffold);
+                                    building.addToBlockPlaceQueue(scaffold);
+                                    yBelow += 1;
+                                }
                             }
                         }
                     }

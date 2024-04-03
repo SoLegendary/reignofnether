@@ -11,13 +11,17 @@ Known issues:
         - as an additional workaround, chunks with enemy buildings are always hidden and not rendered
     - turning on fog of war causes a crash when optifine is installed
 
-- upgrade to allow villagers to build bridges
-    - overlay over water blocks only
-    - when destroyed, replace blocks with water
-    - 2 wood per block used
+- Allow villagers to build bridges
+    - should not provide any vision in fog (if possible?)
+    - when placed, remove any blocks that clip solid terrain or other bridges from the block list
+    - do not allow building underwater
+    - when any blocks are destroyed, replace them with water
+    - when built, becomes neutral, but still repairable by anyone
+    - starts with only the fence railings
     - 2 structures (diagonal and straight) that alternate when scrolled
     - built block-by-block always from the closest block to the villager at any one time
-    - can be attacked and destroyed by anyone
+    - right clicking should not autoattack
+    - upgrade to stone bridges to increase damage resistance and allow building over lava
 
 - prevent units pathing into water at all
     - all piglin units take drowning damage when in water?

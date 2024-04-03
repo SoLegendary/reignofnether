@@ -3,9 +3,8 @@ package com.solegendary.reignofnether.building;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.building.buildings.piglins.Portal;
-import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
+import com.solegendary.reignofnether.building.buildings.shared.Bridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -14,14 +13,11 @@ import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchAdvancedPortals;
-import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -44,12 +40,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -94,6 +87,9 @@ public class BuildingClientEvents {
 
     private static final float MIN_NETHER_BLOCKS_PERCENT = 0.8f;
 
+    private static final float MIN_BRIDGE_WATER_BLOCKS_PERCENT = 0.2f;
+    private static final float MAX_BRIDGE_WATER_BLOCKS_PERCENT = 0.8f;
+
     // can only be one preselected building as you can't box-select them like units
     public static Building getPreselectedBuilding() {
         for (Building building: buildings)
@@ -118,6 +114,10 @@ public class BuildingClientEvents {
         selectedBuildings.add(building);
         selectedBuildings.sort(Comparator.comparing(b -> b.name));
         UnitClientEvents.clearSelectedUnits();
+    }
+
+    private static boolean isBuildingToPlaceABridge() {
+        return buildingToPlace != null && buildingToPlace.getName().contains("Bridge");
     }
 
     // switch to the building with the least production, so we can spread out production items
@@ -238,12 +238,16 @@ public class BuildingClientEvents {
         return !isBuildingPlacementInAir(originPos) &&
                !isBuildingPlacementClipping(originPos) &&
                !isOverlappingAnyOtherBuilding() &&
-               isNonPiglinOrOnNetherBlocks(originPos) &&
+                isNonPiglinOrOnNetherBlocks(originPos) &&
+                isNonBridgeOrMostlyOnWater(originPos) &&
                 FogOfWarClientEvents.isInBrightChunk(originPos);
     }
 
     // disallow any building block from clipping into any other existing blocks
     private static boolean isBuildingPlacementClipping(BlockPos originPos) {
+        if (isBuildingToPlaceABridge())
+            return false;
+
         for (BuildingBlock block : blocksToDraw) {
             Material bm = block.getBlockState().getMaterial();
             BlockPos bp = new BlockPos(
@@ -261,6 +265,9 @@ public class BuildingClientEvents {
     // 90% all solid blocks at the base of the building must be on top of solid blocks to be placeable
     // excluding those under blocks which aren't solid anyway
     private static boolean isBuildingPlacementInAir(BlockPos originPos) {
+        if (isBuildingToPlaceABridge())
+            return false;
+
         int solidBlocksBelow = 0;
         int blocksBelow = 0;
         for (BuildingBlock block : blocksToDraw) {
@@ -295,6 +302,8 @@ public class BuildingClientEvents {
 
         for (Building building : buildings) {
             for (BuildingBlock block : building.blocks) {
+                if (isBuildingToPlaceABridge() && building instanceof Bridge)
+                    continue;
                 BlockPos bp = block.getBlockPos();
                 if (bp.getX() >= minPos.getX() && bp.getX() <= maxPos.getX() &&
                     bp.getY() >= minPos.getY() && bp.getY() <= maxPos.getY() &&
@@ -335,6 +344,34 @@ public class BuildingClientEvents {
         return ((float) netherBlocksBelow / (float) blocksBelow) > MIN_NETHER_BLOCKS_PERCENT;
     }
 
+    // bridges should be connected to land or another bridge and be touching water
+    private static boolean isNonBridgeOrMostlyOnWater(BlockPos originPos) {
+        if (!isBuildingToPlaceABridge())
+            return true;
+
+        int bridgeBlocks = 0;
+        int waterBlocksClipping = 0;
+        for (BuildingBlock block : blocksToDraw) {
+            if (block.getBlockPos().getY() == 0 && MC.level != null) {
+                BlockPos bp = new BlockPos(
+                        originPos.getX() + block.getBlockPos().getX(),
+                        originPos.getY() + block.getBlockPos().getY(),
+                        originPos.getZ() + block.getBlockPos().getZ()
+                );
+                BlockState bs = block.getBlockState(); // building block
+                Material bmWorld = MC.level.getBlockState(bp).getMaterial(); // world block
+
+                bridgeBlocks += 1;
+                if (bmWorld.isLiquid())
+                    waterBlocksClipping += 1;
+            }
+        }
+        if (bridgeBlocks <= 0) return false; // avoid division by 0
+        float percentWater = (float) waterBlocksClipping / (float) bridgeBlocks;
+        return percentWater > MIN_BRIDGE_WATER_BLOCKS_PERCENT &&
+                percentWater < MAX_BRIDGE_WATER_BLOCKS_PERCENT;
+    }
+
     // gets the cursor position rotated according to the preselected building
     private static BlockPos getOriginPos() {
         int xAdj = 0;
@@ -348,7 +385,11 @@ public class BuildingClientEvents {
             case CLOCKWISE_180       -> { xAdj =  xRadius; zAdj =  zRadius; }
             case COUNTERCLOCKWISE_90 -> { xAdj = -xRadius; zAdj =  zRadius; }
         }
-        return CursorClientEvents.getPreselectedBlockPos().offset(xAdj, 0, zAdj);
+        BlockPos bp = CursorClientEvents.getPreselectedBlockPos();
+        if (isBuildingToPlaceABridge())
+            bp = bp.offset(0,-1,0);
+
+        return bp.offset(xAdj, 0, zAdj);
     }
 
     @SubscribeEvent
@@ -383,10 +424,7 @@ public class BuildingClientEvents {
                         MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f);
                 }
             }
-
             Relationship buildingRs = getPlayerToBuildingRelationship(building);
-
-
 
             if (isInBrightChunk) {
                 switch (buildingRs) {
@@ -524,6 +562,8 @@ public class BuildingClientEvents {
                         addSelectedBuilding(preSelBuilding);
                     }
                 }
+            } else if (!isBuildingPlacementValid(pos)) {
+                HudClientEvents.showTemporaryMessage("Invalid building placement");
             }
 
             // deselect any non-owned buildings if we managed to select them with owned buildings

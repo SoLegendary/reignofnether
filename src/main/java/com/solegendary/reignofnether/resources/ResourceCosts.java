@@ -70,6 +70,7 @@ public class ResourceCosts {
 
     // ******************* BUILDINGS ******************* //
     public static ResourceCost STOCKPILE = ResourceCost.Building(0,75,0, 0);
+    public static ResourceCost BRIDGE = ResourceCost.Building(0,50,0, 0);
 
     // Monsters
     public static ResourceCost MAUSOLEUM = ResourceCost.Building(0,300,150, 10);

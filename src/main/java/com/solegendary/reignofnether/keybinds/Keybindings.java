@@ -28,6 +28,7 @@ public class Keybindings {
     public static final Keybinding keyV = new Keybinding(GLFW.GLFW_KEY_V, "V", "V");
     public static final Keybinding keyL = new Keybinding(GLFW.GLFW_KEY_L, "L", "L");
     public static final Keybinding keyM = new Keybinding(GLFW.GLFW_KEY_M, "M", "M");
+    public static final Keybinding keyB = new Keybinding(GLFW.GLFW_KEY_B, "B", "B");
     public static final Keybinding keyF = new Keybinding(GLFW.GLFW_KEY_F, "F", "F");
     public static final Keybinding keyD = new Keybinding(GLFW.GLFW_KEY_D, "D", "D");
     public static final Keybinding keyJ = new Keybinding(GLFW.GLFW_KEY_J, "J", "J");
