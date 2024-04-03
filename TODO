@@ -11,16 +11,17 @@ Known issues:
         - as an additional workaround, chunks with enemy buildings are always hidden and not rendered
     - turning on fog of war causes a crash when optifine is installed
 
-- upgrade for all factions to allow proper swimming on humanoid mobs:
-    - villagers: vindicators, pillagers, witches, evokers
-    - monsters: zombies, skeletons, creepers? (drowned should have it by default)
-    - piglins: brutes, headhunters, wither skeletons
+- upgrade to allow villagers to build bridges
+    - overlay over water blocks only
+    - when destroyed, replace blocks with water
+    - 2 wood per block used
+    - 2 structures (diagonal and straight) that alternate when scrolled
+    - built block-by-block always from the closest block to the villager at any one time
+    - can be attacked and destroyed by anyone
 
+- prevent units pathing into water at all
+    - all piglin units take drowning damage when in water?
 
-
-
-manually setting workers autogather particular resources to look for particular resources sometimes doesn't register
-    - try with a group, some just won't go
 
 
 TODO test in next playtest
