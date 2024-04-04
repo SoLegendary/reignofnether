@@ -12,8 +12,6 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 - Allow villagers to build bridges
-    - when placed, remove any blocks that clip solid terrain or other bridges from the block list
-        - test that we can build through seaweed
     - when any blocks are destroyed, replace them with water
     - 2 structures (diagonal and straight) that alternate when scrolled
     - built block-by-block always from the closest block to the villager at any one time
@@ -21,16 +19,18 @@ Known issues:
 
     Done, testing needed:
     ---------------------
+    - when placed, remove any blocks that clip solid terrain or other bridges from the block list
+        - test that we can build through seaweed
     - do not allow building underwater
     - when placed, becomes neutral, but still buildable/repairable by anyone
         - meaning this should also not provide vision
     - right clicking should not autoattack
 
-- prevent units pathing into water at all
-    - all piglin units take drowning damage when in water?
+
 
 - disable all hotkeys when chat window is open
 
+- revert mixin changes causing rendering bugs with F8 is used in fog
 
 
 TODO test in next playtest
