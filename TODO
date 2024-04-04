@@ -12,12 +12,10 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 - Allow villagers to build bridges
-    - should not provide any vision in fog (if possible?)
     - when placed, remove any blocks that clip solid terrain or other bridges from the block list
     - do not allow building underwater
     - when any blocks are destroyed, replace them with water
-    - when built, becomes neutral, but still repairable by anyone
-    - starts with only the fence railings
+        - when placed, becomes neutral, but still buildable/repairable by anyone
     - 2 structures (diagonal and straight) that alternate when scrolled
     - built block-by-block always from the closest block to the villager at any one time
     - right clicking should not autoattack

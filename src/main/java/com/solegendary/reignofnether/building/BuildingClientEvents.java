@@ -33,9 +33,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.IceBlock;
-import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
@@ -348,6 +346,25 @@ public class BuildingClientEvents {
     private static boolean isNonBridgeOrMostlyOnWater(BlockPos originPos) {
         if (!isBuildingToPlaceABridge())
             return true;
+
+        /*
+        // top y level should not be touching any water at all
+        for (BuildingBlock block : blocksToDraw) {
+            if (block.getBlockPos().getY() == 1 && MC.level != null) {
+                BlockPos bp = new BlockPos(
+                        originPos.getX() + block.getBlockPos().getX(),
+                        originPos.getY() + block.getBlockPos().getY(),
+                        originPos.getZ() + block.getBlockPos().getZ()
+                );
+                BlockState bs = block.getBlockState(); // building block
+                Material bmWorld = MC.level.getBlockState(bp).getMaterial(); // world block
+
+                if ((bs.getBlock() instanceof FenceBlock || bs.getBlock() instanceof WallBlock) &&
+                    bmWorld.isLiquid())
+                    return false;
+            }
+        }
+         */
 
         int bridgeBlocks = 0;
         int waterBlocksClipping = 0;

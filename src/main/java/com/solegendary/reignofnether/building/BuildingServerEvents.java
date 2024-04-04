@@ -96,8 +96,11 @@ public class BuildingServerEvents {
                             building.startingBlockTypes.contains(block.getBlockState().getBlock()))
                         building.addToBlockPlaceQueue(block);
                 }
+                //BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation,
+                //        buildingName.toLowerCase().contains("bridge") ? "" : ownerName, building.blockPlaceQueue.size());
 
                 BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName, building.blockPlaceQueue.size());
+
                 ResourcesServerEvents.addSubtractResources(new Resources(
                     building.ownerName,
                     -building.foodCost,
