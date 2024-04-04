@@ -183,13 +183,13 @@ public class BuildingClientEvents {
         int maxZ = -999999;
 
         for (BuildingBlock block : blocksToDraw) {
+            if (buildingToPlace != null && buildingToPlace.getName().contains("Bridge") &&
+                MC.level != null && Bridge.shouldBlockExist(originPos.offset(0,1,0), block, MC.level))
+                continue;
+
             BlockRenderDispatcher renderer = MC.getBlockRenderer();
             BlockState bs = block.getBlockState();
-            BlockPos bp = new BlockPos(
-                    originPos.getX() + block.getBlockPos().getX(),
-                    originPos.getY() + block.getBlockPos().getY(),
-                    originPos.getZ() + block.getBlockPos().getZ()
-            );
+            BlockPos bp = block.getBlockPos().offset(originPos);
             // ModelData modelData = renderer.getBlockModel(bs).getModelData(MC.level, bp, bs, ModelDataManager.getModelData(MC.level, bp));
 
             matrix.pushPose();
@@ -248,11 +248,7 @@ public class BuildingClientEvents {
 
         for (BuildingBlock block : blocksToDraw) {
             Material bm = block.getBlockState().getMaterial();
-            BlockPos bp = new BlockPos(
-                    originPos.getX() + block.getBlockPos().getX(),
-                    originPos.getY() + block.getBlockPos().getY() + 1,
-                    originPos.getZ() + block.getBlockPos().getZ()
-            );
+            BlockPos bp = block.getBlockPos().offset(originPos).offset(0,1,0);
             Material bmWorld = MC.level.getBlockState(bp).getMaterial();
             if ((bmWorld.isSolid() || bmWorld.isLiquid()) && (bm.isSolid() || bm.isLiquid()))
                 return true;
@@ -270,11 +266,7 @@ public class BuildingClientEvents {
         int blocksBelow = 0;
         for (BuildingBlock block : blocksToDraw) {
             if (block.getBlockPos().getY() == 0 && MC.level != null) {
-                BlockPos bp = new BlockPos(
-                        originPos.getX() + block.getBlockPos().getX(),
-                        originPos.getY() + block.getBlockPos().getY() + 1,
-                        originPos.getZ() + block.getBlockPos().getZ()
-                );
+                BlockPos bp = block.getBlockPos().offset(originPos).offset(0,1,0);
                 BlockState bs = block.getBlockState(); // building block
                 BlockState bsBelow = MC.level.getBlockState(bp.below()); // world block
 
@@ -323,11 +315,7 @@ public class BuildingClientEvents {
         int blocksBelow = 0;
         for (BuildingBlock block : blocksToDraw) {
             if (block.getBlockPos().getY() == 0 && MC.level != null) {
-                BlockPos bp = new BlockPos(
-                        originPos.getX() + block.getBlockPos().getX(),
-                        originPos.getY() + block.getBlockPos().getY() + 1,
-                        originPos.getZ() + block.getBlockPos().getZ()
-                );
+                BlockPos bp = block.getBlockPos().offset(originPos).offset(0,1,0);
                 BlockState bs = block.getBlockState(); // building block
                 BlockState bsBelow = MC.level.getBlockState(bp.below()); // world block
 
@@ -347,15 +335,10 @@ public class BuildingClientEvents {
         if (!isBuildingToPlaceABridge())
             return true;
 
-        /*
         // top y level should not be touching any water at all
         for (BuildingBlock block : blocksToDraw) {
             if (block.getBlockPos().getY() == 1 && MC.level != null) {
-                BlockPos bp = new BlockPos(
-                        originPos.getX() + block.getBlockPos().getX(),
-                        originPos.getY() + block.getBlockPos().getY(),
-                        originPos.getZ() + block.getBlockPos().getZ()
-                );
+                BlockPos bp = block.getBlockPos().offset(originPos).offset(0,1,0);
                 BlockState bs = block.getBlockState(); // building block
                 Material bmWorld = MC.level.getBlockState(bp).getMaterial(); // world block
 
@@ -364,17 +347,11 @@ public class BuildingClientEvents {
                     return false;
             }
         }
-         */
-
         int bridgeBlocks = 0;
         int waterBlocksClipping = 0;
         for (BuildingBlock block : blocksToDraw) {
             if (block.getBlockPos().getY() == 0 && MC.level != null) {
-                BlockPos bp = new BlockPos(
-                        originPos.getX() + block.getBlockPos().getX(),
-                        originPos.getY() + block.getBlockPos().getY(),
-                        originPos.getZ() + block.getBlockPos().getZ()
-                );
+                BlockPos bp = block.getBlockPos().offset(originPos);
                 BlockState bs = block.getBlockState(); // building block
                 Material bmWorld = MC.level.getBlockState(bp).getMaterial(); // world block
 

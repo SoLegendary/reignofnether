@@ -13,16 +13,23 @@ Known issues:
 
 - Allow villagers to build bridges
     - when placed, remove any blocks that clip solid terrain or other bridges from the block list
-    - do not allow building underwater
+        - test that we can build through seaweed
     - when any blocks are destroyed, replace them with water
-        - when placed, becomes neutral, but still buildable/repairable by anyone
     - 2 structures (diagonal and straight) that alternate when scrolled
     - built block-by-block always from the closest block to the villager at any one time
+    - piglins build stone bridges instead with increased damage resistance and fire immunity
+
+    Done, testing needed:
+    ---------------------
+    - do not allow building underwater
+    - when placed, becomes neutral, but still buildable/repairable by anyone
+        - meaning this should also not provide vision
     - right clicking should not autoattack
-    - upgrade to stone bridges to increase damage resistance and allow building over lava
 
 - prevent units pathing into water at all
     - all piglin units take drowning damage when in water?
+
+- disable all hotkeys when chat window is open
 
 
 

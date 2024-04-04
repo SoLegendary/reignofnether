@@ -22,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
@@ -52,7 +53,6 @@ public class BuildingServerEvents {
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int[] builderUnitIds, boolean queue) {
         Building building = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName);
         if (building != null) {
-
             if (building.canAfford(ownerName)) {
                 buildings.add(building);
                 building.forceChunk(true);
@@ -96,10 +96,8 @@ public class BuildingServerEvents {
                             building.startingBlockTypes.contains(block.getBlockState().getBlock()))
                         building.addToBlockPlaceQueue(block);
                 }
-                //BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation,
-                //        buildingName.toLowerCase().contains("bridge") ? "" : ownerName, building.blockPlaceQueue.size());
-
-                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName, building.blockPlaceQueue.size());
+                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation,
+                        buildingName.toLowerCase().contains("bridge") ? "" : ownerName, building.blockPlaceQueue.size());
 
                 ResourcesServerEvents.addSubtractResources(new Resources(
                     building.ownerName,

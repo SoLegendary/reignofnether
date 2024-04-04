@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.shared.Bridge;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -85,7 +86,8 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
             return isBuildingServerside;
 
         if (buildingTarget != null && this.moveTarget != null)
-            if (BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED)
+            if (BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED ||
+                buildingTarget instanceof Bridge)
                 return buildingTarget.isPosInsideBuilding(mob.getOnPos()) ||
                         MiscUtil.isMobInRangeOfPos(moveTarget, mob, 2);
         return false;

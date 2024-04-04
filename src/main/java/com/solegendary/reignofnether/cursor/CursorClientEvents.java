@@ -177,6 +177,9 @@ public class CursorClientEvents {
             // if we clipped a non-solid block (eg. tall grass) search adjacent blocks for a next-best match
             if (!MC.level.getBlockState(preselectedBlockPos).getMaterial().isSolidBlocking()) {
                 preselectedBlockPos = getRefinedBlockPos(preselectedBlockPos, cursorWorldPosNear);
+                // disallow selecting a block just below a fluid block
+                if (MC.level.getBlockState(preselectedBlockPos.above()).getMaterial().isLiquid())
+                    preselectedBlockPos = preselectedBlockPos.above();
             }
         }
 
@@ -342,8 +345,7 @@ public class CursorClientEvents {
             boolean buildingTargetedByWorker = (HudClientEvents.hudSelectedEntity instanceof WorkerUnit &&
                     preSelBuilding != null &&
                     CursorClientEvents.getLeftClickAction() != UnitAction.MOVE &&
-                    ((BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED ||
-                     preSelBuilding instanceof Bridge) ||
+                    (BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED ||
                     CursorClientEvents.getLeftClickAction() == UnitAction.BUILD_REPAIR));
             // same for attacker
             boolean buildingTargetedByAttacker = (HudClientEvents.hudSelectedEntity instanceof AttackerUnit &&

@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.building.buildings.shared;
 
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
+import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -15,7 +17,12 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +48,18 @@ public class Bridge extends Building {
         this.buildTimeModifier = 1.0f;
 
         this.startingBlockTypes.add(Blocks.SPRUCE_FENCE);
+
+        // remove any blocks that are clipping solid blocks
+        blocks.removeIf(b -> shouldBlockExist(new BlockPos(0,0,0), b, level));
+    }
+
+    public static boolean shouldBlockExist(BlockPos originPos, BuildingBlock b, Level level) {
+        BlockState bs = b.getBlockState();
+        boolean isFenceOrWall = b.getBlockState().getBlock() instanceof FenceBlock ||
+                b.getBlockState().getBlock() instanceof WallBlock;
+        Material bm = level.getBlockState(b.getBlockPos().offset(originPos)).getMaterial();
+        Material bmBelow = level.getBlockState(b.getBlockPos().offset(originPos).below()).getMaterial();
+        return bm.isSolidBlocking() || (isFenceOrWall && bmBelow.isSolidBlocking());
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
@@ -57,7 +76,8 @@ public class Bridge extends Building {
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Bridge.class,
                 () -> false,
-                () -> BuildingUtils.doesPlayerOwnCapitol(true, MC.player != null ? MC.player.getName().getString() : "") ||
+                () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
+                        BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(Bridge.class),
                 null,
