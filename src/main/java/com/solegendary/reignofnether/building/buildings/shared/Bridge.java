@@ -14,18 +14,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FenceBlock;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.material.LavaFluid;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.WaterFluid;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
@@ -37,7 +37,7 @@ public class Bridge extends Building {
     public final static ResourceCost cost = ResourceCosts.BRIDGE;
 
     public Bridge(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
+        super(level, originPos, rotation, ownerName, getCulledBlocks(getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), level), false);
 
         this.name = buildingName;
         this.ownerName = ownerName;
@@ -51,35 +51,29 @@ public class Bridge extends Building {
         this.buildTimeModifier = 1.0f;
 
         this.startingBlockTypes.add(Blocks.SPRUCE_FENCE);
-
-        // remove any blocks that are clipping solid blocks
-        blocks.removeIf(b -> shouldCullBlock(new BlockPos(0,0,0), b, level));
-
-        // get min/max/centre positions
-        this.minCorner = new BlockPos(
-                blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
-                blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
-                blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
-        );
-        this.maxCorner = new BlockPos(
-                blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
-                blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
-                blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
-        );
-        this.centrePos = new BlockPos(
-                (float) (this.minCorner.getX() + this.maxCorner.getX()) / 2,
-                (float) (this.minCorner.getY() + this.maxCorner.getY()) / 2,
-                (float) (this.minCorner.getZ() + this.maxCorner.getZ()) / 2
-        );
     }
 
     public static boolean shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level) {
         BlockState bs = b.getBlockState();
-        boolean isFenceOrWall = b.getBlockState().getBlock() instanceof FenceBlock ||
+        boolean isFenceWallOrAir = b.getBlockState().getBlock() instanceof AirBlock ||
+                b.getBlockState().getBlock() instanceof FenceBlock ||
                 b.getBlockState().getBlock() instanceof WallBlock;
         Material bm = level.getBlockState(b.getBlockPos().offset(originPos)).getMaterial();
         Material bmBelow = level.getBlockState(b.getBlockPos().offset(originPos).below()).getMaterial();
-        return bm.isSolidBlocking() || (isFenceOrWall && bmBelow.isSolidBlocking());
+        return bm.isSolidBlocking() || (isFenceWallOrAir && bmBelow.isSolidBlocking());
+    }
+
+    private static ArrayList<BuildingBlock> getCulledBlocks(ArrayList<BuildingBlock> blocks, Level level) {
+        blocks.removeIf(b -> shouldCullBlock(new BlockPos(0,0,0), b, level));
+        return blocks;
+    }
+
+    @Override
+    public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks) {
+        super.onBlockBreak(level, pos, breakBlocks);
+        BlockState bsBelow = level.getBlockState(pos.below());
+        if (bsBelow.getMaterial().isLiquid())
+            level.setBlockAndUpdate(pos, bsBelow);
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}

@@ -353,10 +353,14 @@ public class BuildingClientEvents {
             if (block.getBlockPos().getY() == 0 && MC.level != null) {
                 BlockPos bp = block.getBlockPos().offset(originPos).offset(0,1,0);
                 BlockState bs = block.getBlockState(); // building block
-                Material bmWorld = MC.level.getBlockState(bp).getMaterial(); // world block
+                BlockState bsWorld = MC.level.getBlockState(bp); // world block
+                Material bmWorld = bsWorld.getMaterial(); // world block
+
 
                 bridgeBlocks += 1;
-                if (!bmWorld.isSolidBlocking())
+                if (bmWorld.isLiquid() ||
+                    bsWorld.getBlock() instanceof SeagrassBlock ||
+                    bsWorld.getBlock() instanceof KelpBlock)
                     waterBlocksClipping += 1;
             }
         }

@@ -90,9 +90,9 @@ public abstract class Building {
     public int oreCost;
     public int popSupply; // max population this building provides
 
-    public BlockPos minCorner;
-    public BlockPos maxCorner;
-    public BlockPos centrePos;
+    public final BlockPos minCorner;
+    public final BlockPos maxCorner;
+    public final BlockPos centrePos;
 
     // blocks types that are placed automatically when the building is placed
     // used to control size of initial foundations while keeping it symmetrical
