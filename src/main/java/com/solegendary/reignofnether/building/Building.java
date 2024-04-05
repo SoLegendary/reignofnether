@@ -52,7 +52,7 @@ public abstract class Building {
 
     public String name;
     public static String structureName;
-    private Level level; // directly return MC.level if it's clientside to avoid stale references
+    protected Level level; // directly return MC.level if it's clientside to avoid stale references
     public BlockPos originPos;
     public Rotation rotation;
     public ResourceLocation icon;
@@ -90,9 +90,9 @@ public abstract class Building {
     public int oreCost;
     public int popSupply; // max population this building provides
 
-    public final BlockPos minCorner;
-    public final BlockPos maxCorner;
-    public final BlockPos centrePos;
+    public BlockPos minCorner;
+    public BlockPos maxCorner;
+    public BlockPos centrePos;
 
     // blocks types that are placed automatically when the building is placed
     // used to control size of initial foundations while keeping it symmetrical

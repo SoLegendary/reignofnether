@@ -897,6 +897,8 @@ public class HudClientEvents {
     // for some reason some bound vanilla keys like Q and E don't trigger KeyPressed but still trigger keyReleased
     @SubscribeEvent
     public static void onKeyRelease(ScreenEvent.KeyReleased.KeyReleased.Post evt) {
+        if (MC.screen == null || !MC.screen.getTitle().getString().contains("topdowngui_container"))
+            return;
         for (Button button : renderedButtons)
             button.checkPressed(evt.getKeyCode());
     }

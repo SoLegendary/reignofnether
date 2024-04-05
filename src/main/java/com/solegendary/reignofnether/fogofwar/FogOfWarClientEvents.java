@@ -28,7 +28,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
 
@@ -57,6 +59,7 @@ public class FogOfWarClientEvents {
 
     private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
 
+
     public static void revealOrHidePlayer(boolean reveal, String playerName) {
         if (reveal)
             revealedPlayerNames.add(playerName);
@@ -81,8 +84,9 @@ public class FogOfWarClientEvents {
                 return;
 
             // resetFogChunks
-            if (evt.getKey() == Keybindings.getFnum(8).key)
+            if (evt.getKey() == Keybindings.getFnum(8).key && isEnabled()) {
                 resetFogChunks();
+            }
         }
     }
 
@@ -90,6 +94,7 @@ public class FogOfWarClientEvents {
     public static void resetFogChunks() {
         MC.levelRenderer.allChanged();
         semiFrozenChunks.clear();
+        frozenChunks.clear();
     }
 
     public static void setEnabled(boolean value) {

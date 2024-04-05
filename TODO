@@ -12,10 +12,11 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 - Allow villagers to build bridges
-    - when any blocks are destroyed, replace them with water
+    - when any blocks are destroyed, replace them with the liquid underneath them if it exists
     - 2 structures (diagonal and straight) that alternate when scrolled
-    - built block-by-block always from the closest block to the villager at any one time
     - piglins build stone bridges instead with increased damage resistance and fire immunity
+    - remove from blocklist any fences that are adjacent to another bridge fence
+    - reduce selection dimensions after blocks are culled
 
     Done, testing needed:
     ---------------------
@@ -28,9 +29,9 @@ Known issues:
 
 
 
-- disable all hotkeys when chat window is open
+- find a way to enforce frozenChunks (ie. players shouldn't be able to F8 refresh to see enemy bases in fog)
+    - not clearing them on refresh causes major rendering glitches
 
-- revert mixin changes causing rendering bugs with F8 is used in fog
 
 
 TODO test in next playtest

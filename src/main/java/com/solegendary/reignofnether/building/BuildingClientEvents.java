@@ -85,8 +85,8 @@ public class BuildingClientEvents {
 
     private static final float MIN_NETHER_BLOCKS_PERCENT = 0.8f;
 
-    private static final float MIN_BRIDGE_WATER_BLOCKS_PERCENT = 0.2f;
-    private static final float MAX_BRIDGE_WATER_BLOCKS_PERCENT = 0.8f;
+    private static final float MIN_BRIDGE_WATER_BLOCKS_PERCENT = 0.05f;
+    private static final float MAX_BRIDGE_WATER_BLOCKS_PERCENT = 0.95f;
 
     // can only be one preselected building as you can't box-select them like units
     public static Building getPreselectedBuilding() {
@@ -184,7 +184,7 @@ public class BuildingClientEvents {
 
         for (BuildingBlock block : blocksToDraw) {
             if (buildingToPlace != null && buildingToPlace.getName().contains("Bridge") &&
-                MC.level != null && Bridge.shouldBlockExist(originPos.offset(0,1,0), block, MC.level))
+                MC.level != null && Bridge.shouldCullBlock(originPos.offset(0,1,0), block, MC.level))
                 continue;
 
             BlockRenderDispatcher renderer = MC.getBlockRenderer();
@@ -351,12 +351,12 @@ public class BuildingClientEvents {
         int waterBlocksClipping = 0;
         for (BuildingBlock block : blocksToDraw) {
             if (block.getBlockPos().getY() == 0 && MC.level != null) {
-                BlockPos bp = block.getBlockPos().offset(originPos);
+                BlockPos bp = block.getBlockPos().offset(originPos).offset(0,1,0);
                 BlockState bs = block.getBlockState(); // building block
                 Material bmWorld = MC.level.getBlockState(bp).getMaterial(); // world block
 
                 bridgeBlocks += 1;
-                if (bmWorld.isLiquid())
+                if (!bmWorld.isSolidBlocking())
                     waterBlocksClipping += 1;
             }
         }

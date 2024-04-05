@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.buildings.shared;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
@@ -36,10 +38,11 @@ public class Bridge extends Building {
 
     public Bridge(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
+
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.OAK_FENCE;
-        this.icon = new ResourceLocation("minecraft", "textures/block/oak_fence.png");
+        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/oak_fence.png");
 
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -50,10 +53,27 @@ public class Bridge extends Building {
         this.startingBlockTypes.add(Blocks.SPRUCE_FENCE);
 
         // remove any blocks that are clipping solid blocks
-        blocks.removeIf(b -> shouldBlockExist(new BlockPos(0,0,0), b, level));
+        blocks.removeIf(b -> shouldCullBlock(new BlockPos(0,0,0), b, level));
+
+        // get min/max/centre positions
+        this.minCorner = new BlockPos(
+                blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
+                blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
+                blocks.stream().min(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
+        );
+        this.maxCorner = new BlockPos(
+                blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getX())).get().getBlockPos().getX(),
+                blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getY())).get().getBlockPos().getY(),
+                blocks.stream().max(Comparator.comparing(block -> block.getBlockPos().getZ())).get().getBlockPos().getZ()
+        );
+        this.centrePos = new BlockPos(
+                (float) (this.minCorner.getX() + this.maxCorner.getX()) / 2,
+                (float) (this.minCorner.getY() + this.maxCorner.getY()) / 2,
+                (float) (this.minCorner.getZ() + this.maxCorner.getZ()) / 2
+        );
     }
 
-    public static boolean shouldBlockExist(BlockPos originPos, BuildingBlock b, Level level) {
+    public static boolean shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level) {
         BlockState bs = b.getBlockState();
         boolean isFenceOrWall = b.getBlockState().getBlock() instanceof FenceBlock ||
                 b.getBlockState().getBlock() instanceof WallBlock;
@@ -72,7 +92,7 @@ public class Bridge extends Building {
         Minecraft MC = Minecraft.getInstance();
         return new AbilityButton(
                 Bridge.buildingName,
-                new ResourceLocation("minecraft", "textures/block/oak_fence.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/oak_fence.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Bridge.class,
                 () -> false,
@@ -85,7 +105,10 @@ public class Bridge extends Building {
                         FormattedCharSequence.forward(Bridge.buildingName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A bridge you can build to cross water.", Style.EMPTY)
+                        FormattedCharSequence.forward("A bridge used to traverse water or lava. Must be built", Style.EMPTY),
+                        FormattedCharSequence.forward("over water or lava connecting to land or another bridge.", Style.EMPTY),
+                        FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.forward("Bridges can be repaired or attacked by anyone.", Style.EMPTY)
                 ),
                 null
         );

@@ -23,6 +23,7 @@
         "CameraMixin",
         "ClientLevelMixin",
         "ClientPacketMixin",
+        "ForgeGuiMixin",
         "FrustumMixin",
         "ItemInHandLayerMixin",
         "MobRendererMixin",
