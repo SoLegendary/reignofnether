@@ -14,7 +14,7 @@ Known issues:
 - Allow villagers to build bridges
     - 2 structures (diagonal and straight) that alternate when scrolled
     - piglins build stone bridges instead with increased damage resistance and fire immunity
-    - cull from block list any fences that are adjacent to another bridge fence
+    - blocks built should start from closest to the villager building (random villager if multiple)
 
     Done, testing needed:
     ---------------------
@@ -26,7 +26,9 @@ Known issues:
         - meaning this should also not provide vision
     - right clicking should not autoattack
     - reduce selection dimensions after blocks are culled
+    - cull from block list any fences that are adjacent to another bridge fence
 
+- Give a specific reason why a building can't be placed
 
 - find a way to enforce frozenChunks (ie. players shouldn't be able to F8 refresh to see enemy bases in fog)
     - not clearing them on refresh causes major rendering glitches

@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.piglins.*;
-import com.solegendary.reignofnether.building.buildings.shared.Bridge;
+import com.solegendary.reignofnether.building.buildings.shared.WoodenBridge;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -177,7 +177,7 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
             this.abilityButtons.add(FlameSanctuary.getBuildButton(Keybindings.keyY));
             this.abilityButtons.add(WitherShrine.getBuildButton(Keybindings.keyU));
             this.abilityButtons.add(Fortress.getBuildButton(Keybindings.keyI));
-            this.abilityButtons.add(Bridge.getBuildButton(Keybindings.keyB));
+            this.abilityButtons.add(WoodenBridge.getBuildButton(Keybindings.keyB));
         }
     }
 

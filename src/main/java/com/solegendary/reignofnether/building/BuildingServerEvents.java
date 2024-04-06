@@ -2,7 +2,8 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
-import com.solegendary.reignofnether.building.buildings.shared.Bridge;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.shared.WoodenBridge;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -22,14 +23,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
@@ -58,10 +57,10 @@ public class BuildingServerEvents {
                 building.forceChunk(true);
 
                 int minY = BuildingUtils.getMinCorner(building.blocks).getY();
-                if (building instanceof Bridge)
+                if (building instanceof AbstractBridge)
                     minY += 1; // because fences are on the 2nd layer
 
-                if (!(building instanceof Bridge)) {
+                if (!(building instanceof AbstractBridge)) {
                     for (BuildingBlock block : building.blocks) {
                         // place scaffolding underneath all solid blocks that don't have support
                         if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir()) {

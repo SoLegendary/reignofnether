@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.building.buildings.piglins.Portal;
-import com.solegendary.reignofnether.building.buildings.shared.Bridge;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -83,10 +83,10 @@ public class BuildingClientEvents {
     // 1 means you can't have any gaps at all, 0 means you can place buildings in mid-air
     private static final float MIN_SUPPORTED_BLOCKS_PERCENT = 0.6f;
 
-    private static final float MIN_NETHER_BLOCKS_PERCENT = 0.8f;
+    private static final float MIN_NETHER_BLOCKS_PERCENT = 0.8f; // piglin buildings must be build on at least 80% nether blocks
 
-    private static final float MIN_BRIDGE_WATER_BLOCKS_PERCENT = 0.05f;
-    private static final float MAX_BRIDGE_WATER_BLOCKS_PERCENT = 0.95f;
+    private static final float MIN_BRIDGE_LIQUID_BLOCKS_PERCENT = 0.20f; // at least 20% of covered blocks must be liquid
+    private static final float MAX_BRIDGE_LIQUID_BLOCKS_PERCENT = 0.95f; // at least 5% of covered blocks must be solid
 
     // can only be one preselected building as you can't box-select them like units
     public static Building getPreselectedBuilding() {
@@ -140,14 +140,20 @@ public class BuildingClientEvents {
     public static void setBuildingToPlace(Class<? extends Building> building) {
         buildingToPlace = building;
 
-        if (buildingToPlace != lastBuildingToPlace && buildingToPlace != null) {
+        if ((buildingToPlace != lastBuildingToPlace || isBuildingToPlaceABridge()) && buildingToPlace != null) {
             // load the new buildingToPlace's data
             try {
                 Class<?>[] paramTypes = { LevelAccessor.class };
                 Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData", paramTypes);
-                blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level);
+
+                if (isBuildingToPlaceABridge())
+                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level);
+                else
+                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level, "bridge_orthogonal");
+
                 buildingDimensions = BuildingUtils.getBuildingSize(blocksToDraw);
-                buildingRotation = Rotation.NONE;
+                if (!isBuildingToPlaceABridge())
+                    buildingRotation = Rotation.NONE;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -172,7 +178,7 @@ public class BuildingClientEvents {
     // draws the building with a green/red overlay (based on placement validity) at the target position
     // based on whether the location is valid or not
     // location should be 1 space above the selected spot
-    public static void drawBuildingToPlace(PoseStack matrix, BlockPos originPos) throws NoSuchFieldException {
+    public static void drawBuildingToPlace(PoseStack matrix, BlockPos originPos) {
         boolean valid = isBuildingPlacementValid(originPos);
 
         int minX = 999999;
@@ -184,7 +190,7 @@ public class BuildingClientEvents {
 
         for (BuildingBlock block : blocksToDraw) {
             if (buildingToPlace != null && buildingToPlace.getName().contains("Bridge") &&
-                MC.level != null && Bridge.shouldCullBlock(originPos.offset(0,1,0), block, MC.level))
+                MC.level != null && AbstractBridge.shouldCullBlock(originPos.offset(0,1,0), block, MC.level))
                 continue;
 
             BlockRenderDispatcher renderer = MC.getBlockRenderer();
@@ -292,7 +298,7 @@ public class BuildingClientEvents {
 
         for (Building building : buildings) {
             for (BuildingBlock block : building.blocks) {
-                if (isBuildingToPlaceABridge() && building instanceof Bridge)
+                if (isBuildingToPlaceABridge() && building instanceof AbstractBridge)
                     continue;
                 BlockPos bp = block.getBlockPos();
                 if (bp.getX() >= minPos.getX() && bp.getX() <= maxPos.getX() &&
@@ -366,8 +372,8 @@ public class BuildingClientEvents {
         }
         if (bridgeBlocks <= 0) return false; // avoid division by 0
         float percentWater = (float) waterBlocksClipping / (float) bridgeBlocks;
-        return percentWater > MIN_BRIDGE_WATER_BLOCKS_PERCENT &&
-                percentWater < MAX_BRIDGE_WATER_BLOCKS_PERCENT;
+        return percentWater > MIN_BRIDGE_LIQUID_BLOCKS_PERCENT &&
+                percentWater < MAX_BRIDGE_LIQUID_BLOCKS_PERCENT;
     }
 
     // gets the cursor position rotated according to the preselected building
@@ -457,14 +463,19 @@ public class BuildingClientEvents {
     }
 
     // on scroll rotate the building placement by 90deg by resorting the blocks list
-    // for some reason this event is run twice every scroll
-    private static boolean secondScrollEvt = true;
     @SubscribeEvent
-    public static void onMouseScroll(ScreenEvent.MouseScrolled evt) {
-        secondScrollEvt = !secondScrollEvt;
-        if (!secondScrollEvt) return;
+    public static void onMouseScroll(ScreenEvent.MouseScrolled.Post evt) {
+        if (buildingToPlace != null)  {
 
-        if (buildingToPlace != null) {
+            if (isBuildingToPlaceABridge()) {
+                if (buildingRotation == Rotation.NONE)
+                    buildingRotation = Rotation.CLOCKWISE_90;
+                else if (buildingRotation == Rotation.CLOCKWISE_90)
+                    buildingRotation = Rotation.NONE;
+                else
+                    buildingRotation = Rotation.NONE;
+            }
+
             Rotation rotation = evt.getScrollDelta() > 0 ? Rotation.CLOCKWISE_90 : Rotation.COUNTERCLOCKWISE_90;
             buildingRotation = buildingRotation.getRotated(rotation);
             blocksToDraw.replaceAll(buildingBlock -> buildingBlock.rotate(MC.level, rotation));
