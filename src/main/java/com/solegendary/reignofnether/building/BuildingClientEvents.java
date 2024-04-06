@@ -520,6 +520,9 @@ public class BuildingClientEvents {
         }
 
         BlockPos pos = getOriginPos();
+        if (isBuildingToPlaceABridge() && List.of(2,6).contains(bridgePlaceState))
+            pos.offset(new BlockPos(-5,0,5));
+
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             Building preSelBuilding = getPreselectedBuilding();
 
@@ -534,7 +537,7 @@ public class BuildingClientEvents {
 
                 if (Keybindings.shiftMod.isDown()) {
                     BuildingServerboundPacket.placeAndQueueBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
-                            builderIds.stream().mapToInt(i -> i).toArray());
+                            builderIds.stream().mapToInt(i -> i).toArray(), !isBridgeOrthogonal());
 
                     for (LivingEntity entity : getSelectedUnits()) {
                         if (entity instanceof Unit unit) {
@@ -546,7 +549,7 @@ public class BuildingClientEvents {
                     }
                 } else {
                     BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
-                            builderIds.stream().mapToInt(i -> i).toArray());
+                            builderIds.stream().mapToInt(i -> i).toArray(), !isBridgeOrthogonal());
                     setBuildingToPlace(null);
 
                     for (LivingEntity entity : getSelectedUnits()) {
@@ -696,12 +699,12 @@ public class BuildingClientEvents {
     }
 
     // place a building clientside that has already been registered on serverside
-    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int numBlocksToPlace) {
+    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int numBlocksToPlace, boolean isDiagonalBridge) {
         for (Building building : buildings)
             if (BuildingUtils.isPosPartOfAnyBuilding(true, pos, false))
                 return; // building already exists clientside
 
-        Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName);
+        Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName, isDiagonalBridge);
 
         // add a bunch of dummy blocks so clients know not to remove buildings before the first blocks get placed
         while (numBlocksToPlace > 0) {

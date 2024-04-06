@@ -33,8 +33,9 @@ public class WoodenBridge extends AbstractBridge {
     public final static String structureNameDiagonal = "bridge_diagonal";
     public final static ResourceCost cost = ResourceCosts.BRIDGE;
 
-    public WoodenBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getCulledBlocks(getAbsoluteBlockData(getRelativeBlockData(level, true), level, originPos, rotation), level));
+    public WoodenBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName, boolean diagonal) {
+        super(level, originPos, rotation, ownerName, diagonal,
+                getCulledBlocks(getAbsoluteBlockData(getRelativeBlockData(level, diagonal), level, originPos, rotation), level));
 
         this.name = buildingName;
         this.ownerName = ownerName;
@@ -50,8 +51,8 @@ public class WoodenBridge extends AbstractBridge {
         this.startingBlockTypes.add(Blocks.SPRUCE_FENCE);
     }
 
-    public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level, boolean orthogonal) {
-        return BuildingBlockData.getBuildingBlocks(orthogonal ? structureNameOrthogonal : structureNameDiagonal, level);
+    public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level, boolean diagonal) {
+        return BuildingBlockData.getBuildingBlocks(diagonal ? structureNameDiagonal : structureNameOrthogonal, level);
     }
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {

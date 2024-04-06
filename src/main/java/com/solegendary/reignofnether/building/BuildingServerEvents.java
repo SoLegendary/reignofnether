@@ -49,8 +49,9 @@ public class BuildingServerEvents {
         return buildings;
     }
 
-    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int[] builderUnitIds, boolean queue) {
-        Building building = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName);
+    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName,
+                                     int[] builderUnitIds, boolean queue, boolean isDiagonalBridge) {
+        Building building = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName, isDiagonalBridge);
         if (building != null) {
             if (building.canAfford(ownerName)) {
                 buildings.add(building);
@@ -96,7 +97,7 @@ public class BuildingServerEvents {
                         building.addToBlockPlaceQueue(block);
                 }
                 BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation,
-                        buildingName.toLowerCase().contains("bridge") ? "" : ownerName, building.blockPlaceQueue.size());
+                        buildingName.toLowerCase().contains("bridge") ? "" : ownerName, building.blockPlaceQueue.size(), isDiagonalBridge);
 
                 ResourcesServerEvents.addSubtractResources(new Resources(
                     building.ownerName,
@@ -189,7 +190,8 @@ public class BuildingServerEvents {
                 building.name,
                 building.rotation,
                 building.ownerName,
-                building.blockPlaceQueue.size()
+                building.blockPlaceQueue.size(),
+                building instanceof AbstractBridge bridge && bridge.isDiagonal
             );
     }
 
@@ -335,7 +337,8 @@ public class BuildingServerEvents {
                         building.name,
                         building.rotation,
                         building.ownerName,
-                        building.blockPlaceQueue.size()
+                        building.blockPlaceQueue.size(),
+                        building instanceof AbstractBridge bridge && bridge.isDiagonal
                 );
                 return;
             }

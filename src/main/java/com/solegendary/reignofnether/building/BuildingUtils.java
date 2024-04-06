@@ -92,10 +92,11 @@ public class BuildingUtils {
     }
 
     // given a string name return a new instance of that building
-    public static Building getNewBuilding(String buildingName, Level level, BlockPos pos, Rotation rotation, String ownerName) {
+    public static Building getNewBuilding(String buildingName, Level level, BlockPos pos, Rotation rotation, String ownerName, boolean isDiagonalBridge) {
         Building building = null;
         switch(buildingName) {
-            case WoodenBridge.buildingName -> building = new WoodenBridge(level, pos, rotation, ownerName);
+            case WoodenBridge.buildingName -> building = new WoodenBridge(level, pos, rotation, ownerName, isDiagonalBridge);
+
             case Stockpile.buildingName -> building = new Stockpile(level, pos, rotation, ownerName);
             case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation, ownerName);
             case Graveyard.buildingName -> building = new Graveyard(level, pos, rotation, ownerName);
