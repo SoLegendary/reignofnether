@@ -146,7 +146,7 @@ public class BuildingClientEvents {
                 if (isBuildingToPlaceABridge()) {
                     Class<?>[] paramTypes = { LevelAccessor.class, boolean.class };
                     Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData", paramTypes);
-                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level, isBridgeOrthogonal());
+                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level, isBridgeDiagonal());
                 }
                 else {
                     Class<?>[] paramTypes = { LevelAccessor.class };
@@ -467,14 +467,10 @@ public class BuildingClientEvents {
     // 1 - Diagonal,   0 deg
     // 2 - Orthogonal, 90 deg
     // 3 - Diagonal,   90 deg
-    // 4 - Orthogonal, 180 deg
-    // 5 - Diagonal,   180 deg
-    // 6 - Orthogonal, -90 deg
-    // 7 - Diagonal,   -90 deg
     private static int bridgePlaceState = 0;
 
-    public static boolean isBridgeOrthogonal() {
-        return bridgePlaceState % 2 == 0;
+    public static boolean isBridgeDiagonal() {
+        return bridgePlaceState % 2 != 0;
     }
 
     @SubscribeEvent
@@ -483,20 +479,20 @@ public class BuildingClientEvents {
             if (isBuildingToPlaceABridge()) {
                 bridgePlaceState += evt.getScrollDelta() > 0 ? 1 : -1;
                 if (bridgePlaceState < 0)
-                    bridgePlaceState = 7;
-                else if (bridgePlaceState > 7)
+                    bridgePlaceState = 3;
+                else if (bridgePlaceState > 3)
                     bridgePlaceState = 0;
                 try {
                     Class<?>[] paramTypes = { LevelAccessor.class, boolean.class };
                     Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData", paramTypes);
-                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level, isBridgeOrthogonal());
+                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level, isBridgeDiagonal());
                     buildingDimensions = BuildingUtils.getBuildingSize(blocksToDraw);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Rotation rotationDelta = List.of(0,1,4,5).contains(bridgePlaceState) ? Rotation.NONE : Rotation.CLOCKWISE_90;
+                Rotation rotationDelta = List.of(0,1).contains(bridgePlaceState) ? Rotation.NONE : Rotation.CLOCKWISE_90;
                 buildingRotation = rotationDelta;
-                if (List.of(2,6).contains(bridgePlaceState))
+                if (bridgePlaceState == 2)
                     blocksToDraw.replaceAll(buildingBlock -> buildingBlock.move(MC.level, new BlockPos(-5,0,5)));
                 blocksToDraw.replaceAll(buildingBlock -> buildingBlock.rotate(MC.level, rotationDelta));
             }
@@ -520,8 +516,8 @@ public class BuildingClientEvents {
         }
 
         BlockPos pos = getOriginPos();
-        if (isBuildingToPlaceABridge() && List.of(2,6).contains(bridgePlaceState))
-            pos.offset(new BlockPos(-5,0,5));
+        if (isBuildingToPlaceABridge() && bridgePlaceState == 2)
+            pos = pos.offset(new BlockPos(-5,0,-5));
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             Building preSelBuilding = getPreselectedBuilding();
@@ -537,7 +533,7 @@ public class BuildingClientEvents {
 
                 if (Keybindings.shiftMod.isDown()) {
                     BuildingServerboundPacket.placeAndQueueBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
-                            builderIds.stream().mapToInt(i -> i).toArray(), !isBridgeOrthogonal());
+                            builderIds.stream().mapToInt(i -> i).toArray(), isBridgeDiagonal());
 
                     for (LivingEntity entity : getSelectedUnits()) {
                         if (entity instanceof Unit unit) {
@@ -549,7 +545,7 @@ public class BuildingClientEvents {
                     }
                 } else {
                     BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
-                            builderIds.stream().mapToInt(i -> i).toArray(), !isBridgeOrthogonal());
+                            builderIds.stream().mapToInt(i -> i).toArray(), isBridgeDiagonal());
                     setBuildingToPlace(null);
 
                     for (LivingEntity entity : getSelectedUnits()) {
