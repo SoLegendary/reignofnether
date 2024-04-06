@@ -140,20 +140,20 @@ public class BuildingClientEvents {
     public static void setBuildingToPlace(Class<? extends Building> building) {
         buildingToPlace = building;
 
-        if ((buildingToPlace != lastBuildingToPlace || isBuildingToPlaceABridge()) && buildingToPlace != null) {
+        if ((buildingToPlace != lastBuildingToPlace) && buildingToPlace != null) {
             // load the new buildingToPlace's data
             try {
-                Class<?>[] paramTypes = { LevelAccessor.class };
-                Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData", paramTypes);
-
-                if (isBuildingToPlaceABridge())
+                if (isBuildingToPlaceABridge()) {
+                    Class<?>[] paramTypes = { LevelAccessor.class, boolean.class };
+                    Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData", paramTypes);
+                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level, isBridgeOrthogonal());
+                }
+                else {
+                    Class<?>[] paramTypes = { LevelAccessor.class };
+                    Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData", paramTypes);
                     blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level);
-                else
-                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level, "bridge_orthogonal");
-
+                }
                 buildingDimensions = BuildingUtils.getBuildingSize(blocksToDraw);
-                if (!isBuildingToPlaceABridge())
-                    buildingRotation = Rotation.NONE;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -463,22 +463,48 @@ public class BuildingClientEvents {
     }
 
     // on scroll rotate the building placement by 90deg by resorting the blocks list
+    // 0 - Orthogonal, 0 deg
+    // 1 - Diagonal,   0 deg
+    // 2 - Orthogonal, 90 deg
+    // 3 - Diagonal,   90 deg
+    // 4 - Orthogonal, 180 deg
+    // 5 - Diagonal,   180 deg
+    // 6 - Orthogonal, -90 deg
+    // 7 - Diagonal,   -90 deg
+    private static int bridgePlaceState = 0;
+
+    public static boolean isBridgeOrthogonal() {
+        return bridgePlaceState % 2 == 0;
+    }
+
     @SubscribeEvent
     public static void onMouseScroll(ScreenEvent.MouseScrolled.Post evt) {
-        if (buildingToPlace != null)  {
-
+        if (buildingToPlace != null) {
             if (isBuildingToPlaceABridge()) {
-                if (buildingRotation == Rotation.NONE)
-                    buildingRotation = Rotation.CLOCKWISE_90;
-                else if (buildingRotation == Rotation.CLOCKWISE_90)
-                    buildingRotation = Rotation.NONE;
-                else
-                    buildingRotation = Rotation.NONE;
+                bridgePlaceState += evt.getScrollDelta() > 0 ? 1 : -1;
+                if (bridgePlaceState < 0)
+                    bridgePlaceState = 7;
+                else if (bridgePlaceState > 7)
+                    bridgePlaceState = 0;
+                try {
+                    Class<?>[] paramTypes = { LevelAccessor.class, boolean.class };
+                    Method getRelativeBlockData = buildingToPlace.getMethod("getRelativeBlockData", paramTypes);
+                    blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level, isBridgeOrthogonal());
+                    buildingDimensions = BuildingUtils.getBuildingSize(blocksToDraw);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Rotation rotationDelta = List.of(0,1,4,5).contains(bridgePlaceState) ? Rotation.NONE : Rotation.CLOCKWISE_90;
+                buildingRotation = rotationDelta;
+                if (List.of(2,6).contains(bridgePlaceState))
+                    blocksToDraw.replaceAll(buildingBlock -> buildingBlock.move(MC.level, new BlockPos(-5,0,5)));
+                blocksToDraw.replaceAll(buildingBlock -> buildingBlock.rotate(MC.level, rotationDelta));
             }
-
-            Rotation rotation = evt.getScrollDelta() > 0 ? Rotation.CLOCKWISE_90 : Rotation.COUNTERCLOCKWISE_90;
-            buildingRotation = buildingRotation.getRotated(rotation);
-            blocksToDraw.replaceAll(buildingBlock -> buildingBlock.rotate(MC.level, rotation));
+            else {
+                Rotation rotationDelta = evt.getScrollDelta() > 0 ? Rotation.CLOCKWISE_90 : Rotation.COUNTERCLOCKWISE_90;
+                buildingRotation = buildingRotation.getRotated(rotationDelta);
+                blocksToDraw.replaceAll(buildingBlock -> buildingBlock.rotate(MC.level, rotationDelta));
+            }
         }
     }
 

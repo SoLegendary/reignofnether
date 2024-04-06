@@ -37,7 +37,7 @@ public class ForgeGuiMixin extends Gui {
         CustomizeGuiOverlayEvent.Chat event = new CustomizeGuiOverlayEvent.Chat(this.minecraft.getWindow(), pStack, this.minecraft.getFrameTime(), 0, height - 48);
         MinecraftForge.EVENT_BUS.post(event);
         pStack.pushPose();
-        pStack.translate(event.getPosX(), event.getPosY() - 45, 0.0);
+        pStack.translate(event.getPosX(), event.getPosY() - 40, 0.0);
         this.chat.render(pStack, this.tickCount);
         pStack.popPose();
         this.minecraft.getProfiler().pop();

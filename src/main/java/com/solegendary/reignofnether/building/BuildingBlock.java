@@ -31,6 +31,14 @@ public class BuildingBlock {
         );
     }
 
+    // rotation should only ever be done on a relative BlockPos or it will rotate about world (0,0)
+    public BuildingBlock move(LevelAccessor level, BlockPos offset) {
+        return new BuildingBlock(
+            this.blockPos.offset(offset),
+            this.blockState
+        );
+    }
+
     public boolean isPlaced(Level level) {
         BlockState bs;
         if (level.isClientSide())
