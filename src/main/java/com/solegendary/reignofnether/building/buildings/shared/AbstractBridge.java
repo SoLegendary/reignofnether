@@ -18,8 +18,11 @@ import java.util.List;
 
 public abstract class AbstractBridge extends Building {
 
-    public AbstractBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> culledBlocks) {
+    public final boolean isDiagonal;
+
+    public AbstractBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName, boolean isDiagonal, ArrayList<BuildingBlock> culledBlocks) {
         super(level, originPos, rotation, ownerName, culledBlocks,false);
+        this.isDiagonal = isDiagonal;
     }
 
     public static boolean shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level) {

@@ -28,13 +28,14 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBl
 
 public class WoodenBridge extends AbstractBridge {
 
-    public final static String buildingName = "Abstract Bridge";
+    public final static String buildingName = "Wooden Bridge";
     public final static String structureNameOrthogonal = "bridge_orthogonal";
     public final static String structureNameDiagonal = "bridge_diagonal";
     public final static ResourceCost cost = ResourceCosts.BRIDGE;
 
-    public WoodenBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getCulledBlocks(getAbsoluteBlockData(getRelativeBlockData(level, true), level, originPos, rotation), level));
+    public WoodenBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName, boolean diagonal) {
+        super(level, originPos, rotation, ownerName, diagonal,
+                getCulledBlocks(getAbsoluteBlockData(getRelativeBlockData(level, diagonal), level, originPos, rotation), level));
 
         this.name = buildingName;
         this.ownerName = ownerName;
@@ -50,8 +51,8 @@ public class WoodenBridge extends AbstractBridge {
         this.startingBlockTypes.add(Blocks.SPRUCE_FENCE);
     }
 
-    public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level, boolean orthogonal) {
-        return BuildingBlockData.getBuildingBlocks(orthogonal ? structureNameOrthogonal : structureNameDiagonal, level);
+    public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level, boolean diagonal) {
+        return BuildingBlockData.getBuildingBlocks(diagonal ? structureNameDiagonal : structureNameOrthogonal, level);
     }
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {
@@ -71,8 +72,9 @@ public class WoodenBridge extends AbstractBridge {
                         FormattedCharSequence.forward(WoodenBridge.buildingName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A bridge used to traverse water or lava. Must be built", Style.EMPTY),
-                        FormattedCharSequence.forward("over water or lava connecting to land or another bridge.", Style.EMPTY),
+                        FormattedCharSequence.forward("A bridge used to traverse water. Must be built", Style.EMPTY),
+                        FormattedCharSequence.forward("over water connecting to land or another bridge.", Style.EMPTY),
+                        FormattedCharSequence.forward("You can build it over lava too, but don't expect much!", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Bridges can be repaired or attacked by anyone.", Style.EMPTY)
                 ),

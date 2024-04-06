@@ -12,12 +12,14 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 - Allow villagers to build bridges
-    - 2 structures (diagonal and straight) that alternate when scrolled
     - piglins build stone bridges instead with increased damage resistance and fire immunity
     - blocks built should start from closest to the villager building (random villager if multiple)
+    - overlapping too many bridges can sometimes cause an issue with missing buildings (registered only on serverside)
+        - maybe enforce a max blocks overlapping other bridges?
 
     Done, testing needed:
     ---------------------
+    - 2 structures (diagonal and straight) that alternate when scrolled
     - when any blocks are destroyed, replace them with the liquid underneath them if it exists
     - when placed, remove any blocks that clip solid terrain or other bridges from the block list
         - test that we can build through seaweed
