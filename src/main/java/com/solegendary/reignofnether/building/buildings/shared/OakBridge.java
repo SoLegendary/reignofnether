@@ -26,14 +26,14 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class WoodenBridge extends AbstractBridge {
+public class OakBridge extends AbstractBridge {
 
-    public final static String buildingName = "Wooden Bridge";
-    public final static String structureNameOrthogonal = "bridge_wooden_orthogonal";
-    public final static String structureNameDiagonal = "bridge_wooden_diagonal";
-    public final static ResourceCost cost = ResourceCosts.WOODEN_BRIDGE;
+    public final static String buildingName = "Oak Bridge";
+    public final static String structureNameOrthogonal = "bridge_oak_orthogonal";
+    public final static String structureNameDiagonal = "bridge_oak_diagonal";
+    public final static ResourceCost cost = ResourceCosts.OAK_BRIDGE;
 
-    public WoodenBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName, boolean diagonal) {
+    public OakBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName, boolean diagonal) {
         super(level, originPos, rotation, ownerName, diagonal,
                 getCulledBlocks(getAbsoluteBlockData(getRelativeBlockData(level, diagonal), level, originPos, rotation), level));
 
@@ -58,23 +58,23 @@ public class WoodenBridge extends AbstractBridge {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         Minecraft MC = Minecraft.getInstance();
         return new AbilityButton(
-                WoodenBridge.buildingName,
+                OakBridge.buildingName,
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/oak_fence.png"),
                 hotkey,
-                () -> BuildingClientEvents.getBuildingToPlace() == WoodenBridge.class,
+                () -> BuildingClientEvents.getBuildingToPlace() == OakBridge.class,
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
                         BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(WoodenBridge.class),
+                () -> BuildingClientEvents.setBuildingToPlace(OakBridge.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(WoodenBridge.buildingName, Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(SpruceBridge.buildingName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A bridge used to traverse water. Must be built", Style.EMPTY),
-                        FormattedCharSequence.forward("over water connecting to land or another bridge.", Style.EMPTY),
-                        FormattedCharSequence.forward("Can be built over lava too (but isn't fireproof!)", Style.EMPTY),
+                        FormattedCharSequence.forward("A bridge built to traverse water.", Style.EMPTY),
+                        FormattedCharSequence.forward("Must be connected to land or another bridge.", Style.EMPTY),
+                        FormattedCharSequence.forward("Can be built over lava (but isn't fireproof!)", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Bridges can be repaired or attacked by anyone.", Style.EMPTY)
                 ),

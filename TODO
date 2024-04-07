@@ -12,10 +12,12 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 - Allow villagers to build bridges
-    - blocks built should start from closest to the villager building (random villager if multiple)
+    - check that players joining a map with bridges existing see them correctly clientside
+    - include unbuilt bridge blocks as overlapping solid blocks during validity check
 
     Done, testing needed:
     ---------------------
+    - building placement validity check is broken on bridgePlaceState=2 (clientside issue)
     - 2 structures (diagonal and straight) that alternate when scrolled
     - when any blocks are destroyed, replace them with the liquid underneath them if it exists
         - including on building destruction

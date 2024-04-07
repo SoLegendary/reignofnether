@@ -1,9 +1,8 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.shared.WoodenBridge;
+import com.solegendary.reignofnether.building.buildings.shared.OakBridge;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
-import com.solegendary.reignofnether.building.buildings.shared.WoodenBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -188,7 +187,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             this.abilityButtons.add(Library.getBuildButton(Keybindings.keyO));
             this.abilityButtons.add(Castle.getBuildButton(Keybindings.keyP));
             this.abilityButtons.add(IronGolemBuilding.getBuildButton(Keybindings.keyL));
-            this.abilityButtons.add(WoodenBridge.getBuildButton(Keybindings.keyB));
+            this.abilityButtons.add(OakBridge.getBuildButton(Keybindings.keyB));
         }
     }
 

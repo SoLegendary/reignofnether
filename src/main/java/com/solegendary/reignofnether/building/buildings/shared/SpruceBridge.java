@@ -26,21 +26,21 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class BlackstoneBridge extends AbstractBridge {
+public class SpruceBridge extends AbstractBridge {
 
-    public final static String buildingName = "Blackstone Bridge";
-    public final static String structureNameOrthogonal = "bridge_blackstone_orthogonal";
-    public final static String structureNameDiagonal = "bridge_blackstone_diagonal";
-    public final static ResourceCost cost = ResourceCosts.BLACKSTONE_BRIDGE;
+    public final static String buildingName = "Spruce Bridge";
+    public final static String structureNameOrthogonal = "bridge_spruce_orthogonal";
+    public final static String structureNameDiagonal = "bridge_spruce_diagonal";
+    public final static ResourceCost cost = ResourceCosts.SPRUCE_BRIDGE;
 
-    public BlackstoneBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName, boolean diagonal) {
+    public SpruceBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName, boolean diagonal) {
         super(level, originPos, rotation, ownerName, diagonal,
                 getCulledBlocks(getAbsoluteBlockData(getRelativeBlockData(level, diagonal), level, originPos, rotation), level));
 
         this.name = buildingName;
         this.ownerName = ownerName;
-        this.portraitBlock = Blocks.NETHER_BRICK_FENCE;
-        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/netherbrick_fence.png");
+        this.portraitBlock = Blocks.DARK_OAK_FENCE;
+        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/spruce_fence.png");
 
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -48,7 +48,7 @@ public class BlackstoneBridge extends AbstractBridge {
         this.popSupply = cost.population;
         this.buildTimeModifier = 1.0f;
 
-        this.startingBlockTypes.add(Blocks.NETHER_BRICK_FENCE);
+        this.startingBlockTypes.add(Blocks.DARK_OAK_FENCE);
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level, boolean diagonal) {
@@ -58,22 +58,23 @@ public class BlackstoneBridge extends AbstractBridge {
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         Minecraft MC = Minecraft.getInstance();
         return new AbilityButton(
-                BlackstoneBridge.buildingName,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/netherbrick_fence.png"),
+                SpruceBridge.buildingName,
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/spruce_fence.png"),
                 hotkey,
-                () -> BuildingClientEvents.getBuildingToPlace() == BlackstoneBridge.class,
+                () -> BuildingClientEvents.getBuildingToPlace() == SpruceBridge.class,
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
                         BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(BlackstoneBridge.class),
+                () -> BuildingClientEvents.setBuildingToPlace(SpruceBridge.class),
                 null,
                 List.of(
                         FormattedCharSequence.forward(SpruceBridge.buildingName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A bridge built to traverse water or lava.", Style.EMPTY),
+                        FormattedCharSequence.forward("A bridge built to traverse water.", Style.EMPTY),
                         FormattedCharSequence.forward("Must be connected to land or another bridge.", Style.EMPTY),
+                        FormattedCharSequence.forward("Can be built over lava (but isn't fireproof!)", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("Bridges can be repaired or attacked by anyone.", Style.EMPTY)
                 ),

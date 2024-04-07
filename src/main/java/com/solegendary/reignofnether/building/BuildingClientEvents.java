@@ -85,6 +85,7 @@ public class BuildingClientEvents {
 
     private static final float MIN_NETHER_BLOCKS_PERCENT = 0.8f; // piglin buildings must be build on at least 80% nether blocks
 
+    private static final int MIN_BRIDGE_SIZE = 10; // a bridge must have at least 10 blocks to be placeable
     private static final float MIN_BRIDGE_LIQUID_BLOCKS_PERCENT = 0.20f; // at least 20% of covered blocks must be liquid
     private static final float MAX_BRIDGE_LIQUID_BLOCKS_PERCENT = 0.95f; // at least 5% of covered blocks must be solid
 
@@ -240,11 +241,14 @@ public class BuildingClientEvents {
     }
 
     public static boolean isBuildingPlacementValid(BlockPos originPos) {
+        if (isBuildingToPlaceABridge() && bridgePlaceState == 2)
+            originPos = originPos.offset(-5,0,5);
+
         return !isBuildingPlacementInAir(originPos) &&
                !isBuildingPlacementClipping(originPos) &&
                !isOverlappingAnyOtherBuilding() &&
                 isNonPiglinOrOnNetherBlocks(originPos) &&
-                isNonBridgeOrMostlyOnLiquid(originPos) &&
+                isNonBridgeOrValidBridge(originPos) &&
                 FogOfWarClientEvents.isInBrightChunk(originPos);
     }
 
@@ -338,9 +342,16 @@ public class BuildingClientEvents {
     }
 
     // bridges should be connected to land or another bridge and be touching water
-    private static boolean isNonBridgeOrMostlyOnLiquid(BlockPos originPos) {
+    private static boolean isNonBridgeOrValidBridge(BlockPos originPos) {
         if (!isBuildingToPlaceABridge())
             return true;
+
+        int placeableBlocks = 0;
+        for (BuildingBlock block : blocksToDraw)
+            if (!AbstractBridge.shouldCullBlock(originPos.offset(0,1,0), block, MC.level) && !block.getBlockState().isAir())
+                placeableBlocks += 1;
+        if (placeableBlocks < MIN_BRIDGE_SIZE)
+            return false;
 
         int bridgeBlocks = 0;
         int waterBlocksClipping = 0;
@@ -512,8 +523,6 @@ public class BuildingClientEvents {
         }
 
         BlockPos pos = getOriginPos();
-        if (isBuildingToPlaceABridge() && bridgePlaceState == 2)
-            pos = pos.offset(new BlockPos(-5,0,-5));
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             Building preSelBuilding = getPreselectedBuilding();
@@ -528,7 +537,9 @@ public class BuildingClientEvents {
                         builderIds.add(builderEntity.getId());
 
                 if (Keybindings.shiftMod.isDown()) {
-                    BuildingServerboundPacket.placeAndQueueBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
+                    BuildingServerboundPacket.placeAndQueueBuilding(buildingName,
+                            isBuildingToPlaceABridge() && bridgePlaceState == 2 ? pos.offset(-5,0,-5) : pos,
+                            buildingRotation, MC.player.getName().getString(),
                             builderIds.stream().mapToInt(i -> i).toArray(), isBridgeDiagonal());
 
                     for (LivingEntity entity : getSelectedUnits()) {
@@ -540,7 +551,9 @@ public class BuildingClientEvents {
                         }
                     }
                 } else {
-                    BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
+                    BuildingServerboundPacket.placeBuilding(buildingName,
+                            isBuildingToPlaceABridge() && bridgePlaceState == 2 ? pos.offset(-5,0,-5) : pos,
+                            buildingRotation, MC.player.getName().getString(),
                             builderIds.stream().mapToInt(i -> i).toArray(), isBridgeDiagonal());
                     setBuildingToPlace(null);
 
@@ -592,8 +605,9 @@ public class BuildingClientEvents {
                         addSelectedBuilding(preSelBuilding);
                     }
                 }
-            } else if (!isBuildingPlacementValid(pos)) {
-                HudClientEvents.showTemporaryMessage("Invalid building placement");
+            } else {
+                if (!isBuildingPlacementValid(pos))
+                    HudClientEvents.showTemporaryMessage("Invalid building placement");
             }
 
             // deselect any non-owned buildings if we managed to select them with owned buildings

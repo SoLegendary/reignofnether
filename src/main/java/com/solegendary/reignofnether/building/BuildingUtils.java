@@ -5,8 +5,9 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.building.buildings.monsters.*;
 import com.solegendary.reignofnether.building.buildings.piglins.*;
 import com.solegendary.reignofnether.building.buildings.shared.BlackstoneBridge;
+import com.solegendary.reignofnether.building.buildings.shared.SpruceBridge;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
-import com.solegendary.reignofnether.building.buildings.shared.WoodenBridge;
+import com.solegendary.reignofnether.building.buildings.shared.OakBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -96,7 +97,8 @@ public class BuildingUtils {
     public static Building getNewBuilding(String buildingName, Level level, BlockPos pos, Rotation rotation, String ownerName, boolean isDiagonalBridge) {
         Building building = null;
         switch(buildingName) {
-            case WoodenBridge.buildingName -> building = new WoodenBridge(level, pos, rotation, ownerName, isDiagonalBridge);
+            case OakBridge.buildingName -> building = new OakBridge(level, pos, rotation, ownerName, isDiagonalBridge);
+            case SpruceBridge.buildingName -> building = new SpruceBridge(level, pos, rotation, ownerName, isDiagonalBridge);
             case BlackstoneBridge.buildingName -> building = new BlackstoneBridge(level, pos, rotation, ownerName, isDiagonalBridge);
 
             case Stockpile.buildingName -> building = new Stockpile(level, pos, rotation, ownerName);

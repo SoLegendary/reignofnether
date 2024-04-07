@@ -2,8 +2,9 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.monsters.*;
+import com.solegendary.reignofnether.building.buildings.shared.SpruceBridge;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
-import com.solegendary.reignofnether.building.buildings.shared.WoodenBridge;
+import com.solegendary.reignofnether.building.buildings.shared.OakBridge;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -189,7 +190,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
             this.abilityButtons.add(SpiderLair.getBuildButton(Keybindings.keyI));
             this.abilityButtons.add(Laboratory.getBuildButton(Keybindings.keyO));
             this.abilityButtons.add(Stronghold.getBuildButton(Keybindings.keyP));
-            this.abilityButtons.add(WoodenBridge.getBuildButton(Keybindings.keyB));
+            this.abilityButtons.add(SpruceBridge.getBuildButton(Keybindings.keyB));
         }
     }
 

@@ -323,9 +323,14 @@ public abstract class Building {
                     validBlocks.add(block);
             }
         }
-
-        if (validBlocks.size() > 0)
+        if (validBlocks.size() > 0) {
+            if (this instanceof AbstractBridge) {
+                ArrayList<WorkerUnit> builders = getBuilders(this.level);
+                BlockPos builderPos = ((LivingEntity) builders.get(new Random().nextInt(builders.size()))).getOnPos();
+                validBlocks.sort(Comparator.comparing(bb -> bb.getBlockPos().distSqr(builderPos)));
+            }
             this.blockPlaceQueue.add(validBlocks.get(0));
+        }
     }
 
     private void extinguishFires(ServerLevel level) {

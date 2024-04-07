@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.unit.units.piglins;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.piglins.*;
 import com.solegendary.reignofnether.building.buildings.shared.BlackstoneBridge;
-import com.solegendary.reignofnether.building.buildings.shared.WoodenBridge;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
