@@ -13,10 +13,10 @@ Known issues:
 
 - Allow villagers to build bridges
     - check that players joining a map with bridges existing see them correctly clientside
-    - include unbuilt bridge blocks as overlapping solid blocks during validity check
 
     Done, testing needed:
     ---------------------
+    - include unbuilt bridge blocks as overlapping solid blocks during validity check
     - building placement validity check is broken on bridgePlaceState=2 (clientside issue)
     - 2 structures (diagonal and straight) that alternate when scrolled
     - when any blocks are destroyed, replace them with the liquid underneath them if it exists

@@ -34,13 +34,16 @@ public abstract class AbstractBridge extends Building {
         Material bm = level.getBlockState(bp).getMaterial();
         Material bmBelow = level.getBlockState(bp.below()).getMaterial();
 
+        // cull if overlaps another bridge block that isn't built yet
+        if (BuildingUtils.isPosInsideAnyBuilding(level.isClientSide, bp))
+            return true;
+
+        // cull if fence is adjacent to another bridge block
         for (BlockPos bpAdj : List.of(bp.north(), bp.south(), bp.east(), bp.west())) {
             BlockState bsAdj = level.getBlockState(bpAdj);
             if (isFenceWallOrAir && !bsAdj.isAir() && BuildingUtils.isPosInsideAnyBuilding(level.isClientSide, bpAdj))
                 return true;
         }
-
-
         return bm.isSolidBlocking() || (isFenceWallOrAir && bmBelow.isSolidBlocking());
     }
 
