@@ -12,10 +12,13 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 - Allow villagers to build bridges
-    - piglins build stone bridges instead with increased damage resistance and fire immunity
     - blocks built should start from closest to the villager building (random villager if multiple)
     - overlapping too many bridges can sometimes cause an issue with missing buildings (registered only on serverside)
         - maybe enforce a max blocks overlapping other bridges?
+
+    - causes defeat if destroyed - is serverside ownername correctly blanked?
+    - replace with liquid on building destroyed as well
+    - check that bridge placement doesn't lag when viewing (due to shouldCullBlock being expensive)
 
     Done, testing needed:
     ---------------------

@@ -4,6 +4,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.monsters.*;
 import com.solegendary.reignofnether.building.buildings.piglins.*;
+import com.solegendary.reignofnether.building.buildings.shared.BlackstoneBridge;
 import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
 import com.solegendary.reignofnether.building.buildings.shared.WoodenBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
@@ -96,6 +97,7 @@ public class BuildingUtils {
         Building building = null;
         switch(buildingName) {
             case WoodenBridge.buildingName -> building = new WoodenBridge(level, pos, rotation, ownerName, isDiagonalBridge);
+            case BlackstoneBridge.buildingName -> building = new BlackstoneBridge(level, pos, rotation, ownerName, isDiagonalBridge);
 
             case Stockpile.buildingName -> building = new Stockpile(level, pos, rotation, ownerName);
             case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation, ownerName);

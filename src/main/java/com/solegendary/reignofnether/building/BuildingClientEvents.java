@@ -115,7 +115,7 @@ public class BuildingClientEvents {
     }
 
     private static boolean isBuildingToPlaceABridge() {
-        return buildingToPlace != null && buildingToPlace.getName().contains("Bridge");
+        return buildingToPlace != null && buildingToPlace.getName().toLowerCase().contains("bridge");
     }
 
     // switch to the building with the least production, so we can spread out production items
@@ -154,6 +154,7 @@ public class BuildingClientEvents {
                     blocksToDraw = (ArrayList<BuildingBlock>) getRelativeBlockData.invoke(null, MC.level);
                 }
                 buildingDimensions = BuildingUtils.getBuildingSize(blocksToDraw);
+                buildingRotation = Rotation.NONE;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -189,7 +190,7 @@ public class BuildingClientEvents {
         int maxZ = -999999;
 
         for (BuildingBlock block : blocksToDraw) {
-            if (buildingToPlace != null && buildingToPlace.getName().contains("Bridge") &&
+            if (buildingToPlace != null && buildingToPlace.getName().toLowerCase().contains("bridge") &&
                 MC.level != null && AbstractBridge.shouldCullBlock(originPos.offset(0,1,0), block, MC.level))
                 continue;
 
@@ -243,7 +244,7 @@ public class BuildingClientEvents {
                !isBuildingPlacementClipping(originPos) &&
                !isOverlappingAnyOtherBuilding() &&
                 isNonPiglinOrOnNetherBlocks(originPos) &&
-                isNonBridgeOrMostlyOnWater(originPos) &&
+                isNonBridgeOrMostlyOnLiquid(originPos) &&
                 FogOfWarClientEvents.isInBrightChunk(originPos);
     }
 
@@ -337,37 +338,32 @@ public class BuildingClientEvents {
     }
 
     // bridges should be connected to land or another bridge and be touching water
-    private static boolean isNonBridgeOrMostlyOnWater(BlockPos originPos) {
+    private static boolean isNonBridgeOrMostlyOnLiquid(BlockPos originPos) {
         if (!isBuildingToPlaceABridge())
             return true;
 
-        // top y level should not be touching any water at all
-        for (BuildingBlock block : blocksToDraw) {
-            if (block.getBlockPos().getY() == 1 && MC.level != null) {
-                BlockPos bp = block.getBlockPos().offset(originPos).offset(0,1,0);
-                BlockState bs = block.getBlockState(); // building block
-                Material bmWorld = MC.level.getBlockState(bp).getMaterial(); // world block
-
-                if ((bs.getBlock() instanceof FenceBlock || bs.getBlock() instanceof WallBlock) &&
-                    bmWorld.isLiquid())
-                    return false;
-            }
-        }
         int bridgeBlocks = 0;
         int waterBlocksClipping = 0;
         for (BuildingBlock block : blocksToDraw) {
-            if (block.getBlockPos().getY() == 0 && MC.level != null) {
+            if (MC.level != null) {
                 BlockPos bp = block.getBlockPos().offset(originPos).offset(0,1,0);
                 BlockState bs = block.getBlockState(); // building block
                 BlockState bsWorld = MC.level.getBlockState(bp); // world block
                 Material bmWorld = bsWorld.getMaterial(); // world block
 
+                // top y level should not be touching any water at all
+                if (block.getBlockPos().getY() == 1)
+                    if ((bs.getBlock() instanceof FenceBlock || bs.getBlock() instanceof WallBlock) &&
+                            bmWorld.isLiquid())
+                        return false;
 
-                bridgeBlocks += 1;
-                if (bmWorld.isLiquid() ||
-                    bsWorld.getBlock() instanceof SeagrassBlock ||
-                    bsWorld.getBlock() instanceof KelpBlock)
-                    waterBlocksClipping += 1;
+                if (block.getBlockPos().getY() == 0) {
+                    bridgeBlocks += 1;
+                    if (bmWorld.isLiquid() ||
+                            bsWorld.getBlock() instanceof SeagrassBlock ||
+                            bsWorld.getBlock() instanceof KelpBlock)
+                        waterBlocksClipping += 1;
+                }
             }
         }
         if (bridgeBlocks <= 0) return false; // avoid division by 0
@@ -532,7 +528,8 @@ public class BuildingClientEvents {
                         builderIds.add(builderEntity.getId());
 
                 if (Keybindings.shiftMod.isDown()) {
-                    BuildingServerboundPacket.placeAndQueueBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
+                    BuildingServerboundPacket.placeAndQueueBuilding(buildingName, pos, buildingRotation,
+                            buildingName.toLowerCase().contains("bridge") ? "" : MC.player.getName().getString(),
                             builderIds.stream().mapToInt(i -> i).toArray(), isBridgeDiagonal());
 
                     for (LivingEntity entity : getSelectedUnits()) {
@@ -544,7 +541,8 @@ public class BuildingClientEvents {
                         }
                     }
                 } else {
-                    BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
+                    BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation,
+                            buildingName.toLowerCase().contains("bridge") ? "" : MC.player.getName().getString(),
                             builderIds.stream().mapToInt(i -> i).toArray(), isBridgeDiagonal());
                     setBuildingToPlace(null);
 

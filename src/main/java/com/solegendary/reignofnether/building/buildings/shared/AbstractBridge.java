@@ -34,9 +34,12 @@ public abstract class AbstractBridge extends Building {
         Material bm = level.getBlockState(bp).getMaterial();
         Material bmBelow = level.getBlockState(bp.below()).getMaterial();
 
-        for (BlockPos bpAdj : List.of(bp.north(), bp.south(), bp.east(), bp.west()))
-            if (isFenceWallOrAir && BuildingUtils.isPosPartOfAnyBuilding(level.isClientSide, bpAdj, false))
+        for (BlockPos bpAdj : List.of(bp.north(), bp.south(), bp.east(), bp.west())) {
+            BlockState bsAdj = level.getBlockState(bpAdj);
+            if (isFenceWallOrAir && !bsAdj.isAir() && BuildingUtils.isPosInsideAnyBuilding(level.isClientSide, bpAdj))
                 return true;
+        }
+
 
         return bm.isSolidBlocking() || (isFenceWallOrAir && bmBelow.isSolidBlocking());
     }

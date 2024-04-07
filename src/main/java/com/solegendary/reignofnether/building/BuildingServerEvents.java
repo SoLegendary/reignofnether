@@ -97,7 +97,8 @@ public class BuildingServerEvents {
                         building.addToBlockPlaceQueue(block);
                 }
                 BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation,
-                        buildingName.toLowerCase().contains("bridge") ? "" : ownerName, building.blockPlaceQueue.size(), isDiagonalBridge);
+                        buildingName.toLowerCase().contains("bridge") ? "" : ownerName,
+                        building.blockPlaceQueue.size(), isDiagonalBridge);
 
                 ResourcesServerEvents.addSubtractResources(new Resources(
                     building.ownerName,
