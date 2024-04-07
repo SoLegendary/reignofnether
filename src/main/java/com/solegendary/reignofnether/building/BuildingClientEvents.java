@@ -528,8 +528,7 @@ public class BuildingClientEvents {
                         builderIds.add(builderEntity.getId());
 
                 if (Keybindings.shiftMod.isDown()) {
-                    BuildingServerboundPacket.placeAndQueueBuilding(buildingName, pos, buildingRotation,
-                            buildingName.toLowerCase().contains("bridge") ? "" : MC.player.getName().getString(),
+                    BuildingServerboundPacket.placeAndQueueBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
                             builderIds.stream().mapToInt(i -> i).toArray(), isBridgeDiagonal());
 
                     for (LivingEntity entity : getSelectedUnits()) {
@@ -541,8 +540,7 @@ public class BuildingClientEvents {
                         }
                     }
                 } else {
-                    BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation,
-                            buildingName.toLowerCase().contains("bridge") ? "" : MC.player.getName().getString(),
+                    BuildingServerboundPacket.placeBuilding(buildingName, pos, buildingRotation, MC.player.getName().getString(),
                             builderIds.stream().mapToInt(i -> i).toArray(), isBridgeDiagonal());
                     setBuildingToPlace(null);
 

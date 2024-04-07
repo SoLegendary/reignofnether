@@ -51,7 +51,10 @@ public class BuildingServerEvents {
 
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName,
                                      int[] builderUnitIds, boolean queue, boolean isDiagonalBridge) {
-        Building building = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName, isDiagonalBridge);
+
+        boolean isBridge = buildingName.toLowerCase().contains("bridge");
+        Building building = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, isBridge ? "" : ownerName, isDiagonalBridge);
+
         if (building != null) {
             if (building.canAfford(ownerName)) {
                 buildings.add(building);
@@ -96,8 +99,7 @@ public class BuildingServerEvents {
                             building.startingBlockTypes.contains(block.getBlockState().getBlock()))
                         building.addToBlockPlaceQueue(block);
                 }
-                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation,
-                        buildingName.toLowerCase().contains("bridge") ? "" : ownerName,
+                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, isBridge ? "" : ownerName,
                         building.blockPlaceQueue.size(), isDiagonalBridge);
 
                 ResourcesServerEvents.addSubtractResources(new Resources(

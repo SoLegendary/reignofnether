@@ -49,11 +49,28 @@ public abstract class AbstractBridge extends Building {
         return blocks;
     }
 
+    private void replaceWithLiquidBelow(BlockPos bp) {
+        BlockState bs = level.getBlockState(bp);
+        boolean isFenceOrWall = bs.getBlock() instanceof FenceBlock || bs.getBlock() instanceof WallBlock;
+
+        BlockState bsBelow = level.getBlockState(bp.below());
+        if (bsBelow.getMaterial().isLiquid() && !isFenceOrWall)
+            level.setBlockAndUpdate(bp, bsBelow);
+    }
+
     @Override
     public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks) {
         super.onBlockBreak(level, pos, breakBlocks);
-        BlockState bsBelow = level.getBlockState(pos.below());
-        if (bsBelow.getMaterial().isLiquid())
-            level.setBlockAndUpdate(pos, bsBelow);
+        replaceWithLiquidBelow(pos);
+    }
+
+    @Override
+    public void destroy(ServerLevel serverLevel) {
+        super.destroy(serverLevel);
+        for (BuildingBlock bb : blocks) // need to check first here since we already destroyed the level blocks
+            if (!(bb.getBlockState().getBlock() instanceof FenceBlock) &&
+                !(bb.getBlockState().getBlock() instanceof WallBlock) &&
+                !(bb.getBlockState().getBlock() instanceof AirBlock))
+                replaceWithLiquidBelow(bb.getBlockPos());
     }
 }

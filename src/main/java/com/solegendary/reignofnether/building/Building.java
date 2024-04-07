@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FrozenChunk;
@@ -347,12 +348,13 @@ public abstract class Building {
         if (getLevel().isClientSide())
             return;
         ArrayList<BuildingBlock> placedBlocks = new ArrayList<>(blocks.stream().filter(
-                b -> { // avoid destroying blocks adjacent to liquids
-                    if (this.level.getBlockState(b.getBlockPos().above()).getMaterial().isLiquid() ||
-                            this.level.getBlockState(b.getBlockPos().north()).getMaterial().isLiquid() ||
-                            this.level.getBlockState(b.getBlockPos().south()).getMaterial().isLiquid() ||
-                            this.level.getBlockState(b.getBlockPos().east()).getMaterial().isLiquid() ||
-                            this.level.getBlockState(b.getBlockPos().west()).getMaterial().isLiquid())
+                b -> { // avoid destroying blocks adjacent to liquids unless its a bridge
+                    if (!(this instanceof AbstractBridge) &&
+                        (this.level.getBlockState(b.getBlockPos().above()).getMaterial().isLiquid() ||
+                        this.level.getBlockState(b.getBlockPos().north()).getMaterial().isLiquid() ||
+                        this.level.getBlockState(b.getBlockPos().south()).getMaterial().isLiquid() ||
+                        this.level.getBlockState(b.getBlockPos().east()).getMaterial().isLiquid() ||
+                        this.level.getBlockState(b.getBlockPos().west()).getMaterial().isLiquid()))
                         return false;
                     if (!canDestroyBlock(b.getBlockPos().offset(-originPos.getX(), -originPos.getY(), -originPos.getZ())))
                         return false;

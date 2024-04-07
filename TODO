@@ -13,25 +13,21 @@ Known issues:
 
 - Allow villagers to build bridges
     - blocks built should start from closest to the villager building (random villager if multiple)
-    - overlapping too many bridges can sometimes cause an issue with missing buildings (registered only on serverside)
-        - maybe enforce a max blocks overlapping other bridges?
-
-    - causes defeat if destroyed - is serverside ownername correctly blanked?
-    - replace with liquid on building destroyed as well
-    - check that bridge placement doesn't lag when viewing (due to shouldCullBlock being expensive)
 
     Done, testing needed:
     ---------------------
     - 2 structures (diagonal and straight) that alternate when scrolled
     - when any blocks are destroyed, replace them with the liquid underneath them if it exists
+        - including on building destruction
     - when placed, remove any blocks that clip solid terrain or other bridges from the block list
         - test that we can build through seaweed
     - do not allow building underwater
-    - when placed, becomes neutral, but still buildable/repairable by anyone
+    - when placed, becomes neutral (ownername == "" on client and server), but still buildable/repairable by anyone
         - meaning this should also not provide vision
     - right clicking should not autoattack
     - reduce selection dimensions after blocks are culled
     - cull from block list any fences that are adjacent to another bridge fence
+    - check that bridge placement doesn't lag when viewing (due to shouldCullBlock being expensive)
 
 - Give a specific reason why a building can't be placed
 
