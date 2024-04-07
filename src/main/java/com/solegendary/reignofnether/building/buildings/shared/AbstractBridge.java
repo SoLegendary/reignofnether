@@ -27,9 +27,8 @@ public abstract class AbstractBridge extends Building {
 
     public static boolean shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level) {
         BlockState bs = b.getBlockState();
-        boolean isFenceWallOrAir = b.getBlockState().getBlock() instanceof AirBlock ||
-                b.getBlockState().getBlock() instanceof FenceBlock ||
-                b.getBlockState().getBlock() instanceof WallBlock;
+        boolean isFenceOrAir = b.getBlockState().getBlock() instanceof AirBlock ||
+                b.getBlockState().getBlock() instanceof FenceBlock;
         BlockPos bp = b.getBlockPos().offset(originPos);
         Material bm = level.getBlockState(bp).getMaterial();
         Material bmBelow = level.getBlockState(bp.below()).getMaterial();
@@ -41,10 +40,10 @@ public abstract class AbstractBridge extends Building {
         // cull if fence is adjacent to another bridge block
         for (BlockPos bpAdj : List.of(bp.north(), bp.south(), bp.east(), bp.west())) {
             BlockState bsAdj = level.getBlockState(bpAdj);
-            if (isFenceWallOrAir && !bsAdj.isAir() && BuildingUtils.isPosInsideAnyBuilding(level.isClientSide, bpAdj))
+            if (isFenceOrAir && !bsAdj.isAir() && BuildingUtils.isPosInsideAnyBuilding(level.isClientSide, bpAdj))
                 return true;
         }
-        return bm.isSolidBlocking() || (isFenceWallOrAir && bmBelow.isSolidBlocking());
+        return bm.isSolidBlocking() || (isFenceOrAir && bmBelow.isSolidBlocking());
     }
 
     protected static ArrayList<BuildingBlock> getCulledBlocks(ArrayList<BuildingBlock> blocks, Level level) {
@@ -54,7 +53,7 @@ public abstract class AbstractBridge extends Building {
 
     private void replaceWithLiquidBelow(BlockPos bp) {
         BlockState bs = level.getBlockState(bp);
-        boolean isFenceOrWall = bs.getBlock() instanceof FenceBlock || bs.getBlock() instanceof WallBlock;
+        boolean isFenceOrWall = bs.getBlock() instanceof FenceBlock;
 
         BlockState bsBelow = level.getBlockState(bp.below());
         if (bsBelow.getMaterial().isLiquid() && !isFenceOrWall)
@@ -72,7 +71,6 @@ public abstract class AbstractBridge extends Building {
         super.destroy(serverLevel);
         for (BuildingBlock bb : blocks) // need to check first here since we already destroyed the level blocks
             if (!(bb.getBlockState().getBlock() instanceof FenceBlock) &&
-                !(bb.getBlockState().getBlock() instanceof WallBlock) &&
                 !(bb.getBlockState().getBlock() instanceof AirBlock))
                 replaceWithLiquidBelow(bb.getBlockPos());
     }

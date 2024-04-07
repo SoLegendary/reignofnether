@@ -13,6 +13,9 @@ Known issues:
 
 - Allow villagers to build bridges
     - check that players joining a map with bridges existing see them correctly clientside
+        - partially built bridges seem to 'flicker' when the server updates them (they register as having 0 placed blocks clientside)
+            - for some reason, fence blocks disappeared
+        - fully built bridges disappear entirely
 
     Done, testing needed:
     ---------------------

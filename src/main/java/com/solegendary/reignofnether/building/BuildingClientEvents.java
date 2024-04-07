@@ -364,7 +364,7 @@ public class BuildingClientEvents {
 
                 // top y level should not be touching any water at all
                 if (block.getBlockPos().getY() == 1)
-                    if ((bs.getBlock() instanceof FenceBlock || bs.getBlock() instanceof WallBlock) &&
+                    if ((bs.getBlock() instanceof FenceBlock) &&
                             bmWorld.isLiquid())
                         return false;
 
