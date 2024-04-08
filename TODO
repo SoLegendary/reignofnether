@@ -12,11 +12,12 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 - Allow villagers to build bridges
-    - building placement validity check is broken on bridgePlaceState=2 (clientside issue)
-    - is kelp/seaweed providing validity?
+
+    - building placement validity check might be including air blocks on diagonal structures
 
     Done, testing on server needed:
     ------------------------------
+    - building placement validity check is broken on bridgePlaceState=2 (clientside issue)
     - check that players joining a map with bridges existing see them correctly clientside
     - include unbuilt bridge blocks as overlapping solid blocks during validity check
     - 2 structures (diagonal and straight) that alternate when scrolled

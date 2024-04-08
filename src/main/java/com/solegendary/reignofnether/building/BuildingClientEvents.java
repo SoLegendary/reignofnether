@@ -353,6 +353,8 @@ public class BuildingClientEvents {
         int bridgeBlocks = 0;
         int waterBlocksClipping = 0;
         for (BuildingBlock block : blocksToDraw) {
+            if (block.getBlockState().isAir())
+                continue;
             if (MC.level != null) {
                 BlockPos bp = block.getBlockPos().offset(originPos).offset(0,1,0);
                 BlockState bs = block.getBlockState(); // building block

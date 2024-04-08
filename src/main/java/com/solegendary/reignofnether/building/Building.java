@@ -546,8 +546,19 @@ public abstract class Building {
                         extinguishFires(serverLevel);
                     ticksToExtinguish = 0;
                 }
-
-                int msPerBuild = (3 * BASE_MS_PER_BUILD) / (builderCount + 2);
+                // AoE 2 speed:
+                // 1 builder  - 3/3 (100%)
+                // 2 builders - 3/4 (75%)
+                // 3 builders - 3/5 (60%)
+                // 4 builders - 3/6 (50%)
+                // 5 builders - 3/7 (43%)
+                // Our speed:
+                // 1 builder  - 2/2 (100%)
+                // 2 builders - 2/3 (67%)
+                // 3 builders - 2/4 (50%)
+                // 4 builders - 2/5 (40%)
+                // 5 builders - 2/6 (33%)
+                int msPerBuild = (2 * BASE_MS_PER_BUILD) / (builderCount + 1);
                 if (!isBuilt)
                     msPerBuild *= buildTimeModifier;
 
