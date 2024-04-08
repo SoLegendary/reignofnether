@@ -13,10 +13,9 @@ Known issues:
 
 - Allow villagers to build bridges
 
-    - building placement validity check might be including air blocks on diagonal structures
-
     Done, testing on server needed:
     ------------------------------
+    - building placement validity check might be including air blocks on diagonal structures
     - building placement validity check is broken on bridgePlaceState=2 (clientside issue)
     - check that players joining a map with bridges existing see them correctly clientside
     - include unbuilt bridge blocks as overlapping solid blocks during validity check
@@ -32,8 +31,6 @@ Known issues:
     - reduce selection dimensions after blocks are culled
     - cull from block list any fences that are adjacent to another bridge fence
     - check that bridge placement doesn't lag when viewing (due to shouldCullBlock being expensive)
-
-- Give a specific reason why a building can't be placed
 
 - find a way to enforce frozenChunks (ie. players shouldn't be able to F8 refresh to see enemy bases in fog)
     - not clearing them on refresh causes major rendering glitches
