@@ -241,9 +241,6 @@ public class BuildingClientEvents {
     }
 
     public static boolean isBuildingPlacementValid(BlockPos originPos) {
-        if (isBuildingToPlaceABridge() && bridgePlaceState == 2)
-            originPos = originPos.offset(-5,0,5);
-
         return !isBuildingPlacementInAir(originPos) &&
                !isBuildingPlacementClipping(originPos) &&
                !isOverlappingAnyOtherBuilding() &&

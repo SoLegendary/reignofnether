@@ -506,10 +506,8 @@ public class CursorClientEvents {
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
         /*
         MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "1. x: " + HudClientEvents.mouseX + " y: " + HudClientEvents.mouseY,
-                "2. x: " + (int) screenPos.x + " y: " + (int) screenPos.y,
-                "Zoom: " + OrthoviewClientEvents.getZoom(),
-                "Height: " + MC.getWindow().getGuiScaledHeight()
+                "x: " + BuildingClientEvents.xoffset,
+                "z: " + BuildingClientEvents.zoffset
         });
          */
     }

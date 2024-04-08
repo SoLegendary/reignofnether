@@ -12,15 +12,13 @@ Known issues:
     - turning on fog of war causes a crash when optifine is installed
 
 - Allow villagers to build bridges
-    - check that players joining a map with bridges existing see them correctly clientside
-        - partially built bridges seem to 'flicker' when the server updates them (they register as having 0 placed blocks clientside)
-            - for some reason, fence blocks disappeared
-        - fully built bridges disappear entirely
-
-    Done, testing needed:
-    ---------------------
-    - include unbuilt bridge blocks as overlapping solid blocks during validity check
     - building placement validity check is broken on bridgePlaceState=2 (clientside issue)
+    - is kelp/seaweed providing validity?
+
+    Done, testing on server needed:
+    ------------------------------
+    - check that players joining a map with bridges existing see them correctly clientside
+    - include unbuilt bridge blocks as overlapping solid blocks during validity check
     - 2 structures (diagonal and straight) that alternate when scrolled
     - when any blocks are destroyed, replace them with the liquid underneath them if it exists
         - including on building destruction

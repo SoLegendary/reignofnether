@@ -30,20 +30,25 @@ public abstract class AbstractBridge extends Building {
         boolean isFenceOrAir = b.getBlockState().getBlock() instanceof AirBlock ||
                 b.getBlockState().getBlock() instanceof FenceBlock;
         BlockPos bp = b.getBlockPos().offset(originPos);
-        Material bm = level.getBlockState(bp).getMaterial();
-        Material bmBelow = level.getBlockState(bp.below()).getMaterial();
+        Material bmWorld = level.getBlockState(bp).getMaterial();
+        Material bmWorldBelow = level.getBlockState(bp.below()).getMaterial();
+
+        // if the block in the world matches this exactly, don't cull it, instead just consider it to be our block too
+        BlockState bsWorld = level.getBlockState(bp);
+        if (bsWorld.equals(bs))
+            return false;
 
         // cull if overlaps another bridge block that isn't built yet
         if (BuildingUtils.isPosInsideAnyBuilding(level.isClientSide, bp))
             return true;
 
-        // cull if fence is adjacent to another bridge block
+        // cull if fence is adjacent to another solid block (or a bridge block, even if air)
         for (BlockPos bpAdj : List.of(bp.north(), bp.south(), bp.east(), bp.west())) {
-            BlockState bsAdj = level.getBlockState(bpAdj);
-            if (isFenceOrAir && !bsAdj.isAir() && BuildingUtils.isPosInsideAnyBuilding(level.isClientSide, bpAdj))
+            BlockState bsWorldAdj = level.getBlockState(bpAdj);
+            if (isFenceOrAir && !bsWorldAdj.isAir() && BuildingUtils.isPosInsideAnyBuilding(level.isClientSide, bpAdj))
                 return true;
         }
-        return bm.isSolidBlocking() || (isFenceOrAir && bmBelow.isSolidBlocking());
+        return bmWorld.isSolidBlocking() || (isFenceOrAir && bmWorldBelow.isSolidBlocking());
     }
 
     protected static ArrayList<BuildingBlock> getCulledBlocks(ArrayList<BuildingBlock> blocks, Level level) {
