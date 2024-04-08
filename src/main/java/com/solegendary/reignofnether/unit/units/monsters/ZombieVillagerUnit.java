@@ -2,9 +2,8 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.monsters.*;
-import com.solegendary.reignofnether.building.buildings.shared.SpruceBridge;
-import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
-import com.solegendary.reignofnether.building.buildings.shared.OakBridge;
+import com.solegendary.reignofnether.building.buildings.monsters.SpruceBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -181,7 +180,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
             AbilityButton mausoleumButton = Mausoleum.getBuildButton(Keybindings.keyQ);
             mausoleumButton.isEnabled = () -> !BuildingUtils.doesPlayerOwnCapitol(level.isClientSide(), getOwnerName());
             this.abilityButtons.add(mausoleumButton);
-            this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyW));
+            this.abilityButtons.add(SpruceStockpile.getBuildButton(Keybindings.keyW));
             this.abilityButtons.add(HauntedHouse.getBuildButton(Keybindings.keyE));
             this.abilityButtons.add(PumpkinFarm.getBuildButton(Keybindings.keyR));
             this.abilityButtons.add(DarkWatchtower.getBuildButton(Keybindings.keyT));

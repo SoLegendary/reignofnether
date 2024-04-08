@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.building;
 
-import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
+import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -144,7 +144,7 @@ public class BuildingServerboundPacket {
                         BuildingClientboundPacket.cancelProduction(buildingPos, itemName, false);
                 }
                 case CHECK_STOCKPILE_CHEST -> {
-                    if (building instanceof Stockpile stockpile)
+                    if (building instanceof OakStockpile stockpile)
                         stockpile.checkAndConsumeChestItems();
                 }
                 case REQUEST_REPLACEMENT -> {

@@ -4,10 +4,10 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.monsters.*;
 import com.solegendary.reignofnether.building.buildings.piglins.*;
-import com.solegendary.reignofnether.building.buildings.shared.BlackstoneBridge;
-import com.solegendary.reignofnether.building.buildings.shared.SpruceBridge;
-import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
-import com.solegendary.reignofnether.building.buildings.shared.OakBridge;
+import com.solegendary.reignofnether.building.buildings.piglins.BlackstoneBridge;
+import com.solegendary.reignofnether.building.buildings.monsters.SpruceBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
+import com.solegendary.reignofnether.building.buildings.villagers.OakBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -101,7 +101,8 @@ public class BuildingUtils {
             case SpruceBridge.buildingName -> building = new SpruceBridge(level, pos, rotation, ownerName, isDiagonalBridge);
             case BlackstoneBridge.buildingName -> building = new BlackstoneBridge(level, pos, rotation, ownerName, isDiagonalBridge);
 
-            case Stockpile.buildingName -> building = new Stockpile(level, pos, rotation, ownerName);
+            case OakStockpile.buildingName -> building = new OakStockpile(level, pos, rotation, ownerName);
+            case SpruceStockpile.buildingName -> building = new SpruceStockpile(level, pos, rotation, ownerName);
             case VillagerHouse.buildingName -> building = new VillagerHouse(level, pos, rotation, ownerName);
             case Graveyard.buildingName -> building = new Graveyard(level, pos, rotation, ownerName);
             case WheatFarm.buildingName -> building = new WheatFarm(level, pos, rotation, ownerName);

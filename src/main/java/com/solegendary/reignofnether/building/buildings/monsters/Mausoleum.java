@@ -74,7 +74,7 @@ public class Mausoleum extends ProductionBuilding {
             () -> BuildingClientEvents.setBuildingToPlace(Mausoleum.class),
             null,
             List.of(
-                FormattedCharSequence.forward(Mausoleum.buildingName + " (capitol)", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(Mausoleum.buildingName + " (Capitol)", Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPop(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
