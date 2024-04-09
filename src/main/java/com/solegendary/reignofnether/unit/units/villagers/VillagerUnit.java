@@ -1,7 +1,8 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
+import com.solegendary.reignofnether.building.buildings.villagers.OakBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -176,7 +177,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             AbilityButton townCentreButton = TownCentre.getBuildButton(Keybindings.keyQ);
             townCentreButton.isEnabled = () -> !BuildingUtils.doesPlayerOwnCapitol(level.isClientSide(), getOwnerName());
             this.abilityButtons.add(townCentreButton);
-            this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyW));
+            this.abilityButtons.add(OakStockpile.getBuildButton(Keybindings.keyW));
             this.abilityButtons.add(VillagerHouse.getBuildButton(Keybindings.keyE));
             this.abilityButtons.add(WheatFarm.getBuildButton(Keybindings.keyR));
             this.abilityButtons.add(Watchtower.getBuildButton(Keybindings.keyT));
@@ -186,6 +187,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             this.abilityButtons.add(Library.getBuildButton(Keybindings.keyO));
             this.abilityButtons.add(Castle.getBuildButton(Keybindings.keyP));
             this.abilityButtons.add(IronGolemBuilding.getBuildButton(Keybindings.keyL));
+            this.abilityButtons.add(OakBridge.getBuildButton(Keybindings.keyB));
         }
     }
 

@@ -16,6 +16,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
@@ -28,12 +30,13 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
 
 public class FogOfWarClientEvents {
-
     public static final float BRIGHT = 1.0f;
     public static final float DARK = 0.35f;
     public static final int CHUNK_VIEW_DIST = 1;
@@ -52,10 +55,14 @@ public class FogOfWarClientEvents {
     // chunkInfos that should never be updated, even if the client does a reset or moves the camera out of range
     public static final Set<FrozenChunk> frozenChunks = ConcurrentHashMap.newKeySet();
 
+    // have we already warned the client about using Optifine?
+    public static boolean fogOptifineWarningSent = false;
+
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = false;
 
     private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
+
 
     public static void revealOrHidePlayer(boolean reveal, String playerName) {
         if (reveal)
@@ -81,8 +88,9 @@ public class FogOfWarClientEvents {
                 return;
 
             // resetFogChunks
-            if (evt.getKey() == Keybindings.getFnum(8).key)
+            if (evt.getKey() == Keybindings.getFnum(8).key && isEnabled()) {
                 resetFogChunks();
+            }
         }
     }
 
@@ -90,6 +98,7 @@ public class FogOfWarClientEvents {
     public static void resetFogChunks() {
         MC.levelRenderer.allChanged();
         semiFrozenChunks.clear();
+        frozenChunks.clear();
     }
 
     public static void setEnabled(boolean value) {
@@ -116,7 +125,16 @@ public class FogOfWarClientEvents {
                         return -1;
                     if (!MC.player.hasPermissions(4))
                         return -1;
-                    setServerFog(true);
+                    if (!fogOptifineWarningSent) {
+                        fogOptifineWarningSent = true;
+                        MC.player.sendSystemMessage(Component.literal(""));
+                        MC.player.sendSystemMessage(Component.literal("[WARNING]").withStyle(Style.EMPTY.withBold(true)));
+                        MC.player.sendSystemMessage(Component.literal(
+                                "If any players have rendering optimisation mods such as Optifine installed, enabling fog of war " +
+                                "may cause them to crash. If you are prepared for this, then use /fog enable again to continue."));
+                    } else {
+                        setServerFog(true);
+                    }
                     return 1;
                 })));
         evt.getDispatcher().register(Commands.literal("fog").then(Commands.literal("disable")

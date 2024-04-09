@@ -26,11 +26,9 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SnowLayerBlock;
@@ -48,8 +46,6 @@ import static net.minecraft.world.level.BlockGetter.traverseBlocks;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * Handler that implements and manages screen-to-world translations of the cursor and block/entity selection
@@ -176,6 +172,9 @@ public class CursorClientEvents {
             // if we clipped a non-solid block (eg. tall grass) search adjacent blocks for a next-best match
             if (!MC.level.getBlockState(preselectedBlockPos).getMaterial().isSolidBlocking()) {
                 preselectedBlockPos = getRefinedBlockPos(preselectedBlockPos, cursorWorldPosNear);
+                // disallow selecting a block just below a fluid block
+                if (MC.level.getBlockState(preselectedBlockPos.above()).getMaterial().isLiquid())
+                    preselectedBlockPos = preselectedBlockPos.above();
             }
         }
 
@@ -507,10 +506,8 @@ public class CursorClientEvents {
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
         /*
         MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "1. x: " + HudClientEvents.mouseX + " y: " + HudClientEvents.mouseY,
-                "2. x: " + (int) screenPos.x + " y: " + (int) screenPos.y,
-                "Zoom: " + OrthoviewClientEvents.getZoom(),
-                "Height: " + MC.getWindow().getGuiScaledHeight()
+                "x: " + BuildingClientEvents.xoffset,
+                "z: " + BuildingClientEvents.zoffset
         });
          */
     }

@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.building;
 
-import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
+import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -22,51 +22,55 @@ public class BuildingServerboundPacket {
     public String ownerName; // PLACE
     public int[] builderUnitIds;
     public BuildingAction action;
+    public Boolean isDiagonalBridge;
 
-    public static void placeBuilding(String itemName, BlockPos originPos, Rotation rotation, String ownerName, int[] builderUnitIds) {
+    public static void placeBuilding(String itemName, BlockPos originPos, Rotation rotation,
+                                     String ownerName, int[] builderUnitIds, boolean isDiagonalBridge) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.PLACE,
-                itemName, originPos, BlockPos.ZERO, rotation, ownerName, builderUnitIds));
+                itemName, originPos, BlockPos.ZERO, rotation, ownerName, builderUnitIds, isDiagonalBridge));
     }
-    public static void placeAndQueueBuilding(String itemName, BlockPos originPos, Rotation rotation, String ownerName, int[] builderUnitIds) {
+    public static void placeAndQueueBuilding(String itemName, BlockPos originPos, Rotation rotation,
+                                             String ownerName, int[] builderUnitIds, boolean isDiagonalBridge) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.PLACE_AND_QUEUE,
-                itemName, originPos, BlockPos.ZERO, rotation, ownerName, builderUnitIds));
+                itemName, originPos, BlockPos.ZERO, rotation, ownerName, builderUnitIds, isDiagonalBridge));
     }
     public static void cancelBuilding(BlockPos buildingPos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.DESTROY,
-                "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
+                "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0], false));
     }
     public static void setRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.SET_RALLY_POINT,
-                "", buildingPos, rallyPos, Rotation.NONE, "", new int[0]));
+                "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
     }
     public static void startProduction(BlockPos buildingPos, String itemName) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.START_PRODUCTION,
-                itemName, buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
+                itemName, buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0], false));
 
         BuildingClientEvents.switchHudToIdlestBuilding();
     }
     public static void cancelProduction(BlockPos buildingPos, String itemName, boolean frontItem) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
-                itemName, buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
+                itemName, buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0], false));
     }
     public static void checkStockpileChests(BlockPos chestPos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.CHECK_STOCKPILE_CHEST,
-                "", chestPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
+                "", chestPos, BlockPos.ZERO, Rotation.NONE, "", new int[0], false));
     }
     public static void requestReplacement(BlockPos buildingPos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.REQUEST_REPLACEMENT,
-                "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0]));
+                "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0], false));
     }
 
-    public BuildingServerboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, BlockPos rallyPos, Rotation rotation, String ownerName, int[] builderUnitIds) {
+    public BuildingServerboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, BlockPos rallyPos,
+                                     Rotation rotation, String ownerName, int[] builderUnitIds, boolean isDiagonalBridge) {
         this.action = action;
         this.itemName = itemName;
         this.buildingPos = buildingPos;
@@ -74,6 +78,7 @@ public class BuildingServerboundPacket {
         this.rotation = rotation;
         this.ownerName = ownerName;
         this.builderUnitIds = builderUnitIds;
+        this.isDiagonalBridge = isDiagonalBridge;
     }
 
     public BuildingServerboundPacket(FriendlyByteBuf buffer) {
@@ -84,6 +89,7 @@ public class BuildingServerboundPacket {
         this.rotation = buffer.readEnum(Rotation.class);
         this.ownerName = buffer.readUtf();
         this.builderUnitIds = buffer.readVarIntArray();
+        this.isDiagonalBridge = buffer.readBoolean();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -94,6 +100,7 @@ public class BuildingServerboundPacket {
         buffer.writeEnum(this.rotation);
         buffer.writeUtf(this.ownerName);
         buffer.writeVarIntArray(this.builderUnitIds);
+        buffer.writeBoolean(this.isDiagonalBridge);
     }
 
     // server-side packet-consuming functions
@@ -109,10 +116,10 @@ public class BuildingServerboundPacket {
             }
             switch (this.action) {
                 case PLACE -> {
-                    BuildingServerEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false);
+                    BuildingServerEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false, isDiagonalBridge);
                 }
                 case PLACE_AND_QUEUE -> {
-                    BuildingServerEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, true);
+                    BuildingServerEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, true, isDiagonalBridge);
                 }
                 case DESTROY -> {
                     BuildingServerEvents.cancelBuilding(building);
@@ -137,7 +144,7 @@ public class BuildingServerboundPacket {
                         BuildingClientboundPacket.cancelProduction(buildingPos, itemName, false);
                 }
                 case CHECK_STOCKPILE_CHEST -> {
-                    if (building instanceof Stockpile stockpile)
+                    if (building instanceof OakStockpile stockpile)
                         stockpile.checkAndConsumeChestItems();
                 }
                 case REQUEST_REPLACEMENT -> {

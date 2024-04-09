@@ -2,7 +2,8 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.monsters.*;
-import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
+import com.solegendary.reignofnether.building.buildings.monsters.SpruceBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -33,7 +34,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
@@ -180,7 +180,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
             AbilityButton mausoleumButton = Mausoleum.getBuildButton(Keybindings.keyQ);
             mausoleumButton.isEnabled = () -> !BuildingUtils.doesPlayerOwnCapitol(level.isClientSide(), getOwnerName());
             this.abilityButtons.add(mausoleumButton);
-            this.abilityButtons.add(Stockpile.getBuildButton(Keybindings.keyW));
+            this.abilityButtons.add(SpruceStockpile.getBuildButton(Keybindings.keyW));
             this.abilityButtons.add(HauntedHouse.getBuildButton(Keybindings.keyE));
             this.abilityButtons.add(PumpkinFarm.getBuildButton(Keybindings.keyR));
             this.abilityButtons.add(DarkWatchtower.getBuildButton(Keybindings.keyT));
@@ -189,6 +189,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
             this.abilityButtons.add(SpiderLair.getBuildButton(Keybindings.keyI));
             this.abilityButtons.add(Laboratory.getBuildButton(Keybindings.keyO));
             this.abilityButtons.add(Stronghold.getBuildButton(Keybindings.keyP));
+            this.abilityButtons.add(SpruceBridge.getBuildButton(Keybindings.keyB));
         }
     }
 

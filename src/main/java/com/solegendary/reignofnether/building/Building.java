@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FrozenChunk;
@@ -52,7 +53,7 @@ public abstract class Building {
 
     public String name;
     public static String structureName;
-    private Level level; // directly return MC.level if it's clientside to avoid stale references
+    protected Level level; // directly return MC.level if it's clientside to avoid stale references
     public BlockPos originPos;
     public Rotation rotation;
     public ResourceLocation icon;
@@ -322,9 +323,14 @@ public abstract class Building {
                     validBlocks.add(block);
             }
         }
-
-        if (validBlocks.size() > 0)
+        if (validBlocks.size() > 0) {
+            if (this instanceof AbstractBridge) {
+                ArrayList<WorkerUnit> builders = getBuilders(this.level);
+                BlockPos builderPos = ((LivingEntity) builders.get(new Random().nextInt(builders.size()))).getOnPos();
+                validBlocks.sort(Comparator.comparing(bb -> bb.getBlockPos().distSqr(builderPos)));
+            }
             this.blockPlaceQueue.add(validBlocks.get(0));
+        }
     }
 
     private void extinguishFires(ServerLevel level) {
@@ -347,12 +353,13 @@ public abstract class Building {
         if (getLevel().isClientSide())
             return;
         ArrayList<BuildingBlock> placedBlocks = new ArrayList<>(blocks.stream().filter(
-                b -> { // avoid destroying blocks adjacent to liquids
-                    if (this.level.getBlockState(b.getBlockPos().above()).getMaterial().isLiquid() ||
-                            this.level.getBlockState(b.getBlockPos().north()).getMaterial().isLiquid() ||
-                            this.level.getBlockState(b.getBlockPos().south()).getMaterial().isLiquid() ||
-                            this.level.getBlockState(b.getBlockPos().east()).getMaterial().isLiquid() ||
-                            this.level.getBlockState(b.getBlockPos().west()).getMaterial().isLiquid())
+                b -> { // avoid destroying blocks adjacent to liquids unless its a bridge
+                    if (!(this instanceof AbstractBridge) &&
+                        (this.level.getBlockState(b.getBlockPos().above()).getMaterial().isLiquid() ||
+                        this.level.getBlockState(b.getBlockPos().north()).getMaterial().isLiquid() ||
+                        this.level.getBlockState(b.getBlockPos().south()).getMaterial().isLiquid() ||
+                        this.level.getBlockState(b.getBlockPos().east()).getMaterial().isLiquid() ||
+                        this.level.getBlockState(b.getBlockPos().west()).getMaterial().isLiquid()))
                         return false;
                     if (!canDestroyBlock(b.getBlockPos().offset(-originPos.getX(), -originPos.getY(), -originPos.getZ())))
                         return false;
@@ -539,8 +546,19 @@ public abstract class Building {
                         extinguishFires(serverLevel);
                     ticksToExtinguish = 0;
                 }
-
-                int msPerBuild = (3 * BASE_MS_PER_BUILD) / (builderCount + 2);
+                // AoE 2 speed:
+                // 1 builder  - 3/3 (100%)
+                // 2 builders - 3/4 (75%)
+                // 3 builders - 3/5 (60%)
+                // 4 builders - 3/6 (50%)
+                // 5 builders - 3/7 (43%)
+                // Our speed:
+                // 1 builder  - 2/2 (100%)
+                // 2 builders - 2/3 (67%)
+                // 3 builders - 2/4 (50%)
+                // 4 builders - 2/5 (40%)
+                // 5 builders - 2/6 (33%)
+                int msPerBuild = (2 * BASE_MS_PER_BUILD) / (builderCount + 1);
                 if (!isBuilt)
                     msPerBuild *= buildTimeModifier;
 

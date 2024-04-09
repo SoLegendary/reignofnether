@@ -1,10 +1,10 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.shared.Stockpile;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -58,7 +58,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetFarm(buildingTarget);
                 }
                 // look for the nearest resource to gather after completing a stockpile
-                else if (buildingTarget instanceof Stockpile stockpile && !buildingTarget.isBuilt && mob instanceof WorkerUnit workerUnit) {
+                else if (buildingTarget instanceof OakStockpile stockpile && !buildingTarget.isBuilt && mob instanceof WorkerUnit workerUnit) {
                     ((Unit) mob).getReturnResourcesGoal().depositItems();
                     workerUnit.getGatherResourceGoal().setTargetResourceName(stockpile.mostAbundantNearbyResource);
                 }
@@ -85,7 +85,8 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
             return isBuildingServerside;
 
         if (buildingTarget != null && this.moveTarget != null)
-            if (BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED)
+            if (BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED ||
+                buildingTarget instanceof AbstractBridge)
                 return buildingTarget.isPosInsideBuilding(mob.getOnPos()) ||
                         MiscUtil.isMobInRangeOfPos(moveTarget, mob, 2);
         return false;

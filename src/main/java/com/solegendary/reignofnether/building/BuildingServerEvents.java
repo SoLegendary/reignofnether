@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -27,7 +28,6 @@ import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
@@ -48,38 +48,45 @@ public class BuildingServerEvents {
         return buildings;
     }
 
-    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int[] builderUnitIds, boolean queue) {
-        Building building = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName);
-        if (building != null) {
+    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName,
+                                     int[] builderUnitIds, boolean queue, boolean isDiagonalBridge) {
 
+        boolean isBridge = buildingName.toLowerCase().contains("bridge");
+        Building building = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, isBridge ? "" : ownerName, isDiagonalBridge);
+
+        if (building != null) {
             if (building.canAfford(ownerName)) {
                 buildings.add(building);
                 building.forceChunk(true);
 
                 int minY = BuildingUtils.getMinCorner(building.blocks).getY();
+                if (building instanceof AbstractBridge)
+                    minY += 1; // because fences are on the 2nd layer
 
-                for (BuildingBlock block : building.blocks) {
-                    // place scaffolding underneath all solid blocks that don't have support
-                    if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir()) {
-                        int yBelow = 0;
-                        boolean tooDeep = false;
-                        BlockState bsBelow;
-                        do {
-                            yBelow -= 1;
-                            bsBelow = serverLevel.getBlockState(block.getBlockPos().offset(0, yBelow, 0));
-                            if (yBelow < -5)
-                                tooDeep = true;
-                        }
-                        while (!bsBelow.getMaterial().isSolidBlocking());
-                        yBelow += 1;
+                if (!(building instanceof AbstractBridge)) {
+                    for (BuildingBlock block : building.blocks) {
+                        // place scaffolding underneath all solid blocks that don't have support
+                        if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir()) {
+                            int yBelow = 0;
+                            boolean tooDeep = false;
+                            BlockState bsBelow;
+                            do {
+                                yBelow -= 1;
+                                bsBelow = serverLevel.getBlockState(block.getBlockPos().offset(0, yBelow, 0));
+                                if (yBelow < -5)
+                                    tooDeep = true;
+                            }
+                            while (!bsBelow.getMaterial().isSolidBlocking());
+                            yBelow += 1;
 
-                        if (!tooDeep) {
-                            while (yBelow < 0) {
-                                BlockPos bp = block.getBlockPos().offset(0, yBelow, 0);
-                                BuildingBlock scaffold = new BuildingBlock(bp, Blocks.SCAFFOLDING.defaultBlockState());
-                                building.getScaffoldBlocks().add(scaffold);
-                                building.addToBlockPlaceQueue(scaffold);
-                                yBelow += 1;
+                            if (!tooDeep) {
+                                while (yBelow < 0) {
+                                    BlockPos bp = block.getBlockPos().offset(0, yBelow, 0);
+                                    BuildingBlock scaffold = new BuildingBlock(bp, Blocks.SCAFFOLDING.defaultBlockState());
+                                    building.getScaffoldBlocks().add(scaffold);
+                                    building.addToBlockPlaceQueue(scaffold);
+                                    yBelow += 1;
+                                }
                             }
                         }
                     }
@@ -91,8 +98,9 @@ public class BuildingServerEvents {
                             building.startingBlockTypes.contains(block.getBlockState().getBlock()))
                         building.addToBlockPlaceQueue(block);
                 }
+                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, isBridge ? "" : ownerName,
+                        building.blockPlaceQueue.size(), isDiagonalBridge);
 
-                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName, building.blockPlaceQueue.size());
                 ResourcesServerEvents.addSubtractResources(new Resources(
                     building.ownerName,
                     -building.foodCost,
@@ -184,7 +192,8 @@ public class BuildingServerEvents {
                 building.name,
                 building.rotation,
                 building.ownerName,
-                building.blockPlaceQueue.size()
+                building.blockPlaceQueue.size(),
+                building instanceof AbstractBridge bridge && bridge.isDiagonal
             );
     }
 
@@ -330,7 +339,8 @@ public class BuildingServerEvents {
                         building.name,
                         building.rotation,
                         building.ownerName,
-                        building.blockPlaceQueue.size()
+                        building.blockPlaceQueue.size(),
+                        building instanceof AbstractBridge bridge && bridge.isDiagonal
                 );
                 return;
             }

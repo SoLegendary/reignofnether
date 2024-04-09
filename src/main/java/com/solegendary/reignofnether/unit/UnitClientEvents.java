@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -484,6 +485,7 @@ public class UnitClientEvents {
                 // right click -> attack unfriendly building
                 else if (hudSelectedEntity instanceof AttackerUnit &&
                         (preSelBuilding != null) &&
+                        !(preSelBuilding instanceof AbstractBridge) &&
                         BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.HOSTILE) {
                     sendUnitCommand(UnitAction.ATTACK_BUILDING);
                 }
@@ -496,8 +498,9 @@ public class UnitClientEvents {
                     sendUnitCommand(UnitAction.RETURN_RESOURCES);
                 }
                 // right click -> build or repair preselected building
-                else if (hudSelectedEntity instanceof WorkerUnit &&
-                        preSelBuilding != null && BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED) {
+                else if (hudSelectedEntity instanceof WorkerUnit && preSelBuilding != null &&
+                        (BuildingClientEvents.getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED) ||
+                        preSelBuilding instanceof AbstractBridge) {
 
                     if (preSelBuilding.name.contains(" Farm") && preSelBuilding.isBuilt)
                         sendUnitCommand(UnitAction.FARM);

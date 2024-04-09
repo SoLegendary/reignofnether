@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.building.buildings.shared;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
-import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -30,15 +29,13 @@ import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Stockpile extends ProductionBuilding {
+public abstract class AbstractStockpile extends ProductionBuilding {
 
-    public final static String buildingName = "Stockpile";
-    public final static String structureName = "stockpile";
     public final static ResourceCost cost = ResourceCosts.STOCKPILE;
     public ResourceName mostAbundantNearbyResource = ResourceName.NONE;
 
-    public Stockpile(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
+    public AbstractStockpile(String buildingName, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
+        super(level, originPos, rotation, ownerName, blocks, false);
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.CHEST;
@@ -51,42 +48,16 @@ public class Stockpile extends ProductionBuilding {
         this.canAcceptResources = true;
         this.canSetRallyPoint = false;
 
-        this.startingBlockTypes.add(Blocks.OAK_LOG);
-
         this.findMostAbundantNearbyResource();
 
         if (level.isClientSide()) {
             this.productionButtons = Arrays.asList(
-                ResearchResourceCapacity.getStartButton(this, Keybindings.keyQ)
+                    ResearchResourceCapacity.getStartButton(this, Keybindings.keyQ)
             );
         }
     }
 
-    public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
-        return BuildingBlockData.getBuildingBlocks(structureName, level);
-    }
-
-    public static AbilityButton getBuildButton(Keybinding hotkey) {
-        return new AbilityButton(
-                Stockpile.buildingName,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/chest.png"),
-                hotkey,
-                () -> BuildingClientEvents.getBuildingToPlace() == Stockpile.class,
-                () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
-                        BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
-                        ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Stockpile.class),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(Stockpile.buildingName, Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Storage for units and players to drop off resources", Style.EMPTY)
-                ),
-                null
-        );
-    }
+    public Faction getFaction() {return Faction.VILLAGERS;}
 
     public void findMostAbundantNearbyResource() {
 
@@ -103,7 +74,7 @@ public class Stockpile extends ProductionBuilding {
 
                 // is a valid resource block and meets the target ResourceSource's blockstate condition
                 if (resBlock == null || resBlock.resourceName != resourceName ||
-                    resBlock.name.equals("Farmland") || resBlock.name.equals("Soul Sand"))
+                        resBlock.name.equals("Farmland") || resBlock.name.equals("Soul Sand"))
                     return false;
                 if (!resBlock.blockStateTest.test(bs))
                     return false;

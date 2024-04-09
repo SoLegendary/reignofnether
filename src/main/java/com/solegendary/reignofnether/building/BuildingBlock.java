@@ -31,6 +31,13 @@ public class BuildingBlock {
         );
     }
 
+    public BuildingBlock move(LevelAccessor level, BlockPos offset) {
+        return new BuildingBlock(
+            this.blockPos.offset(offset),
+            this.blockState
+        );
+    }
+
     public boolean isPlaced(Level level) {
         BlockState bs;
         if (level.isClientSide())

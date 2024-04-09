@@ -11,131 +11,29 @@ Known issues:
         - as an additional workaround, chunks with enemy buildings are always hidden and not rendered
     - turning on fog of war causes a crash when optifine is installed
 
-- upgrade for all factions to allow proper swimming on humanoid mobs:
-    - villagers: vindicators, pillagers, witches, evokers
-    - monsters: zombies, skeletons, creepers? (drowned should have it by default)
-    - piglins: brutes, headhunters, wither skeletons
+- Allow villagers to build bridges
 
+    Done, testing on server needed:
+    ------------------------------
+    - building placement validity check might be including air blocks on diagonal structures
+    - building placement validity check is broken on bridgePlaceState=2 (clientside issue)
+    - check that players joining a map with bridges existing see them correctly clientside
+    - include unbuilt bridge blocks as overlapping solid blocks during validity check
+    - 2 structures (diagonal and straight) that alternate when scrolled
+    - when any blocks are destroyed, replace them with the liquid underneath them if it exists
+        - including on building destruction
+    - when placed, remove any blocks that clip solid terrain or other bridges from the block list
+        - test that we can build through seaweed
+    - do not allow building underwater
+    - when placed, becomes neutral (ownername == "" on client and server), but still buildable/repairable by anyone
+        - meaning this should also not provide vision
+    - right clicking should not autoattack
+    - reduce selection dimensions after blocks are culled
+    - cull from block list any fences that are adjacent to another bridge fence
+    - check that bridge placement doesn't lag when viewing (due to shouldCullBlock being expensive)
 
-
-
-manually setting workers autogather particular resources to look for particular resources sometimes doesn't register
-    - try with a group, some just won't go
-
-
-TODO test in next playtest
-
-
-
-TODO tutorial docs
-
-1. Welcome
-     - Explaining what the game is about
-     - Explaining the game is supposed to be match-based
-        - reset on server restart
-     - Win condition by destroying opponent's capitol
-     - /startrts to start
-
-2. Camera controls
-    - top down isometric
-    - toggle with F12
-    - moving the camera:
-        - move mouse to edge of camera
-        - alt drag left click
-        - minimap (see sec.4)
-    - alt scroll to zoom
-    - alt drag right click to rotate
-
-3. Unit controls
-    If you are an RTS veteran, you can probably skip this section
-
-    selection
-        - selection/box-select/double-click-select [gif]
-        - selecting different types of units in a group [gif]
-        - control groups [gif]
-        - click portrait to centre camera on unit
-        - F1 to deselect everything
-
-    movement
-        - right click move [gif]
-        - right click friendly unit to follow
-        - hold position - won't move for any reason but will still attack anything in range
-        - stop
-
-    combat and stats
-        - right click enemy unit or building to attack [gif]
-            - ranged units can't attack buildings
-        - attack command
-            - attack move [gif]
-            - force attack friendly
-        - units will auto attack enemies they see
-        - stats explanations [img]
-
-    casters and abilities
-        - cooldowns
-        - evoker example [gif]
-
-4. Buildings
-    Explanation of how buildings exist and are tracked
-    All workers can build buildings for their faction
-
-    Construction [gif]
-        - Must be on relatively flat ground
-        - Scroll to rotate
-        - Assign workers with right click
-
-    Damage and repair [gif]
-        - block-count based
-        - destroyed at 50% blocks remaining
-        - Repair with workers
-        - more workers = faster
-
-    Production buildings
-        - Rally points [img]
-        - Can select multiple
-        - Bronze border == research
-        - units require population to build
-
-
-5. Resources and gathering
-    Basic explanation
-
-    Resource types [img]
-        - food
-        - wood
-        - ore
-    How to gather
-        - right click on block or farm [gif]
-        - OR use passive gather toggles [img]
-        - idle workers button [img]
-    Capacity and dropoffs
-        - Workers return when at max capacity
-        - Can drop off at capitols and stockpiles [gif]
-        - All units can hold 1 item over their max [img]
-        - Items can be picked up as resources (eg. saplings == wood)
-        - Military units can also pick up resourecs, raiding party time! [gif]
-        - Drop all items with D
-
-6. Minimap
-    Controls
-        - click to move camera
-        - drag left click to move camera [gif]
-        - shift-left-click to recentre map
-        - M to open large map
-    Attack warnings
-        - click to move camera there [gif]
-        - right click to ignore
-    Clock
-        - [img]
-        - Undead burn in sunlight and monsters move much more slowly.
-
-7. Fog of war
-    - explanation of fog of war mechanics
-    - /fog enable | disable for ops
-    - showing how blocks are only updated when revealed [gif]
-
-
-10. Known bugs and limitations
+- find a way to enforce frozenChunks (ie. players shouldn't be able to F8 refresh to see enemy bases in fog)
+    - not clearing them on refresh causes major rendering glitches
 
 
 
