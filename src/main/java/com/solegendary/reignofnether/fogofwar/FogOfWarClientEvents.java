@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -12,6 +13,7 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.commands.Commands;
@@ -24,6 +26,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -246,10 +249,18 @@ public class FogOfWarClientEvents {
             newlyDarkChunks.removeAll(brightChunks);
 
             for (ChunkPos cpos : newlyDarkChunks) {
+                onChunkUnexplore(cpos);
                 for (int x = -1; x <= 1; x++)
                     for (int z = -1; z <= 1; z++)
                         rerenderChunks.add(new ChunkPos(cpos.x + x, cpos.z + z));
             }
+            Set<ChunkPos> newlyBrightChunks = ConcurrentHashMap.newKeySet();
+            newlyBrightChunks.addAll(brightChunks);
+            newlyBrightChunks.removeAll(lastBrightChunks);
+
+            for (ChunkPos cpos : newlyBrightChunks)
+                onChunkExplore(cpos);
+
             if (OrthoviewClientEvents.isEnabled())
                 semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
                         .distSqr(MC.player.getOnPos()) > Math.pow(OrthoviewClientEvents.getZoom() * 2, 2));
@@ -285,5 +296,30 @@ public class FogOfWarClientEvents {
                 }
             }
         }
+    }
+
+    // triggered when a chunk goes from dark to bright
+    public static void onChunkExplore(ChunkPos cpos) {
+        System.out.println("explored: " + cpos);
+    }
+
+    // triggered when a chunk goes from bright to dark
+    public static void onChunkUnexplore(ChunkPos cpos) {
+        System.out.println("unexplored: " + cpos);
+    }
+
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        if (MC.level == null)
+            return;
+
+        ChunkPos cpos = MC.level.getChunk(CursorClientEvents.getPreselectedBlockPos()).getPos();
+
+        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+                "x: " + cpos.x,
+                "z: " + cpos.z,
+                "xo: " + cpos.getWorldPosition().getX(),
+                "zo: " + cpos.getWorldPosition().getZ()
+        });
     }
 }
