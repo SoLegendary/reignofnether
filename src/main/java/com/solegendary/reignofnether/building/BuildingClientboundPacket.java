@@ -109,8 +109,8 @@ public class BuildingClientboundPacket {
 
                         // if the client was missing a building, replace it
                         if (this.action == BuildingAction.SYNC_BLOCKS) {
-                            BuildingServerboundPacket.requestReplacement(this.buildingPos);
-                            System.out.println("Missing building");
+                            //BuildingServerboundPacket.requestReplacement(this.buildingPos);
+                            //System.out.println("Missing building");
                         }
                         return;
                     }
