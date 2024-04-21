@@ -62,15 +62,6 @@ public abstract class LevelRendererMixin {
 
     private List<Pair<BlockPos, Integer>> chunksToReDirty = new ArrayList<>();
 
-    private List<BlockPos> getFrozenChunkOrigins() {
-        ArrayList<BlockPos> origins = new ArrayList<>();
-        for (FrozenChunk frozenChunk : frozenChunks)
-            if (frozenChunk.chunkInfo != null)
-                if (!FogOfWarClientEvents.isInBrightChunk(frozenChunk.chunkInfo.chunk.getOrigin()))
-                    origins.add(frozenChunk.chunkInfo.chunk.getOrigin());
-        return origins;
-    }
-
     @Inject(
             method = "applyFrustum(Lnet/minecraft/client/renderer/culling/Frustum;)V",
             at = @At("HEAD"),
@@ -89,20 +80,10 @@ public abstract class LevelRendererMixin {
             this.renderChunksInFrustum.clear();
 
             for (LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunkStorage.get().renderChunks) {
-                if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()) &&
-                        !getFrozenChunkOrigins().contains(chunkInfo.chunk.getOrigin())) {
+                if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox())) {
                     this.renderChunksInFrustum.add(chunkInfo);
                 }
-                for (FrozenChunk frozenChunk : frozenChunks) {
-                    if (frozenChunk.chunkInfo == null && frozenChunk.origin.equals(chunkInfo.chunk.getOrigin())) {
-                        frozenChunk.chunkInfo = chunkInfo;
-                        System.out.println("added chunkInfo: " + chunkInfo.chunk.getOrigin());
-                    }
-                }
             }
-            for (FrozenChunk frozenChunk : frozenChunks)
-                if (frozenChunk.chunkInfo != null)
-                    this.renderChunksInFrustum.add(frozenChunk.chunkInfo);
 
             this.minecraft.getProfiler().pop();
         }
@@ -166,14 +147,13 @@ public abstract class LevelRendererMixin {
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
 
             BlockPos originPos = chunkInfo.chunk.getOrigin();
-            boolean isFrozenChunk = getFrozenChunkOrigins().contains(originPos);
             ChunkPos chunkPos = new ChunkPos(originPos);
 
             if (rerenderChunks.contains(chunkPos)) {
                 FogOfWarClientEvents.updateChunkLighting(originPos);
                 rerenderChunksToRemove.add(chunkPos);
             }
-            else if (!isInBrightChunk(originPos) && !isFrozenChunk) {
+            else if (!isInBrightChunk(originPos)) {
                 if (semiFrozenChunks.contains(originPos))
                     continue;
                 else
@@ -192,12 +172,12 @@ public abstract class LevelRendererMixin {
                     flag = !net.minecraftforge.common.ForgeConfig.CLIENT.alwaysSetupTerrainOffThread.get() && (blockpos1.distSqr(blockpos) < 768.0D || renderChunk.isDirtyFromPlayer());
                 }
 
-                if (flag && !isFrozenChunk) {
+                if (flag) {
                     this.minecraft.getProfiler().push("build_near_sync");
                     this.chunkRenderDispatcher.rebuildChunkSync(renderChunk, renderregioncache);
                     renderChunk.setNotDirty();
                     this.minecraft.getProfiler().pop();
-                } else if (!isFrozenChunk) {
+                } else {
                     list.add(renderChunk);
                 }
             }

@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.fogofwar.FrozenChunk;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
@@ -705,11 +706,24 @@ public class BuildingClientEvents {
 
     // place a building clientside that has already been registered on serverside
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int numBlocksToPlace, boolean isDiagonalBridge) {
+
         for (Building building : buildings)
             if (BuildingUtils.isPosPartOfAnyBuilding(true, pos, false))
                 return; // building already exists clientside
 
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName, isDiagonalBridge);
+
+
+        // TODO: only in dark chunks
+        // if the building is going to be placed in darkness, then don't - instead keep it serverside and only place it when
+        // the chunk is revealed
+        if (FogOfWarClientEvents.isBuildingInBrightChunk(newBuilding)) {
+            for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(newBuilding))
+                FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(bp));
+        }
+
+
+
 
         // add a bunch of dummy blocks so clients know not to remove buildings before the first blocks get placed
         while (numBlocksToPlace > 0) {

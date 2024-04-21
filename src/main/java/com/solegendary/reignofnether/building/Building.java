@@ -143,10 +143,6 @@ public abstract class Building {
             }
             FogOfWarClientboundPacket.revealOrHidePlayer(false, this.ownerName);
         }
-
-        if (this.level.isClientSide)
-            for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(this))
-                FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(bp));
     }
 
     public Faction getFaction() {return Faction.NONE;}
