@@ -374,8 +374,6 @@ public abstract class Building {
     }
 
     public boolean shouldBeDestroyed() {
-        //if (this instanceof Portal portal && portal.portalType != Portal.PortalType.BASIC && tickAge < 20)
-        //    return false;
         if (blockPlaceQueue.size() > 0)
             return false;
         if (getBlocksPlaced() <= 0)

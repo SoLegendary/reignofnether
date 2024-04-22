@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.fogofwar.FrozenChunkServerboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -30,6 +31,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -260,9 +262,15 @@ public class CursorClientEvents {
             cursorLeftClickDownPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
             cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
             leftClickDown = true;
+
+            if (MC.level != null)
+                MC.level.setBlockAndUpdate(preselectedBlockPos.above(), Blocks.BARREL.defaultBlockState());
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             rightClickDown = true;
+
+            if (MC.level != null)
+                FrozenChunkServerboundPacket.syncServerBlocks(preselectedBlockPos.above());
         }
     }
 

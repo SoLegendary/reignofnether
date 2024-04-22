@@ -29,6 +29,7 @@ import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -298,14 +299,29 @@ public class FogOfWarClientEvents {
         }
     }
 
+    @SubscribeEvent
+    public static void onChunkEvent(ChunkEvent.Load evt) {
+        for (FrozenChunk frozenChunk : frozenChunks)
+            if (MC.level.getChunk(frozenChunk.origin).getPos().equals(evt.getChunk().getPos()))
+                frozenChunk.loadBlocks();
+    }
+
     // triggered when a chunk goes from dark to bright
     public static void onChunkExplore(ChunkPos cpos) {
         System.out.println("explored: " + cpos);
+
+        for (FrozenChunk frozenChunk : frozenChunks)
+            if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
+                frozenChunk.syncServerBlocks(frozenChunk.origin);
     }
 
     // triggered when a chunk goes from bright to dark
     public static void onChunkUnexplore(ChunkPos cpos) {
         System.out.println("unexplored: " + cpos);
+
+        for (FrozenChunk frozenChunk : frozenChunks)
+            if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
+                frozenChunk.saveBlocks();
     }
 
     @SubscribeEvent

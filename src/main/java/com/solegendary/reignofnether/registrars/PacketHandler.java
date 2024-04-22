@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPack
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket;
+import com.solegendary.reignofnether.fogofwar.FrozenChunkServerboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
@@ -81,6 +82,10 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(FogOfWarServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(FogOfWarServerboundPacket::encode).decoder(FogOfWarServerboundPacket::new)
                 .consumer(FogOfWarServerboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(FrozenChunkServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(FrozenChunkServerboundPacket::encode).decoder(FrozenChunkServerboundPacket::new)
+                .consumer(FrozenChunkServerboundPacket::handle).add();
 
         INSTANCE.messageBuilder(BuildingServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(BuildingServerboundPacket::encode).decoder(BuildingServerboundPacket::new)

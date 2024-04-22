@@ -717,12 +717,10 @@ public class BuildingClientEvents {
         // TODO: only in dark chunks
         // if the building is going to be placed in darkness, then don't - instead keep it serverside and only place it when
         // the chunk is revealed
-        if (FogOfWarClientEvents.isBuildingInBrightChunk(newBuilding)) {
-            for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(newBuilding))
-                FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(bp));
-        }
-
-
+        //if (FogOfWarClientEvents.isBuildingInBrightChunk(newBuilding)) {
+        //    for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(newBuilding))
+        //        FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(bp));
+        //}
 
 
         // add a bunch of dummy blocks so clients know not to remove buildings before the first blocks get placed
