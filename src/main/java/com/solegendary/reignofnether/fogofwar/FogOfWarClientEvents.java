@@ -299,13 +299,6 @@ public class FogOfWarClientEvents {
         }
     }
 
-    @SubscribeEvent
-    public static void onChunkEvent(ChunkEvent.Load evt) {
-        for (FrozenChunk frozenChunk : frozenChunks)
-            if (MC.level.getChunk(frozenChunk.origin).getPos().equals(evt.getChunk().getPos()))
-                frozenChunk.loadBlocks();
-    }
-
     // triggered when a chunk goes from dark to bright
     public static void onChunkExplore(ChunkPos cpos) {
         System.out.println("explored: " + cpos);

@@ -60,6 +60,8 @@ public abstract class LevelRendererMixin {
     @Shadow private ChunkRenderDispatcher chunkRenderDispatcher;
     @Shadow private ClientLevel level;
 
+    private static final ObjectArrayList<LevelRenderer.RenderChunkInfo> lastRenderChunksInFrustum = new ObjectArrayList<>();
+
     private List<Pair<BlockPos, Integer>> chunksToReDirty = new ArrayList<>();
 
     @Inject(
@@ -138,6 +140,23 @@ public abstract class LevelRendererMixin {
 
         ci.cancel();
 
+
+        // determine which renderChunks are new - enforce frozenChunks on those
+        ObjectArrayList<LevelRenderer.RenderChunkInfo> newRenderChunksInFrustum = new ObjectArrayList<>();
+        newRenderChunksInFrustum.addAll(renderChunksInFrustum);
+        newRenderChunksInFrustum.removeAll(lastRenderChunksInFrustum);
+
+        if (newRenderChunksInFrustum.size() > 0)
+            System.out.println("newRenderChunksInFrustum: " + newRenderChunksInFrustum.size());
+
+        for (FrozenChunk frozenChunk : frozenChunks)
+            for (LevelRenderer.RenderChunkInfo newRenderChunk : newRenderChunksInFrustum)
+                if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin)) {
+                    System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
+                    frozenChunk.loadBlocks();
+                }
+
+
         this.minecraft.getProfiler().push("populate_chunks_to_compile");
         RenderRegionCache renderregioncache = new RenderRegionCache();
         BlockPos blockpos = pCamera.getBlockPosition();
@@ -193,6 +212,9 @@ public abstract class LevelRendererMixin {
             renderChunk1.setNotDirty();
         }
         this.minecraft.getProfiler().pop();
+
+        lastRenderChunksInFrustum.clear();
+        lastRenderChunksInFrustum.addAll(renderChunksInFrustum);
     }
 
     @Shadow @Final private AtomicBoolean needsFrustumUpdate = new AtomicBoolean(false);

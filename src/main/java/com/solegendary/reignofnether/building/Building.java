@@ -374,6 +374,10 @@ public abstract class Building {
     }
 
     public boolean shouldBeDestroyed() {
+        // don't remove clientside buildings if they're in the dark since they may not have any blocks placed
+        // TODO: make exception for night warping buildings without getting the above issue
+        if (this.level.isClientSide && !FogOfWarClientEvents.isBuildingInBrightChunk(this))
+            return false;
         if (blockPlaceQueue.size() > 0)
             return false;
         if (getBlocksPlaced() <= 0)

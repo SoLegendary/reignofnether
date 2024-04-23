@@ -263,14 +263,14 @@ public class CursorClientEvents {
             cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
             leftClickDown = true;
 
-            if (MC.level != null)
-                MC.level.setBlockAndUpdate(preselectedBlockPos.above(), Blocks.BARREL.defaultBlockState());
+            //if (MC.level != null)
+            //    MC.level.setBlockAndUpdate(preselectedBlockPos.above(), Blocks.BARREL.defaultBlockState());
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             rightClickDown = true;
 
-            if (MC.level != null)
-                FrozenChunkServerboundPacket.syncServerBlocks(preselectedBlockPos.above());
+            //if (MC.level != null)
+            //    FrozenChunkServerboundPacket.syncServerBlocks(preselectedBlockPos.above());
         }
     }
 

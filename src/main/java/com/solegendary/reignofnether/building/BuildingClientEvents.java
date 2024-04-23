@@ -713,15 +713,11 @@ public class BuildingClientEvents {
 
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName, isDiagonalBridge);
 
-
-        // TODO: only in dark chunks
-        // if the building is going to be placed in darkness, then don't - instead keep it serverside and only place it when
-        // the chunk is revealed
-        //if (FogOfWarClientEvents.isBuildingInBrightChunk(newBuilding)) {
-        //    for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(newBuilding))
-        //        FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(bp));
-        //}
-
+        // freeze the chunks for this building if owned by an opponent
+        if (!ownerName.equals(MC.player.getName().getString())) {
+            for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(newBuilding))
+                FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(bp));
+        }
 
         // add a bunch of dummy blocks so clients know not to remove buildings before the first blocks get placed
         while (numBlocksToPlace > 0) {
