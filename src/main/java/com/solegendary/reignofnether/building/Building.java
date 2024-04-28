@@ -49,6 +49,7 @@ import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessag
 public abstract class Building {
 
     public boolean isExploredClientside = false;
+    public boolean isDestroyedServerside = false;
 
     private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned; normally 500ms in real games
     public final float MELEE_DAMAGE_MULTIPLIER = 0.20f; // damage multiplier applied to melee attackers
@@ -377,7 +378,7 @@ public abstract class Building {
     }
 
     public boolean shouldBeDestroyed() {
-        if (this.level.isClientSide && !FogOfWarClientEvents.isBuildingInBrightChunk(this))
+        if (this.level.isClientSide && (!FogOfWarClientEvents.isBuildingInBrightChunk(this) || !isDestroyedServerside))
             return false;
         if (blockPlaceQueue.size() > 0)
             return false;

@@ -11,11 +11,13 @@ Fog and map TODOs:
 - all existing buildings are updated correctly after turning OFF fog
 - all existing building chunks are frozen after turning ON fog
     TODO: need to account for toggling fog in onChunkExplore and onChunkUnexplore
-- night-warping buildings that are destroyed serverside but unexplored clientside should have their night-warping abilities disabled
+
 - freeze all chunks that will have nether blocks spread to them
 - check F8 behaviour
 
-- shouldBeDestroyed is true for a few frames before the blocks get loaded
+PRIORITY:
+- isExploredClientside still not being set correctly
+- destroying a building causes a crash everywhere - test this again
 
 
 Other TODOs:
@@ -30,6 +32,7 @@ Replace /rts-start with UI buttons
 - buildings placed offscreen are updated correctly
 - destroyed buildings no longer have frozenchunks
 - explored frozenchunks should not have any unsynced blocks
+- night-warping buildings that are destroyed serverside but unexplored clientside should have their night-warping abilities disabled
 
 
 [BRIDGES] playtest checklist:

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -238,7 +239,13 @@ public class BuildingServerEvents {
 
         // need to remove from the list first as destroy() will read it to check defeats
         List<Building> buildingsToDestroy = buildings.stream().filter(Building::shouldBeDestroyed).toList();
-        buildings.removeIf(Building::shouldBeDestroyed);
+        buildings.removeIf(b -> {
+            if (b.shouldBeDestroyed()) {
+                FrozenChunkClientboundPacket.setBuildingDestroyedServerside(b.originPos);
+                return true;
+            }
+            return false;
+        });
 
         for (Building building : buildingsToDestroy)
             building.destroy(serverLevel);

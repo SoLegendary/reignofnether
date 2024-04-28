@@ -33,6 +33,7 @@ import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -304,9 +305,15 @@ public class FogOfWarClientEvents {
         for (FrozenChunk frozenChunk : frozenChunks)
             if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
                 frozenChunk.syncServerBlocks(frozenChunk.origin);
-        for (Building building : BuildingClientEvents.getBuildings())
-            if (!building.isExploredClientside && building.isPosInsideBuilding(cpos.getWorldPosition()))
-                building.isExploredClientside = true;
+
+        for (Building building : BuildingClientEvents.getBuildings()) {
+            if (!building.isExploredClientside)
+                continue;
+            for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(building))
+                if (bp.getX() == cpos.getWorldPosition().getX() &&
+                    bp.getZ() == cpos.getWorldPosition().getZ())
+                    building.isExploredClientside = true;
+        }
     }
 
     // triggered when a chunk goes from bright to dark
@@ -314,6 +321,12 @@ public class FogOfWarClientEvents {
         for (FrozenChunk frozenChunk : frozenChunks)
             if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
                 frozenChunk.saveBlocks();
+    }
+
+    public static void setBuildingDestroyedServerside(BlockPos buildingOrigin) {
+        for (Building building : BuildingClientEvents.getBuildings())
+            if (building.originPos.equals(buildingOrigin))
+                building.isDestroyedServerside = true;
     }
 
     /*
