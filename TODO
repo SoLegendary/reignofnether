@@ -3,37 +3,54 @@ TODO bugs/features:
 
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - workers are not marked as idle until 15s after stopping gathering
+- turning on fog of war causes a crash when optifine is installed
 
-Known issues:
-    - when moving far away at fast speeds, we can sometimes end up with semi-frozen chunks that are not rendered at all
-        - if we can detect which chunks are unrendered, we can try rerendering them
-    - as a workaround, just press F8 to reset chunks
-        - as an additional workaround, chunks with enemy buildings are always hidden and not rendered
-    - turning on fog of war causes a crash when optifine is installed
 
-- Allow villagers to build bridges
 
-    Done, testing on server needed:
-    ------------------------------
-    - building placement validity check might be including air blocks on diagonal structures
-    - building placement validity check is broken on bridgePlaceState=2 (clientside issue)
-    - check that players joining a map with bridges existing see them correctly clientside
-    - include unbuilt bridge blocks as overlapping solid blocks during validity check
-    - 2 structures (diagonal and straight) that alternate when scrolled
-    - when any blocks are destroyed, replace them with the liquid underneath them if it exists
-        - including on building destruction
-    - when placed, remove any blocks that clip solid terrain or other bridges from the block list
-        - test that we can build through seaweed
-    - do not allow building underwater
-    - when placed, becomes neutral (ownername == "" on client and server), but still buildable/repairable by anyone
-        - meaning this should also not provide vision
-    - right clicking should not autoattack
-    - reduce selection dimensions after blocks are culled
-    - cull from block list any fences that are adjacent to another bridge fence
-    - check that bridge placement doesn't lag when viewing (due to shouldCullBlock being expensive)
+Fog and map TODOs:
+- all existing buildings are updated correctly after turning OFF fog
+- all existing building chunks are frozen after turning ON fog
+    TODO: need to account for toggling fog in onChunkExplore and onChunkUnexplore
+- night-warping buildings that are destroyed serverside but unexplored clientside should have their night-warping abilities disabled
+- freeze all chunks that will have nether blocks spread to them
+- check F8 behaviour
 
-- find a way to enforce frozenChunks (ie. players shouldn't be able to F8 refresh to see enemy bases in fog)
-    - not clearing them on refresh causes major rendering glitches
+- shouldBeDestroyed is true for a few frames before the blocks get loaded
+
+
+Other TODOs:
+Replace /rts-start with UI buttons
+    - In spectator remove the /rts-start message at top left
+    - Top right: add buttons to join game as each faction with tooltips
+
+
+[FOG OF WAR] playtest checklist:
+--------------------------------
+- buildings destroyed offscreen are updated correctly
+- buildings placed offscreen are updated correctly
+- destroyed buildings no longer have frozenchunks
+- explored frozenchunks should not have any unsynced blocks
+
+
+[BRIDGES] playtest checklist:
+-----------------------------
+- building placement validity check might be including air blocks on diagonal structures
+- building placement validity check is broken on bridgePlaceState=2 (clientside issue)
+- check that players joining a map with bridges existing see them correctly clientside
+- include unbuilt bridge blocks as overlapping solid blocks during validity check
+- 2 structures (diagonal and straight) that alternate when scrolled
+- when any blocks are destroyed, replace them with the liquid underneath them if it exists
+    - including on building destruction
+- when placed, remove any blocks that clip solid terrain or other bridges from the block list
+    - test that we can build through seaweed
+- do not allow building underwater
+- when placed, becomes neutral (ownername == "" on client and server), but still buildable/repairable by anyone
+    - meaning this should also not provide vision
+- right clicking should not autoattack
+- reduce selection dimensions after blocks are culled
+- cull from block list any fences that are adjacent to another bridge fence
+- check that bridge placement doesn't lag when viewing (due to shouldCullBlock being expensive)
+
 
 
 

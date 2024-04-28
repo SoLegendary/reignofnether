@@ -13,7 +13,6 @@ import java.util.ArrayList;
 //
 // Upon creation, a snapshot of the clientside blocks in the chunk are recorded and whenever the chunk is loaded
 // clientside (RenderChunk loading, not ChunkEvent.Load) these blocks are checked and synced to always match this initial state (loadBlocks)
-// TODO: this needs to happen BEFORE the chunk is put into semifrozen state
 //
 // When the chunk is explored: syncServerBlocks()
 // When the chunk is unexplored: saveBlocks()

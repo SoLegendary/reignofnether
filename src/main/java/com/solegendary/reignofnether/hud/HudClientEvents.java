@@ -652,7 +652,7 @@ public class HudClientEvents {
             } else {
                 GuiComponent.drawString(evt.getPoseStack(), MC.font, "You are a spectator", blitX + 5, blitY + 5, 0xFFFFFF);
                 blitY += 10;
-                GuiComponent.drawString(evt.getPoseStack(), MC.font, "Use /startrts to join", blitX + 5, blitY + 5, 0xFFFFFF);
+                GuiComponent.drawString(evt.getPoseStack(), MC.font, "Use '/rts-start' to join", blitX + 5, blitY + 5, 0xFFFFFF);
             }
             blitY += 20;
         }

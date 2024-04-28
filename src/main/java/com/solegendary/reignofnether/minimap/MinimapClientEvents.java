@@ -353,7 +353,8 @@ public class MinimapClientEvents {
     private static void updateMapUnitsAndBuildings() {
         // draw buildings
         for (Building building : BuildingClientEvents.getBuildings()) {
-            if (!FogOfWarClientEvents.isInBrightChunk(building.centrePos))
+
+            if (!building.isExploredClientside)
                 continue;
 
             int xc = building.originPos.getX() + (BUILDING_RADIUS / 2);
@@ -369,11 +370,20 @@ public class MinimapClientEvents {
                         // if pixel is on the edge of the square keep it coloured black
                         if (!(x0 < BUILDING_THICKNESS || x0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS ||
                                 z0 < BUILDING_THICKNESS || z0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS)) {
-                            switch (BuildingClientEvents.getPlayerToBuildingRelationship(building)) {
-                                case OWNED -> rgb = 0x00FF00;
-                                case FRIENDLY -> rgb = 0x0000FF;
-                                case HOSTILE -> rgb = 0xFF0000;
-                                case NEUTRAL -> rgb = 0xFFFF00;
+                            if (FogOfWarClientEvents.isInBrightChunk(building.centrePos)) {
+                                switch (BuildingClientEvents.getPlayerToBuildingRelationship(building)) {
+                                    case OWNED -> rgb = 0x00FF00;
+                                    case FRIENDLY -> rgb = 0x0000FF;
+                                    case HOSTILE -> rgb = 0xFF0000;
+                                    case NEUTRAL -> rgb = 0xFFFF00;
+                                }
+                            } else {
+                                switch (BuildingClientEvents.getPlayerToBuildingRelationship(building)) {
+                                    case OWNED -> rgb = 0x008800;
+                                    case FRIENDLY -> rgb = 0x000088;
+                                    case HOSTILE -> rgb = 0x880000;
+                                    case NEUTRAL -> rgb = 0x888800;
+                                }
                             }
                         }
                         int xN = x - xc_world + (mapGuiRadius * 2);
@@ -400,6 +410,8 @@ public class MinimapClientEvents {
             Relationship relationship = Relationship.HOSTILE;
             if (MC.player.getName().getString().equals(minimapUnit.ownerName))
                 relationship = Relationship.OWNED;
+            else if (minimapUnit.ownerName.isBlank())
+                relationship = Relationship.NEUTRAL;
 
             drawUnitOnMap(minimapUnit.pos.getX(),
                     minimapUnit.pos.getZ(),

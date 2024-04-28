@@ -123,7 +123,7 @@ public class FogOfWarClientEvents {
 
     @SubscribeEvent
     public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
-        evt.getDispatcher().register(Commands.literal("fog").then(Commands.literal("enable")
+        evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("enable")
                 .executes((command) -> {
                     if (MC.player == null)
                         return -1;
@@ -135,13 +135,13 @@ public class FogOfWarClientEvents {
                         MC.player.sendSystemMessage(Component.literal("[WARNING]").withStyle(Style.EMPTY.withBold(true)));
                         MC.player.sendSystemMessage(Component.literal(
                                 "If any players have rendering optimisation mods such as Optifine installed, enabling fog of war " +
-                                "may cause them to crash. If you are prepared for this, then use /fog enable again to continue."));
+                                        "may cause them to crash. If you are prepared for this, then use /rts-fog enable again to continue."));
                     } else {
                         setServerFog(true);
                     }
                     return 1;
                 })));
-        evt.getDispatcher().register(Commands.literal("fog").then(Commands.literal("disable")
+        evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("disable")
                 .executes((command) -> {
                     if (MC.player == null)
                         return -1;
@@ -301,22 +301,22 @@ public class FogOfWarClientEvents {
 
     // triggered when a chunk goes from dark to bright
     public static void onChunkExplore(ChunkPos cpos) {
-        System.out.println("explored: " + cpos);
-
         for (FrozenChunk frozenChunk : frozenChunks)
             if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
                 frozenChunk.syncServerBlocks(frozenChunk.origin);
+        for (Building building : BuildingClientEvents.getBuildings())
+            if (!building.isExploredClientside && building.isPosInsideBuilding(cpos.getWorldPosition()))
+                building.isExploredClientside = true;
     }
 
     // triggered when a chunk goes from bright to dark
     public static void onChunkUnexplore(ChunkPos cpos) {
-        System.out.println("unexplored: " + cpos);
-
         for (FrozenChunk frozenChunk : frozenChunks)
             if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
                 frozenChunk.saveBlocks();
     }
 
+    /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
         if (MC.level == null)
@@ -331,4 +331,5 @@ public class FogOfWarClientEvents {
                 "zo: " + cpos.getWorldPosition().getZ()
         });
     }
+     */
 }

@@ -27,38 +27,38 @@ public class PlayerClientEvents {
 
     @SubscribeEvent
     public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
-        evt.getDispatcher().register(Commands.literal("surrender")
+        evt.getDispatcher().register(Commands.literal("rts-surrender")
                 .executes((command) -> {
                     PlayerServerboundPacket.surrender();
                     return 1;
                 }));
-        evt.getDispatcher().register(Commands.literal("startrts").then(Commands.literal("villagers")
+        evt.getDispatcher().register(Commands.literal("rts-start").then(Commands.literal("villagers")
                 .executes((command) -> {
                     if (!OrthoviewClientEvents.isEnabled())
                         OrthoviewClientEvents.toggleEnable();
                     PlayerServerboundPacket.startRTS(Faction.VILLAGERS);
                     return 1;
                 })));
-        evt.getDispatcher().register(Commands.literal("startrts").then(Commands.literal("monsters")
+        evt.getDispatcher().register(Commands.literal("rts-start").then(Commands.literal("monsters")
                 .executes((command) -> {
                     if (!OrthoviewClientEvents.isEnabled())
                         OrthoviewClientEvents.toggleEnable();
                     PlayerServerboundPacket.startRTS(Faction.MONSTERS);
                     return 1;
                 })));
-        evt.getDispatcher().register(Commands.literal("startrts").then(Commands.literal("piglins")
+        evt.getDispatcher().register(Commands.literal("rts-start").then(Commands.literal("piglins")
                 .executes((command) -> {
                     if (!OrthoviewClientEvents.isEnabled())
                         OrthoviewClientEvents.toggleEnable();
                     PlayerServerboundPacket.startRTS(Faction.PIGLINS);
                     return 1;
                 })));
-        evt.getDispatcher().register(Commands.literal("resetrts")
+        evt.getDispatcher().register(Commands.literal("rts-reset")
                 .executes((command) -> {
                     PlayerServerboundPacket.resetRTS();
                     return 1;
                 }));
-        evt.getDispatcher().register(Commands.literal("controls")
+        evt.getDispatcher().register(Commands.literal("rts-help")
                 .executes((command) -> {
                     if (MC.player != null) {
                         MC.player.sendSystemMessage(Component.literal(" "));
@@ -67,10 +67,10 @@ public class PlayerClientEvents {
                         MC.player.sendSystemMessage(Component.literal("F7 - Toggle FPS/TPS counters"));
                         MC.player.sendSystemMessage(Component.literal("F6 - Toggle hide leaves (experimental)"));
                         MC.player.sendSystemMessage(Component.literal("F1 - Deselect all units and buildings"));
-                        MC.player.sendSystemMessage(Component.literal("/startrts <faction> - Begin a match and spawn in 3 workers"));
-                        MC.player.sendSystemMessage(Component.literal("/fog enable/disable - Toggle fog of war for all players"));
-                        MC.player.sendSystemMessage(Component.literal("/surrender - Concede the match"));
-                        MC.player.sendSystemMessage(Component.literal("/resetrts - Delete all units/buildings, set all to spectator"));
+                        MC.player.sendSystemMessage(Component.literal("/rts-start <faction> - Begin a match and spawn in 3 workers"));
+                        MC.player.sendSystemMessage(Component.literal("/rts-fog enable/disable - Toggle fog of war for all players"));
+                        MC.player.sendSystemMessage(Component.literal("/rts-surrender - Concede the match"));
+                        MC.player.sendSystemMessage(Component.literal("/rts-reset - Delete all units/buildings, set all to spectator"));
                         MC.player.sendSystemMessage(Component.literal("Right click - move, attack or set rallypoint"));
                         MC.player.sendSystemMessage(Component.literal("Ctrl + number key - Create control group"));
                         MC.player.sendSystemMessage(Component.literal("Shift + left-click on map - recenter map"));

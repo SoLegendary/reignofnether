@@ -652,6 +652,9 @@ public class UnitClientEvents {
     public static Relationship getPlayerToEntityRelationship(LivingEntity entity) {
         if (MC.level != null && MC.player != null) {
 
+            if (entity instanceof Unit unit && unit.getOwnerName().isBlank())
+                return Relationship.NEUTRAL;
+
             if (entity instanceof Player)
                 return Relationship.HOSTILE;
             else if (!(entity instanceof Unit))

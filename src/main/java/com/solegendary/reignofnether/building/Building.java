@@ -48,6 +48,8 @@ import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessag
 
 public abstract class Building {
 
+    public boolean isExploredClientside = false;
+
     private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned; normally 500ms in real games
     public final float MELEE_DAMAGE_MULTIPLIER = 0.20f; // damage multiplier applied to melee attackers
 
@@ -234,6 +236,7 @@ public abstract class Building {
         return minPos;
     }
 
+    // does not account for fog of war
     private boolean isFullyLoadedClientSide(ClientLevel level) {
         for (BuildingBlock block : this.blocks)
             if (!level.isLoaded(block.getBlockPos()))
@@ -374,8 +377,6 @@ public abstract class Building {
     }
 
     public boolean shouldBeDestroyed() {
-        // don't remove clientside buildings if they're in the dark since they may not have any blocks placed
-        // TODO: make exception for night warping buildings without getting the above issue
         if (this.level.isClientSide && !FogOfWarClientEvents.isBuildingInBrightChunk(this))
             return false;
         if (blockPlaceQueue.size() > 0)
@@ -392,8 +393,6 @@ public abstract class Building {
     // only explode a fraction of the blocks to avoid lag and sound spikes
     public void destroy(ServerLevel serverLevel) {
         this.forceChunk(false);
-
-        BuildingClientboundPacket.destroyBuilding(this.originPos);
 
         this.blocks.forEach((BuildingBlock block) -> {
             if (block.getBlockState().getMaterial().isLiquid()) {
@@ -592,5 +591,10 @@ public abstract class Building {
                 }
             }
         }
+    }
+
+    public void removeFrozenChunks() {
+        for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(this))
+            FogOfWarClientEvents.frozenChunks.removeIf(fc -> fc.origin.equals(bp));
     }
 }

@@ -677,7 +677,13 @@ public class BuildingClientEvents {
 
             // cleanup destroyed buildings
             selectedBuildings.removeIf(Building::shouldBeDestroyed);
-            buildings.removeIf(Building::shouldBeDestroyed);
+            buildings.removeIf(b -> {
+                if (b.shouldBeDestroyed()) {
+                    b.removeFrozenChunks();
+                    return true;
+                }
+                return false;
+            });
         }
     }
 
@@ -744,10 +750,6 @@ public class BuildingClientEvents {
         }
     }
 
-    public static void destroyBuilding(BlockPos pos) {
-        buildings.removeIf(b -> b.originPos == pos);
-    }
-
     public static void syncBuildingBlocks(Building serverBuilding, int blocksPlaced) {
         for (Building building : buildings)
             if (building.originPos.equals(serverBuilding.originPos))
@@ -757,6 +759,8 @@ public class BuildingClientEvents {
     public static Relationship getPlayerToBuildingRelationship(Building building) {
         if (MC.player != null && building.ownerName.equals(MC.player.getName().getString()))
             return Relationship.OWNED;
+        else if (building.ownerName.isBlank())
+            return Relationship.NEUTRAL;
         else
             return Relationship.HOSTILE;
     }

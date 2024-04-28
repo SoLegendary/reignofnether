@@ -146,16 +146,15 @@ public abstract class LevelRendererMixin {
         newRenderChunksInFrustum.addAll(renderChunksInFrustum);
         newRenderChunksInFrustum.removeAll(lastRenderChunksInFrustum);
 
-        if (newRenderChunksInFrustum.size() > 0)
-            System.out.println("newRenderChunksInFrustum: " + newRenderChunksInFrustum.size());
-
-        for (FrozenChunk frozenChunk : frozenChunks)
-            for (LevelRenderer.RenderChunkInfo newRenderChunk : newRenderChunksInFrustum)
-                if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin)) {
+        for (FrozenChunk frozenChunk : frozenChunks) {
+            for (LevelRenderer.RenderChunkInfo newRenderChunk : newRenderChunksInFrustum) {
+                if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
+                    !isInBrightChunk(frozenChunk.origin)) {
                     System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
                     frozenChunk.loadBlocks();
                 }
-
+            }
+        }
 
         this.minecraft.getProfiler().push("populate_chunks_to_compile");
         RenderRegionCache renderregioncache = new RenderRegionCache();
