@@ -652,7 +652,6 @@ public class HudClientEvents {
             } else {
                 GuiComponent.drawString(evt.getPoseStack(), MC.font, "You are a spectator", blitX + 5, blitY + 5, 0xFFFFFF);
                 blitY += 10;
-                GuiComponent.drawString(evt.getPoseStack(), MC.font, "Use /startrts to join", blitX + 5, blitY + 5, 0xFFFFFF);
             }
             blitY += 20;
         }
@@ -846,7 +845,6 @@ public class HudClientEvents {
         // ----------------------
         // Map size toggle button
         // ----------------------
-
         Button toggleMapSizeButton = MinimapClientEvents.getToggleSizeButton();
         if (!toggleMapSizeButton.isHidden.get())
             toggleMapSizeButton.render(evt.getPoseStack(),
@@ -854,6 +852,29 @@ public class HudClientEvents {
                     screenHeight - (toggleMapSizeButton.iconSize * 2),
                     mouseX, mouseY);
         renderedButtons.add(toggleMapSizeButton);
+
+        // ------------------------------
+        // Start buttons (spectator only)
+        // ------------------------------
+        if (!PlayerClientEvents.isRTSPlayer) {
+            StartButtons.villagerStartButton.render(evt.getPoseStack(),
+                    screenWidth - (StartButtons.iconSize * 6),
+                    StartButtons.iconSize / 2,
+                    mouseX, mouseY);
+            renderedButtons.add(StartButtons.villagerStartButton);
+
+            StartButtons.monsterStartButton.render(evt.getPoseStack(),
+                    (int) (screenWidth - (StartButtons.iconSize * 4f)),
+                    StartButtons.iconSize / 2,
+                    mouseX, mouseY);
+            renderedButtons.add(StartButtons.monsterStartButton);
+
+            StartButtons.piglinStartButton.render(evt.getPoseStack(),
+                    screenWidth - (StartButtons.iconSize * 2),
+                    StartButtons.iconSize / 2,
+                    mouseX, mouseY);
+            renderedButtons.add(StartButtons.piglinStartButton);
+        }
 
         // ------------------------------------------------------
         // Button tooltips (has to be rendered last to be on top)

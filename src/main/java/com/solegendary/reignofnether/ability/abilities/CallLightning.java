@@ -55,7 +55,7 @@ public class CallLightning extends Ability {
                     FormattedCharSequence.forward("Call Lightning", Style.EMPTY.withBold(true)),
                     FormattedCharSequence.forward("\uE004  " + CD_MAX/20 + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Summon a bolt of lightning at the targeted location.", Style.EMPTY),
+                    FormattedCharSequence.forward("Summon a bolt of lightning at the target location.", Style.EMPTY),
                     FormattedCharSequence.forward("Can be used to charge creepers and damage enemies.", Style.EMPTY)
             ),
             this

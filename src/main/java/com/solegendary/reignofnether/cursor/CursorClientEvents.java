@@ -79,7 +79,12 @@ public class CursorClientEvents {
         return leftClickAction;
     }
     public static void setLeftClickAction(UnitAction actionName) {
-        if (UnitClientEvents.getSelectedUnits().size() > 0 ||
+        if (actionName != null &&
+            List.of(UnitAction.STARTRTS_VILLAGERS,
+                UnitAction.STARTRTS_MONSTERS,
+                UnitAction.STARTRTS_PIGLINS).contains(actionName))
+            leftClickAction = actionName;
+        else if (UnitClientEvents.getSelectedUnits().size() > 0 ||
             BuildingClientEvents.getSelectedBuildings().size() > 0)
             leftClickAction = actionName;
         else if (actionName == null)
@@ -362,11 +367,16 @@ public class CursorClientEvents {
                     break;
                 }
             }
-            if (!OrthoviewClientEvents.isCameraMovingByMouse() &&
+            boolean isLeftClickActionStartRTS = leftClickAction != null &&
+                List.of(UnitAction.STARTRTS_VILLAGERS,
+                    UnitAction.STARTRTS_MONSTERS,
+                    UnitAction.STARTRTS_PIGLINS).contains(leftClickAction);
+
+            if ((!OrthoviewClientEvents.isCameraMovingByMouse() &&
                 !leftClickDown && ownAnySelected &&
                 UnitClientEvents.getPreselectedUnits().size() == 0 &&
                 BuildingClientEvents.getPreselectedBuilding() == null &&
-                !buildingTargetedByWorker && !buildingTargetedByAttacker) {
+                !buildingTargetedByWorker && !buildingTargetedByAttacker) || isLeftClickActionStartRTS) {
 
                 if (MC.level.getBlockState(getPreselectedBlockPos().offset(0,1,0)).getBlock() instanceof SnowLayerBlock) {
                     AABB aabb = new AABB(preselectedBlockPos);

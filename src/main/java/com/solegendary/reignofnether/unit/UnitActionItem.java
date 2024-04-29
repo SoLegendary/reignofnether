@@ -57,7 +57,6 @@ public class UnitActionItem {
     // can be done server or clientside - but only serverside will have an effect on the world
     // clientside actions are purely for tracking data
     public void action(Level level) {
-
         // filter out unowned units and non-unit entities
         ArrayList<Unit> actionableUnits = new ArrayList<>();
         for (int id : unitIds) {

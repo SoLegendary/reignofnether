@@ -22,7 +22,6 @@ public enum UnitAction {
     DELETE, // instantly kills this unit
     DISCARD, // instantly removes this unit from the level without any death animation/event
     ATTACK_GROUND,
-
     // special abilities - these can also be assigned to cursor actions
     EXPLODE,
     CALL_LIGHTNING, // actually not from a unit, but we'll make an exception
@@ -35,21 +34,21 @@ public enum UnitAction {
     EJECT, // vehicle removes itself from passengers
     PROMOTE_ILLAGER,
     ROAR,
-
     THROW_HARMING_POTION,
     THROW_HEALING_POTION,
     THROW_LINGERING_HARMING_POTION,
     THROW_LINGERING_HEALING_POTION,
-
     SET_FANGS_LINE,
     SET_FANGS_CIRCLE,
     CAST_SUMMON_VEXES,
     CAST_SONIC_BOOM,
-
     TOGGLE_SHIELD,
     SHOOT_FIREWALL,
-
     CONNECT_PORTAL,
     DISCONNECT_PORTAL,
     GOTO_PORTAL,
+
+    STARTRTS_VILLAGERS,
+    STARTRTS_MONSTERS,
+    STARTRTS_PIGLINS
 }
