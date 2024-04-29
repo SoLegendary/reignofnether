@@ -143,9 +143,7 @@ public class PlayerServerEvents {
 
         if (!isRTSPlayer(serverPlayer.getId())) {
             serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
-            serverPlayer.sendSystemMessage(Component.literal("Use '/rts-start <faction_name>' to get started"));
-            serverPlayer.sendSystemMessage(Component.literal("Make sure to be in a good base location first!"));
-            serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle spectator mode"));
+            serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS camera and join the game"));
             serverPlayer.sendSystemMessage(Component.literal("Use '/rts-help' to see the list of all commands"));
         } else {
             serverPlayer.sendSystemMessage(Component.literal("Welcome back to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));

@@ -32,27 +32,6 @@ public class PlayerClientEvents {
                     PlayerServerboundPacket.surrender();
                     return 1;
                 }));
-        evt.getDispatcher().register(Commands.literal("rts-start").then(Commands.literal("villagers")
-                .executes((command) -> {
-                    if (!OrthoviewClientEvents.isEnabled())
-                        OrthoviewClientEvents.toggleEnable();
-                    PlayerServerboundPacket.startRTS(Faction.VILLAGERS);
-                    return 1;
-                })));
-        evt.getDispatcher().register(Commands.literal("rts-start").then(Commands.literal("monsters")
-                .executes((command) -> {
-                    if (!OrthoviewClientEvents.isEnabled())
-                        OrthoviewClientEvents.toggleEnable();
-                    PlayerServerboundPacket.startRTS(Faction.MONSTERS);
-                    return 1;
-                })));
-        evt.getDispatcher().register(Commands.literal("rts-start").then(Commands.literal("piglins")
-                .executes((command) -> {
-                    if (!OrthoviewClientEvents.isEnabled())
-                        OrthoviewClientEvents.toggleEnable();
-                    PlayerServerboundPacket.startRTS(Faction.PIGLINS);
-                    return 1;
-                })));
         evt.getDispatcher().register(Commands.literal("rts-reset")
                 .executes((command) -> {
                     PlayerServerboundPacket.resetRTS();
@@ -67,7 +46,6 @@ public class PlayerClientEvents {
                         MC.player.sendSystemMessage(Component.literal("F7 - Toggle FPS/TPS counters"));
                         MC.player.sendSystemMessage(Component.literal("F6 - Toggle hide leaves (experimental)"));
                         MC.player.sendSystemMessage(Component.literal("F1 - Deselect all units and buildings"));
-                        MC.player.sendSystemMessage(Component.literal("/rts-start <faction> - Begin a match and spawn in 3 workers"));
                         MC.player.sendSystemMessage(Component.literal("/rts-fog enable/disable - Toggle fog of war for all players"));
                         MC.player.sendSystemMessage(Component.literal("/rts-surrender - Concede the match"));
                         MC.player.sendSystemMessage(Component.literal("/rts-reset - Delete all units/buildings, set all to spectator"));

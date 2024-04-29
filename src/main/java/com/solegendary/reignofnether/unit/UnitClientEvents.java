@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -28,6 +29,7 @@ import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
+import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -195,13 +197,22 @@ public class UnitClientEvents {
     }
 
     public static void sendUnitCommand(UnitAction action) {
+        BlockPos bp = getPreselectedBlockPos();
+        if (action == UnitAction.STARTRTS_VILLAGERS) {
+            PlayerServerboundPacket.startRTS(Faction.VILLAGERS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
+        } else if (action == UnitAction.STARTRTS_MONSTERS) {
+            PlayerServerboundPacket.startRTS(Faction.MONSTERS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
+        } else if (action == UnitAction.STARTRTS_PIGLINS) {
+            PlayerServerboundPacket.startRTS(Faction.PIGLINS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
+        }
+
         if (MC.player != null) {
             UnitActionItem actionItem = new UnitActionItem(
                 MC.player.getName().getString(),
                 action,
                 preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
                 selectedUnits.stream().mapToInt(Entity::getId).toArray(),
-                getPreselectedBlockPos(),
+                bp,
                 HudClientEvents.hudSelectedBuilding != null ? HudClientEvents.hudSelectedBuilding.originPos : new BlockPos(0,0,0)
             );
             actionItem.action(MC.level);
@@ -211,7 +222,7 @@ public class UnitClientEvents {
                 action,
                 preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
                 selectedUnits.stream().mapToInt(Entity::getId).toArray(),
-                getPreselectedBlockPos(),
+                bp,
                 HudClientEvents.hudSelectedBuilding != null ? HudClientEvents.hudSelectedBuilding.originPos : new BlockPos(0,0,0)
             ));
         }
