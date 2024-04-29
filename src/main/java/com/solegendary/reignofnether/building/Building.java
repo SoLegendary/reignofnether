@@ -23,6 +23,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.units.monsters.SilverfishUnit;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +31,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -592,9 +594,20 @@ public abstract class Building {
                 }
             }
         }
+
+        if (this.level.isClientSide && !FogOfWarClientEvents.isEnabled())
+            isExploredClientside = true;
     }
 
-    public void removeFrozenChunks() {
+    public void freezeChunks() {
+        Player player = Minecraft.getInstance().player;
+        // freeze the chunks for this building if owned by an opponent
+        if (player != null && !ownerName.equals(player.getName().getString()))
+            for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(this))
+                FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(bp));
+    }
+
+    public void unFreezeChunks() {
         for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(this))
             FogOfWarClientEvents.frozenChunks.removeIf(fc -> fc.origin.equals(bp));
     }

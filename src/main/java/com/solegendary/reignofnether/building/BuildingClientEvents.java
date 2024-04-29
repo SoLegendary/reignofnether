@@ -442,6 +442,7 @@ public class BuildingClientEvents {
                     case OWNED -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 1.0f, 0.3f, 0.2f);
                     case FRIENDLY -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 0.3f, 1.0f, 0.2f);
                     case HOSTILE -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 1.0f, 0.3f, 0.3f, 0.2f);
+                    case NEUTRAL -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 1.0f, 1.0f, 0.3f, 0.2f);
                 }
             }
         }
@@ -679,7 +680,7 @@ public class BuildingClientEvents {
             selectedBuildings.removeIf(Building::shouldBeDestroyed);
             buildings.removeIf(b -> {
                 if (b.shouldBeDestroyed()) {
-                    b.removeFrozenChunks();
+                    b.unFreezeChunks();
                     return true;
                 }
                 return false;
@@ -719,29 +720,15 @@ public class BuildingClientEvents {
 
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName, isDiagonalBridge);
 
-        // freeze the chunks for this building if owned by an opponent
-        if (!ownerName.equals(MC.player.getName().getString())) {
-            for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(newBuilding))
-                FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(bp));
-        }
-
         // add a bunch of dummy blocks so clients know not to remove buildings before the first blocks get placed
         while (numBlocksToPlace > 0) {
             newBuilding.addToBlockPlaceQueue(new BuildingBlock(new BlockPos(0,0,0), Blocks.AIR.defaultBlockState()));
             numBlocksToPlace -= 1;
         }
-
         if (newBuilding != null) {
-            boolean buildingExists = false;
-            for (Building building : buildings)
-                if (building.originPos == pos) {
-                    buildingExists = true;
-                    break;
-                }
-            if (!buildingExists)
-                buildings.add(newBuilding);
+            buildings.add(newBuilding);
+            newBuilding.freezeChunks();
         }
-
         // sync the goal so we can display the correct animations
         Entity entity = hudSelectedEntity;
         if (entity instanceof WorkerUnit workerUnit) {

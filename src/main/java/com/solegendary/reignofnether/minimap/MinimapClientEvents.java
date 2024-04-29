@@ -8,6 +8,7 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.Button;
@@ -370,7 +371,8 @@ public class MinimapClientEvents {
                         // if pixel is on the edge of the square keep it coloured black
                         if (!(x0 < BUILDING_THICKNESS || x0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS ||
                                 z0 < BUILDING_THICKNESS || z0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS)) {
-                            if (FogOfWarClientEvents.isInBrightChunk(building.centrePos)) {
+
+                            if (FogOfWarClientEvents.isBuildingInBrightChunk(building)) {
                                 switch (BuildingClientEvents.getPlayerToBuildingRelationship(building)) {
                                     case OWNED -> rgb = 0x00FF00;
                                     case FRIENDLY -> rgb = 0x0000FF;

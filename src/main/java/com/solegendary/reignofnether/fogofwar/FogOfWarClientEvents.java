@@ -113,6 +113,13 @@ public class FogOfWarClientEvents {
         if (enabled != value) {
             enabled = value;
             resetFogChunks();
+
+            if (enabled) {
+                for (Building building : BuildingClientEvents.getBuildings())
+                    building.freezeChunks();
+            } else {
+                frozenChunks.clear();
+            }
         }
     }
 
@@ -307,7 +314,7 @@ public class FogOfWarClientEvents {
                 frozenChunk.syncServerBlocks(frozenChunk.origin);
 
         for (Building building : BuildingClientEvents.getBuildings()) {
-            if (!building.isExploredClientside)
+            if (building.isExploredClientside)
                 continue;
             for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(building))
                 if (bp.getX() == cpos.getWorldPosition().getX() &&

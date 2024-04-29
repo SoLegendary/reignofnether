@@ -9,18 +9,24 @@ TODO bugs/features:
 
 Fog and map TODOs:
 - all existing buildings are updated correctly after turning OFF fog
+    - remove all frozen chunks
 - all existing building chunks are frozen after turning ON fog
-    TODO: need to account for toggling fog in onChunkExplore and onChunkUnexplore
+    - recreate all frozen chunks
 
 - freeze all chunks that will have nether blocks spread to them
 - check F8 behaviour
+- any issues caused by stuff happening off-screen? ie. chunks not loaded at all, and MC.level.getBlock() is null/void
+- any issues caused by logging in/out and restarting Minecraft?
 
-PRIORITY:
-- isExploredClientside still not being set correctly
-- destroying a building causes a crash everywhere - test this again
+- can we prevent breaking sounds for grass onChunkExplore?
+
+
+test:
+    - set all buildings isExploredClientside = true when fog is disabled
 
 
 Other TODOs:
+Reveal enemy ghasts briefly when they attack from within fog
 Replace /rts-start with UI buttons
     - In spectator remove the /rts-start message at top left
     - Top right: add buttons to join game as each faction with tooltips
