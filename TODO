@@ -8,11 +8,6 @@ TODO bugs/features:
 
 
 Fog and map TODOs:
-- all existing buildings are updated correctly after turning OFF fog
-    - remove all frozen chunks
-- all existing building chunks are frozen after turning ON fog
-    - recreate all frozen chunks
-
 - freeze all chunks that will have nether blocks spread to them
 - check F8 behaviour
 - any issues caused by stuff happening off-screen? ie. chunks not loaded at all, and MC.level.getBlock() is null/void
@@ -23,6 +18,8 @@ Fog and map TODOs:
 
 test:
     - set all buildings isExploredClientside = true when fog is disabled
+    - all existing buildings are updated correctly after turning OFF fog
+    - all existing building chunks are frozen after turning ON fog
 
 
 Other TODOs:
