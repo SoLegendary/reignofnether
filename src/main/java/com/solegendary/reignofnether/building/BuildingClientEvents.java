@@ -442,7 +442,7 @@ public class BuildingClientEvents {
                     case OWNED -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 1.0f, 0.3f, 0.2f);
                     case FRIENDLY -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 0.3f, 1.0f, 0.2f);
                     case HOSTILE -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 1.0f, 0.3f, 0.3f, 0.2f);
-                    case NEUTRAL -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 1.0f, 1.0f, 0.3f, 0.2f);
+                    case NEUTRAL -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 1.0f, 1.0f, 0.15f, 0.2f);
                 }
             }
         }

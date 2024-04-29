@@ -591,7 +591,7 @@ public class UnitClientEvents {
                         case OWNED -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 1.0f, 0.2f, alpha, excludeMaxY);
                         case FRIENDLY -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 0.2f, 1.0f, alpha, excludeMaxY);
                         case HOSTILE -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.2f, 0.2f, alpha, excludeMaxY);
-                        case NEUTRAL -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 0.2f, alpha, excludeMaxY);
+                        case NEUTRAL -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 0.1f, alpha, excludeMaxY);
                     }
                 }
             }
