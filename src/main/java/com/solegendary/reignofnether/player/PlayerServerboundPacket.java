@@ -32,7 +32,7 @@ public class PlayerServerboundPacket {
         if (MC.player != null)
             PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.DISABLE_ORTHOVIEW, MC.player.getId(), 0d,0d,0d));
     }
-    public static void startRTS(Faction faction) {
+    public static void startRTS(Faction faction, Double x, Double y, Double z) {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null) {
             PlayerAction playerAction = switch (faction) {
@@ -43,9 +43,7 @@ public class PlayerServerboundPacket {
             };
             PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
                     playerAction, MC.player.getId(),
-                    MC.player.getEyePosition().x,
-                    MC.player.getEyePosition().y,
-                    MC.player.getEyePosition().z));
+                    x, y, z));
         }
     }
     public static void resetRTS() {

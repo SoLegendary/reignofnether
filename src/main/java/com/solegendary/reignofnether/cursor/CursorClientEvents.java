@@ -80,10 +80,18 @@ public class CursorClientEvents {
     }
     public static void setLeftClickAction(UnitAction actionName) {
         if (UnitClientEvents.getSelectedUnits().size() > 0 ||
-            BuildingClientEvents.getSelectedBuildings().size() > 0)
+            BuildingClientEvents.getSelectedBuildings().size() > 0 ||
+            isLeftClickActionStartRTS())
             leftClickAction = actionName;
         else if (actionName == null)
             leftClickAction = null;
+    }
+
+    public static boolean isLeftClickActionStartRTS() {
+        return leftClickAction != null &&
+            List.of(UnitAction.STARTRTS_VILLAGERS,
+                UnitAction.STARTRTS_MONSTERS,
+                UnitAction.STARTRTS_PIGLINS).contains(leftClickAction);
     }
 
     private static final ResourceLocation TEXTURE_CURSOR = new ResourceLocation("reignofnether", "textures/cursors/customcursor.png");
@@ -362,11 +370,11 @@ public class CursorClientEvents {
                     break;
                 }
             }
-            if (!OrthoviewClientEvents.isCameraMovingByMouse() &&
+            if ((!OrthoviewClientEvents.isCameraMovingByMouse() &&
                 !leftClickDown && ownAnySelected &&
                 UnitClientEvents.getPreselectedUnits().size() == 0 &&
                 BuildingClientEvents.getPreselectedBuilding() == null &&
-                !buildingTargetedByWorker && !buildingTargetedByAttacker) {
+                !buildingTargetedByWorker && !buildingTargetedByAttacker) || isLeftClickActionStartRTS()) {
 
                 if (MC.level.getBlockState(getPreselectedBlockPos().offset(0,1,0)).getBlock() instanceof SnowLayerBlock) {
                     AABB aabb = new AABB(preselectedBlockPos);
