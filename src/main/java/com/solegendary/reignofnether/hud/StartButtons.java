@@ -58,7 +58,7 @@ public class StartButtons {
         () -> { },
         List.of(
             FormattedCharSequence.forward("Join the game as the Piglin Faction.", Style.EMPTY),
-            FormattedCharSequence.forward("Spawns in 3 piglin grunts to the targeted location.", Style.EMPTY)
+            FormattedCharSequence.forward("Spawns in 3 piglin grunts to the target location.", Style.EMPTY)
         )
     );
 }
