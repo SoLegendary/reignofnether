@@ -79,19 +79,16 @@ public class CursorClientEvents {
         return leftClickAction;
     }
     public static void setLeftClickAction(UnitAction actionName) {
-        if (UnitClientEvents.getSelectedUnits().size() > 0 ||
-            BuildingClientEvents.getSelectedBuildings().size() > 0 ||
-            isLeftClickActionStartRTS())
+        if (actionName != null &&
+            List.of(UnitAction.STARTRTS_VILLAGERS,
+                UnitAction.STARTRTS_MONSTERS,
+                UnitAction.STARTRTS_PIGLINS).contains(actionName))
+            leftClickAction = actionName;
+        else if (UnitClientEvents.getSelectedUnits().size() > 0 ||
+            BuildingClientEvents.getSelectedBuildings().size() > 0)
             leftClickAction = actionName;
         else if (actionName == null)
             leftClickAction = null;
-    }
-
-    public static boolean isLeftClickActionStartRTS() {
-        return leftClickAction != null &&
-            List.of(UnitAction.STARTRTS_VILLAGERS,
-                UnitAction.STARTRTS_MONSTERS,
-                UnitAction.STARTRTS_PIGLINS).contains(leftClickAction);
     }
 
     private static final ResourceLocation TEXTURE_CURSOR = new ResourceLocation("reignofnether", "textures/cursors/customcursor.png");
@@ -370,11 +367,16 @@ public class CursorClientEvents {
                     break;
                 }
             }
+            boolean isLeftClickActionStartRTS = leftClickAction != null &&
+                List.of(UnitAction.STARTRTS_VILLAGERS,
+                    UnitAction.STARTRTS_MONSTERS,
+                    UnitAction.STARTRTS_PIGLINS).contains(leftClickAction);
+
             if ((!OrthoviewClientEvents.isCameraMovingByMouse() &&
                 !leftClickDown && ownAnySelected &&
                 UnitClientEvents.getPreselectedUnits().size() == 0 &&
                 BuildingClientEvents.getPreselectedBuilding() == null &&
-                !buildingTargetedByWorker && !buildingTargetedByAttacker) || isLeftClickActionStartRTS()) {
+                !buildingTargetedByWorker && !buildingTargetedByAttacker) || isLeftClickActionStartRTS) {
 
                 if (MC.level.getBlockState(getPreselectedBlockPos().offset(0,1,0)).getBlock() instanceof SnowLayerBlock) {
                     AABB aabb = new AABB(preselectedBlockPos);

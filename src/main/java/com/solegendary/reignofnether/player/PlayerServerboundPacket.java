@@ -1,9 +1,14 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -33,8 +38,15 @@ public class PlayerServerboundPacket {
             PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.DISABLE_ORTHOVIEW, MC.player.getId(), 0d,0d,0d));
     }
     public static void startRTS(Faction faction, Double x, Double y, Double z) {
+
         Minecraft MC = Minecraft.getInstance();
-        if (MC.player != null) {
+
+        if (MC.player != null && MC.level != null) {
+            BlockState bs = MC.level.getBlockState(new BlockPos(x,y,z));
+            if (bs.getMaterial().isLiquid()) {
+                HudClientEvents.showTemporaryMessage("Invalid starting location");
+                return;
+            }
             PlayerAction playerAction = switch (faction) {
                 case VILLAGERS -> PlayerAction.START_RTS_VILLAGERS;
                 case MONSTERS -> PlayerAction.START_RTS_MONSTERS;
