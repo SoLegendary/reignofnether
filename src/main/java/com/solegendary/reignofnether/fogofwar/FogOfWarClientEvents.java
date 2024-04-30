@@ -25,6 +25,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.ChunkEvent;
@@ -113,7 +114,7 @@ public class FogOfWarClientEvents {
 
             if (enabled) {
                 for (Building building : BuildingClientEvents.getBuildings())
-                    building.freezeChunks();
+                    building.freezeChunks(MC.player.getName().getString());
             } else {
                 frozenChunks.clear();
             }
@@ -355,9 +356,11 @@ public class FogOfWarClientEvents {
             return;
 
         for (FrozenChunk frozenChunk : frozenChunks) {
-            MyRenderer.drawLine(evt.getPoseStack(), frozenChunk.origin, frozenChunk.origin.above(), 1, 1, 1, 1);
-            MyRenderer.drawLine(evt.getPoseStack(), frozenChunk.origin, frozenChunk.origin.north(), 1, 1, 1, 1);
-            MyRenderer.drawLine(evt.getPoseStack(), frozenChunk.origin, frozenChunk.origin.east(), 1, 1, 1, 1);
+            BlockPos bp = frozenChunk.origin;
+            Vec3 vec3 = new Vec3(bp.getX(), bp.getY(), bp.getZ());
+            MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(0,15,0), 1, 1, 1, 1);
+            MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(15,0,0), 1, 1, 1, 1);
+            MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(0,0,15), 1, 1, 1, 1);
         }
     }
 

@@ -725,9 +725,9 @@ public class BuildingClientEvents {
             newBuilding.addToBlockPlaceQueue(new BuildingBlock(new BlockPos(0,0,0), Blocks.AIR.defaultBlockState()));
             numBlocksToPlace -= 1;
         }
-        if (newBuilding != null) {
+        if (newBuilding != null && MC.player != null) {
             buildings.add(newBuilding);
-            newBuilding.freezeChunks();
+            newBuilding.freezeChunks(MC.player.getName().getString());
         }
         // sync the goal so we can display the correct animations
         Entity entity = hudSelectedEntity;

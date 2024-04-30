@@ -285,7 +285,6 @@ public class BuildingServerEvents {
                 }
             }
         }
-
         // set fire to random blocks from a ghast fireball
         if (ghastUnit != null) {
 

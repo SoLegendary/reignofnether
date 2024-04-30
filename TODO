@@ -8,15 +8,16 @@ TODO bugs/features:
 
 
 Fog and map TODOs:
-- freeze all chunks that will have nether blocks spread to them
+
 - freeze all chunks where resources are being gathered
     - add them when a block begins to be gathered, and prevent duplicates
     - remove once explored until the next time it is gathered
-- check F8 behaviour
-- any issues caused by stuff happening off-screen? ie. chunks not loaded at all, and MC.level.getBlock() is null/void
-- any issues caused by logging in/out and restarting Minecraft?
-
 - can we prevent breaking sounds for grass onChunkExplore?
+- any issues caused by stuff happening off-screen? ie. chunks not loaded at all, and MC.level.getBlock() is null/void
+
+- logging in/out of the world re-saves the blocks...
+
+
 
 
 test:
@@ -25,7 +26,7 @@ test:
     - all existing building chunks are frozen after turning ON fog
     - unfreezing chunks works correctly
     - bridges freeze water chunks correctly
-    - test overlapping frozenChunks
+    - freeze all chunks that will have nether blocks spread to them
 
 Other TODOs:
 Reveal enemy ghasts briefly when they attack from within fog

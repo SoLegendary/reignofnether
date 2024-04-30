@@ -380,7 +380,7 @@ public abstract class Building {
     }
 
     public boolean shouldBeDestroyed() {
-        if (this.level.isClientSide && (!FogOfWarClientEvents.isBuildingInBrightChunk(this) || !isDestroyedServerside))
+        if (this.level.isClientSide() && (!FogOfWarClientEvents.isBuildingInBrightChunk(this) || !isDestroyedServerside))
             return false;
         if (blockPlaceQueue.size() > 0)
             return false;
@@ -606,8 +606,8 @@ public abstract class Building {
             addedRange = 16 * Math.ceil(Math.abs(range/16)); // round up to next multiple of 16
         }
         List<BlockPos> origins = new ArrayList<>();
-        BlockPos minCorner = getMinCorner(getBlocks()).offset(-addedRange,0,-addedRange);
-        BlockPos maxCorner = getMaxCorner(getBlocks()).offset(addedRange,0,addedRange);;
+        BlockPos minCorner = getMinCorner(getBlocks()).offset(-addedRange/2,0,-addedRange/2);
+        BlockPos maxCorner = getMaxCorner(getBlocks()).offset(addedRange/2,0,addedRange/2);
 
         BlockPos minOrigin = new BlockPos(
                 Math.round(Math.floor(minCorner.getX() / 16d) * 16),
@@ -626,16 +626,17 @@ public abstract class Building {
         return origins;
     }
 
-    public void freezeChunks() {
-        Player player = Minecraft.getInstance().player;
-        // freeze the chunks for this building if owned by an opponent
-        if (player != null && !ownerName.equals(player.getName().getString()))
-            for (BlockPos bp : getRenderChunkOrigins(true))
-                FogOfWarClientEvents.freezeChunk(bp, this);
+    public void freezeChunks(String localPlayerName) {
+        if (level.isClientSide) {
+            if (!ownerName.equals(localPlayerName))
+                for (BlockPos bp : getRenderChunkOrigins(true))
+                    FogOfWarClientEvents.freezeChunk(bp, this);
+        }
     }
 
     public void unFreezeChunks() {
-        for (BlockPos bp : getRenderChunkOrigins(true))
-            FogOfWarClientEvents.frozenChunks.removeIf(fc -> fc.building != null && fc.building.originPos.equals(originPos));
+        if (level.isClientSide)
+            for (BlockPos bp : getRenderChunkOrigins(true))
+                FogOfWarClientEvents.frozenChunks.removeIf(fc -> fc.building != null && fc.building.originPos.equals(originPos));
     }
 }
