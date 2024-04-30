@@ -20,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-// brightness shading for blocks excluding liquids and flat flace blocks (like tall grass)
 
 @Mixin(LiquidBlockRenderer.class)
 public abstract class LiquidBlockRendererMixin {
