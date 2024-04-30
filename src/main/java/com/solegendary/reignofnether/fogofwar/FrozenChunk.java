@@ -45,8 +45,10 @@ public class FrozenChunk {
             for (int y = 0; y <= 16; y++) {
                 for (int z = 0; z <= 16; z++) {
                     BlockPos bp = origin.offset(x,y,z);
-                    BlockState bs = MC.level.getBlockState(bp);
-                    blocks.add(new Pair<>(bp, MC.level.getBlockState(bp)));
+                    if (MC.level.isLoaded(bp)) {
+                        BlockState bs = MC.level.getBlockState(bp);
+                        blocks.add(new Pair<>(bp, MC.level.getBlockState(bp)));
+                    }
                 }
             }
         }

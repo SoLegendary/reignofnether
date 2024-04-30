@@ -13,12 +13,16 @@ Fog and map TODOs:
     - add them when a block begins to be gathered, and prevent duplicates
     - remove once explored until the next time it is gathered
 - can we prevent breaking sounds for grass onChunkExplore?
-- any issues caused by stuff happening off-screen? ie. chunks not loaded at all, and MC.level.getBlock() is null/void
-
 
 BUGS:
     - logging in/out of the world re-saves the blocks...
-    - chunks unexplored when unloaded do not save correctly
+    - chunks do not save correctly when unloaded (they're all just void air!)
+        - when unexploring an unloaded FrozenChunk, the blocks are out of date
+        - SOLUTION: we need to mark these FrozenChunks as unsaved (blocks.size() == 0?), then:
+            - Save them as soon as we load the chunks:
+                - excluding any building or scaffold blocks (just replace them with air)
+                - reversing any nether blocks with overworld counterparts
+                - reversing any cobble or magma with coal ores
 
 TEST:
     - set all buildings isExploredClientside = true when fog is disabled
