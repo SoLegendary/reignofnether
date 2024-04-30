@@ -282,7 +282,7 @@ public abstract class Building {
     // place blocks according to the following rules:
     // - block must be connected to something else (not air)
     // - block must be the lowest Y value possible
-    private void buildNextBlock(ServerLevel level) {
+    protected void buildNextBlock(ServerLevel level) {
 
         // if the building is already constructed then start subtracting resources for repairs
         if (isBuilt) {

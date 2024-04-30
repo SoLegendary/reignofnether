@@ -136,9 +136,9 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
     }
 
     @Override
-    public void onBuilt() {
-        super.onBuilt();
-        if (!this.getLevel().isClientSide())
+    protected void buildNextBlock(ServerLevel level) {
+        super.buildNextBlock(level);
+        if (this.getBlocksPlaced() >= getBlocksTotal())
             this.getLevel().setBlockAndUpdate(this.centrePos, Blocks.FIRE.defaultBlockState());
     }
 

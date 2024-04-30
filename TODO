@@ -15,12 +15,12 @@ Fog and map TODOs:
 - can we prevent breaking sounds for grass onChunkExplore?
 - any issues caused by stuff happening off-screen? ie. chunks not loaded at all, and MC.level.getBlock() is null/void
 
-- logging in/out of the world re-saves the blocks...
 
+BUGS:
+    - logging in/out of the world re-saves the blocks...
+    - chunks unexplored when unloaded do not save correctly
 
-
-
-test:
+TEST:
     - set all buildings isExploredClientside = true when fog is disabled
     - all existing buildings are updated correctly after turning OFF fog
     - all existing building chunks are frozen after turning ON fog
