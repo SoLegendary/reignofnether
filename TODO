@@ -9,6 +9,9 @@ TODO bugs/features:
 
 Fog and map TODOs:
 - freeze all chunks that will have nether blocks spread to them
+- freeze all chunks where resources are being gathered
+    - add them when a block begins to be gathered, and prevent duplicates
+    - remove once explored until the next time it is gathered
 - check F8 behaviour
 - any issues caused by stuff happening off-screen? ie. chunks not loaded at all, and MC.level.getBlock() is null/void
 - any issues caused by logging in/out and restarting Minecraft?
@@ -20,13 +23,12 @@ test:
     - set all buildings isExploredClientside = true when fog is disabled
     - all existing buildings are updated correctly after turning OFF fog
     - all existing building chunks are frozen after turning ON fog
-
+    - unfreezing chunks works correctly
+    - bridges freeze water chunks correctly
+    - test overlapping frozenChunks
 
 Other TODOs:
 Reveal enemy ghasts briefly when they attack from within fog
-Replace /rts-start with UI buttons
-    - In spectator remove the /rts-start message at top left
-    - Top right: add buttons to join game as each faction with tooltips
 
 
 [FOG OF WAR] playtest checklist:

@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.commands.Commands;
@@ -24,10 +25,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -103,7 +101,6 @@ public class FogOfWarClientEvents {
     public static void resetFogChunks() {
         MC.levelRenderer.allChanged();
         semiFrozenChunks.clear();
-        frozenChunks.clear();
     }
 
     public static void setEnabled(boolean value) {
@@ -316,7 +313,7 @@ public class FogOfWarClientEvents {
         for (Building building : BuildingClientEvents.getBuildings()) {
             if (building.isExploredClientside)
                 continue;
-            for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(building))
+            for (BlockPos bp : building.getRenderChunkOrigins())
                 if (bp.getX() == cpos.getWorldPosition().getX() &&
                     bp.getZ() == cpos.getWorldPosition().getZ())
                     building.isExploredClientside = true;
@@ -336,6 +333,34 @@ public class FogOfWarClientEvents {
                 building.isDestroyedServerside = true;
     }
 
+    public static void freezeChunk(BlockPos origin, Building building) {
+        BlockPos roundedOrigin = origin.offset(
+                -origin.getX() % 16,
+                -origin.getY() % 16,
+                -origin.getZ() % 16
+        );
+        if (origin.getX() % 16 != 0 ||
+            origin.getY() % 16 != 0 ||
+            origin.getZ() % 16 != 0)
+            System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + origin);
+
+        System.out.println("Froze chunk at: " + roundedOrigin);
+        frozenChunks.add(new FrozenChunk(roundedOrigin, building));
+    }
+
+    // show corners of all frozenChunks
+    @SubscribeEvent
+    public static void onRenderLevel(RenderLevelStageEvent evt) {
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+            return;
+
+        for (FrozenChunk frozenChunk : frozenChunks) {
+            MyRenderer.drawLine(evt.getPoseStack(), frozenChunk.origin, frozenChunk.origin.above(), 1, 1, 1, 1);
+            MyRenderer.drawLine(evt.getPoseStack(), frozenChunk.origin, frozenChunk.origin.north(), 1, 1, 1, 1);
+            MyRenderer.drawLine(evt.getPoseStack(), frozenChunk.origin, frozenChunk.origin.east(), 1, 1, 1, 1);
+        }
+    }
+
     /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
@@ -350,6 +375,5 @@ public class FogOfWarClientEvents {
                 "xo: " + cpos.getWorldPosition().getX(),
                 "zo: " + cpos.getWorldPosition().getZ()
         });
-    }
-     */
+    } */
 }

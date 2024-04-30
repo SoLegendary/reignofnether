@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.fogofwar;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.building.Building;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,13 +19,16 @@ import java.util.ArrayList;
 // When the chunk is unexplored: saveBlocks()
 //
 public class FrozenChunk {
+
     public BlockPos origin;
     public ArrayList<Pair<BlockPos, BlockState>> blocks = new ArrayList<>();
+    public Building building;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
-    public FrozenChunk(BlockPos origin) {
+    public FrozenChunk(BlockPos origin, Building building) {
         this.origin = origin;
+        this.building = building;
         saveBlocks();
     }
 

@@ -599,16 +599,43 @@ public abstract class Building {
             isExploredClientside = true;
     }
 
+    public List<BlockPos> getRenderChunkOrigins() {
+        double addedRange = 0;
+        if (this instanceof NetherConvertingBuilding netherConvertingBuilding) {
+            double range = netherConvertingBuilding.getMaxRange();
+            addedRange = 16 * Math.ceil(Math.abs(range/16)); // round up to next multiple of 16
+        }
+        List<BlockPos> origins = new ArrayList<>();
+        BlockPos minCorner = getMinCorner(getBlocks()).offset(-addedRange,0,-addedRange);
+        BlockPos maxCorner = getMaxCorner(getBlocks()).offset(addedRange,0,addedRange);;
+
+        BlockPos minOrigin = new BlockPos(
+                Math.round(Math.floor(minCorner.getX() / 16d) * 16),
+                Math.round(Math.floor(minCorner.getY() / 16d) * 16),
+                Math.round(Math.floor(minCorner.getZ() / 16d) * 16)
+        );
+        BlockPos maxOrigin = new BlockPos(
+                Math.round(Math.floor(maxCorner.getX() / 16d) * 16),
+                Math.round(Math.floor(maxCorner.getY() / 16d) * 16),
+                Math.round(Math.floor(maxCorner.getZ() / 16d) * 16)
+        );
+        for (int x = minOrigin.getX(); x <= maxOrigin.getX(); x += 16)
+            for (int y = minOrigin.getY() - 16; y <= maxOrigin.getY(); y += 16)
+                for (int z = minOrigin.getZ(); z <= maxOrigin.getZ(); z += 16)
+                    origins.add(new BlockPos(x,y,z));
+        return origins;
+    }
+
     public void freezeChunks() {
         Player player = Minecraft.getInstance().player;
         // freeze the chunks for this building if owned by an opponent
         if (player != null && !ownerName.equals(player.getName().getString()))
-            for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(this))
-                FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(bp));
+            for (BlockPos bp : getRenderChunkOrigins())
+                FogOfWarClientEvents.freezeChunk(bp, this);
     }
 
     public void unFreezeChunks() {
-        for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(this))
-            FogOfWarClientEvents.frozenChunks.removeIf(fc -> fc.origin.equals(bp));
+        for (BlockPos bp : getRenderChunkOrigins())
+            FogOfWarClientEvents.frozenChunks.removeIf(fc -> fc.building != null && fc.building.originPos.equals(originPos));
     }
 }

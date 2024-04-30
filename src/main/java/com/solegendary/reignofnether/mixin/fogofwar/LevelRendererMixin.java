@@ -146,16 +146,19 @@ public abstract class LevelRendererMixin {
         newRenderChunksInFrustum.addAll(renderChunksInFrustum);
         newRenderChunksInFrustum.removeAll(lastRenderChunksInFrustum);
 
+        // load saved blocks into unexplored frozen chunks (don't repeat this for overlapping chunks)
+        ArrayList<BlockPos> loadedFrozenChunkOrigins = new ArrayList<>();
         for (FrozenChunk frozenChunk : frozenChunks) {
             for (LevelRenderer.RenderChunkInfo newRenderChunk : newRenderChunksInFrustum) {
                 if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
-                    !isInBrightChunk(frozenChunk.origin)) {
+                    !isInBrightChunk(frozenChunk.origin) &&
+                    !loadedFrozenChunkOrigins.contains(frozenChunk.origin)) {
                     System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
                     frozenChunk.loadBlocks();
+                    loadedFrozenChunkOrigins.add(frozenChunk.origin);
                 }
             }
         }
-
         this.minecraft.getProfiler().push("populate_chunks_to_compile");
         RenderRegionCache renderregioncache = new RenderRegionCache();
         BlockPos blockpos = pCamera.getBlockPosition();

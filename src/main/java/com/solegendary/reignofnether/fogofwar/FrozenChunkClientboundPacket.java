@@ -1,11 +1,6 @@
 package com.solegendary.reignofnether.fogofwar;
 
-import com.solegendary.reignofnether.building.BuildingAction;
-import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesClientEvents;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
@@ -18,24 +13,33 @@ import java.util.function.Supplier;
 
 public class FrozenChunkClientboundPacket {
 
-    BlockPos buildingOrigin;
+    FrozenChunkAction action;
+    BlockPos blockPos;
 
     public static void setBuildingDestroyedServerside(BlockPos buildingOrigin) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new FrozenChunkClientboundPacket(buildingOrigin));
+                new FrozenChunkClientboundPacket(FrozenChunkAction.SET_BUILDING_DESTROYED, buildingOrigin));
+    }
+
+    public static void freezeChunk(BlockPos blockPos) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new FrozenChunkClientboundPacket(FrozenChunkAction.FREEZE_CHUNK_MANUALLY, blockPos));
     }
 
     // packet-handler functions
-    public FrozenChunkClientboundPacket(BlockPos buildingOrigin) {
-        this.buildingOrigin = buildingOrigin;
+    public FrozenChunkClientboundPacket(FrozenChunkAction action, BlockPos blockPos) {
+        this.action = action;
+        this.blockPos = blockPos;
     }
 
     public FrozenChunkClientboundPacket(FriendlyByteBuf buffer) {
-        this.buildingOrigin = buffer.readBlockPos();
+        this.action = buffer.readEnum(FrozenChunkAction.class);
+        this.blockPos = buffer.readBlockPos();
     }
 
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeBlockPos(this.buildingOrigin);
+        buffer.writeEnum(this.action);
+        buffer.writeBlockPos(this.blockPos);
     }
 
     // client-side packet-consuming functions
@@ -45,7 +49,10 @@ public class FrozenChunkClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
-                        FogOfWarClientEvents.setBuildingDestroyedServerside(buildingOrigin);
+                        switch (action) {
+                            case SET_BUILDING_DESTROYED -> FogOfWarClientEvents.setBuildingDestroyedServerside(blockPos);
+                            case FREEZE_CHUNK_MANUALLY -> FogOfWarClientEvents.freezeChunk(blockPos, null);
+                        }
                         success.set(true);
                     });
         });
