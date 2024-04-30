@@ -313,7 +313,7 @@ public class FogOfWarClientEvents {
         for (Building building : BuildingClientEvents.getBuildings()) {
             if (building.isExploredClientside)
                 continue;
-            for (BlockPos bp : building.getRenderChunkOrigins())
+            for (BlockPos bp : building.getRenderChunkOrigins(false))
                 if (bp.getX() == cpos.getWorldPosition().getX() &&
                     bp.getZ() == cpos.getWorldPosition().getZ())
                     building.isExploredClientside = true;

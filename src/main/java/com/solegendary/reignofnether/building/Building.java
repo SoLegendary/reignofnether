@@ -599,9 +599,9 @@ public abstract class Building {
             isExploredClientside = true;
     }
 
-    public List<BlockPos> getRenderChunkOrigins() {
+    public List<BlockPos> getRenderChunkOrigins(boolean includeNetherRange) {
         double addedRange = 0;
-        if (this instanceof NetherConvertingBuilding netherConvertingBuilding) {
+        if (this instanceof NetherConvertingBuilding netherConvertingBuilding && includeNetherRange) {
             double range = netherConvertingBuilding.getMaxRange();
             addedRange = 16 * Math.ceil(Math.abs(range/16)); // round up to next multiple of 16
         }
@@ -630,12 +630,12 @@ public abstract class Building {
         Player player = Minecraft.getInstance().player;
         // freeze the chunks for this building if owned by an opponent
         if (player != null && !ownerName.equals(player.getName().getString()))
-            for (BlockPos bp : getRenderChunkOrigins())
+            for (BlockPos bp : getRenderChunkOrigins(true))
                 FogOfWarClientEvents.freezeChunk(bp, this);
     }
 
     public void unFreezeChunks() {
-        for (BlockPos bp : getRenderChunkOrigins())
+        for (BlockPos bp : getRenderChunkOrigins(true))
             FogOfWarClientEvents.frozenChunks.removeIf(fc -> fc.building != null && fc.building.originPos.equals(originPos));
     }
 }
