@@ -4,7 +4,6 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -13,7 +12,6 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
-import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
@@ -32,11 +30,8 @@ import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
 
@@ -307,6 +302,8 @@ public class FogOfWarClientEvents {
 
     // triggered when a chunk goes from dark to bright
     public static void onChunkExplore(ChunkPos cpos) {
+        frozenChunks.removeIf(fc -> fc.removeOnExplore && MC.level.getChunk(fc.origin).getPos().equals(cpos));
+
         for (FrozenChunk frozenChunk : frozenChunks)
             if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
                 frozenChunk.syncServerBlocks(frozenChunk.origin);
@@ -326,6 +323,15 @@ public class FogOfWarClientEvents {
         for (FrozenChunk frozenChunk : frozenChunks)
             if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
                 frozenChunk.saveBlocks();
+    }
+
+    @SubscribeEvent
+    public static void onChunkLoad(ChunkEvent.Load evt) {
+        for (FrozenChunk fc : frozenChunks)
+            if (fc.attemptedUnloadedSave && evt.getLevel().isClientSide() &&
+                evt.getChunk().getPos().getWorldPosition().getX() == fc.origin.getX() &&
+                evt.getChunk().getPos().getWorldPosition().getZ() == fc.origin.getZ())
+                    fc.saveBlocks();
     }
 
     public static void setBuildingDestroyedServerside(BlockPos buildingOrigin) {

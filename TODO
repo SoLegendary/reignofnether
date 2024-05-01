@@ -9,28 +9,20 @@ TODO bugs/features:
 
 Fog and map TODOs:
 
-- freeze all chunks where resources are being gathered
-    - add them when a block begins to be gathered, and prevent duplicates
-    - remove once explored until the next time it is gathered
-- can we prevent breaking sounds for grass onChunkExplore?
+- can we prevent breaking sounds/animations for grass onChunkExplore?
 
 BUGS:
     - logging in/out of the world re-saves the blocks...
-    - chunks do not save correctly when unloaded (they're all just void air!)
-        - when unexploring an unloaded FrozenChunk, the blocks are out of date
-        - SOLUTION: we need to mark these FrozenChunks as unsaved (blocks.size() == 0?), then:
-            - Save them as soon as we load the chunks:
-                - excluding any building or scaffold blocks (just replace them with air)
-                - reversing any nether blocks with overworld counterparts
-                - reversing any cobble or magma with coal ores
-
+    - previously explored nether blocks that are no longer tied to a building may be overwritten when an unloaded FrozenChunk is saved
+        - maybe when loading overlapping FCs, prioritise the ones that don't contain fluffed blocks
+            - LevelRendererMixin:157
 TEST:
+    - enemy buildings placed IN bright chunks
     - set all buildings isExploredClientside = true when fog is disabled
     - all existing buildings are updated correctly after turning OFF fog
     - all existing building chunks are frozen after turning ON fog
     - unfreezing chunks works correctly
     - bridges freeze water chunks correctly
-    - freeze all chunks that will have nether blocks spread to them
 
 Other TODOs:
 Reveal enemy ghasts briefly when they attack from within fog

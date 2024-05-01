@@ -153,7 +153,7 @@ public abstract class LevelRendererMixin {
                 if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
                     !isInBrightChunk(frozenChunk.origin) &&
                     !loadedFrozenChunkOrigins.contains(frozenChunk.origin)) {
-                    System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
+                    //System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
                     frozenChunk.loadBlocks();
                     loadedFrozenChunkOrigins.add(frozenChunk.origin);
                 }

@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPack
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FrozenChunk;
@@ -23,7 +24,6 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.units.monsters.SilverfishUnit;
 import com.solegendary.reignofnether.util.Faction;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -31,7 +31,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -599,15 +598,22 @@ public abstract class Building {
             isExploredClientside = true;
     }
 
-    public List<BlockPos> getRenderChunkOrigins(boolean includeNetherRange) {
+    // returns each blockpos origin of 16x16x16 renderchunks that this building overlaps
+    // extendedRange includes additional chunks to account for nether conversion and/or resource gathering
+    public List<BlockPos> getRenderChunkOrigins(boolean extendedRange) {
         double addedRange = 0;
-        if (this instanceof NetherConvertingBuilding netherConvertingBuilding && includeNetherRange) {
-            double range = netherConvertingBuilding.getMaxRange();
-            addedRange = 16 * Math.ceil(Math.abs(range/16)); // round up to next multiple of 16
+
+        if (extendedRange) {
+            if (this instanceof NetherConvertingBuilding netherConvertingBuilding) {
+                double range = netherConvertingBuilding.getMaxRange();
+                addedRange = 16 * Math.ceil(Math.abs(range/16)); // round up to next multiple of 16
+            } else if (this instanceof AbstractStockpile) {
+                addedRange = 32;
+            }
         }
         List<BlockPos> origins = new ArrayList<>();
-        BlockPos minCorner = getMinCorner(getBlocks()).offset(-addedRange/2,0,-addedRange/2);
-        BlockPos maxCorner = getMaxCorner(getBlocks()).offset(addedRange/2,0,addedRange/2);
+        BlockPos minCorner = getMinCorner(getBlocks()).offset(-addedRange/2, -1,-addedRange/2);
+        BlockPos maxCorner = getMaxCorner(getBlocks()).offset(addedRange/2, -1,addedRange/2);
 
         BlockPos minOrigin = new BlockPos(
                 Math.round(Math.floor(minCorner.getX() / 16d) * 16),
@@ -637,6 +643,8 @@ public abstract class Building {
     public void unFreezeChunks() {
         if (level.isClientSide)
             for (BlockPos bp : getRenderChunkOrigins(true))
-                FogOfWarClientEvents.frozenChunks.removeIf(fc -> fc.building != null && fc.building.originPos.equals(originPos));
+                for (FrozenChunk fc : FogOfWarClientEvents.frozenChunks)
+                    if (fc.building != null && fc.building.originPos.equals(originPos))
+                        fc.removeOnExplore = true;
     }
 }
