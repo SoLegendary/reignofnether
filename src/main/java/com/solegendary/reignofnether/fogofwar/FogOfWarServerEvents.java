@@ -4,7 +4,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -46,7 +48,7 @@ public class FogOfWarServerEvents {
             return;
 
         for (int x = 0; x < 16; x++) {
-            for (int y = 0; y < 16; y++) {
+            for (int y = 16; y > 0; y--) {
                 for (int z = 0; z < 16; z++) {
                     BlockPos bp = renderChunkOrigin.offset(x,y,z);
                     BlockState bs = serverLevel.getBlockState(bp);

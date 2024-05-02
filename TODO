@@ -9,10 +9,12 @@ TODO bugs/features:
 
 Fog and map TODOs:
 
-- can we prevent breaking sounds/animations for grass onChunkExplore?
-    - addDestroyBlockEffect ?
 
 BUGS:
+    - stop grass breaking from loadBlocks()
+        - FogOfWarClientEvents.syncClientBlocks
+            - make some exception for tall plants?
+
     - logging in/out of the world re-saves the blocks...
         - apply the same block-fluffing logic to all of these chunks
     - previously explored nether blocks that are no longer tied to a building may be overwritten when an unloaded FrozenChunk is saved
@@ -27,16 +29,6 @@ TEST:
     - all existing building chunks are frozen after turning ON fog
     - unfreezing chunks works correctly
     - bridges freeze water chunks correctly
-
-    - range unit reveals in fog:
-        - pillager
-        - blaze
-        - skeleton
-        - stray
-        - evoker
-        - headhunter
-        - ghast (vs unit)
-        - ghast (vs building)
 
 Other TODOs:
 Reveal enemy ghasts briefly when they attack from within fog

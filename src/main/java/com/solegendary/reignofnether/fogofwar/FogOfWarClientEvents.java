@@ -4,7 +4,10 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -25,6 +28,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
@@ -36,6 +40,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
+import static net.minecraft.util.Mth.floor;
 
 public class FogOfWarClientEvents {
     public static final float BRIGHT = 1.0f;
@@ -376,6 +381,7 @@ public class FogOfWarClientEvents {
         if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
             return;
 
+        /*
         for (FrozenChunk frozenChunk : frozenChunks) {
             BlockPos bp = frozenChunk.origin;
             Vec3 vec3 = new Vec3(bp.getX(), bp.getY(), bp.getZ());
@@ -383,6 +389,7 @@ public class FogOfWarClientEvents {
             MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(15,0,0), 1, 1, 1, 1);
             MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(0,0,15), 1, 1, 1, 1);
         }
+         */
     }
 
     public static void revealRangedUnit(String playerBeingAttacked, int unitId) {
@@ -390,6 +397,19 @@ public class FogOfWarClientEvents {
             for (LivingEntity entity : UnitClientEvents.getAllUnits())
                 if (entity.getId() == unitId && entity instanceof RangedAttackerUnit unit)
                     unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
+    }
+
+    @SubscribeEvent
+    public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
+        // select a moused over entity by left clicking it
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            //if (MC.level != null)
+            //    MC.level.setBlockAndUpdate(CursorClientEvents.getPreselectedBlockPos(), Blocks.BARREL.defaultBlockState());
+        }
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            if (MC.level != null)
+                FrozenChunkServerboundPacket.syncServerBlocks(CursorClientEvents.getPreselectedBlockPos());
+        }
     }
 
     /*
