@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.units.monsters;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.MountSpider;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -132,8 +133,11 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     final static public int popCost = ResourceCosts.STRAY.population;
-
     public int maxResources = 100;
+
+    public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
+    public int getFogRevealDuration() { return fogRevealDuration; }
+    public void setFogRevealDuration(int duration) { fogRevealDuration = duration; }
 
     private UnitBowAttackGoal<? extends LivingEntity> attackGoal;
     private MeleeAttackBuildingGoal attackBuildingGoal;
@@ -248,5 +252,8 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
         abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, 0);
         this.playSound(SoundEvents.SKELETON_SHOOT, 3.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
         this.level.addFreshEntity(abstractarrow);
+
+        if (!level.isClientSide() && pTarget instanceof Unit unit)
+            FogOfWarClientboundPacket.revealRangedUnit(unit.getOwnerName(), this.getId());
     }
 }

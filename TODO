@@ -10,12 +10,16 @@ TODO bugs/features:
 Fog and map TODOs:
 
 - can we prevent breaking sounds/animations for grass onChunkExplore?
+    - addDestroyBlockEffect ?
 
 BUGS:
     - logging in/out of the world re-saves the blocks...
+        - apply the same block-fluffing logic to all of these chunks
     - previously explored nether blocks that are no longer tied to a building may be overwritten when an unloaded FrozenChunk is saved
-        - maybe when loading overlapping FCs, prioritise the ones that don't contain fluffed blocks
+        - when loading overlapping FCs, prioritise the ones that don't contain fake blocks
             - LevelRendererMixin:157
+        - what about old nether blocks no longer in FCs?
+            - never unfreeze netherblock chunks??
 TEST:
     - enemy buildings placed IN bright chunks
     - set all buildings isExploredClientside = true when fog is disabled
@@ -23,6 +27,16 @@ TEST:
     - all existing building chunks are frozen after turning ON fog
     - unfreezing chunks works correctly
     - bridges freeze water chunks correctly
+
+    - range unit reveals in fog:
+        - pillager
+        - blaze
+        - skeleton
+        - stray
+        - evoker
+        - headhunter
+        - ghast (vs unit)
+        - ghast (vs building)
 
 Other TODOs:
 Reveal enemy ghasts briefly when they attack from within fog

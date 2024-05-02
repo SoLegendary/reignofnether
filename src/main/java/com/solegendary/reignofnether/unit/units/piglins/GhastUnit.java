@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.AttackGround;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -139,6 +140,10 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     final static public int popCost = ResourceCosts.GHAST.population;
     public int maxResources = 100;
 
+    public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
+    public int getFogRevealDuration() { return fogRevealDuration; }
+    public void setFogRevealDuration(int duration) { fogRevealDuration = duration; }
+
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
@@ -274,6 +279,17 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     @Override
     public void resetBehaviours() {
         this.getRangedAttackGroundGoal().stop();
+    }
+
+    @Override
+    public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
+        double x = pTarget.getX();
+        double y = pTarget.getY();
+        double z = pTarget.getZ();
+        performUnitRangedAttack(x, y, z, velocity);
+
+        if (!level.isClientSide() && pTarget instanceof Unit unit)
+            FogOfWarClientboundPacket.revealRangedUnit(unit.getOwnerName(), this.getId());
     }
 
     @Override

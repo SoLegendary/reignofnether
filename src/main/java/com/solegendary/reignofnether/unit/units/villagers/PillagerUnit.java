@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.ability.abilities.MountRavager;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchServer;
@@ -11,6 +12,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.util.Faction;
@@ -42,7 +44,9 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
+// despite being a RangedAttackerUnit we don't implement performRangedAttack as we override the Pillager crossbow attack instead
+// we just implement this for fog reveal methods
+public class PillagerUnit extends Pillager implements Unit, AttackerUnit, RangedAttackerUnit {
     // region
     private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
     private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
@@ -135,6 +139,10 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
     final static public int popCost = ResourceCosts.PILLAGER.population;
 
     public int maxResources = 100;
+
+    public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
+    public int getFogRevealDuration() { return fogRevealDuration; }
+    public void setFogRevealDuration(int duration) { fogRevealDuration = duration; }
 
     private UnitCrossbowAttackGoal<? extends LivingEntity> attackGoal;
     private MeleeAttackBuildingGoal attackBuildingGoal;
@@ -240,5 +248,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit {
         Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
         pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, (float)(14 - pUser.level.getDifficulty().getId() * 4));
         pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
+
+        if (!level.isClientSide() && pTarget instanceof Unit unit)
+            FogOfWarClientboundPacket.revealRangedUnit(unit.getOwnerName(), this.getId());
     }
 }

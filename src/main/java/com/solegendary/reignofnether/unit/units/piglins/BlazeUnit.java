@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.FirewallShot;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -129,6 +130,10 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     final static public int popCost = ResourceCosts.BLAZE.population;
     public int maxResources = 100;
 
+    public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
+    public int getFogRevealDuration() { return fogRevealDuration; }
+    public void setFogRevealDuration(int duration) { fogRevealDuration = duration; }
+
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
@@ -141,6 +146,8 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
         if (level.isClientSide())
             this.abilityButtons.add(ab1.getButton(Keybindings.keyQ));
     }
+
+
 
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
@@ -215,6 +222,9 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
             fireball.setPos(fireball.getX(), this.getY(0.5) + 0.5, fireball.getZ());
             this.playSound(SoundEvents.BLAZE_SHOOT, 3.0F, 1.0F);
             this.level.addFreshEntity(fireball);
+
+            if (!level.isClientSide() && target instanceof Unit unit)
+                FogOfWarClientboundPacket.revealRangedUnit(unit.getOwnerName(), this.getId());
         }
     }
 

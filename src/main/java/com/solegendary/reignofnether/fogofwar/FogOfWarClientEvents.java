@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -19,6 +20,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
@@ -189,6 +191,19 @@ public class FogOfWarClientEvents {
         return false;
     }
 
+    public static boolean isInBrightChunk(Entity entity) {
+        if (!isEnabled() || MC.level == null)
+            return true;
+
+        // first check if the ChunkPos is already occupied as this is faster
+        for (ChunkPos chunkPos : brightChunks)
+            if (new ChunkPos(entity.getOnPos()).equals(chunkPos))
+                return true;
+
+        return entity instanceof RangedAttackerUnit rangedAttackerUnit &&
+                rangedAttackerUnit.getFogRevealDuration() > 0;
+    }
+
     @SubscribeEvent
     // hudSelectedEntity and portraitRendererUnit should be assigned in the same event to avoid desyncs
     public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
@@ -196,7 +211,7 @@ public class FogOfWarClientEvents {
             return;
 
         // don't render entities in non-bright chunks
-        if (isInBrightChunk(evt.getEntity().getOnPos()))
+        if (isInBrightChunk(evt.getEntity()))
             return;
 
         evt.setCanceled(true);
@@ -368,6 +383,13 @@ public class FogOfWarClientEvents {
             MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(15,0,0), 1, 1, 1, 1);
             MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(0,0,15), 1, 1, 1, 1);
         }
+    }
+
+    public static void revealRangedUnit(String playerBeingAttacked, int unitId) {
+        if (MC.player != null && MC.player.getName().getString().equals(playerBeingAttacked))
+            for (LivingEntity entity : UnitClientEvents.getAllUnits())
+                if (entity.getId() == unitId && entity instanceof RangedAttackerUnit unit)
+                    unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
     }
 
     /*

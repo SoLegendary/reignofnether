@@ -120,6 +120,10 @@ public interface AttackerUnit {
             // enact aggression when idle
             if (attackerUnit.isIdle() && !isAttackingBuilding && attackerUnit.getAggressiveWhenIdle())
                 attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level);
+        } else if (unit instanceof RangedAttackerUnit rangedAttackerUnit) {
+            int revealDuration = rangedAttackerUnit.getFogRevealDuration();
+            if (revealDuration > 0)
+                rangedAttackerUnit.setFogRevealDuration(revealDuration - 1);
         }
     }
 

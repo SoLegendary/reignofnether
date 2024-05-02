@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -109,8 +110,11 @@ public class RangedFlyingAttackBuildingGoal<T extends net.minecraft.world.entity
             }
             if (distToTarget <= attackRange) { // start drawing bowstring
                 if (bowAttackGoal.getAttackCooldown() <= 0) {
-                    if (mob instanceof RangedAttackerUnit rangedAttackerUnit)
+                    if (mob instanceof RangedAttackerUnit rangedAttackerUnit) {
                         rangedAttackerUnit.performUnitRangedAttack(tx, ty, tz, 20);
+                        if (!mob.level.isClientSide() && buildingTarget != null)
+                            FogOfWarClientboundPacket.revealRangedUnit(buildingTarget.ownerName, mob.getId());
+                    }
                     bowAttackGoal.setToMaxAttackCooldown();
                     setNextGroundTarget();
                 }

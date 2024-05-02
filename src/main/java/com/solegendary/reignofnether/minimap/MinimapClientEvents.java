@@ -398,7 +398,7 @@ public class MinimapClientEvents {
 
         // draw units
         for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
-            if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()))
+            if (!FogOfWarClientEvents.isInBrightChunk(entity))
                 continue;
             drawUnitOnMap(entity.getOnPos().getX(),
                     entity.getOnPos().getZ(),

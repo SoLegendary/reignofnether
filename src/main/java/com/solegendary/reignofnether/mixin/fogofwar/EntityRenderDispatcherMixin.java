@@ -19,7 +19,7 @@ public abstract class EntityRenderDispatcherMixin {
             cancellable = true
     )
     private void onRenderFlame(PoseStack pMatrixStack, MultiBufferSource pBuffer, Entity pEntity, CallbackInfo ci) {
-        if (!FogOfWarClientEvents.isInBrightChunk(pEntity.getOnPos()))
+        if (!FogOfWarClientEvents.isInBrightChunk(pEntity))
             ci.cancel();
     }
 }

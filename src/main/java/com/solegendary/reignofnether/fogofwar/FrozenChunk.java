@@ -28,6 +28,7 @@ public class FrozenChunk {
     public Building building;
     public boolean removeOnExplore = false;
     public boolean attemptedUnloadedSave = false;
+    public boolean hasFakeBlocks = false;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -78,9 +79,11 @@ public class FrozenChunk {
                             } else if (blockName.equals("dirt")) {
                                 blocks.add(new Pair<>(bp, Blocks.GRASS_BLOCK.defaultBlockState()));
                             }
+                            hasFakeBlocks = true;
                         } else {
                             BlockState bs = MC.level.getBlockState(bp);
                             blocks.add(new Pair<>(bp, MC.level.getBlockState(bp)));
+                            hasFakeBlocks = false;
                         }
                     }
                 }

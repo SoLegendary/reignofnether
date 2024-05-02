@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.MountHoglin;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -132,6 +133,10 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     final static public int popCost = ResourceCosts.HEADHUNTER.population;
     public int maxResources = 100;
 
+    public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
+    public int getFogRevealDuration() { return fogRevealDuration; }
+    public void setFogRevealDuration(int duration) { fogRevealDuration = duration; }
+
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemStack> items = new ArrayList<>();
@@ -227,6 +232,9 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
         $$2.shoot($$3, $$4 + $$6 * 0.20000000298023224, $$5, 1.6F, 0);
         this.playSound(SoundEvents.DROWNED_SHOOT, 3.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
         this.level.addFreshEntity($$2);
+
+        if (!level.isClientSide() && pTarget instanceof Unit unit)
+            FogOfWarClientboundPacket.revealRangedUnit(unit.getOwnerName(), this.getId());
     }
 
     @Override
