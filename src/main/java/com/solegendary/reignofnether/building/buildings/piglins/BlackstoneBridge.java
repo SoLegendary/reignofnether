@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
-import com.solegendary.reignofnether.building.buildings.monsters.SpruceBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -58,8 +57,6 @@ public class BlackstoneBridge extends AbstractBridge {
         return BuildingBlockData.getBuildingBlocks(diagonal ? structureNameDiagonal : structureNameOrthogonal, level);
     }
 
-    public Faction getFaction() {return Faction.PIGLINS;}
-
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         Minecraft MC = Minecraft.getInstance();
         return new AbilityButton(
@@ -74,7 +71,7 @@ public class BlackstoneBridge extends AbstractBridge {
                 () -> BuildingClientEvents.setBuildingToPlace(BlackstoneBridge.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(SpruceBridge.buildingName, Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(BlackstoneBridge.buildingName, Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("A bridge built to traverse water or lava.", Style.EMPTY),

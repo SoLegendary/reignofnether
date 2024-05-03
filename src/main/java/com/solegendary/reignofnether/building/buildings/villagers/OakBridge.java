@@ -57,8 +57,6 @@ public class OakBridge extends AbstractBridge {
         return BuildingBlockData.getBuildingBlocks(diagonal ? structureNameDiagonal : structureNameOrthogonal, level);
     }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
-
     public static AbilityButton getBuildButton(Keybinding hotkey) {
         Minecraft MC = Minecraft.getInstance();
         return new AbilityButton(
