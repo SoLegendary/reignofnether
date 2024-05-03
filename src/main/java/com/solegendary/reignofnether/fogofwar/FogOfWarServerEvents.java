@@ -5,8 +5,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrassBlock;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.TallGrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -52,8 +55,14 @@ public class FogOfWarServerEvents {
                 for (int z = 0; z < 16; z++) {
                     BlockPos bp = renderChunkOrigin.offset(x,y,z);
                     BlockState bs = serverLevel.getBlockState(bp);
-                    serverLevel.setBlockAndUpdate(bp, Blocks.BEDROCK.defaultBlockState());
-                    serverLevel.setBlockAndUpdate(bp, bs);
+                    BlockState bsAbove = serverLevel.getBlockState(bp.above());
+
+                    if (bs.getBlock() instanceof LeavesBlock ||
+                        (!bs.getMaterial().getColor().equals(MaterialColor.PLANT) &&
+                        !bsAbove.getMaterial().getColor().equals(MaterialColor.PLANT))) {
+                        serverLevel.setBlockAndUpdate(bp, Blocks.BEDROCK.defaultBlockState());
+                        serverLevel.setBlockAndUpdate(bp, bs);
+                    }
                 }
             }
         }

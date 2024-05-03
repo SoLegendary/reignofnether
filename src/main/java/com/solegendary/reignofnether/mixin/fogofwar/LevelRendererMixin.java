@@ -147,18 +147,29 @@ public abstract class LevelRendererMixin {
         newRenderChunksInFrustum.removeAll(lastRenderChunksInFrustum);
 
         // load saved blocks into unexplored frozen chunks (don't repeat this for overlapping chunks)
-        ArrayList<BlockPos> loadedFrozenChunkOrigins = new ArrayList<>();
-        for (FrozenChunk frozenChunk : frozenChunks) {
+        ArrayList<BlockPos> loadedFcOrigins = new ArrayList<>();
+        for (FrozenChunk frozenChunk : frozenChunks.stream().filter(fc -> !fc.hasFakeBlocks).toList()) {
             for (LevelRenderer.RenderChunkInfo newRenderChunk : newRenderChunksInFrustum) {
                 if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
                     !isInBrightChunk(frozenChunk.origin) &&
-                    !loadedFrozenChunkOrigins.contains(frozenChunk.origin)) {
+                    !loadedFcOrigins.contains(frozenChunk.origin)) {
                     //System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
                     frozenChunk.loadBlocks();
-                    loadedFrozenChunkOrigins.add(frozenChunk.origin);
+                    loadedFcOrigins.add(frozenChunk.origin);
                 }
             }
         }
+        // rerun for any faked chunks, only run them if they were not already loaded
+        for (FrozenChunk frozenChunk : frozenChunks.stream().filter(fc -> fc.hasFakeBlocks).toList()) {
+            for (LevelRenderer.RenderChunkInfo newRenderChunk : newRenderChunksInFrustum) {
+                if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
+                    !isInBrightChunk(frozenChunk.origin) &&
+                    !loadedFcOrigins.contains(frozenChunk.origin)) {
+                    frozenChunk.loadBlocks();
+                }
+            }
+        }
+
         this.minecraft.getProfiler().push("populate_chunks_to_compile");
         RenderRegionCache renderregioncache = new RenderRegionCache();
         BlockPos blockpos = pCamera.getBlockPosition();

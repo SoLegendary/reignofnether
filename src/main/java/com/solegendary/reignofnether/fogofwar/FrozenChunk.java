@@ -30,6 +30,8 @@ public class FrozenChunk {
     public boolean attemptedUnloadedSave = false;
     public boolean hasFakeBlocks = false;
 
+    private boolean saveFakeBuildingBlocks = false;
+
     private static final Minecraft MC = Minecraft.getInstance();
 
     public FrozenChunk(BlockPos origin, Building building) {
@@ -49,7 +51,6 @@ public class FrozenChunk {
             return;
         for (int x = 0; x <= 16; x++) {
             for (int y = 0; y <= 16; y++) {
-                outerloop:
                 for (int z = 0; z <= 16; z++) {
                     BlockPos bp = origin.offset(x,y,z);
                     if (MC.level.isLoaded(bp)) {
@@ -59,13 +60,8 @@ public class FrozenChunk {
                         // 3. Nether Blocks -> Overworld equivalent
                         // 4. Blocks that are a part of the parent building -> Air
                         if (attemptedUnloadedSave) {
+                            saveFakeBuildingBlocks = true;
                             BlockState bs = MC.level.getBlockState(bp);
-                            for (BuildingBlock bb : building.getBlocks()) {
-                                if (bb.getBlockPos().equals(bp)) {
-                                    blocks.add(new Pair<>(bp, Blocks.AIR.defaultBlockState()));
-                                    continue outerloop;
-                                }
-                            }
                             String blockName = bs.getBlock().getName().getString().toLowerCase();
                             if (NetherBlocks.isNetherBlock(MC.level, bp)) {
                                 BlockState overworldBs = NetherBlocks.getOverworldBlock(MC.level, bp);
@@ -88,6 +84,12 @@ public class FrozenChunk {
                     }
                 }
             }
+        }
+        // do this outside the loop to avoid nesting loops
+        if (saveFakeBuildingBlocks) {
+            for (BuildingBlock bb : building.getBlocks())
+                blocks.add(new Pair<>(bb.getBlockPos(), Blocks.AIR.defaultBlockState()));
+            saveFakeBuildingBlocks = false;
         }
         if (this.blocks.isEmpty()) {
             attemptedUnloadedSave = true;

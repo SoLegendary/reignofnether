@@ -341,8 +341,8 @@ public class FogOfWarClientEvents {
     // triggered when a chunk goes from bright to dark
     public static void onChunkUnexplore(ChunkPos cpos) {
         for (FrozenChunk frozenChunk : frozenChunks)
-            if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
-                frozenChunk.saveBlocks();
+            if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos) && MC.level.isLoaded(frozenChunk.origin))
+                frozenChunk.saveBlocks(); // only save blocks with faked chunks for NEW frozen chunks
     }
 
     @SubscribeEvent
@@ -399,18 +399,20 @@ public class FogOfWarClientEvents {
                     unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
     }
 
+    /*
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-            //if (MC.level != null)
-            //    MC.level.setBlockAndUpdate(CursorClientEvents.getPreselectedBlockPos(), Blocks.BARREL.defaultBlockState());
+            if (MC.level != null)
+                MC.level.setBlockAndUpdate(CursorClientEvents.getPreselectedBlockPos(), Blocks.BARREL.defaultBlockState());
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (MC.level != null)
                 FrozenChunkServerboundPacket.syncServerBlocks(CursorClientEvents.getPreselectedBlockPos());
         }
     }
+     */
 
     /*
     @SubscribeEvent
