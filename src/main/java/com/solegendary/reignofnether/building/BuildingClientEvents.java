@@ -315,6 +315,8 @@ public class BuildingClientEvents {
 
     private static boolean isNonPiglinOrOnNetherBlocks(BlockPos originPos) {
         String buildingName = buildingToPlace.getName().toLowerCase();
+        if (buildingName.contains("bridge"))
+            return true;
         if (!buildingName.contains("buildings.piglins.") || buildingName.contains("centralportal"))
             return true;
         if (buildingName.contains("portal") && ResearchClient.hasResearch(ResearchAdvancedPortals.itemName))
