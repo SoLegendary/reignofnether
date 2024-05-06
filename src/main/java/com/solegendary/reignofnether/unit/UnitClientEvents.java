@@ -95,7 +95,7 @@ public class UnitClientEvents {
     public static void addPreselectedUnit(LivingEntity unit) {
         if (unit instanceof Player player && (player.isSpectator() || player.isCreative()))
             return;
-        if (!FogOfWarClientEvents.isInBrightChunk(unit.getOnPos()))
+        if (!FogOfWarClientEvents.isInBrightChunk(unit))
             return;
         if (unit.isPassenger())
             return;
@@ -103,7 +103,7 @@ public class UnitClientEvents {
     }
     public static void addSelectedUnit(LivingEntity unit) {
         CursorClientEvents.setLeftClickAction(null);
-        if (!FogOfWarClientEvents.isInBrightChunk(unit.getOnPos()))
+        if (!FogOfWarClientEvents.isInBrightChunk(unit))
             return;
         if (unit.isPassenger())
             return;
@@ -316,7 +316,7 @@ public class UnitClientEvents {
             ticksToNextVisCheck = VIS_CHECK_TICKS_MAX;
 
             // prevent selection of units out of view
-            selectedUnits.removeIf(e -> !FogOfWarClientEvents.isInBrightChunk(e.getOnPos()));
+            selectedUnits.removeIf(e -> !FogOfWarClientEvents.isInBrightChunk(e));
         }
 
         // calculate vecs used to hide leaf blocks around units
@@ -326,7 +326,7 @@ public class UnitClientEvents {
             synchronized (windowPositions) {
                 windowPositions.clear();
                 UnitClientEvents.getAllUnits().forEach(u -> {
-                    if (FogOfWarClientEvents.isInBrightChunk(u.getOnPos()))
+                    if (FogOfWarClientEvents.isInBrightChunk(u))
                         windowPositions.add(u.getOnPos());
                 });
                 BlockPos cursorBp = CursorClientEvents.getPreselectedBlockPos();
@@ -556,7 +556,7 @@ public class UnitClientEvents {
             // don't render preselection outlines if mousing over HUD
             if (OrthoviewClientEvents.isEnabled()) {
                 for (Entity entity : unitsToDraw) {
-                    if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()))
+                    if (!FogOfWarClientEvents.isInBrightChunk(entity))
                         continue;
 
                     if (preselectedUnits.contains(entity) &&
@@ -570,7 +570,7 @@ public class UnitClientEvents {
                 }
             }
             for (LivingEntity entity : allUnits) {
-                if (!FogOfWarClientEvents.isInBrightChunk(entity.getOnPos()) ||
+                if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
                         entity.isPassenger())
                     continue;
 
@@ -591,6 +591,7 @@ public class UnitClientEvents {
                         case OWNED -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 1.0f, 0.2f, alpha, excludeMaxY);
                         case FRIENDLY -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 0.2f, 1.0f, alpha, excludeMaxY);
                         case HOSTILE -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.2f, 0.2f, alpha, excludeMaxY);
+                        case NEUTRAL -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 0.1f, alpha, excludeMaxY);
                     }
                 }
             }
@@ -662,6 +663,9 @@ public class UnitClientEvents {
 
     public static Relationship getPlayerToEntityRelationship(LivingEntity entity) {
         if (MC.level != null && MC.player != null) {
+
+            if (entity instanceof Unit unit && unit.getOwnerName().isBlank())
+                return Relationship.NEUTRAL;
 
             if (entity instanceof Player)
                 return Relationship.HOSTILE;

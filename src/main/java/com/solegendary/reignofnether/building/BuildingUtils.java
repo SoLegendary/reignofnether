@@ -9,8 +9,11 @@ import com.solegendary.reignofnether.building.buildings.monsters.SpruceBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.OakBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
@@ -46,6 +49,8 @@ public class BuildingUtils {
     public static boolean isInRangeOfNightSource(Vec3 pos, boolean clientSide) {
         List<Building> buildings = clientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
         for (Building building : buildings) {
+            if (building.isDestroyedServerside)
+                continue;
             if (building instanceof Mausoleum mausoleum)
                 if (BuildingUtils.getCentrePos(mausoleum.getBlocks()).distToCenterSqr(pos.x, pos.y, pos.z) < Math.pow(Mausoleum.nightRange, 2))
                     return true;
@@ -267,27 +272,5 @@ public class BuildingUtils {
             }
         }
         return false;
-    }
-
-    public static List<BlockPos> getRenderChunkOrigins(Building building) {
-        List<BlockPos> origins = new ArrayList<>();
-        BlockPos minCorner = getMinCorner(building.getBlocks());
-        BlockPos maxCorner = getMaxCorner(building.getBlocks());
-
-        BlockPos minOrigin = new BlockPos(
-                Math.round(Math.floor(minCorner.getX() / 16d) * 16),
-                Math.round(Math.floor(minCorner.getY() / 16d) * 16),
-                Math.round(Math.floor(minCorner.getZ() / 16d) * 16)
-        );
-        BlockPos maxOrigin = new BlockPos(
-                Math.round(Math.floor(maxCorner.getX() / 16d) * 16),
-                Math.round(Math.floor(maxCorner.getY() / 16d) * 16),
-                Math.round(Math.floor(maxCorner.getZ() / 16d) * 16)
-        );
-        for (int x = minOrigin.getX(); x <= maxOrigin.getX(); x += 16)
-            for (int y = minOrigin.getY() - 16; y <= maxOrigin.getY(); y += 16)
-                for (int z = minOrigin.getZ(); z <= maxOrigin.getZ(); z += 16)
-                    origins.add(new BlockPos(x,y,z));
-        return origins;
     }
 }

@@ -32,11 +32,6 @@ public class BuildingClientboundPacket {
             new BuildingClientboundPacket(BuildingAction.PLACE,
                     itemName, buildingPos, rotation, ownerName, 0, numQueuedBlocks, isDiagonalBridge));
     }
-    public static void destroyBuilding(BlockPos buildingPos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new BuildingClientboundPacket(BuildingAction.DESTROY,
-                        "", buildingPos, Rotation.NONE, "", 0, 0, false));
-    }
     public static void syncBuilding(BlockPos buildingPos, int blocksPlaced) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new BuildingClientboundPacket(BuildingAction.SYNC_BLOCKS,
@@ -118,7 +113,6 @@ public class BuildingClientboundPacket {
                 }
                 switch (action) {
                     case PLACE -> BuildingClientEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.numQueuedBlocks, this.isDiagonalBridge);
-                    case DESTROY -> BuildingClientEvents.destroyBuilding(this.buildingPos);
                     case SYNC_BLOCKS -> BuildingClientEvents.syncBuildingBlocks(building, this.blocksPlaced);
                     case START_PRODUCTION -> {
                         ProductionBuilding.startProductionItem((ProductionBuilding) building, this.itemName, this.buildingPos);

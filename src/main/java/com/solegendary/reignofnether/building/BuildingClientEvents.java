@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.fogofwar.FrozenChunk;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
@@ -314,6 +315,8 @@ public class BuildingClientEvents {
 
     private static boolean isNonPiglinOrOnNetherBlocks(BlockPos originPos) {
         String buildingName = buildingToPlace.getName().toLowerCase();
+        if (buildingName.contains("bridge"))
+            return true;
         if (!buildingName.contains("buildings.piglins.") || buildingName.contains("centralportal"))
             return true;
         if (buildingName.contains("portal") && ResearchClient.hasResearch(ResearchAdvancedPortals.itemName))
@@ -441,6 +444,7 @@ public class BuildingClientEvents {
                     case OWNED -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 1.0f, 0.3f, 0.2f);
                     case FRIENDLY -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 0.3f, 1.0f, 0.2f);
                     case HOSTILE -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 1.0f, 0.3f, 0.3f, 0.2f);
+                    case NEUTRAL -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 1.0f, 1.0f, 0.15f, 0.2f);
                 }
             }
         }
@@ -676,7 +680,13 @@ public class BuildingClientEvents {
 
             // cleanup destroyed buildings
             selectedBuildings.removeIf(Building::shouldBeDestroyed);
-            buildings.removeIf(Building::shouldBeDestroyed);
+            buildings.removeIf(b -> {
+                if (b.shouldBeDestroyed()) {
+                    b.unFreezeChunks();
+                    return true;
+                }
+                return false;
+            });
         }
     }
 
@@ -705,6 +715,7 @@ public class BuildingClientEvents {
 
     // place a building clientside that has already been registered on serverside
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int numBlocksToPlace, boolean isDiagonalBridge) {
+
         for (Building building : buildings)
             if (BuildingUtils.isPosPartOfAnyBuilding(true, pos, false))
                 return; // building already exists clientside
@@ -716,28 +727,16 @@ public class BuildingClientEvents {
             newBuilding.addToBlockPlaceQueue(new BuildingBlock(new BlockPos(0,0,0), Blocks.AIR.defaultBlockState()));
             numBlocksToPlace -= 1;
         }
-
-        if (newBuilding != null) {
-            boolean buildingExists = false;
-            for (Building building : buildings)
-                if (building.originPos == pos) {
-                    buildingExists = true;
-                    break;
-                }
-            if (!buildingExists)
-                buildings.add(newBuilding);
+        if (newBuilding != null && MC.player != null) {
+            buildings.add(newBuilding);
+            newBuilding.freezeChunks(MC.player.getName().getString());
         }
-
         // sync the goal so we can display the correct animations
         Entity entity = hudSelectedEntity;
         if (entity instanceof WorkerUnit workerUnit) {
             ((Unit) entity).resetBehaviours();
             workerUnit.getBuildRepairGoal().setBuildingTarget(newBuilding);
         }
-    }
-
-    public static void destroyBuilding(BlockPos pos) {
-        buildings.removeIf(b -> b.originPos == pos);
     }
 
     public static void syncBuildingBlocks(Building serverBuilding, int blocksPlaced) {
@@ -749,6 +748,8 @@ public class BuildingClientEvents {
     public static Relationship getPlayerToBuildingRelationship(Building building) {
         if (MC.player != null && building.ownerName.equals(MC.player.getName().getString()))
             return Relationship.OWNED;
+        else if (building.ownerName.isBlank())
+            return Relationship.NEUTRAL;
         else
             return Relationship.HOSTILE;
     }

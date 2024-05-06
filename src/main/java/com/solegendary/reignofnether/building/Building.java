@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPack
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FrozenChunk;
@@ -47,6 +48,9 @@ import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlaye
 import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
 
 public abstract class Building {
+
+    public boolean isExploredClientside = false;
+    public boolean isDestroyedServerside = false;
 
     private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned; normally 500ms in real games
     public final float MELEE_DAMAGE_MULTIPLIER = 0.20f; // damage multiplier applied to melee attackers
@@ -143,10 +147,6 @@ public abstract class Building {
             }
             FogOfWarClientboundPacket.revealOrHidePlayer(false, this.ownerName);
         }
-
-        if (this.level.isClientSide)
-            for (BlockPos bp : BuildingUtils.getRenderChunkOrigins(this))
-                FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(bp));
     }
 
     public Faction getFaction() {return Faction.NONE;}
@@ -238,6 +238,7 @@ public abstract class Building {
         return minPos;
     }
 
+    // does not account for fog of war
     private boolean isFullyLoadedClientSide(ClientLevel level) {
         for (BuildingBlock block : this.blocks)
             if (!level.isLoaded(block.getBlockPos()))
@@ -378,8 +379,8 @@ public abstract class Building {
     }
 
     public boolean shouldBeDestroyed() {
-        //if (this instanceof Portal portal && portal.portalType != Portal.PortalType.BASIC && tickAge < 20)
-        //    return false;
+        if (this.level.isClientSide() && (!FogOfWarClientEvents.isBuildingInBrightChunk(this) || !isDestroyedServerside))
+            return false;
         if (blockPlaceQueue.size() > 0)
             return false;
         if (getBlocksPlaced() <= 0)
@@ -394,8 +395,6 @@ public abstract class Building {
     // only explode a fraction of the blocks to avoid lag and sound spikes
     public void destroy(ServerLevel serverLevel) {
         this.forceChunk(false);
-
-        BuildingClientboundPacket.destroyBuilding(this.originPos);
 
         this.blocks.forEach((BuildingBlock block) -> {
             if (block.getBlockState().getMaterial().isLiquid()) {
@@ -594,5 +593,58 @@ public abstract class Building {
                 }
             }
         }
+
+        if (this.level.isClientSide && !FogOfWarClientEvents.isEnabled())
+            isExploredClientside = true;
+    }
+
+    // returns each blockpos origin of 16x16x16 renderchunks that this building overlaps
+    // extendedRange includes additional chunks to account for nether conversion and/or resource gathering
+    public List<BlockPos> getRenderChunkOrigins(boolean extendedRange) {
+        double addedRange = 0;
+
+        if (extendedRange) {
+            if (this instanceof NetherConvertingBuilding netherConvertingBuilding) {
+                double range = netherConvertingBuilding.getMaxRange();
+                addedRange = 16 * Math.ceil(Math.abs(range/16)); // round up to next multiple of 16
+            } else if (this instanceof AbstractStockpile) {
+                addedRange = 32;
+            }
+        }
+        List<BlockPos> origins = new ArrayList<>();
+        BlockPos minCorner = getMinCorner(getBlocks()).offset(-addedRange/2, -1,-addedRange/2);
+        BlockPos maxCorner = getMaxCorner(getBlocks()).offset(addedRange/2, -1,addedRange/2);
+
+        BlockPos minOrigin = new BlockPos(
+                Math.round(Math.floor(minCorner.getX() / 16d) * 16),
+                Math.round(Math.floor(minCorner.getY() / 16d) * 16),
+                Math.round(Math.floor(minCorner.getZ() / 16d) * 16)
+        );
+        BlockPos maxOrigin = new BlockPos(
+                Math.round(Math.floor(maxCorner.getX() / 16d) * 16),
+                Math.round(Math.floor(maxCorner.getY() / 16d) * 16),
+                Math.round(Math.floor(maxCorner.getZ() / 16d) * 16)
+        );
+        for (int x = minOrigin.getX(); x <= maxOrigin.getX(); x += 16)
+            for (int y = minOrigin.getY() - 16; y <= maxOrigin.getY(); y += 16)
+                for (int z = minOrigin.getZ(); z <= maxOrigin.getZ(); z += 16)
+                    origins.add(new BlockPos(x,y,z));
+        return origins;
+    }
+
+    public void freezeChunks(String localPlayerName) {
+        if (level.isClientSide) {
+            if (!ownerName.equals(localPlayerName))
+                for (BlockPos bp : getRenderChunkOrigins(true))
+                    FogOfWarClientEvents.freezeChunk(bp, this);
+        }
+    }
+
+    public void unFreezeChunks() {
+        if (level.isClientSide)
+            for (BlockPos bp : getRenderChunkOrigins(true))
+                for (FrozenChunk fc : FogOfWarClientEvents.frozenChunks)
+                    if (fc.building != null && fc.building.originPos.equals(originPos))
+                        fc.removeOnExplore = true;
     }
 }

@@ -74,6 +74,9 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
                 netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
             }
         }
+        if (!this.getLevel().isClientSide() && this.getBlocksPlaced() >= getBlocksTotal() &&
+             this.getLevel().getBlockState(this.centrePos).isAir())
+            this.getLevel().setBlockAndUpdate(this.centrePos, Blocks.FIRE.defaultBlockState());
     }
 
     @Override
@@ -133,13 +136,6 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
                 targetPortal.destination = null;
         }
         destination = null;
-    }
-
-    @Override
-    public void onBuilt() {
-        super.onBuilt();
-        if (!this.getLevel().isClientSide())
-            this.getLevel().setBlockAndUpdate(this.centrePos, Blocks.FIRE.defaultBlockState());
     }
 
     @Override

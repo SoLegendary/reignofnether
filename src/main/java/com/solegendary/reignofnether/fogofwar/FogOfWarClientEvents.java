@@ -4,37 +4,43 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
+import static net.minecraft.util.Mth.floor;
 
 public class FogOfWarClientEvents {
     public static final float BRIGHT = 1.0f;
@@ -98,7 +104,6 @@ public class FogOfWarClientEvents {
     public static void resetFogChunks() {
         MC.levelRenderer.allChanged();
         semiFrozenChunks.clear();
-        frozenChunks.clear();
     }
 
     public static void setEnabled(boolean value) {
@@ -108,6 +113,13 @@ public class FogOfWarClientEvents {
         if (enabled != value) {
             enabled = value;
             resetFogChunks();
+
+            if (enabled) {
+                for (Building building : BuildingClientEvents.getBuildings())
+                    building.freezeChunks(MC.player.getName().getString());
+            } else {
+                frozenChunks.clear();
+            }
         }
     }
 
@@ -119,7 +131,7 @@ public class FogOfWarClientEvents {
 
     @SubscribeEvent
     public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
-        evt.getDispatcher().register(Commands.literal("fog").then(Commands.literal("enable")
+        evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("enable")
                 .executes((command) -> {
                     if (MC.player == null)
                         return -1;
@@ -131,13 +143,13 @@ public class FogOfWarClientEvents {
                         MC.player.sendSystemMessage(Component.literal("[WARNING]").withStyle(Style.EMPTY.withBold(true)));
                         MC.player.sendSystemMessage(Component.literal(
                                 "If any players have rendering optimisation mods such as Optifine installed, enabling fog of war " +
-                                "may cause them to crash. If you are prepared for this, then use /fog enable again to continue."));
+                                        "may cause them to crash. If you are prepared for this, then use /rts-fog enable again to continue."));
                     } else {
                         setServerFog(true);
                     }
                     return 1;
                 })));
-        evt.getDispatcher().register(Commands.literal("fog").then(Commands.literal("disable")
+        evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("disable")
                 .executes((command) -> {
                     if (MC.player == null)
                         return -1;
@@ -184,6 +196,19 @@ public class FogOfWarClientEvents {
         return false;
     }
 
+    public static boolean isInBrightChunk(Entity entity) {
+        if (!isEnabled() || MC.level == null)
+            return true;
+
+        // first check if the ChunkPos is already occupied as this is faster
+        for (ChunkPos chunkPos : brightChunks)
+            if (new ChunkPos(entity.getOnPos()).equals(chunkPos))
+                return true;
+
+        return entity instanceof RangedAttackerUnit rangedAttackerUnit &&
+                rangedAttackerUnit.getFogRevealDuration() > 0;
+    }
+
     @SubscribeEvent
     // hudSelectedEntity and portraitRendererUnit should be assigned in the same event to avoid desyncs
     public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
@@ -191,7 +216,7 @@ public class FogOfWarClientEvents {
             return;
 
         // don't render entities in non-bright chunks
-        if (isInBrightChunk(evt.getEntity().getOnPos()))
+        if (isInBrightChunk(evt.getEntity()))
             return;
 
         evt.setCanceled(true);
@@ -246,10 +271,18 @@ public class FogOfWarClientEvents {
             newlyDarkChunks.removeAll(brightChunks);
 
             for (ChunkPos cpos : newlyDarkChunks) {
+                onChunkUnexplore(cpos);
                 for (int x = -1; x <= 1; x++)
                     for (int z = -1; z <= 1; z++)
                         rerenderChunks.add(new ChunkPos(cpos.x + x, cpos.z + z));
             }
+            Set<ChunkPos> newlyBrightChunks = ConcurrentHashMap.newKeySet();
+            newlyBrightChunks.addAll(brightChunks);
+            newlyBrightChunks.removeAll(lastBrightChunks);
+
+            for (ChunkPos cpos : newlyBrightChunks)
+                onChunkExplore(cpos);
+
             if (OrthoviewClientEvents.isEnabled())
                 semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
                         .distSqr(MC.player.getOnPos()) > Math.pow(OrthoviewClientEvents.getZoom() * 2, 2));
@@ -286,4 +319,114 @@ public class FogOfWarClientEvents {
             }
         }
     }
+
+    // triggered when a chunk goes from dark to bright
+    public static void onChunkExplore(ChunkPos cpos) {
+        frozenChunks.removeIf(fc -> fc.removeOnExplore && MC.level.getChunk(fc.origin).getPos().equals(cpos));
+
+        for (FrozenChunk frozenChunk : frozenChunks)
+            if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
+                frozenChunk.syncServerBlocks(frozenChunk.origin);
+
+        for (Building building : BuildingClientEvents.getBuildings()) {
+            if (building.isExploredClientside)
+                continue;
+            for (BlockPos bp : building.getRenderChunkOrigins(false))
+                if (bp.getX() == cpos.getWorldPosition().getX() &&
+                    bp.getZ() == cpos.getWorldPosition().getZ())
+                    building.isExploredClientside = true;
+        }
+    }
+
+    // triggered when a chunk goes from bright to dark
+    public static void onChunkUnexplore(ChunkPos cpos) {
+        for (FrozenChunk frozenChunk : frozenChunks)
+            if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos) && MC.level.isLoaded(frozenChunk.origin))
+                frozenChunk.saveBlocks(); // only save blocks with faked chunks for NEW frozen chunks
+    }
+
+    @SubscribeEvent
+    public static void onChunkLoad(ChunkEvent.Load evt) {
+        for (FrozenChunk fc : frozenChunks)
+            if (fc.attemptedUnloadedSave && evt.getLevel().isClientSide() &&
+                evt.getChunk().getPos().getWorldPosition().getX() == fc.origin.getX() &&
+                evt.getChunk().getPos().getWorldPosition().getZ() == fc.origin.getZ())
+                    fc.saveBlocks();
+    }
+
+    public static void setBuildingDestroyedServerside(BlockPos buildingOrigin) {
+        for (Building building : BuildingClientEvents.getBuildings())
+            if (building.originPos.equals(buildingOrigin))
+                building.isDestroyedServerside = true;
+    }
+
+    public static void freezeChunk(BlockPos origin, Building building) {
+        BlockPos roundedOrigin = origin.offset(
+                -origin.getX() % 16,
+                -origin.getY() % 16,
+                -origin.getZ() % 16
+        );
+        if (origin.getX() % 16 != 0 ||
+            origin.getY() % 16 != 0 ||
+            origin.getZ() % 16 != 0)
+            System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + origin);
+
+        System.out.println("Froze chunk at: " + roundedOrigin);
+        frozenChunks.add(new FrozenChunk(roundedOrigin, building));
+    }
+
+    // show corners of all frozenChunks
+    @SubscribeEvent
+    public static void onRenderLevel(RenderLevelStageEvent evt) {
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+            return;
+
+        /*
+        for (FrozenChunk frozenChunk : frozenChunks) {
+            BlockPos bp = frozenChunk.origin;
+            Vec3 vec3 = new Vec3(bp.getX(), bp.getY(), bp.getZ());
+            MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(0,15,0), 1, 1, 1, 1);
+            MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(15,0,0), 1, 1, 1, 1);
+            MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(0,0,15), 1, 1, 1, 1);
+        }
+         */
+    }
+
+    public static void revealRangedUnit(String playerBeingAttacked, int unitId) {
+        if (MC.player != null && MC.player.getName().getString().equals(playerBeingAttacked))
+            for (LivingEntity entity : UnitClientEvents.getAllUnits())
+                if (entity.getId() == unitId && entity instanceof RangedAttackerUnit unit)
+                    unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
+    }
+
+    /*
+    @SubscribeEvent
+    public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
+        // select a moused over entity by left clicking it
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            if (MC.level != null)
+                MC.level.setBlockAndUpdate(CursorClientEvents.getPreselectedBlockPos(), Blocks.BARREL.defaultBlockState());
+        }
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            if (MC.level != null)
+                FrozenChunkServerboundPacket.syncServerBlocks(CursorClientEvents.getPreselectedBlockPos());
+        }
+    }
+     */
+
+    /*
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        if (MC.level == null)
+            return;
+
+        ChunkPos cpos = MC.level.getChunk(CursorClientEvents.getPreselectedBlockPos()).getPos();
+
+        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+                "x: " + cpos.x,
+                "z: " + cpos.z,
+                "xo: " + cpos.getWorldPosition().getX(),
+                "zo: " + cpos.getWorldPosition().getZ()
+        });
+    } */
 }

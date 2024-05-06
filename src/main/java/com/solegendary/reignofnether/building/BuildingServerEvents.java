@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -52,19 +53,25 @@ public class BuildingServerEvents {
                                      int[] builderUnitIds, boolean queue, boolean isDiagonalBridge) {
 
         boolean isBridge = buildingName.toLowerCase().contains("bridge");
-        Building building = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, isBridge ? "" : ownerName, isDiagonalBridge);
+        Building newBuilding = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, isBridge ? "" : ownerName, isDiagonalBridge);
+        boolean buildingExists = false;
+        for (Building building : buildings)
+            if (building.originPos == pos) {
+                buildingExists = true;
+                break;
+            }
 
-        if (building != null) {
-            if (building.canAfford(ownerName)) {
-                buildings.add(building);
-                building.forceChunk(true);
+        if (newBuilding != null && !buildingExists) {
+            if (newBuilding.canAfford(ownerName)) {
+                buildings.add(newBuilding);
+                newBuilding.forceChunk(true);
 
-                int minY = BuildingUtils.getMinCorner(building.blocks).getY();
-                if (building instanceof AbstractBridge)
+                int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
+                if (newBuilding instanceof AbstractBridge)
                     minY += 1; // because fences are on the 2nd layer
 
-                if (!(building instanceof AbstractBridge)) {
-                    for (BuildingBlock block : building.blocks) {
+                if (!(newBuilding instanceof AbstractBridge)) {
+                    for (BuildingBlock block : newBuilding.blocks) {
                         // place scaffolding underneath all solid blocks that don't have support
                         if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir()) {
                             int yBelow = 0;
@@ -83,8 +90,8 @@ public class BuildingServerEvents {
                                 while (yBelow < 0) {
                                     BlockPos bp = block.getBlockPos().offset(0, yBelow, 0);
                                     BuildingBlock scaffold = new BuildingBlock(bp, Blocks.SCAFFOLDING.defaultBlockState());
-                                    building.getScaffoldBlocks().add(scaffold);
-                                    building.addToBlockPlaceQueue(scaffold);
+                                    newBuilding.getScaffoldBlocks().add(scaffold);
+                                    newBuilding.addToBlockPlaceQueue(scaffold);
                                     yBelow += 1;
                                 }
                             }
@@ -92,20 +99,20 @@ public class BuildingServerEvents {
                     }
                 }
 
-                for (BuildingBlock block : building.blocks) {
+                for (BuildingBlock block : newBuilding.blocks) {
                     // place all blocks on the lowest y level
                     if (block.getBlockPos().getY() == minY &&
-                            building.startingBlockTypes.contains(block.getBlockState().getBlock()))
-                        building.addToBlockPlaceQueue(block);
+                            newBuilding.startingBlockTypes.contains(block.getBlockState().getBlock()))
+                        newBuilding.addToBlockPlaceQueue(block);
                 }
                 BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, isBridge ? "" : ownerName,
-                        building.blockPlaceQueue.size(), isDiagonalBridge);
+                        newBuilding.blockPlaceQueue.size(), isDiagonalBridge);
 
                 ResourcesServerEvents.addSubtractResources(new Resources(
-                    building.ownerName,
-                    -building.foodCost,
-                    -building.woodCost,
-                    -building.oreCost
+                    newBuilding.ownerName,
+                    -newBuilding.foodCost,
+                    -newBuilding.woodCost,
+                    -newBuilding.oreCost
                 ));
                 // assign the builder unit that placed this building
                 for (int id : builderUnitIds) {
@@ -116,22 +123,22 @@ public class BuildingServerEvents {
                                 ((Unit) entity).resetBehaviours();
                                 WorkerUnit.resetBehaviours(workerUnit);
                             }
-                            workerUnit.getBuildRepairGoal().queuedBuildings.add(building);
+                            workerUnit.getBuildRepairGoal().queuedBuildings.add(newBuilding);
                             if (workerUnit.getBuildRepairGoal().getBuildingTarget() == null)
                                 workerUnit.getBuildRepairGoal().startNextQueuedBuilding();
                         } else {
                             ((Unit) entity).resetBehaviours();
                             WorkerUnit.resetBehaviours(workerUnit);
-                            workerUnit.getBuildRepairGoal().setBuildingTarget(building);
+                            workerUnit.getBuildRepairGoal().setBuildingTarget(newBuilding);
                         }
                     }
                 }
             }
             else
-                ResourcesClientboundPacket.warnInsufficientResources(building.ownerName,
-                    ResourcesServerEvents.canAfford(building.ownerName, ResourceName.FOOD, building.foodCost),
-                    ResourcesServerEvents.canAfford(building.ownerName, ResourceName.WOOD, building.woodCost),
-                    ResourcesServerEvents.canAfford(building.ownerName, ResourceName.ORE, building.oreCost)
+                ResourcesClientboundPacket.warnInsufficientResources(newBuilding.ownerName,
+                    ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.FOOD, newBuilding.foodCost),
+                    ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.WOOD, newBuilding.woodCost),
+                    ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.ORE, newBuilding.oreCost)
                 );
         }
     }
@@ -142,6 +149,7 @@ public class BuildingServerEvents {
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);
+        FrozenChunkClientboundPacket.setBuildingDestroyedServerside(building.originPos);
 
         // AOE2-style refund: return the % of the non-built portion of the building
         // eg. cancelling a building at 70% completion will refund only 30% cost
@@ -238,7 +246,13 @@ public class BuildingServerEvents {
 
         // need to remove from the list first as destroy() will read it to check defeats
         List<Building> buildingsToDestroy = buildings.stream().filter(Building::shouldBeDestroyed).toList();
-        buildings.removeIf(Building::shouldBeDestroyed);
+        buildings.removeIf(b -> {
+            if (b.shouldBeDestroyed()) {
+                FrozenChunkClientboundPacket.setBuildingDestroyedServerside(b.originPos);
+                return true;
+            }
+            return false;
+        });
 
         for (Building building : buildingsToDestroy)
             building.destroy(serverLevel);
@@ -271,7 +285,6 @@ public class BuildingServerEvents {
                 }
             }
         }
-
         // set fire to random blocks from a ghast fireball
         if (ghastUnit != null) {
 

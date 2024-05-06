@@ -60,16 +60,9 @@ public abstract class LevelRendererMixin {
     @Shadow private ChunkRenderDispatcher chunkRenderDispatcher;
     @Shadow private ClientLevel level;
 
-    private List<Pair<BlockPos, Integer>> chunksToReDirty = new ArrayList<>();
+    private static final ObjectArrayList<LevelRenderer.RenderChunkInfo> lastRenderChunksInFrustum = new ObjectArrayList<>();
 
-    private List<BlockPos> getFrozenChunkOrigins() {
-        ArrayList<BlockPos> origins = new ArrayList<>();
-        for (FrozenChunk frozenChunk : frozenChunks)
-            if (frozenChunk.chunkInfo != null)
-                if (!FogOfWarClientEvents.isInBrightChunk(frozenChunk.chunkInfo.chunk.getOrigin()))
-                    origins.add(frozenChunk.chunkInfo.chunk.getOrigin());
-        return origins;
-    }
+    private List<Pair<BlockPos, Integer>> chunksToReDirty = new ArrayList<>();
 
     @Inject(
             method = "applyFrustum(Lnet/minecraft/client/renderer/culling/Frustum;)V",
@@ -89,20 +82,10 @@ public abstract class LevelRendererMixin {
             this.renderChunksInFrustum.clear();
 
             for (LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunkStorage.get().renderChunks) {
-                if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox()) &&
-                        !getFrozenChunkOrigins().contains(chunkInfo.chunk.getOrigin())) {
+                if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox())) {
                     this.renderChunksInFrustum.add(chunkInfo);
                 }
-                for (FrozenChunk frozenChunk : frozenChunks) {
-                    if (frozenChunk.chunkInfo == null && frozenChunk.origin.equals(chunkInfo.chunk.getOrigin())) {
-                        frozenChunk.chunkInfo = chunkInfo;
-                        System.out.println("added chunkInfo: " + chunkInfo.chunk.getOrigin());
-                    }
-                }
             }
-            for (FrozenChunk frozenChunk : frozenChunks)
-                if (frozenChunk.chunkInfo != null)
-                    this.renderChunksInFrustum.add(frozenChunk.chunkInfo);
 
             this.minecraft.getProfiler().pop();
         }
@@ -157,6 +140,36 @@ public abstract class LevelRendererMixin {
 
         ci.cancel();
 
+
+        // determine which renderChunks are new - enforce frozenChunks on those
+        ObjectArrayList<LevelRenderer.RenderChunkInfo> newRenderChunksInFrustum = new ObjectArrayList<>();
+        newRenderChunksInFrustum.addAll(renderChunksInFrustum);
+        newRenderChunksInFrustum.removeAll(lastRenderChunksInFrustum);
+
+        // load saved blocks into unexplored frozen chunks (don't repeat this for overlapping chunks)
+        ArrayList<BlockPos> loadedFcOrigins = new ArrayList<>();
+        for (FrozenChunk frozenChunk : frozenChunks.stream().filter(fc -> !fc.hasFakeBlocks).toList()) {
+            for (LevelRenderer.RenderChunkInfo newRenderChunk : newRenderChunksInFrustum) {
+                if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
+                    !isInBrightChunk(frozenChunk.origin) &&
+                    !loadedFcOrigins.contains(frozenChunk.origin)) {
+                    //System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
+                    frozenChunk.loadBlocks();
+                    loadedFcOrigins.add(frozenChunk.origin);
+                }
+            }
+        }
+        // rerun for any faked chunks, only run them if they were not already loaded
+        for (FrozenChunk frozenChunk : frozenChunks.stream().filter(fc -> fc.hasFakeBlocks).toList()) {
+            for (LevelRenderer.RenderChunkInfo newRenderChunk : newRenderChunksInFrustum) {
+                if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
+                    !isInBrightChunk(frozenChunk.origin) &&
+                    !loadedFcOrigins.contains(frozenChunk.origin)) {
+                    frozenChunk.loadBlocks();
+                }
+            }
+        }
+
         this.minecraft.getProfiler().push("populate_chunks_to_compile");
         RenderRegionCache renderregioncache = new RenderRegionCache();
         BlockPos blockpos = pCamera.getBlockPosition();
@@ -166,14 +179,13 @@ public abstract class LevelRendererMixin {
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
 
             BlockPos originPos = chunkInfo.chunk.getOrigin();
-            boolean isFrozenChunk = getFrozenChunkOrigins().contains(originPos);
             ChunkPos chunkPos = new ChunkPos(originPos);
 
             if (rerenderChunks.contains(chunkPos)) {
                 FogOfWarClientEvents.updateChunkLighting(originPos);
                 rerenderChunksToRemove.add(chunkPos);
             }
-            else if (!isInBrightChunk(originPos) && !isFrozenChunk) {
+            else if (!isInBrightChunk(originPos)) {
                 if (semiFrozenChunks.contains(originPos))
                     continue;
                 else
@@ -192,12 +204,12 @@ public abstract class LevelRendererMixin {
                     flag = !net.minecraftforge.common.ForgeConfig.CLIENT.alwaysSetupTerrainOffThread.get() && (blockpos1.distSqr(blockpos) < 768.0D || renderChunk.isDirtyFromPlayer());
                 }
 
-                if (flag && !isFrozenChunk) {
+                if (flag) {
                     this.minecraft.getProfiler().push("build_near_sync");
                     this.chunkRenderDispatcher.rebuildChunkSync(renderChunk, renderregioncache);
                     renderChunk.setNotDirty();
                     this.minecraft.getProfiler().pop();
-                } else if (!isFrozenChunk) {
+                } else {
                     list.add(renderChunk);
                 }
             }
@@ -213,6 +225,9 @@ public abstract class LevelRendererMixin {
             renderChunk1.setNotDirty();
         }
         this.minecraft.getProfiler().pop();
+
+        lastRenderChunksInFrustum.clear();
+        lastRenderChunksInFrustum.addAll(renderChunksInFrustum);
     }
 
     @Shadow @Final private AtomicBoolean needsFrustumUpdate = new AtomicBoolean(false);

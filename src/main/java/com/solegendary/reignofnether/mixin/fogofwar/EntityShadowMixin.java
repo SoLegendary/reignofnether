@@ -36,7 +36,7 @@ public abstract class EntityShadowMixin {
 
         BlockPos bp = pEntity.getOnPos();
 
-        if (!FogOfWarClientEvents.isInBrightChunk(pEntity.getOnPos()))
+        if (!FogOfWarClientEvents.isInBrightChunk(pEntity))
             ci.cancel();
     }
 }

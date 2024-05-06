@@ -53,6 +53,17 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
                 netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
             }
         }
+        if (!this.getLevel().isClientSide() && this.getBlocksPlaced() >= getBlocksTotal()) {
+            BlockPos bp;
+            if (this.rotation == Rotation.CLOCKWISE_90 ||
+                this.rotation == Rotation.COUNTERCLOCKWISE_90) {
+                bp = this.centrePos.offset(0,-1,0);
+            } else {
+                bp = this.centrePos.offset(-1,0,0);
+            }
+            if (this.getLevel().getBlockState(bp).isAir())
+                this.getLevel().setBlockAndUpdate(bp, Blocks.FIRE.defaultBlockState());
+        }
     }
 
     public CentralPortal(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
@@ -88,19 +99,6 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
-    }
-
-    @Override
-    public void onBuilt() {
-        super.onBuilt();
-        if (!this.getLevel().isClientSide()) {
-            if (this.rotation == Rotation.CLOCKWISE_90 ||
-                this.rotation == Rotation.COUNTERCLOCKWISE_90) {
-                this.getLevel().setBlockAndUpdate(this.centrePos.offset(0,-1,0), Blocks.FIRE.defaultBlockState());
-            } else {
-                this.getLevel().setBlockAndUpdate(this.centrePos.offset(-1,0,0), Blocks.FIRE.defaultBlockState());
-            }
-        }
     }
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {

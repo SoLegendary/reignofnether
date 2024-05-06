@@ -38,9 +38,23 @@ public class NetherBlocks {
     public static boolean isNetherBlock(Level level, BlockPos bp) {
         BlockState bs = level.getBlockState(bp);
         for (Map.Entry<Block, List<Block>> entrySet : MAPPINGS.entrySet())
-            if (bs.getBlock().equals(entrySet.getKey()))
+            if (!bs.isAir() && bs.getBlock().equals(entrySet.getKey()))
                 return true;
         return false;
+    }
+
+    // returns the first block in the list of overworld blocks for a nether block mapping
+    public static BlockState getOverworldBlock(Level level, BlockPos overworldBp) {
+        BlockState netherBs = level.getBlockState(overworldBp);
+        if (!netherBs.isAir()) {
+            for (Map.Entry<Block, List<Block>> entrySet : MAPPINGS.entrySet())
+                if (entrySet.getKey().getName().getString().equals(netherBs.getBlock().getName().getString()))
+                    return entrySet.getValue().get(0).defaultBlockState();
+            for (Map.Entry<Block, List<Block>> entrySet : PLANT_MAPPINGS.entrySet())
+                if (entrySet.getKey().getName().getString().equals(netherBs.getBlock().getName().getString()))
+                    return entrySet.getValue().get(0).defaultBlockState();
+        }
+        return null;
     }
 
     public static final Map<Block, List<Block>> MAPPINGS = new HashMap<>();
@@ -71,8 +85,8 @@ public class NetherBlocks {
             ));
         MAPPINGS.put(Blocks.LAVA,
             List.of(
-                Blocks.OBSIDIAN, // converting water -> lava alone generates a lot of obsidian
                 Blocks.WATER,
+                Blocks.OBSIDIAN, // converting water -> lava alone generates a lot of obsidian
                 Blocks.SEAGRASS,
                 Blocks.TALL_SEAGRASS,
                 Blocks.KELP,
@@ -174,8 +188,8 @@ public class NetherBlocks {
             ));
         PLANT_MAPPINGS.put(Blocks.CRIMSON_FUNGUS,
             List.of(
-                Blocks.SUNFLOWER,
                 Blocks.DANDELION,
+                Blocks.SUNFLOWER,
                 Blocks.CORNFLOWER,
                 Blocks.BLUE_ORCHID,
                 Blocks.POPPY,
@@ -196,17 +210,17 @@ public class NetherBlocks {
                 Blocks.TALL_GRASS
             ));
         PLANT_MAPPINGS.put(Blocks.WEEPING_VINES_PLANT,
-                List.of(
-                        Blocks.FERN,
-                        Blocks.LARGE_FERN,
-                        Blocks.ROSE_BUSH,
-                        Blocks.DEAD_BUSH,
-                        Blocks.SWEET_BERRY_BUSH,
-                        Blocks.MANGROVE_ROOTS,
-                        Blocks.MUDDY_MANGROVE_ROOTS,
-                        Blocks.AZALEA,
-                        Blocks.FLOWERING_AZALEA,
-                        Blocks.SUGAR_CANE
-                ));
+            List.of(
+                Blocks.FERN,
+                Blocks.LARGE_FERN,
+                Blocks.ROSE_BUSH,
+                Blocks.DEAD_BUSH,
+                Blocks.SWEET_BERRY_BUSH,
+                Blocks.MANGROVE_ROOTS,
+                Blocks.MUDDY_MANGROVE_ROOTS,
+                Blocks.AZALEA,
+                Blocks.FLOWERING_AZALEA,
+                Blocks.SUGAR_CANE
+            ));
     }
 }

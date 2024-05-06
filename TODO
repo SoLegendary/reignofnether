@@ -3,37 +3,63 @@ TODO bugs/features:
 
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - workers are not marked as idle until 15s after stopping gathering
+- turning on fog of war causes a crash when optifine is installed
 
-Known issues:
-    - when moving far away at fast speeds, we can sometimes end up with semi-frozen chunks that are not rendered at all
-        - if we can detect which chunks are unrendered, we can try rerendering them
-    - as a workaround, just press F8 to reset chunks
-        - as an additional workaround, chunks with enemy buildings are always hidden and not rendered
-    - turning on fog of war causes a crash when optifine is installed
+BRIDGES
 
-- Allow villagers to build bridges
+- replace bridge blocvks with water if adjacent to water as well or currents form and trap units
+- raise health and/or damage resistance massively
+- dotted line pattern on planks instead of fences as initial build blocks
+- exclude bridges from minimap entirely
+- cant repair bridges on multiplayer
+- don't replace fences with liquid
 
-    Done, testing on server needed:
-    ------------------------------
-    - building placement validity check might be including air blocks on diagonal structures
-    - building placement validity check is broken on bridgePlaceState=2 (clientside issue)
-    - check that players joining a map with bridges existing see them correctly clientside
-    - include unbuilt bridge blocks as overlapping solid blocks during validity check
-    - 2 structures (diagonal and straight) that alternate when scrolled
-    - when any blocks are destroyed, replace them with the liquid underneath them if it exists
-        - including on building destruction
-    - when placed, remove any blocks that clip solid terrain or other bridges from the block list
-        - test that we can build through seaweed
-    - do not allow building underwater
-    - when placed, becomes neutral (ownername == "" on client and server), but still buildable/repairable by anyone
-        - meaning this should also not provide vision
-    - right clicking should not autoattack
-    - reduce selection dimensions after blocks are culled
-    - cull from block list any fences that are adjacent to another bridge fence
-    - check that bridge placement doesn't lag when viewing (due to shouldCullBlock being expensive)
 
-- find a way to enforce frozenChunks (ie. players shouldn't be able to F8 refresh to see enemy bases in fog)
-    - not clearing them on refresh causes major rendering glitches
+
+- attacking out of bastions is buggy - walls too high? - replace with walls instead
+- replace obsidian with water for fake FrozenChunks
+
+FOG:
+    - patches of nether, buildings, etc. are still visible even in fully loaded chunks
+        - loading and unloading sometimes updates more chunks
+
+    - buildings partially in fog sometimes show negative hp on clientside
+        - fix buidlserverhealth and packets
+
+    - buildings disappear even when fully lit up (inconsistent, triggered by panning away and back)
+
+
+BUGS:
+    - stop grass breaking from loadBlocks() - same with PORTALS
+        - FogOfWarClientEvents.syncClientBlocks
+            - temporary solution in place: just don't replace 2+ high plant blocks...
+            - this hack solution stops grass blocks below plants being updated
+    - logging in/out of the world re-saves the blocks...
+        - apply the same block-faking logic to all of these chunks
+    - existing buildings partially in fog are VERY buggy when fog is turned on
+        - disable toggling fog mid-game
+
+
+
+TESTING STEPS:
+    1. Turn on fog, start players as Piglins away from each other
+    2. Scroll Client A far away from B until chunks are unloaded
+    3. On Client B, build a portal and wait for nether to spread fully
+    4. [Observe] On client A, move back into chunk load range
+    5. [Observe] On Client A, place a unit outside of the view of the portal and move it in
+
+
+
+
+[FOG OF WAR] playtest checklist:
+--------------------------------
+- buildings destroyed offscreen are updated correctly
+- buildings placed offscreen are updated correctly
+- destroyed buildings no longer have frozenchunks
+- explored frozenchunks should not have any unsynced blocks
+- night-warping buildings that are destroyed serverside but unexplored clientside should have their night-warping abilities disabled
+
+
 
 
 

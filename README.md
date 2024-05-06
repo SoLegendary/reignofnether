@@ -18,6 +18,7 @@ Another core design tenet is that the gamemode is fully compatible with vanilla 
 | Unit controls | ✔️ |  |  
 | Building construction | ✔️ |  |  
 | Building unit production | ✔️ |  |  
+| Bridge building | ✔ |  |  
 | Unit and building upgrades | ✔️ |  |  
 | Minimap | ✔️ |  |  
 | Resources and population | ✔️ |  |  
@@ -41,7 +42,7 @@ https://github.com/SoLegendary/reignofnether_datapack
 To properly play this mod, your world needs to have three things:
 1. No caves or underground structures, to prevent your units falling in holes and not being able to escape
 2. Ores generated on the surface, so that workers can gather them for building
-3. Restricted world generation, because biomes like extreme hills and jungles are really hard to play i
+3. Restricted world generation, because biomes like extreme hills and jungles are really hard to play in
 
 I've included this datapack that can be used to generate worlds with the above conditions. It also:
 
