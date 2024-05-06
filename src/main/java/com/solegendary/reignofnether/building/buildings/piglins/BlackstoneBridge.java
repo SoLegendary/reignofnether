@@ -50,7 +50,7 @@ public class BlackstoneBridge extends AbstractBridge {
         this.popSupply = cost.population;
         this.buildTimeModifier = 1.0f;
 
-        this.startingBlockTypes.add(Blocks.NETHER_BRICK_FENCE);
+        this.startingBlockTypes.add(Blocks.CHISELED_POLISHED_BLACKSTONE);
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level, boolean diagonal) {

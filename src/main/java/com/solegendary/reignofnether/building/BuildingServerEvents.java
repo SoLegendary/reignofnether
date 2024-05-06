@@ -67,8 +67,6 @@ public class BuildingServerEvents {
                 newBuilding.forceChunk(true);
 
                 int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
-                if (newBuilding instanceof AbstractBridge)
-                    minY += 1; // because fences are on the 2nd layer
 
                 if (!(newBuilding instanceof AbstractBridge)) {
                     for (BuildingBlock block : newBuilding.blocks) {

@@ -50,7 +50,7 @@ public class OakBridge extends AbstractBridge {
         this.popSupply = cost.population;
         this.buildTimeModifier = 1.0f;
 
-        this.startingBlockTypes.add(Blocks.SPRUCE_FENCE);
+        this.startingBlockTypes.add(Blocks.OAK_LOG);
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level, boolean diagonal) {

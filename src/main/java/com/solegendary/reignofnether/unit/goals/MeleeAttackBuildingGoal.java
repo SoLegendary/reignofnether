@@ -73,7 +73,7 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
 
                     AttackerUnit unit = (AttackerUnit) mob;
                     ticksToNextBlockBreak = unit.getAttackCooldown();
-                    double damageFloat = unit.getUnitAttackDamage() * buildingTarget.MELEE_DAMAGE_MULTIPLIER;
+                    double damageFloat = unit.getUnitAttackDamage() * buildingTarget.getMeleeDamageMult();
                     if (unit instanceof IronGolemUnit)
                         damageFloat *= 2;
                     else if (unit instanceof HoglinUnit)

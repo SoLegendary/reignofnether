@@ -7,13 +7,13 @@ TODO bugs/features:
 
 BRIDGES
 
-- replace bridge blocvks with water if adjacent to water as well or currents form and trap units
-- raise health and/or damage resistance massively
-- dotted line pattern on planks instead of fences as initial build blocks
-- exclude bridges from minimap entirely
-- cant repair bridges on multiplayer
-- don't replace fences with liquid
-
+- [TEST] replace bridge blocks with water if adjacent to water as well or currents form and trap units
+- [TEST] raise health and/or damage resistance massively
+- [TEST] dotted line pattern on planks instead of fences as initial build blocks
+- [TEST] exclude bridges from minimap entirely
+- [TEST] cant repair bridges - test that multiple players can repair the same bridge at the same time and it subtracts their resources
+- [TEST] don't replace fences with liquid
+- [TEST] dont cull air blocks inside of diagonal bridge blocks
 
 
 - attacking out of bastions is buggy - walls too high? - replace with walls instead
@@ -24,7 +24,7 @@ FOG:
         - loading and unloading sometimes updates more chunks
 
     - buildings partially in fog sometimes show negative hp on clientside
-        - fix buidlserverhealth and packets
+        - check serverBlocksPlaced and packets
 
     - buildings disappear even when fully lit up (inconsistent, triggered by panning away and back)
 
@@ -37,7 +37,7 @@ BUGS:
     - logging in/out of the world re-saves the blocks...
         - apply the same block-faking logic to all of these chunks
     - existing buildings partially in fog are VERY buggy when fog is turned on
-        - disable toggling fog mid-game
+        - disable toggling fog mid-game?
 
 
 

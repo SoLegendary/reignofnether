@@ -149,6 +149,8 @@ public abstract class Building {
         }
     }
 
+    public float getMeleeDamageMult() { return MELEE_DAMAGE_MULTIPLIER; }
+
     public Faction getFaction() {return Faction.NONE;}
 
     // fully repairs and rebuilds all the blocks in the building
@@ -281,16 +283,16 @@ public abstract class Building {
     // place blocks according to the following rules:
     // - block must be connected to something else (not air)
     // - block must be the lowest Y value possible
-    private void buildNextBlock(ServerLevel level) {
+    private void buildNextBlock(ServerLevel level, String builderName) {
 
         // if the building is already constructed then start subtracting resources for repairs
         if (isBuilt) {
-            if (!ResourcesServerEvents.canAfford(ownerName, ResourceName.WOOD, 1)) {
-                ResourcesClientboundPacket.warnInsufficientResources(ownerName, true, false, true);
+            if (!ResourcesServerEvents.canAfford(builderName, ResourceName.WOOD, 1)) {
+                ResourcesClientboundPacket.warnInsufficientResources(builderName, true, false, true);
                 return;
             }
             else
-                ResourcesServerEvents.addSubtractResources(new Resources(ownerName,0,-1,0));
+                ResourcesServerEvents.addSubtractResources(new Resources(builderName,0,-1,0));
         }
 
         ArrayList<BuildingBlock> unplacedBlocks = new ArrayList<>(blocks.stream().filter(
@@ -535,7 +537,8 @@ public abstract class Building {
         }
         else {
             ServerLevel serverLevel = (ServerLevel) tickLevel;
-            int builderCount = getBuilders(serverLevel).size();
+            ArrayList<WorkerUnit> workerUnits = getBuilders(serverLevel);
+            int builderCount = workerUnits.size();
 
             // place a block if the tick has run down
             if (blocksPlaced < blocksTotal && builderCount > 0) {
@@ -571,7 +574,8 @@ public abstract class Building {
 
                 if (msToNextBuild <= 0) {
                     msToNextBuild = msPerBuild;
-                    buildNextBlock(serverLevel);
+                    String builderName = ((Unit) workerUnits.get(new Random().nextInt(builderCount))).getOwnerName();
+                    buildNextBlock(serverLevel, builderName);
                 }
             } else {
                 this.ticksToExtinguish = 0;

@@ -20,12 +20,17 @@ public abstract class AbstractBridge extends Building {
 
     public final boolean isDiagonal;
 
+    public final float MELEE_DAMAGE_MULTIPLIER = 0.05f;
+
     public AbstractBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName, boolean isDiagonal, ArrayList<BuildingBlock> culledBlocks) {
         super(level, originPos, rotation, ownerName, culledBlocks,false);
         this.isDiagonal = isDiagonal;
     }
 
-    public static boolean shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level) {
+    @Override
+    public float getMeleeDamageMult() { return MELEE_DAMAGE_MULTIPLIER; }
+
+    public static boolean  shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level) {
         BlockState bs = b.getBlockState();
         boolean isFenceOrAir = b.getBlockState().getBlock() instanceof AirBlock ||
                 b.getBlockState().getBlock() instanceof FenceBlock;
@@ -36,6 +41,9 @@ public abstract class AbstractBridge extends Building {
         // if the block in the world matches this exactly, don't cull it, instead just consider it to be our block too
         BlockState bsWorld = level.getBlockState(bp);
         if (bsWorld.equals(bs))
+            return false;
+
+        if ((bsWorld.isAir() || bsWorld.getMaterial().isLiquid()) && !isFenceOrAir)
             return false;
 
         // cull if overlaps another bridge block that isn't built yet
@@ -56,19 +64,21 @@ public abstract class AbstractBridge extends Building {
         return blocks;
     }
 
-    private void replaceWithLiquidBelow(BlockPos bp) {
-        BlockState bs = level.getBlockState(bp);
-        boolean isFenceOrWall = bs.getBlock() instanceof FenceBlock;
-
-        BlockState bsBelow = level.getBlockState(bp.below());
-        if (bsBelow.getMaterial().isLiquid() && !isFenceOrWall)
-            level.setBlockAndUpdate(bp, bsBelow);
+    private void replaceWithLiquidBelow(BlockPos bp, BlockState bs) {
+        if (!(bs.getBlock() instanceof FenceBlock)) {
+            for (BlockPos bpAdj : List.of(bp.below(), bp.north(), bp.south(), bp.east(), bp.west())) {
+                BlockState bsAdj = level.getBlockState(bpAdj);
+                if (bsAdj.getMaterial().isLiquid())
+                    level.setBlockAndUpdate(bp, bsAdj);
+            }
+        }
     }
 
     @Override
     public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks) {
+        BlockState bs = level.getBlockState(pos);
         super.onBlockBreak(level, pos, breakBlocks);
-        replaceWithLiquidBelow(pos);
+        replaceWithLiquidBelow(pos, bs);
     }
 
     @Override
@@ -77,6 +87,6 @@ public abstract class AbstractBridge extends Building {
         for (BuildingBlock bb : blocks) // need to check first here since we already destroyed the level blocks
             if (!(bb.getBlockState().getBlock() instanceof FenceBlock) &&
                 !(bb.getBlockState().getBlock() instanceof AirBlock))
-                replaceWithLiquidBelow(bb.getBlockPos());
+                replaceWithLiquidBelow(bb.getBlockPos(), bb.getBlockState());
     }
 }

@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.Button;
@@ -355,7 +356,7 @@ public class MinimapClientEvents {
         // draw buildings
         for (Building building : BuildingClientEvents.getBuildings()) {
 
-            if (!building.isExploredClientside)
+            if (!building.isExploredClientside || building instanceof AbstractBridge)
                 continue;
 
             int xc = building.originPos.getX() + (BUILDING_RADIUS / 2);

@@ -207,6 +207,7 @@ public class BuildingUtils {
     }
 
     // returns whether the given pos is part of ANY building in the level
+    // WARNING: very processing expensive!
     public static boolean isPosPartOfAnyBuilding(boolean isClientSide, BlockPos bp, boolean onlyPlacedBlocks) {
         List<Building> buildings;
         if (isClientSide)

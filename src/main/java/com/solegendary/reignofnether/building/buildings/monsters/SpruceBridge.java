@@ -49,7 +49,7 @@ public class SpruceBridge extends AbstractBridge {
         this.popSupply = cost.population;
         this.buildTimeModifier = 1.0f;
 
-        this.startingBlockTypes.add(Blocks.DARK_OAK_FENCE);
+        this.startingBlockTypes.add(Blocks.SPRUCE_LOG);
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level, boolean diagonal) {
