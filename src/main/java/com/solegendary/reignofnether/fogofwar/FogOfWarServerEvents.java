@@ -57,12 +57,8 @@ public class FogOfWarServerEvents {
                     BlockState bs = serverLevel.getBlockState(bp);
                     BlockState bsAbove = serverLevel.getBlockState(bp.above());
 
-                    if (bs.getBlock() instanceof LeavesBlock ||
-                        (!bs.getMaterial().getColor().equals(MaterialColor.PLANT) &&
-                        !bsAbove.getMaterial().getColor().equals(MaterialColor.PLANT))) {
-                        serverLevel.setBlockAndUpdate(bp, Blocks.BEDROCK.defaultBlockState());
-                        serverLevel.setBlockAndUpdate(bp, bs);
-                    }
+                    serverLevel.setBlockAndUpdate(bp, Blocks.BEDROCK.defaultBlockState());
+                    serverLevel.setBlockAndUpdate(bp, bs);
                 }
             }
         }
