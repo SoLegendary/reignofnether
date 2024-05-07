@@ -5,38 +5,21 @@ TODO bugs/features:
 - workers are not marked as idle until 15s after stopping gathering
 - turning on fog of war causes a crash when optifine is installed
 
-BRIDGES
 
-- [TEST] replace bridge blocks with water if adjacent to water as well or currents form and trap units
-- [TEST] raise health and/or damage resistance massively
-- [TEST] dotted line pattern on planks instead of fences as initial build blocks
-- [TEST] exclude bridges from minimap entirely
-- [TEST] cant repair bridges - test that multiple players can repair the same bridge at the same time and it subtracts their resources
-- [TEST] don't replace fences with liquid
-- [TEST] dont cull air blocks inside of diagonal bridge blocks
+- replace bridge blocks in faked FrozenChunks with water or lava as appropriate
+- fix shadows/lighing bugs appearing in frozenchunks
+- prevent leaves decaying when near nether wart blocks
 
-
-FOG:
-    - patches of nether, buildings, etc. are still visible even in fully loaded chunks
-        - loading and unloading sometimes updates more chunks
-
-    - buildings partially in fog sometimes show negative hp on clientside
-        - check serverBlocksPlaced and packets
-
-    - buildings disappear even when fully lit up (inconsistent, triggered by panning away and back)
-
+TEST: disappearing buildings in faked frozenchunks
 
 BUGS:
     - stop grass breaking from loadBlocks() - same with PORTALS
         - FogOfWarClientEvents.syncClientBlocks
-            - temporary solution in place: just don't replace 2+ high plant blocks...
-            - this hack solution stops grass blocks below plants being updated
+            - how to do 2-high plants?
     - logging in/out of the world re-saves the blocks...
         - apply the same block-faking logic to all of these chunks
     - existing buildings partially in fog are VERY buggy when fog is turned on
         - disable toggling fog mid-game?
-
-
 
 TESTING STEPS:
     1. Turn on fog, start players as Piglins away from each other

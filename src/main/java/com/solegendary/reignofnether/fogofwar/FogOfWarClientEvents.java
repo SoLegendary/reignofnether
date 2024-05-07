@@ -5,9 +5,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -16,7 +14,6 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.commands.Commands;
@@ -28,8 +25,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.ChunkEvent;
@@ -40,7 +35,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
-import static net.minecraft.util.Mth.floor;
 
 public class FogOfWarClientEvents {
     public static final float BRIGHT = 1.0f;
@@ -340,6 +334,7 @@ public class FogOfWarClientEvents {
 
     // triggered when a chunk goes from bright to dark
     public static void onChunkUnexplore(ChunkPos cpos) {
+        frozenChunks.removeIf(fc -> fc.removeOnExplore && MC.level.getChunk(fc.origin).getPos().equals(cpos));
         for (FrozenChunk frozenChunk : frozenChunks)
             if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos) && MC.level.isLoaded(frozenChunk.origin))
                 frozenChunk.saveBlocks(); // only save blocks with faked chunks for NEW frozen chunks
@@ -348,10 +343,10 @@ public class FogOfWarClientEvents {
     @SubscribeEvent
     public static void onChunkLoad(ChunkEvent.Load evt) {
         for (FrozenChunk fc : frozenChunks)
-            if (fc.attemptedUnloadedSave && evt.getLevel().isClientSide() &&
+            if (fc.blocks.isEmpty() && evt.getLevel().isClientSide() &&
                 evt.getChunk().getPos().getWorldPosition().getX() == fc.origin.getX() &&
                 evt.getChunk().getPos().getWorldPosition().getZ() == fc.origin.getZ())
-                    fc.saveBlocks();
+                    fc.saveFakeBlocks();
     }
 
     public static void setBuildingDestroyedServerside(BlockPos buildingOrigin) {
@@ -399,20 +394,18 @@ public class FogOfWarClientEvents {
                     unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
     }
 
-    /*
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (MC.level != null)
-                MC.level.setBlockAndUpdate(CursorClientEvents.getPreselectedBlockPos(), Blocks.BARREL.defaultBlockState());
+                MC.level.setBlockAndUpdate(CursorClientEvents.getPreselectedBlockPos().above(), Blocks.BARREL.defaultBlockState());
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (MC.level != null)
-                FrozenChunkServerboundPacket.syncServerBlocks(CursorClientEvents.getPreselectedBlockPos());
+                FrozenChunkServerboundPacket.syncServerBlocks(CursorClientEvents.getPreselectedBlockPos().offset(-8,-8,-8));
         }
     }
-     */
 
     /*
     @SubscribeEvent

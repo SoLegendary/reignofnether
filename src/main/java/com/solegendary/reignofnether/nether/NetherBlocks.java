@@ -43,6 +43,14 @@ public class NetherBlocks {
         return false;
     }
 
+    public static boolean isNetherPlantBlock(Level level, BlockPos bp) {
+        BlockState bs = level.getBlockState(bp);
+        for (Map.Entry<Block, List<Block>> entrySet : PLANT_MAPPINGS.entrySet())
+            if (!bs.isAir() && bs.getBlock().equals(entrySet.getKey()))
+                return true;
+        return false;
+    }
+
     // returns the first block in the list of overworld blocks for a nether block mapping
     public static BlockState getOverworldBlock(Level level, BlockPos overworldBp) {
         BlockState netherBs = level.getBlockState(overworldBp);

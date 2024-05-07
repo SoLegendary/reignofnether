@@ -613,7 +613,7 @@ public abstract class Building {
         if (extendedRange) {
             if (this instanceof NetherConvertingBuilding netherConvertingBuilding) {
                 double range = netherConvertingBuilding.getMaxRange();
-                addedRange = 16 * Math.ceil(Math.abs(range/16)); // round up to next multiple of 16
+                addedRange = (16 * Math.ceil(Math.abs(range/16))) + 16; // round up to next multiple of 16
             } else if (this instanceof AbstractStockpile) {
                 addedRange = 32;
             }

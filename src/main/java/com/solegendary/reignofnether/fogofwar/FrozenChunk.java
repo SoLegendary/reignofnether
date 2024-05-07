@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.fogofwar;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -10,6 +11,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
+import java.util.List;
 
 // FrozenChunks are (16x16x16) chunks created when any serverside block placement happens in
 // a dark chunk and should not be seen on clients - eg. building placement by an opponent.
@@ -27,7 +29,6 @@ public class FrozenChunk {
     public ArrayList<Pair<BlockPos, BlockState>> blocks = new ArrayList<>();
     public Building building;
     public boolean removeOnExplore = false;
-    public boolean attemptedUnloadedSave = false;
     public boolean hasFakeBlocks = false;
 
     private boolean saveFakeBuildingBlocks = false;
@@ -37,7 +38,8 @@ public class FrozenChunk {
     public FrozenChunk(BlockPos origin, Building building) {
         this.origin = origin;
         this.building = building;
-        saveBlocks();
+        if (isFullyLoaded())
+            saveBlocks();
     }
 
     // Match ClientLevel blocks with ServerLevel blocks
@@ -50,57 +52,69 @@ public class FrozenChunk {
         if (MC.level == null)
             return;
 
-
-
         for (int x = 0; x <= 16; x++) {
             for (int y = 0; y <= 16; y++) {
                 for (int z = 0; z <= 16; z++) {
                     BlockPos bp = origin.offset(x,y,z);
+                    BlockState bs = MC.level.getBlockState(bp);
+                    blocks.add(new Pair<>(bp, MC.level.getBlockState(bp)));
+                }
+            }
+        }
+        hasFakeBlocks = false;
+    }
 
-                    // if we tried to save this previously but it was unloaded, so manually replace certain blocks:
-                    // 1. Scaffolding -> Air
-                    // 2. Magma/Cobble -> Coal Ore
-                    // 3. Nether Blocks -> Overworld equivalent
-                    // 4. Blocks that are a part of the parent building -> Air
-                    if (attemptedUnloadedSave) {
-                        saveFakeBuildingBlocks = true;
-                        BlockState bs = MC.level.getBlockState(bp);
-                        String blockName = bs.getBlock().getName().getString().toLowerCase();
-                        if (blockName.equals("scaffolding")) {
-                            blocks.add(new Pair<>(bp, Blocks.AIR.defaultBlockState()));
-                        } else if (blockName.equals("magma_block") ||
-                                blockName.equals("cobblestone") ) {
-                            blocks.add(new Pair<>(bp, Blocks.COAL_ORE.defaultBlockState()));
-                        } else if (blockName.equals("dirt")) {
-                            blocks.add(new Pair<>(bp, Blocks.GRASS_BLOCK.defaultBlockState()));
-                        } else if (blockName.equals("obsidian")) {
-                            blocks.add(new Pair<>(bp, Blocks.WATER.defaultBlockState()));
-                        } else if (NetherBlocks.isNetherBlock(MC.level, bp)) {
-                            BlockState overworldBs = NetherBlocks.getOverworldBlock(MC.level, bp);
-                            if (overworldBs != null)
-                                blocks.add(new Pair<>(bp, overworldBs));
+    // Like saveBlocks() but replace certain blocks to obscure the real state:
+    // 1. Scaffolding -> Air
+    // 2. Magma/Cobble -> Coal Ore
+    // 3. Nether Blocks -> Overworld equivalent
+    // 4. Blocks that are a part of the parent building -> Air
+    public void saveFakeBlocks() {
+        if (MC.level == null)
+            return;
+
+        ArrayList<BuildingBlock> bbs = new ArrayList<>();
+        for (BuildingBlock bb : building.getBlocks())
+            if (bb.getBlockPos().getX() >= origin.getX() && bb.getBlockPos().getX() < origin.getX() + 16 &&
+                bb.getBlockPos().getY() >= origin.getY() && bb.getBlockPos().getY() < origin.getY() + 16 &&
+                bb.getBlockPos().getZ() >= origin.getZ() && bb.getBlockPos().getZ() < origin.getZ() + 16 &&
+                !bb.getBlockState().isAir())
+                bbs.add(bb);
+
+        for (int x = 0; x <= 16; x++) {
+            for (int y = 0; y <= 16; y++) {
+                outerloop:
+                for (int z = 0; z <= 16; z++) {
+                    BlockPos bp = origin.offset(x,y,z);
+                    BlockState bs = MC.level.getBlockState(bp);
+
+                    for (BuildingBlock bb : bbs) {
+                        if (bb.getBlockPos().equals(bp)) {
+                            blocks.add(new Pair<>(bb.getBlockPos(), Blocks.AIR.defaultBlockState()));
+                            continue outerloop;
                         }
-                        hasFakeBlocks = true;
-                    } else {
-                        BlockState bs = MC.level.getBlockState(bp);
-                        blocks.add(new Pair<>(bp, MC.level.getBlockState(bp)));
-                        hasFakeBlocks = false;
+                    }
+                    String blockName = bs.getBlock().getName().getString().toLowerCase();
+                    if (blockName.equals("scaffolding")) {
+                        blocks.add(new Pair<>(bp, Blocks.AIR.defaultBlockState()));
+                    } else if (blockName.equals("magma_block") ||
+                            blockName.equals("cobblestone")) {
+                        blocks.add(new Pair<>(bp, Blocks.COAL_ORE.defaultBlockState()));
+                    } else if (blockName.equals("dirt") ||
+                            blockName.equals("netherrack")) {
+                        blocks.add(new Pair<>(bp, Blocks.GRASS_BLOCK.defaultBlockState()));
+                    } else if (blockName.equals("obsidian")) {
+                        blocks.add(new Pair<>(bp, Blocks.WATER.defaultBlockState()));
+                    } else if (NetherBlocks.isNetherBlock(MC.level, bp) ||
+                            NetherBlocks.isNetherPlantBlock(MC.level, bp)) {
+                        BlockState overworldBs = NetherBlocks.getOverworldBlock(MC.level, bp);
+                        if (overworldBs != null)
+                            blocks.add(new Pair<>(bp, overworldBs));
                     }
                 }
             }
         }
-        // do this outside the loop to avoid nesting loops
-        if (saveFakeBuildingBlocks) {
-            for (BuildingBlock bb : building.getBlocks())
-                blocks.add(new Pair<>(bb.getBlockPos(), Blocks.AIR.defaultBlockState()));
-            saveFakeBuildingBlocks = false;
-        }
-        if (this.blocks.isEmpty()) {
-            attemptedUnloadedSave = true;
-            System.out.println("attempted unloaded save at: " + origin);
-        } else {
-            attemptedUnloadedSave = false;
-        }
+        hasFakeBlocks = true;
     }
 
     // updates the ClientLevel with the blocks saved
