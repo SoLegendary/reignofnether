@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -57,6 +58,12 @@ public abstract class AbstractArrowMixin extends Projectile {
 
             if (garr != null ) {
                 Building building = (Building) garr;
+
+                BlockPos bp = this.blockPosition();
+                boolean isPosInsideBuildingExt =
+                        bp.getX() <= building.maxCorner.getX() + 1 && bp.getX() >= building.minCorner.getX() - 1 &&
+                        bp.getY() <= building.maxCorner.getY() + 1 && bp.getY() >= building.minCorner.getY() - 1 &&
+                        bp.getZ() <= building.maxCorner.getZ() + 1 && bp.getZ() >= building.minCorner.getZ() - 1;
 
                 // only have nophysics at a high Y value so we can still attack enemies at the base of the building
                 if (building.isPosInsideBuilding(this.blockPosition()) &&

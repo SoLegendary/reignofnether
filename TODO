@@ -16,9 +16,6 @@ BRIDGES
 - [TEST] dont cull air blocks inside of diagonal bridge blocks
 
 
-- attacking out of bastions is buggy - walls too high? - replace with walls instead
-- replace obsidian with water for fake FrozenChunks
-
 FOG:
     - patches of nether, buildings, etc. are still visible even in fully loaded chunks
         - loading and unloading sometimes updates more chunks
