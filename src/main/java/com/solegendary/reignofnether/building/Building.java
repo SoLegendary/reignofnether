@@ -305,24 +305,27 @@ public abstract class Building {
         // iterate through unplaced blocks and start at the bottom Y values
         // prioritise placing blocks that are connected to other blocks (nonfloating)
         int nonFloatingBlocks = 0;
-        for (BuildingBlock block : unplacedBlocks) {
-            BlockPos bp = block.getBlockPos();
-            if ((bp.getY() <= minY) &&
-                    (!level.getBlockState(bp.below()).isAir() ||
-                            !level.getBlockState(bp.east()).isAir() ||
-                            !level.getBlockState(bp.west()).isAir() ||
-                            !level.getBlockState(bp.south()).isAir() ||
-                            !level.getBlockState(bp.north()).isAir() ||
-                            !level.getBlockState(bp.above()).isAir())) {
-                nonFloatingBlocks += 1;
-                validBlocks.add(block);
+
+        if (!(this instanceof AbstractBridge)) {
+            for (BuildingBlock block : unplacedBlocks) {
+                BlockPos bp = block.getBlockPos();
+                if ((bp.getY() <= minY) &&
+                        (!level.getBlockState(bp.below()).isAir() ||
+                                !level.getBlockState(bp.east()).isAir() ||
+                                !level.getBlockState(bp.west()).isAir() ||
+                                !level.getBlockState(bp.south()).isAir() ||
+                                !level.getBlockState(bp.north()).isAir() ||
+                                !level.getBlockState(bp.above()).isAir())) {
+                    nonFloatingBlocks += 1;
+                    validBlocks.add(block);
+                }
             }
         }
         // if there were no nonFloating blocks then allow floating blocks
         if (nonFloatingBlocks == 0) {
             for (BuildingBlock block : unplacedBlocks) {
                 BlockPos bp = block.getBlockPos();
-                if (bp.getY() <= minY)
+                if (bp.getY() <= minY || this instanceof AbstractBridge)
                     validBlocks.add(block);
             }
         }
