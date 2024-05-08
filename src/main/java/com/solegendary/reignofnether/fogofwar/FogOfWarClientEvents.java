@@ -342,11 +342,12 @@ public class FogOfWarClientEvents {
 
     @SubscribeEvent
     public static void onChunkLoad(ChunkEvent.Load evt) {
-        for (FrozenChunk fc : frozenChunks)
+        for (FrozenChunk fc : frozenChunks) {
             if (fc.blocks.isEmpty() && evt.getLevel().isClientSide() &&
-                evt.getChunk().getPos().getWorldPosition().getX() == fc.origin.getX() &&
-                evt.getChunk().getPos().getWorldPosition().getZ() == fc.origin.getZ())
-                    fc.saveFakeBlocks();
+                    evt.getChunk().getPos().getWorldPosition().getX() == fc.origin.getX() &&
+                    evt.getChunk().getPos().getWorldPosition().getZ() == fc.origin.getZ())
+                fc.saveFakeBlocks();
+        }
     }
 
     public static void setBuildingDestroyedServerside(BlockPos buildingOrigin) {
@@ -394,18 +395,20 @@ public class FogOfWarClientEvents {
                     unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
     }
 
+    /*
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (MC.level != null)
-                MC.level.setBlockAndUpdate(CursorClientEvents.getPreselectedBlockPos().above(), Blocks.BARREL.defaultBlockState());
+                MC.level.setBlockAndUpdate(CursorClientEvents.getPreselectedBlockPos().above(), Blocks.SUNFLOWER.defaultBlockState());
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (MC.level != null)
                 FrozenChunkServerboundPacket.syncServerBlocks(CursorClientEvents.getPreselectedBlockPos().offset(-8,-8,-8));
         }
     }
+     */
 
     /*
     @SubscribeEvent

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.fogofwar;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -54,18 +55,19 @@ public class FogOfWarServerEvents {
         ArrayList<Pair<BlockPos, BlockState>> plants = new ArrayList<>();
 
         for (int x = 0; x < 16; x++) {
-            for (int y = 15; y >= 0; y--) {
+            for (int y = 0; y < 16; y++) {
                 for (int z = 0; z < 16; z++) {
                     BlockPos bp = renderChunkOrigin.offset(x,y,z);
                     BlockState bs = serverLevel.getBlockState(bp);
-                    if (bs.getBlock() instanceof RootsBlock ||
-                        bs.getBlock() instanceof TallGrassBlock) {
+                    if (bs.getMaterial() == Material.PLANT ||
+                        bs.getMaterial() == Material.REPLACEABLE_PLANT) {
                         plants.add(new Pair<>(bp, bs));
-                        serverLevel.destroyBlock(bp, false);
                     }
                 }
             }
         }
+        for (Pair<BlockPos, BlockState> plant : plants)
+            serverLevel.setBlockAndUpdate(plant.getFirst(), Blocks.AIR.defaultBlockState());
 
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 16; y++) {
@@ -80,5 +82,6 @@ public class FogOfWarServerEvents {
         plants.sort(Comparator.comparing(p -> ((Pair<BlockPos, BlockState>) p).getFirst().getY()).reversed());
         for (Pair<BlockPos, BlockState> plant : plants)
             serverLevel.setBlockAndUpdate(plant.getFirst(), plant.getSecond());
+
     }
 }

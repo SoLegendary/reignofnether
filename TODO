@@ -6,20 +6,21 @@ TODO bugs/features:
 - turning on fog of war causes a crash when optifine is installed
 
 
+TODO:
 - replace bridge blocks in faked FrozenChunks with water or lava as appropriate
 - fix shadows/lighing bugs appearing in frozenchunks
 - prevent leaves decaying when near nether wart blocks
 
-TEST: disappearing buildings in faked frozenchunks
-
+TEST:
+    - disappearing buildings in faked frozenchunks
+    - turn on fog when buildings are partially explored
+    - exploring fake/nonfake unloaded frozen chunks
 BUGS:
     - stop grass breaking from loadBlocks() - same with PORTALS
         - FogOfWarClientEvents.syncClientBlocks
             - how to do 2-high plants?
     - logging in/out of the world re-saves the blocks...
         - apply the same block-faking logic to all of these chunks
-    - existing buildings partially in fog are VERY buggy when fog is turned on
-        - disable toggling fog mid-game?
 
 TESTING STEPS:
     1. Turn on fog, start players as Piglins away from each other

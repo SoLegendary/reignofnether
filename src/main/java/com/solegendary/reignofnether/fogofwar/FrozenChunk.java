@@ -5,10 +5,12 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.nether.NetherBlocks;
+import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +33,6 @@ public class FrozenChunk {
     public boolean removeOnExplore = false;
     public boolean hasFakeBlocks = false;
 
-    private boolean saveFakeBuildingBlocks = false;
-
     private static final Minecraft MC = Minecraft.getInstance();
 
     public FrozenChunk(BlockPos origin, Building building) {
@@ -43,7 +43,23 @@ public class FrozenChunk {
     }
 
     // Match ClientLevel blocks with ServerLevel blocks
+    // need to mute any plant or portal locations as they will be broken and replaced
     public void syncServerBlocks(BlockPos renderChunkOrigin) {
+        if (MC.level != null) {
+            for (int x = 0; x < 16; x++) {
+                for (int y = 0; y < 16; y++) {
+                    for (int z = 0; z < 16; z++) {
+                        BlockPos bp = renderChunkOrigin.offset(x,y,z);
+                        BlockState bs = MC.level.getBlockState(bp);
+                        if (bs.getMaterial() == Material.PORTAL ||
+                            bs.getMaterial() == Material.PLANT ||
+                            bs.getMaterial() == Material.REPLACEABLE_PLANT) {
+                            SoundClientEvents.mutedBps.add(bp);
+                        }
+                    }
+                }
+            }
+        }
         FrozenChunkServerboundPacket.syncServerBlocks(renderChunkOrigin);
     }
 

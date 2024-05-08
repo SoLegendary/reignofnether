@@ -7,7 +7,12 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 
+import java.util.ArrayList;
+
 public class SoundClientEvents {
+
+    // mute the next sound played at each pos in ClientLevelMixin, then remove it from the list
+    public static ArrayList<BlockPos> mutedBps = new ArrayList<>();
 
     public static void playSoundForAction(SoundAction soundAction, BlockPos bp) {
         SoundEvent soundEvent = getSoundEvent(soundAction);
