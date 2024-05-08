@@ -16,9 +16,6 @@ TEST:
     - turn on fog when buildings are partially explored
     - exploring fake/nonfake unloaded frozen chunks
 BUGS:
-    - stop grass breaking from loadBlocks() - same with PORTALS
-        - FogOfWarClientEvents.syncClientBlocks
-            - how to do 2-high plants?
     - logging in/out of the world re-saves the blocks...
         - apply the same block-faking logic to all of these chunks
 
