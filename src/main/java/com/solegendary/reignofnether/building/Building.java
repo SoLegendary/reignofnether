@@ -376,8 +376,8 @@ public abstract class Building {
         Collections.shuffle(placedBlocks);
         for (int i = 0; i < amount && i < placedBlocks.size(); i++) {
             BlockPos bp = placedBlocks.get(i).getBlockPos();
-            getLevel().destroyBlock(bp, false);
             this.onBlockBreak((ServerLevel) getLevel(), bp, false);
+            getLevel().destroyBlock(bp, false);
         }
         if (amount > 0)
             AttackWarningClientboundPacket.sendWarning(ownerName, BuildingUtils.getCentrePos(getBlocks()));
