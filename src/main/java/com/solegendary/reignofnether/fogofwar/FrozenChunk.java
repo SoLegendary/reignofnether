@@ -45,21 +45,6 @@ public class FrozenChunk {
     // Match ClientLevel blocks with ServerLevel blocks
     // need to mute any plant or portal locations as they will be broken and replaced
     public void syncServerBlocks(BlockPos renderChunkOrigin) {
-        if (MC.level != null) {
-            for (int x = 0; x < 16; x++) {
-                for (int y = 0; y < 16; y++) {
-                    for (int z = 0; z < 16; z++) {
-                        BlockPos bp = renderChunkOrigin.offset(x,y,z);
-                        BlockState bs = MC.level.getBlockState(bp);
-                        if (bs.getMaterial() == Material.PORTAL ||
-                            bs.getMaterial() == Material.PLANT ||
-                            bs.getMaterial() == Material.REPLACEABLE_PLANT) {
-                            SoundClientEvents.mutedBps.add(bp);
-                        }
-                    }
-                }
-            }
-        }
         FrozenChunkServerboundPacket.syncServerBlocks(renderChunkOrigin);
     }
 
@@ -106,7 +91,10 @@ public class FrozenChunk {
 
                     for (BuildingBlock bb : bbs) {
                         if (bb.getBlockPos().equals(bp)) {
-                            blocks.add(new Pair<>(bb.getBlockPos(), Blocks.AIR.defaultBlockState()));
+                            if (building instanceof AbstractBridge)
+                                blocks.add(new Pair<>(bb.getBlockPos(), Blocks.WATER.defaultBlockState()));
+                            else
+                                blocks.add(new Pair<>(bb.getBlockPos(), Blocks.AIR.defaultBlockState()));
                             continue outerloop;
                         }
                     }

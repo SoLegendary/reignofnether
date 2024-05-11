@@ -3,12 +3,10 @@ package com.solegendary.reignofnether.fogofwar;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -60,7 +58,9 @@ public class FogOfWarServerEvents {
                     BlockPos bp = renderChunkOrigin.offset(x,y,z);
                     BlockState bs = serverLevel.getBlockState(bp);
                     if (bs.getMaterial() == Material.PLANT ||
-                        bs.getMaterial() == Material.REPLACEABLE_PLANT) {
+                        bs.getMaterial() == Material.REPLACEABLE_PLANT ||
+                        bs.getMaterial() == Material.REPLACEABLE_WATER_PLANT ||
+                        bs.getMaterial() == Material.REPLACEABLE_FIREPROOF_PLANT) {
                         plants.add(new Pair<>(bp, bs));
                     }
                 }
@@ -83,5 +83,6 @@ public class FogOfWarServerEvents {
         for (Pair<BlockPos, BlockState> plant : plants)
             serverLevel.setBlockAndUpdate(plant.getFirst(), plant.getSecond());
 
+        FrozenChunkClientboundPacket.unmuteChunks();
     }
 }

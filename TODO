@@ -7,17 +7,16 @@ TODO bugs/features:
 
 
 TODO:
-- replace bridge blocks in faked FrozenChunks with water or lava as appropriate
-- fix shadows/lighing bugs appearing in frozenchunks
 - prevent leaves decaying when near nether wart blocks
+- make nether blocks turn back into overworld blocks when portals are removed
 
 TEST:
-    - disappearing buildings in faked frozenchunks
-    - turn on fog when buildings are partially explored
-    - exploring fake/nonfake unloaded frozen chunks
+    - night warping should still work from unexplored buildings and stop if they are destroyed out of view
 BUGS:
     - logging in/out of the world re-saves the blocks...
         - apply the same block-faking logic to all of these chunks
+
+    - loading faked frozen chunks causes some bleed through in building blocks sometimes
 
 TESTING STEPS:
     1. Turn on fog, start players as Piglins away from each other

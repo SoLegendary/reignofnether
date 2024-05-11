@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
@@ -395,7 +396,11 @@ public class FogOfWarClientEvents {
                     unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
     }
 
-    /*
+    public static void unmuteChunks() {
+        SoundClientEvents.mutedBps.clear();
+    }
+
+
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         // select a moused over entity by left clicking it
@@ -408,7 +413,7 @@ public class FogOfWarClientEvents {
                 FrozenChunkServerboundPacket.syncServerBlocks(CursorClientEvents.getPreselectedBlockPos().offset(-8,-8,-8));
         }
     }
-     */
+
 
     /*
     @SubscribeEvent
