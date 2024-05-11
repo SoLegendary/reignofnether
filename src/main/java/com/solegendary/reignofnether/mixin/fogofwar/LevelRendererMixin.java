@@ -96,7 +96,7 @@ public abstract class LevelRendererMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void compileChunks(Camera pCamera, CallbackInfo ci) {
+    private void compileChunks(Camera pCamera, CallbackInfo ci) throws InterruptedException {
 
         // hiding leaves around cursor
         if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR &&
@@ -153,7 +153,12 @@ public abstract class LevelRendererMixin {
                 if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
                     !isInBrightChunk(frozenChunk.origin) &&
                     !loadedFcOrigins.contains(frozenChunk.origin)) {
-                    //System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
+                    int i = 0;
+                    while (frozenChunk.isSaveInProgress() && i < 1000) {
+                        i += 1;
+                        Thread.sleep(1);
+                    }
+                    System.out.println("loaded frozen blocks at: " + frozenChunk.origin + ", waited for (ms): " + i);
                     frozenChunk.loadBlocks();
                     loadedFcOrigins.add(frozenChunk.origin);
                 }
@@ -165,6 +170,12 @@ public abstract class LevelRendererMixin {
                 if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
                     !isInBrightChunk(frozenChunk.origin) &&
                     !loadedFcOrigins.contains(frozenChunk.origin)) {
+                    int i = 0;
+                    while (frozenChunk.isSaveInProgress() && i < 1000) {
+                        i += 1;
+                        Thread.sleep(1);
+                    }
+                    System.out.println("loaded (faked) frozen blocks at: " + frozenChunk.origin + ", waited for (ms): " + i);
                     frozenChunk.loadBlocks();
                 }
             }

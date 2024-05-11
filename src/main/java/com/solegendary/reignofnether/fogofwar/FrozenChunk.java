@@ -32,6 +32,7 @@ public class FrozenChunk {
     public Building building;
     public boolean removeOnExplore = false;
     public boolean hasFakeBlocks = false;
+    private boolean saveInProgress = false;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -40,6 +41,10 @@ public class FrozenChunk {
         this.building = building;
         if (isFullyLoaded())
             saveBlocks();
+    }
+
+    public boolean isSaveInProgress() {
+        return saveInProgress;
     }
 
     // Match ClientLevel blocks with ServerLevel blocks
@@ -52,6 +57,7 @@ public class FrozenChunk {
     public void saveBlocks() {
         if (MC.level == null)
             return;
+        saveInProgress = true;
 
         for (int x = 0; x <= 16; x++) {
             for (int y = 0; y <= 16; y++) {
@@ -62,7 +68,10 @@ public class FrozenChunk {
                 }
             }
         }
+        System.out.println("completed saved blocks at: " + origin);
+
         hasFakeBlocks = false;
+        saveInProgress = false;
     }
 
     // Like saveBlocks() but replace certain blocks to obscure the real state:
@@ -74,6 +83,8 @@ public class FrozenChunk {
         if (MC.level == null)
             return;
 
+        saveInProgress = true;
+
         ArrayList<BuildingBlock> bbs = new ArrayList<>();
         for (BuildingBlock bb : building.getBlocks())
             if (bb.getBlockPos().getX() >= origin.getX() && bb.getBlockPos().getX() < origin.getX() + 16 &&
@@ -82,10 +93,10 @@ public class FrozenChunk {
                 !bb.getBlockState().isAir())
                 bbs.add(bb);
 
-        for (int x = 0; x <= 16; x++) {
-            for (int y = 0; y <= 16; y++) {
+        for (int x = 0; x < 16; x++) {
+            for (int y = 0; y < 16; y++) {
                 outerloop:
-                for (int z = 0; z <= 16; z++) {
+                for (int z = 0; z < 16; z++) {
                     BlockPos bp = origin.offset(x,y,z);
                     BlockState bs = MC.level.getBlockState(bp);
 
@@ -114,11 +125,15 @@ public class FrozenChunk {
                         BlockState overworldBs = NetherBlocks.getOverworldBlock(MC.level, bp);
                         if (overworldBs != null)
                             blocks.add(new Pair<>(bp, overworldBs));
+                    } else {
+                        blocks.add(new Pair<>(bp, MC.level.getBlockState(bp)));
                     }
                 }
             }
         }
         hasFakeBlocks = true;
+        saveInProgress = false;
+        System.out.println("completed saved (fake) blocks at: " + origin);
     }
 
     // updates the ClientLevel with the blocks saved
