@@ -32,6 +32,7 @@ import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -114,6 +115,8 @@ public class FogOfWarClientEvents {
                     building.freezeChunks(MC.player.getName().getString());
             } else {
                 frozenChunks.clear();
+                for (FrozenChunk frozenChunk : frozenChunks)
+                    FrozenChunkServerboundPacket.syncServerBlocks(frozenChunk.origin);
             }
         }
     }
@@ -346,8 +349,10 @@ public class FogOfWarClientEvents {
         for (FrozenChunk fc : frozenChunks) {
             if (fc.blocks.isEmpty() && evt.getLevel().isClientSide() &&
                     evt.getChunk().getPos().getWorldPosition().getX() == fc.origin.getX() &&
-                    evt.getChunk().getPos().getWorldPosition().getZ() == fc.origin.getZ())
+                    evt.getChunk().getPos().getWorldPosition().getZ() == fc.origin.getZ()) {
                 fc.saveFakeBlocks();
+                fc.loadBlocks();
+            }
         }
     }
 

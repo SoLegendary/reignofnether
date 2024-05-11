@@ -10,14 +10,16 @@ TODO:
 - prevent leaves decaying when near nether wart blocks
 - make nether blocks turn back into overworld blocks when portals are removed
 
+
 TEST:
     - night warping should still work from unexplored buildings and stop if they are destroyed out of view
+    - faking block saves on other buildings
+    - what happens if we have an explored but unloaded chunk that is then loaded
 BUGS:
-    - logging in/out of the world re-saves the blocks...
-        - apply the same block-faking logic to all of these chunks
-
-    - loading faked frozen chunks causes some bleed through in building blocks sometimes
-        - Is the Mixin loading it before its finished?
+    - logging in/out of the world should apply the same block-faking logic to all of these chunks
+    - shadows still appear under building blocks in dark chunks
+        - try to adapt updateChunkLighting into loadBlocks()?
+            - place and break a glowstone block on every lowest-Y-level building block in the chunk, then reload the blocks
 
 TESTING STEPS:
     1. Turn on fog, start players as Piglins away from each other

@@ -3,12 +3,14 @@ package com.solegendary.reignofnether.fogofwar;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
@@ -32,7 +34,7 @@ public class FrozenChunk {
     public Building building;
     public boolean removeOnExplore = false;
     public boolean hasFakeBlocks = false;
-    private boolean saveInProgress = false;
+    public boolean unsaved = true;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -41,10 +43,6 @@ public class FrozenChunk {
         this.building = building;
         if (isFullyLoaded())
             saveBlocks();
-    }
-
-    public boolean isSaveInProgress() {
-        return saveInProgress;
     }
 
     // Match ClientLevel blocks with ServerLevel blocks
@@ -57,21 +55,20 @@ public class FrozenChunk {
     public void saveBlocks() {
         if (MC.level == null)
             return;
-        saveInProgress = true;
 
         for (int x = 0; x <= 16; x++) {
             for (int y = 0; y <= 16; y++) {
                 for (int z = 0; z <= 16; z++) {
                     BlockPos bp = origin.offset(x,y,z);
                     BlockState bs = MC.level.getBlockState(bp);
-                    blocks.add(new Pair<>(bp, MC.level.getBlockState(bp)));
+                    saveBlock(bp, MC.level.getBlockState(bp), new ArrayList<>());
                 }
             }
         }
         System.out.println("completed saved blocks at: " + origin);
 
         hasFakeBlocks = false;
-        saveInProgress = false;
+        unsaved = false;
     }
 
     // Like saveBlocks() but replace certain blocks to obscure the real state:
@@ -82,8 +79,6 @@ public class FrozenChunk {
     public void saveFakeBlocks() {
         if (MC.level == null)
             return;
-
-        saveInProgress = true;
 
         ArrayList<BuildingBlock> bbs = new ArrayList<>();
         for (BuildingBlock bb : building.getBlocks())
@@ -103,36 +98,38 @@ public class FrozenChunk {
                     for (BuildingBlock bb : bbs) {
                         if (bb.getBlockPos().equals(bp)) {
                             if (building instanceof AbstractBridge)
-                                blocks.add(new Pair<>(bb.getBlockPos(), Blocks.WATER.defaultBlockState()));
+                                saveBlock(bb.getBlockPos(), Blocks.WATER.defaultBlockState(), bbs);
                             else
-                                blocks.add(new Pair<>(bb.getBlockPos(), Blocks.AIR.defaultBlockState()));
+                                saveBlock(bb.getBlockPos(), Blocks.AIR.defaultBlockState(), bbs);
                             continue outerloop;
                         }
                     }
                     String blockName = bs.getBlock().getName().getString().toLowerCase();
                     if (blockName.equals("scaffolding")) {
-                        blocks.add(new Pair<>(bp, Blocks.AIR.defaultBlockState()));
+                        saveBlock(bp, Blocks.AIR.defaultBlockState(), bbs);
                     } else if (blockName.equals("magma_block") ||
                             blockName.equals("cobblestone")) {
-                        blocks.add(new Pair<>(bp, Blocks.COAL_ORE.defaultBlockState()));
+                        saveBlock(bp, Blocks.COAL_ORE.defaultBlockState(), bbs);
                     } else if (blockName.equals("dirt") ||
                             blockName.equals("netherrack")) {
-                        blocks.add(new Pair<>(bp, Blocks.GRASS_BLOCK.defaultBlockState()));
+                        saveBlock(bp, Blocks.GRASS_BLOCK.defaultBlockState(), bbs);
                     } else if (blockName.equals("obsidian")) {
-                        blocks.add(new Pair<>(bp, Blocks.WATER.defaultBlockState()));
+                        saveBlock(bp, Blocks.WATER.defaultBlockState(), bbs);
+                    } else if (blockName.equals("nether portal")) {
+                        saveBlock(bp, Blocks.AIR.defaultBlockState(), bbs);
                     } else if (NetherBlocks.isNetherBlock(MC.level, bp) ||
                             NetherBlocks.isNetherPlantBlock(MC.level, bp)) {
                         BlockState overworldBs = NetherBlocks.getOverworldBlock(MC.level, bp);
                         if (overworldBs != null)
-                            blocks.add(new Pair<>(bp, overworldBs));
+                            saveBlock(bp, overworldBs, bbs);
                     } else {
-                        blocks.add(new Pair<>(bp, MC.level.getBlockState(bp)));
+                        saveBlock(bp, MC.level.getBlockState(bp), bbs);
                     }
                 }
             }
         }
         hasFakeBlocks = true;
-        saveInProgress = false;
+        unsaved = false;
         System.out.println("completed saved (fake) blocks at: " + origin);
     }
 
@@ -154,5 +151,9 @@ public class FrozenChunk {
                     if (!MC.level.isLoaded(origin.offset(x,y,z)))
                         return false;
         return true;
+    }
+    
+    private void saveBlock(BlockPos bp, BlockState bs, ArrayList<BuildingBlock> bbs) {
+        blocks.add(new Pair<>(bp, bs));
     }
 }
