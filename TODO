@@ -7,19 +7,22 @@ TODO bugs/features:
 
 
 TODO:
-- prevent leaves decaying when near nether wart blocks
-- make nether blocks turn back into overworld blocks when portals are removed
-
+- make nether blocks turn back into overworld blocks when portals are removed?
 
 
 TEST:
+
+
     - night warping should still work from unexplored buildings and stop if they are destroyed out of view
     - faking block saves on other buildings
-    - what happens if we have an explored but unloaded chunk that is then loaded
+    - check for bleed in some bits of frozenchunks (esp nether terrain) when rendering
+    - minimap shows unfrozen blocks being placed when out of direct camera view
 BUGS:
     - logging in/out of the world should apply the same block-faking logic to all of these chunks
-    - there is still bleed in some bits of frozenchunks when rendering
-    - minimap shows unfrozen blocks being placed when out of direct camera view
+    - turning on and off fog interactions with loaded, looking at and unloaded chunks
+
+    - loading a frozen chunk causes massive lag
+
 
 TESTING STEPS:
     1. Turn on fog, start players as Piglins away from each other

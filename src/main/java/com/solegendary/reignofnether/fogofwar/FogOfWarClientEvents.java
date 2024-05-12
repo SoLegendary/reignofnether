@@ -347,12 +347,15 @@ public class FogOfWarClientEvents {
     public static void onChunkLoad(ChunkEvent.Load evt) {
         // save any unsaved frozenChunks
         for (FrozenChunk fc : frozenChunks) {
-            if (fc.unsaved && evt.getLevel().isClientSide() &&
-                    evt.getChunk().getPos().getWorldPosition().getX() == fc.origin.getX() &&
-                    evt.getChunk().getPos().getWorldPosition().getZ() == fc.origin.getZ()) {
-                fc.saveFakeBlocks();
+
+            if (evt.getLevel().isClientSide() &&
+                evt.getChunk().getPos().getWorldPosition().getX() == fc.origin.getX() &&
+                evt.getChunk().getPos().getWorldPosition().getZ() == fc.origin.getZ()) {
+
+                if (fc.unsaved)
+                    fc.saveFakeBlocks();
+                fc.loadBlocks();
             }
-            fc.loadBlocks();
         }
     }
 
