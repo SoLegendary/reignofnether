@@ -18,9 +18,8 @@ TEST:
     - what happens if we have an explored but unloaded chunk that is then loaded
 BUGS:
     - logging in/out of the world should apply the same block-faking logic to all of these chunks
-    - shadows still appear under building blocks in faked frozen chunks
-        - try to adapt updateChunkLighting into loadBlocks()?
-            - place and break a glowstone block on every lowest-Y-level building block in the chunk, then replace the block and block below
+    - there is still bleed in some bits of frozenchunks when rendering
+    - minimap shows unfrozen blocks being placed when out of direct camera view
 
 TESTING STEPS:
     1. Turn on fog, start players as Piglins away from each other

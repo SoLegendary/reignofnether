@@ -1,22 +1,17 @@
 package com.solegendary.reignofnether.fogofwar;
 
-import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.nether.NetherBlocks;
-import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 // FrozenChunks are (16x16x16) chunks created when any serverside block placement happens in
@@ -45,12 +40,6 @@ public class FrozenChunk {
         this.building = building;
         if (isFullyLoaded())
             saveBlocks();
-    }
-
-    // Match ClientLevel blocks with ServerLevel blocks
-    // need to mute any plant or portal locations as they will be broken and replaced
-    public void syncServerBlocks(BlockPos renderChunkOrigin) {
-        FrozenChunkServerboundPacket.syncServerBlocks(renderChunkOrigin);
     }
 
     // saves the ClientLevel blocks into this.blocks
@@ -145,6 +134,14 @@ public class FrozenChunk {
         for (BlockPos bp : blocks.keySet()) {
             MC.level.setBlockAndUpdate(bp, blocks.get(bp));
         }
+        MinimapClientEvents.freezeChunk(this);
+    }
+
+    // Match ClientLevel blocks with ServerLevel blocks
+    // need to mute any plant or portal locations as they will be broken and replaced
+    public void unloadBlocks() {
+        MinimapClientEvents.unfreezeChunk(this);
+        FrozenChunkServerboundPacket.syncServerBlocks(origin);
     }
 
     private boolean isFullyLoaded() {

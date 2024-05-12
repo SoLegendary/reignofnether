@@ -8,7 +8,6 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
@@ -80,7 +79,6 @@ public class MinimapClientEvents {
 
     public static final ArrayList<MinimapUnit> minimapUnits = new ArrayList<>();
 
-
     // objects for tracking serverside Units that don't yet exist on clientside
     private static class MinimapUnit {
         public BlockPos pos;
@@ -106,6 +104,15 @@ public class MinimapClientEvents {
         minimapUnits.add(new MinimapUnit(pos, id, ownerName));
     }
 
+    private static Set<ChunkPos> frozenChunkPoses = new HashSet<>();
+
+    public static void freezeChunk(FrozenChunk fc) {
+        frozenChunkPoses.add(MC.level.getChunk(fc.origin).getPos());
+    }
+
+    public static void unfreezeChunk(FrozenChunk fc) {
+        frozenChunkPoses.remove(MC.level.getChunk(fc.origin).getPos());
+    }
 
     public static void setMapCentre(double x, double z) {
         xc_world = (int) x;
@@ -228,9 +235,9 @@ public class MinimapClientEvents {
             xLoop:
             for (int x = xMin; x < xMax; x++) {
 
+                boolean isBright = false;
                 if (FogOfWarClientEvents.isEnabled()) {
                     // apply a much slower update rate to dark chunks
-                    boolean isBright = false;
                     for (ChunkPos chunkPos : brightChunks) {
                         if (x >= chunkPos.getMinBlockX() && x <= chunkPos.getMaxBlockX() &&
                                 z >= chunkPos.getMinBlockZ() && z <= chunkPos.getMaxBlockZ()) {
@@ -242,6 +249,15 @@ public class MinimapClientEvents {
                         continue;
                 }
 
+                if (!isBright) {
+                    for (ChunkPos chunkPos : frozenChunkPoses) {
+                        int cX = chunkPos.getWorldPosition().getX();
+                        int cZ = chunkPos.getWorldPosition().getZ();
+                        if (x >= cX && x < cX + 16 &&
+                                z >= cZ && z < cZ + 16)
+                            continue xLoop;
+                    }
+                }
 
                 int y = MC.level.getChunkAt(new BlockPos(x,0,z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                 BlockState bs;
@@ -392,6 +408,7 @@ public class MinimapClientEvents {
                         }
                         int xN = x - xc_world + (mapGuiRadius * 2);
                         int zN = z - zc_world + (mapGuiRadius * 2);
+
                         mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                     }
                 }

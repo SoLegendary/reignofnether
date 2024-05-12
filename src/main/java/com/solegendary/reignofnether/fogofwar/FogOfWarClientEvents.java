@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -32,7 +33,6 @@ import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -115,7 +115,7 @@ public class FogOfWarClientEvents {
                     building.freezeChunks(MC.player.getName().getString());
             } else {
                 for (FrozenChunk frozenChunk : frozenChunks)
-                    FrozenChunkServerboundPacket.syncServerBlocks(frozenChunk.origin);
+                    frozenChunk.unloadBlocks();
             }
         }
     }
@@ -323,7 +323,7 @@ public class FogOfWarClientEvents {
 
         for (FrozenChunk frozenChunk : frozenChunks)
             if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
-                frozenChunk.syncServerBlocks(frozenChunk.origin);
+                frozenChunk.unloadBlocks();
 
         for (Building building : BuildingClientEvents.getBuildings()) {
             if (building.isExploredClientside)
