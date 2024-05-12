@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.fogofwar.FrozenChunk;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;

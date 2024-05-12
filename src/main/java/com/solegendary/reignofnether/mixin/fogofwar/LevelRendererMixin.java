@@ -96,7 +96,7 @@ public abstract class LevelRendererMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void compileChunks(Camera pCamera, CallbackInfo ci) throws InterruptedException {
+    private void compileChunks(Camera pCamera, CallbackInfo ci) {
 
         // hiding leaves around cursor
         if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR &&
@@ -195,7 +195,7 @@ public abstract class LevelRendererMixin {
                 rerenderChunksToRemove.add(chunkPos);
             }
             else if (!isInBrightChunk(originPos)) {
-                if (semiFrozenChunks.contains(originPos))
+                if (semiFrozenChunks.contains(originPos) || frozenChunks.stream().map(fc -> fc.origin).toList().contains(originPos))
                     continue;
                 else
                     semiFrozenChunks.add(originPos);

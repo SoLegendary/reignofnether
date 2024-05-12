@@ -114,7 +114,6 @@ public class FogOfWarClientEvents {
                 for (Building building : BuildingClientEvents.getBuildings())
                     building.freezeChunks(MC.player.getName().getString());
             } else {
-                frozenChunks.clear();
                 for (FrozenChunk frozenChunk : frozenChunks)
                     FrozenChunkServerboundPacket.syncServerBlocks(frozenChunk.origin);
             }
@@ -346,13 +345,14 @@ public class FogOfWarClientEvents {
 
     @SubscribeEvent
     public static void onChunkLoad(ChunkEvent.Load evt) {
+        // save any unsaved frozenChunks
         for (FrozenChunk fc : frozenChunks) {
-            if (fc.blocks.isEmpty() && evt.getLevel().isClientSide() &&
+            if (fc.unsaved && evt.getLevel().isClientSide() &&
                     evt.getChunk().getPos().getWorldPosition().getX() == fc.origin.getX() &&
                     evt.getChunk().getPos().getWorldPosition().getZ() == fc.origin.getZ()) {
                 fc.saveFakeBlocks();
-                fc.loadBlocks();
             }
+            fc.loadBlocks();
         }
     }
 

@@ -15,7 +15,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // FrozenChunks are (16x16x16) chunks created when any serverside block placement happens in
 // a dark chunk and should not be seen on clients - eg. building placement by an opponent.
@@ -30,7 +32,7 @@ import java.util.List;
 public class FrozenChunk {
 
     public BlockPos origin;
-    public ArrayList<Pair<BlockPos, BlockState>> blocks = new ArrayList<>();
+    public Map<BlockPos, BlockState> blocks = new HashMap<>();
     public Building building;
     public boolean removeOnExplore = false;
     public boolean hasFakeBlocks = false;
@@ -82,10 +84,7 @@ public class FrozenChunk {
 
         ArrayList<BuildingBlock> bbs = new ArrayList<>();
         for (BuildingBlock bb : building.getBlocks())
-            if (bb.getBlockPos().getX() >= origin.getX() && bb.getBlockPos().getX() < origin.getX() + 16 &&
-                bb.getBlockPos().getY() >= origin.getY() && bb.getBlockPos().getY() < origin.getY() + 16 &&
-                bb.getBlockPos().getZ() >= origin.getZ() && bb.getBlockPos().getZ() < origin.getZ() + 16 &&
-                !bb.getBlockState().isAir())
+            if (isPosInside(bb.getBlockPos()) && !bb.getBlockState().isAir())
                 bbs.add(bb);
 
         for (int x = 0; x < 16; x++) {
@@ -133,12 +132,18 @@ public class FrozenChunk {
         System.out.println("completed saved (fake) blocks at: " + origin);
     }
 
+    public boolean isPosInside(BlockPos bp) {
+        return bp.getX() >= origin.getX() && bp.getX() < origin.getX() + 16 &&
+                bp.getY() >= origin.getY() && bp.getY() < origin.getY() + 16 &&
+                bp.getZ() >= origin.getZ() && bp.getZ() < origin.getZ() + 16;
+    }
+
     // updates the ClientLevel with the blocks saved
     public void loadBlocks() {
         if (MC.level == null)
             return;
-        for (Pair<BlockPos, BlockState> pair : blocks) {
-            MC.level.setBlockAndUpdate(pair.getFirst(), pair.getSecond());
+        for (BlockPos bp : blocks.keySet()) {
+            MC.level.setBlockAndUpdate(bp, blocks.get(bp));
         }
     }
 
@@ -154,6 +159,6 @@ public class FrozenChunk {
     }
     
     private void saveBlock(BlockPos bp, BlockState bs, ArrayList<BuildingBlock> bbs) {
-        blocks.add(new Pair<>(bp, bs));
+        blocks.put(bp, bs);
     }
 }
