@@ -345,16 +345,17 @@ public class FogOfWarClientEvents {
 
     @SubscribeEvent
     public static void onChunkLoad(ChunkEvent.Load evt) {
+        BlockPos bp = evt.getChunk().getPos().getWorldPosition();
         // save any unsaved frozenChunks
         for (FrozenChunk fc : frozenChunks) {
 
             if (evt.getLevel().isClientSide() &&
-                evt.getChunk().getPos().getWorldPosition().getX() == fc.origin.getX() &&
-                evt.getChunk().getPos().getWorldPosition().getZ() == fc.origin.getZ()) {
-
+                    bp.getX() == fc.origin.getX() &&
+                    bp.getZ() == fc.origin.getZ()) {
                 if (fc.unsaved)
                     fc.saveFakeBlocks();
-                fc.loadBlocks();
+                if (!isInBrightChunk(bp))
+                    fc.loadBlocks();
             }
         }
     }

@@ -195,7 +195,11 @@ public abstract class LevelRendererMixin {
                 rerenderChunksToRemove.add(chunkPos);
             }
             else if (!isInBrightChunk(originPos)) {
-                if (semiFrozenChunks.contains(originPos) || frozenChunks.stream().map(fc -> fc.origin).toList().contains(originPos))
+                if (semiFrozenChunks.contains(originPos) ||
+                    frozenChunks.stream()
+                            .filter(fc -> fc.unsaved)
+                            .map(fc -> fc.origin)
+                            .toList().contains(originPos))
                     continue;
                 else
                     semiFrozenChunks.add(originPos);

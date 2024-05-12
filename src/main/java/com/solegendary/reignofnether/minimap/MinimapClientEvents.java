@@ -104,16 +104,6 @@ public class MinimapClientEvents {
         minimapUnits.add(new MinimapUnit(pos, id, ownerName));
     }
 
-    private static Set<ChunkPos> frozenChunkPoses = new HashSet<>();
-
-    public static void freezeChunk(FrozenChunk fc) {
-        frozenChunkPoses.add(MC.level.getChunk(fc.origin).getPos());
-    }
-
-    public static void unfreezeChunk(FrozenChunk fc) {
-        frozenChunkPoses.remove(MC.level.getChunk(fc.origin).getPos());
-    }
-
     public static void setMapCentre(double x, double z) {
         xc_world = (int) x;
         zc_world = (int) z;
@@ -249,16 +239,6 @@ public class MinimapClientEvents {
                         continue;
                 }
 
-                if (!isBright) {
-                    for (ChunkPos chunkPos : frozenChunkPoses) {
-                        int cX = chunkPos.getWorldPosition().getX();
-                        int cZ = chunkPos.getWorldPosition().getZ();
-                        if (x >= cX && x < cX + 16 &&
-                                z >= cZ && z < cZ + 16)
-                            continue xLoop;
-                    }
-                }
-
                 int y = MC.level.getChunkAt(new BlockPos(x,0,z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                 BlockState bs;
                 do {
@@ -279,7 +259,21 @@ public class MinimapClientEvents {
                         break;
                 } while (true);
 
-                Material mat = MC.level.getBlockState(new BlockPos(x,yNorth,z-1)).getMaterial();
+                Material mat = null;
+                if (!isBright) {
+                    for (FrozenChunk fc : FogOfWarClientEvents.frozenChunks) {
+                        int cX = fc.origin.getX();
+                        int cZ = fc.origin.getZ();
+                        if (x >= cX && x < cX + 16 &&
+                            z-1 >= cZ && z-1 < cZ + 16) {
+                            BlockState fcbs = fc.blocks.get(new BlockPos(x,yNorth,z-1));
+                            if (fcbs != null)
+                                mat = fcbs.getMaterial();
+                        }
+                    }
+                }
+                if (mat == null)
+                    mat = MC.level.getBlockState(new BlockPos(x,yNorth,z-1)).getMaterial();
                 int rgb = mat.getColor().col;
 
                 // shade blocks to give elevation effects, excluding liquids and nonblocking blocks (eg. grass, flowers)

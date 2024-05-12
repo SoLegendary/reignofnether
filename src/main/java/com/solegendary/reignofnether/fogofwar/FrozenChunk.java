@@ -134,13 +134,11 @@ public class FrozenChunk {
         for (BlockPos bp : blocks.keySet()) {
             MC.level.setBlockAndUpdate(bp, blocks.get(bp));
         }
-        MinimapClientEvents.freezeChunk(this);
     }
 
     // Match ClientLevel blocks with ServerLevel blocks
     // need to mute any plant or portal locations as they will be broken and replaced
     public void unloadBlocks() {
-        MinimapClientEvents.unfreezeChunk(this);
         FrozenChunkServerboundPacket.syncServerBlocks(origin);
     }
 
