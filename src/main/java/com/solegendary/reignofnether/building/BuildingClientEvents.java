@@ -714,7 +714,8 @@ public class BuildingClientEvents {
     }
 
     // place a building clientside that has already been registered on serverside
-    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName, int numBlocksToPlace, boolean isDiagonalBridge) {
+    public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName,
+                                     int numBlocksToPlace, boolean isDiagonalBridge, boolean forPlayerLoggingIn) {
 
         for (Building building : buildings)
             if (BuildingUtils.isPosPartOfAnyBuilding(true, pos, false))
@@ -729,7 +730,7 @@ public class BuildingClientEvents {
         }
         if (newBuilding != null && MC.player != null) {
             buildings.add(newBuilding);
-            newBuilding.freezeChunks(MC.player.getName().getString());
+            newBuilding.freezeChunks(MC.player.getName().getString(), forPlayerLoggingIn);
         }
         // sync the goal so we can display the correct animations
         Entity entity = hudSelectedEntity;
