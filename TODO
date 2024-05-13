@@ -14,7 +14,6 @@ TEST:
     - night warping should still work from unexplored buildings and stop if they are destroyed out of view
     - faking block saves on other buildings
     - check for bleed in some bits of frozenchunks (esp nether terrain) when rendering
-    - standard walk-in explore of frozen chunks
 BUGS:
     - logging in/out of the world should apply the same block-faking logic to all of these chunks
     - turning on and off fog interactions with loaded, looking at and unloaded chunks

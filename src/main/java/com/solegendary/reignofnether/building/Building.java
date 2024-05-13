@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FrozenChunk;
+import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -51,6 +52,7 @@ public abstract class Building {
 
     public boolean isExploredClientside = false;
     public boolean isDestroyedServerside = false;
+    public boolean isBuiltServerside = false;
 
     private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned; normally 500ms in real games
     public final float MELEE_DAMAGE_MULTIPLIER = 0.20f; // damage multiplier applied to melee attackers
@@ -513,6 +515,8 @@ public abstract class Building {
 
     public void onBuilt() {
         isBuilt = true;
+        if (!this.level.isClientSide())
+            FrozenChunkClientboundPacket.setBuildingBuiltServerside(this.originPos);
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) { }

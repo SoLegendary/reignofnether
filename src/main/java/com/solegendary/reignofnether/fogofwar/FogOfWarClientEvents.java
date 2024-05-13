@@ -366,6 +366,12 @@ public class FogOfWarClientEvents {
                 building.isDestroyedServerside = true;
     }
 
+    public static void setBuildingBuiltServerside(BlockPos buildingOrigin) {
+        for (Building building : BuildingClientEvents.getBuildings())
+            if (building.originPos.equals(buildingOrigin))
+                building.isBuiltServerside = true;
+    }
+
     public static void freezeChunk(BlockPos origin, Building building) {
         BlockPos roundedOrigin = origin.offset(
                 -origin.getX() % 16,

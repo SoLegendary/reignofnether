@@ -54,7 +54,7 @@ public class BuildingUtils {
             if (building instanceof Mausoleum mausoleum)
                 if (BuildingUtils.getCentrePos(mausoleum.getBlocks()).distToCenterSqr(pos.x, pos.y, pos.z) < Math.pow(Mausoleum.nightRange, 2))
                     return true;
-            if (building instanceof Stronghold stronghold && stronghold.isBuilt)
+            if (building instanceof Stronghold stronghold && (stronghold.isBuilt || stronghold.isBuiltServerside))
                 if (BuildingUtils.getCentrePos(stronghold.getBlocks()).distToCenterSqr(pos.x, pos.y, pos.z) < Math.pow(Stronghold.nightRange, 2))
                     return true;
         }
