@@ -644,11 +644,10 @@ public abstract class Building {
     }
 
     public void freezeChunks(String localPlayerName) {
-        if (level.isClientSide) {
+        if (level.isClientSide)
             if (!ownerName.equals(localPlayerName))
                 for (BlockPos bp : getRenderChunkOrigins(true))
                     FogOfWarClientEvents.freezeChunk(bp, this);
-        }
     }
 
     public void unFreezeChunks() {

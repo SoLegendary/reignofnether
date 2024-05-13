@@ -265,7 +265,7 @@ public class MinimapClientEvents {
                         int cX = fc.origin.getX();
                         int cZ = fc.origin.getZ();
                         if (x >= cX && x < cX + 16 &&
-                            z-1 >= cZ && z-1 < cZ + 16) {
+                            z >= cZ && z < cZ + 16) {
                             BlockState fcbs = fc.blocks.get(new BlockPos(x,yNorth,z-1));
                             if (fcbs != null)
                                 mat = fcbs.getMaterial();

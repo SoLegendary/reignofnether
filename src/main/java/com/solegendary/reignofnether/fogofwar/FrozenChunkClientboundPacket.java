@@ -26,11 +26,6 @@ public class FrozenChunkClientboundPacket {
                 new FrozenChunkClientboundPacket(FrozenChunkAction.SET_BUILDING_BUILT, buildingOrigin));
     }
 
-    public static void freezeChunk(BlockPos blockPos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new FrozenChunkClientboundPacket(FrozenChunkAction.FREEZE_CHUNK_MANUALLY, blockPos));
-    }
-
     public static void unmuteChunks() {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new FrozenChunkClientboundPacket(FrozenChunkAction.UNMUTE, new BlockPos(0,0,0)));
@@ -62,7 +57,6 @@ public class FrozenChunkClientboundPacket {
                         switch (action) {
                             case SET_BUILDING_DESTROYED -> FogOfWarClientEvents.setBuildingDestroyedServerside(blockPos);
                             case SET_BUILDING_BUILT -> FogOfWarClientEvents.setBuildingBuiltServerside(blockPos);
-                            case FREEZE_CHUNK_MANUALLY -> FogOfWarClientEvents.freezeChunk(blockPos, null);
                             case UNMUTE -> FogOfWarClientEvents.unmuteChunks();
                         }
                         success.set(true);

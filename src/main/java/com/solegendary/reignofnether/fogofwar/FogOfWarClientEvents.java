@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -111,11 +110,13 @@ public class FogOfWarClientEvents {
             resetFogChunks();
 
             if (enabled) {
+                updateFogChunks();
                 for (Building building : BuildingClientEvents.getBuildings())
                     building.freezeChunks(MC.player.getName().getString());
             } else {
                 for (FrozenChunk frozenChunk : frozenChunks)
                     frozenChunk.unloadBlocks();
+                frozenChunks.clear();
             }
         }
     }
@@ -219,6 +220,77 @@ public class FogOfWarClientEvents {
         evt.setCanceled(true);
     }
 
+    private static void updateFogChunks() {
+        brightChunks.clear();
+        Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
+        Set<ChunkPos> occupiedFarviewChunks = ConcurrentHashMap.newKeySet();
+
+        // get chunks that have units/buildings that can see
+        for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+            if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
+                    (entity instanceof Unit unit && isPlayerRevealed(unit.getOwnerName()))) {
+                if (entity instanceof GhastUnit)
+                    occupiedFarviewChunks.add(new ChunkPos(entity.getOnPos()));
+                else
+                    occupiedChunks.add(new ChunkPos(entity.getOnPos()));
+            }
+        }
+        for (Building building : BuildingClientEvents.getBuildings()) {
+            if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED ||
+                    isPlayerRevealed(building.ownerName)) {
+                if ((building instanceof GarrisonableBuilding && GarrisonableBuilding.getNumOccupants(building) > 0 && building.isBuilt) ||
+                        building.isCapitol)
+                    occupiedFarviewChunks.add(new ChunkPos(building.centrePos));
+                else
+                    occupiedChunks.add(new ChunkPos(building.centrePos));
+            }
+        }
+
+        for (ChunkPos chunkPos : occupiedChunks)
+            for (int x = -CHUNK_VIEW_DIST; x <= CHUNK_VIEW_DIST; x++)
+                for (int z = -CHUNK_VIEW_DIST; z <= CHUNK_VIEW_DIST; z++)
+                    brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
+
+        for (ChunkPos chunkPos : occupiedFarviewChunks)
+            for (int x = -CHUNK_FAR_VIEW_DIST; x <= CHUNK_FAR_VIEW_DIST; x++)
+                for (int z = -CHUNK_FAR_VIEW_DIST; z <= CHUNK_FAR_VIEW_DIST; z++)
+                    brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
+
+        Set<ChunkPos> newlyDarkChunks = ConcurrentHashMap.newKeySet();
+        newlyDarkChunks.addAll(lastBrightChunks);
+        newlyDarkChunks.removeAll(brightChunks);
+
+        for (ChunkPos cpos : newlyDarkChunks) {
+            onChunkUnexplore(cpos);
+            for (int x = -1; x <= 1; x++)
+                for (int z = -1; z <= 1; z++)
+                    rerenderChunks.add(new ChunkPos(cpos.x + x, cpos.z + z));
+        }
+        Set<ChunkPos> newlyBrightChunks = ConcurrentHashMap.newKeySet();
+        newlyBrightChunks.addAll(brightChunks);
+        newlyBrightChunks.removeAll(lastBrightChunks);
+
+        for (ChunkPos cpos : newlyBrightChunks)
+            onChunkExplore(cpos);
+
+        if (OrthoviewClientEvents.isEnabled())
+            semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
+                    .distSqr(MC.player.getOnPos()) > Math.pow(OrthoviewClientEvents.getZoom() * 2, 2));
+        else
+            semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
+                    .distSqr(MC.player.getOnPos()) > Math.pow(MC.levelRenderer.getLastViewDistance() * 8, 2));
+        semiFrozenChunks.removeIf(bp -> {
+            if (isInBrightChunk(bp)) {
+                updateChunkLighting(bp);
+                return true;
+            }
+            return false;
+        });
+
+        lastBrightChunks.clear();
+        lastBrightChunks.addAll(brightChunks);
+    }
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (!isEnabled() || MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
@@ -228,74 +300,8 @@ public class FogOfWarClientEvents {
             updateTicksLeft -= 1;
         } else {
             updateTicksLeft = UPDATE_TICKS_MAX;
-            brightChunks.clear();
-            Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
-            Set<ChunkPos> occupiedFarviewChunks = ConcurrentHashMap.newKeySet();
 
-            // get chunks that have units/buildings that can see
-            for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
-                if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
-                    (entity instanceof Unit unit && isPlayerRevealed(unit.getOwnerName()))) {
-                    if (entity instanceof GhastUnit)
-                        occupiedFarviewChunks.add(new ChunkPos(entity.getOnPos()));
-                    else
-                        occupiedChunks.add(new ChunkPos(entity.getOnPos()));
-                }
-            }
-            for (Building building : BuildingClientEvents.getBuildings()) {
-                if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED ||
-                    isPlayerRevealed(building.ownerName)) {
-                    if ((building instanceof GarrisonableBuilding && GarrisonableBuilding.getNumOccupants(building) > 0 && building.isBuilt) ||
-                        building.isCapitol)
-                        occupiedFarviewChunks.add(new ChunkPos(building.centrePos));
-                    else
-                        occupiedChunks.add(new ChunkPos(building.centrePos));
-                }
-            }
-
-            for (ChunkPos chunkPos : occupiedChunks)
-                for (int x = -CHUNK_VIEW_DIST; x <= CHUNK_VIEW_DIST; x++)
-                    for (int z = -CHUNK_VIEW_DIST; z <= CHUNK_VIEW_DIST; z++)
-                        brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
-
-            for (ChunkPos chunkPos : occupiedFarviewChunks)
-                for (int x = -CHUNK_FAR_VIEW_DIST; x <= CHUNK_FAR_VIEW_DIST; x++)
-                    for (int z = -CHUNK_FAR_VIEW_DIST; z <= CHUNK_FAR_VIEW_DIST; z++)
-                        brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
-
-            Set<ChunkPos> newlyDarkChunks = ConcurrentHashMap.newKeySet();
-            newlyDarkChunks.addAll(lastBrightChunks);
-            newlyDarkChunks.removeAll(brightChunks);
-
-            for (ChunkPos cpos : newlyDarkChunks) {
-                onChunkUnexplore(cpos);
-                for (int x = -1; x <= 1; x++)
-                    for (int z = -1; z <= 1; z++)
-                        rerenderChunks.add(new ChunkPos(cpos.x + x, cpos.z + z));
-            }
-            Set<ChunkPos> newlyBrightChunks = ConcurrentHashMap.newKeySet();
-            newlyBrightChunks.addAll(brightChunks);
-            newlyBrightChunks.removeAll(lastBrightChunks);
-
-            for (ChunkPos cpos : newlyBrightChunks)
-                onChunkExplore(cpos);
-
-            if (OrthoviewClientEvents.isEnabled())
-                semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
-                        .distSqr(MC.player.getOnPos()) > Math.pow(OrthoviewClientEvents.getZoom() * 2, 2));
-            else
-                semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
-                        .distSqr(MC.player.getOnPos()) > Math.pow(MC.levelRenderer.getLastViewDistance() * 8, 2));
-            semiFrozenChunks.removeIf(bp -> {
-                if (isInBrightChunk(bp)) {
-                    updateChunkLighting(bp);
-                    return true;
-                }
-                return false;
-            });
-
-            lastBrightChunks.clear();
-            lastBrightChunks.addAll(brightChunks);
+            updateFogChunks();
         }
     }
 
@@ -348,7 +354,6 @@ public class FogOfWarClientEvents {
         BlockPos bp = evt.getChunk().getPos().getWorldPosition();
         // save any unsaved frozenChunks
         for (FrozenChunk fc : frozenChunks) {
-
             if (evt.getLevel().isClientSide() &&
                     bp.getX() == fc.origin.getX() &&
                     bp.getZ() == fc.origin.getZ()) {

@@ -9,14 +9,15 @@ TODO bugs/features:
 TODO:
 - make nether blocks turn back into overworld blocks when portals are removed?
 
+might need to throttle Serverside syncClientBlocks()
 
 TEST:
-    - night warping should still work from unexplored buildings and stop if they are destroyed out of view
-    - faking block saves on other buildings
-    - check for bleed in some bits of frozenchunks (esp nether terrain) when rendering
+    - faking block saves on another building that you have already explored
 BUGS:
-    - logging in/out of the world should apply the same block-faking logic to all of these chunks
-    - turning on and off fog interactions with loaded, looking at and unloaded chunks
+    - on log out, remove all frozen chunks
+        - on log in, recreate all frozen chunks and force them to be faked
+        - make sure to run updateFogChunks on login
+
 
 
 TESTING STEPS:
