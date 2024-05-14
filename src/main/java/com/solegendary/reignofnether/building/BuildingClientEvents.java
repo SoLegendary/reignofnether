@@ -725,16 +725,6 @@ public class BuildingClientEvents {
 
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName, isDiagonalBridge);
 
-        // if a player is looking directly at a frozenchunk on login, they may load in the real blocks before
-        // they are frozen so move them to their capitol (or any of their buildings if they don't have one)
-        if (MC.player != null && forPlayerLoggingIn && ownerName.equals(MC.player.getName().getString())) {
-            if (!FogOfWarClientEvents.movedToCapitol) {
-                OrthoviewClientEvents.centreCameraOnPos(newBuilding.originPos.getX(), newBuilding.originPos.getZ());
-                if (newBuilding.isCapitol)
-                    FogOfWarClientEvents.movedToCapitol = true;
-            }
-        }
-
         // add a bunch of dummy blocks so clients know not to remove buildings before the first blocks get placed
         while (numBlocksToPlace > 0) {
             newBuilding.addToBlockPlaceQueue(new BuildingBlock(new BlockPos(0,0,0), Blocks.AIR.defaultBlockState()));
@@ -743,6 +733,16 @@ public class BuildingClientEvents {
         if (newBuilding != null && MC.player != null) {
             buildings.add(newBuilding);
             newBuilding.freezeChunks(MC.player.getName().getString(), forPlayerLoggingIn);
+
+            // if a player is looking directly at a frozenchunk on login, they may load in the real blocks before
+            // they are frozen so move them to their capitol (or any of their buildings if they don't have one)
+            if (MC.player != null && forPlayerLoggingIn && ownerName.equals(MC.player.getName().getString())) {
+                if (!FogOfWarClientEvents.movedToCapitol) {
+                    OrthoviewClientEvents.centreCameraOnPos(newBuilding.originPos.getX(), newBuilding.originPos.getZ());
+                    if (newBuilding.isCapitol)
+                        FogOfWarClientEvents.movedToCapitol = true;
+                }
+            }
         }
         // sync the goal so we can display the correct animations
         Entity entity = hudSelectedEntity;

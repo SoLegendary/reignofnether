@@ -9,8 +9,9 @@ TODO bugs/features:
 TODO:
 - make nether blocks turn back into overworld blocks when portals are removed?
 
+- on relogin sometimes loading screen does not disappear until F12 is pressed
+    - make sure Ortho screen is cleaned up on logout?
 
-might need to throttle Serverside syncClientBlocks()
 
 TEST:
     - faking block saves on another building that you have already explored
