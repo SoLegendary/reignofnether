@@ -941,6 +941,7 @@ public class HudClientEvents {
                 hudSelectedBuilding != null) {
                 BlockPos pos = hudSelectedBuilding.centrePos;
                 OrthoviewClientEvents.centreCameraOnPos(pos.getX(), pos.getZ());
+
             }
             else if (unitPortraitZone != null &&
                     unitPortraitZone.isMouseOver(mouseX, mouseY) &&

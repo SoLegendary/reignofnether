@@ -64,6 +64,8 @@ public class FogOfWarClientEvents {
 
     private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
 
+    public static boolean movedToCapitol = false;
+
 
     public static void revealOrHidePlayer(boolean reveal, String playerName) {
         if (reveal)

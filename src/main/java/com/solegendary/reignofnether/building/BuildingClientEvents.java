@@ -10,8 +10,10 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FrozenChunk;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchAdvancedPortals;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -722,6 +724,16 @@ public class BuildingClientEvents {
                 return; // building already exists clientside
 
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName, isDiagonalBridge);
+
+        // if a player is looking directly at a frozenchunk on login, they may load in the real blocks before
+        // they are frozen so move them to their capitol (or any of their buildings if they don't have one)
+        if (MC.player != null && forPlayerLoggingIn && ownerName.equals(MC.player.getName().getString())) {
+            if (!FogOfWarClientEvents.movedToCapitol) {
+                OrthoviewClientEvents.centreCameraOnPos(newBuilding.originPos.getX(), newBuilding.originPos.getZ());
+                if (newBuilding.isCapitol)
+                    FogOfWarClientEvents.movedToCapitol = true;
+            }
+        }
 
         // add a bunch of dummy blocks so clients know not to remove buildings before the first blocks get placed
         while (numBlocksToPlace > 0) {

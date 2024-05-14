@@ -102,6 +102,7 @@ public class PlayerClientEvents {
         // LOG OUT FROM SINGLEPLAYER WORLD ONLY
         if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
             resetRTS();
+            FogOfWarClientEvents.movedToCapitol = false;
             FogOfWarClientEvents.frozenChunks.clear();
             FogOfWarClientEvents.semiFrozenChunks.clear();
         }
@@ -110,8 +111,12 @@ public class PlayerClientEvents {
     @SubscribeEvent
     public static void onPlayerLoginEvent(PlayerEvent.PlayerLoggedInEvent evt) {
         // LOG IN TO SINGLEPLAYER WORLD ONLY
-        if (MC.player != null && evt.getEntity().getId() == MC.player.getId())
+        if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
+            // if a player is looking directly at a frozenchunk on login, they may load in the real blocks before
+            // they are frozen so move them away then BuildingClientEvents.placeBuilding moves them to their base later
+            OrthoviewClientEvents.centreCameraOnPos(0,0);
             FogOfWarClientEvents.updateFogChunks();
+        }
     }
 
     @SubscribeEvent
@@ -119,6 +124,7 @@ public class PlayerClientEvents {
         // LOG OUT FROM SERVER WORLD ONLY
         if (MC.player != null && evt.getPlayer() != null && evt.getPlayer().getId() == MC.player.getId()) {
             resetRTS();
+            FogOfWarClientEvents.movedToCapitol = false;
             FogOfWarClientEvents.frozenChunks.clear();
             FogOfWarClientEvents.semiFrozenChunks.clear();
         }
@@ -127,8 +133,12 @@ public class PlayerClientEvents {
     @SubscribeEvent
     public static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn evt) {
         // LOG IN TO SERVER WORLD ONLY
-        if (MC.player != null && evt.getPlayer().getId() == MC.player.getId())
+        if (MC.player != null && evt.getPlayer().getId() == MC.player.getId()) {
+            // if a player is looking directly at a frozenchunk on login, they may load in the real blocks before
+            // they are frozen so move them away then BuildingClientEvents.placeBuilding moves them to their base later
+            OrthoviewClientEvents.centreCameraOnPos(0,0);
             FogOfWarClientEvents.updateFogChunks();
+        }
     }
 
     public static void resetRTS() {
