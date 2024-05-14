@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
@@ -99,15 +100,37 @@ public class PlayerClientEvents {
     @SubscribeEvent
     public static void onPlayerLogoutEvent(PlayerEvent.PlayerLoggedOutEvent evt) {
         // LOG OUT FROM SINGLEPLAYER WORLD ONLY
-        if (MC.player != null && evt.getEntity().getId() == MC.player.getId())
+        if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
             resetRTS();
+            FogOfWarClientEvents.movedToCapitol = false;
+            FogOfWarClientEvents.frozenChunks.clear();
+            FogOfWarClientEvents.semiFrozenChunks.clear();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoginEvent(PlayerEvent.PlayerLoggedInEvent evt) {
+        // LOG IN TO SINGLEPLAYER WORLD ONLY
+        if (MC.player != null && evt.getEntity().getId() == MC.player.getId())
+            FogOfWarClientEvents.updateFogChunks();
     }
 
     @SubscribeEvent
     public static void onClientLogout(ClientPlayerNetworkEvent.LoggingOut evt) {
         // LOG OUT FROM SERVER WORLD ONLY
-        if (MC.player != null && evt.getPlayer() != null && evt.getPlayer().getId() == MC.player.getId())
+        if (MC.player != null && evt.getPlayer() != null && evt.getPlayer().getId() == MC.player.getId()) {
             resetRTS();
+            FogOfWarClientEvents.movedToCapitol = false;
+            FogOfWarClientEvents.frozenChunks.clear();
+            FogOfWarClientEvents.semiFrozenChunks.clear();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn evt) {
+        // LOG IN TO SERVER WORLD ONLY
+        if (MC.player != null && evt.getPlayer().getId() == MC.player.getId())
+            FogOfWarClientEvents.updateFogChunks();
     }
 
     public static void resetRTS() {

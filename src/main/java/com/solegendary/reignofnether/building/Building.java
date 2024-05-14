@@ -643,11 +643,25 @@ public abstract class Building {
         return origins;
     }
 
-    public void freezeChunks(String localPlayerName) {
-        if (level.isClientSide)
-            if (!ownerName.equals(localPlayerName))
-                for (BlockPos bp : getRenderChunkOrigins(true))
-                    FogOfWarClientEvents.freezeChunk(bp, this);
+    public void freezeChunks(String localPlayerName, boolean forceFakeBlocks) {
+        if (level.isClientSide) {
+            if (!ownerName.equals(localPlayerName)) {
+                for (BlockPos bp : getRenderChunkOrigins(true)) {
+                    BlockPos roundedOrigin = bp.offset(
+                            -bp.getX() % 16,
+                            -bp.getY() % 16,
+                            -bp.getZ() % 16
+                    );
+                    if (bp.getX() % 16 != 0 ||
+                            bp.getY() % 16 != 0 ||
+                            bp.getZ() % 16 != 0)
+                        System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + bp);
+
+                    System.out.println("Froze chunk at: " + roundedOrigin);
+                    FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(roundedOrigin, this, forceFakeBlocks));
+                }
+            }
+        }
     }
 
     public void unFreezeChunks() {

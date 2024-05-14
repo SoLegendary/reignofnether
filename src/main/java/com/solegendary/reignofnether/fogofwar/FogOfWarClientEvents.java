@@ -64,6 +64,8 @@ public class FogOfWarClientEvents {
 
     private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
 
+    public static boolean movedToCapitol = false;
+
 
     public static void revealOrHidePlayer(boolean reveal, String playerName) {
         if (reveal)
@@ -112,7 +114,7 @@ public class FogOfWarClientEvents {
             if (enabled) {
                 updateFogChunks();
                 for (Building building : BuildingClientEvents.getBuildings())
-                    building.freezeChunks(MC.player.getName().getString());
+                    building.freezeChunks(MC.player.getName().getString(), false);
             } else {
                 for (FrozenChunk frozenChunk : frozenChunks)
                     frozenChunk.unloadBlocks();
@@ -220,7 +222,7 @@ public class FogOfWarClientEvents {
         evt.setCanceled(true);
     }
 
-    private static void updateFogChunks() {
+    public static void updateFogChunks() {
         brightChunks.clear();
         Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
         Set<ChunkPos> occupiedFarviewChunks = ConcurrentHashMap.newKeySet();
@@ -377,7 +379,7 @@ public class FogOfWarClientEvents {
                 building.isBuiltServerside = true;
     }
 
-    public static void freezeChunk(BlockPos origin, Building building) {
+    public static void freezeChunk(BlockPos origin, Building building, boolean forceFakeBlocks) {
         BlockPos roundedOrigin = origin.offset(
                 -origin.getX() % 16,
                 -origin.getY() % 16,
@@ -389,7 +391,7 @@ public class FogOfWarClientEvents {
             System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + origin);
 
         System.out.println("Froze chunk at: " + roundedOrigin);
-        frozenChunks.add(new FrozenChunk(roundedOrigin, building));
+        frozenChunks.add(new FrozenChunk(roundedOrigin, building, forceFakeBlocks));
     }
 
     // show corners of all frozenChunks

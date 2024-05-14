@@ -35,11 +35,15 @@ public class FrozenChunk {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
-    public FrozenChunk(BlockPos origin, Building building) {
+    public FrozenChunk(BlockPos origin, Building building, boolean forceFakeChunks) {
         this.origin = origin;
         this.building = building;
-        if (isFullyLoaded())
-            saveBlocks();
+        if (isFullyLoaded()) {
+            if (forceFakeChunks)
+                saveFakeBlocks();
+            else
+                saveBlocks();
+        }
     }
 
     // saves the ClientLevel blocks into this.blocks
