@@ -114,7 +114,7 @@ public class FrozenChunk {
                         if (overworldBs != null)
                             saveBlock(bp, overworldBs, bbs);
                     } else if (NetherBlocks.isNetherPlantBlock(MC.level, bp)) {
-                        BlockState overworldBs = NetherBlocks.getOverworldPlantBlock(MC.level, bp);
+                        BlockState overworldBs = NetherBlocks.getOverworldPlantBlock(MC.level, bp, false);
                         if (overworldBs != null)
                             saveBlock(bp, overworldBs, bbs);
                     } else {
