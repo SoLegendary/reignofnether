@@ -732,7 +732,9 @@ public class BuildingClientEvents {
         }
         if (newBuilding != null && MC.player != null) {
             buildings.add(newBuilding);
-            newBuilding.freezeChunks(MC.player.getName().getString(), forPlayerLoggingIn);
+
+            if (FogOfWarClientEvents.isEnabled())
+                newBuilding.freezeChunks(MC.player.getName().getString(), forPlayerLoggingIn);
 
             // if a player is looking directly at a frozenchunk on login, they may load in the real blocks before
             // they are frozen so move them to their capitol (or any of their buildings if they don't have one)

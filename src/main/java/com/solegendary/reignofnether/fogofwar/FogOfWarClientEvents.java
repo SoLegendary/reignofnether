@@ -379,21 +379,6 @@ public class FogOfWarClientEvents {
                 building.isBuiltServerside = true;
     }
 
-    public static void freezeChunk(BlockPos origin, Building building, boolean forceFakeBlocks) {
-        BlockPos roundedOrigin = origin.offset(
-                -origin.getX() % 16,
-                -origin.getY() % 16,
-                -origin.getZ() % 16
-        );
-        if (origin.getX() % 16 != 0 ||
-            origin.getY() % 16 != 0 ||
-            origin.getZ() % 16 != 0)
-            System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + origin);
-
-        System.out.println("Froze chunk at: " + roundedOrigin);
-        frozenChunks.add(new FrozenChunk(roundedOrigin, building, forceFakeBlocks));
-    }
-
     // show corners of all frozenChunks
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
