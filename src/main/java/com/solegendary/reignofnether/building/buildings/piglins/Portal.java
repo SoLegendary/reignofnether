@@ -116,6 +116,11 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
                     ResearchPortalForTransport.getStartButton(this, Keybindings.keyE)
             );
         }
+    }
+
+    @Override
+    public void onBuilt() {
+        super.onBuilt();
         netherConversionZone = new NetherConversionZone(level, centrePos.offset(0,-2,0), getMaxRange(), getStartingRange());
         if (!level.isClientSide())
             BuildingServerEvents.netherConversionZones.add(netherConversionZone);

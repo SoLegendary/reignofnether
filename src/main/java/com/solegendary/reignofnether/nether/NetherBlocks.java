@@ -61,8 +61,12 @@ public class NetherBlocks {
         BlockState netherBs = level.getBlockState(overworldBp);
         if (!netherBs.isAir()) {
             for (Map.Entry<Block, List<Block>> entrySet : MAPPINGS.entrySet())
-                if (entrySet.getKey().getName().getString().equals(netherBs.getBlock().getName().getString()))
-                    return entrySet.getValue().get(0).defaultBlockState();
+                if (entrySet.getKey().getName().getString().equals(netherBs.getBlock().getName().getString())) {
+                    if (netherBs.getBlock() == Blocks.OBSIDIAN)
+                        return Blocks.WATER.defaultBlockState();
+                    else
+                        return entrySet.getValue().get(0).defaultBlockState();
+                }
         }
         return null;
     }
@@ -96,8 +100,13 @@ public class NetherBlocks {
             else if (randInt < 30)
                 return Blocks.FERN;
         } else if (List.of("plains", "forest").contains(biomeName)) {
-            if (randInt < 25)
+            if (randInt < 20)
                 return FLOWERS.get(random.nextInt(FLOWERS.size()));
+        } else if (biomeName.contains("swamp")) {
+            if (randInt < 10)
+                return Blocks.RED_MUSHROOM;
+            else if (randInt < 20)
+                return Blocks.BROWN_MUSHROOM;
         } else if (biomeName.contains("desert")) {
             return Blocks.DEAD_BUSH;
         }

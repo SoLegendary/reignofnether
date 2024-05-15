@@ -247,7 +247,7 @@ public class BuildingServerEvents {
         List<Building> buildingsToDestroy = buildings.stream().filter(Building::shouldBeDestroyed).toList();
         buildings.removeIf(b -> {
             if (b.shouldBeDestroyed()) {
-                if (b instanceof NetherConvertingBuilding nb)
+                if (b instanceof NetherConvertingBuilding nb && nb.getZone() != null)
                     nb.getZone().startRestoring();
                 FrozenChunkClientboundPacket.setBuildingDestroyedServerside(b.originPos);
                 return true;

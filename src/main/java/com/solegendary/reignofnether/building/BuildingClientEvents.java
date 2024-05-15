@@ -720,7 +720,8 @@ public class BuildingClientEvents {
                                      int numBlocksToPlace, boolean isDiagonalBridge, boolean forPlayerLoggingIn) {
 
         for (Building building : buildings)
-            if (BuildingUtils.isPosPartOfAnyBuilding(true, pos, false))
+            if (!buildingName.toLowerCase().contains("bridge") &&
+                BuildingUtils.isPosPartOfAnyBuilding(true, pos, false, 0))
                 return; // building already exists clientside
 
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName, isDiagonalBridge);

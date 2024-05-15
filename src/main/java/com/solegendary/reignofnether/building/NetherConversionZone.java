@@ -45,14 +45,14 @@ public class NetherConversionZone {
             ticksLeft -= 1;
             if (ticksLeft <= 0 && convertsAfterConstantRange < MAX_CONVERTS_AFTER_CONSTANT_RANGE) {
                 if (!isRestoring) {
-                    netherConvertTick(origin, range);
+                    netherConvertTick();
                     if (range < maxRange)
                         range += 0.1f;
                     else
                         convertsAfterConstantRange += 1;
                 }
                 else {
-                    overworldRestoreTick(origin, maxRange);
+                    overworldRestoreTick();
                     if (range > 0)
                         range -= 0.1f;
                     else
@@ -67,12 +67,39 @@ public class NetherConversionZone {
     }
 
     // randomly convert nether blocks into overworld blocks at decreasing ranges
-    private void overworldRestoreTick(BlockPos origin, double maxRange) {
+    private void overworldRestoreTick() {
+        double restoreRange = range + 5;
 
+        ArrayList<BlockPos> bps = new ArrayList<>();
+        for (double x = -restoreRange; x < restoreRange; x++)
+            for (double y = -restoreRange/2; y < restoreRange/2; y++)
+                for (double z = -restoreRange; z < restoreRange; z++)
+                    bps.add(origin.offset(x, y, z));
+
+        for (BlockPos bp : bps) {
+            double distSqr = bp.distSqr(origin);
+            double rangeSqr = restoreRange * restoreRange;
+            double rangeMaxSqr = maxRange * maxRange;
+            if (distSqr < rangeSqr)
+                continue;
+
+            // at half distance, chance = 50%
+            //double chance = (distSqr / rangeMaxSqr) / 10;
+            //if (random.nextDouble() > chance)
+            //    continue;
+
+            BlockState bs = NetherBlocks.getOverworldBlock(level, bp);
+            BlockState bsPlant = NetherBlocks.getOverworldPlantBlock(level, bp.above(), true);
+            if (bs != null && !BuildingUtils.isPosPartOfAnyBuilding(level.isClientSide(), bp, true, (int) (maxRange * 2))) {
+                level.setBlockAndUpdate(bp, bs);
+                if (bsPlant != null)
+                    level.setBlockAndUpdate(bp.above(), bsPlant);
+            }
+        }
     }
 
     // randomly convert overworld blocks into nether blocks at increasing ranges
-    private void netherConvertTick(BlockPos origin, double range) {
+    private void netherConvertTick() {
         ArrayList<BlockPos> bps = new ArrayList<>();
         for (double x = -range; x < range; x++)
             for (double y = -range/2; y < range/2; y++)
@@ -93,7 +120,7 @@ public class NetherConversionZone {
 
             BlockState bs = NetherBlocks.getNetherBlock(level, bp);
             BlockState bsPlant = NetherBlocks.getNetherPlantBlock(level, bp.above());
-            if (bs != null && !BuildingUtils.isPosPartOfAnyBuilding(level.isClientSide(), bp, true)) {
+            if (bs != null && !BuildingUtils.isPosPartOfAnyBuilding(level.isClientSide(), bp, true, (int) (maxRange * 2))) {
                 level.setBlockAndUpdate(bp, bs);
                 if (bsPlant != null)
                     level.setBlockAndUpdate(bp.above(), bsPlant);
