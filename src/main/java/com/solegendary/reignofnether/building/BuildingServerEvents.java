@@ -261,7 +261,6 @@ public class BuildingServerEvents {
         for (Building building : buildings)
             building.tick(serverLevel);
 
-        netherConversionZones.removeIf(NetherConversionZone::shouldBeDestroyed);
         for (NetherConversionZone netherConversionZone : netherConversionZones)
             netherConversionZone.tick();
     }

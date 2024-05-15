@@ -109,9 +109,12 @@ public class FrozenChunk {
                         saveBlock(bp, Blocks.WATER.defaultBlockState(), bbs);
                     } else if (blockName.equals("nether portal")) {
                         saveBlock(bp, Blocks.AIR.defaultBlockState(), bbs);
-                    } else if (NetherBlocks.isNetherBlock(MC.level, bp) ||
-                            NetherBlocks.isNetherPlantBlock(MC.level, bp)) {
+                    } else if (NetherBlocks.isNetherBlock(MC.level, bp)) {
                         BlockState overworldBs = NetherBlocks.getOverworldBlock(MC.level, bp);
+                        if (overworldBs != null)
+                            saveBlock(bp, overworldBs, bbs);
+                    } else if (NetherBlocks.isNetherPlantBlock(MC.level, bp)) {
+                        BlockState overworldBs = NetherBlocks.getOverworldPlantBlock(MC.level, bp);
                         if (overworldBs != null)
                             saveBlock(bp, overworldBs, bbs);
                     } else {

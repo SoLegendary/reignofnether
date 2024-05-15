@@ -11,7 +11,7 @@ import java.util.Random;
 public class NetherConversionZone {
 
     private final int MAX_TICKS = 5;
-    private final int MAX_CONVERTS_AFTER_MAX_RANGE = 60; // to prevent continuously processing
+    private final int MAX_CONVERTS_AFTER_CONSTANT_RANGE = 60; // to prevent continuously processing
 
     private final double maxRange;
     private final Level level;
@@ -21,7 +21,7 @@ public class NetherConversionZone {
     private boolean isRestoring = false; // if false, start converting Nether back into Overworld blocks
     private double range;
     private int ticksLeft = MAX_TICKS;
-    private int convertsAfterMaxRange = 0;
+    private int convertsAfterConstantRange = 0; // after reaching max or min range, keep converting for a few more ticks
 
     public NetherConversionZone(Level level, BlockPos origin, double maxRange, double range) {
         this.level = level;
@@ -35,29 +35,33 @@ public class NetherConversionZone {
     }
 
     public void startRestoring() {
+        convertsAfterConstantRange = 0;
         isRestoring = true;
-    }
-
-    public boolean shouldBeDestroyed() {
-        return false; // TODO: isRestoring && range is at minimum
     }
 
     public void tick() {
 
         if (!level.isClientSide()) {
             ticksLeft -= 1;
-            if (ticksLeft <= 0 && convertsAfterMaxRange < MAX_CONVERTS_AFTER_MAX_RANGE) {
-
-                if (!isRestoring)
+            if (ticksLeft <= 0 && convertsAfterConstantRange < MAX_CONVERTS_AFTER_CONSTANT_RANGE) {
+                if (!isRestoring) {
                     netherConvertTick(origin, range);
-                else
+                    if (range < maxRange)
+                        range += 0.1f;
+                    else
+                        convertsAfterConstantRange += 1;
+                }
+                else {
                     overworldRestoreTick(origin, range);
-
-                if (range < maxRange)
-                    range += 0.1f;
-                else
-                    convertsAfterMaxRange += 1;
+                    if (range > 0)
+                        range -= 0.1f;
+                    else
+                        convertsAfterConstantRange += 1;
+                }
                 ticksLeft = MAX_TICKS;
+            }
+            else if (!level.isClientSide() && isRestoring && convertsAfterConstantRange >= MAX_CONVERTS_AFTER_CONSTANT_RANGE) {
+                BuildingServerEvents.netherConversionZones.remove(this);
             }
         }
     }
@@ -69,7 +73,6 @@ public class NetherConversionZone {
 
     // randomly convert overworld blocks into nether blocks at increasing ranges
     private void netherConvertTick(BlockPos origin, double range) {
-
         ArrayList<BlockPos> bps = new ArrayList<>();
         for (double x = -range; x < range; x++)
             for (double y = -range/2; y < range/2; y++)
