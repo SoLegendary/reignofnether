@@ -51,7 +51,7 @@ public class NetherConversionZone {
                 if (!isRestoring)
                     netherConvertTick(origin, range);
                 else
-                    netherRestoreTick(origin, range);
+                    overworldRestoreTick(origin, range);
 
                 if (range < maxRange)
                     range += 0.1f;
@@ -62,8 +62,12 @@ public class NetherConversionZone {
         }
     }
 
-    // randomly convert nearby overworld blocks into a nether block
-    // returns true if any block was converted
+    // randomly convert nether blocks into overworld blocks at decreasing ranges
+    private void overworldRestoreTick(BlockPos origin, double range) {
+
+    }
+
+    // randomly convert overworld blocks into nether blocks at increasing ranges
     private void netherConvertTick(BlockPos origin, double range) {
 
         ArrayList<BlockPos> bps = new ArrayList<>();
