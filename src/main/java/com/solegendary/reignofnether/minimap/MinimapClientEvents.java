@@ -8,10 +8,10 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.fogofwar.FrozenChunk;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -79,7 +79,6 @@ public class MinimapClientEvents {
 
     public static final ArrayList<MinimapUnit> minimapUnits = new ArrayList<>();
 
-
     // objects for tracking serverside Units that don't yet exist on clientside
     private static class MinimapUnit {
         public BlockPos pos;
@@ -104,7 +103,6 @@ public class MinimapClientEvents {
         }
         minimapUnits.add(new MinimapUnit(pos, id, ownerName));
     }
-
 
     public static void setMapCentre(double x, double z) {
         xc_world = (int) x;
@@ -227,9 +225,9 @@ public class MinimapClientEvents {
             xLoop:
             for (int x = xMin; x < xMax; x++) {
 
+                boolean isBright = false;
                 if (FogOfWarClientEvents.isEnabled()) {
                     // apply a much slower update rate to dark chunks
-                    boolean isBright = false;
                     for (ChunkPos chunkPos : brightChunks) {
                         if (x >= chunkPos.getMinBlockX() && x <= chunkPos.getMaxBlockX() &&
                                 z >= chunkPos.getMinBlockZ() && z <= chunkPos.getMaxBlockZ()) {
@@ -240,7 +238,6 @@ public class MinimapClientEvents {
                     if (!isBright && skipDarkPartition)
                         continue;
                 }
-
 
                 int y = MC.level.getChunkAt(new BlockPos(x,0,z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                 BlockState bs;
@@ -262,7 +259,21 @@ public class MinimapClientEvents {
                         break;
                 } while (true);
 
-                Material mat = MC.level.getBlockState(new BlockPos(x,yNorth,z-1)).getMaterial();
+                Material mat = null;
+                if (!isBright) {
+                    for (FrozenChunk fc : FogOfWarClientEvents.frozenChunks) {
+                        int cX = fc.origin.getX();
+                        int cZ = fc.origin.getZ();
+                        if (x >= cX && x < cX + 16 &&
+                            z >= cZ && z < cZ + 16) {
+                            BlockState fcbs = fc.blocks.get(new BlockPos(x,yNorth,z-1));
+                            if (fcbs != null)
+                                mat = fcbs.getMaterial();
+                        }
+                    }
+                }
+                if (mat == null)
+                    mat = MC.level.getBlockState(new BlockPos(x,yNorth,z-1)).getMaterial();
                 int rgb = mat.getColor().col;
 
                 // shade blocks to give elevation effects, excluding liquids and nonblocking blocks (eg. grass, flowers)
@@ -391,6 +402,7 @@ public class MinimapClientEvents {
                         }
                         int xN = x - xc_world + (mapGuiRadius * 2);
                         int zN = z - zc_world + (mapGuiRadius * 2);
+
                         mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                     }
                 }

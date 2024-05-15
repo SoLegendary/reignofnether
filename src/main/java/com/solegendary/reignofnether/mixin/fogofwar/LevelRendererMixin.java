@@ -153,9 +153,13 @@ public abstract class LevelRendererMixin {
                 if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
                     !isInBrightChunk(frozenChunk.origin) &&
                     !loadedFcOrigins.contains(frozenChunk.origin)) {
-                    //System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
-                    frozenChunk.loadBlocks();
-                    loadedFcOrigins.add(frozenChunk.origin);
+                    if (!frozenChunk.unsaved) {
+                        System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
+                        frozenChunk.loadBlocks();
+                        loadedFcOrigins.add(frozenChunk.origin);
+                    } else {
+                        System.out.println("skipped loading (faked) frozen blocks at: " + frozenChunk.origin);
+                    }
                 }
             }
         }
@@ -165,7 +169,12 @@ public abstract class LevelRendererMixin {
                 if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
                     !isInBrightChunk(frozenChunk.origin) &&
                     !loadedFcOrigins.contains(frozenChunk.origin)) {
-                    frozenChunk.loadBlocks();
+                    if (!frozenChunk.unsaved) {
+                        System.out.println("loaded (faked) frozen blocks at: " + frozenChunk.origin);
+                        frozenChunk.loadBlocks();
+                    } else {
+                        System.out.println("skipped loading (faked) frozen blocks at: " + frozenChunk.origin);
+                    }
                 }
             }
         }
@@ -186,7 +195,11 @@ public abstract class LevelRendererMixin {
                 rerenderChunksToRemove.add(chunkPos);
             }
             else if (!isInBrightChunk(originPos)) {
-                if (semiFrozenChunks.contains(originPos))
+                if (semiFrozenChunks.contains(originPos) ||
+                    frozenChunks.stream()
+                            .filter(fc -> fc.unsaved)
+                            .map(fc -> fc.origin)
+                            .toList().contains(originPos))
                     continue;
                 else
                     semiFrozenChunks.add(originPos);

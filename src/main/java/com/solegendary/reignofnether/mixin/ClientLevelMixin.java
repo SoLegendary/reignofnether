@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -83,6 +84,12 @@ public class ClientLevelMixin {
         ci.cancel();
         if (pSoundEvent.equals(SoundEvents.WARDEN_HEARTBEAT))
             return;
+
+        BlockPos bp = new BlockPos(pX, pY, pZ);
+        if (SoundClientEvents.mutedBps.contains(bp)) {
+            SoundClientEvents.mutedBps.remove(bp);
+            return;
+        }
 
         float volumeMult = 0.5f;
         if (isWardenSound(pSoundEvent))

@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServer;
@@ -125,11 +126,22 @@ public class PlayerServerEvents {
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         ServerPlayer serverPlayer = (ServerPlayer) evt.getEntity();
-        players.add((ServerPlayer) evt.getEntity());
 
+        players.add((ServerPlayer) evt.getEntity());
         String playerName = serverPlayer.getName().getString();
         System.out.println("Player logged in: " + playerName + ", id: " + serverPlayer.getId());
 
+        // if a player is looking directly at a frozenchunk on login, they may load in the real blocks before
+        // they are frozen so move them away then BuildingClientEvents.placeBuilding moves them to their base later
+        // don't do this if they don't own any buildings
+        if (isRTSPlayer(playerName)) {
+            for (Building building : BuildingServerEvents.getBuildings()) {
+                if (building.ownerName.equals(playerName)) {
+                    movePlayer(serverPlayer.getId(), 0,85,0);
+                    break;
+                }
+            }
+        }
         for (LivingEntity entity : UnitServerEvents.getAllUnits())
             if (entity instanceof Unit unit)
                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);

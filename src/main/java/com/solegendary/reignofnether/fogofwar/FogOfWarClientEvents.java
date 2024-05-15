@@ -5,18 +5,16 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.commands.Commands;
@@ -28,8 +26,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.ChunkEvent;
@@ -40,7 +36,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
-import static net.minecraft.util.Mth.floor;
 
 public class FogOfWarClientEvents {
     public static final float BRIGHT = 1.0f;
@@ -68,6 +63,8 @@ public class FogOfWarClientEvents {
     private static boolean enabled = false;
 
     private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
+
+    public static boolean movedToCapitol = false;
 
 
     public static void revealOrHidePlayer(boolean reveal, String playerName) {
@@ -115,9 +112,12 @@ public class FogOfWarClientEvents {
             resetFogChunks();
 
             if (enabled) {
+                updateFogChunks();
                 for (Building building : BuildingClientEvents.getBuildings())
-                    building.freezeChunks(MC.player.getName().getString());
+                    building.freezeChunks(MC.player.getName().getString(), false);
             } else {
+                for (FrozenChunk frozenChunk : frozenChunks)
+                    frozenChunk.unloadBlocks();
                 frozenChunks.clear();
             }
         }
@@ -222,6 +222,77 @@ public class FogOfWarClientEvents {
         evt.setCanceled(true);
     }
 
+    public static void updateFogChunks() {
+        brightChunks.clear();
+        Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
+        Set<ChunkPos> occupiedFarviewChunks = ConcurrentHashMap.newKeySet();
+
+        // get chunks that have units/buildings that can see
+        for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+            if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
+                    (entity instanceof Unit unit && isPlayerRevealed(unit.getOwnerName()))) {
+                if (entity instanceof GhastUnit)
+                    occupiedFarviewChunks.add(new ChunkPos(entity.getOnPos()));
+                else
+                    occupiedChunks.add(new ChunkPos(entity.getOnPos()));
+            }
+        }
+        for (Building building : BuildingClientEvents.getBuildings()) {
+            if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED ||
+                    isPlayerRevealed(building.ownerName)) {
+                if ((building instanceof GarrisonableBuilding && GarrisonableBuilding.getNumOccupants(building) > 0 && building.isBuilt) ||
+                        building.isCapitol)
+                    occupiedFarviewChunks.add(new ChunkPos(building.centrePos));
+                else
+                    occupiedChunks.add(new ChunkPos(building.centrePos));
+            }
+        }
+
+        for (ChunkPos chunkPos : occupiedChunks)
+            for (int x = -CHUNK_VIEW_DIST; x <= CHUNK_VIEW_DIST; x++)
+                for (int z = -CHUNK_VIEW_DIST; z <= CHUNK_VIEW_DIST; z++)
+                    brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
+
+        for (ChunkPos chunkPos : occupiedFarviewChunks)
+            for (int x = -CHUNK_FAR_VIEW_DIST; x <= CHUNK_FAR_VIEW_DIST; x++)
+                for (int z = -CHUNK_FAR_VIEW_DIST; z <= CHUNK_FAR_VIEW_DIST; z++)
+                    brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
+
+        Set<ChunkPos> newlyDarkChunks = ConcurrentHashMap.newKeySet();
+        newlyDarkChunks.addAll(lastBrightChunks);
+        newlyDarkChunks.removeAll(brightChunks);
+
+        for (ChunkPos cpos : newlyDarkChunks) {
+            onChunkUnexplore(cpos);
+            for (int x = -1; x <= 1; x++)
+                for (int z = -1; z <= 1; z++)
+                    rerenderChunks.add(new ChunkPos(cpos.x + x, cpos.z + z));
+        }
+        Set<ChunkPos> newlyBrightChunks = ConcurrentHashMap.newKeySet();
+        newlyBrightChunks.addAll(brightChunks);
+        newlyBrightChunks.removeAll(lastBrightChunks);
+
+        for (ChunkPos cpos : newlyBrightChunks)
+            onChunkExplore(cpos);
+
+        if (OrthoviewClientEvents.isEnabled())
+            semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
+                    .distSqr(MC.player.getOnPos()) > Math.pow(OrthoviewClientEvents.getZoom() * 2, 2));
+        else
+            semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
+                    .distSqr(MC.player.getOnPos()) > Math.pow(MC.levelRenderer.getLastViewDistance() * 8, 2));
+        semiFrozenChunks.removeIf(bp -> {
+            if (isInBrightChunk(bp)) {
+                updateChunkLighting(bp);
+                return true;
+            }
+            return false;
+        });
+
+        lastBrightChunks.clear();
+        lastBrightChunks.addAll(brightChunks);
+    }
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (!isEnabled() || MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
@@ -231,74 +302,8 @@ public class FogOfWarClientEvents {
             updateTicksLeft -= 1;
         } else {
             updateTicksLeft = UPDATE_TICKS_MAX;
-            brightChunks.clear();
-            Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
-            Set<ChunkPos> occupiedFarviewChunks = ConcurrentHashMap.newKeySet();
 
-            // get chunks that have units/buildings that can see
-            for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
-                if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
-                    (entity instanceof Unit unit && isPlayerRevealed(unit.getOwnerName()))) {
-                    if (entity instanceof GhastUnit)
-                        occupiedFarviewChunks.add(new ChunkPos(entity.getOnPos()));
-                    else
-                        occupiedChunks.add(new ChunkPos(entity.getOnPos()));
-                }
-            }
-            for (Building building : BuildingClientEvents.getBuildings()) {
-                if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED ||
-                    isPlayerRevealed(building.ownerName)) {
-                    if ((building instanceof GarrisonableBuilding && GarrisonableBuilding.getNumOccupants(building) > 0 && building.isBuilt) ||
-                        building.isCapitol)
-                        occupiedFarviewChunks.add(new ChunkPos(building.centrePos));
-                    else
-                        occupiedChunks.add(new ChunkPos(building.centrePos));
-                }
-            }
-
-            for (ChunkPos chunkPos : occupiedChunks)
-                for (int x = -CHUNK_VIEW_DIST; x <= CHUNK_VIEW_DIST; x++)
-                    for (int z = -CHUNK_VIEW_DIST; z <= CHUNK_VIEW_DIST; z++)
-                        brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
-
-            for (ChunkPos chunkPos : occupiedFarviewChunks)
-                for (int x = -CHUNK_FAR_VIEW_DIST; x <= CHUNK_FAR_VIEW_DIST; x++)
-                    for (int z = -CHUNK_FAR_VIEW_DIST; z <= CHUNK_FAR_VIEW_DIST; z++)
-                        brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
-
-            Set<ChunkPos> newlyDarkChunks = ConcurrentHashMap.newKeySet();
-            newlyDarkChunks.addAll(lastBrightChunks);
-            newlyDarkChunks.removeAll(brightChunks);
-
-            for (ChunkPos cpos : newlyDarkChunks) {
-                onChunkUnexplore(cpos);
-                for (int x = -1; x <= 1; x++)
-                    for (int z = -1; z <= 1; z++)
-                        rerenderChunks.add(new ChunkPos(cpos.x + x, cpos.z + z));
-            }
-            Set<ChunkPos> newlyBrightChunks = ConcurrentHashMap.newKeySet();
-            newlyBrightChunks.addAll(brightChunks);
-            newlyBrightChunks.removeAll(lastBrightChunks);
-
-            for (ChunkPos cpos : newlyBrightChunks)
-                onChunkExplore(cpos);
-
-            if (OrthoviewClientEvents.isEnabled())
-                semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
-                        .distSqr(MC.player.getOnPos()) > Math.pow(OrthoviewClientEvents.getZoom() * 2, 2));
-            else
-                semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
-                        .distSqr(MC.player.getOnPos()) > Math.pow(MC.levelRenderer.getLastViewDistance() * 8, 2));
-            semiFrozenChunks.removeIf(bp -> {
-                if (isInBrightChunk(bp)) {
-                    updateChunkLighting(bp);
-                    return true;
-                }
-                return false;
-            });
-
-            lastBrightChunks.clear();
-            lastBrightChunks.addAll(brightChunks);
+            updateFogChunks();
         }
     }
 
@@ -326,7 +331,7 @@ public class FogOfWarClientEvents {
 
         for (FrozenChunk frozenChunk : frozenChunks)
             if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
-                frozenChunk.syncServerBlocks(frozenChunk.origin);
+                frozenChunk.unloadBlocks();
 
         for (Building building : BuildingClientEvents.getBuildings()) {
             if (building.isExploredClientside)
@@ -340,6 +345,7 @@ public class FogOfWarClientEvents {
 
     // triggered when a chunk goes from bright to dark
     public static void onChunkUnexplore(ChunkPos cpos) {
+        frozenChunks.removeIf(fc -> fc.removeOnExplore && MC.level.getChunk(fc.origin).getPos().equals(cpos));
         for (FrozenChunk frozenChunk : frozenChunks)
             if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos) && MC.level.isLoaded(frozenChunk.origin))
                 frozenChunk.saveBlocks(); // only save blocks with faked chunks for NEW frozen chunks
@@ -347,11 +353,18 @@ public class FogOfWarClientEvents {
 
     @SubscribeEvent
     public static void onChunkLoad(ChunkEvent.Load evt) {
-        for (FrozenChunk fc : frozenChunks)
-            if (fc.attemptedUnloadedSave && evt.getLevel().isClientSide() &&
-                evt.getChunk().getPos().getWorldPosition().getX() == fc.origin.getX() &&
-                evt.getChunk().getPos().getWorldPosition().getZ() == fc.origin.getZ())
-                    fc.saveBlocks();
+        BlockPos bp = evt.getChunk().getPos().getWorldPosition();
+        // save any unsaved frozenChunks
+        for (FrozenChunk fc : frozenChunks) {
+            if (evt.getLevel().isClientSide() &&
+                    bp.getX() == fc.origin.getX() &&
+                    bp.getZ() == fc.origin.getZ()) {
+                if (fc.unsaved)
+                    fc.saveFakeBlocks();
+                if (!isInBrightChunk(bp))
+                    fc.loadBlocks();
+            }
+        }
     }
 
     public static void setBuildingDestroyedServerside(BlockPos buildingOrigin) {
@@ -360,19 +373,10 @@ public class FogOfWarClientEvents {
                 building.isDestroyedServerside = true;
     }
 
-    public static void freezeChunk(BlockPos origin, Building building) {
-        BlockPos roundedOrigin = origin.offset(
-                -origin.getX() % 16,
-                -origin.getY() % 16,
-                -origin.getZ() % 16
-        );
-        if (origin.getX() % 16 != 0 ||
-            origin.getY() % 16 != 0 ||
-            origin.getZ() % 16 != 0)
-            System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + origin);
-
-        System.out.println("Froze chunk at: " + roundedOrigin);
-        frozenChunks.add(new FrozenChunk(roundedOrigin, building));
+    public static void setBuildingBuiltServerside(BlockPos buildingOrigin) {
+        for (Building building : BuildingClientEvents.getBuildings())
+            if (building.originPos.equals(buildingOrigin))
+                building.isBuiltServerside = true;
     }
 
     // show corners of all frozenChunks
@@ -399,20 +403,24 @@ public class FogOfWarClientEvents {
                     unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
     }
 
-    /*
+    public static void unmuteChunks() {
+        SoundClientEvents.mutedBps.clear();
+    }
+
+
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         // select a moused over entity by left clicking it
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (MC.level != null)
-                MC.level.setBlockAndUpdate(CursorClientEvents.getPreselectedBlockPos(), Blocks.BARREL.defaultBlockState());
+                MC.level.setBlockAndUpdate(CursorClientEvents.getPreselectedBlockPos().above(), Blocks.SUNFLOWER.defaultBlockState());
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (MC.level != null)
-                FrozenChunkServerboundPacket.syncServerBlocks(CursorClientEvents.getPreselectedBlockPos());
+                FrozenChunkServerboundPacket.syncServerBlocks(CursorClientEvents.getPreselectedBlockPos().offset(-8,-8,-8));
         }
     }
-     */
+
 
     /*
     @SubscribeEvent

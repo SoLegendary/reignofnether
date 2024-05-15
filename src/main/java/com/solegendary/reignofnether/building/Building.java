@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FrozenChunk;
+import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -51,6 +52,7 @@ public abstract class Building {
 
     public boolean isExploredClientside = false;
     public boolean isDestroyedServerside = false;
+    public boolean isBuiltServerside = false;
 
     private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned; normally 500ms in real games
     public final float MELEE_DAMAGE_MULTIPLIER = 0.20f; // damage multiplier applied to melee attackers
@@ -376,8 +378,8 @@ public abstract class Building {
         Collections.shuffle(placedBlocks);
         for (int i = 0; i < amount && i < placedBlocks.size(); i++) {
             BlockPos bp = placedBlocks.get(i).getBlockPos();
-            getLevel().destroyBlock(bp, false);
             this.onBlockBreak((ServerLevel) getLevel(), bp, false);
+            getLevel().destroyBlock(bp, false);
         }
         if (amount > 0)
             AttackWarningClientboundPacket.sendWarning(ownerName, BuildingUtils.getCentrePos(getBlocks()));
@@ -513,6 +515,8 @@ public abstract class Building {
 
     public void onBuilt() {
         isBuilt = true;
+        if (!this.level.isClientSide())
+            FrozenChunkClientboundPacket.setBuildingBuiltServerside(this.originPos);
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) { }
@@ -613,7 +617,7 @@ public abstract class Building {
         if (extendedRange) {
             if (this instanceof NetherConvertingBuilding netherConvertingBuilding) {
                 double range = netherConvertingBuilding.getMaxRange();
-                addedRange = 16 * Math.ceil(Math.abs(range/16)); // round up to next multiple of 16
+                addedRange = (16 * Math.ceil(Math.abs(range/16))) + 16; // round up to next multiple of 16
             } else if (this instanceof AbstractStockpile) {
                 addedRange = 32;
             }
@@ -639,11 +643,24 @@ public abstract class Building {
         return origins;
     }
 
-    public void freezeChunks(String localPlayerName) {
+    public void freezeChunks(String localPlayerName, boolean forceFakeBlocks) {
         if (level.isClientSide) {
-            if (!ownerName.equals(localPlayerName))
-                for (BlockPos bp : getRenderChunkOrigins(true))
-                    FogOfWarClientEvents.freezeChunk(bp, this);
+            if (!ownerName.equals(localPlayerName)) {
+                for (BlockPos bp : getRenderChunkOrigins(true)) {
+                    BlockPos roundedOrigin = bp.offset(
+                            -bp.getX() % 16,
+                            -bp.getY() % 16,
+                            -bp.getZ() % 16
+                    );
+                    if (bp.getX() % 16 != 0 ||
+                            bp.getY() % 16 != 0 ||
+                            bp.getZ() % 16 != 0)
+                        System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + bp);
+
+                    System.out.println("Froze chunk at: " + roundedOrigin);
+                    FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(roundedOrigin, this, forceFakeBlocks));
+                }
+            }
         }
     }
 

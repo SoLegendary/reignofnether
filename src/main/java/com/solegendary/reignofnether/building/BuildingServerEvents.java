@@ -104,7 +104,7 @@ public class BuildingServerEvents {
                         newBuilding.addToBlockPlaceQueue(block);
                 }
                 BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, isBridge ? "" : ownerName,
-                        newBuilding.blockPlaceQueue.size(), isDiagonalBridge);
+                        newBuilding.blockPlaceQueue.size(), isDiagonalBridge, false);
 
                 ResourcesServerEvents.addSubtractResources(new Resources(
                     newBuilding.ownerName,
@@ -199,7 +199,8 @@ public class BuildingServerEvents {
                 building.rotation,
                 building.ownerName,
                 building.blockPlaceQueue.size(),
-                building instanceof AbstractBridge bridge && bridge.isDiagonal
+                building instanceof AbstractBridge bridge && bridge.isDiagonal,
+                true
             );
     }
 
@@ -351,7 +352,8 @@ public class BuildingServerEvents {
                         building.rotation,
                         building.ownerName,
                         building.blockPlaceQueue.size(),
-                        building instanceof AbstractBridge bridge && bridge.isDiagonal
+                        building instanceof AbstractBridge bridge && bridge.isDiagonal,
+                        false
                 );
                 return;
             }
