@@ -49,31 +49,20 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
     public final static String structureName = "portal_basic";
     public final static ResourceCost cost = ResourceCosts.BASIC_PORTAL;
 
-    private final double NETHER_CONVERT_RANGE_MAX = 20;
-    private double netherConvertRange = 3;
-    private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
-    private int convertsAfterMaxRange = 0;
     public PortalType portalType = PortalType.BASIC;
 
     public BlockPos destination; // for transport portals
 
-    public double getMaxRange() { return NETHER_CONVERT_RANGE_MAX; }
+    public NetherConversionZone netherConversionZone;
+
+    @Override public double getMaxRange() { return 20; }
+    @Override public double getStartingRange() { return 3; }
+    @Override public NetherConversionZone getZone() { return netherConversionZone; }
 
     @Override
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
 
-        if (isBuilt) {
-            netherConvertTicksLeft -= 1;
-            if (netherConvertTicksLeft <= 0 && convertsAfterMaxRange < MAX_CONVERTS_AFTER_MAX_RANGE) {
-                netherConvertTick(this, netherConvertRange, NETHER_CONVERT_RANGE_MAX);
-                if (netherConvertRange < NETHER_CONVERT_RANGE_MAX)
-                    netherConvertRange += 0.1f;
-                else
-                    convertsAfterMaxRange += 1;
-                netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
-            }
-        }
         if (!this.getLevel().isClientSide() && this.getBlocksPlaced() >= getBlocksTotal() &&
              this.getLevel().getBlockState(this.centrePos).isAir())
             this.getLevel().setBlockAndUpdate(this.centrePos, Blocks.FIRE.defaultBlockState());
@@ -127,6 +116,9 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
                     ResearchPortalForTransport.getStartButton(this, Keybindings.keyE)
             );
         }
+        netherConversionZone = new NetherConversionZone(level, centrePos.offset(0,-2,0), getMaxRange(), getStartingRange());
+        if (!level.isClientSide())
+            BuildingServerEvents.netherConversionZones.add(netherConversionZone);
     }
 
     public void disconnectPortal() {

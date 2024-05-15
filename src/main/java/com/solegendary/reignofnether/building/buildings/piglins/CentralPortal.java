@@ -31,28 +31,16 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
     public final static String structureName = "central_portal";
     public final static ResourceCost cost = ResourceCosts.CENTRAL_PORTAL;
 
-    private final double NETHER_CONVERT_RANGE_MAX = 30;
-    private double netherConvertRange = 6;
-    private int netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
-    private int convertsAfterMaxRange = 0;
+    public NetherConversionZone netherConversionZone;
 
-    public double getMaxRange() { return NETHER_CONVERT_RANGE_MAX; }
+    @Override public double getMaxRange() { return 30; }
+    @Override public double getStartingRange() { return 6; }
+    @Override public NetherConversionZone getZone() { return netherConversionZone; }
 
     @Override
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
 
-        if (isBuilt) {
-            netherConvertTicksLeft -= 1;
-            if (netherConvertTicksLeft <= 0 && convertsAfterMaxRange < MAX_CONVERTS_AFTER_MAX_RANGE) {
-                netherConvertTick(this, netherConvertRange, NETHER_CONVERT_RANGE_MAX);
-                if (netherConvertRange < NETHER_CONVERT_RANGE_MAX)
-                    netherConvertRange += 0.1f;
-                else
-                    convertsAfterMaxRange += 1;
-                netherConvertTicksLeft = NETHER_CONVERT_TICKS_MAX;
-            }
-        }
         if (!this.getLevel().isClientSide() && this.getBlocksPlaced() >= getBlocksTotal()) {
             BlockPos bp;
             if (this.rotation == Rotation.CLOCKWISE_90 ||
@@ -86,6 +74,10 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
             this.productionButtons = Arrays.asList(
                     GruntProd.getStartButton(this, Keybindings.keyQ)
             );
+
+        netherConversionZone = new NetherConversionZone(level, centrePos.offset(0,-6,0), getMaxRange(), getStartingRange());
+        if (!level.isClientSide())
+            BuildingServerEvents.netherConversionZones.add(netherConversionZone);
     }
 
     @Override
