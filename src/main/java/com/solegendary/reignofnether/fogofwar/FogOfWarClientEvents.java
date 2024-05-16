@@ -277,7 +277,7 @@ public class FogOfWarClientEvents {
 
         if (OrthoviewClientEvents.isEnabled())
             semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
-                    .distSqr(MC.player.getOnPos()) > Math.pow(OrthoviewClientEvents.getZoom() * 2, 2));
+                    .distSqr(MC.player.getOnPos()) > Math.pow(OrthoviewClientEvents.getZoom() * 3, 2));
         else
             semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
                     .distSqr(MC.player.getOnPos()) > Math.pow(MC.levelRenderer.getLastViewDistance() * 8, 2));

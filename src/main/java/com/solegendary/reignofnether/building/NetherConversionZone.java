@@ -84,7 +84,7 @@ public class NetherConversionZone {
             if (distSqr < rangeSqr)
                 continue;
 
-            double chance = 0.15f;
+            double chance = 0.10f;
             if (random.nextDouble() > chance)
                 continue;
 
