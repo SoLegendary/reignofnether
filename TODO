@@ -10,6 +10,8 @@ TODO:
 - on relogin sometimes loading screen does not disappear until F12 is pressed
     - make sure Ortho screen is cleaned up on logout?
 
+- can't convert water blocks above soulsand to lava?
+
 
 Playtest checklist:
     - Frozen loaded chunks, then move in units to explore

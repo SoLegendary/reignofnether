@@ -79,7 +79,7 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
     @Override
     public void onBuilt() {
         super.onBuilt();
-        netherConversionZone = new NetherConversionZone(level, centrePos.offset(0,-2,0), getMaxRange(), getStartingRange());
+        netherConversionZone = new NetherConversionZone(level, centrePos.offset(0,-6,0), getMaxRange(), getStartingRange());
         if (!level.isClientSide())
             BuildingServerEvents.netherConversionZones.add(netherConversionZone);
     }

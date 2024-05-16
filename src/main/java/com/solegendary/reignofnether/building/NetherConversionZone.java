@@ -77,6 +77,7 @@ public class NetherConversionZone {
                 for (double z = -restoreRange; z < restoreRange; z++)
                     bps.add(origin.offset(x, y, z));
 
+        outerloop:
         for (BlockPos bp : bps) {
             double distSqr = bp.distSqr(origin);
             double rangeSqr = range * range;
@@ -87,6 +88,10 @@ public class NetherConversionZone {
             double chance = 0.10f;
             if (random.nextDouble() > chance)
                 continue;
+
+            for (NetherConversionZone ncz : BuildingServerEvents.netherConversionZones)
+                if (!ncz.isRestoring && bp.distSqr(ncz.origin) < ncz.maxRange * ncz.maxRange)
+                    continue outerloop;
 
             BlockState bs = NetherBlocks.getOverworldBlock(level, bp);
             BlockState bsPlant = NetherBlocks.getOverworldPlantBlock(level, bp.above(), true);
