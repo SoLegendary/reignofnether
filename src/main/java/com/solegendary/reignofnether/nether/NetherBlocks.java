@@ -90,28 +90,24 @@ public class NetherBlocks {
 
     private static Block getRandomPlantForBiome(Level level, BlockPos overworldBp) {
         int randInt = random.nextInt(100);
-        String biomeName = level.getBiome(overworldBp).get().toString().toLowerCase();
+        Biome biome = level.getBiome(overworldBp).get();
 
-        if (biomeName.contains("sunflower")) {
-            if (randInt < 20)
-                return Blocks.SUNFLOWER;
-        } else if (biomeName.contains("taiga")) {
-            if (randInt < 2)
-                return Blocks.SWEET_BERRY_BUSH;
-            else if (randInt < 30)
-                return Blocks.FERN;
-        } else if (List.of("plains", "forest").contains(biomeName)) {
+        if (biome.getBaseTemperature() >= 2.0f &&
+            level.getBlockState(overworldBp.below()).getBlock() == Blocks.SAND) {
+            return Blocks.DEAD_BUSH;
+        } else if (biome.getBaseTemperature() >= 1.0f) {
+            return Blocks.GRASS;
+        }  else if (biome.getBaseTemperature() >= 0) {
             if (randInt < 20)
                 return FLOWERS.get(random.nextInt(FLOWERS.size()));
-        } else if (biomeName.contains("swamp")) {
-            if (randInt < 10)
-                return Blocks.RED_MUSHROOM;
-            else if (randInt < 20)
-                return Blocks.BROWN_MUSHROOM;
-        } else if (biomeName.contains("desert")) {
-            return Blocks.DEAD_BUSH;
+            else
+                return Blocks.GRASS;
+        } else {
+            if (randInt < 20)
+                return Blocks.FERN;
+            else
+                return Blocks.GRASS;
         }
-        return Blocks.GRASS;
     }
 
     public static final List<Block> FLOWERS = List.of(
@@ -294,7 +290,8 @@ public class NetherBlocks {
                 Blocks.MUDDY_MANGROVE_ROOTS,
                 Blocks.AZALEA,
                 Blocks.FLOWERING_AZALEA,
-                Blocks.SUGAR_CANE
+                Blocks.SUGAR_CANE,
+                Blocks.CACTUS
             ));
     }
 }
