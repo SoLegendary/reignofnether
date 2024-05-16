@@ -74,8 +74,6 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
             this.productionButtons = Arrays.asList(
                     GruntProd.getStartButton(this, Keybindings.keyQ)
             );
-
-
     }
 
     @Override

@@ -408,6 +408,7 @@ public class FogOfWarClientEvents {
     }
 
 
+    /*
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         // select a moused over entity by left clicking it
@@ -420,7 +421,7 @@ public class FogOfWarClientEvents {
                 FrozenChunkServerboundPacket.syncServerBlocks(CursorClientEvents.getPreselectedBlockPos().offset(-8,-8,-8));
         }
     }
-
+     */
 
     /*
     @SubscribeEvent

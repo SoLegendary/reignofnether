@@ -7,17 +7,11 @@ TODO bugs/features:
 
 
 TODO:
-- make nether blocks turn back into overworld blocks when portals are removed?
-
 - on relogin sometimes loading screen does not disappear until F12 is pressed
     - make sure Ortho screen is cleaned up on logout?
 
 
-TEST:
-    - faking block saves on another building that you have already explored
-
-
-Playest checklist:
+Playtest checklist:
     - Frozen loaded chunks, then move in units to explore
     - Frozen unloaded chunks, then move in units to explore
     - Faking block saves on another building that you have already explored

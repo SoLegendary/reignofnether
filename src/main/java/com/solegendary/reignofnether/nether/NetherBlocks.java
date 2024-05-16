@@ -60,13 +60,14 @@ public class NetherBlocks {
     public static BlockState getOverworldBlock(Level level, BlockPos overworldBp) {
         BlockState netherBs = level.getBlockState(overworldBp);
         if (!netherBs.isAir()) {
-            for (Map.Entry<Block, List<Block>> entrySet : MAPPINGS.entrySet())
-                if (entrySet.getKey().getName().getString().equals(netherBs.getBlock().getName().getString())) {
-                    if (netherBs.getBlock() == Blocks.OBSIDIAN)
-                        return Blocks.WATER.defaultBlockState();
-                    else
-                        return entrySet.getValue().get(0).defaultBlockState();
-                }
+            for (Map.Entry<Block, List<Block>> entrySet : MAPPINGS.entrySet()) {
+                if (netherBs.getBlock() == Blocks.OBSIDIAN)
+                    return Blocks.WATER.defaultBlockState();
+                else if (netherBs.getBlock() == Blocks.NETHERRACK)
+                    return Blocks.GRASS_BLOCK.defaultBlockState();
+                else if (entrySet.getKey().getName().getString().equals(netherBs.getBlock().getName().getString()))
+                    return entrySet.getValue().get(0).defaultBlockState();
+            }
         }
         return null;
     }

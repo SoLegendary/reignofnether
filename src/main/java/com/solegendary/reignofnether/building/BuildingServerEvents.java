@@ -263,6 +263,8 @@ public class BuildingServerEvents {
 
         for (NetherConversionZone netherConversionZone : netherConversionZones)
             netherConversionZone.tick();
+
+        netherConversionZones.removeIf(NetherConversionZone::isDone);
     }
 
     // cancel all explosion damage to non-building blocks

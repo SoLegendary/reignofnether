@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
@@ -39,8 +40,11 @@ public class NetherConversionZone {
         isRestoring = true;
     }
 
-    public void tick() {
+    public boolean isDone() {
+        return !level.isClientSide() && isRestoring && convertsAfterConstantRange >= MAX_CONVERTS_AFTER_CONSTANT_RANGE;
+    }
 
+    public void tick() {
         if (!level.isClientSide()) {
             ticksLeft -= 1;
             if (ticksLeft <= 0 && convertsAfterConstantRange < MAX_CONVERTS_AFTER_CONSTANT_RANGE) {
@@ -60,9 +64,6 @@ public class NetherConversionZone {
                 }
                 ticksLeft = MAX_TICKS;
             }
-            else if (!level.isClientSide() && isRestoring && convertsAfterConstantRange >= MAX_CONVERTS_AFTER_CONSTANT_RANGE) {
-                BuildingServerEvents.netherConversionZones.remove(this);
-            }
         }
     }
 
@@ -78,15 +79,14 @@ public class NetherConversionZone {
 
         for (BlockPos bp : bps) {
             double distSqr = bp.distSqr(origin);
-            double rangeSqr = restoreRange * restoreRange;
+            double rangeSqr = range * range;
             double rangeMaxSqr = maxRange * maxRange;
             if (distSqr < rangeSqr)
                 continue;
 
-            // at half distance, chance = 50%
-            //double chance = (distSqr / rangeMaxSqr) / 10;
-            //if (random.nextDouble() > chance)
-            //    continue;
+            double chance = 0.15f;
+            if (random.nextDouble() > chance)
+                continue;
 
             BlockState bs = NetherBlocks.getOverworldBlock(level, bp);
             BlockState bsPlant = NetherBlocks.getOverworldPlantBlock(level, bp.above(), true);
@@ -113,8 +113,18 @@ public class NetherConversionZone {
             if (distSqr > rangeSqr)
                 continue;
 
-            // at half distance, chance = 50%
+            // give a higher chance to convert blocks at closer distance
             double chance = (1 - (distSqr / rangeMaxSqr)) / 10;
+
+            if (level.getBlockState(bp).getBlock() == Blocks.WATER) {
+                int adjObs = 0;
+                if (level.getBlockState(bp.north()).getBlock() == Blocks.OBSIDIAN) adjObs += 1;
+                if (level.getBlockState(bp.south()).getBlock() == Blocks.OBSIDIAN) adjObs += 1;
+                if (level.getBlockState(bp.east()).getBlock() == Blocks.OBSIDIAN) adjObs += 1;
+                if (level.getBlockState(bp.west()).getBlock() == Blocks.OBSIDIAN) adjObs += 1;
+                if (adjObs >= 3)
+                    chance = 1.0f;
+            }
             if (random.nextDouble() > chance)
                 continue;
 
