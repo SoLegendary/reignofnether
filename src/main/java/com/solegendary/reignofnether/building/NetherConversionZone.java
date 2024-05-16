@@ -58,7 +58,7 @@ public class NetherConversionZone {
                 else {
                     overworldRestoreTick();
                     if (range > 0)
-                        range -= 0.1f;
+                        range -= 0.05f;
                     else
                         convertsAfterConstantRange += 1;
                 }

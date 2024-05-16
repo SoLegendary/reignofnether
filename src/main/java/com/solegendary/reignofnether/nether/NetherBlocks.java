@@ -98,7 +98,7 @@ public class NetherBlocks {
         } else if (biome.getBaseTemperature() >= 1.0f) {
             return Blocks.GRASS;
         }  else if (biome.getBaseTemperature() >= 0) {
-            if (randInt < 20)
+            if (randInt < 10)
                 return FLOWERS.get(random.nextInt(FLOWERS.size()));
             else
                 return Blocks.GRASS;
