@@ -121,7 +121,8 @@ public class NetherConversionZone {
             // give a higher chance to convert blocks at closer distance
             double chance = (1 - (distSqr / rangeMaxSqr)) / 10;
 
-            if (level.getBlockState(bp).getBlock() == Blocks.WATER) {
+            if (level.getBlockState(bp).getBlock() == Blocks.WATER ||
+                level.getBlockState(bp).getBlock() == Blocks.BUBBLE_COLUMN) {
                 int adjObs = 0;
                 if (level.getBlockState(bp.north()).getBlock() == Blocks.OBSIDIAN) adjObs += 1;
                 if (level.getBlockState(bp.south()).getBlock() == Blocks.OBSIDIAN) adjObs += 1;

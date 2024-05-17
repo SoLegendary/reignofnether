@@ -156,6 +156,7 @@ public class NetherBlocks {
         MAPPINGS.put(Blocks.LAVA,
             List.of(
                 Blocks.WATER,
+                Blocks.BUBBLE_COLUMN,
                 Blocks.OBSIDIAN, // converting water -> lava alone generates a lot of obsidian
                 Blocks.SEAGRASS,
                 Blocks.TALL_SEAGRASS,
