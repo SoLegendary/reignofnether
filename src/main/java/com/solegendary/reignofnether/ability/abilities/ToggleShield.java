@@ -54,7 +54,7 @@ public class ToggleShield extends Ability {
                 List.of(
                         FormattedCharSequence.forward("Shield Stance", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Hold up your shield, halving all projectile ", Style.EMPTY),
+                        FormattedCharSequence.forward("Raise or lower a shield, halving projectile ", Style.EMPTY),
                         FormattedCharSequence.forward("damage taken but also halving movement speed.", Style.EMPTY)
                 ),
                 this

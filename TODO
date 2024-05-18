@@ -13,7 +13,9 @@ TODO bugs/features:
 
 - ghasts dont damage buildings?
     - likely due to some shots hitting only explosion-resistant blocks like stone bricks
-- in a grouped army using abilities from one unit resets the commands from others
+
+- brutes dont change movement speed when toggling shield
+    - maybe change to slowness debuff instead?
 
 
 

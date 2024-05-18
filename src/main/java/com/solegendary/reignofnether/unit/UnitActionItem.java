@@ -18,6 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class UnitActionItem {
     private final String ownerName;
@@ -26,6 +27,24 @@ public class UnitActionItem {
     private final int[] unitIds; // selected unit(s)
     private final BlockPos preselectedBlockPos;
     private final BlockPos selectedBuildingPos;
+
+    private final List<UnitAction> nonAbilityActions = List.of(
+        UnitAction.STOP,
+        UnitAction.HOLD,
+        UnitAction.GARRISON,
+        UnitAction.UNGARRISON,
+        UnitAction.MOVE,
+        UnitAction.ATTACK_MOVE,
+        UnitAction.ATTACK,
+        UnitAction.ATTACK_BUILDING,
+        UnitAction.FOLLOW,
+        UnitAction.BUILD_REPAIR,
+        UnitAction.FARM,
+        UnitAction.RETURN_RESOURCES,
+        UnitAction.RETURN_RESOURCES_TO_CLOSEST,
+        UnitAction.DELETE,
+        UnitAction.DISCARD
+    );
 
     public UnitActionItem(
             String ownerName,
@@ -83,17 +102,20 @@ public class UnitActionItem {
             }
             else {
                 // if we are issuing a redundant unit attack command then don't resetBehaviours or else the unit will pause unnecessarily
+                // also don't reset if the action is an ability and the ability wasn't found on this unit
                 if ((action != UnitAction.ATTACK || unit.getTargetGoal().getTarget() == null ||
                     unit.getTargetGoal().getTarget().getId() != unitId)) {
 
+                    boolean foundAbility = false;
                     boolean shouldResetBehaviours = true;
                     for (Ability ability : unit.getAbilities()) {
                         if (ability.action == action) {
+                            foundAbility = true;
                             shouldResetBehaviours = ability.shouldResetBehaviours();
                             break;
                         }
                     }
-                    if (shouldResetBehaviours)
+                    if (shouldResetBehaviours && (nonAbilityActions.contains(action) || foundAbility))
                         resetBehaviours(unit);
                 }
             }
