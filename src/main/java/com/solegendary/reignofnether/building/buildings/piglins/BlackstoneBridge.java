@@ -65,8 +65,7 @@ public class BlackstoneBridge extends AbstractBridge {
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == BlackstoneBridge.class,
                 () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
-                        BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
+                () -> BuildingClientEvents.hasFinishedBuilding(CentralPortal.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(BlackstoneBridge.class),
                 null,

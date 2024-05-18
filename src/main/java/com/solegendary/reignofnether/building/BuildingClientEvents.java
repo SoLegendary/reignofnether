@@ -273,6 +273,9 @@ public class BuildingClientEvents {
         if (isBuildingToPlaceABridge())
             return false;
 
+        if (buildingToPlace.getName().toLowerCase().contains("piglins.portal"))
+            return false;
+
         int solidBlocksBelow = 0;
         int blocksBelow = 0;
         for (BuildingBlock block : blocksToDraw) {
@@ -720,7 +723,8 @@ public class BuildingClientEvents {
                                      int numBlocksToPlace, boolean isDiagonalBridge, boolean forPlayerLoggingIn) {
 
         for (Building building : buildings)
-            if (BuildingUtils.isPosPartOfAnyBuilding(true, pos, false))
+            if (!buildingName.toLowerCase().contains("bridge") &&
+                BuildingUtils.isPosPartOfAnyBuilding(true, pos, false, 0))
                 return; // building already exists clientside
 
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName, isDiagonalBridge);

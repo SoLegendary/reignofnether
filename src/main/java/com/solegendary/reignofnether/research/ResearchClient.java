@@ -54,16 +54,12 @@ public class ResearchClient {
     public static void addCheat(String cheatItemName) {
         synchronized (cheatItems) {
             cheatItems.add(cheatItemName);
-            if (cheatItemName.equals("iseedeadpeople"))
-                resetFogChunks();
         }
     }
 
     public static void removeCheat(String cheatItemName) {
         synchronized (cheatItems) {
             cheatItems.removeIf(r -> r.equals(cheatItemName));
-            if (cheatItemName.equals("iseedeadpeople"))
-                resetFogChunks();
         }
     }
 

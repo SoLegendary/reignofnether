@@ -208,7 +208,7 @@ public class BuildingUtils {
 
     // returns whether the given pos is part of ANY building in the level
     // WARNING: very processing expensive!
-    public static boolean isPosPartOfAnyBuilding(boolean isClientSide, BlockPos bp, boolean onlyPlacedBlocks) {
+    public static boolean isPosPartOfAnyBuilding(boolean isClientSide, BlockPos bp, boolean onlyPlacedBlocks, int range) {
         List<Building> buildings;
         if (isClientSide)
             buildings = BuildingClientEvents.getBuildings();
@@ -216,8 +216,9 @@ public class BuildingUtils {
             buildings = BuildingServerEvents.getBuildings();
 
         for (Building building : buildings)
-            if (building.isPosPartOfBuilding(bp, onlyPlacedBlocks))
-                return true;
+            if (range == 0 || bp.distSqr(building.centrePos) < range * range)
+                if (building.isPosPartOfBuilding(bp, onlyPlacedBlocks))
+                    return true;
         return false;
     }
 

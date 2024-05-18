@@ -57,12 +57,9 @@ public class OrthoviewClientEvents {
     private static final float ZOOM_STEP_SCROLL = 1;
     private static final float ZOOM_MIN = 10;
     private static final float ZOOM_MAX = 90;
-    private static final float PAN_KEY_STEP = 0.5f;
-    private static final float EDGE_CAMPAM_SENSITIVITY = 0.8f;
     private static final float CAMROTY_MAX = -20;
     private static final float CAMROTY_MIN = -90;
     private static final float CAMROT_MOUSE_SENSITIVITY = 0.12f;
-    private static final float CAMPAN_MOUSE_SENSITIVITY = 0.15f;
 
     private static float zoom = 30; // * 2 = number of blocks in height (higher == zoomed out)
     private static float camRotX = 135; // left/right - should start northeast (towards -Z,+X)
@@ -239,17 +236,19 @@ public class OrthoviewClientEvents {
         double cursorX = glfwCursorX.get();
         double cursorY = glfwCursorY.get();
 
+        float edgeCamPanSensitivity = 1.5f * (getZoom() / ZOOM_MAX);
+
         // panCam when cursor is at edge of screen
         // remember that mouse (0,0) is top left of screen
         if (!Keybindings.altMod.isDown() && MC.isWindowActive()) {
             if (cursorX <= 0)
-                panCam(EDGE_CAMPAM_SENSITIVITY, 0, 0);
+                panCam(edgeCamPanSensitivity, 0, 0);
             else if (cursorX >= glfwWinWidth)
-                panCam(-EDGE_CAMPAM_SENSITIVITY, 0, 0);
+                panCam(-edgeCamPanSensitivity, 0, 0);
             if (cursorY <= 0)
-                panCam(0, 0, EDGE_CAMPAM_SENSITIVITY);
+                panCam(0, 0, edgeCamPanSensitivity);
             else if (cursorY >= glfwWinHeight)
-                panCam(0, 0, -EDGE_CAMPAM_SENSITIVITY);
+                panCam(0, 0, -edgeCamPanSensitivity);
         }
 
         // lock mouse inside window
@@ -270,15 +269,17 @@ public class OrthoviewClientEvents {
         if (Keybindings.zoomOut.isDown())
             zoomCam(ZOOM_STEP_KEY);
 
+        float panKeyStep = 1.5f * (getZoom() / ZOOM_MAX);
+
         // pan camera with keys
         if (Keybindings.panPlusX.isDown())
-            panCam(PAN_KEY_STEP,0,0);
+            panCam(panKeyStep,0,0);
         else if (Keybindings.panMinusX.isDown())
-            panCam(-PAN_KEY_STEP,0,0);
+            panCam(-panKeyStep,0,0);
         if (Keybindings.panPlusZ.isDown())
-            panCam(0,0,PAN_KEY_STEP);
+            panCam(0,0,panKeyStep);
         else if (Keybindings.panMinusZ.isDown())
-            panCam(0,0,-PAN_KEY_STEP);
+            panCam(0,0,-panKeyStep);
 
         // note that we treat x and y rot as horizontal and vertical, but MC treats it the other way around...
         if (player != null) {
@@ -328,8 +329,9 @@ public class OrthoviewClientEvents {
 
         if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;
-            float moveX = (float) evt.getDragX() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX); //* winWidth/1920;
-            float moveZ = (float) evt.getDragY() * CAMPAN_MOUSE_SENSITIVITY * (zoom/ZOOM_MAX); //* winHeight/1080;
+
+            float moveX = (float) evt.getDragX() * 0.15f * (zoom/ZOOM_MAX); //* winWidth/1920;
+            float moveZ = (float) evt.getDragY() * 0.15f * (zoom/ZOOM_MAX); //* winHeight/1080;
             panCam(moveX, 0, moveZ);
         }
         else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybindings.altMod.isDown()) {

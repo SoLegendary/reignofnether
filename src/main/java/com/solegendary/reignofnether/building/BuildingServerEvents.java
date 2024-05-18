@@ -43,7 +43,7 @@ public class BuildingServerEvents {
     // buildings that currently exist serverside
     private static final ArrayList<Building> buildings = new ArrayList<>();
 
-    private static final ArrayList<Building> buildingsBackup = new ArrayList<>();
+    public static final ArrayList<NetherConversionZone> netherConversionZones = new ArrayList<>();
 
     public static ArrayList<Building> getBuildings() {
         return buildings;
@@ -247,6 +247,8 @@ public class BuildingServerEvents {
         List<Building> buildingsToDestroy = buildings.stream().filter(Building::shouldBeDestroyed).toList();
         buildings.removeIf(b -> {
             if (b.shouldBeDestroyed()) {
+                if (b instanceof NetherConvertingBuilding nb && nb.getZone() != null)
+                    nb.getZone().startRestoring();
                 FrozenChunkClientboundPacket.setBuildingDestroyedServerside(b.originPos);
                 return true;
             }
@@ -258,6 +260,11 @@ public class BuildingServerEvents {
 
         for (Building building : buildings)
             building.tick(serverLevel);
+
+        for (NetherConversionZone netherConversionZone : netherConversionZones)
+            netherConversionZone.tick();
+
+        netherConversionZones.removeIf(NetherConversionZone::isDone);
     }
 
     // cancel all explosion damage to non-building blocks

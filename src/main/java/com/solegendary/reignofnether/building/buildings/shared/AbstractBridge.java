@@ -6,10 +6,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.AirBlock;
-import net.minecraft.world.level.block.FenceBlock;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
@@ -30,8 +27,9 @@ public abstract class AbstractBridge extends Building {
     @Override
     public float getMeleeDamageMult() { return MELEE_DAMAGE_MULTIPLIER; }
 
-    public static boolean  shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level) {
+    public static boolean shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level) {
         BlockState bs = b.getBlockState();
+
         boolean isFenceOrAir = b.getBlockState().getBlock() instanceof AirBlock ||
                 b.getBlockState().getBlock() instanceof FenceBlock;
         BlockPos bp = b.getBlockPos().offset(originPos);
@@ -40,9 +38,11 @@ public abstract class AbstractBridge extends Building {
 
         // if the block in the world matches this exactly, don't cull it, instead just consider it to be our block too
         BlockState bsWorld = level.getBlockState(bp);
+
+        if (bsWorld.getBlock() == Blocks.OBSIDIAN)
+            return false;
         if (bsWorld.equals(bs))
             return false;
-
         if ((bsWorld.isAir() || bsWorld.getMaterial().isLiquid()) && !isFenceOrAir)
             return false;
 
