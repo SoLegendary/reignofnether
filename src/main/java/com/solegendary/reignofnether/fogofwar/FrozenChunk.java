@@ -46,16 +46,40 @@ public class FrozenChunk {
         }
     }
 
+    public FrozenChunk(BlockPos origin, Building building, FrozenChunk frozenChunkToCopy) {
+        this.origin = origin;
+        this.building = building;
+        this.blocks = Map.copyOf(frozenChunkToCopy.blocks);
+        this.hasFakeBlocks = frozenChunkToCopy.hasFakeBlocks;
+        this.unsaved = frozenChunkToCopy.unsaved;
+    }
+
     // saves the ClientLevel blocks into this.blocks
     public void saveBlocks() {
         if (MC.level == null)
             return;
 
+        ArrayList<BuildingBlock> bbs = new ArrayList<>();
+        for (BuildingBlock bb : building.getBlocks())
+            if (isPosInside(bb.getBlockPos()) && !bb.getBlockState().isAir())
+                bbs.add(bb);
+
         for (int x = 0; x <= 16; x++) {
             for (int y = 0; y <= 16; y++) {
+                outerloop:
                 for (int z = 0; z <= 16; z++) {
                     BlockPos bp = origin.offset(x,y,z);
                     BlockState bs = MC.level.getBlockState(bp);
+
+                    for (BuildingBlock bb : bbs) {
+                        if (bb.getBlockPos().equals(bp)) {
+                            if (building instanceof AbstractBridge)
+                                saveBlock(bb.getBlockPos(), Blocks.WATER.defaultBlockState(), bbs);
+                            else
+                                saveBlock(bb.getBlockPos(), Blocks.AIR.defaultBlockState(), bbs);
+                            continue outerloop;
+                        }
+                    }
                     saveBlock(bp, MC.level.getBlockState(bp), new ArrayList<>());
                 }
             }

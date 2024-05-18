@@ -6,18 +6,14 @@ TODO bugs/features:
 - turning on fog of war causes a crash when optifine is installed
 
 
-TODO:
-- on relogin sometimes loading screen does not disappear until F12 is pressed
-    - make sure Ortho screen is cleaned up on logout?
 
-- can't convert water blocks above soulsand to lava?
+- in first-person camera, dont make semifrozen chunks if they are too far away
+- cant spread nether over large water
+- add warning message for building in fog
 
-
-Playtest checklist:
-    - Frozen loaded chunks, then move in units to explore
-    - Frozen unloaded chunks, then move in units to explore
-    - Faking block saves on another building that you have already explored
-    - Log in/out while looking at a frozen chunk
+- ghasts dont damage buildings?
+    - likely due to some shots hitting only explosion-resistant blocks like stone bricks
+- in a grouped army using abilities from one unit resets the commands from others
 
 
 

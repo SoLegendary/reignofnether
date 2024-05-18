@@ -124,8 +124,6 @@ public class FogOfWarClientEvents {
     }
 
     public static boolean isEnabled() {
-        if (ResearchClient.hasCheat("iseedeadpeople"))
-            return false;
         return enabled;
     }
 

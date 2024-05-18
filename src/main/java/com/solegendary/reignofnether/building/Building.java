@@ -658,7 +658,18 @@ public abstract class Building {
                         System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + bp);
 
                     System.out.println("Froze chunk at: " + roundedOrigin);
-                    FogOfWarClientEvents.frozenChunks.add(new FrozenChunk(roundedOrigin, this, forceFakeBlocks));
+
+                    FrozenChunk newFrozenChunk = null;
+                    for (FrozenChunk frozenChunk : FogOfWarClientEvents.frozenChunks) {
+                        if (roundedOrigin.equals(frozenChunk.origin)) {
+                            newFrozenChunk = new FrozenChunk(roundedOrigin, this, frozenChunk);
+                            break;
+                        }
+                    }
+                    if (newFrozenChunk == null)
+                        newFrozenChunk = new FrozenChunk(roundedOrigin, this, forceFakeBlocks);
+
+                    FogOfWarClientEvents.frozenChunks.add(newFrozenChunk);
                 }
             }
         }

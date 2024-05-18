@@ -55,13 +55,12 @@ public class PlayerServerEvents {
 
     // warpten - faster building/unit production
     // operationcwal - faster resource gathering
-    // iseedeadpeople - ignore fog of war
     // modifythephasevariance - ignore building requirements
-    // medievalman - get all research (cannot disable)
+    // medievalman - get all research (cannot reverse)
     // greedisgood X - gain X of each resource
     // foodforthought - unlimited population
     public static final List<String> singleWordCheats = List.of(
-            "warpten", "operationcwal", "iseedeadpeople", "modifythephasevariance", "medievalman", "foodforthought"
+            "warpten", "operationcwal", "modifythephasevariance", "medievalman", "foodforthought"
     );
 
     private static class RTSPlayer {

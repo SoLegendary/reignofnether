@@ -273,6 +273,9 @@ public class BuildingClientEvents {
         if (isBuildingToPlaceABridge())
             return false;
 
+        if (buildingToPlace.getName().toLowerCase().contains("piglins.portal"))
+            return false;
+
         int solidBlocksBelow = 0;
         int blocksBelow = 0;
         for (BuildingBlock block : blocksToDraw) {
