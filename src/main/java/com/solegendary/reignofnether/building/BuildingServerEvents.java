@@ -314,8 +314,9 @@ public class BuildingServerEvents {
         if (exp.getExploder() == null && exp.getSourceMob() == null && ghastUnit == null)
             evt.getAffectedEntities().clear();
 
-        // apply creeper attack damage as bonus damage to buildings
-        if (creeperUnit != null) {
+        // apply creeper and ghast attack damage as bonus damage to buildings
+        // this is dealt in addition to the actual blocks destroyed by the explosion itself
+        if (creeperUnit != null || ghastUnit != null) {
             Set<Building> affectedBuildings = new HashSet<>();
             for (BlockPos bp : evt.getAffectedBlocks()) {
                 Building building = BuildingUtils.findBuilding(false, bp);
@@ -323,20 +324,17 @@ public class BuildingServerEvents {
                     affectedBuildings.add(building);
             }
             for (Building building : affectedBuildings) {
-                int atkDmg = (int) creeperUnit.getUnitAttackDamage();
-                if (creeperUnit.isPowered())
-                    atkDmg *= 2;
+                int atkDmg = 0;
+                if (ghastUnit != null) {
+                    atkDmg = (int) ghastUnit.getUnitAttackDamage();
+                } else {
+                     atkDmg = (int) creeperUnit.getUnitAttackDamage();
+                    if (creeperUnit.isPowered())
+                        atkDmg *= 2;
+                }
                 building.destroyRandomBlocks(atkDmg);
             }
-        } // apply ghast attack damage as bonus damage to buildings
-        else if (ghastUnit != null) {
-            BlockPos centreBp = new BlockPos(evt.getExplosion().getPosition());
-            Building affectedBuilding = BuildingUtils.findBuilding(false, centreBp);
-            if (affectedBuilding != null) {
-                affectedBuilding.destroyRandomBlocks((int) ghastUnit.getUnitAttackDamage());
-            }
         }
-
         // don't do any block damage apart from the scripted building damage above or damage to leaves
         evt.getAffectedBlocks().removeIf(bp -> {
             BlockState bs = evt.getLevel().getBlockState(bp);
