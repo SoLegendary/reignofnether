@@ -54,6 +54,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -533,7 +534,6 @@ public class UnitClientEvents {
     public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (MC.level == null)
             return;
-
         /**
          *  TODO: make these visible to 1st-person players but currently had a visual glitch
          *  doesnt align to camera very well, sometimes sinks below ground and too thin

@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
@@ -151,19 +152,20 @@ public class PlayerServerEvents {
         if (orthoviewPlayers.stream().map(Entity::getId).toList().contains(evt.getEntity().getId())) {
             orthoviewPlayers.add((ServerPlayer) evt.getEntity());
         }
-
-        if (!isRTSPlayer(serverPlayer.getId())) {
-            serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
-            serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS camera and join the game"));
-            serverPlayer.sendSystemMessage(Component.literal("Use '/rts-help' to see the list of all commands"));
-        } else {
-            serverPlayer.sendSystemMessage(Component.literal("Welcome back to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
-        }
-        if (serverPlayer.hasPermissions(4)) {
-            serverPlayer.sendSystemMessage(Component.literal(""));
-            serverPlayer.sendSystemMessage(Component.literal("As a server op you may use:"));
-            serverPlayer.sendSystemMessage(Component.literal("/rts-fog enable | disable"));
-            serverPlayer.sendSystemMessage(Component.literal("/rts-reset"));
+        if (!TutorialServerEvents.isEnabled()) {
+            if (!isRTSPlayer(serverPlayer.getId())) {
+                serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
+                serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS camera and join the game"));
+                serverPlayer.sendSystemMessage(Component.literal("Use '/rts-help' to see the list of all commands"));
+            } else {
+                serverPlayer.sendSystemMessage(Component.literal("Welcome back to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
+            }
+            if (serverPlayer.hasPermissions(4)) {
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                serverPlayer.sendSystemMessage(Component.literal("As a server op you may use:"));
+                serverPlayer.sendSystemMessage(Component.literal("/rts-fog enable | disable"));
+                serverPlayer.sendSystemMessage(Component.literal("/rts-reset"));
+            }
         }
         if (isRTSPlayer(playerName))
             PlayerClientboundPacket.enableRTSStatus(playerName);
