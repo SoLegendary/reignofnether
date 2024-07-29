@@ -1,8 +1,12 @@
 package com.solegendary.reignofnether.tutorial;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.hud.Button;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+
+import java.util.ArrayList;
 
 public class TutorialClientEvents {
 
@@ -20,4 +24,7 @@ public class TutorialClientEvents {
         enabled = value;
     }
 
+    public static void renderPointingAtNextButton(PoseStack poseStack, ArrayList<Button> arrayList) {
+
+    }
 }

@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -882,6 +883,8 @@ public class HudClientEvents {
         for (Button button : renderedButtons)
             if (button.isMouseOver(mouseX, mouseY))
                 button.renderTooltip(evt.getPoseStack(), mouseX, mouseY);
+
+        TutorialClientEvents.renderPointingAtNextButton(evt.getPoseStack(), renderedButtons);
     }
 
     public static boolean isMouseOverAnyButton() {
