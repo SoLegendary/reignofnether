@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.hud;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +38,7 @@ public class StartButtons {
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_MONSTERS,
         () -> false,
-        () -> true,
+        () -> !TutorialClientEvents.isEnabled(),
         () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_MONSTERS),
         () -> { },
         List.of(
@@ -53,7 +54,7 @@ public class StartButtons {
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_PIGLINS,
         () -> false,
-        () -> true,
+        () -> !TutorialClientEvents.isEnabled(),
         () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_PIGLINS),
         () -> { },
         List.of(
