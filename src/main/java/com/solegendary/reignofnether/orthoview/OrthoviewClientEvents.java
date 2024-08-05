@@ -7,6 +7,8 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialRendering;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
@@ -160,6 +162,7 @@ public class OrthoviewClientEvents {
                 PlayerServerboundPacket.teleportPlayer(MC.player.getX(), MC.player.getY(), MC.player.getZ());
             }
         }
+        TutorialClientEvents.updateStage();
     }
 
     // moves the camera to the position such that x,z is at the centre of the screen

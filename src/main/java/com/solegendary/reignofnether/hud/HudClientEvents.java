@@ -35,7 +35,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -884,7 +883,7 @@ public class HudClientEvents {
             if (button.isMouseOver(mouseX, mouseY))
                 button.renderTooltip(evt.getPoseStack(), mouseX, mouseY);
 
-        TutorialClientEvents.renderPointingAtNextButton(evt.getPoseStack(), renderedButtons);
+        TutorialClientEvents.checkAndHighlightNextButton(evt.getPoseStack(), renderedButtons);
     }
 
     public static boolean isMouseOverAnyButton() {
