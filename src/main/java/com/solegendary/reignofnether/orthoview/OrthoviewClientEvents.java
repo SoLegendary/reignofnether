@@ -53,6 +53,7 @@ public class OrthoviewClientEvents {
     public static int enabledCount = 0;
     public static boolean enabled = false;
     private static boolean cameraMovingByMouse = false; // excludes edgepanning
+    private static boolean cameraLocked = false;
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static final float ZOOM_STEP_KEY = 5;
@@ -93,6 +94,8 @@ public class OrthoviewClientEvents {
         camRotY = -45;
     }
     public static void rotateCam(float x, float y) {
+        if (cameraLocked)
+            return;
         camRotX += x;
         if (camRotX >= 360)
             camRotX -= 360;
@@ -108,6 +111,8 @@ public class OrthoviewClientEvents {
          */
     }
     public static void zoomCam(float zoomAdj) {
+        if (cameraLocked)
+            return;
         zoom += zoomAdj;
         if (zoom < ZOOM_MIN)
             zoom = ZOOM_MIN;
@@ -116,6 +121,8 @@ public class OrthoviewClientEvents {
     }
 
     public static void panCam(float x, float y, float z) { // pan camera relative to rotation
+        if (cameraLocked)
+            return;
         if (MC.player != null) {
             Vec2 XZRotated = MyMath.rotateCoords(x, z, -camRotX - camRotAdjX);
             MC.player.move(MoverType.SELF, new Vec3(XZRotated.x, y, XZRotated.y));
@@ -300,7 +307,8 @@ public class OrthoviewClientEvents {
     
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
-        if (!enabled) return;
+        if (!enabled || cameraLocked)
+            return;
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             mouseLeftDownX = (float) evt.getMouseX();
@@ -313,7 +321,8 @@ public class OrthoviewClientEvents {
     }
     @SubscribeEvent
     public static void onMouseRelease(ScreenEvent.MouseButtonReleased evt) {
-        if (!enabled) return;
+        if (!enabled || cameraLocked)
+            return;
 
         // stop treating the rotation as adjustments and add them to the base amount
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -328,7 +337,8 @@ public class OrthoviewClientEvents {
     }
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragged evt) {
-        if (!enabled) return;
+        if (!enabled || cameraLocked)
+            return;
 
         if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;
