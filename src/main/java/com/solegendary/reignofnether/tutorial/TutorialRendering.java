@@ -26,12 +26,12 @@ public class TutorialRendering {
         if (MC.screen == null)
             return;
 
-        int tutorialStage = TutorialClientEvents.getStage();
+        TutorialStage stage = TutorialClientEvents.getStage();
 
         Button activeButton = null;
         for (Button button : buttons) {
-            if (tutorialStage == 0 && button.name.equals("Villagers") ||
-                tutorialStage == 1 && button.name.equals(TownCentre.buildingName)) {
+            if (stage == TutorialStage.INTRO && button.name.equals("Villagers") ||
+                stage == TutorialStage.BUILD_TOWN_CENTRE && button.name.equals(TownCentre.buildingName)) {
                 activeButton = button;
                 break;
             }

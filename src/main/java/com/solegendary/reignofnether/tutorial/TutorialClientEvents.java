@@ -1,12 +1,19 @@
 package com.solegendary.reignofnether.tutorial;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.Relationship;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 
@@ -57,6 +64,13 @@ public class TutorialClientEvents {
             if (ticksOnStage % 40 == 0)
                 updateStage();
             ticksOnStage += 1;
+        }
+    }
+
+    @SubscribeEvent
+    public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
+            OrthoviewClientEvents.forceMoveCam(-2950, -1166, 20);
         }
     }
 

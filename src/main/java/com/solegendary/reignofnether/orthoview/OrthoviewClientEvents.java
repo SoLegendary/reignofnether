@@ -53,7 +53,6 @@ public class OrthoviewClientEvents {
     public static int enabledCount = 0;
     public static boolean enabled = false;
     private static boolean cameraMovingByMouse = false; // excludes edgepanning
-    private static boolean cameraLocked = false;
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static final float ZOOM_STEP_KEY = 5;
@@ -63,6 +62,19 @@ public class OrthoviewClientEvents {
     private static final float CAMROTY_MAX = -20;
     private static final float CAMROTY_MIN = -90;
     private static final float CAMROT_MOUSE_SENSITIVITY = 0.12f;
+
+    private static final float ZOOM_DEFAULT = 30;
+    private static final float CAMROTX_DEFAULT = 135;
+    private static final float CAMROTY_DEFAULT = -45;
+
+    private static int FORCE_PAN_TICKS_MAX = 30;
+    private static int forcePanTicksLeft = 0;
+    private static int cameraLockTicksLeft = 0;
+    private static float forcePanTargetX = 0;
+    private static float forcePanTargetZ = 0;
+    private static float forcePanOriginalX = 0;
+    private static float forcePanOriginalZ = 0;
+    private static float forcePanOriginalZoom = 0;
 
     private static float zoom = 30; // * 2 = number of blocks in height (higher == zoomed out)
     private static float camRotX = 135; // left/right - should start northeast (towards -Z,+X)
@@ -89,12 +101,12 @@ public class OrthoviewClientEvents {
     public static float getCamRotY() { return -camRotY - camRotAdjY; }
 
     private static void reset() {
-        zoom = 30;
-        camRotX = 135;
-        camRotY = -45;
+        zoom = ZOOM_DEFAULT;
+        camRotX = CAMROTX_DEFAULT;
+        camRotY = CAMROTY_DEFAULT;
     }
     public static void rotateCam(float x, float y) {
-        if (cameraLocked)
+        if (cameraLockTicksLeft > 0)
             return;
         camRotX += x;
         if (camRotX >= 360)
@@ -111,7 +123,7 @@ public class OrthoviewClientEvents {
          */
     }
     public static void zoomCam(float zoomAdj) {
-        if (cameraLocked)
+        if (cameraLockTicksLeft > 0)
             return;
         zoom += zoomAdj;
         if (zoom < ZOOM_MIN)
@@ -121,11 +133,22 @@ public class OrthoviewClientEvents {
     }
 
     public static void panCam(float x, float y, float z) { // pan camera relative to rotation
-        if (cameraLocked)
-            return;
         if (MC.player != null) {
             Vec2 XZRotated = MyMath.rotateCoords(x, z, -camRotX - camRotAdjX);
             MC.player.move(MoverType.SELF, new Vec3(XZRotated.x, y, XZRotated.y));
+        }
+    }
+
+    // lock the camera and move it towards a location, remain locked for cameraLockTicks
+    public static void forceMoveCam(int x, int z, int cameraLockTicks) {
+        if (MC.player != null) {
+            forcePanTicksLeft = FORCE_PAN_TICKS_MAX;
+            forcePanTargetX = x;
+            forcePanTargetZ = z;
+            cameraLockTicksLeft = FORCE_PAN_TICKS_MAX + cameraLockTicks;
+            forcePanOriginalX = MC.player.getOnPos().getX();
+            forcePanOriginalZ = MC.player.getOnPos().getZ();
+            forcePanOriginalZoom = zoom;
         }
     }
 
@@ -142,6 +165,17 @@ public class OrthoviewClientEvents {
         if (!MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-6,0)) &&
             MC.player.getOnPos().getY() >= ORTHOVIEW_PLAYER_BASE_Y)
             panCam(0,-0.5f,0);
+
+        if (forcePanTicksLeft > 0) {
+            float xDiff = (forcePanTargetX - forcePanOriginalX) / FORCE_PAN_TICKS_MAX;
+            float zDiff = (forcePanTargetZ - forcePanOriginalZ) / FORCE_PAN_TICKS_MAX;
+            float zoomDiff = (ZOOM_DEFAULT - forcePanOriginalZoom) / FORCE_PAN_TICKS_MAX;
+            zoom += zoomDiff;
+            MC.player.move(MoverType.SELF, new Vec3(xDiff , 0, zDiff));
+            forcePanTicksLeft -= 1;
+        }
+        if (cameraLockTicksLeft > 0)
+            cameraLockTicksLeft -= 1;
     }
 
     public static void toggleEnable() {
@@ -224,7 +258,8 @@ public class OrthoviewClientEvents {
 
     @SubscribeEvent
     public static void onMouseScroll(ScreenEvent.MouseScrolled evt) {
-        if (!enabled) return;
+        if (!enabled || cameraLockTicksLeft > 0)
+            return;
 
         if (Keybindings.altMod.isDown())
             zoomCam((float) sign(evt.getScrollDelta()) * -ZOOM_STEP_SCROLL);
@@ -250,7 +285,7 @@ public class OrthoviewClientEvents {
 
         // panCam when cursor is at edge of screen
         // remember that mouse (0,0) is top left of screen
-        if (!Keybindings.altMod.isDown() && MC.isWindowActive()) {
+        if (!Keybindings.altMod.isDown() && MC.isWindowActive() && cameraLockTicksLeft <= 0) {
             if (cursorX <= 0)
                 panCam(edgeCamPanSensitivity, 0, 0);
             else if (cursorX >= glfwWinWidth)
@@ -307,7 +342,7 @@ public class OrthoviewClientEvents {
     
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
-        if (!enabled || cameraLocked)
+        if (!enabled || cameraLockTicksLeft > 0)
             return;
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -321,7 +356,7 @@ public class OrthoviewClientEvents {
     }
     @SubscribeEvent
     public static void onMouseRelease(ScreenEvent.MouseButtonReleased evt) {
-        if (!enabled || cameraLocked)
+        if (!enabled || cameraLockTicksLeft > 0)
             return;
 
         // stop treating the rotation as adjustments and add them to the base amount
@@ -337,7 +372,7 @@ public class OrthoviewClientEvents {
     }
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragged evt) {
-        if (!enabled || cameraLocked)
+        if (!enabled || cameraLockTicksLeft > 0)
             return;
 
         if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybindings.altMod.isDown()) {
