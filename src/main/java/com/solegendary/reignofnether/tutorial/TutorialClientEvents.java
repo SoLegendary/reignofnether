@@ -1,12 +1,8 @@
 package com.solegendary.reignofnether.tutorial;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.hud.Button;
-import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.unit.Relationship;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -21,10 +17,8 @@ import static com.solegendary.reignofnether.tutorial.TutorialStage.*;
 
 public class TutorialClientEvents {
 
-    // TODO: force camera pan feature
-
     private static Minecraft MC = Minecraft.getInstance();
-    private static TutorialStage tutorialStage = INTRO;
+    private static TutorialStage tutorialStage = PAN_CAMERA;
     private static boolean enabled = false;
 
     private static int ticksOnStage = 0;
@@ -54,8 +48,15 @@ public class TutorialClientEvents {
     }
 
     // check if we need to render an arrow to point at the next button
-    public static void checkAndHighlightNextButton(PoseStack poseStack, ArrayList<Button> buttons) {
-        TutorialRendering.highlightNextButton(poseStack, buttons);
+    public static void checkAndRenderNextAction(PoseStack poseStack, ArrayList<Button> buttons) {
+        if (tutorialStage == PAN_CAMERA && MC.screen != null) {
+            TutorialRendering.pointAtWithArrow(poseStack, MC.screen.width / 2, -Button.iconFrameSize, true);
+            TutorialRendering.pointAtWithArrow(poseStack, MC.screen.width / 2, MC.screen.height, true);
+            TutorialRendering.pointAtWithArrow(poseStack, -Button.iconFrameSize, MC.screen.height / 2, false);
+            TutorialRendering.pointAtWithArrow(poseStack, MC.screen.width, MC.screen.height / 2, false);
+        } else {
+            TutorialRendering.highlightNextButton(poseStack, buttons);
+        }
     }
 
     @SubscribeEvent

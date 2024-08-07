@@ -883,7 +883,7 @@ public class HudClientEvents {
             if (button.isMouseOver(mouseX, mouseY))
                 button.renderTooltip(evt.getPoseStack(), mouseX, mouseY);
 
-        TutorialClientEvents.checkAndHighlightNextButton(evt.getPoseStack(), renderedButtons);
+        TutorialClientEvents.checkAndRenderNextAction(evt.getPoseStack(), renderedButtons);
     }
 
     public static boolean isMouseOverAnyButton() {
