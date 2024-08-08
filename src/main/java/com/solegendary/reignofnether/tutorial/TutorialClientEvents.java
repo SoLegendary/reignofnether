@@ -24,7 +24,9 @@ public class TutorialClientEvents {
     private static int ticksOnStage = 0;
     private static int msgsOnStage = 0;
 
-    public static boolean isEnabled() { return enabled; }
+    public static boolean isEnabled() {
+        return enabled && MC.hasSingleplayerServer();
+    }
 
     public static void setEnabled(boolean value) {
         if (value && !enabled && MC.player != null) {
@@ -82,64 +84,6 @@ public class TutorialClientEvents {
             return;
 
         switch(tutorialStage) {
-            case INTRO -> {
-            }
-            case PAN_CAMERA -> {
-            }
-            case PAN_CAMERA_TIPS -> {
-            }
-            case ZOOM_CAMERA -> {
-            }
-            case ROTATE_CAMERA -> {
-            }
-            case MINIMAP_MAXIMISE -> {
-            }
-            case MINIMAP_CLICK -> {
-            }
-            case MINIMAP_SHIFT_CLICK -> {
-            }
-            case MINIMAP_MINIMISE -> {
-            }
-            case MINIMAP_TIPS -> {
-            }
-            case OBSERVER_TIPS -> {
-            }
-            case PLACE_VILLAGERS -> {
-            }
-            case SELECT_UNIT -> {
-            }
-            case BOX_SELECT_UNITS -> {
-            }
-            case MOVE_UNITS -> {
-            }
-            case MOVING_TIPS -> {
-            }
-            case BUILD_TOWN_CENTRE -> {
-            }
-            case BUILDING_TIPS -> {
-            }
-            case TRAIN_WORKER -> {
-            }
-            case GATHER_RESOURCES -> {
-            }
-            case HUNT_ANIMALS -> {
-            }
-            case RETURN_FOOD -> {
-            }
-            case BUILD_BASE -> {
-            }
-            case BUILD_ARMY -> {
-            }
-            case DEFEND_BASE -> {
-            }
-            case DEFEND_BASE_AGAIN -> {
-            }
-            case BUILD_BRIDGE -> {
-            }
-            case ATTACK_ENEMY_BASE -> {
-            }
-            case OUTRO -> {
-            }
         }
     }
 }

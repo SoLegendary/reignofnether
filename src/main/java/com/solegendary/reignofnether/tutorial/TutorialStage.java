@@ -8,24 +8,24 @@ public enum TutorialStage {
             return this;
         };
     },
-    PAN_CAMERA, // make player pan in all 4 directions before continuing
-    PAN_CAMERA_TIPS, // just a delayed msg to explain you can use arrow keys
-    ZOOM_CAMERA,
-    ROTATE_CAMERA,
-    MINIMAP_MAXIMISE, // before this step, hide the map and expand button
-    MINIMAP_CLICK,
-    MINIMAP_SHIFT_CLICK,
-    MINIMAP_MINIMISE,
-    MINIMAP_TIPS, // explaining units and buildings appear on it
-    OBSERVER_TIPS, // explaining you start in observer mode
-    PLACE_VILLAGERS, // don't highlight button while cursor has the action to place
+    PLACE_VILLAGERS, // don't highlight button while cursor has the action to place - LOCK CAM
     SELECT_UNIT,
+    MOVE_UNIT,
     BOX_SELECT_UNITS,
     MOVE_UNITS,
-    MOVING_TIPS, // double click to select multiple, control groups, following etc.
-    BUILD_TOWN_CENTRE, // don't highlight button while cursor has the action to place
+    UNIT_TIPS, // double click to select multiple, control groups, F1 to deselect, following etc.
+
+    PAN_CAMERA, // make player pan in all 4 directions before continuing - UNLOCK CAM
+    PAN_CAMERA_TIPS, // just a delayed msg to explain you can use arrow keys
+    MINIMAP_INTRO, // just messages to explain it
+    MINIMAP_CLICK,
+    MINIMAP_SHIFT_CLICK,
+    MINIMAP_TIPS, // mention minimise/maximise button, explain units and buildings appear on it
+
+    BUILD_TOWN_CENTRE, // forcePanCam back to spawn, ask player to select workers, don't highlight button while cursor has the action to place
     BUILDING_TIPS, // explain you can order multiple workers to help build together
-    TRAIN_WORKER, // while building, explain you can right click to set rally point; progress once worker is built
+    SELECT_BUILDING, // explain buildings, damage and health
+    TRAIN_WORKER, // progress once worker is built, while building explain rally points and cancelling
     GATHER_RESOURCES, // explain resources, highlight some nearby trees and ores; progress once a resource is dropped
     HUNT_ANIMALS, // Spawn in some pigs nearby, explain to take a villager and right click it
     RETURN_FOOD,
@@ -33,6 +33,7 @@ public enum TutorialStage {
     BUILD_ARMY, // progress once 3 units are built
     DEFEND_BASE, // set time to night, send in two zombies to fight - if the player loses somehow set time to day early
     DEFEND_BASE_AGAIN, // send in more zombies targeting town centre, but set time to day to kill them with explanation
+    REPAIR_BUILDING,
     BUILD_BRIDGE, // once completed, spawn in free army including iron golems
     ATTACK_ENEMY_BASE, // completed once enemy capitol is destroyed
     OUTRO;

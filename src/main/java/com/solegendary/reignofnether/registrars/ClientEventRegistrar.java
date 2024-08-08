@@ -20,7 +20,6 @@ import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.tps.TPSClientEvents;
 import com.solegendary.reignofnether.tps.TPSServerEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialRendering;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -53,8 +52,6 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(TPSClientEvents.class);
         vanillaEventBus.register(PlayerClientEvents.class);
         vanillaEventBus.register(TutorialClientEvents.class);
-
-        vanillaEventBus.register(TutorialRendering.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(TutorialServerEvents.class);

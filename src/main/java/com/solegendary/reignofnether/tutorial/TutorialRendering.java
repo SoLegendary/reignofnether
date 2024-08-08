@@ -98,6 +98,7 @@ public class TutorialRendering {
         );
     }
 
+    /*
     @SubscribeEvent
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT) {
@@ -118,4 +119,5 @@ public class TutorialRendering {
                 "yOffset2: " + yOffset2,
         });
     }
+     */
 }

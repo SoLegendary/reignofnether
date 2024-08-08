@@ -547,7 +547,8 @@ public class MinimapClientEvents {
         // when clicking on map move player there
         if (OrthoviewClientEvents.isEnabled() &&
             evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 &&
-            !Keybindings.shiftMod.isDown()) {
+            !Keybindings.shiftMod.isDown() &&
+            !OrthoviewClientEvents.isCameraLocked()) {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
             if (MC.player != null && moveTo != null) {
                 PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
@@ -557,7 +558,7 @@ public class MinimapClientEvents {
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre evt) {
-        if (!OrthoviewClientEvents.isEnabled())
+        if (!OrthoviewClientEvents.isEnabled() || OrthoviewClientEvents.isCameraLocked())
             return;
 
         // when clicking on map move player there
