@@ -12,25 +12,31 @@ import java.util.function.Supplier;
 
 public class TutorialClientboundPacket {
 
-    private final boolean enable;
+    private final TutorialAction action;
 
-    public static void setEnableTutorial(boolean enable) {
+    public static void enableTutorial() {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new TutorialClientboundPacket(enable));
+                new TutorialClientboundPacket(TutorialAction.ENABLE));
+    }
+    public static void disableTutorial() {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new TutorialClientboundPacket(TutorialAction.DISABLE));
+    }
+    public static void updateTutorialStage() {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new TutorialClientboundPacket(TutorialAction.UPDATE_STAGE));
     }
 
-    public TutorialClientboundPacket(
-            boolean enable
-    ) {
-        this.enable = enable;
+    public TutorialClientboundPacket(TutorialAction action) {
+        this.action = action;
     }
 
     public TutorialClientboundPacket(FriendlyByteBuf buffer) {
-        this.enable = buffer.readBoolean();
+        this.action = buffer.readEnum(TutorialAction.class);
     }
 
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeBoolean(this.enable);
+        buffer.writeEnum(this.action);
     }
 
     // client-side packet-consuming functions
@@ -39,9 +45,13 @@ public class TutorialClientboundPacket {
 
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
-                    () -> () -> {
-                        TutorialClientEvents.setEnabled(enable);
-                    });
+                () -> () -> {
+                    switch (action) {
+                        case ENABLE -> TutorialClientEvents.setEnabled(true);
+                        case DISABLE -> TutorialClientEvents.setEnabled(false);
+                        case UPDATE_STAGE -> TutorialClientEvents.updateStage();
+                    }
+                });
         });
         ctx.get().setPacketHandled(true);
         return success.get();

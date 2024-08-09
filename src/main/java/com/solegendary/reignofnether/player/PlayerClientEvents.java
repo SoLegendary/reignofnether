@@ -4,19 +4,14 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.commands.TitleCommand;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -76,7 +71,7 @@ public class PlayerClientEvents {
 
         disableRTS(playerName);
         MC.gui.setTitle(Component.literal("You have been defeated"));
-        MC.player.playSound(SoundRegistrar.DEFEAT_SOUND.get(), 0.5f, 1.0f);
+        MC.player.playSound(SoundRegistrar.DEFEAT.get(), 0.5f, 1.0f);
     }
 
     public static void victory(String playerName) {
@@ -84,7 +79,7 @@ public class PlayerClientEvents {
             return;
 
         MC.gui.setTitle(Component.literal("You are victorious!"));
-        MC.player.playSound(SoundRegistrar.VICTORY_SOUND.get(), 0.5f, 1.0f);
+        MC.player.playSound(SoundRegistrar.VICTORY.get(), 0.5f, 1.0f);
     }
 
     public static void enableRTS(String playerName) {

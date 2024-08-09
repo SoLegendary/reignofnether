@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
@@ -76,7 +77,7 @@ public class OrthoviewClientEvents {
     private static float forcePanOriginalZoom = 0;
 
     private static int cameraLockTicksLeft = 0;
-    public static boolean cameraLocked = false;
+    private static boolean cameraLocked = false;
 
     private static float zoom = 30; // * 2 = number of blocks in height (higher == zoomed out)
     private static float camRotX = 135; // left/right - should start northeast (towards -Z,+X)
@@ -105,6 +106,9 @@ public class OrthoviewClientEvents {
     public static boolean isCameraLocked() {
         return cameraLockTicksLeft > 0 || cameraLocked;
     }
+
+    public static void lockCam() { cameraLocked = true; }
+    public static void unlockCam() { cameraLocked = false; }
 
     private static void reset() {
         zoom = ZOOM_DEFAULT;
@@ -156,6 +160,10 @@ public class OrthoviewClientEvents {
             forcePanOriginalZ = MC.player.getOnPos().getZ();
             forcePanOriginalZoom = zoom;
         }
+    }
+
+    public static void forceMoveCam(Vec3i pos, int cameraLockTicks) {
+        forceMoveCam(pos.getX(), pos.getZ(), cameraLockTicks);
     }
 
     @SubscribeEvent

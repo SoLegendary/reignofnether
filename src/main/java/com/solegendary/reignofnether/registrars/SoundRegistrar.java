@@ -13,17 +13,33 @@ public class SoundRegistrar {
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS =
             DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, ReignOfNether.MOD_ID);
 
-    public static final RegistryObject<SoundEvent> UNDER_ATTACK_SOUND =
+    public static final RegistryObject<SoundEvent> UNDER_ATTACK =
             SOUND_EVENTS.register("under_attack", () ->
                     new SoundEvent(new ResourceLocation(ReignOfNether.MOD_ID, "under_attack")));
 
-    public static final RegistryObject<SoundEvent> VICTORY_SOUND =
+    public static final RegistryObject<SoundEvent> VICTORY =
             SOUND_EVENTS.register("victory", () ->
                     new SoundEvent(new ResourceLocation(ReignOfNether.MOD_ID, "victory")));
 
-    public static final RegistryObject<SoundEvent> DEFEAT_SOUND =
+    public static final RegistryObject<SoundEvent> DEFEAT =
             SOUND_EVENTS.register("defeat", () ->
                     new SoundEvent(new ResourceLocation(ReignOfNether.MOD_ID, "defeat")));
+
+    public static final RegistryObject<SoundEvent> CHAT =
+            SOUND_EVENTS.register("chat", () ->
+                    new SoundEvent(new ResourceLocation(ReignOfNether.MOD_ID, "chat")));
+
+    public static final RegistryObject<SoundEvent> ALLY =
+            SOUND_EVENTS.register("ally", () ->
+                    new SoundEvent(new ResourceLocation(ReignOfNether.MOD_ID, "ally")));
+
+    public static final RegistryObject<SoundEvent> NEUTRAL =
+            SOUND_EVENTS.register("neutral", () ->
+                    new SoundEvent(new ResourceLocation(ReignOfNether.MOD_ID, "neutral")));
+
+    public static final RegistryObject<SoundEvent> ENEMY =
+            SOUND_EVENTS.register("enemy", () ->
+                    new SoundEvent(new ResourceLocation(ReignOfNether.MOD_ID, "enemy")));
 
     public static void init() {
         SOUND_EVENTS.register(FMLJavaModLoadingContext.get().getModEventBus());

@@ -35,15 +35,8 @@ public class TutorialRendering {
 
         Button activeButton = null;
         for (Button button : buttons) {
-            /*
-            if (stage == TutorialStage.INTRO && button.name.equals("Villagers") ||
+            if (stage == TutorialStage.PLACE_VILLAGERS && button.name.equals("Villagers") ||
                 stage == TutorialStage.BUILD_TOWN_CENTRE && button.name.equals(TownCentre.buildingName)) {
-                activeButton = button;
-                break;
-            }
-             */
-            if (button.name.equals("Villagers") ||
-                button.name.equals(TownCentre.buildingName)) {
                 activeButton = button;
                 break;
             }

@@ -381,6 +381,7 @@ public class UnitClientEvents {
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
         Entity entity = evt.getEntity();
         if (entity instanceof Unit unit && evt.getLevel().isClientSide) {
+            TutorialClientEvents.updateStage();
 
             if (selectedUnits.removeIf(e -> e.getId() == entity.getId()))
                 selectedUnits.add((LivingEntity) entity);

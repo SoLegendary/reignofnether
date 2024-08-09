@@ -10,5 +10,21 @@
     "defeat": {
         "subtitle": "sounds.reignofnether.defeat",
         "sounds": [ "reignofnether:defeat" ]
+    },
+    "chat": {
+        "subtitle": "sounds.reignofnether.chat",
+        "sounds": [ "reignofnether:chat" ]
+    },
+    "ally": {
+        "subtitle": "sounds.reignofnether.ally",
+        "sounds": [ "reignofnether:ally" ]
+    },
+    "neutral": {
+        "subtitle": "sounds.reignofnether.neutral",
+        "sounds": [ "reignofnether:neutral" ]
+    },
+    "enemy": {
+        "subtitle": "sounds.reignofnether.enemy",
+        "sounds": [ "reignofnether:enemy" ]
     }
 }

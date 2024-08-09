@@ -25,7 +25,7 @@ public class TutorialServerEvents {
         if (evt.getEntity().getLevel() instanceof ServerLevel serverLevel)
             if (serverLevel.getSeed() == TUTORIAL_MAP_SEED &&
                 levelName.equals(TUTORIAL_MAP_NAME)) {
-                TutorialClientboundPacket.setEnableTutorial(true);
+                TutorialClientboundPacket.enableTutorial();
                 enabled = true;
             }
     }
