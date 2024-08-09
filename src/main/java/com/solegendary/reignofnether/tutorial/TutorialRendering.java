@@ -2,16 +2,11 @@ package com.solegendary.reignofnether.tutorial;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 
@@ -24,19 +19,28 @@ public class TutorialRendering {
     private static final ResourceLocation TEXTURE_ARROW_UP = new ResourceLocation("reignofnether", "textures/hud/tutorial_arrow_up.png");
     private static final ResourceLocation TEXTURE_ARROW_DOWN = new ResourceLocation("reignofnether", "textures/hud/tutorial_arrow_down.png");
 
+    private static String buttonNameToHighlight = "";
+
     static int xOffset2 = 0;
     static int yOffset2 = 0;
 
+    public static void setButtonName(String name) {
+        if (name != null)
+            buttonNameToHighlight = name;
+    }
+    public static void clearButtonName() {
+        buttonNameToHighlight = "";
+    }
+
     public static void highlightNextButton(PoseStack poseStack, ArrayList<Button> buttons) {
-        if (!TutorialClientEvents.isEnabled())
+        if (!TutorialClientEvents.isEnabled() || buttonNameToHighlight.isEmpty())
             return;
 
         TutorialStage stage = TutorialClientEvents.getStage();
 
         Button activeButton = null;
         for (Button button : buttons) {
-            if (stage == TutorialStage.PLACE_VILLAGERS && button.name.equals("Villagers") ||
-                stage == TutorialStage.BUILD_TOWN_CENTRE && button.name.equals(TownCentre.buildingName)) {
+            if (button.name.equals(buttonNameToHighlight)) {
                 activeButton = button;
                 break;
             }

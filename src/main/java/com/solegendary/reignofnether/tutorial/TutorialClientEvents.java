@@ -10,6 +10,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.RegistryObject;
@@ -72,6 +73,12 @@ public class TutorialClientEvents {
     }
 
     @SubscribeEvent
+    public static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre evt) { updateStage(); }
+
+    @SubscribeEvent
+    public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) { updateStage(); }
+
+    @SubscribeEvent
     public static void TickEvent(TickEvent.ClientTickEvent evt) {
         if (ticksOnStage < Integer.MAX_VALUE) {
             if (ticksOnStage % 40 == 0)
@@ -121,8 +128,10 @@ public class TutorialClientEvents {
                 } else if (stageProgress == 1 && ticksOnStage >= 80) {
                     msgWithSound("Left-click the button at the top right and then click on the ground where" +
                                  "you want to place them.");
+                    TutorialRendering.setButtonName("Villagers");
                     stageProgress += 1;
                 } else if (stageProgress == 2 && UnitClientEvents.getAllUnits().size() > 0) {
+                    TutorialRendering.clearButtonName();
                     nextStage();
                 }
             }
