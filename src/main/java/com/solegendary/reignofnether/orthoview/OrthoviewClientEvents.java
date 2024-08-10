@@ -168,17 +168,17 @@ public class OrthoviewClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (!OrthoviewClientEvents.isEnabled())
+        if (!OrthoviewClientEvents.isEnabled() || evt.phase != TickEvent.Phase.END)
             return;
         if (MC.player == null || MC.level == null)
             return;
 
         if (MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-5,0)) &&
             MC.player.getOnPos().getY() <= ORTHOVIEW_PLAYER_MAX_Y)
-            panCam(0,0.5f,0);
+            panCam(0,1f,0);
         if (!MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-6,0)) &&
             MC.player.getOnPos().getY() >= ORTHOVIEW_PLAYER_BASE_Y)
-            panCam(0,-0.5f,0);
+            panCam(0,-1f,0);
 
         if (forcePanTicksLeft > 0) {
             float xDiff = (forcePanTargetX - forcePanOriginalX) / FORCE_PAN_TICKS_MAX;

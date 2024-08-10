@@ -40,6 +40,7 @@ public class TutorialClientEvents {
     public static boolean clickedMinimap = false;
 
     private static final Vec3i SPAWN_POS = new Vec3i(-2950, 0, -1166);
+    private static final Vec3i BUILD_POS = new Vec3i(-2944, 0, -1200);
 
     public static int getStageProgress() {
         return stageProgress;
@@ -63,11 +64,13 @@ public class TutorialClientEvents {
         tutorialStage = tutorialStage.next();
         ticksOnStage = 0;
         stageProgress = 0;
+        updateStage();
     }
     private static void prevStage() {
         tutorialStage = tutorialStage.prev();
         ticksOnStage = 0;
         stageProgress = 0;
+        updateStage();
     }
 
     // check if we need to render an arrow to point at the next button
@@ -166,12 +169,11 @@ public class TutorialClientEvents {
             case CAMERA_TIPS -> {
                 if (stageProgress == 0) {
                     msgWithSound("Good work. You can also move it in the same way with the arrow keys.");
-                    nextStage();
                     stageProgress += 1;
                 }
                 else if (stageProgress == 1 && ticksOnStage >= 100) {
                     msgWithSound("You can also zoom the camera with CTRL+SCROLL and rotate it with " +
-                                 "ALT+SCROLL.");
+                                 "ALT+RIGHT-CLICK.");
                     stageProgress += 1;
                 }
                 else if (stageProgress == 2 && ticksOnStage >= 200) {
@@ -211,7 +213,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 1 && ticksOnStage >= 100) {
                     msgWithSound("Let's get started by spawning in some villagers here.");
-                    OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 20);
+                    OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 30);
                     stageProgress += 1;
                 }
                 else if (stageProgress == 2 && ticksOnStage >= 200) {
