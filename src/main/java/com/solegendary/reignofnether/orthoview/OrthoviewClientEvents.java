@@ -303,11 +303,11 @@ public class OrthoviewClientEvents {
         if (!Keybindings.altMod.isDown() && MC.isWindowActive() && !isCameraLocked()) {
             if (cursorX <= 0) {
                 panCam(edgeCamPanSensitivity, 0, 0);
-                TutorialClientEvents.pannedRight = true;
+                TutorialClientEvents.pannedLeft = true;
             }
             else if (cursorX >= glfwWinWidth) {
                 panCam(-edgeCamPanSensitivity, 0, 0);
-                TutorialClientEvents.pannedLeft = true;
+                TutorialClientEvents.pannedRight = true;
             }
             if (cursorY <= 0) {
                 panCam(0, 0, edgeCamPanSensitivity);

@@ -31,7 +31,6 @@ public class TutorialClientEvents {
     private static boolean enabled = false;
 
     private static int ticksOnStage = 0;
-    private static int msgsOnStage = 0;
     private static int stageProgress = 0; // used to track progress within each TutorialStage
 
     public static boolean pannedUp = false;
@@ -63,12 +62,12 @@ public class TutorialClientEvents {
     private static void nextStage() {
         tutorialStage = tutorialStage.next();
         ticksOnStage = 0;
-        msgsOnStage = 0;
+        stageProgress = 0;
     }
     private static void prevStage() {
         tutorialStage = tutorialStage.prev();
         ticksOnStage = 0;
-        msgsOnStage = 0;
+        stageProgress = 0;
     }
 
     // check if we need to render an arrow to point at the next button
@@ -98,7 +97,9 @@ public class TutorialClientEvents {
 
     @SubscribeEvent
     public static void TickEvent(TickEvent.ClientTickEvent evt) {
-        if (ticksOnStage < Integer.MAX_VALUE) {
+        if (evt.phase != TickEvent.Phase.END)
+            return;
+        if (ticksOnStage < Integer.MAX_VALUE && OrthoviewClientEvents.isEnabled()) {
             if (ticksOnStage % 20 == 0)
                 updateStage();
             ticksOnStage += 1;
@@ -112,6 +113,7 @@ public class TutorialClientEvents {
     private static void msgWithSound(String msg, RegistryObject<SoundEvent> soundEvent) {
         if (MC.player == null)
             return;
+        MC.player.sendSystemMessage(Component.literal(""));
         MC.player.sendSystemMessage(Component.literal(msg));
         if (soundEvent != null)
             MC.player.playSound(soundEvent.get(), 0.5f, 1.0f);
@@ -147,13 +149,14 @@ public class TutorialClientEvents {
                                  "here we can view the world from above.");
                     stageProgress += 1;
                 }
-                else if (stageProgress == 1 && ticksOnStage >= 60) {
+                else if (stageProgress == 1 && ticksOnStage >= 100) {
                     nextStage();
                 }
             }
             case PAN_CAMERA -> {
-                if (stageProgress == 0 && OrthoviewClientEvents.isEnabled()) {
-                    msgWithSound("To move your camera, move your mouse to the edges of the screen, try it now.");
+                if (stageProgress == 0) {
+                    OrthoviewClientEvents.unlockCam();
+                    msgWithSound("To move your camera, move your mouse to the edges of the screen. Try it now.");
                     stageProgress += 1;
                 }
                 else if (stageProgress == 1 && pannedUp && pannedDown && pannedLeft && pannedRight) {
@@ -166,12 +169,12 @@ public class TutorialClientEvents {
                     nextStage();
                     stageProgress += 1;
                 }
-                else if (stageProgress == 1 && ticksOnStage >= 60) {
+                else if (stageProgress == 1 && ticksOnStage >= 100) {
                     msgWithSound("You can also zoom the camera with CTRL+SCROLL and rotate it with " +
                                  "ALT+SCROLL.");
                     stageProgress += 1;
                 }
-                else if (stageProgress == 2 && ticksOnStage >= 120) {
+                else if (stageProgress == 2 && ticksOnStage >= 200) {
                     nextStage();
                 }
             }
@@ -181,7 +184,7 @@ public class TutorialClientEvents {
                                  "for you to help navigate.");
                     stageProgress += 1;
                 }
-                else if (stageProgress == 1 && ticksOnStage >= 60) {
+                else if (stageProgress == 1 && ticksOnStage >= 100) {
                     msgWithSound("You can move around the world quickly by clicking on a spot on the map. " +
                                  "Try doing that now.");
                     stageProgress += 1;
@@ -196,7 +199,7 @@ public class TutorialClientEvents {
                                  "to recentre the map on that location.");
                     stageProgress += 1;
                 }
-                else if (stageProgress == 1 && ticksOnStage >= 60) {
+                else if (stageProgress == 1 && ticksOnStage >= 100) {
                     msgWithSound("You can also press M or click the bottom right button to expand the map.");
                     nextStage();
                 }
@@ -206,12 +209,12 @@ public class TutorialClientEvents {
                     msgWithSound("It's time to start playing with some units.");
                     stageProgress += 1;
                 }
-                else if (stageProgress == 1 && ticksOnStage >= 60) {
+                else if (stageProgress == 1 && ticksOnStage >= 100) {
                     msgWithSound("Let's get started by spawning in some villagers here.");
                     OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 20);
                     stageProgress += 1;
                 }
-                else if (stageProgress == 2 && ticksOnStage >= 120) {
+                else if (stageProgress == 2 && ticksOnStage >= 200) {
                     msgWithSound("Left-click the button at the top right and then click on the ground where " +
                                  "you want to place them.");
                     TutorialRendering.setButtonName("Villagers");
@@ -227,7 +230,7 @@ public class TutorialClientEvents {
                     msgWithSound("Villagers are your worker units who can build and gather resources.");
                     stageProgress += 1;
                 }
-                else if (stageProgress == 1 && ticksOnStage >= 60) {
+                else if (stageProgress == 1 && ticksOnStage >= 100) {
                     msgWithSound("Try selecting one by clicking them.");
                     stageProgress += 1;
                 }
