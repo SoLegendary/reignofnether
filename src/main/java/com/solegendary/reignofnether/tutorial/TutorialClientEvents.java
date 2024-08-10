@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
-import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -19,9 +18,11 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.RegistryObject;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 
+import static com.solegendary.reignofnether.registrars.SoundRegistrar.*;
 import static com.solegendary.reignofnether.tutorial.TutorialStage.*;
 
 public class TutorialClientEvents {
@@ -30,8 +31,12 @@ public class TutorialClientEvents {
     private static TutorialStage tutorialStage = INTRO;
     private static boolean enabled = false;
 
+    private static int ticksToProgressStage = 0;
+    private static int ticksToNextStage = 0;
     private static int ticksOnStage = 0;
     private static int stageProgress = 0; // used to track progress within each TutorialStage
+    private static boolean pressSpaceToContinue = false;
+    private static boolean blockUpdateStage = false; // prevent updateStage being called when we block it with a delay
 
     public static boolean pannedUp = false;
     public static boolean pannedDown = false;
@@ -52,8 +57,10 @@ public class TutorialClientEvents {
 
     public static void setEnabled(boolean value) {
         if (value && !enabled && MC.player != null) {
+            MC.player.sendSystemMessage(Component.literal(""));
             MC.player.sendSystemMessage(Component.literal("Welcome to the Reign of Nether Tutorial!").withStyle(Style.EMPTY.withBold(true)));
             MC.player.sendSystemMessage(Component.literal("Press F12 to get started."));
+            MC.player.sendSystemMessage(Component.literal(""));
         }
         enabled = value;
     }
@@ -64,12 +71,14 @@ public class TutorialClientEvents {
         tutorialStage = tutorialStage.next();
         ticksOnStage = 0;
         stageProgress = 0;
+        blockUpdateStage = false;
         updateStage();
     }
     private static void prevStage() {
         tutorialStage = tutorialStage.prev();
         ticksOnStage = 0;
         stageProgress = 0;
+        blockUpdateStage = false;
         updateStage();
     }
 
@@ -93,34 +102,59 @@ public class TutorialClientEvents {
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre evt) { updateStage(); }
 
     @SubscribeEvent
-    public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) { updateStage(); }
+    public static void onKeyRelease(ScreenEvent.KeyReleased.Pre evt) { updateStage(); }
 
     @SubscribeEvent
-    public static void onKeyRelease(ScreenEvent.KeyReleased.Pre evt) { updateStage(); }
+    public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
+        if (pressSpaceToContinue && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
+            pressSpaceToContinue = false;
+            nextStage();
+        }
+    }
 
     @SubscribeEvent
     public static void TickEvent(TickEvent.ClientTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END)
             return;
-        if (ticksOnStage < Integer.MAX_VALUE && OrthoviewClientEvents.isEnabled()) {
+        if (ticksOnStage < Integer.MAX_VALUE) {
             if (ticksOnStage % 20 == 0)
                 updateStage();
             ticksOnStage += 1;
         }
+        if (ticksToProgressStage > 0) {
+            ticksToProgressStage -= 1;
+            if (ticksToProgressStage == 0) {
+                progressStage();
+                updateStage();
+            }
+        }
+        if (ticksToNextStage > 0) {
+            ticksToNextStage -= 1;
+            if (ticksToNextStage == 0)
+                nextStage();
+        }
     }
 
-    private static void msgWithSound(String msg) {
-        msgWithSound(msg, SoundRegistrar.CHAT);
-    }
-
-    private static void msgWithSound(String msg, RegistryObject<SoundEvent> soundEvent) {
+    private static void msg(String msg, boolean bold, RegistryObject<SoundEvent> soundEvt) {
         if (MC.player == null)
             return;
         MC.player.sendSystemMessage(Component.literal(""));
-        MC.player.sendSystemMessage(Component.literal(msg));
-        if (soundEvent != null)
-            MC.player.playSound(soundEvent.get(), 0.5f, 1.0f);
+        if (bold)
+            MC.player.sendSystemMessage(Component.literal(msg).withStyle(Style.EMPTY.withBold(true)));
+        else
+            MC.player.sendSystemMessage(Component.literal(msg));
+        MC.player.sendSystemMessage(Component.literal(""));
+        MC.player.playSound(soundEvt.get(), 1.0f, 1.0f);
     }
+
+    private static void msg(String msg) {
+        msg(msg, false, CHAT);
+    }
+
+    private static void specialMsg(String msg) {
+        msg(msg, true, ALLY);
+    }
+
 
     public static boolean isAtOrPastStage(TutorialStage stage) {
         if (!isEnabled())
@@ -136,31 +170,54 @@ public class TutorialClientEvents {
         });
     }
 
+    private static void progressStage() {
+        blockUpdateStage = false;
+        stageProgress += 1;
+    }
+
+    private static void progressStageAfterDelay(int delay) {
+        blockUpdateStage = true;
+        ticksToProgressStage = delay;
+    }
+
+    private static void nextStageAfterDelay(int delay) {
+        blockUpdateStage = true;
+        ticksToNextStage = delay;
+    }
+
+    private static void nextStageAfterSpace() {
+        blockUpdateStage = true;
+        msg("Press SPACE when you're ready to continue.", true, CHAT);
+        pressSpaceToContinue = true;
+    }
+
     // Whenever doing anything that could be a tutorial action like enabling orthoview or building your first building,
     // check here to progress the tutorial and give updates to the player.
     // This theoretically should be able to be called at any time but will only actually progress if actions are done
     // This should be called in specific clientside events like
     public static void updateStage() {
-        if (!isEnabled())
+        if (!isEnabled() || blockUpdateStage)
             return;
 
         switch(tutorialStage) {
             case INTRO -> {
                 if (stageProgress == 0 && OrthoviewClientEvents.isEnabled()) {
                     OrthoviewClientEvents.lockCam();
-                    msgWithSound("Welcome to RTS view. Instead of the usual first-person minecraft camera, " +
-                                 "here we can view the world from above.");
-                    stageProgress += 1;
+                    msg("Welcome to RTS view. Instead of the usual first-person minecraft camera, " +
+                        "here we can view the world from a top-down perspective.");
+                    progressStageAfterDelay(100);
                 }
-                else if (stageProgress == 1 && ticksOnStage >= 100) {
-                    nextStage();
+                else if (stageProgress == 1) {
+                    msg("Note that if you want to see any of these messages again, opening chat " +
+                        "has been changed to the ENTER key.");
+                    nextStageAfterDelay(100);
                 }
             }
             case PAN_CAMERA -> {
                 if (stageProgress == 0) {
                     OrthoviewClientEvents.unlockCam();
-                    msgWithSound("To move your camera, move your mouse to the edges of the screen. Try it now.");
-                    stageProgress += 1;
+                    msg("To move your camera, move your mouse to the edges of the screen. Try it now.");
+                    progressStage();
                 }
                 else if (stageProgress == 1 && pannedUp && pannedDown && pannedLeft && pannedRight) {
                     nextStage();
@@ -168,28 +225,32 @@ public class TutorialClientEvents {
             }
             case CAMERA_TIPS -> {
                 if (stageProgress == 0) {
-                    msgWithSound("Good work. You can also move it in the same way with the arrow keys.");
-                    stageProgress += 1;
+                    specialMsg("Nicely done.");
+                    progressStageAfterDelay(50);
                 }
-                else if (stageProgress == 1 && ticksOnStage >= 100) {
-                    msgWithSound("You can also zoom the camera with CTRL+SCROLL and rotate it with " +
-                                 "ALT+RIGHT-CLICK.");
-                    stageProgress += 1;
+                if (stageProgress == 1) {
+                    msg("You can also move it in the same way with the arrow keys.");
+                    progressStageAfterDelay(100);
                 }
-                else if (stageProgress == 2 && ticksOnStage >= 200) {
-                    nextStage();
+                else if (stageProgress == 2) {
+                    msg("You can also zoom the camera with ALT+SCROLL and rotate it with " +
+                        "ALT+RIGHT-CLICK.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 3) {
+                    nextStageAfterSpace();
                 }
             }
             case MINIMAP_CLICK -> {
                 if (stageProgress == 0) {
-                    msgWithSound("Since you could get lost with a top-down view like this, here's a minimap " +
-                                 "for you to help navigate.");
-                    stageProgress += 1;
+                    msg("Since you could get lost with a top-down view like this, here's a minimap " +
+                        "for you to help navigate.");
+                    progressStageAfterDelay(120);
                 }
-                else if (stageProgress == 1 && ticksOnStage >= 100) {
-                    msgWithSound("You can move around the world quickly by clicking on a spot on the map. " +
-                                 "Try doing that now.");
-                    stageProgress += 1;
+                else if (stageProgress == 1) {
+                    msg("You can move around the world quickly by clicking on a spot on the map. " +
+                        "Try doing that now.");
+                    progressStage();
                 }
                 else if (stageProgress == 2 && clickedMinimap) {
                     nextStage();
@@ -197,30 +258,37 @@ public class TutorialClientEvents {
             }
             case MINIMAP_TIPS -> {
                 if (stageProgress == 0) {
-                    msgWithSound("Good work. If you need to move really far away, you can also SHIFT+CLICK " +
-                                 "to recentre the map on that location.");
-                    stageProgress += 1;
+                    specialMsg("Good work!");
+                    progressStageAfterDelay(50);
                 }
-                else if (stageProgress == 1 && ticksOnStage >= 100) {
-                    msgWithSound("You can also press M or click the bottom right button to expand the map.");
-                    nextStage();
+                if (stageProgress == 1) {
+                    msg("If you need to move really far away, you can also SHIFT+CLICK " +
+                        "to recentre the map on that location.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 2) {
+                    msg("You can also press M or click the bottom right button to expand the map.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 3) {
+                    nextStageAfterSpace();
                 }
             }
             case PLACE_WORKERS -> {
                 if (stageProgress == 0) {
-                    msgWithSound("It's time to start playing with some units.");
-                    stageProgress += 1;
+                    msg("It's time to start playing with some units.");
+                    progressStageAfterDelay(100);
                 }
-                else if (stageProgress == 1 && ticksOnStage >= 100) {
-                    msgWithSound("Let's get started by spawning in some villagers here.");
+                else if (stageProgress == 1) {
+                    msg("Let's get started by spawning in some villagers here.");
                     OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 30);
-                    stageProgress += 1;
+                    progressStageAfterDelay(100);
                 }
-                else if (stageProgress == 2 && ticksOnStage >= 200) {
-                    msgWithSound("Left-click the button at the top right and then click on the ground where " +
-                                 "you want to place them.");
+                else if (stageProgress == 2) {
+                    msg("Click the button at the top right and then click on the ground where " +
+                        "you want to place them.");
                     TutorialRendering.setButtonName("Villagers");
-                    stageProgress += 1;
+                    progressStage();
                 }
                 else if (stageProgress == 3 && PlayerClientEvents.isRTSPlayer) {
                     TutorialRendering.clearButtonName();
@@ -229,33 +297,85 @@ public class TutorialClientEvents {
             }
             case SELECT_UNIT -> {
                 if (stageProgress == 0) {
-                    msgWithSound("Villagers are your worker units who can build and gather resources.");
-                    stageProgress += 1;
+                    specialMsg("Excellent.");
+                    progressStageAfterDelay(50);
                 }
-                else if (stageProgress == 1 && ticksOnStage >= 100) {
-                    msgWithSound("Try selecting one by clicking them.");
-                    stageProgress += 1;
+                else if (stageProgress == 1) {
+                    msg("Villagers are your worker units who can build and gather resources " +
+                        "and are vital to starting and maintaining a good base.");
+                    progressStageAfterDelay(150);
                 }
-                else if (stageProgress == 2 && UnitClientEvents.getSelectedUnits().size() > 0) {
-                    msgWithSound("Now, try right clicking where you want to move.");
+                else if (stageProgress == 2) {
+                    msg("Try selecting one with LEFT-CLICK.");
+                    progressStage();
+                }
+                else if (stageProgress == 3 && UnitClientEvents.getSelectedUnits().size() > 0) {
                     nextStage();
                 }
             }
             case MOVE_UNIT -> {
                 if (stageProgress == 0 && UnitClientEvents.getSelectedUnits().size() > 0) {
+                    msg("Now, RIGHT-CLICK where you want to move.");
+                    progressStage();
+                }
+                else if (stageProgress == 1 && UnitClientEvents.getSelectedUnits().size() > 0) {
                     Unit unit = (Unit) UnitClientEvents.getSelectedUnits().get(0);
                     MoveToTargetBlockGoal goal = unit.getMoveGoal();
                     if (goal != null && goal.getMoveTarget() != null) {
-                        msgWithSound("Excellent. Now we need to get the rest here too.");
-                        stageProgress += 1;
+                        nextStage();
                     }
                 }
             }
             case BOX_SELECT_UNITS -> {
+                if (stageProgress == 0) {
+                    specialMsg("Nice work.");
+                    progressStageAfterDelay(50);
+                }
+                if (stageProgress == 1) {
+                    msg("Now let's try selecting a group of villagers.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 2) {
+                    msg("To do this, LEFT-CLICK and DRAG your mouse across them, then release to select.");
+                    progressStage();
+                }
+                else if (stageProgress == 3 && UnitClientEvents.getSelectedUnits().size() > 1) {
+                    nextStage();
+                }
             }
             case MOVE_UNITS -> {
+                if (stageProgress == 0 && UnitClientEvents.getSelectedUnits().size() > 1) {
+                    msg("Now, RIGHT-CLICK where you want to move the group.");
+                    progressStage();
+                }
+                else if (stageProgress == 1 && UnitClientEvents.getSelectedUnits().size() > 1) {
+                    Unit unit = (Unit) UnitClientEvents.getSelectedUnits().get(0);
+                    MoveToTargetBlockGoal goal = unit.getMoveGoal();
+                    if (goal != null && goal.getMoveTarget() != null) {
+                        nextStage();
+                    }
+                }
             }
             case UNIT_TIPS -> {
+                if (stageProgress == 0) {
+                    specialMsg("Great job!");
+                    progressStageAfterDelay(50);
+                }
+                else if (stageProgress == 1) {
+                    msg("You can also double click a unit to select all units of the same type.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 2) {
+                    msg("If you want to deselect your units, press F1.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 3) {
+                    msg("For you RTS fans out there, control grouping with CTRL+NUM is also a feature.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 4) {
+                    nextStageAfterSpace();
+                }
             }
             case BUILD_TOWN_CENTRE -> {
             }
