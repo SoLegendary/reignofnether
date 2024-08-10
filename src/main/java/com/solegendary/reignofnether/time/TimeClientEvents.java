@@ -2,6 +2,8 @@ package com.solegendary.reignofnether.time;
 
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -70,9 +72,10 @@ public class TimeClientEvents {
     // render directly above the minimap
     @SubscribeEvent
     public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
-
-        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused())
+        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() ||
+            !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
             return;
+
         xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) + 2;
         yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 4;
 
@@ -82,6 +85,9 @@ public class TimeClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
+        if (!TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
+            return;
+
         final int GUI_LENGTH = 16;
 
         if (evt.getMouseX() > xPos && evt.getMouseX() <= xPos + GUI_LENGTH &&

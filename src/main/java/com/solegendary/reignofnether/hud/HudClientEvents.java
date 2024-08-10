@@ -857,25 +857,28 @@ public class HudClientEvents {
         // Start buttons (spectator only)
         // ------------------------------
         if (!PlayerClientEvents.isRTSPlayer) {
-            StartButtons.villagerStartButton.render(evt.getPoseStack(),
-                    screenWidth - (StartButtons.iconSize * 6),
-                    StartButtons.iconSize / 2,
-                    mouseX, mouseY);
-            renderedButtons.add(StartButtons.villagerStartButton);
-
-            StartButtons.monsterStartButton.render(evt.getPoseStack(),
-                    (int) (screenWidth - (StartButtons.iconSize * 4f)),
-                    StartButtons.iconSize / 2,
-                    mouseX, mouseY);
-            renderedButtons.add(StartButtons.monsterStartButton);
-
-            StartButtons.piglinStartButton.render(evt.getPoseStack(),
-                    screenWidth - (StartButtons.iconSize * 2),
-                    StartButtons.iconSize / 2,
-                    mouseX, mouseY);
-            renderedButtons.add(StartButtons.piglinStartButton);
+            if (!StartButtons.villagerStartButton.isHidden.get()) {
+                StartButtons.villagerStartButton.render(evt.getPoseStack(),
+                        screenWidth - (StartButtons.iconSize * 6),
+                        StartButtons.iconSize / 2,
+                        mouseX, mouseY);
+                renderedButtons.add(StartButtons.villagerStartButton);
+            }
+            if (!StartButtons.monsterStartButton.isHidden.get()) {
+                StartButtons.monsterStartButton.render(evt.getPoseStack(),
+                        (int) (screenWidth - (StartButtons.iconSize * 4f)),
+                        StartButtons.iconSize / 2,
+                        mouseX, mouseY);
+                renderedButtons.add(StartButtons.monsterStartButton);
+            }
+            if (!StartButtons.piglinStartButton.isHidden.get()) {
+                StartButtons.piglinStartButton.render(evt.getPoseStack(),
+                        screenWidth - (StartButtons.iconSize * 2),
+                        StartButtons.iconSize / 2,
+                        mouseX, mouseY);
+                renderedButtons.add(StartButtons.piglinStartButton);
+            }
         }
-
         // ------------------------------------------------------
         // Button tooltips (has to be rendered last to be on top)
         // ------------------------------------------------------

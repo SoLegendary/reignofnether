@@ -68,7 +68,7 @@ public class OrthoviewClientEvents {
     private static final float CAMROTX_DEFAULT = 135;
     private static final float CAMROTY_DEFAULT = -45;
 
-    private static int FORCE_PAN_TICKS_MAX = 30;
+    private static final int FORCE_PAN_TICKS_MAX = 20;
     private static int forcePanTicksLeft = 0;
     private static float forcePanTargetX = 0;
     private static float forcePanTargetZ = 0;
@@ -188,7 +188,7 @@ public class OrthoviewClientEvents {
             MC.player.move(MoverType.SELF, new Vec3(xDiff , 0, zDiff));
             forcePanTicksLeft -= 1;
         }
-        if (isCameraLocked())
+        if (cameraLockTicksLeft > 0)
             cameraLockTicksLeft -= 1;
     }
 
