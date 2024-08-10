@@ -8,19 +8,18 @@ public enum TutorialStage {
             return this;
         };
     },
-    PLACE_VILLAGERS, // don't highlight button while cursor has the action to place - LOCK CAM
+
+    PAN_CAMERA, // make player pan in all 4 directions before continuing - UNLOCK CAM
+    CAMERA_TIPS, // just a delayed msg to explain you can use arrow keys
+    MINIMAP_CLICK,
+    MINIMAP_TIPS, // mention minimise/maximise button, explain units and buildings appear on it
+
+    PLACE_WORKERS, // don't highlight button while cursor has the action to place - LOCK CAM
     SELECT_UNIT,
     MOVE_UNIT,
     BOX_SELECT_UNITS,
     MOVE_UNITS,
     UNIT_TIPS, // double click to select multiple, control groups, F1 to deselect, following etc.
-
-    PAN_CAMERA, // make player pan in all 4 directions before continuing - UNLOCK CAM
-    PAN_CAMERA_TIPS, // just a delayed msg to explain you can use arrow keys
-    MINIMAP_INTRO, // just messages to explain it
-    MINIMAP_CLICK,
-    MINIMAP_SHIFT_CLICK,
-    MINIMAP_TIPS, // mention minimise/maximise button, explain units and buildings appear on it
 
     BUILD_TOWN_CENTRE, // forcePanCam back to spawn, ask player to select workers, don't highlight button while cursor has the action to place
     BUILDING_TIPS, // explain you can order multiple workers to help build together

@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -21,7 +22,7 @@ public class StartButtons {
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_VILLAGERS,
-        () -> false,
+        () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.PLACE_WORKERS),
         () -> true,
         () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_VILLAGERS),
         () -> { },
@@ -37,7 +38,7 @@ public class StartButtons {
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_MONSTERS,
-        () -> false,
+        () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.PLACE_WORKERS),
         () -> !TutorialClientEvents.isEnabled(),
         () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_MONSTERS),
         () -> { },
@@ -53,7 +54,7 @@ public class StartButtons {
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_PIGLINS,
-        () -> false,
+        () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.PLACE_WORKERS),
         () -> !TutorialClientEvents.isEnabled(),
         () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_PIGLINS),
         () -> { },

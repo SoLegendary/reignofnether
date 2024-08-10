@@ -301,16 +301,23 @@ public class OrthoviewClientEvents {
         // panCam when cursor is at edge of screen
         // remember that mouse (0,0) is top left of screen
         if (!Keybindings.altMod.isDown() && MC.isWindowActive() && !isCameraLocked()) {
-            if (cursorX <= 0)
+            if (cursorX <= 0) {
                 panCam(edgeCamPanSensitivity, 0, 0);
-            else if (cursorX >= glfwWinWidth)
+                TutorialClientEvents.pannedRight = true;
+            }
+            else if (cursorX >= glfwWinWidth) {
                 panCam(-edgeCamPanSensitivity, 0, 0);
-            if (cursorY <= 0)
+                TutorialClientEvents.pannedLeft = true;
+            }
+            if (cursorY <= 0) {
                 panCam(0, 0, edgeCamPanSensitivity);
-            else if (cursorY >= glfwWinHeight)
+                TutorialClientEvents.pannedUp = true;
+            }
+            else if (cursorY >= glfwWinHeight) {
                 panCam(0, 0, -edgeCamPanSensitivity);
+                TutorialClientEvents.pannedDown = true;
+            }
         }
-
         // lock mouse inside window
         if (cursorX >= glfwWinWidth)
             GLFW.glfwSetCursorPos(glfwWindow, glfwWinWidth, cursorY);

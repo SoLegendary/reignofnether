@@ -220,9 +220,11 @@ public class PlayerServerEvents {
             }
             ResourcesServerEvents.resetResources(serverPlayer.getName().getString());
 
-            serverPlayer.sendSystemMessage(Component.literal(""));
-            sendMessageToAllPlayers(serverPlayer.getName().getString() + " has started their game!", true);
-            sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
+            if (!TutorialServerEvents.isEnabled()) {
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                sendMessageToAllPlayers(serverPlayer.getName().getString() + " has started their game!", true);
+                sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
+            }
         }
     }
 
