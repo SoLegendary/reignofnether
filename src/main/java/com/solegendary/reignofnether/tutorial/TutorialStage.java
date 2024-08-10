@@ -14,7 +14,8 @@ public enum TutorialStage {
     MINIMAP_CLICK,
     MINIMAP_TIPS, // mention minimise/maximise button, explain units and buildings appear on it
 
-    PLACE_WORKERS, // don't highlight button while cursor has the action to place - LOCK CAM
+    PLACE_WORKERS_A, // don't highlight button while cursor has the action to place - LOCK CAM
+    PLACE_WORKERS_B,
     SELECT_UNIT,
     MOVE_UNIT,
     BOX_SELECT_UNITS,

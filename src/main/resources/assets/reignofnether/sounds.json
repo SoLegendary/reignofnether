@@ -19,10 +19,6 @@
         "subtitle": "sounds.reignofnether.ally",
         "sounds": [ "reignofnether:ally" ]
     },
-    "neutral": {
-        "subtitle": "sounds.reignofnether.neutral",
-        "sounds": [ "reignofnether:neutral" ]
-    },
     "enemy": {
         "subtitle": "sounds.reignofnether.enemy",
         "sounds": [ "reignofnether:enemy" ]

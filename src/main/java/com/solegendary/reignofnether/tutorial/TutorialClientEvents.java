@@ -144,7 +144,7 @@ public class TutorialClientEvents {
         else
             MC.player.sendSystemMessage(Component.literal(msg));
         MC.player.sendSystemMessage(Component.literal(""));
-        MC.player.playSound(soundEvt.get(), 1.0f, 1.0f);
+        MC.player.playSound(soundEvt.get(), 1.2f, 1.0f);
     }
 
     private static void msg(String msg) {
@@ -274,23 +274,24 @@ public class TutorialClientEvents {
                     nextStageAfterSpace();
                 }
             }
-            case PLACE_WORKERS -> {
+            case PLACE_WORKERS_A -> {
                 if (stageProgress == 0) {
                     msg("It's time to start playing with some units.");
                     progressStageAfterDelay(100);
-                }
-                else if (stageProgress == 1) {
+                } else if (stageProgress == 1) {
                     msg("Let's get started by spawning in some villagers here.");
                     OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 30);
-                    progressStageAfterDelay(100);
+                    nextStageAfterDelay(100);
                 }
-                else if (stageProgress == 2) {
+            }
+            case PLACE_WORKERS_B -> {
+                if (stageProgress == 0) {
                     msg("Click the button at the top right and then click on the ground where " +
                         "you want to place them.");
                     TutorialRendering.setButtonName("Villagers");
                     progressStage();
                 }
-                else if (stageProgress == 3 && PlayerClientEvents.isRTSPlayer) {
+                else if (stageProgress == 1 && PlayerClientEvents.isRTSPlayer) {
                     TutorialRendering.clearButtonName();
                     nextStage();
                 }
@@ -307,6 +308,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 2) {
                     msg("Try selecting one with LEFT-CLICK.");
+                    UnitClientEvents.clearSelectedUnits();
                     progressStage();
                 }
                 else if (stageProgress == 3 && UnitClientEvents.getSelectedUnits().size() > 0) {
@@ -349,7 +351,7 @@ public class TutorialClientEvents {
                     progressStage();
                 }
                 else if (stageProgress == 1 && UnitClientEvents.getSelectedUnits().size() > 1) {
-                    Unit unit = (Unit) UnitClientEvents.getSelectedUnits().get(0);
+                    Unit unit = (Unit) UnitClientEvents.getSelectedUnits().get(1);
                     MoveToTargetBlockGoal goal = unit.getMoveGoal();
                     if (goal != null && goal.getMoveTarget() != null) {
                         nextStage();
