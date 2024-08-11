@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
@@ -517,6 +518,8 @@ public abstract class Building {
         isBuilt = true;
         if (!this.level.isClientSide())
             FrozenChunkClientboundPacket.setBuildingBuiltServerside(this.originPos);
+        else
+            TutorialClientEvents.updateStage();
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) { }

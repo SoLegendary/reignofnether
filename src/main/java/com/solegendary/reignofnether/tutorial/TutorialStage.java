@@ -27,7 +27,8 @@ public enum TutorialStage {
     BUILDING_TIPS, // explain you can order multiple workers to help build together
     TRAIN_WORKER, // progress once worker is built, while building explain rally points and cancelling
 
-    GATHER_RESOURCES, // explain resources, highlight some nearby trees and ores; progress once a resource is dropped
+    GATHER_WOOD,
+    GATHER_ORE,
     HUNT_ANIMALS, // Spawn in some pigs nearby, explain to take a villager and right click it
     RETURN_FOOD,
     BUILD_BASE, // give free resources, open options to build houses, farms and barracks with a msg for each when built

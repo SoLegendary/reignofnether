@@ -6,6 +6,8 @@ import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -17,6 +19,9 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -48,8 +53,14 @@ public class TutorialClientEvents {
     public static boolean pannedRight = false;
     public static boolean clickedMinimap = false;
 
+    private static int foodBeforeHunting = 0;
+
     private static final Vec3i SPAWN_POS = new Vec3i(-2950, 0, -1166);
     private static final Vec3i BUILD_POS = new Vec3i(-2944, 0, -1200);
+
+    private static final Vec3i WOOD_POS = new Vec3i(-2919, 0, -1196);
+    private static final Vec3i ORE_POS = new Vec3i(-2951, 0, -1224);
+    private static final Vec3i FOOD_POS = new Vec3i(-2939, 0, -1173);
 
     public static int getStageProgress() {
         return stageProgress;
@@ -142,13 +153,13 @@ public class TutorialClientEvents {
     private static void msg(String msg, boolean bold, RegistryObject<SoundEvent> soundEvt) {
         if (MC.player == null)
             return;
+        MC.player.playSound(soundEvt.get(), 1.2f, 1.0f);
         MC.player.sendSystemMessage(Component.literal(""));
         if (bold)
             MC.player.sendSystemMessage(Component.literal(msg).withStyle(Style.EMPTY.withBold(true)));
         else
             MC.player.sendSystemMessage(Component.literal(msg));
         MC.player.sendSystemMessage(Component.literal(""));
-        MC.player.playSound(soundEvt.get(), 1.2f, 1.0f);
     }
 
     private static void msg(String msg) {
@@ -278,7 +289,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(100);
                 } else if (stageProgress == 1) {
                     msg("Let's get started by spawning in some villagers here.");
-                    OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 30);
+                    OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 50);
                     nextStageAfterDelay(100);
                 }
             }
@@ -380,7 +391,7 @@ public class TutorialClientEvents {
                 else if (stageProgress == 2) {
                     msg("This looks like a good spot for it, being flat ground, near lots of resources and with " +
                         "plenty of space around it for other buildings.");
-                    OrthoviewClientEvents.forceMoveCam(BUILD_POS, 120);
+                    OrthoviewClientEvents.forceMoveCam(BUILD_POS, 50);
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 3) {
@@ -461,9 +472,120 @@ public class TutorialClientEvents {
                     nextStageAfterSpace();
                 }
             }
-            case GATHER_RESOURCES -> {
+            case GATHER_WOOD -> {
+                if (stageProgress == 0) {
+                    msg("Now that we have a bunch of workers, we can start gathering some resources.");
+                    progressStageAfterDelay(100);
+                }
+                if (stageProgress == 1) {
+                    msg("There's a forest over here that we can get wood from.");
+                    OrthoviewClientEvents.forceMoveCam(WOOD_POS, 100);
+                    progressStageAfterDelay(100);
+                }
+                if (stageProgress == 2) {
+                    msg("To gather a resource, select a worker, then RIGHT-CLICK a tree or an ore block.");
+                    progressStage();
+                }
+                if (stageProgress == 3) {
+                    for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+                        if (entity instanceof VillagerUnit villager &&
+                                villager.getGatherResourceGoal().isGathering() &&
+                                villager.getGatherResourceGoal().getTargetResourceName() == ResourceName.WOOD) {
+                            specialMsg("Well done.");
+                            progressStageAfterDelay(60);
+                        }
+                    }
+                }
+                if (stageProgress == 4) {
+                    msg("TIP: Workers will keep gathering until told to do something else. " +
+                        "Once they have at least 50 total resources they return it to the town centre.");
+                    progressStageAfterDelay(100);
+                }
+            }
+            case GATHER_ORE -> {
+                if (stageProgress == 0) {
+                    msg("Now let's do the same thing for ore.");
+                    progressStageAfterDelay(80);
+                }
+                if (stageProgress == 1) {
+                    msg("Here's a beach with coal and iron we can get ore from.");
+                    OrthoviewClientEvents.forceMoveCam(ORE_POS, 50);
+                    progressStageAfterDelay(100);
+                }
+                if (stageProgress == 2) {
+                    msg("Select a worker, then RIGHT-CLICK an ore block.");
+                    progressStage();
+                }
+                if (stageProgress == 3) {
+                    for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+                        if (entity instanceof VillagerUnit villager &&
+                            villager.getGatherResourceGoal().isGathering() &&
+                            villager.getGatherResourceGoal().getTargetResourceName() == ResourceName.ORE) {
+                            specialMsg("Well done.");
+                            progressStageAfterDelay(60);
+                        }
+                    }
+                }
+                if (stageProgress == 4) {
+                    msg("TIP: Sandy biomes like deserts and beaches have more and better ores.");
+                    nextStageAfterDelay(100);
+                }
             }
             case HUNT_ANIMALS -> {
+                if (stageProgress == 0) {
+                    msg("While your other workers are busy on wood and ore, let's find some food.");
+                    progressStageAfterDelay(100);
+                }
+                if (stageProgress == 1) {
+                    foodBeforeHunting = ResourcesClientEvents.getOwnResources().food;
+                    OrthoviewClientEvents.forceMoveCam(FOOD_POS, 50);
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_ANIMALS);
+                    msg("Here are some pigs that you can hunt for food.");
+                    progressStageAfterDelay(100);
+                }
+                if (stageProgress == 2) {
+                    msg("Just like wood and ore, select a worker and right click a pig to start hunting it.");
+                    progressStageAfterDelay(100);
+                }
+                if (stageProgress == 3) {
+                    msg("This might take a while, but animals offer a good amount of food for the effort.");
+                    progressStage();
+                }
+                if (stageProgress == 3) {
+                    msg("This might take a while, but animals offer a good amount of food for the effort.");
+                    progressStage();
+                }
+                if (stageProgress == 3) {
+                    for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+                        if (entity instanceof VillagerUnit villager) {
+                            for (ItemStack itemStack : villager.getItems()) {
+                                if (itemStack.getItem().equals(Items.PORKCHOP)) {
+                                    specialMsg("Great work!");
+                                    progressStageAfterDelay(60);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (stageProgress == 4) {
+                    msg("Your villager should now return some porkchops to your town centre, but if they aren't, " +
+                        "simply select the villager and RIGHT-CLICK your town centre.");
+                    progressStage();
+                }
+                if (stageProgress == 5 && ResourcesClientEvents.getOwnResources().food >= foodBeforeHunting + 100) {
+                    specialMsg("Excellent. You now have more food to build new units.");
+                    progressStageAfterDelay(80);
+                }
+                if (stageProgress == 6) {
+                    msg("TIP: Units hold up to 100 total resources, but hunting allows you to go above this maximum.");
+                    progressStageAfterDelay(100);
+                }
+                if (stageProgress == 7) {
+                    msg("TIP: Items like saplings and porkchops can be picked up by any unit and dropped off for resources." +
+                        "When units die, they drop everything they were holding.");
+                    nextStageAfterDelay(100);
+                }
             }
             case RETURN_FOOD -> {
             }
