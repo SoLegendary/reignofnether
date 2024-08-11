@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.tutorial;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
@@ -40,7 +41,7 @@ public class TutorialRendering {
 
         Button activeButton = null;
         for (Button button : buttons) {
-            if (button.name.equals(buttonNameToHighlight)) {
+            if (button.name.equals(buttonNameToHighlight) && button.hotkey != null) {
                 activeButton = button;
                 break;
             }

@@ -1,12 +1,16 @@
 package com.solegendary.reignofnether.tutorial;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerProd;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
@@ -208,7 +212,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 1) {
-                    msg("Note that if you want to see any of these messages again, opening chat " +
+                    msg("TIP: If you want to see any of these messages again, opening chat " +
                         "has been changed to the ENTER key.");
                     nextStageAfterDelay(100);
                 }
@@ -220,24 +224,21 @@ public class TutorialClientEvents {
                     progressStage();
                 }
                 else if (stageProgress == 1 && pannedUp && pannedDown && pannedLeft && pannedRight) {
-                    nextStage();
+                    specialMsg("Nicely done.");
+                    nextStageAfterDelay(60);
                 }
             }
             case CAMERA_TIPS -> {
                 if (stageProgress == 0) {
-                    specialMsg("Nicely done.");
-                    progressStageAfterDelay(50);
-                }
-                if (stageProgress == 1) {
                     msg("You can also move it in the same way with the arrow keys.");
                     progressStageAfterDelay(100);
                 }
-                else if (stageProgress == 2) {
+                else if (stageProgress == 1) {
                     msg("You can also zoom the camera with ALT+SCROLL and rotate it with " +
                         "ALT+RIGHT-CLICK.");
                     progressStageAfterDelay(100);
                 }
-                else if (stageProgress == 3) {
+                else if (stageProgress == 2) {
                     nextStageAfterSpace();
                 }
             }
@@ -253,24 +254,21 @@ public class TutorialClientEvents {
                     progressStage();
                 }
                 else if (stageProgress == 2 && clickedMinimap) {
-                    nextStage();
+                    specialMsg("Good work!");
+                    nextStageAfterDelay(60);
                 }
             }
             case MINIMAP_TIPS -> {
                 if (stageProgress == 0) {
-                    specialMsg("Good work!");
-                    progressStageAfterDelay(50);
-                }
-                if (stageProgress == 1) {
                     msg("If you need to move really far away, you can also SHIFT+CLICK " +
                         "to recentre the map on that location.");
                     progressStageAfterDelay(100);
                 }
-                else if (stageProgress == 2) {
+                else if (stageProgress == 1) {
                     msg("You can also press M or click the bottom right button to expand the map.");
                     progressStageAfterDelay(100);
                 }
-                else if (stageProgress == 3) {
+                else if (stageProgress == 2) {
                     nextStageAfterSpace();
                 }
             }
@@ -293,25 +291,22 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 1 && PlayerClientEvents.isRTSPlayer) {
                     TutorialRendering.clearButtonName();
-                    nextStage();
+                    specialMsg("Excellent.");
+                    nextStageAfterDelay(60);
                 }
             }
             case SELECT_UNIT -> {
                 if (stageProgress == 0) {
-                    specialMsg("Excellent.");
-                    progressStageAfterDelay(50);
+                    msg("Villagers are your worker units who can build and gather resources " +
+                        "and are essential to starting and maintaining a good base.");
+                    progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 1) {
-                    msg("Villagers are your worker units who can build and gather resources " +
-                        "and are vital to starting and maintaining a good base.");
-                    progressStageAfterDelay(150);
-                }
-                else if (stageProgress == 2) {
                     msg("Try selecting one with LEFT-CLICK.");
                     UnitClientEvents.clearSelectedUnits();
                     progressStage();
                 }
-                else if (stageProgress == 3 && UnitClientEvents.getSelectedUnits().size() > 0) {
+                else if (stageProgress == 2 && UnitClientEvents.getSelectedUnits().size() > 0) {
                     nextStage();
                 }
             }
@@ -324,24 +319,21 @@ public class TutorialClientEvents {
                     Unit unit = (Unit) UnitClientEvents.getSelectedUnits().get(0);
                     MoveToTargetBlockGoal goal = unit.getMoveGoal();
                     if (goal != null && goal.getMoveTarget() != null) {
-                        nextStage();
+                        specialMsg("Nice work.");
+                        nextStageAfterDelay(60);
                     }
                 }
             }
             case BOX_SELECT_UNITS -> {
                 if (stageProgress == 0) {
-                    specialMsg("Nice work.");
-                    progressStageAfterDelay(50);
-                }
-                if (stageProgress == 1) {
                     msg("Now let's try selecting a group of villagers.");
                     progressStageAfterDelay(100);
                 }
-                else if (stageProgress == 2) {
+                else if (stageProgress == 1) {
                     msg("To do this, LEFT-CLICK and DRAG your mouse across them, then release to select.");
                     progressStage();
                 }
-                else if (stageProgress == 3 && UnitClientEvents.getSelectedUnits().size() > 1) {
+                else if (stageProgress == 2 && UnitClientEvents.getSelectedUnits().size() > 1) {
                     nextStage();
                 }
             }
@@ -354,38 +346,120 @@ public class TutorialClientEvents {
                     Unit unit = (Unit) UnitClientEvents.getSelectedUnits().get(1);
                     MoveToTargetBlockGoal goal = unit.getMoveGoal();
                     if (goal != null && goal.getMoveTarget() != null) {
-                        nextStage();
+                        specialMsg("Great job!");
+                        nextStageAfterDelay(60);
                     }
                 }
             }
             case UNIT_TIPS -> {
                 if (stageProgress == 0) {
-                    specialMsg("Great job!");
-                    progressStageAfterDelay(50);
+                    msg("TIP: You can also double click a unit to select all units of the same type.");
+                    progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 1) {
-                    msg("You can also double click a unit to select all units of the same type.");
+                    msg("TIP: If you want to deselect your units, press F1.");
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 2) {
-                    msg("If you want to deselect your units, press F1.");
+                    msg("TIP: For you RTS fans, control grouping with CTRL+NUM is also a feature.");
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 3) {
-                    msg("For you RTS fans out there, control grouping with CTRL+NUM is also a feature.");
-                    progressStageAfterDelay(100);
-                }
-                else if (stageProgress == 4) {
                     nextStageAfterSpace();
                 }
             }
+            case BUILD_INTRO -> {
+                if (stageProgress == 0) {
+                    msg("It's time to start your base.");
+                    progressStageAfterDelay(60);
+                }
+                else if (stageProgress == 1) {
+                    msg("The first and most important building of any base is always the capitol.");
+                    progressStageAfterDelay(80);
+                }
+                else if (stageProgress == 2) {
+                    msg("This looks like a good spot for it, being flat ground, near lots of resources and with " +
+                        "plenty of space around it for other buildings.");
+                    OrthoviewClientEvents.forceMoveCam(BUILD_POS, 120);
+                    progressStageAfterDelay(120);
+                }
+                else if (stageProgress == 3) {
+                    msg("Note that building takes resources. Luckily, the TOP-LEFT shows we have more than enough " +
+                        "WOOD and ORE needed.");
+                    nextStageAfterDelay(120);
+                }
+            }
             case BUILD_TOWN_CENTRE -> {
+                if (stageProgress == 0) {
+                    msg("Select your workers, then click the bottom-left button and click on the " +
+                        "ground where you want to place your capitol.");
+                    TutorialRendering.setButtonName(TownCentre.buildingName);
+                    progressStage();
+                }
+                else if (stageProgress == 1 && BuildingClientEvents.getBuildings().size() > 0) {
+                    if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre)
+                        nextStage();
+                }
             }
             case BUILDING_TIPS -> {
-            }
-            case SELECT_BUILDING -> {
-            }
+                if (stageProgress == 0) {
+                    msg("If they aren't already, you can have all of your villagers help to build to speed up progress." +
+                        "To do this, select your workers and RIGHT-CLICK the building.");
+                    progressStageAfterDelay(140);
+                }
+                else if (stageProgress == 1) {
+                    msg("You can also select the building itself like a unit to see how far along it is in building.");
+                    progressStage();
+                }
+                else if (stageProgress == 2 && BuildingClientEvents.getBuildings().size() > 0) {
+                    if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre townCentre && townCentre.isBuilt) {
+                        specialMsg("Congratulations, you now have a base set up!");
+                        nextStageAfterDelay(80);
+                    }
+                }
+            } //msg("You can also set a rally point for your building with RIGHT-CLICK.");
             case TRAIN_WORKER -> {
+                if (stageProgress == 0) {
+                    msg("Capitols like the Town Centre are the only building that can produce workers like villagers.");
+                    progressStageAfterDelay(100);
+                }
+                if (stageProgress == 1) {
+                    msg("Note that producing workers takes 50 FOOD each. We should have enough resources for 3 of them.");
+                    progressStageAfterDelay(100);
+                }
+                if (stageProgress == 2) {
+                    msg("With your building selected, RIGHT-CLICK to set a rally point - units will " +
+                        "automatically go to that spot when they appear.");
+                    progressStageAfterDelay(100);
+                }
+                if (stageProgress == 3 && BuildingClientEvents.getBuildings().size() > 0) {
+                    if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre townCentre &&
+                        townCentre.getRallyPoint() != null) {
+                        msg("Now let's try making a villager. LEFT-CLICK to select your Town Centre, then click the " +
+                            "bottom-left button to start producing.");
+                        TutorialRendering.setButtonName(VillagerProd.itemName);
+                        progressStage();
+                    }
+                }
+                if (stageProgress == 4 && BuildingClientEvents.getBuildings().size() > 0) {
+                    if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre townCentre &&
+                            townCentre.productionQueue.size() > 0) {
+                        msg("TIP: you can queue up as many units to build as you can afford.");
+                        progressStage();
+                    }
+                }
+                if (stageProgress == 5 && UnitClientEvents.getAllUnits().size() > 3) {
+                    specialMsg("Nice work. Having lots of workers are vital for a healthy base!");
+                    TutorialRendering.clearButtonName();
+                    progressStageAfterDelay(80);
+                }
+                if (stageProgress == 6) {
+                    msg("TIP: you can cancel any in-progress units for a full refund by clicking their icon at the bottom.");
+                    progressStageAfterDelay(100);
+                }
+                if (stageProgress == 7) {
+                    nextStageAfterSpace();
+                }
             }
             case GATHER_RESOURCES -> {
             }

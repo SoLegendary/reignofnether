@@ -22,10 +22,11 @@ public enum TutorialStage {
     MOVE_UNITS,
     UNIT_TIPS, // double click to select multiple, control groups, F1 to deselect, following etc.
 
+    BUILD_INTRO,
     BUILD_TOWN_CENTRE, // forcePanCam back to spawn, ask player to select workers, don't highlight button while cursor has the action to place
     BUILDING_TIPS, // explain you can order multiple workers to help build together
-    SELECT_BUILDING, // explain buildings, damage and health
     TRAIN_WORKER, // progress once worker is built, while building explain rally points and cancelling
+
     GATHER_RESOURCES, // explain resources, highlight some nearby trees and ores; progress once a resource is dropped
     HUNT_ANIMALS, // Spawn in some pigs nearby, explain to take a villager and right click it
     RETURN_FOOD,

@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -576,15 +577,15 @@ public class HudClientEvents {
 
                 // GATHER button does not have a static icon
                 if (actionButton == ActionButtons.GATHER && hudSelectedEntity instanceof WorkerUnit workerUnit) {
-                    switch(workerUnit.getGatherResourceGoal().getTargetResourceName()) {
+                    switch (workerUnit.getGatherResourceGoal().getTargetResourceName()) {
                         case NONE -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/no_gather.png");
                         case FOOD -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/hoe.png");
                         case WOOD -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/axe.png");
                         case ORE -> actionButton.iconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/pickaxe.png");
                     }
                     actionButton.tooltipLines = List.of(
-                        FormattedCharSequence.forward("Gather Resources (" + UnitClientEvents.getSelectedUnitResourceTarget() + ")", Style.EMPTY),
-                        FormattedCharSequence.forward("Click to change target resource", Style.EMPTY));
+                            FormattedCharSequence.forward("Gather Resources (" + UnitClientEvents.getSelectedUnitResourceTarget() + ")", Style.EMPTY),
+                            FormattedCharSequence.forward("Click to change target resource", Style.EMPTY));
                 }
                 actionButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
                 renderedButtons.add(actionButton);
@@ -594,29 +595,31 @@ public class HudClientEvents {
             blitY = screenHeight - (iconFrameSize * 2) - 4;
 
             // includes worker building buttons
-            for (LivingEntity livingEntity : selUnits) {
-                if (getSimpleEntityName(livingEntity).equals(getSimpleEntityName(hudSelectedEntity))) {
-                    List<AbilityButton> abilityButtons = ((Unit) livingEntity).getAbilityButtons();
+            if (TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_INTRO)) {
+                for (LivingEntity livingEntity : selUnits) {
+                    if (getSimpleEntityName(livingEntity).equals(getSimpleEntityName(hudSelectedEntity))) {
+                        List<AbilityButton> abilityButtons = ((Unit) livingEntity).getAbilityButtons();
 
-                    int shownAbilities = abilityButtons.stream().filter(b -> !b.isHidden.get()).toList().size();
-                    int rowsUp = (int) Math.floor((float) (shownAbilities - 1) / MAX_BUTTONS_PER_ROW);
-                    rowsUp = Math.max(0, rowsUp);
-                    blitY -= iconFrameSize * rowsUp;
+                        int shownAbilities = abilityButtons.stream().filter(b -> !b.isHidden.get()).toList().size();
+                        int rowsUp = (int) Math.floor((float) (shownAbilities - 1) / MAX_BUTTONS_PER_ROW);
+                        rowsUp = Math.max(0, rowsUp);
+                        blitY -= iconFrameSize * rowsUp;
 
-                    int i = 0;
-                    for (AbilityButton abilityButton : abilityButtons) {
-                        if (!abilityButton.isHidden.get()) {
-                            i += 1;
-                            abilityButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
-                            renderedButtons.add(abilityButton);
-                            blitX += iconFrameSize;
-                            if (i % MAX_BUTTONS_PER_ROW == 0) {
-                                blitX = 0;
-                                blitY += iconFrameSize;
+                        int i = 0;
+                        for (AbilityButton abilityButton : abilityButtons) {
+                            if (!abilityButton.isHidden.get()) {
+                                i += 1;
+                                abilityButton.render(evt.getPoseStack(), blitX, blitY, mouseX, mouseY);
+                                renderedButtons.add(abilityButton);
+                                blitX += iconFrameSize;
+                                if (i % MAX_BUTTONS_PER_ROW == 0) {
+                                    blitX = 0;
+                                    blitY += iconFrameSize;
+                                }
                             }
                         }
+                        break;
                     }
-                    break;
                 }
             }
         }
