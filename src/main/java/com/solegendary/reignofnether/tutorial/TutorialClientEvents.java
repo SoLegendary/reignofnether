@@ -1,8 +1,9 @@
 package com.solegendary.reignofnether.tutorial;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
+import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -11,8 +12,7 @@ import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerProd;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
@@ -61,6 +61,8 @@ public class TutorialClientEvents {
     private static final Vec3i WOOD_POS = new Vec3i(-2919, 0, -1196);
     private static final Vec3i ORE_POS = new Vec3i(-2951, 0, -1224);
     private static final Vec3i FOOD_POS = new Vec3i(-2939, 0, -1173);
+
+    private static final Vec3i DEFEND_POS = new Vec3i(-2939, 0, -1173);
 
     public static int getStageProgress() {
         return stageProgress;
@@ -206,6 +208,18 @@ public class TutorialClientEvents {
         pressSpaceToContinue = true;
     }
 
+    private static boolean hasUnitSelected(String unitName) {
+        return UnitClientEvents.getSelectedUnits().size() > 0 &&
+                UnitClientEvents.getSelectedUnits().get(0)
+                .getName().getString().toLowerCase().contains(unitName.toLowerCase());
+    }
+
+    private static boolean hasBuildingSelected(String buildingName) {
+        return BuildingClientEvents.getSelectedBuildings().size() > 0 &&
+                BuildingClientEvents.getSelectedBuildings().get(0)
+                .name.toLowerCase().equals(buildingName.toLowerCase());
+    }
+
     // Whenever doing anything that could be a tutorial action like enabling orthoview or building your first building,
     // check here to progress the tutorial and give updates to the player.
     // This theoretically should be able to be called at any time but will only actually progress if actions are done
@@ -318,16 +332,16 @@ public class TutorialClientEvents {
                     UnitClientEvents.clearSelectedUnits();
                     progressStage();
                 }
-                else if (stageProgress == 2 && UnitClientEvents.getSelectedUnits().size() > 0) {
+                else if (stageProgress == 2 && hasUnitSelected("villager")) {
                     nextStage();
                 }
             }
             case MOVE_UNIT -> {
-                if (stageProgress == 0 && UnitClientEvents.getSelectedUnits().size() > 0) {
+                if (stageProgress == 0 && hasUnitSelected("villager")) {
                     msg("Now, RIGHT-CLICK where you want to move.");
                     progressStage();
                 }
-                else if (stageProgress == 1 && UnitClientEvents.getSelectedUnits().size() > 0) {
+                else if (stageProgress == 1 && hasUnitSelected("villager")) {
                     Unit unit = (Unit) UnitClientEvents.getSelectedUnits().get(0);
                     MoveToTargetBlockGoal goal = unit.getMoveGoal();
                     if (goal != null && goal.getMoveTarget() != null) {
@@ -435,16 +449,16 @@ public class TutorialClientEvents {
                     msg("Capitols like the Town Centre are the only building that can produce workers like villagers.");
                     progressStageAfterDelay(100);
                 }
-                if (stageProgress == 1) {
+                else if (stageProgress == 1) {
                     msg("Note that producing workers takes 50 FOOD each. We should have enough resources for 3 of them.");
                     progressStageAfterDelay(100);
                 }
-                if (stageProgress == 2) {
+                else if (stageProgress == 2) {
                     msg("With your building selected, RIGHT-CLICK to set a rally point - units will " +
                         "automatically go to that spot when they appear.");
                     progressStageAfterDelay(100);
                 }
-                if (stageProgress == 3 && BuildingClientEvents.getBuildings().size() > 0) {
+                else if (stageProgress == 3 && BuildingClientEvents.getBuildings().size() > 0) {
                     if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre townCentre &&
                         townCentre.getRallyPoint() != null) {
                         msg("Now let's try making a villager. LEFT-CLICK to select your Town Centre, then click the " +
@@ -453,23 +467,23 @@ public class TutorialClientEvents {
                         progressStage();
                     }
                 }
-                if (stageProgress == 4 && BuildingClientEvents.getBuildings().size() > 0) {
+                else if (stageProgress == 4 && BuildingClientEvents.getBuildings().size() > 0) {
                     if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre townCentre &&
                             townCentre.productionQueue.size() > 0) {
                         msg("TIP: you can queue up as many units to build as you can afford.");
                         progressStage();
                     }
                 }
-                if (stageProgress == 5 && UnitClientEvents.getAllUnits().size() > 3) {
+                else if (stageProgress == 5 && UnitClientEvents.getAllUnits().size() > 3) {
                     specialMsg("Nice work. Workers are vital for a healthy base!");
                     TutorialRendering.clearButtonName();
                     progressStageAfterDelay(80);
                 }
-                if (stageProgress == 6) {
+                else if (stageProgress == 6) {
                     msg("TIP: you can cancel any in-progress units for a full refund by clicking their icon at the bottom.");
                     progressStageAfterDelay(100);
                 }
-                if (stageProgress == 7) {
+                else if (stageProgress == 7) {
                     nextStageAfterSpace();
                 }
             }
@@ -478,16 +492,16 @@ public class TutorialClientEvents {
                     msg("Now that we have a bunch of workers, we can start gathering some resources.");
                     progressStageAfterDelay(100);
                 }
-                if (stageProgress == 1) {
+                else if (stageProgress == 1) {
                     msg("There's a forest over here that we can get wood from.");
                     OrthoviewClientEvents.forceMoveCam(WOOD_POS, 100);
                     progressStageAfterDelay(100);
                 }
-                if (stageProgress == 2) {
+                else if (stageProgress == 2) {
                     msg("To gather a resource, select a worker, then RIGHT-CLICK a tree or an ore block.");
                     progressStage();
                 }
-                if (stageProgress == 3) {
+                else if (stageProgress == 3) {
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
                         if (entity instanceof VillagerUnit villager &&
                                 villager.getGatherResourceGoal().isGathering() &&
@@ -497,7 +511,7 @@ public class TutorialClientEvents {
                         }
                     }
                 }
-                if (stageProgress == 4) {
+                else if (stageProgress == 4) {
                     msg("TIP: Workers will keep gathering until told to do something else. " +
                         "Once they have at least 50 total resources they return it to the town centre.");
                     nextStageAfterDelay(100);
@@ -508,16 +522,16 @@ public class TutorialClientEvents {
                     msg("Now let's do the same thing for ore.");
                     progressStageAfterDelay(80);
                 }
-                if (stageProgress == 1) {
+                else if (stageProgress == 1) {
                     msg("Here's a beach with coal and iron we can get ore from.");
                     OrthoviewClientEvents.forceMoveCam(ORE_POS, 50);
                     progressStageAfterDelay(100);
                 }
-                if (stageProgress == 2) {
+                else if (stageProgress == 2) {
                     msg("Select a worker, then RIGHT-CLICK an ore block.");
                     progressStage();
                 }
-                if (stageProgress == 3) {
+                else if (stageProgress == 3) {
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
                         if (entity instanceof VillagerUnit villager &&
                             villager.getGatherResourceGoal().isGathering() &&
@@ -527,7 +541,7 @@ public class TutorialClientEvents {
                         }
                     }
                 }
-                if (stageProgress == 4) {
+                else if (stageProgress == 4) {
                     msg("TIP: Sandy biomes like deserts and beaches have more and better ores.");
                     nextStageAfterDelay(100);
                 }
@@ -537,22 +551,22 @@ public class TutorialClientEvents {
                     msg("While your other workers are busy on wood and ore, let's find some food.");
                     progressStageAfterDelay(100);
                 }
-                if (stageProgress == 1) {
+                else if (stageProgress == 1) {
                     foodBeforeHunting = ResourcesClientEvents.getOwnResources().food;
                     OrthoviewClientEvents.forceMoveCam(FOOD_POS, 50);
                     TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_ANIMALS);
                     msg("Here are some pigs that you can hunt for food.");
                     progressStageAfterDelay(100);
                 }
-                if (stageProgress == 2) {
+                else if (stageProgress == 2) {
                     msg("Just like wood and ore, select a worker and right click a pig to start hunting it.");
                     progressStageAfterDelay(100);
                 }
-                if (stageProgress == 3) {
+                else if (stageProgress == 3) {
                     msg("This might take a while, but animals offer a good amount of food for the effort.");
                     progressStage();
                 }
-                if (stageProgress == 4) {
+                else if (stageProgress == 4) {
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
                         if (entity instanceof VillagerUnit villager) {
                             for (ItemStack itemStack : villager.getItems()) {
@@ -565,28 +579,100 @@ public class TutorialClientEvents {
                         }
                     }
                 }
-                if (stageProgress == 5) {
+                else if (stageProgress == 5) {
                     msg("Your villager should now return some porkchops to your town centre, but if they aren't, " +
                         "simply select the villager and RIGHT-CLICK your town centre.");
                     progressStage();
                 }
-                if (stageProgress == 6 && ResourcesClientEvents.getOwnResources().food >= foodBeforeHunting + 100) {
+                else if (stageProgress == 6 && ResourcesClientEvents.getOwnResources().food >= foodBeforeHunting + 100) {
                     specialMsg("Excellent. You now have more food to build new units.");
                     progressStageAfterDelay(80);
                 }
-                if (stageProgress == 7) {
+                else if (stageProgress == 7) {
                     msg("TIP: Units hold up to 100 total resources, but hunting allows you to go above this maximum.");
                     progressStageAfterDelay(100);
                 }
-                if (stageProgress == 8) {
+                else if (stageProgress == 8) {
                     msg("TIP: Items like saplings and porkchops can be picked up by any unit and dropped off for resources." +
                         "When units die, they drop everything they were holding.");
                     nextStageAfterDelay(100);
                 }
             }
             case BUILD_BASE -> {
+                if (stageProgress == 0) {
+                    msg("Let's expand your base. Some new buildings have been unlocked for you. Select a worker if you " +
+                        "haven't already to check them out.");
+                    progressStageAfterDelay(120);
+                }
+                else if (stageProgress == 2 && hasUnitSelected("villager")) {
+                    TutorialRendering.setButtonName(OakStockpile.buildingName);
+                    msg("Stockpiles can give your workers a place to drop off resources faster.");
+                    progressStageAfterDelay(120);
+                }
+                else if (stageProgress == 2 && hasUnitSelected("villager")) {
+                    TutorialRendering.setButtonName(VillagerHouse.buildingName);
+                    msg("Houses raise your max unit population. Check the top left for your current totals.");
+                    progressStageAfterDelay(120);
+                }
+                else if (stageProgress == 3 && hasUnitSelected("villager")) {
+                    TutorialRendering.setButtonName(WheatFarm.buildingName);
+                    msg("Farms give you a slow but renewable source of food in exchange for wood.");
+                    progressStageAfterDelay(120);
+                }
+                else if (stageProgress == 4 && hasUnitSelected("villager")) {
+                    TutorialRendering.setButtonName(OakStockpile.buildingName);
+                    msg("Finally, barracks let you start training soldiers to fight enemies.");
+                    progressStageAfterDelay(120);
+                }
+                else if (stageProgress == 5) {
+                    TutorialRendering.clearButtonName();
+                    msg("Let's take some time to check out a few of these buildings.");
+                    progressStageAfterDelay(80);
+                }
+                else if (stageProgress == 6) {
+                    msg("When you're ready, build a barracks and get prepare to train your first army.", true, CHAT);
+                    progressStage();
+                }
+                else if (stageProgress == 7) {
+                    for (Building building : BuildingClientEvents.getBuildings()) {
+                        if (building instanceof Barracks barracks && barracks.isBuilt) {
+                            msg("Great job.", true, CHAT);
+                            nextStage();
+                        }
+                    }
+                }
             }
             case BUILD_ARMY -> {
+                if (stageProgress == 0) {
+                    msg("The barracks is one of many buildings (though the only one available in this tutorial) " +
+                        "that can produce military units. Select your barracks to check them out.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 2 && hasBuildingSelected(Barracks.buildingName)) {
+                    TutorialRendering.setButtonName(VindicatorProd.itemName);
+                    msg("Vindicators are melee units with high health and moderate damage.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 3 && hasBuildingSelected(Barracks.buildingName)) {
+                    TutorialRendering.setButtonName(PillagerProd.itemName);
+                    msg("Pillagers are ranged units which attack slowly but with high damage.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 4) {
+                    TutorialRendering.clearButtonName();
+                    msg("Try building 3 units from here to continue.", true, CHAT);
+                    progressStage();
+                }
+                else if (stageProgress == 5) {
+                    int armyCount = 0;
+                    for (LivingEntity entity : UnitClientEvents.getAllUnits())
+                        if (entity instanceof VindicatorUnit || entity instanceof PillagerUnit)
+                            armyCount += 1;
+                    if (armyCount >= 3) {
+                        specialMsg("Awesome!");
+                        nextStage();
+                    }
+                }
             }
             case DEFEND_BASE -> {
             }

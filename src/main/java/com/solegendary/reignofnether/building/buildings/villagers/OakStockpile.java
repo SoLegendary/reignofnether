@@ -12,6 +12,8 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -52,7 +54,7 @@ public class OakStockpile extends AbstractStockpile {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/chest.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == OakStockpile.class,
-                () -> false,
+                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_BASE),
                 () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
                         BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),

@@ -8,5 +8,8 @@ public enum TutorialAction {
     UPDATE_STAGE,
 
     // serverbound
-    SPAWN_ANIMALS
+    SPAWN_ANIMALS,
+    SPAWN_MONSTERS,
+    ATTACK_WITH_MONSTERS,
+    START_BUILDING_MONSTER_BASE
 }
