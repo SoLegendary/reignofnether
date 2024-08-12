@@ -129,7 +129,7 @@ public class TutorialClientEvents {
 
     @SubscribeEvent
     public static void TickEvent(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
+        if (evt.phase != TickEvent.Phase.END || MC.isPaused())
             return;
         if (ticksOnStage < Integer.MAX_VALUE) {
             if (ticksOnStage % 20 == 0)
@@ -260,6 +260,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
+                    clickedMinimap = false;
                     msg("You can move around the world quickly by clicking on a spot on the map. " +
                         "Try doing that now.");
                     progressStage();
@@ -460,7 +461,7 @@ public class TutorialClientEvents {
                     }
                 }
                 if (stageProgress == 5 && UnitClientEvents.getAllUnits().size() > 3) {
-                    specialMsg("Nice work. Having lots of workers are vital for a healthy base!");
+                    specialMsg("Nice work. Workers are vital for a healthy base!");
                     TutorialRendering.clearButtonName();
                     progressStageAfterDelay(80);
                 }
@@ -499,7 +500,7 @@ public class TutorialClientEvents {
                 if (stageProgress == 4) {
                     msg("TIP: Workers will keep gathering until told to do something else. " +
                         "Once they have at least 50 total resources they return it to the town centre.");
-                    progressStageAfterDelay(100);
+                    nextStageAfterDelay(100);
                 }
             }
             case GATHER_ORE -> {
@@ -551,11 +552,7 @@ public class TutorialClientEvents {
                     msg("This might take a while, but animals offer a good amount of food for the effort.");
                     progressStage();
                 }
-                if (stageProgress == 3) {
-                    msg("This might take a while, but animals offer a good amount of food for the effort.");
-                    progressStage();
-                }
-                if (stageProgress == 3) {
+                if (stageProgress == 4) {
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
                         if (entity instanceof VillagerUnit villager) {
                             for (ItemStack itemStack : villager.getItems()) {
@@ -568,26 +565,24 @@ public class TutorialClientEvents {
                         }
                     }
                 }
-                if (stageProgress == 4) {
+                if (stageProgress == 5) {
                     msg("Your villager should now return some porkchops to your town centre, but if they aren't, " +
                         "simply select the villager and RIGHT-CLICK your town centre.");
                     progressStage();
                 }
-                if (stageProgress == 5 && ResourcesClientEvents.getOwnResources().food >= foodBeforeHunting + 100) {
+                if (stageProgress == 6 && ResourcesClientEvents.getOwnResources().food >= foodBeforeHunting + 100) {
                     specialMsg("Excellent. You now have more food to build new units.");
                     progressStageAfterDelay(80);
                 }
-                if (stageProgress == 6) {
+                if (stageProgress == 7) {
                     msg("TIP: Units hold up to 100 total resources, but hunting allows you to go above this maximum.");
                     progressStageAfterDelay(100);
                 }
-                if (stageProgress == 7) {
+                if (stageProgress == 8) {
                     msg("TIP: Items like saplings and porkchops can be picked up by any unit and dropped off for resources." +
                         "When units die, they drop everything they were holding.");
                     nextStageAfterDelay(100);
                 }
-            }
-            case RETURN_FOOD -> {
             }
             case BUILD_BASE -> {
             }

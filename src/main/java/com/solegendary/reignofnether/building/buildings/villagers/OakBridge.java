@@ -12,6 +12,8 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -65,9 +67,10 @@ public class OakBridge extends AbstractBridge {
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == OakBridge.class,
                 () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
+                () -> TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_BRIDGE) &&
+                       (BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
                         BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
-                        ResearchClient.hasCheat("modifythephasevariance"),
+                        ResearchClient.hasCheat("modifythephasevariance")),
                 () -> BuildingClientEvents.setBuildingToPlace(OakBridge.class),
                 null,
                 List.of(

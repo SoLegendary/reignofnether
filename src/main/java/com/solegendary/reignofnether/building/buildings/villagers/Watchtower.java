@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -68,7 +69,7 @@ public class Watchtower extends Building implements GarrisonableBuilding {
             new ResourceLocation("minecraft", "textures/block/stone_bricks.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Watchtower.class,
-            () -> false,
+            TutorialClientEvents::isEnabled,
             () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(Watchtower.class),

@@ -34,14 +34,16 @@ public class TutorialRendering {
     }
 
     public static void highlightNextButton(PoseStack poseStack, ArrayList<Button> buttons) {
-        if (!TutorialClientEvents.isEnabled() || buttonNameToHighlight.isEmpty())
+        if (!TutorialClientEvents.isEnabled() || buttonNameToHighlight.isEmpty() )
             return;
 
         TutorialStage stage = TutorialClientEvents.getStage();
 
         Button activeButton = null;
         for (Button button : buttons) {
-            if (button.name.equals(buttonNameToHighlight) && button.hotkey != null) {
+            if (button.name.equals(buttonNameToHighlight) &&
+                !button.isHidden.get() && button.isEnabled.get() && !button.isSelected.get() &&
+                (button.hotkey != null || TutorialClientEvents.isAtOrPastStage(TutorialStage.SELECT_UNIT))) {
                 activeButton = button;
                 break;
             }
