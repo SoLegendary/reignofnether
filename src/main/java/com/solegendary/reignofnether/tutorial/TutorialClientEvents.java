@@ -1,14 +1,18 @@
 package com.solegendary.reignofnether.tutorial;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -18,7 +22,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -30,6 +36,7 @@ import net.minecraftforge.registries.RegistryObject;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.solegendary.reignofnether.registrars.SoundRegistrar.*;
 import static com.solegendary.reignofnether.tutorial.TutorialStage.*;
@@ -57,12 +64,35 @@ public class TutorialClientEvents {
 
     private static final Vec3i SPAWN_POS = new Vec3i(-2950, 0, -1166);
     private static final Vec3i BUILD_POS = new Vec3i(-2944, 0, -1200);
-
     private static final Vec3i WOOD_POS = new Vec3i(-2919, 0, -1196);
     private static final Vec3i ORE_POS = new Vec3i(-2951, 0, -1224);
     private static final Vec3i FOOD_POS = new Vec3i(-2939, 0, -1173);
-
     private static final Vec3i DEFEND_POS = new Vec3i(-2939, 0, -1173);
+
+    private static int helpButtonClicks = 0;
+    private static String helpButtonText = "";
+    public static final Button helpButton = new Button(
+            "Villagers",
+            14,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/warning.png"),
+            (Keybinding) null,
+            () -> false,
+            () -> !isEnabled(),
+            () -> isEnabled() && !helpButtonText.isEmpty(),
+            () -> msg(helpButtonText, true, CHAT),
+            () -> { },
+            List.of(FormattedCharSequence.forward("Tutorial Help", Style.EMPTY))
+    );
+
+    private static void setHelpButtonText(String text) {
+        helpButtonClicks = 0;
+        helpButtonText = text;
+    }
+
+    private static void clearHelpButtonText() {
+        helpButtonClicks = 0;
+        helpButtonText = "";
+    }
 
     public static int getStageProgress() {
         return stageProgress;
@@ -89,6 +119,7 @@ public class TutorialClientEvents {
         ticksOnStage = 0;
         stageProgress = 0;
         blockUpdateStage = false;
+        clearHelpButtonText();
         updateStage();
     }
     private static void prevStage() {
@@ -96,6 +127,7 @@ public class TutorialClientEvents {
         ticksOnStage = 0;
         stageProgress = 0;
         blockUpdateStage = false;
+        clearHelpButtonText();
         updateStage();
     }
 
@@ -239,6 +271,15 @@ public class TutorialClientEvents {
                 else if (stageProgress == 1) {
                     msg("TIP: If you want to see any of these messages again, opening chat " +
                         "has been changed to the ENTER key.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 2) {
+                    msg("If at any point you're lost or need a reminder on what to do next, click the button at the " +
+                        "top right. Try doing that now to continue.");
+                    setHelpButtonText("You just needed to click this button, which you did. Great work!");
+                    progressStage();
+                }
+                else if (stageProgress == 3 && helpButtonClicks > 0) {
                     nextStageAfterDelay(100);
                 }
             }
@@ -246,6 +287,8 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     OrthoviewClientEvents.unlockCam();
                     msg("To move your camera, move your mouse to the edges of the screen. Try it now.");
+                    setHelpButtonText("Move your mouse to each edge of your screen until the camera starts moving, " +
+                                        "as shown by the arrows.");
                     progressStage();
                 }
                 else if (stageProgress == 1 && pannedUp && pannedDown && pannedLeft && pannedRight) {
@@ -305,7 +348,7 @@ public class TutorialClientEvents {
                 } else if (stageProgress == 1) {
                     msg("Let's get started by spawning in some villagers here.");
                     OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 50);
-                    nextStageAfterDelay(100);
+                    nextStageAfterDelay(80);
                 }
             }
             case PLACE_WORKERS_B -> {
@@ -630,13 +673,13 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(80);
                 }
                 else if (stageProgress == 6) {
-                    msg("When you're ready, build a barracks and get prepare to train your first army.", true, CHAT);
+                    msg("When you're ready, build a barracks and get prepare to train your first army.");
                     progressStage();
                 }
                 else if (stageProgress == 7) {
                     for (Building building : BuildingClientEvents.getBuildings()) {
                         if (building instanceof Barracks barracks && barracks.isBuilt) {
-                            msg("Great job.", true, CHAT);
+                            specialMsg("Great job.");
                             nextStage();
                         }
                     }
@@ -660,7 +703,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 4) {
                     TutorialRendering.clearButtonName();
-                    msg("Try building 3 units from here to continue.", true, CHAT);
+                    msg("Try building 3 units from here to continue.");
                     progressStage();
                 }
                 else if (stageProgress == 5) {
