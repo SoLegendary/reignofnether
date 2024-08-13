@@ -72,14 +72,17 @@ public class TutorialClientEvents {
     private static int helpButtonClicks = 0;
     private static String helpButtonText = "";
     public static final Button helpButton = new Button(
-            "Villagers",
-            14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/warning.png"),
+            "Tutorial Help",
+            18,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/help.png"),
             (Keybinding) null,
             () -> false,
             () -> !isEnabled(),
             () -> isEnabled() && !helpButtonText.isEmpty(),
-            () -> msg(helpButtonText, true, CHAT),
+            () ->  {
+                helpButtonClicks += 1;
+                msg(helpButtonText, true, CHAT);
+            },
             () -> { },
             List.of(FormattedCharSequence.forward("Tutorial Help", Style.EMPTY))
     );
@@ -174,7 +177,6 @@ public class TutorialClientEvents {
             ticksToProgressStage -= 1;
             if (ticksToProgressStage == 0) {
                 progressStage();
-                updateStage();
             }
         }
         if (ticksToNextStage > 0) {
@@ -222,6 +224,7 @@ public class TutorialClientEvents {
     private static void progressStage() {
         blockUpdateStage = false;
         stageProgress += 1;
+        updateStage();
     }
 
     private static void progressStageAfterDelay(int delay) {
@@ -277,9 +280,11 @@ public class TutorialClientEvents {
                     msg("If at any point you're lost or need a reminder on what to do next, click the button at the " +
                         "top right. Try doing that now to continue.");
                     setHelpButtonText("You just needed to click this button, which you did. Great work!");
+                    TutorialRendering.setButtonName(helpButton.name);
                     progressStage();
                 }
                 else if (stageProgress == 3 && helpButtonClicks > 0) {
+                    clearHelpButtonText();
                     nextStageAfterDelay(100);
                 }
             }
