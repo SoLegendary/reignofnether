@@ -235,11 +235,13 @@ public class TutorialClientEvents {
     private static void nextStageAfterDelay(int delay) {
         blockUpdateStage = true;
         ticksToNextStage = delay;
+        clearHelpButtonText();
     }
 
     private static void nextStageAfterSpace() {
         blockUpdateStage = true;
         msg("Press SPACE when you're ready to continue.", true, CHAT);
+        setHelpButtonText("Press SPACE when you're ready to continue.");
         pressSpaceToContinue = true;
     }
 
@@ -279,12 +281,11 @@ public class TutorialClientEvents {
                 else if (stageProgress == 2) {
                     msg("If at any point you're lost or need a reminder on what to do next, click the button at the " +
                         "top right. Try doing that now to continue.");
-                    setHelpButtonText("You just needed to click this button, which you did. Great work!");
+                    setHelpButtonText("You needed to click this button, which you just did. Great work!");
                     TutorialRendering.setButtonName(helpButton.name);
                     progressStage();
                 }
                 else if (stageProgress == 3 && helpButtonClicks > 0) {
-                    clearHelpButtonText();
                     nextStageAfterDelay(100);
                 }
             }
@@ -325,6 +326,7 @@ public class TutorialClientEvents {
                     clickedMinimap = false;
                     msg("You can move around the world quickly by clicking on a spot on the map. " +
                         "Try doing that now.");
+                    setHelpButtonText("Click a spot on the minimap at the bottom right to move the camera there");
                     progressStage();
                 }
                 else if (stageProgress == 2 && clickedMinimap) {
@@ -360,6 +362,8 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     msg("Click the button at the top right and then click on the ground where " +
                         "you want to place them.");
+                    setHelpButtonText("Click the button at the top right and then click on the ground where " +
+                                        "you want to place your villagers.");
                     TutorialRendering.setButtonName("Villagers");
                     progressStage();
                 }
@@ -377,6 +381,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 1) {
                     msg("Try selecting one with LEFT-CLICK.");
+                    setHelpButtonText("LEFT-CLICK a villager to select it.");
                     UnitClientEvents.clearSelectedUnits();
                     progressStage();
                 }
@@ -387,6 +392,7 @@ public class TutorialClientEvents {
             case MOVE_UNIT -> {
                 if (stageProgress == 0 && hasUnitSelected("villager")) {
                     msg("Now, RIGHT-CLICK where you want to move.");
+                    setHelpButtonText("LEFT-CLICK a villager to select it, then RIGHT-CLICK on the ground to move it.");
                     progressStage();
                 }
                 else if (stageProgress == 1 && hasUnitSelected("villager")) {
@@ -404,7 +410,9 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 1) {
-                    msg("To do this, LEFT-CLICK and DRAG your mouse across them, then release to select.");
+                    msg("To do this, hold LEFT-CLICK and DRAG your mouse across them, then release to select.");
+                    setHelpButtonText("Hold LEFT-CLICK and DRAG your mouse across a group of villagers, " +
+                                    "then release to select them.");
                     progressStage();
                 }
                 else if (stageProgress == 2 && UnitClientEvents.getSelectedUnits().size() > 1) {
@@ -414,6 +422,7 @@ public class TutorialClientEvents {
             case MOVE_UNITS -> {
                 if (stageProgress == 0 && UnitClientEvents.getSelectedUnits().size() > 1) {
                     msg("Now, RIGHT-CLICK where you want to move the group.");
+                    setHelpButtonText("With a group of villagers selected, RIGHT-CLICK on the ground to move them.");
                     progressStage();
                 }
                 else if (stageProgress == 1 && UnitClientEvents.getSelectedUnits().size() > 1) {
@@ -455,7 +464,7 @@ public class TutorialClientEvents {
                     msg("This looks like a good spot for it, being flat ground, near lots of resources and with " +
                         "plenty of space around it for other buildings.");
                     OrthoviewClientEvents.forceMoveCam(BUILD_POS, 50);
-                    progressStageAfterDelay(120);
+                    progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 3) {
                     msg("Note that building takes resources. Luckily, the TOP-LEFT shows we have more than enough " +
@@ -467,6 +476,8 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     msg("Select your workers, then click the bottom-left button and click on the " +
                         "ground where you want to place your capitol.");
+                    setHelpButtonText("Select your workers, then click the bottom-left button and click on the " +
+                                      "ground to place a town centre.");
                     TutorialRendering.setButtonName(TownCentre.buildingName);
                     progressStage();
                 }
@@ -479,6 +490,8 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     msg("If they aren't already, you can have all of your villagers help to build to speed up progress." +
                         "To do this, select your workers and RIGHT-CLICK the building.");
+                    setHelpButtonText("Just wait for your Town Centre to complete. If your workers stopped building " +
+                                      "for some reason, just select them and RIGHT-CLICK it to resume.");
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 1) {
@@ -502,15 +515,18 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 2) {
-                    msg("With your building selected, RIGHT-CLICK to set a rally point - units will " +
+                    msg("LEFT-CLICK to select your Town Centre, RIGHT-CLICK to set a rally point - units will " +
                         "automatically go to that spot when they appear.");
-                    progressStageAfterDelay(100);
+                    setHelpButtonText("LEFT-CLICK to select your Town Centre, then RIGHT-CLICK on the ground to set a rally point.");
+                    progressStage();
                 }
                 else if (stageProgress == 3 && BuildingClientEvents.getBuildings().size() > 0) {
                     if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre townCentre &&
                         townCentre.getRallyPoint() != null) {
-                        msg("Now let's try making a villager. LEFT-CLICK to select your Town Centre, then click the " +
-                            "bottom-left button to start producing.");
+                        msg("Now let's try making a villager. With your Town Centre selected, click the " +
+                            "bottom-left button to start producing one.");
+                        setHelpButtonText("LEFT-CLICK to select your Town Centre, click the bottom-left button make a villager, " +
+                                          "then wait for it to be completed.");
                         TutorialRendering.setButtonName(VillagerProd.itemName);
                         progressStage();
                     }
@@ -524,6 +540,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 5 && UnitClientEvents.getAllUnits().size() > 3) {
                     specialMsg("Nice work. Workers are vital for a healthy base!");
+                    clearHelpButtonText();
                     TutorialRendering.clearButtonName();
                     progressStageAfterDelay(80);
                 }
@@ -546,7 +563,8 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 2) {
-                    msg("To gather a resource, select a worker, then RIGHT-CLICK a tree or an ore block.");
+                    msg("To gather a resource, select a worker, then RIGHT-CLICK a tree.");
+                    setHelpButtonText("Select any villager, then RIGHT-CLICK any tree.");
                     progressStage();
                 }
                 else if (stageProgress == 3) {
@@ -555,6 +573,7 @@ public class TutorialClientEvents {
                                 villager.getGatherResourceGoal().isGathering() &&
                                 villager.getGatherResourceGoal().getTargetResourceName() == ResourceName.WOOD) {
                             specialMsg("Well done.");
+                            clearHelpButtonText();
                             progressStageAfterDelay(60);
                         }
                     }
@@ -577,6 +596,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 2) {
                     msg("Select a worker, then RIGHT-CLICK an ore block.");
+                    setHelpButtonText("Select any villager, then RIGHT-CLICK any ore block.");
                     progressStage();
                 }
                 else if (stageProgress == 3) {
@@ -585,6 +605,7 @@ public class TutorialClientEvents {
                             villager.getGatherResourceGoal().isGathering() &&
                             villager.getGatherResourceGoal().getTargetResourceName() == ResourceName.ORE) {
                             specialMsg("Well done.");
+                            clearHelpButtonText();
                             progressStageAfterDelay(60);
                         }
                     }
@@ -608,10 +629,13 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 2) {
                     msg("Just like wood and ore, select a worker and right click a pig to start hunting it.");
+                    setHelpButtonText("Select any villager, then RIGHT-CLICK a pig and wait for it to be killed." +
+                                        "Make sure that villager doesn't already have a full inventory.");
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 3) {
-                    msg("This might take a while, but animals offer a good amount of food for the effort.");
+                    msg("TIP: If your hunting villager has a full inventory of resources already, the porkchops will drop to the ground."+
+                        "Any unit with a free inventory can pick up items like porkchops or saplings and return them for resources.");
                     progressStage();
                 }
                 else if (stageProgress == 4) {
@@ -620,6 +644,7 @@ public class TutorialClientEvents {
                             for (ItemStack itemStack : villager.getItems()) {
                                 if (itemStack.getItem().equals(Items.PORKCHOP)) {
                                     specialMsg("Great work!");
+                                    clearHelpButtonText();
                                     progressStageAfterDelay(60);
                                     break;
                                 }
@@ -629,11 +654,13 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 5) {
                     msg("Your villager should now return some porkchops to your town centre, but if they aren't, " +
-                        "simply select the villager and RIGHT-CLICK your town centre.");
+                        "simply select the villager and RIGHT-CLICK your Town Centre.");
+                    setHelpButtonText("Select your villager that hunted the pig and RIGHT-CLICK your Town Centre.");
                     progressStage();
                 }
-                else if (stageProgress == 6 && ResourcesClientEvents.getOwnResources().food >= foodBeforeHunting + 100) {
+                else if (stageProgress == 6 && ResourcesClientEvents.getOwnResources().food >= foodBeforeHunting + 50) {
                     specialMsg("Excellent. You now have more food to build new units.");
+                    clearHelpButtonText();
                     progressStageAfterDelay(80);
                 }
                 else if (stageProgress == 7) {
@@ -641,8 +668,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 8) {
-                    msg("TIP: Items like saplings and porkchops can be picked up by any unit and dropped off for resources." +
-                        "When units die, they drop everything they were holding.");
+                    msg("This might take a while, but animals offer a good amount of food for the effort.");
                     nextStageAfterDelay(100);
                 }
             }
@@ -650,9 +676,11 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     msg("Let's expand your base. Some new buildings have been unlocked for you. Select a worker if you " +
                         "haven't already to check them out.");
+                    setHelpButtonText("Select any worker to check out your new building options");
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 2 && hasUnitSelected("villager")) {
+                    clearHelpButtonText();
                     TutorialRendering.setButtonName(OakStockpile.buildingName);
                     msg("Stockpiles can give your workers a place to drop off resources faster.");
                     progressStageAfterDelay(120);
@@ -679,6 +707,8 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 6) {
                     msg("When you're ready, build a barracks and get prepare to train your first army.");
+                    setHelpButtonText("Select any villager and build a barracks building at the bottom right. Make sure " +
+                                      "you've gathered enough wood to afford it!");
                     progressStage();
                 }
                 else if (stageProgress == 7) {
@@ -694,9 +724,11 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     msg("The barracks is one of many buildings (though the only one available in this tutorial) " +
                         "that can produce military units. Select your barracks to check them out.");
+                    setHelpButtonText("Select your barracks to check out your military unit options");
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 2 && hasBuildingSelected(Barracks.buildingName)) {
+                    clearHelpButtonText();
                     TutorialRendering.setButtonName(VindicatorProd.itemName);
                     msg("Vindicators are melee units with high health and moderate damage.");
                     progressStageAfterDelay(100);
@@ -707,6 +739,8 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 4) {
+                    setHelpButtonText("Select your barracks and produce a total of 3 Pillagers and/or Vindicators. If you need more food " +
+                                    "try building a farm or hunt more animals. If you need more population supply, try building a house.");
                     TutorialRendering.clearButtonName();
                     msg("Try building 3 units from here to continue.");
                     progressStage();
@@ -725,6 +759,8 @@ public class TutorialClientEvents {
             case DEFEND_BASE -> {
             }
             case DEFEND_BASE_AGAIN -> {
+
+                // tip to protect villagers because they drop items
             }
             case REPAIR_BUILDING -> {
             }
