@@ -43,6 +43,8 @@ import static com.solegendary.reignofnether.tutorial.TutorialStage.*;
 
 public class TutorialClientEvents {
 
+    // TODO: option to have fog of war locked in during tutorial (add more steps during movement and attack/defense stages)
+
     private static Minecraft MC = Minecraft.getInstance();
     private static TutorialStage tutorialStage = INTRO;
     private static boolean enabled = false;
@@ -67,7 +69,6 @@ public class TutorialClientEvents {
     private static final Vec3i WOOD_POS = new Vec3i(-2919, 0, -1196);
     private static final Vec3i ORE_POS = new Vec3i(-2951, 0, -1224);
     private static final Vec3i FOOD_POS = new Vec3i(-2939, 0, -1173);
-    private static final Vec3i DEFEND_POS = new Vec3i(-2939, 0, -1173);
 
     private static int helpButtonClicks = 0;
     private static String helpButtonText = "";
@@ -760,7 +761,7 @@ public class TutorialClientEvents {
             }
             case DEFEND_BASE_AGAIN -> {
 
-                // tip to protect villagers because they drop items
+                // tip to protect villagers because they drop items and the fact you can raid enemy workers
             }
             case REPAIR_BUILDING -> {
             }

@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
@@ -135,6 +136,8 @@ public class FogOfWarClientEvents {
                         return -1;
                     if (!MC.player.hasPermissions(4))
                         return -1;
+                    if (TutorialClientEvents.isEnabled())
+                        MC.player.sendSystemMessage(Component.literal("Fog of war is not available in the tutorial."));
                     if (!fogOptifineWarningSent) {
                         fogOptifineWarningSent = true;
                         MC.player.sendSystemMessage(Component.literal(""));

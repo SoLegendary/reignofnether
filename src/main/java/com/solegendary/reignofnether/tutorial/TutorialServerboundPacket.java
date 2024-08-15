@@ -34,6 +34,12 @@ public class TutorialServerboundPacket {
         ctx.get().enqueueWork(() -> {
             switch (action) {
                 case SPAWN_ANIMALS -> TutorialServerEvents.spawnAnimals();
+                case SPAWN_MONSTERS_A -> TutorialServerEvents.spawnMonstersA();
+                case ATTACK_WITH_MONSTERS_A -> TutorialServerEvents.attackWithMonstersA();
+                case SPAWN_MONSTERS_B -> TutorialServerEvents.spawnMonstersB();
+                case ATTACK_WITH_MONSTERS_B -> TutorialServerEvents.attackWithMonstersB();
+                case SPAWN_MONSTER_WORKERS -> TutorialServerEvents.spawnMonsterWorkers();
+                case START_BUILDING_MONSTER_BASE -> TutorialServerEvents.startBuildingMonsterBase();
             }
             success.set(true);
         });
