@@ -13,6 +13,7 @@ TODO bugs/features:
 
 - ghasts dont damage buildings?
     - likely due to some shots hitting only explosion-resistant blocks like stone bricks
+    - is this already fixed?
 
 - brutes dont change movement speed when toggling shield
     - maybe change to slowness debuff instead?
