@@ -96,27 +96,4 @@ public class TutorialRendering {
                 32, 32
         );
     }
-
-    /*
-    @SubscribeEvent
-    public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT) {
-            xOffset2 -= 1;
-        } else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-            xOffset2 += 1;
-        } else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-            yOffset2 -= 1;
-        } else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
-            yOffset2 += 1;
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "xOffset2: " + xOffset2,
-                "yOffset2: " + yOffset2,
-        });
-    }
-     */
 }

@@ -29,6 +29,7 @@
         "MobRendererMixin",
         "OrthoViewMixin",
         "RenderChunkRegionMixin",
+        "TitleScreenMixin",
         "TopdownGuiMixin",
         "fogofwar.CompiledChunkMixin",
         "fogofwar.EntityRenderDispatcherMixin",
