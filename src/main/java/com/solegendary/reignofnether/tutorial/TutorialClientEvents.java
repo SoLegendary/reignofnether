@@ -16,8 +16,10 @@ import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
+import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
@@ -70,6 +72,9 @@ public class TutorialClientEvents {
     private static final Vec3i WOOD_POS = new Vec3i(-2919, 0, -1196);
     private static final Vec3i ORE_POS = new Vec3i(-2951, 0, -1224);
     private static final Vec3i FOOD_POS = new Vec3i(-2939, 0, -1173);
+
+    private static final Vec3i MONSTER_SPAWN_POS = new Vec3i(-2968, 64, -1216);
+    private static final Vec3i MONSTER_BASE_POS = new Vec3i(-3082, 72, -1293);
 
     private static int helpButtonClicks = 0;
     private static String helpButtonText = "";
@@ -669,10 +674,6 @@ public class TutorialClientEvents {
                     msg("TIP: Units hold up to 100 total resources, but hunting allows you to go above this maximum.");
                     progressStageAfterDelay(100);
                 }
-                else if (stageProgress == 8) {
-                    msg("This might take a while, but animals offer a good amount of food for the effort.");
-                    nextStageAfterDelay(100);
-                }
             }
             case BUILD_BASE -> {
                 if (stageProgress == 0) {
@@ -754,15 +755,70 @@ public class TutorialClientEvents {
                             armyCount += 1;
                     if (armyCount >= 3) {
                         specialMsg("Awesome!");
-                        nextStage();
+                        TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTER_WORKERS);
+                        nextStageAfterDelay(100);
                     }
+                }
+                else if (stageProgress == 6) {
+                    msg("TIP: If you lose track of your military units, you can press K or click the button " +
+                        "on the right to select all of them at once.");
+                    TutorialServerboundPacket.doServerAction(TutorialAction.START_BUILDING_MONSTER_BASE);
+                    nextStageAfterDelay(100);
                 }
             }
             case DEFEND_BASE -> {
-            }
-            case DEFEND_BASE_AGAIN -> {
+                if (stageProgress == 0) {
+                    msg("Uh oh, looks like some monsters are about to attack!");
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTERS_A);
+                    OrthoviewClientEvents.forceMoveCam(MONSTER_SPAWN_POS, 50);
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 1) {
+                    setHelpButtonText("With your units selected, RIGHT-CLICK an enemy to attack them. " +
+                            "Units will also automatically attack nearby enemies if they are idle.");
+                    msg("With your units selected, RIGHT-CLICK an enemy to attack them. " +
+                            "Units will also automatically attack nearby enemies if they are idle.");
+                    TutorialServerboundPacket.doServerAction(TutorialAction.ATTACK_WITH_MONSTERS_A);
+                    progressStage();
+                }
+                else if (stageProgress == 2) {
+                    if (UnitClientEvents.getAllUnits().stream().filter(
+                                    u -> u instanceof AttackerUnit &&
+                                            u instanceof Unit unit &&
+                                            unit.getFaction() == Faction.MONSTERS)
+                            .toList().isEmpty()) {
 
-                // tip to protect villagers because they drop items and the fact you can raid enemy workers
+                        msg("Watch out! More monsters incoming!");
+                        TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTERS_B);
+                        OrthoviewClientEvents.forceMoveCam(MONSTER_SPAWN_POS, 50);
+                        progressStageAfterDelay(40);
+                    }
+                }
+                else if (stageProgress == 3) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.ATTACK_WITH_MONSTERS_B);
+                    progressStageAfterDelay(140);
+                }
+                else if (stageProgress == 4) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
+                    msg("Dawn breaks! And as you know, monsters don't like sunlight.");
+                    progressStage();
+                }
+                else if (stageProgress == 5) {
+                    if (UnitClientEvents.getAllUnits().stream().filter(
+                                    u -> u instanceof AttackerUnit &&
+                                            u instanceof Unit unit &&
+                                            unit.getFaction() == Faction.MONSTERS)
+                            .toList().isEmpty()) {
+                        specialMsg("Nicely done, you successfully defended your base!");
+                        clearHelpButtonText();
+                        progressStageAfterDelay(100);
+                    }
+                }
+                else if (stageProgress == 6) {
+                    msg("TIP: During an attack, be sure to protect your workers. If a worker dies while holding " +
+                        "resources, it is dropped and can be stolen by your enemies!");
+                    progressStageAfterDelay(100);
+                }
             }
             case REPAIR_BUILDING -> {
             }

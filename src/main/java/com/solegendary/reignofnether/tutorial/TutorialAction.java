@@ -8,6 +8,8 @@ public enum TutorialAction {
     UPDATE_STAGE,
 
     // serverbound
+    SET_NIGHT_TIME,
+    SET_DAY_TIME,
     SPAWN_ANIMALS,
     SPAWN_MONSTERS_A,
     ATTACK_WITH_MONSTERS_A,

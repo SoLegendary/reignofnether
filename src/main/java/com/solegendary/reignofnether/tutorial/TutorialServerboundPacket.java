@@ -33,6 +33,8 @@ public class TutorialServerboundPacket {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
             switch (action) {
+                case SET_DAY_TIME -> TutorialServerEvents.setDayTime();
+                case SET_NIGHT_TIME -> TutorialServerEvents.setNightTime();
                 case SPAWN_ANIMALS -> TutorialServerEvents.spawnAnimals();
                 case SPAWN_MONSTERS_A -> TutorialServerEvents.spawnMonstersA();
                 case ATTACK_WITH_MONSTERS_A -> TutorialServerEvents.attackWithMonstersA();

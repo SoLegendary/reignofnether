@@ -33,7 +33,6 @@ public enum TutorialStage {
     BUILD_BASE, // give free resources, open options to build houses, farms and barracks with a msg for each when built
     BUILD_ARMY, // progress once 3 units are built
     DEFEND_BASE, // set time to night, send in two zombies to fight - if the player loses somehow set time to day early
-    DEFEND_BASE_AGAIN, // send in more zombies targeting town centre, but set time to day to kill them with explanation
     REPAIR_BUILDING,
     BUILD_BRIDGE, // once completed, spawn in free army including iron golems
     ATTACK_ENEMY_BASE, // completed once enemy capitol is destroyed

@@ -136,6 +136,22 @@ public class PlayerServerEvents {
         }
     }
 
+    public static boolean isBot(String playerName) {
+        synchronized (rtsPlayers) {
+            for (RTSPlayer rtsPlayer : rtsPlayers)
+                if (rtsPlayer.name.equalsIgnoreCase(playerName))
+                    return rtsPlayer.isBot();
+        }
+    }
+
+    public static boolean isBot(int id) {
+        synchronized (rtsPlayers) {
+            for (RTSPlayer rtsPlayer : rtsPlayers)
+                if (rtsPlayer.id == id)
+                    return rtsPlayer.isBot();
+        }
+    }
+
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
         synchronized (rtsPlayers) {
