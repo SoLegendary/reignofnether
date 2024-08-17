@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServer;
@@ -66,14 +65,37 @@ public class PlayerServerEvents {
 
     private static class RTSPlayer {
         public String name;
-        public int id;
+        public int id; // for AI, always negative
         public int ticksWithoutCapitol = 0;
         public Faction faction;
 
-        RTSPlayer(ServerPlayer player, Faction faction) {
+        private RTSPlayer(ServerPlayer player, Faction faction) {
             this.name = player.getName().getString();
             this.id = player.getId();
             this.faction = faction;
+        }
+
+        // bot
+        private RTSPlayer(String name, Faction faction) {
+            int minId = Collections.min(rtsPlayers.stream().map(r -> r.id).toList());
+            if (minId >= 0)
+                this.id = -1;
+            else
+                this.id = minId - 1;
+            this.faction = faction;
+            this.name = name;
+        }
+
+        public static RTSPlayer getNewPlayer(ServerPlayer player, Faction faction) {
+            return new RTSPlayer(player, faction);
+        }
+
+        public static RTSPlayer getNewBot(String name, Faction faction) {
+            return new RTSPlayer(name, faction);
+        }
+
+        public boolean isBot() {
+            return id < 0;
         }
 
         public void tick() {
@@ -202,7 +224,7 @@ public class PlayerServerEvents {
                 case PIGLINS -> EntityRegistrar.GRUNT_UNIT.get();
                 case NONE -> null;
             };
-            rtsPlayers.add(new RTSPlayer(serverPlayer, faction));
+            rtsPlayers.add(RTSPlayer.getNewPlayer(serverPlayer, faction));
             PlayerClientboundPacket.enableRTSStatus(serverPlayer.getName().getString());
 
             ServerLevel level = serverPlayer.getLevel();
@@ -223,6 +245,44 @@ public class PlayerServerEvents {
             if (!TutorialServerEvents.isEnabled()) {
                 serverPlayer.sendSystemMessage(Component.literal(""));
                 sendMessageToAllPlayers(serverPlayer.getName().getString() + " has started their game!", true);
+                sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
+            }
+        }
+    }
+
+    public static void startRTSBot(String name, Vec3 pos, Faction faction) {
+        synchronized (rtsPlayers) {
+            ServerLevel level;
+            if (players.isEmpty())
+                return;
+            else
+                level = players.get(0).getLevel();
+
+            EntityType<? extends Unit> entityType = switch(faction) {
+                case VILLAGERS -> EntityRegistrar.VILLAGER_UNIT.get();
+                case MONSTERS -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
+                case PIGLINS -> EntityRegistrar.GRUNT_UNIT.get();
+                case NONE -> null;
+            };
+            RTSPlayer bot = RTSPlayer.getNewBot(name, faction);
+            rtsPlayers.add(bot);
+
+            for (int i = -1; i <= 1; i++) {
+                Entity entity = entityType != null ? entityType.create(level) : null;
+                if (entity != null) {
+                    BlockPos bp = MiscUtil.getHighestNonAirBlock(level, new BlockPos(pos.x + i, 0, pos.z)).above().above();
+                    ((Unit) entity).setOwnerName(bot.name);
+                    entity.moveTo(bp, 0,0);
+                    level.addFreshEntity(entity);
+                }
+            }
+            if (faction == Faction.MONSTERS) {
+                level.setDayTime(13000);
+            }
+            ResourcesServerEvents.resetResources(bot.name);
+
+            if (!TutorialServerEvents.isEnabled()) {
+                sendMessageToAllPlayers(bot.name + " (bot) has been added to the game!", true);
                 sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
             }
         }

@@ -13,6 +13,9 @@ import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
+import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.resources.SplashManager;
@@ -23,12 +26,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -88,12 +93,14 @@ public class TutorialServerEvents {
     }
 
     public static void spawnMonstersA() {
+        PlayerServerEvents.startRTSBot(TUTORIAL_ENEMY_NAME, Vec3.atCenterOf(MONSTER_BASE_POS), Faction.MONSTERS);
         spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), MONSTER_SPAWN_POS, 1, TUTORIAL_ENEMY_NAME);
         spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), MONSTER_SPAWN_POS.east(), 1, TUTORIAL_ENEMY_NAME);
     }
 
     public static void spawnMonstersB() {
-
+        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), MONSTER_SPAWN_POS, 3, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.CREEPER_UNIT.get(), MONSTER_SPAWN_POS, 2, TUTORIAL_ENEMY_NAME);
     }
 
     public static void attackWithMonstersA() { // order all monster units to attack move towards the enemy base
@@ -102,17 +109,28 @@ public class TutorialServerEvents {
             if (building instanceof TownCentre)
                 attackPos = building.centrePos;
 
-        if (attackPos != null) {
-            BlockPos finalAttackPos = attackPos;
-            UnitServerEvents.getAllUnits().forEach(u -> {
-                if (u instanceof AttackerUnit aUnit)
-                    aUnit.setAttackMoveTarget(finalAttackPos);
-            });
-        }
+        if (attackPos != null)
+            for (LivingEntity entity : UnitServerEvents.getAllUnits())
+                if (entity instanceof AttackerUnit aUnit)
+                    aUnit.setAttackMoveTarget(attackPos);
     }
 
     public static void attackWithMonstersB() {
+        BlockPos attackTargetZombies = null;
+        BlockPos attackTargetCreepers = null;
+        for (Building building : BuildingServerEvents.getBuildings()) {
+            if (building instanceof Barracks)
+                attackTargetZombies = building.originPos;
+            else if (building instanceof TownCentre)
+                attackTargetCreepers = building.originPos;
+        }
 
+        for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
+            if (attackTargetZombies != null && entity instanceof ZombieUnit zUnit)
+                zUnit.setAttackBuildingTarget(attackTargetZombies);
+            else if (attackTargetCreepers != null && entity instanceof CreeperUnit cUnit)
+                cUnit.setAttackBuildingTarget(attackTargetCreepers);
+        }
     }
 
     public static void spawnMonsterWorkers() {
