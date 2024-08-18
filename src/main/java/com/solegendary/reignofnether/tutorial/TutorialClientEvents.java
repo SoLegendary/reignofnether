@@ -868,9 +868,10 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 2) {
                     OrthoviewClientEvents.forceMoveCam(BRIDGE_POS, 50);
-                    msg("This looks like a good spot for one. Select a worker and build a bridge here.");
-                    setHelpButtonText("Select a worker and build a bridge across the river to reach the monsters' base. " +
-                            "If the bridge is too short, you can build more segments connecting to it.");
+                    msg("This looks like a good spot for one. Select a worker and build a bridge here. " +
+                        "You can scroll to rotate the bridge. before placement.");
+                    setHelpButtonText("Select a worker and build a bridge across the river. You can scroll to rotate the bridge. " +
+                            "before placement. If the bridge is too short, you can build more segments connecting to it.");
                     progressStage();
                 }
                 else if (stageProgress == 3) {
