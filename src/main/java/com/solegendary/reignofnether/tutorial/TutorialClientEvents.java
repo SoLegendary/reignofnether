@@ -74,7 +74,7 @@ public class TutorialClientEvents {
     private static final Vec3i MONSTER_SPAWN_POS = new Vec3i(-2968, 64, -1216);
     private static final Vec3i MONSTER_BASE_POS = new Vec3i(-3082, 72, -1293);
 
-    private static final Vec3i BRIDGE_POS = new Vec3i(0,0,0);
+    private static final Vec3i BRIDGE_POS = new Vec3i(-2997,0,-1206);
 
     private static int helpButtonClicks = 0;
     private static String helpButtonText = "";

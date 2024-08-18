@@ -142,6 +142,7 @@ public class PlayerServerEvents {
                 if (rtsPlayer.name.equalsIgnoreCase(playerName))
                     return rtsPlayer.isBot();
         }
+        return false;
     }
 
     public static boolean isBot(int id) {
@@ -150,6 +151,7 @@ public class PlayerServerEvents {
                 if (rtsPlayer.id == id)
                     return rtsPlayer.isBot();
         }
+        return false;
     }
 
     @SubscribeEvent
