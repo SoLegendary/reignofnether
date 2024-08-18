@@ -66,7 +66,7 @@ public class OakBridge extends AbstractBridge {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/oak_fence.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == OakBridge.class,
-                () -> false,
+                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_BRIDGE),
                 () -> TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_BRIDGE) &&
                        (BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
                         BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||

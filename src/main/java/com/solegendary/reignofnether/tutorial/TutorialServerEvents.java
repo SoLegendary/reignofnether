@@ -35,6 +35,7 @@ public class TutorialServerEvents {
     private static final String TUTORIAL_ENEMY_NAME = "Monsters";
     private static boolean enabled = false;
 
+    private static final Vec3i SPAWN_POS = new Vec3i(-2950, 0, -1166);
     private static final Vec3i ANIMAL_POS = new Vec3i(-2923, 67, -1184);
     private static final Vec3i MONSTER_SPAWN_POS = new Vec3i(-2968, 64, -1216);
     private static final Vec3i MONSTER_BASE_POS = new Vec3i(-3082, 72, -1293);
@@ -150,5 +151,14 @@ public class TutorialServerEvents {
         if (builderUnitIds.length > 0)
             BuildingServerEvents.placeBuilding(Mausoleum.buildingName, (BlockPos) MONSTER_BASE_POS, Rotation.NONE,
                     TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+    }
+
+    public static void spawnFriendlyArmy() {
+        if (PlayerServerEvents.players.isEmpty())
+            return;
+        String ownerName = PlayerServerEvents.players.get(0).getName().getString();
+        spawnMobs(EntityRegistrar.VINDICATOR_UNIT.get(), SPAWN_POS, 5, ownerName);
+        spawnMobs(EntityRegistrar.PILLAGER_UNIT.get(), SPAWN_POS.south(), 3, ownerName);
+        spawnMobs(EntityRegistrar.IRON_GOLEM_UNIT.get(), SPAWN_POS.south().south(), 1, ownerName);
     }
 }

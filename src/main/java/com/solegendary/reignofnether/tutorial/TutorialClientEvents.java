@@ -5,15 +5,12 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
-import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -66,6 +63,7 @@ public class TutorialClientEvents {
     public static boolean clickedMinimap = false;
 
     private static int foodBeforeHunting = 0;
+    private static final ArrayList<Building> damagedBuildings = new ArrayList<>();
 
     private static final Vec3i SPAWN_POS = new Vec3i(-2950, 0, -1166);
     private static final Vec3i BUILD_POS = new Vec3i(-2944, 0, -1200);
@@ -75,6 +73,8 @@ public class TutorialClientEvents {
 
     private static final Vec3i MONSTER_SPAWN_POS = new Vec3i(-2968, 64, -1216);
     private static final Vec3i MONSTER_BASE_POS = new Vec3i(-3082, 72, -1293);
+
+    private static final Vec3i BRIDGE_POS = new Vec3i(0,0,0);
 
     private static int helpButtonClicks = 0;
     private static String helpButtonText = "";
@@ -173,7 +173,7 @@ public class TutorialClientEvents {
 
     @SubscribeEvent
     public static void TickEvent(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || MC.isPaused())
+        if (evt.phase != TickEvent.Phase.END || MC.isPaused() || !isEnabled())
             return;
         if (ticksOnStage < Integer.MAX_VALUE) {
             if (ticksOnStage % 20 == 0)
@@ -672,7 +672,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 7) {
                     msg("TIP: Units hold up to 100 total resources, but hunting allows you to go above this maximum.");
-                    progressStageAfterDelay(100);
+                    nextStageAfterDelay(100);
                 }
             }
             case BUILD_BASE -> {
@@ -756,14 +756,17 @@ public class TutorialClientEvents {
                     if (armyCount >= 3) {
                         specialMsg("Awesome!");
                         TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTER_WORKERS);
-                        nextStageAfterDelay(100);
+                        progressStageAfterDelay(100);
                     }
                 }
                 else if (stageProgress == 6) {
                     msg("TIP: If you lose track of your military units, you can press K or click the button " +
                         "on the right to select all of them at once.");
                     TutorialServerboundPacket.doServerAction(TutorialAction.START_BUILDING_MONSTER_BASE);
-                    nextStageAfterDelay(100);
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 7) {
+                    nextStageAfterSpace();
                 }
             }
             case DEFEND_BASE -> {
@@ -800,7 +803,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 4) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("Dawn breaks! And as you know, monsters don't like sunlight.");
+                    specialMsg("Dawn breaks! And as you know, monsters don't like sunlight.");
                     progressStage();
                 }
                 else if (stageProgress == 5) {
@@ -817,16 +820,160 @@ public class TutorialClientEvents {
                 else if (stageProgress == 6) {
                     msg("TIP: During an attack, be sure to protect your workers. If a worker dies while holding " +
                         "resources, it is dropped and can be stolen by your enemies!");
-                    progressStageAfterDelay(100);
+                    nextStageAfterDelay(100);
                 }
             }
             case REPAIR_BUILDING -> {
+                if (stageProgress == 0) {
+                    for (Building building : BuildingClientEvents.getBuildings())
+                        if (building.getHealth() < building.getMaxHealth() && building.getFaction() == Faction.VILLAGERS && damagedBuildings.size() < 3)
+                            damagedBuildings.add(building);
+                    msg("Looks like some of your buildings were damaged in the attack.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 1) {
+                    msg("Try repairing one of them by selecting a villager, then RIGHT-CLICKING the damaged building. " +
+                            "Repairs 1 wood for each missing building block.");
+                    setHelpButtonText("Select a worker and RIGHT-CLICK a damaged building, then wait for it to be fully repaired. " +
+                            "Repairs 1 wood for each missing building block.");
+                }
+                else if (stageProgress == 2) {
+                    for (Building building : damagedBuildings) {
+                        if (building.getHealth() >= building.getMaxHealth()) {
+                            specialMsg("Good job!");
+                            clearHelpButtonText();
+                            progressStageAfterDelay(100);
+                            break;
+                        }
+                    }
+                }
+                else if (stageProgress == 3) {
+                    msg("TIP: Building health is determined by how many blocks it's made up of. If they have less than " +
+                            "half blocks remaining, they are destroyed completely.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 4) {
+                    nextStageAfterSpace();
+                }
             }
             case BUILD_BRIDGE -> {
+                if (stageProgress == 0) {
+                    OrthoviewClientEvents.forceMoveCam(MONSTER_BASE_POS, 80);
+                    msg("The monsters are setting up base across the river, we should destroy it before it becomes a problem.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 1) {
+                    msg("To cross the river, we need to build a bridge.");
+                    progressStageAfterDelay(60);
+                }
+                else if (stageProgress == 2) {
+                    OrthoviewClientEvents.forceMoveCam(BRIDGE_POS, 50);
+                    msg("This looks like a good spot for one. Select a worker and build a bridge here.");
+                    setHelpButtonText("Select a worker and build a bridge across the river to reach the monsters' base. " +
+                            "If the bridge is too short, you can build more segments connecting to it.");
+                    progressStage();
+                }
+                else if (stageProgress == 3) {
+                    for (Building building : BuildingClientEvents.getBuildings()) {
+                        if (building instanceof OakBridge bridge) {
+                            msg("TIP: You may need more than one bridge segment to cross the river. After completing " +
+                                    "one you can connect new segments to it.");
+                            progressStage();
+                            break;
+                        }
+                    }
+                }
+                else if (stageProgress == 4) {
+                    for (Building building : BuildingClientEvents.getBuildings()) {
+                        if (building instanceof OakBridge bridge && bridge.isBuilt) {
+                            specialMsg("Nice job.");
+                            progressStageAfterDelay(100);
+                            break;
+                        }
+                    }
+                }
+                else if (stageProgress == 5) {
+                    msg("TIP: Bridges are always neutral regardless of who built them. This means anyone can attack, " +
+                            "repair and connect new segments to them.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 6) {
+                    msg("TIP: Be very careful when crossing bridges. If it is destroyed while your units are crossing, " +
+                        "they will land in the water and be defenceless!");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 7) {
+                    nextStageAfterSpace();
+                }
             }
             case ATTACK_ENEMY_BASE -> {
+                if (stageProgress == 0) {
+                    msg("Reinforcements have arrived!");
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_FRIENDLY_ARMY);
+                    OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 50);
+                    progressStageAfterDelay(120);
+                }
+                else if (stageProgress == 1) {
+                    msg("Take your new army and crush the monsters' base! This includes an iron golem and your " +
+                        "workers can now build blacksmiths to produce more if needed.");
+                    setHelpButtonText("Prepare your army and destroy all buildings in the monsters' base");
+                    progressStageAfterDelay(120);
+                }
+                else if (stageProgress == 2) {
+                    msg("TIP: Only melee units can damage buildings. Iron golems in particular do double damage to them.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 3) {
+                    for (Building building : BuildingClientEvents.getBuildings()) {
+                        if (building.getFaction() == Faction.MONSTERS && building.getHealth() < building.getMaxHealth()) {
+                            msg("TIP: The monsters' capitol, the Mausoleum, produces an artificial night time around it. " +
+                                    "If you can destroy it during the day, undead units will burn under the sunlight.");
+                            progressStage();
+                            break;
+                        }
+                    }
+                }
+                else if (stageProgress == 4) {
+                    boolean botAlive = false;
+                    for (Building building : BuildingClientEvents.getBuildings())
+                        if (building.getFaction() == Faction.MONSTERS)
+                            botAlive = true;
+
+                    if (!botAlive) {
+                        // should show the standard victory screen
+                        progressStageAfterDelay(100);
+                    }
+                }
+                else if (stageProgress == 5) {
+                    nextStageAfterSpace();
+                }
             }
             case OUTRO -> {
+                if (stageProgress == 0) {
+                    specialMsg("Congratulations! You have completed the tutorial!");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 1) {
+                    msg("You may now continue with all of the buildings and units unlocked.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 2) {
+                    msg("To reset the game and try a new faction, type /rts-reset");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 3) {
+                    msg("If you would like to play against another player, check out the Reign of Nether CurseForge " +
+                        "page for a guide on server hosting.");
+                    progressStageAfterDelay(100);
+                }
+                else if (stageProgress == 4) {
+                    msg("Until next time... Good luck and have fun!");
+                    progressStageAfterDelay(80);
+                }
+                else if (stageProgress == 5) {
+                    specialMsg("Tutorial mode disabled");
+                    setEnabled(false);
+                }
             }
         }
     }
