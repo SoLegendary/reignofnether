@@ -56,12 +56,15 @@ public class TutorialServerEvents {
             return;
         }
         String levelName = server.getWorldData().getLevelSettings().levelName();
-        if (evt.getEntity().getLevel() instanceof ServerLevel serverLevel)
-            if (serverLevel.getSeed() == TUTORIAL_MAP_SEED &&
+        if (evt.getEntity().getLevel() instanceof ServerLevel serverLevel &&
+                serverLevel.getSeed() == TUTORIAL_MAP_SEED &&
                 levelName.equals(TUTORIAL_MAP_NAME)) {
-                TutorialClientboundPacket.enableTutorial();
-                enabled = true;
-            }
+            TutorialClientboundPacket.enableTutorial();
+            enabled = true;
+        } else {
+            TutorialClientboundPacket.disableTutorial();
+            enabled = false;
+        }
     }
 
     public static void setDayTime() {

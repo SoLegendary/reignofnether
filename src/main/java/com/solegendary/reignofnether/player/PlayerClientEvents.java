@@ -6,14 +6,18 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
 
 public class PlayerClientEvents {
 

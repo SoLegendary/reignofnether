@@ -18,8 +18,12 @@ TODO bugs/features:
 - brutes dont change movement speed when toggling shield
     - maybe change to slowness debuff instead?
 
-- custom background panoramas
+- custom background panoramas for each faction
+    - https://www.youtube.com/watch?v=hN-b8_N2wMs
+    - find a way to randomise between the three factions' sets
 
+- change F1 deselect to tilda (~)
+    - disable vanilla HUD being hidden with F1 when orthoview is enabled
 
 
 [FOG OF WAR] playtest checklist:
