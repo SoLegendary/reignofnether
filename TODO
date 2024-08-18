@@ -20,6 +20,7 @@ TODO bugs/features:
 
 - custom background panoramas for each faction
     - https://www.youtube.com/watch?v=hN-b8_N2wMs
+        - 90 fov, disable fov distortion
     - find a way to randomise between the three factions' sets
 
 - change F1 deselect to tilda (~)
