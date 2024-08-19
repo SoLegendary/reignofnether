@@ -9,7 +9,6 @@ TODO bugs/features:
 
 - in first-person camera, dont make semifrozen chunks if they are too far away
 - cant spread nether over large water
-- add warning message for building in fog
 
 - ghasts dont damage buildings?
     - likely due to some shots hitting only explosion-resistant blocks like stone bricks

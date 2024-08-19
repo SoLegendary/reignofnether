@@ -26,6 +26,7 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.model.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -1046,9 +1047,6 @@ public class HudClientEvents {
         }
     }
 
-
-
-
     // newUnitIds are replacing oldUnitIds - replace them in every control group while retaining their index
     public static void convertControlGroups(int[] oldUnitIds, int[] newUnitIds) {
         if (MC.level == null)
@@ -1070,4 +1068,6 @@ public class HudClientEvents {
             }
         }
     }
+
+
 }

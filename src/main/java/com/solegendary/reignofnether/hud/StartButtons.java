@@ -35,7 +35,7 @@ public class StartButtons {
     public static Button monsterStartButton = new Button(
         "Monsters",
         iconSize,
-        new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
+        new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png"),
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_MONSTERS,
         () -> TutorialClientEvents.isEnabled(),

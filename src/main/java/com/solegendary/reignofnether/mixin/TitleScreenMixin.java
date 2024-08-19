@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Vector3f;
 import com.mojang.realmsclient.gui.screens.RealmsNotificationsScreen;
+import com.solegendary.reignofnether.hud.TitleClientEvents;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -39,21 +40,12 @@ import java.util.Objects;
 public class TitleScreenMixin extends Screen {
 
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final String DEMO_LEVEL_ID = "Demo_World";
-    private static final Component COPYRIGHT_TEXT = Component.literal("Copyright Mojang AB. Do not distribute!");
-    private static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
-    private static final ResourceLocation PANORAMA_OVERLAY = new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
-    private static final ResourceLocation ACCESSIBILITY_TEXTURE = new ResourceLocation("textures/gui/accessibility.png");
-    @Shadow private String splash;
-    @Shadow private Button resetDemoButton;
     private static final ResourceLocation MINECRAFT_LOGO = new ResourceLocation("textures/gui/title/minecraft.png");
     private static final ResourceLocation MINECRAFT_EDITION = new ResourceLocation("textures/gui/title/edition.png");
-    @Shadow private RealmsNotificationsScreen realmsNotificationsScreen;
     @Shadow @Final private PanoramaRenderer panorama;
     @Shadow @Final private boolean fading;
     @Shadow private long fadeInStart;
     @Nullable
-    // private TitleScreen.WarningLabel warningLabel;
     @Shadow private TitleScreenModUpdateIndicator modUpdateNotification;
 
     protected TitleScreenMixin(Component pTitle) {
@@ -71,16 +63,20 @@ public class TitleScreenMixin extends Screen {
         if (this.fadeInStart == 0L && this.fading) {
             this.fadeInStart = Util.getMillis();
         }
-
         float f = this.fading ? (float)(Util.getMillis() - this.fadeInStart) / 1000.0F : 1.0F;
-        this.panorama.render(pPartialTick, Mth.clamp(f, 0.0F, 1.0F));
+
+        TitleClientEvents.getPanorama().render(pPartialTick, Mth.clamp(f, 0.0F, 1.0F));
         int j = this.width / 2 - 137;
+
+        /*
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, PANORAMA_OVERLAY);
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.fading ? (float)Mth.ceil(Mth.clamp(f, 0.0F, 1.0F)) : 1.0F);
         blit(pPoseStack, 0, 0, this.width, this.height, 0.0F, 0.0F, 16, 128, 16, 128);
+         */
+
         float f1 = this.fading ? Mth.clamp(f - 1.0F, 0.0F, 1.0F) : 1.0F;
         int l = Mth.ceil(f1 * 255.0F) << 24;
         if ((l & -67108864) != 0) {
@@ -92,14 +88,15 @@ public class TitleScreenMixin extends Screen {
             blit(pPoseStack, j + 44, 67, 0.0F, 0.0F, 186, 14, 186, 16);
 
             ForgeHooksClient.renderMainMenu((TitleScreen) Minecraft.getInstance().screen, pPoseStack, this.font, this.width, this.height, l);
-            if (this.splash != null) {
+            if (TitleClientEvents.splash != null) {
                 pPoseStack.pushPose();
                 pPoseStack.translate(this.width / 2 + 90, 70.0, 0.0);
                 pPoseStack.mulPose(Vector3f.ZP.rotationDegrees(-20.0F));
                 float f2 = 1.8F - Mth.abs(Mth.sin((float)(Util.getMillis() % 1000L) / 1000.0F * 6.2831855F) * 0.1F);
-                f2 = f2 * 100.0F / (float)(this.font.width(this.splash) + 32);
+                f2 = f2 * 100.0F / (float)(this.font.width(TitleClientEvents.splash) + 32);
                 pPoseStack.scale(f2, f2, f2);
-                drawCenteredString(pPoseStack, this.font, this.splash, 26, 12, 16776960 | l);
+                int f3 = Math.max(0, this.font.width(TitleClientEvents.splash)/5);
+                drawCenteredString(pPoseStack, this.font, TitleClientEvents.splash, f3 + 14, f3, 16776960 | l);
                 pPoseStack.popPose();
             }
 
@@ -132,7 +129,5 @@ public class TitleScreenMixin extends Screen {
                 this.modUpdateNotification.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
             }
         }
-
     }
-
 }

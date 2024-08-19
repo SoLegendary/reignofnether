@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiClientEvents;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.TitleClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -52,6 +53,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(TPSClientEvents.class);
         vanillaEventBus.register(PlayerClientEvents.class);
         vanillaEventBus.register(TutorialClientEvents.class);
+        vanillaEventBus.register(TitleClientEvents.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(TutorialServerEvents.class);
