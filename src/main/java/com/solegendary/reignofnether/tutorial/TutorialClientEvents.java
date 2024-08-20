@@ -46,7 +46,7 @@ public class TutorialClientEvents {
     // TODO: option to have fog of war locked in during tutorial (add more steps during movement and attack/defense stages)
 
     private static Minecraft MC = Minecraft.getInstance();
-    private static TutorialStage tutorialStage = INTRO;
+    private static TutorialStage tutorialStage = GATHER_ORE;
     private static boolean enabled = false;
 
     private static int ticksToProgressStage = 0;
@@ -88,7 +88,10 @@ public class TutorialClientEvents {
             () -> isEnabled() && !helpButtonText.isEmpty(),
             () ->  {
                 helpButtonClicks += 1;
-                msg(helpButtonText, true, CHAT);
+                if (getStage() == INTRO)
+                    specialMsg(helpButtonText);
+                else
+                    msg(helpButtonText, true, CHAT);
             },
             () -> { },
             List.of(FormattedCharSequence.forward("Tutorial Help", Style.EMPTY))
@@ -471,12 +474,12 @@ public class TutorialClientEvents {
                     msg("This looks like a good spot for it, being flat ground, near lots of resources and with " +
                         "plenty of space around it for other buildings.");
                     OrthoviewClientEvents.forceMoveCam(BUILD_POS, 50);
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 3) {
                     msg("Note that building takes resources. Luckily, the TOP-LEFT shows we have more than enough " +
                         "WOOD and ORE needed.");
-                    nextStageAfterDelay(120);
+                    nextStageAfterDelay(100);
                 }
             }
             case BUILD_TOWN_CENTRE -> {
@@ -499,7 +502,7 @@ public class TutorialClientEvents {
                         "To do this, select your workers and RIGHT-CLICK the building.");
                     setHelpButtonText("Just wait for your Town Centre to complete. If your workers stopped building " +
                                       "for some reason, just select them and RIGHT-CLICK it to resume.");
-                    progressStageAfterDelay(140);
+                    progressStageAfterDelay(240);
                 }
                 else if (stageProgress == 1) {
                     msg("You can also select the building itself like a unit to see how far along it is in building.");

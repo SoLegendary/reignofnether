@@ -660,6 +660,8 @@ public class HudClientEvents {
             blitY += 20;
         }
 
+        int resourceBlitYStart = blitY;
+
         if (resources != null) {
 
             for (String resourceName : new String[]{ "food", "wood", "ore", "pop" }) {
@@ -674,25 +676,21 @@ public class HudClientEvents {
                         rlPath = "textures/icons/items/wheat.png";
                         resValueStr = String.valueOf(resources.food);
                         resName = ResourceName.FOOD;
-                        tooltip = List.of(FormattedCharSequence.forward("Food", Style.EMPTY));
                     }
                     case "wood" -> {
                         rlPath = "textures/icons/items/wood.png";
                         resValueStr = String.valueOf(resources.wood);
                         resName = ResourceName.WOOD;
-                        tooltip = List.of(FormattedCharSequence.forward("Wood", Style.EMPTY));
                     }
                     case "ore" -> {
                         rlPath = "textures/icons/items/iron_ore.png";
                         resValueStr = String.valueOf(resources.ore);
                         resName = ResourceName.ORE;
-                        tooltip = List.of(FormattedCharSequence.forward("Ore", Style.EMPTY));
                     }
                     default -> {
                         rlPath = "textures/icons/items/bed.png";
                         resValueStr = UnitClientEvents.getCurrentPopulation(selPlayerName) + "/" + BuildingClientEvents.getTotalPopulationSupply(selPlayerName);
                         resName = ResourceName.NONE;
-                        tooltip = List.of(FormattedCharSequence.forward("Population", Style.EMPTY));
                     }
                 }
                 hudZones.add(MyRenderer.renderFrameWithBg(evt.getPoseStack(), blitX + iconFrameSize - 1, blitY,
@@ -734,14 +732,29 @@ public class HudClientEvents {
                     GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, String.valueOf(numWorkersAssigned),
                             blitX + 69 + (iconFrameSize / 2) , blitY + (iconSize / 2) + 1, 0xFFFFFF);
                 }
+                blitY += iconFrameSize - 1;
+            }
+
+            blitY = resourceBlitYStart;
+            for (String resourceName : new String[]{ "Food", "Wood", "Ore", "Population" }) {
+                List<FormattedCharSequence> tooltip = List.of(FormattedCharSequence.forward(resourceName, Style.EMPTY));
                 if (mouseX >= blitX &&
-                    mouseY >= blitY &&
-                    mouseX < blitX + iconFrameSize &&
-                    mouseY < blitY + iconFrameSize
+                        mouseY >= blitY &&
+                        mouseX < blitX + iconFrameSize &&
+                        mouseY < blitY + iconFrameSize
                 ) {
                     MyRenderer.renderTooltip(evt.getPoseStack(), tooltip, mouseX, mouseY);
                 }
-
+                List<FormattedCharSequence> tooltipWorkersAssigned =
+                        List.of(FormattedCharSequence.forward("Workers gathering " + resourceName.toLowerCase(), Style.EMPTY));
+                if (!resourceName.equals("pop") &&
+                        mouseX >= blitX + 69 + (iconFrameSize / 2) &&
+                        mouseY >= blitY &&
+                        mouseX < blitX + 69 + (iconFrameSize / 2) &&
+                        mouseY < blitY + iconFrameSize
+                ) {
+                    MyRenderer.renderTooltip(evt.getPoseStack(), tooltipWorkersAssigned, mouseX, mouseY);
+                }
                 blitY += iconFrameSize - 1;
             }
         }

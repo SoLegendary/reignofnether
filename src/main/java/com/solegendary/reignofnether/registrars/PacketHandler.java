@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.tps.TPSClientBoundPacket;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialClientboundPacket;
+import com.solegendary.reignofnether.tutorial.TutorialServerboundPacket;
 import com.solegendary.reignofnether.unit.packets.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
@@ -124,5 +125,9 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(TutorialClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(TutorialClientboundPacket::encode).decoder(TutorialClientboundPacket::new)
                 .consumer(TutorialClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(TutorialServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(TutorialServerboundPacket::encode).decoder(TutorialServerboundPacket::new)
+                .consumer(TutorialServerboundPacket::handle).add();
     }
 }
