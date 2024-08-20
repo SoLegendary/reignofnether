@@ -10,8 +10,11 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
+import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -26,6 +29,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
@@ -309,7 +313,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 1 && pannedUp && pannedDown && pannedLeft && pannedRight) {
                     specialMsg("Nicely done.");
-                    nextStageAfterDelay(60);
+                    nextStageAfterDelay(80);
                 }
             }
             case CAMERA_TIPS -> {
@@ -341,7 +345,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 2 && clickedMinimap) {
                     specialMsg("Good work!");
-                    nextStageAfterDelay(60);
+                    nextStageAfterDelay(80);
                 }
             }
             case MINIMAP_TIPS -> {
@@ -380,7 +384,7 @@ public class TutorialClientEvents {
                 else if (stageProgress == 1 && PlayerClientEvents.isRTSPlayer) {
                     TutorialRendering.clearButtonName();
                     specialMsg("Excellent.");
-                    nextStageAfterDelay(60);
+                    nextStageAfterDelay(80);
                 }
             }
             case SELECT_UNIT -> {
@@ -410,7 +414,7 @@ public class TutorialClientEvents {
                     MoveToTargetBlockGoal goal = unit.getMoveGoal();
                     if (goal != null && goal.getMoveTarget() != null) {
                         specialMsg("Nice work.");
-                        nextStageAfterDelay(60);
+                        nextStageAfterDelay(80);
                     }
                 }
             }
@@ -440,7 +444,7 @@ public class TutorialClientEvents {
                     MoveToTargetBlockGoal goal = unit.getMoveGoal();
                     if (goal != null && goal.getMoveTarget() != null) {
                         specialMsg("Great job!");
-                        nextStageAfterDelay(60);
+                        nextStageAfterDelay(80);
                     }
                 }
             }
@@ -450,7 +454,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 1) {
-                    msg("TIP: If you want to deselect your units, press F1.");
+                    msg("TIP: If you want to deselect your units, press the tilde (~) key");
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 2) {
@@ -584,13 +588,13 @@ public class TutorialClientEvents {
                                 villager.getGatherResourceGoal().getTargetResourceName() == ResourceName.WOOD) {
                             specialMsg("Well done.");
                             clearHelpButtonText();
-                            progressStageAfterDelay(60);
+                            progressStageAfterDelay(80);
                         }
                     }
                 }
                 else if (stageProgress == 4) {
-                    msg("TIP: Workers will keep gathering until told to do something else. " +
-                        "Once they have at least 50 total resources they return it to the town centre.");
+                    msg("TIP: Workers keep gathering until told to do something else. " +
+                            "Once they have at least 50 total resources they return it to the town centre.");
                     nextStageAfterDelay(100);
                 }
             }
@@ -616,7 +620,7 @@ public class TutorialClientEvents {
                             villager.getGatherResourceGoal().getTargetResourceName() == ResourceName.ORE) {
                             specialMsg("Well done.");
                             clearHelpButtonText();
-                            progressStageAfterDelay(60);
+                            progressStageAfterDelay(80);
                         }
                     }
                 }
@@ -638,42 +642,63 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 2) {
-                    msg("Just like wood and ore, select a worker and right click a pig to start hunting it.");
-                    setHelpButtonText("Select any villager, then RIGHT-CLICK a pig and wait for it to be killed." +
+                    msg("Just like wood and ore, select a worker and RIGHT-CLICK an animal to start hunting it.");
+                    setHelpButtonText("Select any villager, then RIGHT-CLICK an animal and wait for it to be killed." +
                                         "Make sure that villager doesn't already have a full inventory.");
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 3) {
-                    msg("TIP: If your hunting villager has a full inventory of resources already, the porkchops will drop to the ground."+
-                        "Any unit with a free inventory can pick up items like porkchops or saplings and return them for resources.");
+                    msg("Make sure your worker isn't holding any other resources!");
                     progressStage();
                 }
                 else if (stageProgress == 4) {
+                    for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+                        if (entity instanceof VillagerUnit villager) {
+                            LivingEntity targetEntity = villager.getTarget();
+                            if (ResourceSources.isHuntableAnimal(targetEntity) &&
+                                    targetEntity.getHealth() < targetEntity.getMaxHealth()) {
+                                msg("If your worker can't hold all the food after hunting an animal, it will drop the ground.");
+                            }
+                        }
+                    }
+                }
+                else if (stageProgress == 5) {
+                    for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+                        if (entity instanceof VillagerUnit villager) {
+                            LivingEntity targetEntity = villager.getTarget();
+                            if (ResourceSources.isHuntableAnimal(targetEntity) &&
+                                    targetEntity.getHealth() < targetEntity.getMaxHealth() / 2) {
+                                msg("Dropped items like food and saplings can be picked by ANY unit and returned for resources.");
+                            }
+                        }
+                    }
+                }
+                else if (stageProgress == 6) {
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
                         if (entity instanceof VillagerUnit villager) {
                             for (ItemStack itemStack : villager.getItems()) {
                                 if (itemStack.getItem().equals(Items.PORKCHOP)) {
                                     specialMsg("Great work!");
                                     clearHelpButtonText();
-                                    progressStageAfterDelay(60);
+                                    progressStageAfterDelay(80);
                                     break;
                                 }
                             }
                         }
                     }
                 }
-                else if (stageProgress == 5) {
+                else if (stageProgress == 7) {
                     msg("Your villager should now return some porkchops to your town centre, but if they aren't, " +
                         "simply select the villager and RIGHT-CLICK your Town Centre.");
                     setHelpButtonText("Select your villager that hunted the pig and RIGHT-CLICK your Town Centre.");
                     progressStage();
                 }
-                else if (stageProgress == 6 && ResourcesClientEvents.getOwnResources().food >= foodBeforeHunting + 50) {
+                else if (stageProgress == 8 && ResourcesClientEvents.getOwnResources().food >= foodBeforeHunting + 50) {
                     specialMsg("Excellent. You now have more food to build new units.");
                     clearHelpButtonText();
                     progressStageAfterDelay(80);
                 }
-                else if (stageProgress == 7) {
+                else if (stageProgress == 9) {
                     msg("TIP: Units hold up to 100 total resources, but hunting allows you to go above this maximum.");
                     nextStageAfterDelay(100);
                 }
@@ -759,7 +784,7 @@ public class TutorialClientEvents {
                     if (armyCount >= 3) {
                         specialMsg("Awesome!");
                         TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTER_WORKERS);
-                        progressStageAfterDelay(100);
+                        progressStageAfterDelay(80);
                     }
                 }
                 else if (stageProgress == 6) {
@@ -845,7 +870,7 @@ public class TutorialClientEvents {
                         if (building.getHealth() >= building.getMaxHealth()) {
                             specialMsg("Good job!");
                             clearHelpButtonText();
-                            progressStageAfterDelay(100);
+                            progressStageAfterDelay(80);
                             break;
                         }
                     }
@@ -891,7 +916,7 @@ public class TutorialClientEvents {
                     for (Building building : BuildingClientEvents.getBuildings()) {
                         if (building instanceof OakBridge bridge && bridge.isBuilt) {
                             specialMsg("Nice job.");
-                            progressStageAfterDelay(100);
+                            progressStageAfterDelay(80);
                             break;
                         }
                     }

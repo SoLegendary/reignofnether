@@ -743,17 +743,17 @@ public class HudClientEvents {
                         mouseX < blitX + iconFrameSize &&
                         mouseY < blitY + iconFrameSize
                 ) {
-                    MyRenderer.renderTooltip(evt.getPoseStack(), tooltip, mouseX, mouseY);
+                    MyRenderer.renderTooltip(evt.getPoseStack(), tooltip, mouseX + 5, mouseY);
                 }
                 List<FormattedCharSequence> tooltipWorkersAssigned =
-                        List.of(FormattedCharSequence.forward("Workers gathering " + resourceName.toLowerCase(), Style.EMPTY));
+                        List.of(FormattedCharSequence.forward("Workers on " + resourceName.toLowerCase(), Style.EMPTY));
                 if (!resourceName.equals("pop") &&
-                        mouseX >= blitX + 69 + (iconFrameSize / 2) &&
+                        mouseX >= blitX + 69 &&
                         mouseY >= blitY &&
-                        mouseX < blitX + 69 + (iconFrameSize / 2) &&
+                        mouseX < blitX + 69 + iconFrameSize &&
                         mouseY < blitY + iconFrameSize
                 ) {
-                    MyRenderer.renderTooltip(evt.getPoseStack(), tooltipWorkersAssigned, mouseX, mouseY);
+                    MyRenderer.renderTooltip(evt.getPoseStack(), tooltipWorkersAssigned, mouseX + 5, mouseY);
                 }
                 blitY += iconFrameSize - 1;
             }
@@ -1035,7 +1035,7 @@ public class HudClientEvents {
         }
 
         // deselect everything
-        if (evt.getKeyCode() == Keybindings.getFnum(1).key) {
+        if (evt.getKeyCode() == Keybindings.deselect.key) {
             UnitClientEvents.clearSelectedUnits();
             BuildingClientEvents.clearSelectedBuildings();
             BuildingClientEvents.setBuildingToPlace(null);

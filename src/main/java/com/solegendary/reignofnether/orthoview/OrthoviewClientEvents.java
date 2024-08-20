@@ -168,9 +168,13 @@ public class OrthoviewClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (!OrthoviewClientEvents.isEnabled() || evt.phase != TickEvent.Phase.END)
+        if (evt.phase != TickEvent.Phase.END)
             return;
-        if (MC.player == null || MC.level == null)
+
+        if (cameraLockTicksLeft > 0)
+            cameraLockTicksLeft -= 1;
+
+        if (!OrthoviewClientEvents.isEnabled() || MC.player == null || MC.level == null)
             return;
 
         if (MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-5,0)) &&
@@ -188,8 +192,6 @@ public class OrthoviewClientEvents {
             MC.player.move(MoverType.SELF, new Vec3(xDiff , 0, zDiff));
             forcePanTicksLeft -= 1;
         }
-        if (cameraLockTicksLeft > 0)
-            cameraLockTicksLeft -= 1;
     }
 
     public static void toggleEnable() {
