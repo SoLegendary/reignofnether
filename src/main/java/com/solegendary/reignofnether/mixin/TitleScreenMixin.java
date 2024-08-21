@@ -89,7 +89,7 @@ public class TitleScreenMixin extends Screen {
                 f2 = f2 * 100.0F / (float)(this.font.width(TitleClientEvents.splash) + 32);
                 pPoseStack.scale(f2, f2, f2);
                 int f3 = Math.max(0, this.font.width(TitleClientEvents.splash)/5);
-                drawCenteredString(pPoseStack, this.font, TitleClientEvents.splash, f3 + 14, f3, 16776960 | l);
+                drawCenteredString(pPoseStack, this.font, TitleClientEvents.splash, f3 + 14, f3 - 2, 16776960 | l);
                 pPoseStack.popPose();
             }
 

@@ -207,6 +207,7 @@ public class OrthoviewClientEvents {
             PlayerServerboundPacket.teleportPlayer(MC.player.getX(), ORTHOVIEW_PLAYER_BASE_Y, MC.player.getZ());
             TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
             MC.options.cloudStatus().set(CloudStatus.OFF);
+            MC.options.hideGui = false; // for some reason, when gui is hidden, shape rendering goes whack
         }
         else {
             PlayerServerboundPacket.disableOrthoview();

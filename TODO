@@ -5,15 +5,11 @@ TODO bugs/features:
 - workers are not marked as idle until 15s after stopping gathering
 - turning on fog of war causes a crash when optifine is installed
 
-
-
 - in first-person camera, dont make semifrozen chunks if they are too far away
-- cant spread nether over large water
 
 - brutes dont change movement speed when toggling shield
     - maybe change to slowness debuff instead?
 
-- disable vanilla HUD being hidden with F1 when orthoview is enabled
 
 
 [FOG OF WAR] playtest checklist:
@@ -26,7 +22,29 @@ TODO bugs/features:
 
 
 
+Balance additions
+-----------------
+- Monsters and Villagers should have a late game ranged sieger
+    - VILLAGERS: Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but the ravager loses its roar ability
+    - MONSTERS: Wardens can yamato gun buildings
+- Piglins should have a mid game melee sieger
+    - PIGLINS: ?
 
+
+New Upgrades
+------------
+MONSTERS: Upgrade for watchtowers to come with a shulker in the centre
+PIGLINS: Upgrade for ghasts to spread nether on hit (solves issue of spreading base over water)
+VILLAGERS: New potions for witches
+
+New Units
+---------
+MONSTERS: Endermen who can't attack but have a cooldown ability to place shulker boxes (with limited lifespan) (research extends lifespan)
+    - comes from ender portal building
+PIGLINS: Magma cubes (research make melee attacks set enemies on fire)
+    - comes from mother cube building - giant building that looks exactly like a magma cube
+VILLAGERS: Illusioner - hallucination ability, targeted invisibility (research unlocks second ability)
+    - comes from new supplementary building ala-library
 
 
 
