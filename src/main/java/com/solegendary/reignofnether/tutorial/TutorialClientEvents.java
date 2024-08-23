@@ -19,6 +19,8 @@ import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -51,6 +53,8 @@ public class TutorialClientEvents {
 
     // TODO: option to have fog of war locked in during tutorial (add more steps during movement and attack/defense stages)
 
+    // TODO: if in the first attack all military units are lost or the town centre drops below half health, skip to dawnbreak
+
     private static Minecraft MC = Minecraft.getInstance();
     private static TutorialStage tutorialStage = HUNT_ANIMALS;
     private static boolean enabled = false;
@@ -77,7 +81,7 @@ public class TutorialClientEvents {
     private static final Vec3i ORE_POS = new Vec3i(-2951, 0, -1224);
     private static final Vec3i FOOD_POS = new Vec3i(-2939, 0, -1173);
 
-    private static final Vec3i MONSTER_SPAWN_POS = new Vec3i(-2968, 64, -1216);
+    private static final Vec3i MONSTER_CAMERA_POS = new Vec3i(-2983, 64, -1199);
     private static final Vec3i MONSTER_BASE_POS = new Vec3i(-3082, 72, -1293);
 
     private static final Vec3i BRIDGE_POS = new Vec3i(-2997,0,-1206);
@@ -764,7 +768,7 @@ public class TutorialClientEvents {
                     for (Building building : BuildingClientEvents.getBuildings()) {
                         if (building instanceof Barracks barracks && barracks.isBuilt) {
                             specialMsg("Great job.");
-                            nextStage();
+                            nextStageAfterDelay(80);
                         }
                     }
                 }
@@ -823,7 +827,7 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     msg("Uh oh, looks like some monsters are about to attack!");
                     TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTERS_A);
-                    OrthoviewClientEvents.forceMoveCam(MONSTER_SPAWN_POS, 50);
+                    OrthoviewClientEvents.forceMoveCam(MONSTER_CAMERA_POS, 50);
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 1) {
@@ -836,14 +840,12 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 2) {
                     if (UnitClientEvents.getAllUnits().stream().filter(
-                                    u -> u instanceof AttackerUnit &&
-                                            u instanceof Unit unit &&
-                                            unit.getFaction() == Faction.MONSTERS)
+                                    u -> u instanceof ZombieUnit || u instanceof SkeletonUnit)
                             .toList().isEmpty()) {
 
                         msg("Watch out! More monsters incoming!");
                         TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTERS_B);
-                        OrthoviewClientEvents.forceMoveCam(MONSTER_SPAWN_POS, 50);
+                        OrthoviewClientEvents.forceMoveCam(MONSTER_CAMERA_POS, 50);
                         progressStageAfterDelay(40);
                     }
                 }

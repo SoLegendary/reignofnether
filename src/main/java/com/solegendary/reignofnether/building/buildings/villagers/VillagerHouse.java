@@ -58,7 +58,7 @@ public class VillagerHouse extends Building {
             new ResourceLocation("minecraft", "textures/block/oak_log.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == VillagerHouse.class,
-            () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_BASE),
+            () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
             () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(VillagerHouse.class),

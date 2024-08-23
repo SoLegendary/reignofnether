@@ -132,8 +132,8 @@ public class TutorialServerEvents {
 
         if (attackPos != null)
             for (LivingEntity entity : UnitServerEvents.getAllUnits())
-                if (entity instanceof AttackerUnit aUnit)
-                    aUnit.setAttackMoveTarget(attackPos);
+                if (entity instanceof ZombieUnit || entity instanceof SkeletonUnit)
+                    ((AttackerUnit) entity).setAttackMoveTarget(attackPos);
     }
 
     public static void attackWithMonstersB() {

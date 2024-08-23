@@ -54,7 +54,7 @@ public class OakStockpile extends AbstractStockpile {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/chest.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == OakStockpile.class,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_BASE),
+                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
                 () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
                         BuildingClientEvents.hasFinishedBuilding(Mausoleum.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),

@@ -67,7 +67,7 @@ public class Barracks extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/fletching_table_front.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Barracks.class,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_BASE),
+                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
                 () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(Barracks.class),

@@ -59,7 +59,7 @@ public class WheatFarm extends Building {
                 new ResourceLocation("minecraft", "textures/block/hay_block_side.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == WheatFarm.class,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_BASE),
+                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
                 () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(WheatFarm.class),
