@@ -35,6 +35,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -43,9 +44,11 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -393,16 +396,11 @@ public class UnitClientEvents {
             unit.initialiseGoals(); // for clientside data tracking - server automatically does this via registerGoals();
             unit.setupEquipmentAndUpgradesClient();
 
-            RandomSource rand = RandomSource.create();
-            for(int j = 0; j < 35; ++j) {
-                double d0 = rand.nextGaussian() * 0.2;
-                double d1 = rand.nextGaussian() * 0.2;
-                double d2 = rand.nextGaussian() * 0.2;
-                evt.getLevel().addParticle(ParticleTypes.POOF, entity.getX(), entity.getY(), entity.getZ(), d0, d1, d2);
-            }
+            addUnitPoofs(evt.getLevel(), entity);
         }
+        if (entity instanceof Pig && TutorialClientEvents.isEnabled())
+            addUnitPoofs(evt.getLevel(), entity);
     }
-
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
@@ -826,6 +824,16 @@ public class UnitClientEvents {
                     getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                     UnitClientEvents.idleWorkerIds.add(id);
             }
+        }
+    }
+
+    public static void addUnitPoofs(Level level, Entity entity) {
+        RandomSource rand = RandomSource.create();
+        for(int j = 0; j < 35; ++j) {
+            double d0 = rand.nextGaussian() * 0.2;
+            double d1 = rand.nextGaussian() * 0.2;
+            double d2 = rand.nextGaussian() * 0.2;
+            level.addParticle(ParticleTypes.POOF, entity.getX(), entity.getY(), entity.getZ(), d0, d1, d2);
         }
     }
 

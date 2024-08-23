@@ -125,6 +125,11 @@ public class TutorialServerEvents {
             if (building instanceof TownCentre)
                 attackPos = building.centrePos;
 
+        if (attackPos == null)
+            for (Building building : BuildingServerEvents.getBuildings())
+                if (building instanceof Barracks)
+                    attackPos = building.centrePos;
+
         if (attackPos != null)
             for (LivingEntity entity : UnitServerEvents.getAllUnits())
                 if (entity instanceof AttackerUnit aUnit)

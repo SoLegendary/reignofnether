@@ -57,7 +57,7 @@ public class TutorialRendering {
                     activeButton.y + Button.iconFrameSize,
                     0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
-        pointAtWithArrow(poseStack, activeButton.x, activeButton.y, false);
+        pointAtWithArrow(poseStack, activeButton.x, activeButton.y, true);
     }
 
     public static void pointAtWithArrow(PoseStack poseStack, int x, int y, boolean vertical) {

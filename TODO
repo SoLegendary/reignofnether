@@ -1,4 +1,9 @@
 
+
+TODO temporary debugging changes
+BuildingServerEvents.cancelBuilding isCapitol check
+
+
 TODO bugs/features:
 
 - time set causes desyncs when done with /gamerule dodaynightcycle false
@@ -27,8 +32,13 @@ Balance additions
 - Monsters and Villagers should have a late game ranged sieger
     - VILLAGERS: Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but the ravager loses its roar ability
     - MONSTERS: Wardens can yamato gun buildings
+
 - Piglins should have a mid game melee sieger
     - PIGLINS: ?
+
+- change witches to auto attack like evokers, reduce cooldown, reduce potion strength and remove lingering effect
+    - ability to toggle between potion types
+    - ability to toggle between auto-attack targets (ally or enemy)
 
 
 New Upgrades

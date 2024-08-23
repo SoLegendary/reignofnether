@@ -910,13 +910,13 @@ public class HudClientEvents {
                         mouseX, mouseY);
                 renderedButtons.add(StartButtons.piglinStartButton);
             }
-            else if (TutorialClientEvents.isEnabled()) {
-                TutorialClientEvents.helpButton.render(evt.getPoseStack(),
-                        screenWidth - (TutorialClientEvents.helpButton.iconSize * 2),
-                        TutorialClientEvents.helpButton.iconSize / 2,
-                        mouseX, mouseY);
-                renderedButtons.add(TutorialClientEvents.helpButton);
-            }
+        }
+        if (TutorialClientEvents.isEnabled()) {
+            TutorialClientEvents.helpButton.render(evt.getPoseStack(),
+                    screenWidth - (TutorialClientEvents.helpButton.iconSize * 2),
+                    TutorialClientEvents.helpButton.iconSize / 2,
+                    mouseX, mouseY);
+            renderedButtons.add(TutorialClientEvents.helpButton);
         }
         // ------------------------------------------------------
         // Button tooltips (has to be rendered last to be on top)

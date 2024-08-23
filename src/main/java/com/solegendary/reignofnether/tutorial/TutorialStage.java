@@ -30,7 +30,9 @@ public enum TutorialStage {
     GATHER_WOOD,
     GATHER_ORE,
     HUNT_ANIMALS, // Spawn in some pigs nearby, explain to take a villager and right click it
+    EXPLAIN_BUILDINGS,
     BUILD_BASE, // give free resources, open options to build houses, farms and barracks with a msg for each when built
+    EXPLAIN_BARRACKS,
     BUILD_ARMY, // progress once 3 units are built
     DEFEND_BASE, // set time to night, send in two zombies to fight - if the player loses somehow set time to day early
     REPAIR_BUILDING,

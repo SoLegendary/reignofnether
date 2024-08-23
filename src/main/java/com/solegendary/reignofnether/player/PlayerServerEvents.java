@@ -498,7 +498,8 @@ public class PlayerServerEvents {
 
             PlayerClientboundPacket.resetRTS();
 
-            sendMessageToAllPlayers("Match has been reset!", true);
+            if (!TutorialServerEvents.isEnabled())
+                sendMessageToAllPlayers("Match has been reset!", true);
         }
     }
 }
