@@ -42,6 +42,9 @@ public class TutorialServerboundPacket {
                 case ATTACK_WITH_MONSTERS_B -> TutorialServerEvents.attackWithMonstersB();
                 case SPAWN_MONSTER_WORKERS -> TutorialServerEvents.spawnMonsterWorkers();
                 case START_MONSTER_BASE -> TutorialServerEvents.startBuildingMonsterBase();
+                case EXPAND_MONSTER_BASE_A -> TutorialServerEvents.expandMonsterBaseA();
+                case EXPAND_MONSTER_BASE_B -> TutorialServerEvents.expandMonsterBaseB();
+                case SPAWN_MONSTER_BASE_ARMY -> TutorialServerEvents.spawnMonsterBaseArmy();
                 case SPAWN_FRIENDLY_ARMY -> TutorialServerEvents.spawnFriendlyArmy();
             }
             success.set(true);

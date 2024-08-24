@@ -2,6 +2,7 @@
 
 TODO temporary debugging changes
 BuildingServerEvents.cancelBuilding isCapitol check
+disallow cancel building when in tutorial
 
 
 TODO bugs/features:

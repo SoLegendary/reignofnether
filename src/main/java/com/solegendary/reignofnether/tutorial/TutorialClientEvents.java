@@ -858,6 +858,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 4) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.EXPAND_MONSTER_BASE_A);
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     specialMsg("Dawn breaks!");
                     progressStage();
@@ -879,6 +880,7 @@ public class TutorialClientEvents {
             }
             case REPAIR_BUILDING -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.EXPAND_MONSTER_BASE_B);
                     for (Building building : BuildingClientEvents.getBuildings())
                         if (building.getHealth() < building.getMaxHealth() && building.getFaction() == Faction.VILLAGERS && damagedBuildings.size() < 3)
                             damagedBuildings.add(building);
@@ -912,6 +914,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 4) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTER_BASE_ARMY);
                     nextStageAfterSpace();
                 }
             }
@@ -1028,7 +1031,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 4) {
                     msg("Until next time... Good luck and have fun!");
-                    progressStageAfterDelay(10);
+                    progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 5) {
                     specialMsg("Tutorial mode disabled");

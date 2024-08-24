@@ -40,7 +40,19 @@ public class TutorialServerEvents {
     private static final Vec3i ANIMAL_POS = new Vec3i(-2923, 67, -1184);
     private static final Vec3i MONSTER_ATTACK_SPAWN_POS = new Vec3i(-2968, 64, -1216);
     private static final Vec3i MONSTER_WORKER_POS = new Vec3i(-3082, 71, -1286);
-    private static final Vec3i MONSTER_MAUSOLEUM_POS = new Vec3i(-3082, 71, -1293);
+
+    private static final Vec3i MAUSOLEUM_POS = new Vec3i(-3082, 71, -1293);
+    private static final Vec3i FARM_POS_1 = new Vec3i(-3091, 70, -1291);
+    private static final Vec3i FARM_POS_2 = new Vec3i(-3080, 70, -1281);
+    private static final Vec3i GRAVEYARD_POS = new Vec3i(-3076, 71, -1278);
+    private static final Vec3i TOWER_POS = new Vec3i(-3070, 71, -1286);
+    private static final Vec3i SPIDER_LAIR_POS = new Vec3i(-3084, 71, -1302);
+
+    private static final Vec3i TOWER_SKELETON_POS = new Vec3i(-3067, 82, -1283);
+    private static final Vec3i GROUND_SKELETON_POS_1 = new Vec3i(-3074, 72, -1281);
+    private static final Vec3i GROUND_SKELETON_POS_2 = new Vec3i(-3080, 71, -1275);
+    private static final Vec3i SPIDER_POS = new Vec3i(-3080, 73, -1297);
+    private static final Vec3i GRAVEYARD_ZOMBIE_POS = new Vec3i(-3072, 73, -1273);
 
     public static boolean isEnabled() { return enabled; }
 
@@ -108,7 +120,7 @@ public class TutorialServerEvents {
 
     // also officially adds the tutorial bot to the game as an RTSPlayer
     public static void spawnMonsterWorkers() {
-        PlayerServerEvents.startRTSBot(TUTORIAL_ENEMY_NAME, Vec3.atCenterOf(MONSTER_MAUSOLEUM_POS), Faction.MONSTERS);
+        PlayerServerEvents.startRTSBot(TUTORIAL_ENEMY_NAME, Vec3.atCenterOf(MAUSOLEUM_POS), Faction.MONSTERS);
     }
 
     public static void spawnMonstersA() {
@@ -174,9 +186,49 @@ public class TutorialServerEvents {
                 .mapToInt(Entity::getId).toArray();
         if (builderUnitIds.length > 0) {
             BuildingServerEvents.placeBuilding(Mausoleum.buildingName,
-                    new BlockPos(MONSTER_MAUSOLEUM_POS.getX(), MONSTER_MAUSOLEUM_POS.getY(), MONSTER_MAUSOLEUM_POS.getZ()),
+                    new BlockPos(MAUSOLEUM_POS.getX(), MAUSOLEUM_POS.getY(), MAUSOLEUM_POS.getZ()),
                     Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
         }
+    }
+
+    public static void expandMonsterBaseA() {
+        int[] builderUnitIds = UnitServerEvents.getAllUnits().stream()
+                .filter(u -> u instanceof ZombieVillagerUnit)
+                .mapToInt(Entity::getId).toArray();
+
+        for (int i = 0; i < builderUnitIds.length; i++) {
+            switch (i) {
+                case 0 -> BuildingServerEvents.placeBuilding(Mausoleum.buildingName, new BlockPos(FARM_POS_1),
+                        Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+                case 1 -> BuildingServerEvents.placeBuilding(Mausoleum.buildingName, new BlockPos(FARM_POS_2),
+                        Rotation.CLOCKWISE_90, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+            }
+        }
+    }
+
+    public static void expandMonsterBaseB() {
+        int[] builderUnitIds = UnitServerEvents.getAllUnits().stream()
+                .filter(u -> u instanceof ZombieVillagerUnit)
+                .mapToInt(Entity::getId).toArray();
+
+        for (int i = 0; i < builderUnitIds.length; i++) {
+            switch (i) {
+                case 0 -> BuildingServerEvents.placeBuilding(Mausoleum.buildingName, new BlockPos(MAUSOLEUM_POS),
+                        Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+                case 1 -> BuildingServerEvents.placeBuilding(Mausoleum.buildingName, new BlockPos(TOWER_POS),
+                        Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+                case 2 -> BuildingServerEvents.placeBuilding(Mausoleum.buildingName, new BlockPos(SPIDER_LAIR_POS),
+                        Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+            }
+        }
+    }
+
+    public static void spawnMonsterBaseArmy() {
+        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), GRAVEYARD_ZOMBIE_POS, 3, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), GROUND_SKELETON_POS_1, 1, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), GROUND_SKELETON_POS_2, 1, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), TOWER_SKELETON_POS, 1, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.SPIDER_UNIT.get(), SPIDER_POS, 3, TUTORIAL_ENEMY_NAME);
     }
 
     public static void spawnFriendlyArmy() {
