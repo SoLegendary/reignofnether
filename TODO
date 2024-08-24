@@ -15,6 +15,8 @@ TODO bugs/features:
 - brutes dont change movement speed when toggling shield
     - maybe change to slowness debuff instead?
 
+- give units smooth block climbing for 1-block-high ledges (horse move logic)
+- recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
 
 
 [FOG OF WAR] playtest checklist:

@@ -36,10 +36,11 @@ public class TutorialServerEvents {
     private static final String TUTORIAL_ENEMY_NAME = "Monsters";
     private static boolean enabled = false;
 
-    private static final Vec3i SPAWN_POS = new Vec3i(-2950, 0, -1166);
+    private static final Vec3i ARMY_SPAWN_POS = new Vec3i(-2946, 68, -1177);
     private static final Vec3i ANIMAL_POS = new Vec3i(-2923, 67, -1184);
-    private static final Vec3i MONSTER_SPAWN_POS = new Vec3i(-2968, 64, -1216);
-    private static final Vec3i MONSTER_BASE_POS = new Vec3i(-3082, 72, -1293);
+    private static final Vec3i MONSTER_ATTACK_SPAWN_POS = new Vec3i(-2968, 64, -1216);
+    private static final Vec3i MONSTER_WORKER_POS = new Vec3i(-3082, 71, -1286);
+    private static final Vec3i MONSTER_MAUSOLEUM_POS = new Vec3i(-3082, 71, -1293);
 
     public static boolean isEnabled() { return enabled; }
 
@@ -107,17 +108,17 @@ public class TutorialServerEvents {
 
     // also officially adds the tutorial bot to the game as an RTSPlayer
     public static void spawnMonsterWorkers() {
-        PlayerServerEvents.startRTSBot(TUTORIAL_ENEMY_NAME, Vec3.atCenterOf(MONSTER_BASE_POS), Faction.MONSTERS);
+        PlayerServerEvents.startRTSBot(TUTORIAL_ENEMY_NAME, Vec3.atCenterOf(MONSTER_MAUSOLEUM_POS), Faction.MONSTERS);
     }
 
     public static void spawnMonstersA() {
-        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), MONSTER_SPAWN_POS, 1, TUTORIAL_ENEMY_NAME);
-        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), MONSTER_SPAWN_POS.east(), 1, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), MONSTER_ATTACK_SPAWN_POS, 1, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), MONSTER_ATTACK_SPAWN_POS.north(), 1, TUTORIAL_ENEMY_NAME);
     }
 
     public static void spawnMonstersB() {
-        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), MONSTER_SPAWN_POS, 4, TUTORIAL_ENEMY_NAME);
-        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), MONSTER_SPAWN_POS, 2, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), MONSTER_ATTACK_SPAWN_POS, 4, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), MONSTER_ATTACK_SPAWN_POS.north(), 2, TUTORIAL_ENEMY_NAME);
     }
 
     public static void attackWithMonstersA() { // order all monster units to attack move towards the enemy base
@@ -173,7 +174,7 @@ public class TutorialServerEvents {
                 .mapToInt(Entity::getId).toArray();
         if (builderUnitIds.length > 0) {
             BuildingServerEvents.placeBuilding(Mausoleum.buildingName,
-                    new BlockPos(MONSTER_BASE_POS.getX(), MONSTER_BASE_POS.getY(), MONSTER_BASE_POS.getZ()),
+                    new BlockPos(MONSTER_MAUSOLEUM_POS.getX(), MONSTER_MAUSOLEUM_POS.getY(), MONSTER_MAUSOLEUM_POS.getZ()),
                     Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
         }
     }
@@ -182,8 +183,8 @@ public class TutorialServerEvents {
         if (PlayerServerEvents.players.isEmpty())
             return;
         String ownerName = PlayerServerEvents.players.get(0).getName().getString();
-        spawnMobs(EntityRegistrar.VINDICATOR_UNIT.get(), SPAWN_POS, 5, ownerName);
-        spawnMobs(EntityRegistrar.PILLAGER_UNIT.get(), SPAWN_POS.south(), 3, ownerName);
-        spawnMobs(EntityRegistrar.IRON_GOLEM_UNIT.get(), SPAWN_POS.south().south(), 1, ownerName);
+        spawnMobs(EntityRegistrar.VINDICATOR_UNIT.get(), ARMY_SPAWN_POS, 5, ownerName);
+        spawnMobs(EntityRegistrar.PILLAGER_UNIT.get(), ARMY_SPAWN_POS.south(), 3, ownerName);
+        spawnMobs(EntityRegistrar.IRON_GOLEM_UNIT.get(), ARMY_SPAWN_POS.south().south(), 1, ownerName);
     }
 }

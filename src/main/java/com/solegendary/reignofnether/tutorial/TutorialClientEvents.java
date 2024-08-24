@@ -49,13 +49,13 @@ public class TutorialClientEvents {
     // TODO: option to have fog of war locked in during tutorial (add more steps during movement and attack/defense stages)
 
     private static Minecraft MC = Minecraft.getInstance();
-    private static TutorialStage tutorialStage = EXPLAIN_BUILDINGS;
+    private static TutorialStage tutorialStage = BUILD_ARMY;
     private static boolean enabled = false;
 
     private static int ticksToProgressStage = 0;
     private static int ticksToNextStage = 0;
     private static int ticksOnStage = 0;
-    private static int stageProgress = 4; // used to track progress within each TutorialStage
+    private static int stageProgress = 0; // used to track progress within each TutorialStage
     private static boolean pressSpaceToContinue = false;
     private static boolean blockUpdateStage = false; // prevent updateStage being called when we block it with a delay
 
@@ -68,6 +68,7 @@ public class TutorialClientEvents {
     private static int foodBeforeHunting = 0;
     private static final ArrayList<Building> damagedBuildings = new ArrayList<>();
 
+    // all these positions are for camera only, actual spawn locations differ slightly on the serverside
     private static final Vec3i SPAWN_POS = new Vec3i(-2950, 0, -1166);
     private static final Vec3i BUILD_POS = new Vec3i(-2944, 0, -1200);
     private static final Vec3i WOOD_POS = new Vec3i(-2919, 0, -1196);
@@ -75,9 +76,10 @@ public class TutorialClientEvents {
     private static final Vec3i FOOD_POS = new Vec3i(-2939, 0, -1173);
 
     private static final Vec3i MONSTER_CAMERA_POS = new Vec3i(-2983, 64, -1199);
-    private static final Vec3i MONSTER_BASE_POS = new Vec3i(-3098, 72, -1276);
+    private static final Vec3i MONSTER_BASE_POS = new Vec3i(-3085, 72, -1277);
 
     private static final Vec3i BRIDGE_POS = new Vec3i(-2997,0,-1206);
+    private static final Vec3i ARMY_POS = new Vec3i(-2963, 64, -1160);
 
     private static Supplier<Boolean> shouldPauseTicking = () -> false;
 
@@ -482,18 +484,18 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 1) {
                     msg("The first and most important building of any base is always the capitol.");
-                    progressStageAfterDelay(80);
+                    progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 2) {
                     msg("This looks like a good spot for it, being flat ground, near lots of resources and with " +
                         "plenty of space around it for other buildings.");
                     OrthoviewClientEvents.forceMoveCam(BUILD_POS, 50);
-                    progressStageAfterDelay(120);
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 3) {
                     msg("Note that building takes resources. Luckily, the TOP-LEFT shows we have more than enough " +
                         "WOOD and ORE needed.");
-                    nextStageAfterDelay(100);
+                    nextStageAfterDelay(120);
                 }
             }
             case BUILD_TOWN_CENTRE -> {
@@ -749,13 +751,12 @@ public class TutorialClientEvents {
             }
             case BUILD_BASE -> {
                 if (stageProgress == 0) {
-                    TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTER_WORKERS);
+
                     TutorialRendering.clearButtonName();
                     msg("Let's take some time to check out a few of these buildings.");
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
-                    TutorialServerboundPacket.doServerAction(TutorialAction.START_MONSTER_BASE);
                     msg("When you're ready, build a barracks and get prepare to train your first army.");
                     setHelpButtonText("Select any villager and build a barracks building at the bottom left. Make sure " +
                                       "you've gathered enough wood to afford it!");
@@ -808,12 +809,14 @@ public class TutorialClientEvents {
                     if (armyCount >= 3) {
                         specialMsg("Awesome!");
                         progressStageAfterDelay(80);
+                        TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTER_WORKERS);
                     }
                 }
                 else if (stageProgress == 2) {
                     msg("TIP: If you lose track of your military units, you can press K or click the button " +
                         "on the right to select all of them at once.");
                     progressStageAfterDelay(100);
+                    TutorialServerboundPacket.doServerAction(TutorialAction.START_MONSTER_BASE);
                 }
                 else if (stageProgress == 3) {
                     nextStageAfterSpace();
@@ -822,6 +825,7 @@ public class TutorialClientEvents {
             case DEFEND_BASE -> {
                 if (stageProgress == 0) {
                     msg("Uh oh, looks like some monsters are about to attack!");
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_NIGHT_TIME);
                     TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTERS_A);
                     OrthoviewClientEvents.forceMoveCam(MONSTER_CAMERA_POS, 50);
                     progressStageAfterDelay(100);
@@ -843,7 +847,6 @@ public class TutorialClientEvents {
                     if (UnitClientEvents.getAllUnits().stream().filter(
                             u -> u instanceof ZombieUnit || u instanceof SkeletonUnit)
                             .toList().isEmpty()) {
-
                         msg("Watch out! More monsters incoming!");
                         TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTERS_B);
                         OrthoviewClientEvents.forceMoveCam(MONSTER_CAMERA_POS, 50);
@@ -879,14 +882,19 @@ public class TutorialClientEvents {
                     for (Building building : BuildingClientEvents.getBuildings())
                         if (building.getHealth() < building.getMaxHealth() && building.getFaction() == Faction.VILLAGERS && damagedBuildings.size() < 3)
                             damagedBuildings.add(building);
-                    msg("Looks like some of your buildings were damaged in the attack.");
-                    progressStageAfterDelay(100);
+                    if (damagedBuildings.isEmpty()) {
+                        nextStage();
+                    } else {
+                        msg("Looks like some of your buildings were damaged in the attack.");
+                        progressStageAfterDelay(100);
+                    }
                 }
                 else if (stageProgress == 1) {
                     msg("Try repairing one of them by selecting a villager, then RIGHT-CLICKING the damaged building. " +
-                            "Repairs 1 wood for each missing building block.");
+                            "Repairs cost 1 wood for each block.");
                     setHelpButtonText("Select a worker and RIGHT-CLICK a damaged building, then wait for it to be fully repaired. " +
-                            "Repairs 1 wood for each missing building block.");
+                            "Repairs cost 1 wood for each block.");
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 2) {
                     for (Building building : damagedBuildings) {
@@ -901,7 +909,7 @@ public class TutorialClientEvents {
                 else if (stageProgress == 3) {
                     msg("TIP: Building health is determined by how many blocks it's made up of. If they have less than " +
                             "half blocks remaining, they are destroyed completely.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 4) {
                     nextStageAfterSpace();
@@ -911,11 +919,11 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     OrthoviewClientEvents.forceMoveCam(MONSTER_BASE_POS, 80);
                     msg("The monsters are setting up base across the river, we should destroy it before it becomes a problem.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
                     msg("To cross the river, we need to build a bridge.");
-                    progressStageAfterDelay(60);
+                    progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 2) {
                     OrthoviewClientEvents.forceMoveCam(BRIDGE_POS, 50);
@@ -947,12 +955,12 @@ public class TutorialClientEvents {
                 else if (stageProgress == 5) {
                     msg("TIP: Bridges are always neutral regardless of who built them. This means anyone can attack, " +
                             "repair and connect new segments to them.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 6) {
                     msg("TIP: Be very careful when crossing bridges. If it is destroyed while your units are crossing, " +
                         "they will land in the water and be defenceless!");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 7) {
                     nextStageAfterSpace();
@@ -962,18 +970,18 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     msg("Reinforcements have arrived!");
                     TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_FRIENDLY_ARMY);
-                    OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 50);
+                    OrthoviewClientEvents.forceMoveCam(ARMY_POS, 50);
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
                     msg("Take your new army and crush the monsters' base! This includes an iron golem and your " +
                         "workers can now build blacksmiths to produce more if needed.");
                     setHelpButtonText("Prepare your army and destroy all buildings in the monsters' base");
-                    progressStageAfterDelay(120);
+                    progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 2) {
                     msg("TIP: Only melee units can damage buildings. Iron golems in particular do double damage to them.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 3) {
                     for (Building building : BuildingClientEvents.getBuildings()) {
@@ -993,7 +1001,7 @@ public class TutorialClientEvents {
 
                     if (!botAlive) {
                         // should show the standard victory screen
-                        progressStageAfterDelay(100);
+                        progressStageAfterDelay(200);
                     }
                 }
                 else if (stageProgress == 5) {
@@ -1007,20 +1015,20 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 1) {
                     msg("You may now continue with all of the buildings and units unlocked.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 2) {
                     msg("To reset the game and try a new faction, type /rts-reset");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 3) {
                     msg("If you would like to play against another player, check out the Reign of Nether CurseForge " +
                         "page for a guide on server hosting.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 4) {
                     msg("Until next time... Good luck and have fun!");
-                    progressStageAfterDelay(80);
+                    progressStageAfterDelay(10);
                 }
                 else if (stageProgress == 5) {
                     specialMsg("Tutorial mode disabled");
