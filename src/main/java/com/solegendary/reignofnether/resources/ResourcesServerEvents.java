@@ -87,21 +87,16 @@ public class ResourcesServerEvents {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
-
         String playerName = evt.getEntity().getName().getString();
+        ResourcesClientboundPacket.syncResources(resourcesList);
+    }
 
-        Resources playerResources = null;
-        for (Resources resources : resourcesList)
-            if (resources.ownerName.equals(playerName))
-                playerResources = resources;
-
-        if (playerResources == null) {
-            playerResources = new Resources(playerName,
-                    STARTING_FOOD,
-                    STARTING_WOOD,
-                    STARTING_ORE);
-            resourcesList.add(playerResources);
-        }
+    public static void assignResources(String playerName) {
+        Resources resources = new Resources(playerName,
+                STARTING_FOOD,
+                STARTING_WOOD,
+                STARTING_ORE);
+        resourcesList.add(resources);
         ResourcesClientboundPacket.syncResources(resourcesList);
     }
 

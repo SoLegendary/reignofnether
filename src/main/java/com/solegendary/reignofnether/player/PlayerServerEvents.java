@@ -77,7 +77,9 @@ public class PlayerServerEvents {
 
         // bot
         private RTSPlayer(String name, Faction faction) {
-            int minId = Collections.min(rtsPlayers.stream().map(r -> r.id).toList());
+            int minId = 0;
+            if (!rtsPlayers.isEmpty())
+                minId = Collections.min(rtsPlayers.stream().map(r -> r.id).toList());
             if (minId >= 0)
                 this.id = -1;
             else
@@ -243,14 +245,17 @@ public class PlayerServerEvents {
                 case NONE -> null;
             };
             rtsPlayers.add(RTSPlayer.getNewPlayer(serverPlayer, faction));
-            PlayerClientboundPacket.enableRTSStatus(serverPlayer.getName().getString());
+
+            String playerName = serverPlayer.getName().getString();
+            ResourcesServerEvents.assignResources(playerName);
+            PlayerClientboundPacket.enableRTSStatus(playerName);
 
             ServerLevel level = serverPlayer.getLevel();
             for (int i = -1; i <= 1; i++) {
                 Entity entity = entityType != null ? entityType.create(level) : null;
                 if (entity != null) {
                     BlockPos bp = MiscUtil.getHighestNonAirBlock(level, new BlockPos(pos.x + i, 0, pos.z)).above().above();
-                    ((Unit) entity).setOwnerName(serverPlayer.getName().getString());
+                    ((Unit) entity).setOwnerName(playerName);
                     entity.moveTo(bp, 0,0);
                     level.addFreshEntity(entity);
                 }
@@ -258,11 +263,11 @@ public class PlayerServerEvents {
             if (faction == Faction.MONSTERS) {
                 level.setDayTime(13000);
             }
-            ResourcesServerEvents.resetResources(serverPlayer.getName().getString());
+            ResourcesServerEvents.resetResources(playerName);
 
             if (!TutorialServerEvents.isEnabled()) {
                 serverPlayer.sendSystemMessage(Component.literal(""));
-                sendMessageToAllPlayers(serverPlayer.getName().getString() + " has started their game!", true);
+                sendMessageToAllPlayers(playerName + " has started their game!", true);
                 sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
             }
         }
@@ -284,6 +289,7 @@ public class PlayerServerEvents {
             };
             RTSPlayer bot = RTSPlayer.getNewBot(name, faction);
             rtsPlayers.add(bot);
+            ResourcesServerEvents.assignResources(bot.name);
 
             for (int i = -1; i <= 1; i++) {
                 Entity entity = entityType != null ? entityType.create(level) : null;

@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -115,7 +116,7 @@ public class TutorialServerEvents {
     }
 
     public static void spawnMonstersB() {
-        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), MONSTER_SPAWN_POS, 3, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), MONSTER_SPAWN_POS, 4, TUTORIAL_ENEMY_NAME);
         spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), MONSTER_SPAWN_POS, 2, TUTORIAL_ENEMY_NAME);
     }
 
@@ -123,12 +124,12 @@ public class TutorialServerEvents {
         BlockPos attackPos = null;
         for (Building building : BuildingServerEvents.getBuildings())
             if (building instanceof TownCentre)
-                attackPos = building.centrePos;
+                attackPos = building.originPos;
 
         if (attackPos == null)
             for (Building building : BuildingServerEvents.getBuildings())
                 if (building instanceof Barracks)
-                    attackPos = building.centrePos;
+                    attackPos = building.originPos;
 
         if (attackPos != null)
             for (LivingEntity entity : UnitServerEvents.getAllUnits())
@@ -137,28 +138,44 @@ public class TutorialServerEvents {
     }
 
     public static void attackWithMonstersB() {
-        BlockPos attackTargetZombies = null;
-        BlockPos attackTargetSkeleton = null;
+        BlockPos townCentrePos = null;
+        BlockPos barracksPos = null;
         for (Building building : BuildingServerEvents.getBuildings()) {
-            if (building instanceof Barracks)
-                attackTargetZombies = building.originPos;
-            else if (building instanceof TownCentre)
-                attackTargetSkeleton = building.centrePos;
+            if (building instanceof TownCentre)
+                townCentrePos = building.originPos;
+            else if (building instanceof Barracks)
+                barracksPos = building.originPos;
         }
 
+        int zombiesCommanded = 0;
+        int skeletonsCommanded = 0;
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
-            if (attackTargetZombies != null && entity instanceof ZombieUnit zUnit)
-                zUnit.setAttackBuildingTarget(attackTargetZombies);
-            else if (attackTargetSkeleton != null && entity instanceof SkeletonUnit cUnit)
-                cUnit.setAttackMoveTarget(attackTargetSkeleton);
+            if (entity instanceof ZombieUnit zUnit) {
+                if (zombiesCommanded == 0 && barracksPos != null)
+                    zUnit.setAttackBuildingTarget(barracksPos);
+                else if (townCentrePos != null)
+                    zUnit.setAttackBuildingTarget(townCentrePos);
+                zombiesCommanded += 1;
+            }
+            else if (entity instanceof SkeletonUnit sUnit) {
+                if (skeletonsCommanded == 0 && barracksPos != null)
+                    sUnit.setAttackMoveTarget(barracksPos);
+                else if (townCentrePos != null)
+                    sUnit.setAttackMoveTarget(townCentrePos);
+                skeletonsCommanded += 1;
+            }
         }
     }
 
     public static void startBuildingMonsterBase() {
-        int[] builderUnitIds = UnitServerEvents.getAllUnits().stream().mapToInt(Entity::getId).toArray();
-        if (builderUnitIds.length > 0)
-            BuildingServerEvents.placeBuilding(Mausoleum.buildingName, (BlockPos) MONSTER_BASE_POS, Rotation.NONE,
-                    TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+        int[] builderUnitIds = UnitServerEvents.getAllUnits().stream()
+                .filter(u -> u instanceof ZombieVillagerUnit)
+                .mapToInt(Entity::getId).toArray();
+        if (builderUnitIds.length > 0) {
+            BuildingServerEvents.placeBuilding(Mausoleum.buildingName,
+                    new BlockPos(MONSTER_BASE_POS.getX(), MONSTER_BASE_POS.getY(), MONSTER_BASE_POS.getZ()),
+                    Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+        }
     }
 
     public static void spawnFriendlyArmy() {

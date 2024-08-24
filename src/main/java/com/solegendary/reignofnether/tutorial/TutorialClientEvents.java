@@ -14,10 +14,7 @@ import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
-import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
-import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
@@ -32,9 +29,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -53,16 +48,14 @@ public class TutorialClientEvents {
 
     // TODO: option to have fog of war locked in during tutorial (add more steps during movement and attack/defense stages)
 
-    // TODO: if in the first attack all military units are lost or the town centre drops below half health, skip to dawnbreak
-
     private static Minecraft MC = Minecraft.getInstance();
-    private static TutorialStage tutorialStage = HUNT_ANIMALS;
+    private static TutorialStage tutorialStage = EXPLAIN_BUILDINGS;
     private static boolean enabled = false;
 
     private static int ticksToProgressStage = 0;
     private static int ticksToNextStage = 0;
     private static int ticksOnStage = 0;
-    private static int stageProgress = 6; // used to track progress within each TutorialStage
+    private static int stageProgress = 4; // used to track progress within each TutorialStage
     private static boolean pressSpaceToContinue = false;
     private static boolean blockUpdateStage = false; // prevent updateStage being called when we block it with a delay
 
@@ -82,7 +75,7 @@ public class TutorialClientEvents {
     private static final Vec3i FOOD_POS = new Vec3i(-2939, 0, -1173);
 
     private static final Vec3i MONSTER_CAMERA_POS = new Vec3i(-2983, 64, -1199);
-    private static final Vec3i MONSTER_BASE_POS = new Vec3i(-3082, 72, -1293);
+    private static final Vec3i MONSTER_BASE_POS = new Vec3i(-3098, 72, -1276);
 
     private static final Vec3i BRIDGE_POS = new Vec3i(-2997,0,-1206);
 
@@ -384,6 +377,7 @@ public class TutorialClientEvents {
                 } else if (stageProgress == 1) {
                     msg("Let's get started by spawning in some villagers here.");
                     OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 50);
+                    OrthoviewClientEvents.lockCam();
                     nextStageAfterDelay(80);
                 }
             }
@@ -399,6 +393,7 @@ public class TutorialClientEvents {
                 else if (stageProgress == 1 && PlayerClientEvents.isRTSPlayer) {
                     TutorialRendering.clearButtonName();
                     specialMsg("Excellent.");
+                    OrthoviewClientEvents.unlockCam();
                     nextStageAfterDelay(80);
                 }
             }
@@ -754,11 +749,13 @@ public class TutorialClientEvents {
             }
             case BUILD_BASE -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTER_WORKERS);
                     TutorialRendering.clearButtonName();
                     msg("Let's take some time to check out a few of these buildings.");
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.START_MONSTER_BASE);
                     msg("When you're ready, build a barracks and get prepare to train your first army.");
                     setHelpButtonText("Select any villager and build a barracks building at the bottom left. Make sure " +
                                       "you've gathered enough wood to afford it!");
@@ -800,6 +797,7 @@ public class TutorialClientEvents {
                                     "try building a farm or hunt more animals. If you need more population supply, try building a house.");
                     TutorialRendering.clearButtonName();
                     msg("Try building 3 units from here to continue.");
+
                     progressStage();
                 }
                 else if (stageProgress == 1) {
@@ -809,14 +807,12 @@ public class TutorialClientEvents {
                             armyCount += 1;
                     if (armyCount >= 3) {
                         specialMsg("Awesome!");
-                        TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTER_WORKERS);
                         progressStageAfterDelay(80);
                     }
                 }
                 else if (stageProgress == 2) {
                     msg("TIP: If you lose track of your military units, you can press K or click the button " +
                         "on the right to select all of them at once.");
-                    TutorialServerboundPacket.doServerAction(TutorialAction.START_BUILDING_MONSTER_BASE);
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 3) {
@@ -840,7 +836,12 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 2) {
                     if (UnitClientEvents.getAllUnits().stream().filter(
-                                    u -> u instanceof ZombieUnit || u instanceof SkeletonUnit)
+                            u -> u instanceof PillagerUnit || u instanceof VindicatorUnit)
+                            .toList().isEmpty()) {
+                        nextStage();
+                    }
+                    if (UnitClientEvents.getAllUnits().stream().filter(
+                            u -> u instanceof ZombieUnit || u instanceof SkeletonUnit)
                             .toList().isEmpty()) {
 
                         msg("Watch out! More monsters incoming!");
@@ -851,18 +852,16 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 3) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.ATTACK_WITH_MONSTERS_B);
-                    progressStageAfterDelay(140);
+                    progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 4) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    specialMsg("Dawn breaks! And as you know, monsters don't like sunlight.");
+                    specialMsg("Dawn breaks!");
                     progressStage();
                 }
                 else if (stageProgress == 5) {
                     if (UnitClientEvents.getAllUnits().stream().filter(
-                                    u -> u instanceof AttackerUnit &&
-                                            u instanceof Unit unit &&
-                                            unit.getFaction() == Faction.MONSTERS)
+                                    u -> u instanceof ZombieUnit || u instanceof SkeletonUnit)
                             .toList().isEmpty()) {
                         specialMsg("Nicely done, you successfully defended your base!");
                         clearHelpButtonText();
