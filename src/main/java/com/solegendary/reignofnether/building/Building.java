@@ -18,6 +18,7 @@ import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
@@ -145,7 +146,8 @@ public abstract class Building {
 
         // re-hide players if they were revealed
         if (this.isCapitol && !this.level.isClientSide()) {
-            if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 1) {
+            if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 1 &&
+                !TutorialServerEvents.isEnabled()) {
                 sendMessageToAllPlayers(this.ownerName + " has placed their capitol building!");
             }
             FogOfWarClientboundPacket.revealOrHidePlayer(false, this.ownerName);

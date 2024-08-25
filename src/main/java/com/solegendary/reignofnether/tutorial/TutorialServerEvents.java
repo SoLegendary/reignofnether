@@ -2,11 +2,16 @@ package com.solegendary.reignofnether.tutorial;
 
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.buildings.monsters.DarkWatchtower;
 import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
+import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
+import com.solegendary.reignofnether.building.buildings.monsters.SpiderLair;
 import com.solegendary.reignofnether.building.buildings.villagers.Barracks;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -121,6 +126,7 @@ public class TutorialServerEvents {
     // also officially adds the tutorial bot to the game as an RTSPlayer
     public static void spawnMonsterWorkers() {
         PlayerServerEvents.startRTSBot(TUTORIAL_ENEMY_NAME, Vec3.atCenterOf(MAUSOLEUM_POS), Faction.MONSTERS);
+        ResourcesServerEvents.addSubtractResources(new Resources(TUTORIAL_ENEMY_NAME, 10000, 10000, 10000));
     }
 
     public static void spawnMonstersA() {
@@ -198,9 +204,9 @@ public class TutorialServerEvents {
 
         for (int i = 0; i < builderUnitIds.length; i++) {
             switch (i) {
-                case 0 -> BuildingServerEvents.placeBuilding(Mausoleum.buildingName, new BlockPos(FARM_POS_1),
+                case 0 -> BuildingServerEvents.placeBuilding(PumpkinFarm.buildingName, new BlockPos(FARM_POS_1),
                         Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
-                case 1 -> BuildingServerEvents.placeBuilding(Mausoleum.buildingName, new BlockPos(FARM_POS_2),
+                case 1 -> BuildingServerEvents.placeBuilding(PumpkinFarm.buildingName, new BlockPos(FARM_POS_2),
                         Rotation.CLOCKWISE_90, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
             }
         }
@@ -215,9 +221,9 @@ public class TutorialServerEvents {
             switch (i) {
                 case 0 -> BuildingServerEvents.placeBuilding(Mausoleum.buildingName, new BlockPos(MAUSOLEUM_POS),
                         Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
-                case 1 -> BuildingServerEvents.placeBuilding(Mausoleum.buildingName, new BlockPos(TOWER_POS),
+                case 1 -> BuildingServerEvents.placeBuilding(DarkWatchtower.buildingName, new BlockPos(TOWER_POS),
                         Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
-                case 2 -> BuildingServerEvents.placeBuilding(Mausoleum.buildingName, new BlockPos(SPIDER_LAIR_POS),
+                case 2 -> BuildingServerEvents.placeBuilding(SpiderLair.buildingName, new BlockPos(SPIDER_LAIR_POS),
                         Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
             }
         }
