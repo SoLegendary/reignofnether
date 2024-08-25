@@ -2,14 +2,12 @@ package com.solegendary.reignofnether.tutorial;
 
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
-import com.solegendary.reignofnether.building.buildings.monsters.DarkWatchtower;
-import com.solegendary.reignofnether.building.buildings.monsters.Mausoleum;
-import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
-import com.solegendary.reignofnether.building.buildings.monsters.SpiderLair;
+import com.solegendary.reignofnether.building.buildings.monsters.*;
 import com.solegendary.reignofnether.building.buildings.villagers.Barracks;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -55,9 +53,9 @@ public class TutorialServerEvents {
 
     private static final Vec3i TOWER_SKELETON_POS = new Vec3i(-3067, 82, -1283);
     private static final Vec3i GROUND_SKELETON_POS_1 = new Vec3i(-3074, 72, -1281);
-    private static final Vec3i GROUND_SKELETON_POS_2 = new Vec3i(-3080, 71, -1275);
-    private static final Vec3i SPIDER_POS = new Vec3i(-3080, 73, -1297);
-    private static final Vec3i GRAVEYARD_ZOMBIE_POS = new Vec3i(-3072, 73, -1273);
+    private static final Vec3i GROUND_SKELETON_POS_2 = new Vec3i(-3080, 71, -1272);
+    private static final Vec3i SPIDER_POS = new Vec3i(-3082, 73, -1297);
+    private static final Vec3i GRAVEYARD_ZOMBIE_POS = new Vec3i(-3074, 73, -1273);
 
     public static boolean isEnabled() { return enabled; }
 
@@ -126,6 +124,7 @@ public class TutorialServerEvents {
     // also officially adds the tutorial bot to the game as an RTSPlayer
     public static void spawnMonsterWorkers() {
         PlayerServerEvents.startRTSBot(TUTORIAL_ENEMY_NAME, Vec3.atCenterOf(MAUSOLEUM_POS), Faction.MONSTERS);
+        ResearchServer.addCheat(TUTORIAL_ENEMY_NAME, "warpten");
         ResourcesServerEvents.addSubtractResources(new Resources(TUTORIAL_ENEMY_NAME, 10000, 10000, 10000));
     }
 
@@ -205,9 +204,9 @@ public class TutorialServerEvents {
         for (int i = 0; i < builderUnitIds.length; i++) {
             switch (i) {
                 case 0 -> BuildingServerEvents.placeBuilding(PumpkinFarm.buildingName, new BlockPos(FARM_POS_1),
-                        Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+                        Rotation.NONE, TUTORIAL_ENEMY_NAME, new int[] {builderUnitIds[0]}, false, false);
                 case 1 -> BuildingServerEvents.placeBuilding(PumpkinFarm.buildingName, new BlockPos(FARM_POS_2),
-                        Rotation.CLOCKWISE_90, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+                        Rotation.CLOCKWISE_90, TUTORIAL_ENEMY_NAME, new int[] {builderUnitIds[1]}, false, false);
             }
         }
     }
@@ -219,12 +218,12 @@ public class TutorialServerEvents {
 
         for (int i = 0; i < builderUnitIds.length; i++) {
             switch (i) {
-                case 0 -> BuildingServerEvents.placeBuilding(Mausoleum.buildingName, new BlockPos(MAUSOLEUM_POS),
-                        Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+                case 0 -> BuildingServerEvents.placeBuilding(Graveyard.buildingName, new BlockPos(GRAVEYARD_POS),
+                        Rotation.NONE, TUTORIAL_ENEMY_NAME, new int[] {builderUnitIds[0]}, false, false);
                 case 1 -> BuildingServerEvents.placeBuilding(DarkWatchtower.buildingName, new BlockPos(TOWER_POS),
-                        Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+                        Rotation.NONE, TUTORIAL_ENEMY_NAME, new int[] {builderUnitIds[1]}, false, false);
                 case 2 -> BuildingServerEvents.placeBuilding(SpiderLair.buildingName, new BlockPos(SPIDER_LAIR_POS),
-                        Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+                        Rotation.NONE, TUTORIAL_ENEMY_NAME, new int[] {builderUnitIds[2]}, false, false);
             }
         }
     }

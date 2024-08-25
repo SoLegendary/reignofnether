@@ -842,7 +842,7 @@ public class TutorialClientEvents {
                     if (UnitClientEvents.getAllUnits().stream().filter(
                             u -> u instanceof PillagerUnit || u instanceof VindicatorUnit)
                             .toList().isEmpty()) {
-                        nextStage();
+                        progressStage();
                     }
                     if (UnitClientEvents.getAllUnits().stream().filter(
                             u -> u instanceof ZombieUnit || u instanceof SkeletonUnit)
