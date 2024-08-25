@@ -921,7 +921,7 @@ public class TutorialClientEvents {
             case BUILD_BRIDGE -> {
                 if (stageProgress == 0) {
                     OrthoviewClientEvents.forceMoveCam(MONSTER_BASE_POS, 80);
-                    msg("The monsters are setting up base across the river, we should destroy it before it becomes a problem.");
+                    msg("The monsters have a base across the river, we should destroy it before they attack again.");
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
@@ -971,14 +971,13 @@ public class TutorialClientEvents {
             }
             case ATTACK_ENEMY_BASE -> {
                 if (stageProgress == 0) {
-                    msg("Reinforcements have arrived!");
+                    msg("Reinforcements have arrived! Use them to crush the enemy base!");
                     TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_FRIENDLY_ARMY);
                     OrthoviewClientEvents.forceMoveCam(ARMY_POS, 50);
-                    progressStageAfterDelay(120);
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
-                    msg("Take your new army and crush the monsters' base! This includes an iron golem and your " +
-                        "workers can now build blacksmiths to produce more if needed.");
+                    msg("Your army includes an iron golem and your workers can now build blacksmiths to produce more if needed.");
                     setHelpButtonText("Prepare your army and destroy all buildings in the monsters' base");
                     progressStageAfterDelay(200);
                 }

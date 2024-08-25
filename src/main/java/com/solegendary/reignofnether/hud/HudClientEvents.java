@@ -1029,6 +1029,9 @@ public class HudClientEvents {
     // MANAGE CONTROL GROUPS
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.KeyPressed.Pre evt) {
+        if (!(MC.screen instanceof TopdownGui))
+            return;
+
         // prevent spectator mode options from showing up
         if (OrthoviewClientEvents.isEnabled()) {
             for (Keybinding numKey : Keybindings.nums)
