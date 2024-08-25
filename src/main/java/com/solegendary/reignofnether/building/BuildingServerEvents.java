@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -143,7 +144,7 @@ public class BuildingServerEvents {
     }
 
     public static void cancelBuilding(Building building) {
-        if (building == null) //building.isCapitol)
+        if (building == null || building.isCapitol || TutorialServerEvents.isEnabled())
             return;
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up

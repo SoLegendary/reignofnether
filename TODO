@@ -1,10 +1,5 @@
 
 
-TODO temporary debugging changes
-BuildingServerEvents.cancelBuilding isCapitol check
-disallow cancel building when in tutorial
-
-
 TODO bugs/features:
 
 - time set causes desyncs when done with /gamerule dodaynightcycle false

@@ -49,7 +49,7 @@ public class TutorialClientEvents {
     // TODO: option to have fog of war locked in during tutorial (add more steps during movement and attack/defense stages)
 
     private static Minecraft MC = Minecraft.getInstance();
-    private static TutorialStage tutorialStage = BUILD_ARMY;
+    private static TutorialStage tutorialStage = INTRO;
     private static boolean enabled = false;
 
     private static int ticksToProgressStage = 0;
@@ -236,6 +236,7 @@ public class TutorialClientEvents {
         return tutorialStage.ordinal() >= stage.ordinal();
     }
 
+    /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
         MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
@@ -243,7 +244,7 @@ public class TutorialClientEvents {
                 "progress: " + stageProgress,
                 "ticks: " + ticksOnStage
         });
-    }
+    } */
 
     private static void progressStage() {
         blockUpdateStage = false;
