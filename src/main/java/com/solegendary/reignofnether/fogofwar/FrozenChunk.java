@@ -49,8 +49,9 @@ public class FrozenChunk {
     public FrozenChunk(BlockPos origin, Building building, FrozenChunk frozenChunkToCopy) {
         this.origin = origin;
         this.building = building;
-        this.blocks = Map.copyOf(frozenChunkToCopy.blocks);
         this.hasFakeBlocks = frozenChunkToCopy.hasFakeBlocks;
+        for (BlockPos pos : frozenChunkToCopy.blocks.keySet())
+            this.blocks.put(pos, frozenChunkToCopy.blocks.get(pos));
         this.unsaved = frozenChunkToCopy.unsaved;
     }
 
@@ -58,6 +59,8 @@ public class FrozenChunk {
     public void saveBlocks() {
         if (MC.level == null)
             return;
+
+        System.out.println("Starting to save blocks at: " + this.origin);
 
         ArrayList<BuildingBlock> bbs = new ArrayList<>();
         for (BuildingBlock bb : building.getBlocks())

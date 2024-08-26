@@ -24,7 +24,9 @@ public class ResourcesServerEvents {
     // tracks all players' resources
     public static ArrayList<Resources> resourcesList = new ArrayList<>();
 
-    public static final int STARTING_FOOD_TUTORIAL = 150;
+    public static final int STARTING_FOOD_TUTORIAL = 600;
+    public static final int STARTING_WOOD_TUTORIAL = 600;
+    public static final int STARTING_ORE_TUTORIAL = 150;
     public static final int STARTING_FOOD = 100;
     public static final int STARTING_WOOD = 400;
     public static final int STARTING_ORE = 150;
@@ -32,12 +34,16 @@ public class ResourcesServerEvents {
     public static void resetResources(String playerName) {
         for (Resources resources : resourcesList) {
             if (resources.ownerName.equals(playerName)) {
-                if (TutorialServerEvents.isEnabled())
+                if (TutorialServerEvents.isEnabled()) {
                     resources.food = STARTING_FOOD_TUTORIAL;
-                else
+                    resources.wood = STARTING_WOOD_TUTORIAL;
+                    resources.ore = STARTING_ORE_TUTORIAL;
+                }
+                else {
                     resources.food = STARTING_FOOD;
-                resources.wood = STARTING_WOOD;
-                resources.ore = STARTING_ORE;
+                    resources.wood = STARTING_WOOD;
+                    resources.ore = STARTING_ORE;
+                }
                 ResourcesClientboundPacket.syncResources(resourcesList);
                 break;
             }

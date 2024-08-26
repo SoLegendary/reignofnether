@@ -397,6 +397,7 @@ public class TutorialClientEvents {
                     TutorialRendering.clearButtonName();
                     specialMsg("Excellent.");
                     OrthoviewClientEvents.unlockCam();
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     nextStageAfterDelay(80);
                 }
             }
@@ -716,7 +717,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 9) {
                     msg("TIP: Units hold up to 100 total resources, but hunting allows you to go above this maximum.");
-                    nextStageAfterDelay(120);
+                    nextStageAfterSpace();
                 }
             }
             case EXPLAIN_BUILDINGS -> {
@@ -876,7 +877,7 @@ public class TutorialClientEvents {
                 else if (stageProgress == 6) {
                     msg("TIP: During an attack, be sure to protect your workers. If a worker dies while holding " +
                         "resources, it is dropped and can be stolen by your enemies!");
-                    nextStageAfterDelay(100);
+                    nextStageAfterDelay(200);
                 }
             }
             case REPAIR_BUILDING -> {
@@ -912,7 +913,7 @@ public class TutorialClientEvents {
                 else if (stageProgress == 3) {
                     msg("TIP: Building health is determined by how many blocks it's made up of. If they have less than " +
                             "half blocks remaining, they are destroyed completely.");
-                    progressStageAfterDelay(160);
+                    progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 4) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTER_BASE_ARMY);
@@ -959,12 +960,12 @@ public class TutorialClientEvents {
                 else if (stageProgress == 5) {
                     msg("TIP: Bridges are always neutral regardless of who built them. This means anyone can attack, " +
                             "repair and connect new segments to them.");
-                    progressStageAfterDelay(160);
+                    progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 6) {
                     msg("TIP: Be very careful when crossing bridges. If it is destroyed while your units are crossing, " +
                         "they will land in the water and be defenceless!");
-                    progressStageAfterDelay(160);
+                    progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 7) {
                     nextStageAfterSpace();
@@ -984,7 +985,7 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 2) {
                     msg("TIP: Only melee units can damage buildings. Iron golems in particular do double damage to them.");
-                    progressStageAfterDelay(140);
+                    progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 3) {
                     for (Building building : BuildingClientEvents.getBuildings()) {

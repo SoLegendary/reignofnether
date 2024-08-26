@@ -8,11 +8,22 @@ TODO bugs/features:
 
 - in first-person camera, dont make semifrozen chunks if they are too far away
 
+- give units smooth block climbing for 1-block-high ledges (horse/ravager move logic)
+- recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
+    - most prevalent in 1v1 melee combat
+
 - brutes dont change movement speed when toggling shield
     - maybe change to slowness debuff instead?
 
-- give units smooth block climbing for 1-block-high ledges (horse move logic)
-- recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
+- do iron golems built by villagers circumvent population?
+
+
+
+- unexploring a frozenchunk causes a crash inside saveBlocks()
+    - overlapping chunks from different buildings?
+        - duplicate FrozenChunk coords?
+
+
 
 
 [FOG OF WAR] playtest checklist:
@@ -28,7 +39,7 @@ TODO bugs/features:
 Balance additions
 -----------------
 - Monsters and Villagers should have a late game ranged sieger
-    - VILLAGERS: Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but the ravager loses its roar ability
+    - VILLAGERS: Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but loses multishot
     - MONSTERS: Wardens can yamato gun buildings
 
 - Piglins should have a mid game melee sieger

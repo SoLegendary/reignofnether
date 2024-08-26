@@ -45,6 +45,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.common.world.ForgeChunkManager;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.*;
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
@@ -649,34 +650,35 @@ public abstract class Building {
     }
 
     public void freezeChunks(String localPlayerName, boolean forceFakeBlocks) {
-        if (level.isClientSide) {
-            if (!ownerName.equals(localPlayerName)) {
-                for (BlockPos bp : getRenderChunkOrigins(true)) {
-                    BlockPos roundedOrigin = bp.offset(
-                            -bp.getX() % 16,
-                            -bp.getY() % 16,
-                            -bp.getZ() % 16
-                    );
-                    if (bp.getX() % 16 != 0 ||
-                            bp.getY() % 16 != 0 ||
-                            bp.getZ() % 16 != 0)
-                        System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + bp);
+        if (!level.isClientSide)
+            return;
+        if (ownerName.equals(localPlayerName))
+            return;
 
-                    System.out.println("Froze chunk at: " + roundedOrigin);
+        for (BlockPos bp : getRenderChunkOrigins(true)) {
+            BlockPos roundedOrigin = bp.offset(
+                    -bp.getX() % 16,
+                    -bp.getY() % 16,
+                    -bp.getZ() % 16
+            );
+            if (bp.getX() % 16 != 0 ||
+                    bp.getY() % 16 != 0 ||
+                    bp.getZ() % 16 != 0)
+                System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + bp);
 
-                    FrozenChunk newFrozenChunk = null;
-                    for (FrozenChunk frozenChunk : FogOfWarClientEvents.frozenChunks) {
-                        if (roundedOrigin.equals(frozenChunk.origin)) {
-                            newFrozenChunk = new FrozenChunk(roundedOrigin, this, frozenChunk);
-                            break;
-                        }
-                    }
-                    if (newFrozenChunk == null)
-                        newFrozenChunk = new FrozenChunk(roundedOrigin, this, forceFakeBlocks);
+            System.out.println("Froze chunk at: " + roundedOrigin);
 
-                    FogOfWarClientEvents.frozenChunks.add(newFrozenChunk);
+            FrozenChunk newFrozenChunk = null;
+            for (FrozenChunk frozenChunk : FogOfWarClientEvents.frozenChunks) {
+                if (roundedOrigin.equals(frozenChunk.origin)) {
+                    newFrozenChunk = new FrozenChunk(roundedOrigin, this, frozenChunk);
+                    break;
                 }
             }
+            if (newFrozenChunk == null)
+                newFrozenChunk = new FrozenChunk(roundedOrigin, this, forceFakeBlocks);
+
+            FogOfWarClientEvents.frozenChunks.add(newFrozenChunk);
         }
     }
 
