@@ -87,7 +87,7 @@ public class FrozenChunk {
                 }
             }
         }
-        System.out.println("completed saved blocks at: " + origin);
+        //System.out.println("completed saved blocks at: " + origin);
 
         hasFakeBlocks = false;
         unsaved = false;
@@ -152,7 +152,7 @@ public class FrozenChunk {
         }
         hasFakeBlocks = true;
         unsaved = false;
-        System.out.println("completed saved (fake) blocks at: " + origin);
+        //System.out.println("completed saved (fake) blocks at: " + origin);
     }
 
     public boolean isPosInside(BlockPos bp) {

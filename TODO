@@ -19,9 +19,28 @@ TODO bugs/features:
 
 
 
-- unexploring a frozenchunk causes a crash inside saveBlocks()
-    - overlapping chunks from different buildings?
-        - duplicate FrozenChunk coords?
+
+- add chat bottom to top right
+- fix foodBeforeHunting (should trigger on food returned not total)
+
+- help is disabled if you click away from your barracks during explanation
+
+- lock time for tutorial entirely
+
+- dont show cracks in resources mining when in fog
+
+regular game
+    - make animal spawns more consistent or spawn on game start
+
+bridges show weird water displacement in fog
+
+minimap still shows physical blocks in fogh until the camera moves
+
+portal blocks cerack when explored
+
+game time on clock
+
+hoglin cavalry upgrade is sent to everybody
 
 
 
@@ -49,6 +68,10 @@ Balance additions
     - ability to toggle between potion types
     - ability to toggle between auto-attack targets (ally or enemy)
 
+- add a tier of farm upgrades to each faction
+    - pumpkins -> carved pumpkins
+    - wheat -> potatoes
+    - red nylium netherwart -> green nylium
 
 New Upgrades
 ------------
