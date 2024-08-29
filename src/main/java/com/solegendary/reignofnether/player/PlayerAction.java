@@ -12,5 +12,6 @@ public enum PlayerAction {
     VICTORY,
     DISABLE_RTS,
     ENABLE_RTS,
-    RESET_RTS
+    RESET_RTS,
+    SYNC_RTS_GAME_TIME
 }

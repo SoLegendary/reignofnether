@@ -26,7 +26,7 @@ public class ResearchBlazeFirewall extends ProductionItem {
         super(building, ResourceCosts.RESEARCH_BLAZE_FIRE_WALL.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchBlazeFirewall.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchBlazeFirewall.itemName);
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchBlazeFirewall.itemName);
             }

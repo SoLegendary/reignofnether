@@ -26,7 +26,7 @@ public class ResearchGolemSmithing extends ProductionItem {
         super(building, ResourceCosts.RESEARCH_GOLEM_SMITHING.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchGolemSmithing.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchGolemSmithing.itemName);
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchGolemSmithing.itemName);
             }

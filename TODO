@@ -2,15 +2,8 @@
 
 TODO bugs/features:
 
-- time set causes desyncs when done with /gamerule dodaynightcycle false
-- workers are not marked as idle until 15s after stopping gathering
-- turning on fog of war causes a crash when optifine is installed
-
 - in first-person camera, dont make semifrozen chunks if they are too far away
-
-- give units smooth block climbing for 1-block-high ledges (horse/ravager move logic)
-- recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
-    - most prevalent in 1v1 melee combat
+    - unless its a frozenChunk
 
 - brutes dont change movement speed when toggling shield
     - maybe change to slowness debuff instead?
@@ -19,28 +12,23 @@ TODO bugs/features:
 
 
 
-
-- add chat bottom to top right
-- fix foodBeforeHunting (should trigger on food returned not total)
+- add chat button to top right
 
 - help is disabled if you click away from your barracks during explanation
 
 - lock time for tutorial entirely
 
-- dont show cracks in resources mining when in fog
-
 regular game
     - make animal spawns more consistent or spawn on game start
 
-bridges show weird water displacement in fog
 
-minimap still shows physical blocks in fogh until the camera moves
 
-portal blocks cerack when explored
-
-game time on clock
-
-hoglin cavalry upgrade is sent to everybody
+test:
+    - fix foodBeforeHunting (should trigger on food returned not total)
+    - bridges show weird water displacement in fog
+    - game time on clocks
+    - research should only be given to the owner
+    - dont show cracks in resources mining when in fog
 
 
 
@@ -73,6 +61,12 @@ Balance additions
     - wheat -> potatoes
     - red nylium netherwart -> green nylium
 
+- give units smooth block climbing for 1-block-high ledges (horse/ravager move logic)
+- recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
+    - most prevalent in 1v1 melee combat
+
+
+
 New Upgrades
 ------------
 MONSTERS: Upgrade for watchtowers to come with a shulker in the centre
@@ -88,6 +82,15 @@ PIGLINS: Magma cubes (research make melee attacks set enemies on fire)
 VILLAGERS: Illusioner - hallucination ability, targeted invisibility (research unlocks second ability)
     - comes from new supplementary building ala-library
 
+
+
+Bugs backlog
+------------
+- time set causes desyncs when done with /gamerule dodaynightcycle false
+- workers are not marked as idle until 15s after stopping gathering
+- turning on fog of war causes a crash when optifine is installed
+- portal blocks crack when explored (because of updating fake frozen blocks)
+- minimap still shows physical blocks in fog until the camera moves (and replaces them with fake frozen blocks)
 
 
 TODO vanilla player balancing/interaction (backlog)

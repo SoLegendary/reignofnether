@@ -710,10 +710,22 @@ public class TutorialClientEvents {
                     setHelpButtonText("Select your villager that hunted the pig and RIGHT-CLICK your Town Centre.");
                     progressStage();
                 }
-                else if (stageProgress == 8 && ResourcesClientEvents.getOwnResources().food >= foodBeforeHunting + 50) {
-                    specialMsg("Excellent.");
-                    clearHelpButtonText();
-                    progressStageAfterDelay(80);
+                else if (stageProgress == 8) {
+                    int villagersHoldingFood = 0;
+                    for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+                        if (entity instanceof VillagerUnit villager) {
+                            for (ItemStack itemStack : villager.getItems()) {
+                                Resources res = Resources.getTotalResourcesFromItems(List.of(itemStack));
+                                if (res.food > 0)
+                                    villagersHoldingFood += 1;
+                            }
+                        }
+                    }
+                    if (villagersHoldingFood == 0) {
+                        specialMsg("Excellent.");
+                        clearHelpButtonText();
+                        progressStageAfterDelay(80);
+                    }
                 }
                 else if (stageProgress == 9) {
                     msg("TIP: Units hold up to 100 total resources, but hunting allows you to go above this maximum.");
@@ -753,7 +765,6 @@ public class TutorialClientEvents {
             }
             case BUILD_BASE -> {
                 if (stageProgress == 0) {
-
                     TutorialRendering.clearButtonName();
                     msg("Let's take some time to check out a few of these buildings.");
                     progressStageAfterDelay(120);

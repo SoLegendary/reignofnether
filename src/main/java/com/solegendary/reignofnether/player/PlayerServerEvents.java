@@ -53,6 +53,8 @@ public class PlayerServerEvents {
 
     public static final int TICKS_TO_REVEAL = 60 * ResourceCost.TICKS_PER_SECOND;
 
+    public static long rtsGameTicks = 0; // ticks up as long as there is at least 1 rtsPlayer
+
     // warpten - faster building/unit production
     // operationcwal - faster resource gathering
     // modifythephasevariance - ignore building requirements
@@ -156,12 +158,24 @@ public class PlayerServerEvents {
         return false;
     }
 
+    public static boolean isGameActive() {
+        return !rtsPlayers.isEmpty();
+    }
+
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
         synchronized (rtsPlayers) {
-            if (evt.phase == TickEvent.Phase.END)
+            if (evt.phase == TickEvent.Phase.END) {
                 for (RTSPlayer rtsPlayer : rtsPlayers)
                     rtsPlayer.tick();
+                if (rtsPlayers.isEmpty()) {
+                    rtsGameTicks = 0;
+                } else {
+                    rtsGameTicks += 1;
+                    if (rtsGameTicks % 200 == 0)
+                        PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
+                }
+            }
         }
     }
 

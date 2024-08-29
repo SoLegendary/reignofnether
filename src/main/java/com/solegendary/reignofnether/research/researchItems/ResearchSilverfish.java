@@ -31,7 +31,7 @@ public class ResearchSilverfish extends ProductionItem {
         super(building, ResourceCosts.RESEARCH_SILVERFISH.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchSilverfish.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchSilverfish.itemName);
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchSilverfish.itemName);
             }

@@ -27,7 +27,7 @@ public class ResearchVindicatorAxes extends ProductionItem {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchVindicatorAxes.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchVindicatorAxes.itemName);
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchVindicatorAxes.itemName);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())

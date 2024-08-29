@@ -67,7 +67,7 @@ public class ResearchClientboundPacket {
                                     ResearchClient.removeCheat(this.itemName);
                             } else {
                                 if (add)
-                                    ResearchClient.addResearch(this.itemName);
+                                    ResearchClient.addResearch(this.playerName, this.itemName);
                             }
                         }
                         success.set(true);

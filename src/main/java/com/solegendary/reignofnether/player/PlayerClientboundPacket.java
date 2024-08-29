@@ -21,45 +21,54 @@ public class PlayerClientboundPacket {
 
     PlayerAction playerAction;
     String playerName;
+    Long rtsGameTime;
 
     public static void enableRTSStatus(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.ENABLE_RTS, playerName));
+                new PlayerClientboundPacket(PlayerAction.ENABLE_RTS, playerName, 0L));
     }
 
     public static void disableRTSStatus(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.DISABLE_RTS, playerName));
+                new PlayerClientboundPacket(PlayerAction.DISABLE_RTS, playerName, 0L));
     }
 
     public static void defeat(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.DEFEAT, playerName));
+                new PlayerClientboundPacket(PlayerAction.DEFEAT, playerName, 0L));
     }
 
     public static void victory(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.VICTORY, playerName));
+                new PlayerClientboundPacket(PlayerAction.VICTORY, playerName, 0L));
     }
 
     public static void resetRTS() {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.RESET_RTS, ""));
+                new PlayerClientboundPacket(PlayerAction.RESET_RTS, "", 0L));
     }
 
-    public PlayerClientboundPacket(PlayerAction playerAction, String playerName) {
+    public static void syncRtsGameTime(Long rtsGameTicks) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.RESET_RTS, "", rtsGameTicks));
+    }
+
+    public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long rtsGameTime) {
         this.playerAction = playerAction;
         this.playerName = playerName;
+        this.rtsGameTime = rtsGameTime;
     }
 
     public PlayerClientboundPacket(FriendlyByteBuf buffer) {
         this.playerAction = buffer.readEnum(PlayerAction.class);
         this.playerName = buffer.readUtf();
+        this.rtsGameTime = buffer.readLong();
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(this.playerAction);
         buffer.writeUtf(this.playerName);
+        buffer.writeLong(this.rtsGameTime);
     }
 
     // server-side packet-consuming functions
@@ -75,6 +84,7 @@ public class PlayerClientboundPacket {
                             case DISABLE_RTS -> PlayerClientEvents.disableRTS(playerName);
                             case ENABLE_RTS -> PlayerClientEvents.enableRTS(playerName);
                             case RESET_RTS -> PlayerClientEvents.resetRTS();
+                            case SYNC_RTS_GAME_TIME -> PlayerClientEvents.syncRtsGameTime(rtsGameTime);
                         }
                         success.set(true);
                     });

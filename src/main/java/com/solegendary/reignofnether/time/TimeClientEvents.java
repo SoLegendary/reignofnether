@@ -2,6 +2,8 @@ package com.solegendary.reignofnether.time;
 
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -28,6 +30,8 @@ public class TimeClientEvents {
     public static long targetClientTime = 0;
     // actual time on the server
     public static long serverTime = 0;
+
+
 
     // ensures a time value is between 0 and 24000
     public static long normaliseTime(long time) {
@@ -61,6 +65,17 @@ public class TimeClientEvents {
 
         // there's 1200 real time seconds per MC day (24000 units)
         int sec = (int) Math.round(timeDiff / 20d);
+        int min = sec / 60;
+        sec -= (min * 60);
+
+        if (min == 0)
+            return sec + "s";
+        return min + "m" + sec + "s";
+    }
+
+    // get a string representing real time in min/sec until the given time
+    private static String getTimeStrFromTicks(long ticks) {
+        int sec = (int) Math.round(ticks / 20d);
         int min = sec / 60;
         sec -= (min * 60);
 
@@ -104,6 +119,12 @@ public class TimeClientEvents {
 
             FormattedCharSequence timeUntilStr = FormattedCharSequence.forward(
                     getTimeUntilStr(serverTime, isDay ? DUSK : DAWN) + " until " + (isDay ? "night" : "day"), Style.EMPTY);
+
+            FormattedCharSequence gameLength = FormattedCharSequence.forward("", Style.EMPTY);
+
+            if (PlayerClientEvents.isRTSPlayer)
+                gameLength = FormattedCharSequence.forward(getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks), Style.EMPTY);
+
 
             List<FormattedCharSequence> tooltip = List.of(
                     FormattedCharSequence.forward("Time: " + timeStr, Style.EMPTY),

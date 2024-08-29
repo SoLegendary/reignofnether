@@ -29,7 +29,7 @@ public class ResearchPillagerCrossbows extends ProductionItem {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchPillagerCrossbows.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchPillagerCrossbows.itemName);
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchPillagerCrossbows.itemName);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())

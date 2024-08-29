@@ -76,7 +76,7 @@ public class FrozenChunk {
 
                     for (BuildingBlock bb : bbs) {
                         if (bb.getBlockPos().equals(bp)) {
-                            if (building instanceof AbstractBridge)
+                            if (building instanceof AbstractBridge && bb.getBlockPos().getY() == 0)
                                 saveBlock(bb.getBlockPos(), Blocks.WATER.defaultBlockState(), bbs);
                             else
                                 saveBlock(bb.getBlockPos(), Blocks.AIR.defaultBlockState(), bbs);

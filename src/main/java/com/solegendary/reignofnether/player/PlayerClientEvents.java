@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -22,6 +23,8 @@ import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.s
 public class PlayerClientEvents {
 
     public static boolean isRTSPlayer = false;
+
+    public static long rtsGameTicks = 0;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -130,6 +133,16 @@ public class PlayerClientEvents {
         // LOG IN TO SERVER WORLD ONLY
         if (MC.player != null && evt.getPlayer().getId() == MC.player.getId())
             FogOfWarClientEvents.updateFogChunks();
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (evt.phase == TickEvent.Phase.END)
+            rtsGameTicks += 1;
+    }
+
+    public static void syncRtsGameTime(Long gameTicks) {
+        rtsGameTicks = gameTicks;
     }
 
     public static void resetRTS() {

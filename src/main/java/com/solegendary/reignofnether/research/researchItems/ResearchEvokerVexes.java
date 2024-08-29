@@ -26,7 +26,7 @@ public class ResearchEvokerVexes extends ProductionItem {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchEvokerVexes.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchEvokerVexes.itemName);
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchEvokerVexes.itemName);
             }
