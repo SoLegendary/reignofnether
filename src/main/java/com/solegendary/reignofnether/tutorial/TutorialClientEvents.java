@@ -296,12 +296,12 @@ public class TutorialClientEvents {
                     OrthoviewClientEvents.lockCam();
                     msg("Welcome to RTS view. Instead of the usual first-person minecraft camera, " +
                         "here we can view the world from a top-down perspective.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
                     msg("TIP: If you want to see any of these messages again, opening chat " +
                         "has been changed to the ENTER key.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 2) {
                     msg("If at any point you're lost or need a reminder on what to do next, click the button at the " +
@@ -311,7 +311,7 @@ public class TutorialClientEvents {
                     progressStage();
                 }
                 else if (stageProgress == 3 && helpButtonClicks > 0) {
-                    nextStageAfterDelay(100);
+                    nextStageAfterDelay(120);
                 }
             }
             case PAN_CAMERA -> {
@@ -324,18 +324,18 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 1 && pannedUp && pannedDown && pannedLeft && pannedRight) {
                     specialMsg("Nicely done.");
-                    nextStageAfterDelay(80);
+                    nextStageAfterDelay(100);
                 }
             }
             case CAMERA_TIPS -> {
                 if (stageProgress == 0) {
-                    msg("You can also move it in the same way with the arrow keys.");
-                    progressStageAfterDelay(100);
+                    msg("TIP: You can also move the camera with arrow keys.");
+                    progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 1) {
-                    msg("You can also zoom the camera with ALT+SCROLL and rotate it with " +
+                    msg("TIP: You can zoom the camera with ALT+SCROLL and rotate it with " +
                         "ALT+RIGHT-CLICK.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 2) {
                     nextStageAfterSpace();
@@ -345,7 +345,7 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     msg("Since you could get lost with a top-down view like this, here's a minimap " +
                         "for you to help navigate.");
-                    progressStageAfterDelay(120);
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
                     clickedMinimap = false;
@@ -356,18 +356,18 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 2 && clickedMinimap) {
                     specialMsg("Good work!");
-                    nextStageAfterDelay(80);
+                    nextStageAfterDelay(100);
                 }
             }
             case MINIMAP_TIPS -> {
                 if (stageProgress == 0) {
                     msg("If you need to move really far away, you can also SHIFT+CLICK " +
                         "to recentre the map on that location.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
-                    msg("You can also press M or click the bottom right button to expand the map.");
-                    progressStageAfterDelay(100);
+                    msg("TIP: Press M or click the bottom right button to expand the map.");
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 2) {
                     nextStageAfterSpace();
@@ -376,12 +376,12 @@ public class TutorialClientEvents {
             case PLACE_WORKERS_A -> {
                 if (stageProgress == 0) {
                     msg("It's time to start playing with some units.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 } else if (stageProgress == 1) {
                     msg("Let's get started by spawning in some villagers here.");
                     OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 50);
                     OrthoviewClientEvents.lockCam();
-                    nextStageAfterDelay(80);
+                    nextStageAfterDelay(100);
                 }
             }
             case PLACE_WORKERS_B -> {
@@ -398,14 +398,14 @@ public class TutorialClientEvents {
                     specialMsg("Excellent.");
                     OrthoviewClientEvents.unlockCam();
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    nextStageAfterDelay(80);
+                    nextStageAfterDelay(100);
                 }
             }
             case SELECT_UNIT -> {
                 if (stageProgress == 0) {
                     msg("Villagers are your worker units who can build and gather resources " +
                         "and are essential to starting and maintaining a good base.");
-                    progressStageAfterDelay(140);
+                    progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
                     msg("Try selecting one with LEFT-CLICK.");
@@ -428,14 +428,14 @@ public class TutorialClientEvents {
                     MoveToTargetBlockGoal goal = unit.getMoveGoal();
                     if (goal != null && goal.getMoveTarget() != null) {
                         specialMsg("Nice work.");
-                        nextStageAfterDelay(80);
+                        nextStageAfterDelay(100);
                     }
                 }
             }
             case BOX_SELECT_UNITS -> {
                 if (stageProgress == 0) {
                     msg("Now let's try selecting a group of villagers.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
                     msg("To do this, hold LEFT-CLICK and DRAG your mouse across them, then release to select.");
@@ -458,22 +458,22 @@ public class TutorialClientEvents {
                     MoveToTargetBlockGoal goal = unit.getMoveGoal();
                     if (goal != null && goal.getMoveTarget() != null) {
                         specialMsg("Great job!");
-                        nextStageAfterDelay(80);
+                        nextStageAfterDelay(100);
                     }
                 }
             }
             case UNIT_TIPS -> {
                 if (stageProgress == 0) {
                     msg("TIP: You can also double click a unit to select all units of the same type.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 1) {
                     msg("TIP: If you want to deselect your units, press the tilde (~) key");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 2) {
                     msg("TIP: For you RTS fans, control grouping with CTRL+NUM is also a feature.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 3) {
                     nextStageAfterSpace();
@@ -482,22 +482,22 @@ public class TutorialClientEvents {
             case BUILD_INTRO -> {
                 if (stageProgress == 0) {
                     msg("It's time to start your base.");
-                    progressStageAfterDelay(60);
+                    progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 1) {
                     msg("The first and most important building of any base is always the capitol.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 2) {
                     msg("This looks like a good spot for it, being flat ground, near lots of resources and with " +
                         "plenty of space around it for other buildings.");
                     OrthoviewClientEvents.forceMoveCam(BUILD_POS, 50);
-                    progressStageAfterDelay(160);
+                    progressStageAfterDelay(180);
                 }
                 else if (stageProgress == 3) {
                     msg("Note that building takes resources. Luckily, the TOP-LEFT shows we have more than enough " +
                         "WOOD and ORE needed.");
-                    nextStageAfterDelay(120);
+                    nextStageAfterDelay(1240);
                 }
             }
             case BUILD_TOWN_CENTRE -> {
@@ -529,18 +529,18 @@ public class TutorialClientEvents {
                 else if (stageProgress == 2 && BuildingClientEvents.getBuildings().size() > 0) {
                     if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre townCentre && townCentre.isBuilt) {
                         specialMsg("Congratulations, you now have a base set up!");
-                        nextStageAfterDelay(80);
+                        nextStageAfterDelay(100);
                     }
                 }
             } //msg("You can also set a rally point for your building with RIGHT-CLICK.");
             case TRAIN_WORKER -> {
                 if (stageProgress == 0) {
                     msg("Capitols like the Town Centre are the only building that can produce workers like villagers.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
                     msg("Note that producing workers takes 50 FOOD each. We should have enough resources for 3 of them.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 2) {
                     msg("LEFT-CLICK to select your Town Centre, RIGHT-CLICK to set a rally point - units will " +
@@ -570,11 +570,11 @@ public class TutorialClientEvents {
                     specialMsg("Nice work. Workers are vital for a healthy base!");
                     clearHelpButtonText();
                     TutorialRendering.clearButtonName();
-                    progressStageAfterDelay(80);
+                    progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 6) {
                     msg("TIP: you can cancel any in-progress units for a full refund by clicking their icon at the bottom.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 7) {
                     nextStageAfterSpace();
@@ -583,12 +583,12 @@ public class TutorialClientEvents {
             case GATHER_WOOD -> {
                 if (stageProgress == 0) {
                     msg("Now that we have a bunch of workers, we can start gathering some resources.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
                     msg("There's a forest over here that we can get wood from.");
                     OrthoviewClientEvents.forceMoveCam(WOOD_POS, 100);
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 2) {
                     msg("To gather a resource, select a worker, then RIGHT-CLICK a tree.");
@@ -602,25 +602,25 @@ public class TutorialClientEvents {
                                 villager.getGatherResourceGoal().getTargetResourceName() == ResourceName.WOOD) {
                             specialMsg("Well done.");
                             clearHelpButtonText();
-                            progressStageAfterDelay(80);
+                            progressStageAfterDelay(100);
                         }
                     }
                 }
                 else if (stageProgress == 4) {
                     msg("TIP: Workers keep gathering until told to do something else. " +
                             "Once they have at least 50 total resources they return it to the town centre.");
-                    nextStageAfterDelay(100);
+                    nextStageAfterDelay(160);
                 }
             }
             case GATHER_ORE -> {
                 if (stageProgress == 0) {
                     msg("Now let's do the same thing for ore.");
-                    progressStageAfterDelay(80);
+                    progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 1) {
                     msg("Here's a beach with coal and iron we can get ore from.");
                     OrthoviewClientEvents.forceMoveCam(ORE_POS, 50);
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 2) {
                     msg("Select a worker, then RIGHT-CLICK an ore block.");
@@ -634,32 +634,32 @@ public class TutorialClientEvents {
                             villager.getGatherResourceGoal().getTargetResourceName() == ResourceName.ORE) {
                             specialMsg("Well done.");
                             clearHelpButtonText();
-                            progressStageAfterDelay(80);
+                            progressStageAfterDelay(100);
                         }
                     }
                 }
                 else if (stageProgress == 4) {
                     msg("TIP: Sandy biomes like deserts and beaches have more and better ores.");
-                    nextStageAfterDelay(100);
+                    nextStageAfterDelay(120);
                 }
             }
             case HUNT_ANIMALS -> {
                 if (stageProgress == 0) {
                     msg("While your other workers are busy on wood and ore, let's find some food.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
                     foodBeforeHunting = ResourcesClientEvents.getOwnResources().food;
                     OrthoviewClientEvents.forceMoveCam(FOOD_POS, 50);
                     TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_ANIMALS);
                     msg("Here are some pigs that you can hunt for food.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 2) {
                     msg("Just like wood and ore, select a worker and RIGHT-CLICK an animal to start hunting it.");
                     setHelpButtonText("Select any villager, then RIGHT-CLICK an animal and wait for it to be killed." +
                                         "Make sure that villager doesn't already have a full inventory.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(180);
                 }
                 else if (stageProgress == 3) {
                     msg("Make sure your worker isn't holding any other resources!");
@@ -697,7 +697,7 @@ public class TutorialClientEvents {
                                 if (res.food >= 100) {
                                     specialMsg("Great work!");
                                     clearHelpButtonText();
-                                    progressStageAfterDelay(80);
+                                    progressStageAfterDelay(100);
                                     break;
                                 }
                             }
@@ -724,7 +724,7 @@ public class TutorialClientEvents {
                     if (villagersHoldingFood == 0) {
                         specialMsg("Excellent.");
                         clearHelpButtonText();
-                        progressStageAfterDelay(80);
+                        progressStageAfterDelay(100);
                     }
                 }
                 else if (stageProgress == 9) {
@@ -779,7 +779,7 @@ public class TutorialClientEvents {
                     for (Building building : BuildingClientEvents.getBuildings()) {
                         if (building instanceof Barracks barracks && barracks.isBuilt) {
                             specialMsg("Great job.");
-                            nextStageAfterDelay(80);
+                            nextStageAfterDelay(100);
                         }
                     }
                 }
@@ -821,7 +821,7 @@ public class TutorialClientEvents {
                             armyCount += 1;
                     if (armyCount >= 3) {
                         specialMsg("Awesome!");
-                        progressStageAfterDelay(80);
+                        progressStageAfterDelay(100);
                         TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTER_WORKERS);
                     }
                 }
@@ -841,17 +841,20 @@ public class TutorialClientEvents {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_NIGHT_TIME);
                     TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTERS_A);
                     OrthoviewClientEvents.forceMoveCam(MONSTER_CAMERA_POS, 50);
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(120);
                 }
-                else if (stageProgress == 1) {
+                if (stageProgress == 0) {
                     setHelpButtonText("With your units selected, RIGHT-CLICK an enemy to attack them. " +
                             "Units will also automatically attack nearby enemies if they are idle.");
                     msg("With your units selected, RIGHT-CLICK an enemy to attack them. " +
                             "Units will also automatically attack nearby enemies if they are idle.");
+                    progressStageAfterDelay(160);
+                }
+                else if (stageProgress == 2) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.ATTACK_WITH_MONSTERS_A);
                     progressStage();
                 }
-                else if (stageProgress == 2) {
+                else if (stageProgress == 3) {
                     if (UnitClientEvents.getAllUnits().stream().filter(
                             u -> u instanceof PillagerUnit || u instanceof VindicatorUnit)
                             .toList().isEmpty()) {
@@ -863,20 +866,20 @@ public class TutorialClientEvents {
                         msg("Watch out! More monsters incoming!");
                         TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTERS_B);
                         OrthoviewClientEvents.forceMoveCam(MONSTER_CAMERA_POS, 50);
-                        progressStageAfterDelay(40);
+                        progressStageAfterDelay(100);
                     }
                 }
-                else if (stageProgress == 3) {
+                else if (stageProgress == 4) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.ATTACK_WITH_MONSTERS_B);
                     progressStageAfterDelay(200);
                 }
-                else if (stageProgress == 4) {
+                else if (stageProgress == 5) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.EXPAND_MONSTER_BASE_A);
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     specialMsg("Dawn breaks!");
                     progressStage();
                 }
-                else if (stageProgress == 5) {
+                else if (stageProgress == 6) {
                     if (UnitClientEvents.getAllUnits().stream().filter(
                                     u -> u instanceof ZombieUnit || u instanceof SkeletonUnit)
                             .toList().isEmpty()) {
@@ -885,7 +888,7 @@ public class TutorialClientEvents {
                         progressStageAfterDelay(100);
                     }
                 }
-                else if (stageProgress == 6) {
+                else if (stageProgress == 7) {
                     msg("TIP: During an attack, be sure to protect your workers. If a worker dies while holding " +
                         "resources, it is dropped and can be stolen by your enemies!");
                     nextStageAfterDelay(200);
@@ -916,7 +919,7 @@ public class TutorialClientEvents {
                         if (building.getHealth() >= building.getMaxHealth()) {
                             specialMsg("Good job!");
                             clearHelpButtonText();
-                            progressStageAfterDelay(80);
+                            progressStageAfterDelay(100);
                             break;
                         }
                     }
@@ -963,7 +966,7 @@ public class TutorialClientEvents {
                     for (Building building : BuildingClientEvents.getBuildings()) {
                         if (building instanceof OakBridge bridge && bridge.isBuilt) {
                             specialMsg("Nice job.");
-                            progressStageAfterDelay(80);
+                            progressStageAfterDelay(100);
                             break;
                         }
                     }

@@ -120,21 +120,22 @@ public class TimeClientEvents {
             FormattedCharSequence timeUntilStr = FormattedCharSequence.forward(
                     getTimeUntilStr(serverTime, isDay ? DUSK : DAWN) + " until " + (isDay ? "night" : "day"), Style.EMPTY);
 
-            FormattedCharSequence gameLength = FormattedCharSequence.forward("", Style.EMPTY);
+            FormattedCharSequence gameLengthStr = FormattedCharSequence.forward("", Style.EMPTY);
 
             if (PlayerClientEvents.isRTSPlayer)
-                gameLength = FormattedCharSequence.forward(getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks), Style.EMPTY);
-
+                gameLengthStr = FormattedCharSequence.forward("Game time: " + getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks), Style.EMPTY);
 
             List<FormattedCharSequence> tooltip = List.of(
                     FormattedCharSequence.forward("Time: " + timeStr, Style.EMPTY),
-                    timeUntilStr
+                    timeUntilStr,
+                    gameLengthStr
             );
             if (targetClientTime != serverTime)
                 tooltip = List.of(
                     FormattedCharSequence.forward("Time is distorted to midnight", Style.EMPTY.withBold(true)),
                     FormattedCharSequence.forward("Real time: " + timeStr, Style.EMPTY),
-                    timeUntilStr
+                    timeUntilStr,
+                        gameLengthStr
                 );
 
             MyRenderer.renderTooltip(

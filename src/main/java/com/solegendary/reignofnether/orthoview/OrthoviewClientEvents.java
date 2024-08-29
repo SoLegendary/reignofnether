@@ -341,16 +341,17 @@ public class OrthoviewClientEvents {
 
         float panKeyStep = 1.5f * (getZoom() / ZOOM_MAX);
 
-        // pan camera with keys
-        if (Keybindings.panPlusX.isDown())
-            panCam(panKeyStep,0,0);
-        else if (Keybindings.panMinusX.isDown())
-            panCam(-panKeyStep,0,0);
-        if (Keybindings.panPlusZ.isDown())
-            panCam(0,0,panKeyStep);
-        else if (Keybindings.panMinusZ.isDown())
-            panCam(0,0,-panKeyStep);
-
+        if (!isCameraLocked()) {
+            // pan camera with keys
+            if (Keybindings.panPlusX.isDown())
+                panCam(panKeyStep,0,0);
+            else if (Keybindings.panMinusX.isDown())
+                panCam(-panKeyStep,0,0);
+            if (Keybindings.panPlusZ.isDown())
+                panCam(0,0,panKeyStep);
+            else if (Keybindings.panMinusZ.isDown())
+                panCam(0,0,-panKeyStep);
+        }
         // note that we treat x and y rot as horizontal and vertical, but MC treats it the other way around...
         if (player != null) {
             player.setXRot(-camRotY - camRotAdjY);

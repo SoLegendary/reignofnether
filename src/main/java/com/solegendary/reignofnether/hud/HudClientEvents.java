@@ -822,7 +822,7 @@ public class HudClientEvents {
                     List.of(FormattedCharSequence.forward("Idle workers", Style.EMPTY))
             );
             int xi = screenWidth - (idleButton.iconSize * 2);
-            int yi = screenHeight - 200;
+            int yi = 100;
 
             idleButton.render(evt.getPoseStack(), xi, yi, mouseX, mouseY);
             GuiComponent.drawString(evt.getPoseStack(), MC.font, String.valueOf(idleWorkerIds.size()),
@@ -855,7 +855,7 @@ public class HudClientEvents {
                     List.of(FormattedCharSequence.forward("Select all military units", Style.EMPTY))
             );
             int xi = screenWidth - (armyButton.iconSize * 2);
-            int yi = screenHeight - 230;
+            int yi = 130;
 
             armyButton.render(evt.getPoseStack(), xi, yi, mouseX, mouseY);
 
@@ -913,11 +913,36 @@ public class HudClientEvents {
         }
         if (TutorialClientEvents.isEnabled()) {
             TutorialClientEvents.helpButton.render(evt.getPoseStack(),
-                    screenWidth - (TutorialClientEvents.helpButton.iconSize * 2),
-                    TutorialClientEvents.helpButton.iconSize / 2,
+                    screenWidth - 28,
+                    40,
                     mouseX, mouseY);
             renderedButtons.add(TutorialClientEvents.helpButton);
         }
+
+        // -----------
+        // Chat button
+        // -----------
+        Button chatButton = new Button(
+                "Chat",
+                iconSize,
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/book.png"),
+                (Keybinding) null,
+                () -> false,
+                () -> true,
+                () -> true,
+                () -> {
+                    MC.setScreen(new ChatScreen(""));
+                },
+                null,
+                List.of(FormattedCharSequence.forward("Chat (enter)", Style.EMPTY))
+        );
+        int xi = screenWidth - (chatButton.iconSize * 2);
+        int yi = 70;
+
+        chatButton.render(evt.getPoseStack(), xi, yi, mouseX, mouseY);
+
+        renderedButtons.add(chatButton);
+
         // ------------------------------------------------------
         // Button tooltips (has to be rendered last to be on top)
         // ------------------------------------------------------
@@ -1058,7 +1083,6 @@ public class HudClientEvents {
             if (Keybindings.ctrlMod.isDown() && evt.getKeyCode() == keybinding.key)
                 controlGroups.get(index).saveFromSelected(keybinding);
         }
-
         // open chat while orthoview is enabled
         if (OrthoviewClientEvents.isEnabled() && evt.getKeyCode() == Keybindings.chat.key) {
             MC.setScreen(new ChatScreen(""));

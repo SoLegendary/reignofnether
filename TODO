@@ -8,11 +8,9 @@ TODO bugs/features:
 - brutes dont change movement speed when toggling shield
     - maybe change to slowness debuff instead?
 
-- do iron golems built by villagers circumvent population?
 
 
 
-- add chat button to top right
 
 - help is disabled if you click away from your barracks during explanation
 
@@ -22,11 +20,10 @@ regular game
     - make animal spawns more consistent or spawn on game start
 
 
-
 test:
+    - iron golems built by villagers circumvent population caps
     - fix foodBeforeHunting (should trigger on food returned not total)
     - bridges show weird water displacement in fog
-    - game time on clocks
     - research should only be given to the owner
     - dont show cracks in resources mining when in fog
 

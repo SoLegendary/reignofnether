@@ -3,12 +3,14 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
@@ -64,6 +66,25 @@ public class BuildingServerEvents {
             }
 
         if (newBuilding != null && !buildingExists) {
+
+            // special check for iron golem buildings
+            if (newBuilding instanceof IronGolemBuilding) {
+                int currentPop = UnitServerEvents.getCurrentPopulation(serverLevel, ownerName);
+                int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
+
+                boolean canAffordPop = false;
+                for (Resources resources : ResourcesServerEvents.resourcesList) {
+                    if (resources.ownerName.equals(ownerName)) {
+                        canAffordPop = (currentPop + ResourceCosts.IRON_GOLEM.population) > popSupply;
+                        break;
+                    }
+                }
+                if (!canAffordPop) {
+                    ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
+                    return;
+                }
+            }
+
             if (newBuilding.canAfford(ownerName)) {
                 buildings.add(newBuilding);
                 newBuilding.forceChunk(true);

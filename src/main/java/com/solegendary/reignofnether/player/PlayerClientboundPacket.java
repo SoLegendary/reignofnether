@@ -50,7 +50,7 @@ public class PlayerClientboundPacket {
 
     public static void syncRtsGameTime(Long rtsGameTicks) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.RESET_RTS, "", rtsGameTicks));
+                new PlayerClientboundPacket(PlayerAction.SYNC_RTS_GAME_TIME, "", rtsGameTicks));
     }
 
     public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long rtsGameTime) {

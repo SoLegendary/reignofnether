@@ -284,6 +284,7 @@ public class PlayerServerEvents {
                 sendMessageToAllPlayers(playerName + " has started their game!", true);
                 sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
             }
+            PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
         }
     }
 
