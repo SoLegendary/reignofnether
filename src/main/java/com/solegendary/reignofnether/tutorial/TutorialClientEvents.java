@@ -65,7 +65,6 @@ public class TutorialClientEvents {
     public static boolean pannedRight = false;
     public static boolean clickedMinimap = false;
 
-    private static int foodBeforeHunting = 0;
     private static final ArrayList<Building> damagedBuildings = new ArrayList<>();
 
     // all these positions are for camera only, actual spawn locations differ slightly on the serverside
@@ -140,6 +139,7 @@ public class TutorialClientEvents {
         stageProgress = 0;
         blockUpdateStage = false;
         clearHelpButtonText();
+        TutorialRendering.clearButtonName();
         updateStage();
         shouldPauseTicking = () -> false;
     }
@@ -149,6 +149,7 @@ public class TutorialClientEvents {
         stageProgress = 0;
         blockUpdateStage = false;
         clearHelpButtonText();
+        TutorialRendering.clearButtonName();
         updateStage();
         shouldPauseTicking = () -> false;
     }
@@ -261,12 +262,14 @@ public class TutorialClientEvents {
         blockUpdateStage = true;
         ticksToNextStage = delay;
         clearHelpButtonText();
+        TutorialRendering.clearButtonName();
     }
 
     private static void nextStageAfterSpace() {
         blockUpdateStage = true;
         msg("Press SPACE when you're ready to continue.", true, CHAT);
         setHelpButtonText("Press SPACE when you're ready to continue.");
+        TutorialRendering.clearButtonName();
         pressSpaceToContinue = true;
     }
 
@@ -293,14 +296,14 @@ public class TutorialClientEvents {
         switch(tutorialStage) {
             case INTRO -> {
                 if (stageProgress == 0 && OrthoviewClientEvents.isEnabled()) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     OrthoviewClientEvents.lockCam();
                     msg("Welcome to RTS view. Instead of the usual first-person minecraft camera, " +
                         "here we can view the world from a top-down perspective.");
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
-                    msg("TIP: If you want to see any of these messages again, opening chat " +
-                        "has been changed to the ENTER key.");
+                    msg("TIP: If you want to see any of these messages again, open chat with ENTER or the button on the right.");
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 2) {
@@ -316,6 +319,7 @@ public class TutorialClientEvents {
             }
             case PAN_CAMERA -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     OrthoviewClientEvents.unlockCam();
                     msg("To move your camera, move your mouse to the edges of the screen. Try it now.");
                     setHelpButtonText("Move your mouse to each edge of your screen until the camera starts moving, " +
@@ -329,6 +333,7 @@ public class TutorialClientEvents {
             }
             case CAMERA_TIPS -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("TIP: You can also move the camera with arrow keys.");
                     progressStageAfterDelay(140);
                 }
@@ -343,6 +348,7 @@ public class TutorialClientEvents {
             }
             case MINIMAP_CLICK -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("Since you could get lost with a top-down view like this, here's a minimap " +
                         "for you to help navigate.");
                     progressStageAfterDelay(160);
@@ -361,6 +367,7 @@ public class TutorialClientEvents {
             }
             case MINIMAP_TIPS -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("If you need to move really far away, you can also SHIFT+CLICK " +
                         "to recentre the map on that location.");
                     progressStageAfterDelay(160);
@@ -375,6 +382,7 @@ public class TutorialClientEvents {
             }
             case PLACE_WORKERS_A -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("It's time to start playing with some units.");
                     progressStageAfterDelay(120);
                 } else if (stageProgress == 1) {
@@ -386,6 +394,7 @@ public class TutorialClientEvents {
             }
             case PLACE_WORKERS_B -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("Click the button at the top right and then click on the ground where " +
                         "you want to place them.");
                     setHelpButtonText("Click the button at the top right and then click on the ground where " +
@@ -403,6 +412,7 @@ public class TutorialClientEvents {
             }
             case SELECT_UNIT -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("Villagers are your worker units who can build and gather resources " +
                         "and are essential to starting and maintaining a good base.");
                     progressStageAfterDelay(160);
@@ -419,7 +429,8 @@ public class TutorialClientEvents {
             }
             case MOVE_UNIT -> {
                 if (stageProgress == 0 && hasUnitSelected("villager")) {
-                    msg("Now, RIGHT-CLICK where you want to move.");
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
+                    msg("Now, RIGHT-CLICK where you want to move it.");
                     setHelpButtonText("LEFT-CLICK a villager to select it, then RIGHT-CLICK on the ground to move it.");
                     progressStage();
                 }
@@ -434,6 +445,7 @@ public class TutorialClientEvents {
             }
             case BOX_SELECT_UNITS -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("Now let's try selecting a group of villagers.");
                     progressStageAfterDelay(120);
                 }
@@ -449,6 +461,7 @@ public class TutorialClientEvents {
             }
             case MOVE_UNITS -> {
                 if (stageProgress == 0 && UnitClientEvents.getSelectedUnits().size() > 1) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("Now, RIGHT-CLICK where you want to move the group.");
                     setHelpButtonText("With a group of villagers selected, RIGHT-CLICK on the ground to move them.");
                     progressStage();
@@ -464,6 +477,7 @@ public class TutorialClientEvents {
             }
             case UNIT_TIPS -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("TIP: You can also double click a unit to select all units of the same type.");
                     progressStageAfterDelay(140);
                 }
@@ -481,6 +495,7 @@ public class TutorialClientEvents {
             }
             case BUILD_INTRO -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("It's time to start your base.");
                     progressStageAfterDelay(100);
                 }
@@ -497,11 +512,12 @@ public class TutorialClientEvents {
                 else if (stageProgress == 3) {
                     msg("Note that building takes resources. Luckily, the TOP-LEFT shows we have more than enough " +
                         "WOOD and ORE needed.");
-                    nextStageAfterDelay(1240);
+                    nextStageAfterDelay(120);
                 }
             }
             case BUILD_TOWN_CENTRE -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("Select your workers, then click the bottom-left button and click on the " +
                         "ground where you want to place your capitol.");
                     setHelpButtonText("Select your workers, then click the bottom-left button and click on the " +
@@ -516,7 +532,8 @@ public class TutorialClientEvents {
             }
             case BUILDING_TIPS -> {
                 if (stageProgress == 0) {
-                    msg("If they aren't already, you can have all of your villagers help to build to speed up progress." +
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
+                    msg("If they aren't already, you can have all of your villagers help to build to speed up progress. " +
                         "To do this, select your workers and RIGHT-CLICK the building.");
                     setHelpButtonText("Just wait for your Town Centre to complete. If your workers stopped building " +
                                       "for some reason, just select them and RIGHT-CLICK it to resume.");
@@ -535,6 +552,7 @@ public class TutorialClientEvents {
             } //msg("You can also set a rally point for your building with RIGHT-CLICK.");
             case TRAIN_WORKER -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("Capitols like the Town Centre are the only building that can produce workers like villagers.");
                     progressStageAfterDelay(120);
                 }
@@ -582,6 +600,7 @@ public class TutorialClientEvents {
             }
             case GATHER_WOOD -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("Now that we have a bunch of workers, we can start gathering some resources.");
                     progressStageAfterDelay(120);
                 }
@@ -614,6 +633,7 @@ public class TutorialClientEvents {
             }
             case GATHER_ORE -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("Now let's do the same thing for ore.");
                     progressStageAfterDelay(100);
                 }
@@ -645,11 +665,11 @@ public class TutorialClientEvents {
             }
             case HUNT_ANIMALS -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("While your other workers are busy on wood and ore, let's find some food.");
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
-                    foodBeforeHunting = ResourcesClientEvents.getOwnResources().food;
                     OrthoviewClientEvents.forceMoveCam(FOOD_POS, 50);
                     TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_ANIMALS);
                     msg("Here are some pigs that you can hunt for food.");
@@ -734,6 +754,7 @@ public class TutorialClientEvents {
             }
             case EXPLAIN_BUILDINGS -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("Let's expand your base. Some new buildings have been unlocked for you. Select a worker if you " +
                             "haven't already to check them out.");
                     setHelpButtonText("Select any worker to check out your new building options.");
@@ -742,7 +763,6 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 1 && hasUnitSelected("villager")) {
-                    clearHelpButtonText();
                     TutorialRendering.setButtonName(OakStockpile.buildingName);
                     msg("Stockpiles can give your workers a place to drop off resources faster.");
                     progressStageAfterDelay(160);
@@ -758,6 +778,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 4 && hasUnitSelected("villager")) {
+                    clearHelpButtonText();
                     TutorialRendering.setButtonName(Barracks.buildingName);
                     msg("Finally, a barracks lets you start training soldiers to fight enemies.");
                     nextStageAfterDelay(160);
@@ -765,6 +786,7 @@ public class TutorialClientEvents {
             }
             case BUILD_BASE -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     TutorialRendering.clearButtonName();
                     msg("Let's take some time to check out a few of these buildings.");
                     progressStageAfterDelay(120);
@@ -786,6 +808,7 @@ public class TutorialClientEvents {
             }
             case EXPLAIN_BARRACKS -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     msg("The barracks is one of many buildings that can produce military units. " +
                             "Select your barracks to check them out.");
                     setHelpButtonText("Select your barracks to check out your military unit options");
@@ -794,12 +817,12 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 1 && hasBuildingSelected(Barracks.buildingName)) {
-                    clearHelpButtonText();
                     TutorialRendering.setButtonName(VindicatorProd.itemName);
                     msg("Vindicators are melee units with high health and moderate damage.");
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 2 && hasBuildingSelected(Barracks.buildingName)) {
+                    clearHelpButtonText();
                     TutorialRendering.setButtonName(PillagerProd.itemName);
                     msg("Pillagers are ranged units which attack slowly but with high damage.");
                     nextStageAfterDelay(160);
@@ -807,11 +830,11 @@ public class TutorialClientEvents {
             }
             case BUILD_ARMY -> {
                 if (stageProgress == 0) {
+                    TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     setHelpButtonText("Select your barracks and produce a total of 3 Pillagers and/or Vindicators. If you need more food " +
                                     "try building a farm or hunt more animals. If you need more population supply, try building a house.");
                     TutorialRendering.clearButtonName();
                     msg("Try building 3 units from here to continue.");
-
                     progressStage();
                 }
                 else if (stageProgress == 1) {
@@ -843,7 +866,7 @@ public class TutorialClientEvents {
                     OrthoviewClientEvents.forceMoveCam(MONSTER_CAMERA_POS, 50);
                     progressStageAfterDelay(120);
                 }
-                if (stageProgress == 0) {
+                if (stageProgress == 1) {
                     setHelpButtonText("With your units selected, RIGHT-CLICK an enemy to attack them. " +
                             "Units will also automatically attack nearby enemies if they are idle.");
                     msg("With your units selected, RIGHT-CLICK an enemy to attack them. " +

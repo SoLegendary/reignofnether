@@ -42,7 +42,8 @@ public class TutorialRendering {
         for (Button button : buttons) {
             if (button.name.equals(buttonNameToHighlight) &&
                 !button.isHidden.get() && button.isEnabled.get() && !button.isSelected.get() &&
-                (button.hotkey != null || TutorialClientEvents.getStage() == TutorialStage.PLACE_WORKERS_B)) {
+                (button.hotkey != null || button.name.equals(TutorialClientEvents.helpButton.name) ||
+                TutorialClientEvents.getStage() == TutorialStage.PLACE_WORKERS_B)) {
                 activeButton = button;
                 break;
             }

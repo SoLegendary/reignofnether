@@ -128,6 +128,7 @@ public class TimeClientEvents {
             List<FormattedCharSequence> tooltip = List.of(
                     FormattedCharSequence.forward("Time: " + timeStr, Style.EMPTY),
                     timeUntilStr,
+                    FormattedCharSequence.forward("" + timeStr, Style.EMPTY),
                     gameLengthStr
             );
             if (targetClientTime != serverTime)
@@ -135,7 +136,8 @@ public class TimeClientEvents {
                     FormattedCharSequence.forward("Time is distorted to midnight", Style.EMPTY.withBold(true)),
                     FormattedCharSequence.forward("Real time: " + timeStr, Style.EMPTY),
                     timeUntilStr,
-                        gameLengthStr
+                    FormattedCharSequence.forward("" + timeStr, Style.EMPTY),
+                    gameLengthStr
                 );
 
             MyRenderer.renderTooltip(
