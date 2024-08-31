@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
@@ -28,21 +29,24 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.units.monsters.SilverfishUnit;
 import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LevelEvent;
-import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.world.ForgeChunkManager;
 
 import java.util.*;
@@ -88,13 +92,17 @@ public abstract class Building {
     protected ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
     public String ownerName;
     public Block portraitBlock; // block rendered in the portrait GUI to represent this building
-    public int tickAge = 0; // how many ticks ago this building was placed
     public boolean canAcceptResources = false; // can workers drop off resources here?
     public int serverBlocksPlaced = 1;
     private int totalBlocksEverBroken = 0;
 
     private long ticksToExtinguish = 0;
     private final long TICKS_TO_EXTINGUISH = 100;
+
+    private final long TICKS_TO_SPAWN_ANIMALS_MAX = 1200; // how often we attempt to spawn animals around each
+    private long ticksToSpawnAnimals = TICKS_TO_SPAWN_ANIMALS_MAX; // spawn once immediately on placement
+    private final int MAX_ANIMALS = 8;
+    private final int ANIMAL_SPAWN_RANGE = 100; // block range to check and spawn animals in
 
     public int foodCost;
     public int woodCost;
@@ -529,8 +537,6 @@ public abstract class Building {
     public void onBlockBuilt(BlockPos bp, BlockState bs) { }
 
     public void tick(Level tickLevel) {
-        this.tickAge += 1;
-
         for (Ability ability : abilities)
             ability.tickCooldown();
 
@@ -614,6 +620,85 @@ public abstract class Building {
 
         if (this.level.isClientSide && !FogOfWarClientEvents.isEnabled())
             isExploredClientside = true;
+
+        // check and do animal spawns around capitols for consistent hunting sources\
+        if (isCapitol) {
+            ticksToSpawnAnimals += 1;
+            if (ticksToSpawnAnimals >= TICKS_TO_SPAWN_ANIMALS_MAX) {
+                ticksToSpawnAnimals = 0;
+                spawnHuntableAnimalsNearby();
+            }
+        }
+    }
+
+    // if there aren't already too many animals nearby, spawn some random huntable animals
+    private void spawnHuntableAnimalsNearby() {
+        if (level.isClientSide())
+            return;
+
+        int numNearbyAnimals = MiscUtil.getEntitiesWithinRange(
+                new Vector3d(centrePos.getX(), centrePos.getY(), centrePos.getZ()),
+                ANIMAL_SPAWN_RANGE,
+                Animal.class,
+                level
+        ).stream().filter(ResourceSources::isHuntableAnimal).toList().size();
+        if (numNearbyAnimals >= MAX_ANIMALS)
+            return;
+
+        int spawnAttempts = 0;
+        BlockState spawnBs;
+        BlockPos spawnBp;
+        Random random = new Random();
+        do {
+            int x = centrePos.getX() + random.nextInt(-ANIMAL_SPAWN_RANGE/2, ANIMAL_SPAWN_RANGE/2);
+            int z = centrePos.getZ() + random.nextInt(-ANIMAL_SPAWN_RANGE/2, ANIMAL_SPAWN_RANGE/2);
+            int y = level.getChunkAt(new BlockPos(x,0,z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+            BlockState bs;
+            do {
+                bs = level.getBlockState(new BlockPos(x,y,z));
+                if (!bs.getMaterial().isSolid() && !bs.getMaterial().isLiquid() && y > 0)
+                    y -= 1;
+                else
+                    break;
+            } while (true);
+            spawnBp = new BlockPos(x,y,z);
+            spawnBs = level.getBlockState(spawnBp);
+            spawnAttempts += 1;
+            if (spawnAttempts > 20) {
+                System.out.println("WARNING: Gave up trying to find a suitable animal spawn!");
+                return;
+            }
+        }
+        while (!spawnBs.getMaterial().isSolid() ||
+                spawnBs.getMaterial() == Material.LEAVES ||
+                spawnBs.getMaterial() == Material.WOOD ||
+                spawnBp.distSqr(centrePos) < 100 ||
+                BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp) ||
+                BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp.above()));
+
+        EntityType<? extends Animal> animalType = null;
+        int spawnQty = 1;
+        switch (random.nextInt(6)) {
+            case 0 -> {
+                animalType = EntityType.COW;
+                spawnQty += random.nextInt(2);
+            }
+            case 1 -> {
+                animalType = EntityType.PIG;
+                spawnQty += random.nextInt(2);
+            }
+            case 2 -> {
+                animalType = EntityType.SHEEP;
+                spawnQty += random.nextInt(2);
+            }
+            case 4 -> {
+                animalType = EntityType.CHICKEN;
+                spawnQty = 3;
+                spawnQty += random.nextInt(3);
+            }
+        }
+        if (animalType != null)
+            UnitServerEvents.spawnMobs(animalType, (ServerLevel) level, spawnBp.above(), spawnQty, "");
     }
 
     // returns each blockpos origin of 16x16x16 renderchunks that this building overlaps

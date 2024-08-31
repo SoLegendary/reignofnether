@@ -3,12 +3,11 @@
 TODO bugs/features:
 
 
-regular game
-    - make animal spawns more consistent or spawn on game start
+minimap still shows physical blocks in fog until the camera moves (and replaces them with fake frozen blocks)
+
+make animal spawns more consistent or spawn on game start
 
 
-TEST:
-- clean up buttons in hudClientEvents
 
 
 [FOG OF WAR] playtest checklist:
@@ -68,7 +67,7 @@ Bugs backlog
 - workers are not marked as idle until 15s after stopping gathering
 - turning on fog of war causes a crash when optifine is installed
 - portal blocks crack when explored (because of updating fake frozen blocks)
-- minimap still shows physical blocks in fog until the camera moves (and replaces them with fake frozen blocks)
+
 
 
 TODO vanilla player balancing/interaction (backlog)

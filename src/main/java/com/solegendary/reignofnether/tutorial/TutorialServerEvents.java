@@ -32,6 +32,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 
+import static com.solegendary.reignofnether.unit.UnitServerEvents.spawnMobs;
+
 public class TutorialServerEvents {
 
     private static final String TUTORIAL_MAP_NAME = "reign_of_nether_tutorial";
@@ -98,26 +100,8 @@ public class TutorialServerEvents {
         }
     }
 
-    private static ArrayList<Entity> spawnMobs(EntityType<? extends Mob> entityType, Vec3i pos, int qty, String ownerName) {
-        ArrayList<Entity> entities = new ArrayList<>();
-        ServerLevel level = getServerLevel();
-        if (level != null) {
-            for (int i = 0; i < qty; i++) {
-                Entity entity = entityType.create(level);
-                if (entity != null) {
-                    entity.moveTo(pos.getX() + i, pos.getY(), pos.getZ());
-                    level.addFreshEntity(entity);
-                    entities.add(entity);
-                    if (entity instanceof Unit unit)
-                        unit.setOwnerName(ownerName);
-                }
-            }
-        }
-        return entities;
-    }
-
     public static void spawnAnimals() {
-        spawnMobs(EntityType.PIG, ANIMAL_POS, 3, "");
+        spawnMobs(EntityType.PIG, getServerLevel(), ANIMAL_POS, 3, "");
     }
 
 
@@ -129,13 +113,13 @@ public class TutorialServerEvents {
     }
 
     public static void spawnMonstersA() {
-        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), MONSTER_ATTACK_SPAWN_POS, 1, TUTORIAL_ENEMY_NAME);
-        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), MONSTER_ATTACK_SPAWN_POS.north(), 1, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), getServerLevel(), MONSTER_ATTACK_SPAWN_POS, 1, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), getServerLevel(), MONSTER_ATTACK_SPAWN_POS.north(), 1, TUTORIAL_ENEMY_NAME);
     }
 
     public static void spawnMonstersB() {
-        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), MONSTER_ATTACK_SPAWN_POS, 4, TUTORIAL_ENEMY_NAME);
-        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), MONSTER_ATTACK_SPAWN_POS.north(), 2, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), getServerLevel(), MONSTER_ATTACK_SPAWN_POS, 4, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), getServerLevel(), MONSTER_ATTACK_SPAWN_POS.north(), 2, TUTORIAL_ENEMY_NAME);
     }
 
     public static void attackWithMonstersA() { // order all monster units to attack move towards the enemy base
@@ -229,19 +213,19 @@ public class TutorialServerEvents {
     }
 
     public static void spawnMonsterBaseArmy() {
-        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), GRAVEYARD_ZOMBIE_POS, 3, TUTORIAL_ENEMY_NAME);
-        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), GROUND_SKELETON_POS_1, 1, TUTORIAL_ENEMY_NAME);
-        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), GROUND_SKELETON_POS_2, 1, TUTORIAL_ENEMY_NAME);
-        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), TOWER_SKELETON_POS, 1, TUTORIAL_ENEMY_NAME);
-        spawnMobs(EntityRegistrar.SPIDER_UNIT.get(), SPIDER_POS, 3, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), getServerLevel(), GRAVEYARD_ZOMBIE_POS, 3, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), getServerLevel(), GROUND_SKELETON_POS_1, 1, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), getServerLevel(), GROUND_SKELETON_POS_2, 1, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), getServerLevel(), TOWER_SKELETON_POS, 1, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.SPIDER_UNIT.get(), getServerLevel(), SPIDER_POS, 3, TUTORIAL_ENEMY_NAME);
     }
 
     public static void spawnFriendlyArmy() {
         if (PlayerServerEvents.players.isEmpty())
             return;
         String ownerName = PlayerServerEvents.players.get(0).getName().getString();
-        spawnMobs(EntityRegistrar.VINDICATOR_UNIT.get(), ARMY_SPAWN_POS, 5, ownerName);
-        spawnMobs(EntityRegistrar.PILLAGER_UNIT.get(), ARMY_SPAWN_POS.south(), 3, ownerName);
-        spawnMobs(EntityRegistrar.IRON_GOLEM_UNIT.get(), ARMY_SPAWN_POS.south().south(), 1, ownerName);
+        spawnMobs(EntityRegistrar.VINDICATOR_UNIT.get(), getServerLevel(), ARMY_SPAWN_POS, 5, ownerName);
+        spawnMobs(EntityRegistrar.PILLAGER_UNIT.get(), getServerLevel(), ARMY_SPAWN_POS.south(), 3, ownerName);
+        spawnMobs(EntityRegistrar.IRON_GOLEM_UNIT.get(), getServerLevel(), ARMY_SPAWN_POS.south().south(), 1, ownerName);
     }
 }

@@ -13,10 +13,7 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.resources.ResourceName;
-import com.solegendary.reignofnether.resources.ResourceSources;
-import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -46,7 +43,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -403,7 +399,7 @@ public class UnitClientEvents {
 
             addUnitPoofs(evt.getLevel(), entity);
         }
-        if (entity instanceof Pig && TutorialClientEvents.isEnabled())
+        if (entity instanceof LivingEntity le && ResourceSources.isHuntableAnimal(le))
             addUnitPoofs(evt.getLevel(), entity);
     }
 

@@ -86,8 +86,6 @@ public class ResourceSources {
             return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
         } else if (animal instanceof Donkey) {
             return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
-        } else if (animal instanceof Llama) {
-            return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
         } else if (animal instanceof Mule) {
             return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
         }

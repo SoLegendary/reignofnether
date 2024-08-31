@@ -23,6 +23,7 @@ import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
@@ -412,6 +413,23 @@ public class UnitServerEvents {
 
         return evt.getSource().isMagic() && evt.getSource() instanceof IndirectEntityDamageSource &&
                 (!(shooter instanceof EvokerUnit));
+    }
+
+    public static ArrayList<Entity> spawnMobs(EntityType<? extends Mob> entityType, ServerLevel level, Vec3i pos, int qty, String ownerName) {
+        ArrayList<Entity> entities = new ArrayList<>();
+        if (level != null) {
+            for (int i = 0; i < qty; i++) {
+                Entity entity = entityType.create(level);
+                if (entity != null) {
+                    entity.moveTo(pos.getX() + i, pos.getY(), pos.getZ());
+                    level.addFreshEntity(entity);
+                    entities.add(entity);
+                    if (entity instanceof Unit unit)
+                        unit.setOwnerName(ownerName);
+                }
+            }
+        }
+        return entities;
     }
 
     @SubscribeEvent
