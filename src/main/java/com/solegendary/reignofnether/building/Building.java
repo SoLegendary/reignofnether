@@ -672,7 +672,7 @@ public abstract class Building {
         while (!spawnBs.getMaterial().isSolid() ||
                 spawnBs.getMaterial() == Material.LEAVES ||
                 spawnBs.getMaterial() == Material.WOOD ||
-                spawnBp.distSqr(centrePos) < 100 ||
+                spawnBp.distSqr(centrePos) < 400 ||
                 BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp) ||
                 BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp.above()));
 
