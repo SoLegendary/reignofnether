@@ -64,8 +64,8 @@ public class ResearchBruteShields extends ProductionItem {
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Allows Brutes to raise a shield to halve", Style.EMPTY),
-                        FormattedCharSequence.forward("their movement speed and projectile damage taken.", Style.EMPTY)
+                        FormattedCharSequence.forward("Allows Brutes to raise a shield to reduce projectile ", Style.EMPTY),
+                        FormattedCharSequence.forward("damage taken by 67% and movement speed by 50%.", Style.EMPTY)
                 )
         );
     }

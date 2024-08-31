@@ -443,7 +443,7 @@ public class UnitServerEvents {
             evt.setAmount(attackerUnit.getUnitAttackDamage());
 
         if (evt.getEntity() instanceof BruteUnit brute && brute.isHoldingUpShield && (evt.getSource().isProjectile()))
-            evt.setAmount(evt.getAmount() / 2);
+            evt.setAmount(evt.getAmount() / 3);
 
         if (evt.getEntity() instanceof CreeperUnit && (evt.getSource().isExplosion()))
             evt.setCanceled(true);

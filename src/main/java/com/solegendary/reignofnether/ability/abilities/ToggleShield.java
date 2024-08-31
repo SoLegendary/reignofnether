@@ -54,8 +54,8 @@ public class ToggleShield extends Ability {
                 List.of(
                         FormattedCharSequence.forward("Shield Stance", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Raise or lower a shield, halving projectile ", Style.EMPTY),
-                        FormattedCharSequence.forward("damage taken but also halving movement speed.", Style.EMPTY)
+                        FormattedCharSequence.forward("Raise or lower a shield - reducing projectile ", Style.EMPTY),
+                        FormattedCharSequence.forward("damage taken by 67% and movement speed by 50%.", Style.EMPTY)
                 ),
                 this
         );
@@ -64,8 +64,12 @@ public class ToggleShield extends Ability {
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
         bruteUnit.isHoldingUpShield = !bruteUnit.isHoldingUpShield;
-        if (!level.isClientSide())
+        if (!level.isClientSide()) {
             UnitSyncClientboundPacket.sendSyncAnimationPacket(this.bruteUnit, bruteUnit.isHoldingUpShield);
+            BlockPos bp = unitUsing.getMoveGoal().getMoveTarget();
+            unitUsing.getMoveGoal().stopMoving();
+            unitUsing.getMoveGoal().setMoveTarget(bp);
+        }
     }
 
     @Override
