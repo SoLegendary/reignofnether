@@ -26,7 +26,7 @@ public class ResearchWitherClouds extends ProductionItem {
         super(building, ResourceCosts.RESEARCH_WITHER_CLOUDS.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchWitherClouds.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchWitherClouds.itemName);
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchWitherClouds.itemName);
             }

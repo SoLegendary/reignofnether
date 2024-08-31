@@ -10,14 +10,18 @@ import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -379,7 +383,10 @@ public class MyRenderer {
     }
 
     public static void renderTooltip(PoseStack poseStack, List<FormattedCharSequence> tooltipLines, int mouseX, int mouseY) {
-        if (MC.screen != null && tooltipLines != null && tooltipLines.size() > 0)
+        if (MC.screen != null && tooltipLines != null && tooltipLines.size() > 0) {
+            if (mouseY < MC.screen.height / 2)
+                mouseY += 20;
             MC.screen.renderTooltip(poseStack, tooltipLines, mouseX, mouseY - (9 * (tooltipLines.size() - 1)), MC.font);
+        }
     }
 }

@@ -7,22 +7,25 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.commands.TitleCommand;
+import net.minecraft.network.chat.Style;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
 
 public class PlayerClientEvents {
 
     public static boolean isRTSPlayer = false;
+
+    public static long rtsGameTicks = 0;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -76,7 +79,7 @@ public class PlayerClientEvents {
 
         disableRTS(playerName);
         MC.gui.setTitle(Component.literal("You have been defeated"));
-        MC.player.playSound(SoundRegistrar.DEFEAT_SOUND.get(), 0.5f, 1.0f);
+        MC.player.playSound(SoundRegistrar.DEFEAT.get(), 0.5f, 1.0f);
     }
 
     public static void victory(String playerName) {
@@ -84,7 +87,7 @@ public class PlayerClientEvents {
             return;
 
         MC.gui.setTitle(Component.literal("You are victorious!"));
-        MC.player.playSound(SoundRegistrar.VICTORY_SOUND.get(), 0.5f, 1.0f);
+        MC.player.playSound(SoundRegistrar.VICTORY.get(), 0.5f, 1.0f);
     }
 
     public static void enableRTS(String playerName) {
@@ -105,6 +108,7 @@ public class PlayerClientEvents {
             FogOfWarClientEvents.movedToCapitol = false;
             FogOfWarClientEvents.frozenChunks.clear();
             FogOfWarClientEvents.semiFrozenChunks.clear();
+            OrthoviewClientEvents.unlockCam();
         }
     }
 
@@ -131,6 +135,16 @@ public class PlayerClientEvents {
         // LOG IN TO SERVER WORLD ONLY
         if (MC.player != null && evt.getPlayer().getId() == MC.player.getId())
             FogOfWarClientEvents.updateFogChunks();
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (evt.phase == TickEvent.Phase.END)
+            rtsGameTicks += 1;
+    }
+
+    public static void syncRtsGameTime(Long gameTicks) {
+        rtsGameTicks = gameTicks;
     }
 
     public static void resetRTS() {

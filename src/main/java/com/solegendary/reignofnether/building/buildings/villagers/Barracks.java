@@ -7,6 +7,8 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerProd;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorProd;
 import com.solegendary.reignofnether.util.Faction;
@@ -65,7 +67,7 @@ public class Barracks extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/fletching_table_front.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Barracks.class,
-                () -> false,
+                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
                 () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(Barracks.class),

@@ -500,29 +500,6 @@ public class CursorClientEvents {
         }
         return bestBp;
     }
-
-    private static int progress = 0;
-
-    @SubscribeEvent
-    public static void onKeyRelease(ScreenEvent.KeyPressed.KeyPressed.Post evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT_SHIFT && preselectedBlockPos != null && MC.level != null && MC.player != null) {
-            MC.level.destroyBlockProgress(MC.player.getId(), preselectedBlockPos, progress);
-            progress += 1;
-            if (progress > 10)
-                progress = 0;
-        }
-
-    }
-
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        /*
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "x: " + BuildingClientEvents.xoffset,
-                "z: " + BuildingClientEvents.zoffset
-        });
-         */
-    }
 }
 
 

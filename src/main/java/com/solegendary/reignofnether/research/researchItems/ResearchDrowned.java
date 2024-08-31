@@ -33,7 +33,7 @@ public class ResearchDrowned extends ProductionItem {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchDrowned.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchDrowned.itemName);
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchDrowned.itemName);
 

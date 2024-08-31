@@ -1,23 +1,20 @@
 
+
 TODO bugs/features:
-
-- time set causes desyncs when done with /gamerule dodaynightcycle false
-- workers are not marked as idle until 15s after stopping gathering
-- turning on fog of war causes a crash when optifine is installed
-
-
-
-- in first-person camera, dont make semifrozen chunks if they are too far away
-- cant spread nether over large water
-- add warning message for building in fog
-
-- ghasts dont damage buildings?
-    - likely due to some shots hitting only explosion-resistant blocks like stone bricks
 
 - brutes dont change movement speed when toggling shield
     - maybe change to slowness debuff instead?
 
 
+
+
+
+regular game
+    - make animal spawns more consistent or spawn on game start
+
+
+TEST:
+- clean up buttons in hudClientEvents
 
 
 [FOG OF WAR] playtest checklist:
@@ -30,8 +27,54 @@ TODO bugs/features:
 
 
 
+Balance additions
+-----------------
+- Monsters and Villagers should have a late game ranged sieger
+    - VILLAGERS: Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but loses multishot
+    - MONSTERS: Wardens can yamato gun buildings
+
+- Piglins should have a mid game melee sieger
+    - PIGLINS: ?
+
+- change witches to auto attack like evokers, reduce cooldown, reduce potion strength and remove lingering effect
+    - ability to toggle between potion types
+    - ability to toggle between auto-attack targets (ally or enemy)
+
+- add a tier of farm upgrades to each faction
+    - pumpkins -> carved pumpkins
+    - wheat -> potatoes
+    - red nylium netherwart -> green nylium
+
+- give units smooth block climbing for 1-block-high ledges (horse/ravager move logic)
+- recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
+    - most prevalent in 1v1 melee combat
 
 
+
+New Upgrades
+------------
+MONSTERS: Upgrade for watchtowers to come with a shulker in the centre
+PIGLINS: Upgrade for ghasts to spread nether on hit (solves issue of spreading base over water)
+VILLAGERS: New potions for witches
+
+New Units
+---------
+MONSTERS: Endermen who can't attack but have a cooldown ability to place shulker boxes (with limited lifespan) (research extends lifespan)
+    - comes from ender portal building
+PIGLINS: Magma cubes (research make melee attacks set enemies on fire)
+    - comes from mother cube building - giant building that looks exactly like a magma cube
+VILLAGERS: Illusioner - hallucination ability, targeted invisibility (research unlocks second ability)
+    - comes from new supplementary building ala-library
+
+
+
+Bugs backlog
+------------
+- time set causes desyncs when done with /gamerule dodaynightcycle false
+- workers are not marked as idle until 15s after stopping gathering
+- turning on fog of war causes a crash when optifine is installed
+- portal blocks crack when explored (because of updating fake frozen blocks)
+- minimap still shows physical blocks in fog until the camera moves (and replaces them with fake frozen blocks)
 
 
 TODO vanilla player balancing/interaction (backlog)

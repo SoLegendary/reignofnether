@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchEvokerVexes;
 import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPotions;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -72,7 +73,7 @@ public class Library extends ProductionBuilding {
             new ResourceLocation("minecraft", "textures/block/enchanting_table_top.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Library.class,
-            () -> false,
+            TutorialClientEvents::isEnabled,
             () -> BuildingClientEvents.hasFinishedBuilding(ArcaneTower.buildingName) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(Library.class),

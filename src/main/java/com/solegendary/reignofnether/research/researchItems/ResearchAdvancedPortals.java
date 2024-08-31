@@ -26,7 +26,7 @@ public class ResearchAdvancedPortals extends ProductionItem {
         super(building, ResourceCosts.RESEARCH_ADVANCED_PORTALS.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchAdvancedPortals.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchAdvancedPortals.itemName);
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchAdvancedPortals.itemName);
             }

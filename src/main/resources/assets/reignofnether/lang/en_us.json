@@ -30,5 +30,9 @@
 
   "sounds.reignofnether.under_attack": "Under attack!",
   "sounds.reignofnether.victory": "Victory!",
-  "sounds.reignofnether.defeat": "Defeat"
+  "sounds.reignofnether.defeat": "Defeat",
+  "sounds.reignofnether.chat": "Chat",
+  "sounds.reignofnether.ally": "Ally",
+  "sounds.reignofnether.neutral": "Neutral",
+  "sounds.reignofnether.enemy": "Enemy"
 }

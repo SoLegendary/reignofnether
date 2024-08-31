@@ -1,8 +1,11 @@
-package com.solegendary.reignofnether.hud;
+package com.solegendary.reignofnether.hud.buttons;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -12,15 +15,15 @@ import java.util.List;
 
 public class StartButtons {
 
-    static final int iconSize = 14;
+    public static final int ICON_SIZE = 14;
 
     public static Button villagerStartButton = new Button(
         "Villagers",
-        iconSize,
+            ICON_SIZE,
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_VILLAGERS,
-        () -> false,
+        () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.PLACE_WORKERS_B),
         () -> true,
         () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_VILLAGERS),
         () -> { },
@@ -32,12 +35,12 @@ public class StartButtons {
 
     public static Button monsterStartButton = new Button(
         "Monsters",
-        iconSize,
-        new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
+            ICON_SIZE,
+        new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png"),
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_MONSTERS,
-        () -> false,
-        () -> true,
+        TutorialClientEvents::isEnabled,
+        () -> !TutorialClientEvents.isEnabled(),
         () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_MONSTERS),
         () -> { },
         List.of(
@@ -48,12 +51,12 @@ public class StartButtons {
 
     public static Button piglinStartButton = new Button(
         "Piglins",
-        iconSize,
+            ICON_SIZE,
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_PIGLINS,
-        () -> false,
-        () -> true,
+        TutorialClientEvents::isEnabled,
+        () -> !TutorialClientEvents.isEnabled(),
         () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_PIGLINS),
         () -> { },
         List.of(

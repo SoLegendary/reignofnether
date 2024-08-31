@@ -29,7 +29,7 @@ public class ResearchBruteShields extends ProductionItem {
         super(building, ResourceCosts.RESEARCH_BRUTE_SHIELDS.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchBruteShields.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchBruteShields.itemName);
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchBruteShields.itemName);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())

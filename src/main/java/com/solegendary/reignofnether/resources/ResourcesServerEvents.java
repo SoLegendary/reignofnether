@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
+import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
@@ -23,6 +24,9 @@ public class ResourcesServerEvents {
     // tracks all players' resources
     public static ArrayList<Resources> resourcesList = new ArrayList<>();
 
+    public static final int STARTING_FOOD_TUTORIAL = 600;
+    public static final int STARTING_WOOD_TUTORIAL = 600;
+    public static final int STARTING_ORE_TUTORIAL = 150;
     public static final int STARTING_FOOD = 100;
     public static final int STARTING_WOOD = 400;
     public static final int STARTING_ORE = 150;
@@ -30,9 +34,16 @@ public class ResourcesServerEvents {
     public static void resetResources(String playerName) {
         for (Resources resources : resourcesList) {
             if (resources.ownerName.equals(playerName)) {
-                resources.food = STARTING_FOOD;
-                resources.wood = STARTING_WOOD;
-                resources.ore = STARTING_ORE;
+                if (TutorialServerEvents.isEnabled()) {
+                    resources.food = STARTING_FOOD_TUTORIAL;
+                    resources.wood = STARTING_WOOD_TUTORIAL;
+                    resources.ore = STARTING_ORE_TUTORIAL;
+                }
+                else {
+                    resources.food = STARTING_FOOD;
+                    resources.wood = STARTING_WOOD;
+                    resources.ore = STARTING_ORE;
+                }
                 ResourcesClientboundPacket.syncResources(resourcesList);
                 break;
             }
@@ -82,21 +93,16 @@ public class ResourcesServerEvents {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
-
         String playerName = evt.getEntity().getName().getString();
+        ResourcesClientboundPacket.syncResources(resourcesList);
+    }
 
-        Resources playerResources = null;
-        for (Resources resources : resourcesList)
-            if (resources.ownerName.equals(playerName))
-                playerResources = resources;
-
-        if (playerResources == null) {
-            playerResources = new Resources(playerName,
-                    STARTING_FOOD,
-                    STARTING_WOOD,
-                    STARTING_ORE);
-            resourcesList.add(playerResources);
-        }
+    public static void assignResources(String playerName) {
+        Resources resources = new Resources(playerName,
+                STARTING_FOOD,
+                STARTING_WOOD,
+                STARTING_ORE);
+        resourcesList.add(resources);
         ResourcesClientboundPacket.syncResources(resourcesList);
     }
 

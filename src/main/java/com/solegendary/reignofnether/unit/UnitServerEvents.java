@@ -4,11 +4,13 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
 import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
+import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -135,9 +137,12 @@ public class UnitServerEvents {
                     currentPopulation += unit.getPopCost();
         for (Building building : BuildingServerEvents.getBuildings())
             if (building.ownerName.equals(ownerName))
-                if (building instanceof ProductionBuilding prodBuilding)
+                if (building instanceof ProductionBuilding prodBuilding) {
                     for (ProductionItem prodItem : prodBuilding.productionQueue)
                         currentPopulation += prodItem.popCost;
+                } else if (building instanceof IronGolemBuilding) {
+                    currentPopulation += ResourceCosts.IRON_GOLEM.population;
+                }
         return currentPopulation;
     }
 

@@ -26,7 +26,7 @@ public class ResearchFireResistance extends ProductionItem {
         super(building, ResourceCosts.RESEARCH_FIRE_RESISTANCE.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchFireResistance.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchFireResistance.itemName);
             else {
                 ResearchServer.addResearch(this.building.ownerName, ResearchFireResistance.itemName);
             }

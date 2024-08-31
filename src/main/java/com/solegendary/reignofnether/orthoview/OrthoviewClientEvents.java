@@ -7,12 +7,15 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialRendering;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
@@ -61,6 +64,21 @@ public class OrthoviewClientEvents {
     private static final float CAMROTY_MIN = -90;
     private static final float CAMROT_MOUSE_SENSITIVITY = 0.12f;
 
+    private static final float ZOOM_DEFAULT = 30;
+    private static final float CAMROTX_DEFAULT = 135;
+    private static final float CAMROTY_DEFAULT = -45;
+
+    private static final int FORCE_PAN_TICKS_MAX = 20;
+    private static int forcePanTicksLeft = 0;
+    private static float forcePanTargetX = 0;
+    private static float forcePanTargetZ = 0;
+    private static float forcePanOriginalX = 0;
+    private static float forcePanOriginalZ = 0;
+    private static float forcePanOriginalZoom = 0;
+
+    private static int cameraLockTicksLeft = 0;
+    private static boolean cameraLocked = false;
+
     private static float zoom = 30; // * 2 = number of blocks in height (higher == zoomed out)
     private static float camRotX = 135; // left/right - should start northeast (towards -Z,+X)
     private static float camRotY = -45; // up/down
@@ -85,12 +103,21 @@ public class OrthoviewClientEvents {
     }
     public static float getCamRotY() { return -camRotY - camRotAdjY; }
 
+    public static boolean isCameraLocked() {
+        return cameraLockTicksLeft > 0 || cameraLocked;
+    }
+
+    public static void lockCam() { cameraLocked = true; }
+    public static void unlockCam() { cameraLocked = false; }
+
     private static void reset() {
-        zoom = 30;
-        camRotX = 135;
-        camRotY = -45;
+        zoom = ZOOM_DEFAULT;
+        camRotX = CAMROTX_DEFAULT;
+        camRotY = CAMROTY_DEFAULT;
     }
     public static void rotateCam(float x, float y) {
+        if (isCameraLocked())
+            return;
         camRotX += x;
         if (camRotX >= 360)
             camRotX -= 360;
@@ -106,6 +133,8 @@ public class OrthoviewClientEvents {
          */
     }
     public static void zoomCam(float zoomAdj) {
+        if (isCameraLocked())
+            return;
         zoom += zoomAdj;
         if (zoom < ZOOM_MIN)
             zoom = ZOOM_MIN;
@@ -120,19 +149,49 @@ public class OrthoviewClientEvents {
         }
     }
 
+    // lock the camera and move it towards a location, remain locked for cameraLockTicks
+    public static void forceMoveCam(int x, int z, int cameraLockTicks) {
+        if (MC.player != null) {
+            forcePanTicksLeft = FORCE_PAN_TICKS_MAX;
+            forcePanTargetX = x;
+            forcePanTargetZ = z;
+            cameraLockTicksLeft = FORCE_PAN_TICKS_MAX + cameraLockTicks;
+            forcePanOriginalX = MC.player.getOnPos().getX();
+            forcePanOriginalZ = MC.player.getOnPos().getZ();
+            forcePanOriginalZoom = zoom;
+        }
+    }
+
+    public static void forceMoveCam(Vec3i pos, int cameraLockTicks) {
+        forceMoveCam(pos.getX(), pos.getZ(), cameraLockTicks);
+    }
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (!OrthoviewClientEvents.isEnabled())
+        if (evt.phase != TickEvent.Phase.END)
             return;
-        if (MC.player == null || MC.level == null)
+
+        if (cameraLockTicksLeft > 0)
+            cameraLockTicksLeft -= 1;
+
+        if (!OrthoviewClientEvents.isEnabled() || MC.player == null || MC.level == null)
             return;
 
         if (MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-5,0)) &&
             MC.player.getOnPos().getY() <= ORTHOVIEW_PLAYER_MAX_Y)
-            panCam(0,0.5f,0);
+            panCam(0,1f,0);
         if (!MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-6,0)) &&
             MC.player.getOnPos().getY() >= ORTHOVIEW_PLAYER_BASE_Y)
-            panCam(0,-0.5f,0);
+            panCam(0,-1f,0);
+
+        if (forcePanTicksLeft > 0) {
+            float xDiff = (forcePanTargetX - forcePanOriginalX) / FORCE_PAN_TICKS_MAX;
+            float zDiff = (forcePanTargetZ - forcePanOriginalZ) / FORCE_PAN_TICKS_MAX;
+            float zoomDiff = (ZOOM_DEFAULT - forcePanOriginalZoom) / FORCE_PAN_TICKS_MAX;
+            zoom += zoomDiff;
+            MC.player.move(MoverType.SELF, new Vec3(xDiff , 0, zDiff));
+            forcePanTicksLeft -= 1;
+        }
     }
 
     public static void toggleEnable() {
@@ -148,6 +207,7 @@ public class OrthoviewClientEvents {
             PlayerServerboundPacket.teleportPlayer(MC.player.getX(), ORTHOVIEW_PLAYER_BASE_Y, MC.player.getZ());
             TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
             MC.options.cloudStatus().set(CloudStatus.OFF);
+            MC.options.hideGui = false; // for some reason, when gui is hidden, shape rendering goes whack
         }
         else {
             PlayerServerboundPacket.disableOrthoview();
@@ -160,6 +220,7 @@ public class OrthoviewClientEvents {
                 PlayerServerboundPacket.teleportPlayer(MC.player.getX(), MC.player.getY(), MC.player.getZ());
             }
         }
+        TutorialClientEvents.updateStage();
     }
 
     // moves the camera to the position such that x,z is at the centre of the screen
@@ -187,7 +248,8 @@ public class OrthoviewClientEvents {
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.Key evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
-            if (evt.getKey() == Keybindings.getFnum(12).key)
+            if (evt.getKey() == Keybindings.getFnum(12).key &&
+                !OrthoviewClientEvents.isCameraLocked())
                 toggleEnable();
 
             if (evt.getKey() == Keybindings.getFnum(6).key) {
@@ -214,7 +276,8 @@ public class OrthoviewClientEvents {
 
     @SubscribeEvent
     public static void onMouseScroll(ScreenEvent.MouseScrolled evt) {
-        if (!enabled) return;
+        if (!enabled || isCameraLocked())
+            return;
 
         if (Keybindings.altMod.isDown())
             zoomCam((float) sign(evt.getScrollDelta()) * -ZOOM_STEP_SCROLL);
@@ -240,17 +303,24 @@ public class OrthoviewClientEvents {
 
         // panCam when cursor is at edge of screen
         // remember that mouse (0,0) is top left of screen
-        if (!Keybindings.altMod.isDown() && MC.isWindowActive()) {
-            if (cursorX <= 0)
+        if (!Keybindings.altMod.isDown() && MC.isWindowActive() && !isCameraLocked()) {
+            if (cursorX <= 0) {
                 panCam(edgeCamPanSensitivity, 0, 0);
-            else if (cursorX >= glfwWinWidth)
+                TutorialClientEvents.pannedLeft = true;
+            }
+            else if (cursorX >= glfwWinWidth) {
                 panCam(-edgeCamPanSensitivity, 0, 0);
-            if (cursorY <= 0)
+                TutorialClientEvents.pannedRight = true;
+            }
+            if (cursorY <= 0) {
                 panCam(0, 0, edgeCamPanSensitivity);
-            else if (cursorY >= glfwWinHeight)
+                TutorialClientEvents.pannedUp = true;
+            }
+            else if (cursorY >= glfwWinHeight) {
                 panCam(0, 0, -edgeCamPanSensitivity);
+                TutorialClientEvents.pannedDown = true;
+            }
         }
-
         // lock mouse inside window
         if (cursorX >= glfwWinWidth)
             GLFW.glfwSetCursorPos(glfwWindow, glfwWinWidth, cursorY);
@@ -271,16 +341,17 @@ public class OrthoviewClientEvents {
 
         float panKeyStep = 1.5f * (getZoom() / ZOOM_MAX);
 
-        // pan camera with keys
-        if (Keybindings.panPlusX.isDown())
-            panCam(panKeyStep,0,0);
-        else if (Keybindings.panMinusX.isDown())
-            panCam(-panKeyStep,0,0);
-        if (Keybindings.panPlusZ.isDown())
-            panCam(0,0,panKeyStep);
-        else if (Keybindings.panMinusZ.isDown())
-            panCam(0,0,-panKeyStep);
-
+        if (!isCameraLocked()) {
+            // pan camera with keys
+            if (Keybindings.panPlusX.isDown())
+                panCam(panKeyStep,0,0);
+            else if (Keybindings.panMinusX.isDown())
+                panCam(-panKeyStep,0,0);
+            if (Keybindings.panPlusZ.isDown())
+                panCam(0,0,panKeyStep);
+            else if (Keybindings.panMinusZ.isDown())
+                panCam(0,0,-panKeyStep);
+        }
         // note that we treat x and y rot as horizontal and vertical, but MC treats it the other way around...
         if (player != null) {
             player.setXRot(-camRotY - camRotAdjY);
@@ -297,7 +368,8 @@ public class OrthoviewClientEvents {
     
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
-        if (!enabled) return;
+        if (!enabled || isCameraLocked())
+            return;
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             mouseLeftDownX = (float) evt.getMouseX();
@@ -310,7 +382,8 @@ public class OrthoviewClientEvents {
     }
     @SubscribeEvent
     public static void onMouseRelease(ScreenEvent.MouseButtonReleased evt) {
-        if (!enabled) return;
+        if (!enabled || isCameraLocked())
+            return;
 
         // stop treating the rotation as adjustments and add them to the base amount
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -325,7 +398,8 @@ public class OrthoviewClientEvents {
     }
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragged evt) {
-        if (!enabled) return;
+        if (!enabled || isCameraLocked())
+            return;
 
         if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;

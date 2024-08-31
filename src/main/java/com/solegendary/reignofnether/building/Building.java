@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile;
+import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FrozenChunk;
@@ -17,6 +18,8 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
@@ -43,6 +46,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.common.world.ForgeChunkManager;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.*;
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
@@ -144,7 +148,8 @@ public abstract class Building {
 
         // re-hide players if they were revealed
         if (this.isCapitol && !this.level.isClientSide()) {
-            if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 1) {
+            if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 1 &&
+                !TutorialServerEvents.isEnabled()) {
                 sendMessageToAllPlayers(this.ownerName + " has placed their capitol building!");
             }
             FogOfWarClientboundPacket.revealOrHidePlayer(false, this.ownerName);
@@ -517,6 +522,8 @@ public abstract class Building {
         isBuilt = true;
         if (!this.level.isClientSide())
             FrozenChunkClientboundPacket.setBuildingBuiltServerside(this.originPos);
+        else
+            TutorialClientEvents.updateStage();
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) { }
@@ -644,34 +651,35 @@ public abstract class Building {
     }
 
     public void freezeChunks(String localPlayerName, boolean forceFakeBlocks) {
-        if (level.isClientSide) {
-            if (!ownerName.equals(localPlayerName)) {
-                for (BlockPos bp : getRenderChunkOrigins(true)) {
-                    BlockPos roundedOrigin = bp.offset(
-                            -bp.getX() % 16,
-                            -bp.getY() % 16,
-                            -bp.getZ() % 16
-                    );
-                    if (bp.getX() % 16 != 0 ||
-                            bp.getY() % 16 != 0 ||
-                            bp.getZ() % 16 != 0)
-                        System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + bp);
+        if (!level.isClientSide)
+            return;
+        if (ownerName.equals(localPlayerName))
+            return;
 
-                    System.out.println("Froze chunk at: " + roundedOrigin);
+        for (BlockPos bp : getRenderChunkOrigins(true)) {
+            BlockPos roundedOrigin = bp.offset(
+                    -bp.getX() % 16,
+                    -bp.getY() % 16,
+                    -bp.getZ() % 16
+            );
+            if (bp.getX() % 16 != 0 ||
+                    bp.getY() % 16 != 0 ||
+                    bp.getZ() % 16 != 0)
+                System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + bp);
 
-                    FrozenChunk newFrozenChunk = null;
-                    for (FrozenChunk frozenChunk : FogOfWarClientEvents.frozenChunks) {
-                        if (roundedOrigin.equals(frozenChunk.origin)) {
-                            newFrozenChunk = new FrozenChunk(roundedOrigin, this, frozenChunk);
-                            break;
-                        }
-                    }
-                    if (newFrozenChunk == null)
-                        newFrozenChunk = new FrozenChunk(roundedOrigin, this, forceFakeBlocks);
+            System.out.println("Froze chunk at: " + roundedOrigin);
 
-                    FogOfWarClientEvents.frozenChunks.add(newFrozenChunk);
+            FrozenChunk newFrozenChunk = null;
+            for (FrozenChunk frozenChunk : FogOfWarClientEvents.frozenChunks) {
+                if (roundedOrigin.equals(frozenChunk.origin)) {
+                    newFrozenChunk = new FrozenChunk(roundedOrigin, this, frozenChunk);
+                    break;
                 }
             }
+            if (newFrozenChunk == null)
+                newFrozenChunk = new FrozenChunk(roundedOrigin, this, forceFakeBlocks);
+
+            FogOfWarClientEvents.frozenChunks.add(newFrozenChunk);
         }
     }
 

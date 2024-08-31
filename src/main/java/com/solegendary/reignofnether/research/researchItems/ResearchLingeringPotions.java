@@ -26,7 +26,7 @@ public class ResearchLingeringPotions extends ProductionItem {
         super(building, ResourceCosts.RESEARCH_LINGERING_POTIONS.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide())
-                ResearchClient.addResearch(ResearchLingeringPotions.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchLingeringPotions.itemName);
             else
                 ResearchServer.addResearch(this.building.ownerName, ResearchLingeringPotions.itemName);
         };

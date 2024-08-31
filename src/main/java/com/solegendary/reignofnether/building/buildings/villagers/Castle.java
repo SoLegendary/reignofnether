@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.*;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerProd;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
@@ -89,7 +90,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
                 new ResourceLocation("minecraft", "textures/block/cobblestone.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Castle.class,
-                () -> false,
+                TutorialClientEvents::isEnabled,
                 () -> (BuildingClientEvents.hasFinishedBuilding(Barracks.buildingName) &&
                         BuildingClientEvents.hasFinishedBuilding(ArcaneTower.buildingName)) ||
                         ResearchClient.hasCheat("modifythephasevariance"),

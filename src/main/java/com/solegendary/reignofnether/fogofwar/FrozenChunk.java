@@ -8,6 +8,8 @@ import com.solegendary.reignofnether.nether.NetherBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
@@ -49,8 +51,9 @@ public class FrozenChunk {
     public FrozenChunk(BlockPos origin, Building building, FrozenChunk frozenChunkToCopy) {
         this.origin = origin;
         this.building = building;
-        this.blocks = Map.copyOf(frozenChunkToCopy.blocks);
         this.hasFakeBlocks = frozenChunkToCopy.hasFakeBlocks;
+        for (BlockPos pos : frozenChunkToCopy.blocks.keySet())
+            this.blocks.put(pos, frozenChunkToCopy.blocks.get(pos));
         this.unsaved = frozenChunkToCopy.unsaved;
     }
 
@@ -58,6 +61,8 @@ public class FrozenChunk {
     public void saveBlocks() {
         if (MC.level == null)
             return;
+
+        System.out.println("Starting to save blocks at: " + this.origin);
 
         ArrayList<BuildingBlock> bbs = new ArrayList<>();
         for (BuildingBlock bb : building.getBlocks())
@@ -73,7 +78,9 @@ public class FrozenChunk {
 
                     for (BuildingBlock bb : bbs) {
                         if (bb.getBlockPos().equals(bp)) {
-                            if (building instanceof AbstractBridge)
+                            if (building instanceof AbstractBridge &&
+                                !(bb.getBlockState().getBlock() instanceof WallBlock) &&
+                                !(bb.getBlockState().getBlock() instanceof FenceBlock))
                                 saveBlock(bb.getBlockPos(), Blocks.WATER.defaultBlockState(), bbs);
                             else
                                 saveBlock(bb.getBlockPos(), Blocks.AIR.defaultBlockState(), bbs);
@@ -84,7 +91,7 @@ public class FrozenChunk {
                 }
             }
         }
-        System.out.println("completed saved blocks at: " + origin);
+        //System.out.println("completed saved blocks at: " + origin);
 
         hasFakeBlocks = false;
         unsaved = false;
@@ -113,7 +120,9 @@ public class FrozenChunk {
 
                     for (BuildingBlock bb : bbs) {
                         if (bb.getBlockPos().equals(bp)) {
-                            if (building instanceof AbstractBridge)
+                            if (building instanceof AbstractBridge &&
+                                !(bb.getBlockState().getBlock() instanceof WallBlock) &&
+                                !(bb.getBlockState().getBlock() instanceof FenceBlock))
                                 saveBlock(bb.getBlockPos(), Blocks.WATER.defaultBlockState(), bbs);
                             else
                                 saveBlock(bb.getBlockPos(), Blocks.AIR.defaultBlockState(), bbs);
@@ -149,7 +158,7 @@ public class FrozenChunk {
         }
         hasFakeBlocks = true;
         unsaved = false;
-        System.out.println("completed saved (fake) blocks at: " + origin);
+        //System.out.println("completed saved (fake) blocks at: " + origin);
     }
 
     public boolean isPosInside(BlockPos bp) {

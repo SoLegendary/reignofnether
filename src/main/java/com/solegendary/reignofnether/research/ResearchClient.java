@@ -25,10 +25,12 @@ public class ResearchClient {
         }
     }
 
-    public static void addResearch(String researchItemName) {
+    public static void addResearch(String ownerName, String researchItemName) {
         synchronized (researchItems) {
-            researchItems.add(researchItemName);
-            HudClientEvents.showTemporaryMessage("Upgrade completed: " + researchItemName);
+            if (MC.player != null && MC.player.getName().getString().equals(ownerName)) {
+                researchItems.add(researchItemName);
+                HudClientEvents.showTemporaryMessage("Upgrade completed: " + researchItemName);
+            }
         }
     }
 

@@ -31,7 +31,7 @@ public class ResearchResourceCapacity extends ProductionItem {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (level.isClientSide()) {
-                ResearchClient.addResearch(ResearchResourceCapacity.itemName);
+                ResearchClient.addResearch(this.building.ownerName, ResearchResourceCapacity.itemName);
                 for (LivingEntity unit : UnitClientEvents.getAllUnits())
                     if (unit instanceof WorkerUnit)
                         ((Unit) unit).setupEquipmentAndUpgradesClient();

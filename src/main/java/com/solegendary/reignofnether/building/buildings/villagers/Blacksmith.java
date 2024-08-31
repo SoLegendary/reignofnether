@@ -10,6 +10,8 @@ import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCros
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemProd;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
@@ -69,7 +71,7 @@ public class Blacksmith extends ProductionBuilding {
                 new ResourceLocation("minecraft", "textures/block/smithing_table_front.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Blacksmith.class,
-                () -> false,
+                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.ATTACK_ENEMY_BASE),
                 () -> BuildingClientEvents.hasFinishedBuilding(Barracks.buildingName) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(Blacksmith.class),

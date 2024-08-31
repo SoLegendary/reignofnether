@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
@@ -135,13 +136,17 @@ public class FogOfWarClientEvents {
                         return -1;
                     if (!MC.player.hasPermissions(4))
                         return -1;
+                    //if (TutorialClientEvents.isEnabled()) {
+                    //    MC.player.sendSystemMessage(Component.literal("Fog of war is not available in the tutorial."));
+                    //    return -1;
+                    //}
                     if (!fogOptifineWarningSent) {
                         fogOptifineWarningSent = true;
                         MC.player.sendSystemMessage(Component.literal(""));
                         MC.player.sendSystemMessage(Component.literal("[WARNING]").withStyle(Style.EMPTY.withBold(true)));
                         MC.player.sendSystemMessage(Component.literal(
-                                "If any players have rendering optimisation mods such as Optifine installed, enabling fog of war " +
-                                        "may cause them to crash. If you are prepared for this, then use /rts-fog enable again to continue."));
+                        "You are about to enable fog of war for the server. This is an experimental feature and can cause serious lag and/or crashing, " +
+                                "ESPECIALLY for anyone with Optifine enabled. If you are prepared for this, then use /rts-fog enable again to continue."));
                     } else {
                         setServerFog(true);
                     }

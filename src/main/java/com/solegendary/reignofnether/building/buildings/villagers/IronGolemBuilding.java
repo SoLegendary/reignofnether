@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchGolemSmithing;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemProd;
 import com.solegendary.reignofnether.util.Faction;
@@ -82,7 +83,7 @@ public class IronGolemBuilding extends Building {
             new ResourceLocation("minecraft", "textures/block/iron_block.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == IronGolemBuilding.class,
-            () -> false,
+            TutorialClientEvents::isEnabled,
             () -> ResearchClient.hasResearch(ResearchGolemSmithing.itemName) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(IronGolemBuilding.class),

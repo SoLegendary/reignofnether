@@ -16,6 +16,8 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -139,7 +141,7 @@ public class MinimapClientEvents {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
             Keybindings.keyM,
             () -> false,
-            () -> false,
+            () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK),
             () -> true,
             () -> shouldToggleSize = true,
             () -> { },
@@ -547,7 +549,8 @@ public class MinimapClientEvents {
         // when clicking on map move player there
         if (OrthoviewClientEvents.isEnabled() &&
             evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 &&
-            !Keybindings.shiftMod.isDown()) {
+            !Keybindings.shiftMod.isDown() &&
+            !OrthoviewClientEvents.isCameraLocked()) {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
             if (MC.player != null && moveTo != null) {
                 PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
@@ -557,7 +560,7 @@ public class MinimapClientEvents {
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre evt) {
-        if (!OrthoviewClientEvents.isEnabled())
+        if (!OrthoviewClientEvents.isEnabled() || OrthoviewClientEvents.isCameraLocked())
             return;
 
         // when clicking on map move player there
@@ -567,8 +570,10 @@ public class MinimapClientEvents {
                 if (Keybindings.shiftMod.isDown()) {
                     setMapCentre(moveTo.getX(), moveTo.getZ());
                     forceUpdateAllPartitions = true;
+                    TutorialClientEvents.clickedMinimap = true;
                     PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
                 } else {
+                    TutorialClientEvents.clickedMinimap = true;
                     PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
                 }
             }
@@ -587,7 +592,8 @@ public class MinimapClientEvents {
 
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiOverlayEvent.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused())
+        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() ||
+            !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
             return;
 
         // toggle here to ensure it doesn't happen in the middle of the updates

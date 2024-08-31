@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -12,9 +13,11 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -34,6 +37,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -42,9 +46,11 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -54,6 +60,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -146,9 +153,12 @@ public class UnitClientEvents {
             }
             for (Building building : BuildingClientEvents.getBuildings())
                 if (building.ownerName.equals(playerName))
-                    if (building instanceof ProductionBuilding prodBuilding)
+                    if (building instanceof ProductionBuilding prodBuilding) {
                         for (ProductionItem prodItem : prodBuilding.productionQueue)
                             currentPopulation += prodItem.popCost;
+                    } else if (building instanceof IronGolemBuilding) {
+                        currentPopulation += ResourceCosts.IRON_GOLEM.population;
+                    }
         }
         return currentPopulation;
     }
@@ -379,6 +389,7 @@ public class UnitClientEvents {
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
         Entity entity = evt.getEntity();
         if (entity instanceof Unit unit && evt.getLevel().isClientSide) {
+            TutorialClientEvents.updateStage();
 
             if (selectedUnits.removeIf(e -> e.getId() == entity.getId()))
                 selectedUnits.add((LivingEntity) entity);
@@ -390,16 +401,11 @@ public class UnitClientEvents {
             unit.initialiseGoals(); // for clientside data tracking - server automatically does this via registerGoals();
             unit.setupEquipmentAndUpgradesClient();
 
-            RandomSource rand = RandomSource.create();
-            for(int j = 0; j < 35; ++j) {
-                double d0 = rand.nextGaussian() * 0.2;
-                double d1 = rand.nextGaussian() * 0.2;
-                double d2 = rand.nextGaussian() * 0.2;
-                evt.getLevel().addParticle(ParticleTypes.POOF, entity.getX(), entity.getY(), entity.getZ(), d0, d1, d2);
-            }
+            addUnitPoofs(evt.getLevel(), entity);
         }
+        if (entity instanceof Pig && TutorialClientEvents.isEnabled())
+            addUnitPoofs(evt.getLevel(), entity);
     }
-
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
@@ -533,7 +539,6 @@ public class UnitClientEvents {
     public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (MC.level == null)
             return;
-
         /**
          *  TODO: make these visible to 1st-person players but currently had a visual glitch
          *  doesnt align to camera very well, sometimes sinks below ground and too thin
@@ -650,7 +655,7 @@ public class UnitClientEvents {
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
             LivingEntity entity = hudSelectedEntity;
-            if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED)
+            if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED && !TutorialClientEvents.isEnabled())
                 sendUnitCommand(UnitAction.DELETE);
         }
     }
@@ -824,6 +829,16 @@ public class UnitClientEvents {
                     getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                     UnitClientEvents.idleWorkerIds.add(id);
             }
+        }
+    }
+
+    public static void addUnitPoofs(Level level, Entity entity) {
+        RandomSource rand = RandomSource.create();
+        for(int j = 0; j < 35; ++j) {
+            double d0 = rand.nextGaussian() * 0.2;
+            double d1 = rand.nextGaussian() * 0.2;
+            double d2 = rand.nextGaussian() * 0.2;
+            level.addParticle(ParticleTypes.POOF, entity.getX(), entity.getY(), entity.getZ(), d0, d1, d2);
         }
     }
 

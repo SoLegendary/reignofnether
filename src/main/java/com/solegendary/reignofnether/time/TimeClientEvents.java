@@ -2,6 +2,10 @@ package com.solegendary.reignofnether.time;
 
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -26,6 +30,8 @@ public class TimeClientEvents {
     public static long targetClientTime = 0;
     // actual time on the server
     public static long serverTime = 0;
+
+
 
     // ensures a time value is between 0 and 24000
     public static long normaliseTime(long time) {
@@ -67,12 +73,24 @@ public class TimeClientEvents {
         return min + "m" + sec + "s";
     }
 
+    // get a string representing real time in min/sec until the given time
+    private static String getTimeStrFromTicks(long ticks) {
+        int sec = (int) Math.round(ticks / 20d);
+        int min = sec / 60;
+        sec -= (min * 60);
+
+        if (min == 0)
+            return sec + "s";
+        return min + "m" + sec + "s";
+    }
+
     // render directly above the minimap
     @SubscribeEvent
     public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
-
-        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused())
+        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() ||
+            !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
             return;
+
         xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) + 2;
         yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 4;
 
@@ -82,6 +100,9 @@ public class TimeClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
+        if (!TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
+            return;
+
         final int GUI_LENGTH = 16;
 
         if (evt.getMouseX() > xPos && evt.getMouseX() <= xPos + GUI_LENGTH &&
@@ -99,15 +120,24 @@ public class TimeClientEvents {
             FormattedCharSequence timeUntilStr = FormattedCharSequence.forward(
                     getTimeUntilStr(serverTime, isDay ? DUSK : DAWN) + " until " + (isDay ? "night" : "day"), Style.EMPTY);
 
+            FormattedCharSequence gameLengthStr = FormattedCharSequence.forward("", Style.EMPTY);
+
+            if (PlayerClientEvents.isRTSPlayer)
+                gameLengthStr = FormattedCharSequence.forward("Game time: " + getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks), Style.EMPTY);
+
             List<FormattedCharSequence> tooltip = List.of(
                     FormattedCharSequence.forward("Time: " + timeStr, Style.EMPTY),
-                    timeUntilStr
+                    timeUntilStr,
+                    FormattedCharSequence.forward("" + timeStr, Style.EMPTY),
+                    gameLengthStr
             );
             if (targetClientTime != serverTime)
                 tooltip = List.of(
                     FormattedCharSequence.forward("Time is distorted to midnight", Style.EMPTY.withBold(true)),
                     FormattedCharSequence.forward("Real time: " + timeStr, Style.EMPTY),
-                    timeUntilStr
+                    timeUntilStr,
+                    FormattedCharSequence.forward("" + timeStr, Style.EMPTY),
+                    gameLengthStr
                 );
 
             MyRenderer.renderTooltip(

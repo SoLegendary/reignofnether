@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiClientEvents;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.TitleClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -19,6 +20,8 @@ import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.tps.TPSClientEvents;
 import com.solegendary.reignofnether.tps.TPSServerEvents;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraftforge.common.MinecraftForge;
@@ -49,8 +52,11 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(ResourcesClientEvents.class);
         vanillaEventBus.register(TPSClientEvents.class);
         vanillaEventBus.register(PlayerClientEvents.class);
+        vanillaEventBus.register(TutorialClientEvents.class);
+        vanillaEventBus.register(TitleClientEvents.class);
 
         // to allow singleplayer integrated server to work
+        vanillaEventBus.register(TutorialServerEvents.class);
         vanillaEventBus.register(PlayerServerEvents.class);
         vanillaEventBus.register(UnitServerEvents.class);
         vanillaEventBus.register(BuildingServerEvents.class);

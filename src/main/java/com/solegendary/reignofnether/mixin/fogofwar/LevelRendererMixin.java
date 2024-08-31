@@ -64,6 +64,12 @@ public abstract class LevelRendererMixin {
 
     private List<Pair<BlockPos, Integer>> chunksToReDirty = new ArrayList<>();
 
+    private int distToChunk(ChunkPos chunkPos) {
+        if (minecraft.player == null)
+            return 0;
+        return minecraft.player.chunkPosition().getChessboardDistance(chunkPos);
+    }
+
     @Inject(
             method = "applyFrustum(Lnet/minecraft/client/renderer/culling/Frustum;)V",
             at = @At("HEAD"),
@@ -201,7 +207,7 @@ public abstract class LevelRendererMixin {
                             .map(fc -> fc.origin)
                             .toList().contains(originPos))
                     continue;
-                else
+                else if (OrthoviewClientEvents.isEnabled() || distToChunk(chunkPos) <= minecraft.levelRenderer.getLastViewDistance())
                     semiFrozenChunks.add(originPos);
             }
             ChunkRenderDispatcher.RenderChunk renderChunk = chunkInfo.chunk;

@@ -6,6 +6,8 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -56,7 +58,7 @@ public class VillagerHouse extends Building {
             new ResourceLocation("minecraft", "textures/block/oak_log.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == VillagerHouse.class,
-            () -> false,
+            () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
             () -> BuildingClientEvents.hasFinishedBuilding(TownCentre.buildingName) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(VillagerHouse.class),

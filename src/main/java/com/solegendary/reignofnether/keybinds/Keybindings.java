@@ -41,6 +41,7 @@ public class Keybindings {
     public static final Keybinding gather = new Keybinding(GLFW.GLFW_KEY_G, "G", "Gather");
     public static final Keybinding garrison = new Keybinding(GLFW.GLFW_KEY_N, "N", "Garrison");
     public static final Keybinding chat = new Keybinding(GLFW.GLFW_KEY_ENTER, "ENTR", "Chat");
+    public static final Keybinding deselect = new Keybinding(GLFW.GLFW_KEY_GRAVE_ACCENT, "TILDE", "Deselect");
 
     public static final Keybinding[] nums = {
         new Keybinding(GLFW.GLFW_KEY_0, "0", "0"),

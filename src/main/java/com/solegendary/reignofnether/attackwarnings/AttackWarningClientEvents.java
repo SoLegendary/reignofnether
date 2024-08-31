@@ -4,7 +4,6 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
@@ -75,7 +74,7 @@ public class AttackWarningClientEvents {
             HudClientEvents.showTemporaryMessage("Your units are in danger!", 200);
             lastAttackPos = attackPos;
             if (MC.player != null)
-                MC.player.playSound(SoundRegistrar.UNDER_ATTACK_SOUND.get(), 0.5f, 1.0f);
+                MC.player.playSound(SoundRegistrar.UNDER_ATTACK.get(), 0.5f, 1.0f);
             attackWarningCd = ATTACK_WARNING_CD_MAX;
             warnDuration = WARN_DURATION_MAX;
         }

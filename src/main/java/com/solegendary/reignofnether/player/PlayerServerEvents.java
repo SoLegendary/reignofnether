@@ -6,13 +6,13 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
@@ -53,6 +53,8 @@ public class PlayerServerEvents {
 
     public static final int TICKS_TO_REVEAL = 60 * ResourceCost.TICKS_PER_SECOND;
 
+    public static long rtsGameTicks = 0; // ticks up as long as there is at least 1 rtsPlayer
+
     // warpten - faster building/unit production
     // operationcwal - faster resource gathering
     // modifythephasevariance - ignore building requirements
@@ -65,14 +67,39 @@ public class PlayerServerEvents {
 
     private static class RTSPlayer {
         public String name;
-        public int id;
+        public int id; // for AI, always negative
         public int ticksWithoutCapitol = 0;
         public Faction faction;
 
-        RTSPlayer(ServerPlayer player, Faction faction) {
+        private RTSPlayer(ServerPlayer player, Faction faction) {
             this.name = player.getName().getString();
             this.id = player.getId();
             this.faction = faction;
+        }
+
+        // bot
+        private RTSPlayer(String name, Faction faction) {
+            int minId = 0;
+            if (!rtsPlayers.isEmpty())
+                minId = Collections.min(rtsPlayers.stream().map(r -> r.id).toList());
+            if (minId >= 0)
+                this.id = -1;
+            else
+                this.id = minId - 1;
+            this.faction = faction;
+            this.name = name;
+        }
+
+        public static RTSPlayer getNewPlayer(ServerPlayer player, Faction faction) {
+            return new RTSPlayer(player, faction);
+        }
+
+        public static RTSPlayer getNewBot(String name, Faction faction) {
+            return new RTSPlayer(name, faction);
+        }
+
+        public boolean isBot() {
+            return id < 0;
         }
 
         public void tick() {
@@ -113,12 +140,42 @@ public class PlayerServerEvents {
         }
     }
 
+    public static boolean isBot(String playerName) {
+        synchronized (rtsPlayers) {
+            for (RTSPlayer rtsPlayer : rtsPlayers)
+                if (rtsPlayer.name.equalsIgnoreCase(playerName))
+                    return rtsPlayer.isBot();
+        }
+        return false;
+    }
+
+    public static boolean isBot(int id) {
+        synchronized (rtsPlayers) {
+            for (RTSPlayer rtsPlayer : rtsPlayers)
+                if (rtsPlayer.id == id)
+                    return rtsPlayer.isBot();
+        }
+        return false;
+    }
+
+    public static boolean isGameActive() {
+        return !rtsPlayers.isEmpty();
+    }
+
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
         synchronized (rtsPlayers) {
-            if (evt.phase == TickEvent.Phase.END)
+            if (evt.phase == TickEvent.Phase.END) {
                 for (RTSPlayer rtsPlayer : rtsPlayers)
                     rtsPlayer.tick();
+                if (rtsPlayers.isEmpty()) {
+                    rtsGameTicks = 0;
+                } else {
+                    rtsGameTicks += 1;
+                    if (rtsGameTicks % 200 == 0)
+                        PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
+                }
+            }
         }
     }
 
@@ -151,19 +208,20 @@ public class PlayerServerEvents {
         if (orthoviewPlayers.stream().map(Entity::getId).toList().contains(evt.getEntity().getId())) {
             orthoviewPlayers.add((ServerPlayer) evt.getEntity());
         }
-
-        if (!isRTSPlayer(serverPlayer.getId())) {
-            serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
-            serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS camera and join the game"));
-            serverPlayer.sendSystemMessage(Component.literal("Use '/rts-help' to see the list of all commands"));
-        } else {
-            serverPlayer.sendSystemMessage(Component.literal("Welcome back to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
-        }
-        if (serverPlayer.hasPermissions(4)) {
-            serverPlayer.sendSystemMessage(Component.literal(""));
-            serverPlayer.sendSystemMessage(Component.literal("As a server op you may use:"));
-            serverPlayer.sendSystemMessage(Component.literal("/rts-fog enable | disable"));
-            serverPlayer.sendSystemMessage(Component.literal("/rts-reset"));
+        if (!TutorialServerEvents.isEnabled()) {
+            if (!isRTSPlayer(serverPlayer.getId())) {
+                serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
+                serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS camera and join the game"));
+                serverPlayer.sendSystemMessage(Component.literal("Use '/rts-help' to see the list of all commands"));
+            } else {
+                serverPlayer.sendSystemMessage(Component.literal("Welcome back to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
+            }
+            if (serverPlayer.hasPermissions(4)) {
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                serverPlayer.sendSystemMessage(Component.literal("As a server op you may use:"));
+                serverPlayer.sendSystemMessage(Component.literal("/rts-fog enable | disable"));
+                serverPlayer.sendSystemMessage(Component.literal("/rts-reset"));
+            }
         }
         if (isRTSPlayer(playerName))
             PlayerClientboundPacket.enableRTSStatus(playerName);
@@ -200,15 +258,18 @@ public class PlayerServerEvents {
                 case PIGLINS -> EntityRegistrar.GRUNT_UNIT.get();
                 case NONE -> null;
             };
-            rtsPlayers.add(new RTSPlayer(serverPlayer, faction));
-            PlayerClientboundPacket.enableRTSStatus(serverPlayer.getName().getString());
+            rtsPlayers.add(RTSPlayer.getNewPlayer(serverPlayer, faction));
+
+            String playerName = serverPlayer.getName().getString();
+            ResourcesServerEvents.assignResources(playerName);
+            PlayerClientboundPacket.enableRTSStatus(playerName);
 
             ServerLevel level = serverPlayer.getLevel();
             for (int i = -1; i <= 1; i++) {
                 Entity entity = entityType != null ? entityType.create(level) : null;
                 if (entity != null) {
                     BlockPos bp = MiscUtil.getHighestNonAirBlock(level, new BlockPos(pos.x + i, 0, pos.z)).above().above();
-                    ((Unit) entity).setOwnerName(serverPlayer.getName().getString());
+                    ((Unit) entity).setOwnerName(playerName);
                     entity.moveTo(bp, 0,0);
                     level.addFreshEntity(entity);
                 }
@@ -216,11 +277,53 @@ public class PlayerServerEvents {
             if (faction == Faction.MONSTERS) {
                 level.setDayTime(13000);
             }
-            ResourcesServerEvents.resetResources(serverPlayer.getName().getString());
+            ResourcesServerEvents.resetResources(playerName);
 
-            serverPlayer.sendSystemMessage(Component.literal(""));
-            sendMessageToAllPlayers(serverPlayer.getName().getString() + " has started their game!", true);
-            sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
+            if (!TutorialServerEvents.isEnabled()) {
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                sendMessageToAllPlayers(playerName + " has started their game!", true);
+                sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
+            }
+            PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
+        }
+    }
+
+    public static void startRTSBot(String name, Vec3 pos, Faction faction) {
+        synchronized (rtsPlayers) {
+            ServerLevel level;
+            if (players.isEmpty())
+                return;
+            else
+                level = players.get(0).getLevel();
+
+            EntityType<? extends Unit> entityType = switch(faction) {
+                case VILLAGERS -> EntityRegistrar.VILLAGER_UNIT.get();
+                case MONSTERS -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
+                case PIGLINS -> EntityRegistrar.GRUNT_UNIT.get();
+                case NONE -> null;
+            };
+            RTSPlayer bot = RTSPlayer.getNewBot(name, faction);
+            rtsPlayers.add(bot);
+            ResourcesServerEvents.assignResources(bot.name);
+
+            for (int i = -1; i <= 1; i++) {
+                Entity entity = entityType != null ? entityType.create(level) : null;
+                if (entity != null) {
+                    BlockPos bp = MiscUtil.getHighestNonAirBlock(level, new BlockPos(pos.x + i, 0, pos.z)).above().above();
+                    ((Unit) entity).setOwnerName(bot.name);
+                    entity.moveTo(bp, 0,0);
+                    level.addFreshEntity(entity);
+                }
+            }
+            if (faction == Faction.MONSTERS) {
+                level.setDayTime(13000);
+            }
+            ResourcesServerEvents.resetResources(bot.name);
+
+            if (!TutorialServerEvents.isEnabled()) {
+                sendMessageToAllPlayers(bot.name + " (bot) has been added to the game!", true);
+                sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
+            }
         }
     }
 
@@ -416,7 +519,8 @@ public class PlayerServerEvents {
 
             PlayerClientboundPacket.resetRTS();
 
-            sendMessageToAllPlayers("Match has been reset!", true);
+            if (!TutorialServerEvents.isEnabled())
+                sendMessageToAllPlayers("Match has been reset!", true);
         }
     }
 }

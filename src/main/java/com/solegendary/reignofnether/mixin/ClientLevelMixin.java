@@ -103,8 +103,9 @@ public class ClientLevelMixin {
     // not a mixin, but called by them
     private void playSoundActual(double pX, double pY, double pZ, SoundEvent pSoundEvent, SoundSource pSource,
                            float pVolume, float pPitch, boolean pDistanceDelay, long pSeed) {
-
-        if (!FogOfWarClientEvents.isInBrightChunk(new BlockPos(pX + 0.5f, pY + 0.5f, pZ + 0.5f)))
+        if (!FogOfWarClientEvents.isInBrightChunk(new BlockPos(pX + 0.5f, pY + 0.5f, pZ + 0.5f)) &&
+                !pSoundEvent.getLocation().getPath().contains("ui.button.click") &&
+                !pSoundEvent.getLocation().getNamespace().contains("reignofnether"))
             return;
 
         Vec3 soundPos = getOrthoviewSoundPos(new Vec3(pX, pY, pZ));

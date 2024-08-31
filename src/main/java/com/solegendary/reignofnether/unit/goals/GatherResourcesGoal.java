@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
@@ -135,7 +136,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     public void tickClient() {
-        if (targetResourceSource != null && this.gatherTarget != null && isGathering()) {
+        if (targetResourceSource != null && this.gatherTarget != null && isGathering() && FogOfWarClientEvents.isInBrightChunk(this.gatherTarget)) {
             gatherTicksLeft = Math.min(gatherTicksLeft, targetResourceSource.ticksToGather);
             gatherTicksLeft -= 1;
             if (gatherTicksLeft <= 0)
