@@ -46,6 +46,7 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuilding 
         this.woodCost = cost.wood;
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
+        this.buildTimeModifier = 0.9f;
 
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE);
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_BRICKS);

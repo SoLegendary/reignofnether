@@ -8,6 +8,8 @@ import com.solegendary.reignofnether.nether.NetherBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
@@ -76,7 +78,9 @@ public class FrozenChunk {
 
                     for (BuildingBlock bb : bbs) {
                         if (bb.getBlockPos().equals(bp)) {
-                            if (building instanceof AbstractBridge && bb.getBlockPos().getY() == 0)
+                            if (building instanceof AbstractBridge &&
+                                !(bb.getBlockState().getBlock() instanceof WallBlock) &&
+                                !(bb.getBlockState().getBlock() instanceof FenceBlock))
                                 saveBlock(bb.getBlockPos(), Blocks.WATER.defaultBlockState(), bbs);
                             else
                                 saveBlock(bb.getBlockPos(), Blocks.AIR.defaultBlockState(), bbs);
@@ -116,7 +120,9 @@ public class FrozenChunk {
 
                     for (BuildingBlock bb : bbs) {
                         if (bb.getBlockPos().equals(bp)) {
-                            if (building instanceof AbstractBridge)
+                            if (building instanceof AbstractBridge &&
+                                !(bb.getBlockState().getBlock() instanceof WallBlock) &&
+                                !(bb.getBlockState().getBlock() instanceof FenceBlock))
                                 saveBlock(bb.getBlockPos(), Blocks.WATER.defaultBlockState(), bbs);
                             else
                                 saveBlock(bb.getBlockPos(), Blocks.AIR.defaultBlockState(), bbs);

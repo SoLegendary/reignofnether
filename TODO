@@ -2,9 +2,6 @@
 
 TODO bugs/features:
 
-- in first-person camera, dont make semifrozen chunks if they are too far away
-    - unless its a frozenChunk
-
 - brutes dont change movement speed when toggling shield
     - maybe change to slowness debuff instead?
 
@@ -16,13 +13,8 @@ regular game
     - make animal spawns more consistent or spawn on game start
 
 
-test:
-    - iron golems built by villagers circumvent population caps
-    - bridges show weird water displacement in fog
-    - research should only be given to the owner
-    - dont show cracks in resources mining when in fog
-
-
+TEST:
+- clean up buttons in hudClientEvents
 
 
 [FOG OF WAR] playtest checklist:

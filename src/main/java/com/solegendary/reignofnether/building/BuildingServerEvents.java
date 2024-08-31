@@ -75,7 +75,7 @@ public class BuildingServerEvents {
                 boolean canAffordPop = false;
                 for (Resources resources : ResourcesServerEvents.resourcesList) {
                     if (resources.ownerName.equals(ownerName)) {
-                        canAffordPop = (currentPop + ResourceCosts.IRON_GOLEM.population) > popSupply;
+                        canAffordPop = (currentPop + ResourceCosts.IRON_GOLEM.population) <= popSupply;
                         break;
                     }
                 }

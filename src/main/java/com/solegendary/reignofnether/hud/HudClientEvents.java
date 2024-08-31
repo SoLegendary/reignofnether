@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
+import com.solegendary.reignofnether.hud.buttons.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -24,11 +25,8 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.model.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -44,13 +42,13 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
+import static com.solegendary.reignofnether.hud.buttons.HelperButtons.*;
+import static com.solegendary.reignofnether.tutorial.TutorialClientEvents.helpButton;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.*;
 
 public class HudClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
-
-    private static int idleWorkerIndex = 0; // which worker to look at when clicking the idle workers button
 
     private static String tempMsg = "";
     private static int tempMsgTicksLeft = 0;
@@ -326,24 +324,9 @@ public class HudClientEvents {
             blitY = screenHeight - iconFrameSize;
 
             if (hudSelectedBuilding != null && hudSelBuildingOwned && !hudSelectedBuilding.isBuilt) {
-                Button cancelButton = new Button(
-                        "Cancel",
-                        iconSize,
-                        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
-                        Keybindings.cancelBuild,
-                        () -> false,
-                        () -> hudSelectedBuilding.isCapitol,
-                        () -> true,
-                        () -> {
-                            BuildingServerboundPacket.cancelBuilding(hudSelectedBuilding.minCorner);
-                            HudClientEvents.hudSelectedBuilding = null;
-                        },
-                        null,
-                        List.of(FormattedCharSequence.forward("Cancel", Style.EMPTY))
-                );
-                if (!cancelButton.isHidden.get()) {
-                    cancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
-                    renderedButtons.add(cancelButton);
+                if (!buildingCancelButton.isHidden.get()) {
+                    buildingCancelButton.render(evt.getPoseStack(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
+                    renderedButtons.add(buildingCancelButton);
                 }
             }
             else if (hudSelBuildingOwned) {
@@ -793,75 +776,6 @@ public class HudClientEvents {
             }
         }
 
-        // -------------------
-        // Idle workers button
-        // -------------------
-        if (idleWorkerIds.size() > 0) {
-            Button idleButton = new Button(
-                    "Idle workers",
-                    iconSize,
-                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
-                    Keybindings.keyJ,
-                    () -> false,
-                    () -> true,
-                    () -> true,
-                    () -> {
-                        if (idleWorkerIndex >= idleWorkerIds.size())
-                            idleWorkerIndex = 0;
-                        Entity entity = MC.level.getEntity(idleWorkerIds.get(idleWorkerIndex));
-                        if (entity instanceof WorkerUnit) {
-                            OrthoviewClientEvents.centreCameraOnPos(entity.getX(), entity.getZ());
-                            UnitClientEvents.clearSelectedUnits();
-                            UnitClientEvents.addSelectedUnit((LivingEntity) entity);
-                        }
-                        idleWorkerIndex += 1;
-                        if (idleWorkerIndex >= idleWorkerIds.size())
-                            idleWorkerIndex = 0;
-                    },
-                    null,
-                    List.of(FormattedCharSequence.forward("Idle workers", Style.EMPTY))
-            );
-            int xi = screenWidth - (idleButton.iconSize * 2);
-            int yi = 100;
-
-            idleButton.render(evt.getPoseStack(), xi, yi, mouseX, mouseY);
-            GuiComponent.drawString(evt.getPoseStack(), MC.font, String.valueOf(idleWorkerIds.size()),
-                    xi + 2, yi + idleButton.iconSize - 1, 0xFFFFFF);
-
-            renderedButtons.add(idleButton);
-        }
-
-        // -------------------------
-        // Select all military units
-        // -------------------------
-        List<LivingEntity> militaryUnits = UnitClientEvents.getAllUnits().stream()
-                .filter(u -> !(u instanceof WorkerUnit) && getPlayerToEntityRelationship(u) == Relationship.OWNED).toList();
-
-        if (militaryUnits.size() > 0) {
-            Button armyButton = new Button(
-                    "Select all military units",
-                    iconSize,
-                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sword_and_bow.png"),
-                    Keybindings.keyK,
-                    () -> false,
-                    () -> true,
-                    () -> true,
-                    () -> {
-                        UnitClientEvents.clearSelectedUnits();
-                        for (LivingEntity militaryUnit : militaryUnits)
-                            UnitClientEvents.addSelectedUnit(militaryUnit);
-                    },
-                    null,
-                    List.of(FormattedCharSequence.forward("Select all military units", Style.EMPTY))
-            );
-            int xi = screenWidth - (armyButton.iconSize * 2);
-            int yi = 130;
-
-            armyButton.render(evt.getPoseStack(), xi, yi, mouseX, mouseY);
-
-            renderedButtons.add(armyButton);
-        }
-
         // ---------------------
         // Attack warning button
         // ---------------------
@@ -891,57 +805,65 @@ public class HudClientEvents {
         if (!PlayerClientEvents.isRTSPlayer) {
             if (!StartButtons.villagerStartButton.isHidden.get()) {
                 StartButtons.villagerStartButton.render(evt.getPoseStack(),
-                        screenWidth - (StartButtons.iconSize * 6),
-                        StartButtons.iconSize / 2,
+                        screenWidth - (StartButtons.ICON_SIZE * 6),
+                        StartButtons.ICON_SIZE / 2,
                         mouseX, mouseY);
                 renderedButtons.add(StartButtons.villagerStartButton);
             }
             if (!StartButtons.monsterStartButton.isHidden.get()) {
                 StartButtons.monsterStartButton.render(evt.getPoseStack(),
-                        (int) (screenWidth - (StartButtons.iconSize * 4f)),
-                        StartButtons.iconSize / 2,
+                        (int) (screenWidth - (StartButtons.ICON_SIZE * 4f)),
+                        StartButtons.ICON_SIZE / 2,
                         mouseX, mouseY);
                 renderedButtons.add(StartButtons.monsterStartButton);
             }
             if (!StartButtons.piglinStartButton.isHidden.get()) {
                 StartButtons.piglinStartButton.render(evt.getPoseStack(),
-                        screenWidth - (StartButtons.iconSize * 2),
-                        StartButtons.iconSize / 2,
+                        screenWidth - (StartButtons.ICON_SIZE * 2),
+                        StartButtons.ICON_SIZE / 2,
                         mouseX, mouseY);
                 renderedButtons.add(StartButtons.piglinStartButton);
             }
         }
-        if (TutorialClientEvents.isEnabled()) {
-            TutorialClientEvents.helpButton.render(evt.getPoseStack(),
-                    screenWidth - 28,
-                    40,
-                    mouseX, mouseY);
-            renderedButtons.add(TutorialClientEvents.helpButton);
-        }
 
+        // --------------------
+        // Tutorial Help button
+        // --------------------
+        if (!helpButton.isHidden.get()) {
+            int xi = screenWidth - (chatButton.iconSize * 2);
+            int yi = 40;
+            helpButton.render(evt.getPoseStack(), xi, yi, mouseX, mouseY);
+            renderedButtons.add(helpButton);
+        }
         // -----------
         // Chat button
         // -----------
-        Button chatButton = new Button(
-                "Chat",
-                iconSize,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/book.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> true,
-                () -> true,
-                () -> {
-                    MC.setScreen(new ChatScreen(""));
-                },
-                null,
-                List.of(FormattedCharSequence.forward("Chat (enter)", Style.EMPTY))
-        );
-        int xi = screenWidth - (chatButton.iconSize * 2);
-        int yi = 70;
-
-        chatButton.render(evt.getPoseStack(), xi, yi, mouseX, mouseY);
-
-        renderedButtons.add(chatButton);
+        if (!chatButton.isHidden.get()) {
+            int xi = screenWidth - (chatButton.iconSize * 2);
+            int yi = 70;
+            chatButton.render(evt.getPoseStack(), xi, yi, mouseX, mouseY);
+            renderedButtons.add(chatButton);
+        }
+        // -------------------------
+        // Select all military units
+        // -------------------------
+        if (!armyButton.isHidden.get()) {
+            int xi = screenWidth - (armyButton.iconSize * 2);
+            int yi = 100;
+            armyButton.render(evt.getPoseStack(), xi, yi, mouseX, mouseY);
+            renderedButtons.add(armyButton);
+        }
+        // -------------------
+        // Idle workers button
+        // -------------------
+        if (!idleWorkerButton.isHidden.get()) {
+            int xi = screenWidth - (idleWorkerButton.iconSize * 2);
+            int yi = 130;
+            idleWorkerButton.render(evt.getPoseStack(), xi, yi, mouseX, mouseY);
+            GuiComponent.drawString(evt.getPoseStack(), MC.font, String.valueOf(idleWorkerIds.size()),
+                    xi + 2, yi + idleWorkerButton.iconSize - 1, 0xFFFFFF);
+            renderedButtons.add(idleWorkerButton);
+        }
 
         // ------------------------------------------------------
         // Button tooltips (has to be rendered last to be on top)
@@ -1110,6 +1032,4 @@ public class HudClientEvents {
             }
         }
     }
-
-
 }

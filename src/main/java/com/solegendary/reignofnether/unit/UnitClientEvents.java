@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -12,6 +13,7 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
@@ -151,9 +153,12 @@ public class UnitClientEvents {
             }
             for (Building building : BuildingClientEvents.getBuildings())
                 if (building.ownerName.equals(playerName))
-                    if (building instanceof ProductionBuilding prodBuilding)
+                    if (building instanceof ProductionBuilding prodBuilding) {
                         for (ProductionItem prodItem : prodBuilding.productionQueue)
                             currentPopulation += prodItem.popCost;
+                    } else if (building instanceof IronGolemBuilding) {
+                        currentPopulation += ResourceCosts.IRON_GOLEM.population;
+                    }
         }
         return currentPopulation;
     }
