@@ -4,8 +4,7 @@ TODO bugs/features:
 
 
 minimap still shows physical blocks in fog until the camera moves (and replaces them with fake frozen blocks)
-
-make animal spawns more consistent or spawn on game start
+    - because the frozenchunk logic in MinimapClientEvents can save air
 
 
 

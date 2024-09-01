@@ -45,6 +45,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class MinimapClientEvents {
 
@@ -224,7 +225,6 @@ public class MinimapClientEvents {
                     skipDarkPartition = true;
             }
 
-            xLoop:
             for (int x = xMin; x < xMax; x++) {
 
                 boolean isBright = false;
@@ -261,21 +261,7 @@ public class MinimapClientEvents {
                         break;
                 } while (true);
 
-                Material mat = null;
-                if (!isBright) {
-                    for (FrozenChunk fc : FogOfWarClientEvents.frozenChunks) {
-                        int cX = fc.origin.getX();
-                        int cZ = fc.origin.getZ();
-                        if (x >= cX && x < cX + 16 &&
-                            z >= cZ && z < cZ + 16) {
-                            BlockState fcbs = fc.blocks.get(new BlockPos(x,yNorth,z-1));
-                            if (fcbs != null)
-                                mat = fcbs.getMaterial();
-                        }
-                    }
-                }
-                if (mat == null)
-                    mat = MC.level.getBlockState(new BlockPos(x,yNorth,z-1)).getMaterial();
+                Material mat = MC.level.getBlockState(new BlockPos(x,yNorth,z-1)).getMaterial();
                 int rgb = mat.getColor().col;
 
                 // shade blocks to give elevation effects, excluding liquids and nonblocking blocks (eg. grass, flowers)
