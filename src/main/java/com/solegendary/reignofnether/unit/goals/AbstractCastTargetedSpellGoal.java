@@ -2,11 +2,14 @@ package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 
+import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 public abstract class AbstractCastTargetedSpellGoal extends MoveToTargetBlockGoal {
@@ -19,15 +22,20 @@ public abstract class AbstractCastTargetedSpellGoal extends MoveToTargetBlockGoa
     protected boolean isCasting = false;
     private BlockPos castTarget = null; // pos that the spell will be cast at
     private final int range;
-    public Consumer onCast;
-    boolean targetsGround;
+    public Consumer<LivingEntity> onEntityCast;
+    public Consumer<BlockPos> onGroundCast;
+    public Consumer<Building> onBuildingCast;
 
-    public AbstractCastTargetedSpellGoal(Mob mob, int channelTicks, int range, boolean targetsGround, Consumer onCast) {
+    public AbstractCastTargetedSpellGoal(Mob mob, int channelTicks, int range,
+                                         @Nullable Consumer<LivingEntity> onEntityCast,
+                                         @Nullable Consumer<BlockPos> onGroundCast,
+                                         @Nullable Consumer<Building> onBuildingCast) {
         super(mob, false, 0);
         this.channelTicks = channelTicks;
         this.range = range;
-        this.targetsGround = targetsGround; // if true, onCast provides a BlockPos, else it provides LivingEntity
-        this.onCast = onCast;
+        this.onEntityCast = onEntityCast;
+        this.onGroundCast = onGroundCast;
+        this.onBuildingCast = onBuildingCast;
     }
 
     // if we set an entity target, on every tick we will follow that target
@@ -38,6 +46,10 @@ public abstract class AbstractCastTargetedSpellGoal extends MoveToTargetBlockGoa
     }
     public void setTarget(BlockPos bpTarget) {
         this.setMoveTarget(bpTarget);
+        this.setTarget((LivingEntity) null);
+    }
+    public void setTarget(Building building) {
+        this.setMoveTarget(building.centrePos);
         this.setTarget((LivingEntity) null);
     }
 
@@ -80,11 +92,16 @@ public abstract class AbstractCastTargetedSpellGoal extends MoveToTargetBlockGoa
                 this.mob.getLookControl().setLookAt(castTarget.getX(), castTarget.getY(), castTarget.getZ());
                 ticksCasting += 1;
                 if (ticksCasting >= channelTicks) {
-                    if (targetsGround)
-                        onCast.accept(castTarget);
-                    else
-                        onCast.accept(targetEntity);
-
+                    if (onEntityCast != null && targetEntity != null)
+                        onEntityCast.accept(targetEntity);
+                    else if (onGroundCast != null || onBuildingCast != null) {
+                        Building targetBuilding = BuildingUtils.findBuilding(mob.level.isClientSide(), castTarget);
+                        if (onBuildingCast != null && targetBuilding != null) {
+                            onBuildingCast.accept(targetBuilding);
+                        }
+                        else if (onGroundCast != null)
+                            onGroundCast.accept(castTarget);
+                    }
                     if (this.ability != null && !this.mob.level.isClientSide())
                         AbilityClientboundPacket.sendSetCooldownPacket(this.mob.getId(), this.ability.action, this.ability.cooldownMax);
                     this.stop();

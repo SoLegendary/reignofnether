@@ -3,9 +3,9 @@
 TODO bugs/features:
 
 
-minimap still shows physical blocks in fog until the camera moves (and replaces them with fake frozen blocks)
-    - because the frozenchunk logic in MinimapClientEvents can save air
-
+- Monsters and Villagers should have a late game ranged sieger
+    - VILLAGERS: Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but loses multishot
+    - MONSTERS: Wardens can yamato gun buildings
 
 
 
@@ -21,10 +21,6 @@ minimap still shows physical blocks in fog until the camera moves (and replaces 
 
 Balance additions
 -----------------
-- Monsters and Villagers should have a late game ranged sieger
-    - VILLAGERS: Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but loses multishot
-    - MONSTERS: Wardens can yamato gun buildings
-
 - Piglins should have a mid game melee sieger
     - PIGLINS: ?
 
@@ -66,8 +62,8 @@ Bugs backlog
 - workers are not marked as idle until 15s after stopping gathering
 - turning on fog of war causes a crash when optifine is installed
 - portal blocks crack when explored (because of updating fake frozen blocks)
-
-
+- minimap still shows physical blocks in fog until the camera moves (and replaces them with fake frozen blocks)
+    - because the frozenchunk logic in MinimapClientEvents can save air
 
 TODO vanilla player balancing/interaction (backlog)
 - Balance strong player actions using food:
