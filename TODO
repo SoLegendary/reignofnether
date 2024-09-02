@@ -2,11 +2,31 @@
 
 TODO bugs/features:
 
+QoL/Balance
+-----------
+Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but loses multishot
+Let workers gather beehives
 
-- Monsters and Villagers should have a late game ranged sieger
-    - VILLAGERS: Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but loses multishot
-    - MONSTERS: Wardens can yamato gun buildings
+Tutorial improvements
+---------------------
+force player to place their capitol near the spot specified
+force pan camera to resources/build spots when you click the help button
+dont specify porkchops on return tip
+progress pig hunting return step if ANY one villager returns food
+add space to continue between each explanation step (buildings, barracks units)
+arrow doesnt highlight barracks during explanation
+limit to 1 house in the tutorial
+villagers get stuck in the bridge if they fall in water
+people may forget to press space to get their army after the bridge is first built
 
+Other fixes
+-----------
+rts reset did not reset client resources properly after a victory
+	- assignResources is done twice for some reason?
+does upgrading spiders while they're mounted crash the server??
+    - while auto-mounting 5+ skeletons, have the spiders upgrade to poison spiders
+    - related to new setupEquipment logic?
+    - try on server
 
 
 [FOG OF WAR] playtest checklist:
@@ -21,9 +41,6 @@ TODO bugs/features:
 
 Balance additions
 -----------------
-- Piglins should have a mid game melee sieger
-    - PIGLINS: ?
-
 - change witches to auto attack like evokers, reduce cooldown, reduce potion strength and remove lingering effect
     - ability to toggle between potion types
     - ability to toggle between auto-attack targets (ally or enemy)
