@@ -303,6 +303,7 @@ public class BuildingServerEvents {
 
         GhastUnit ghastUnit = null;
         CreeperUnit creeperUnit = null;
+        PillagerUnit pillagerUnit = null;
 
         if (evt.getExplosion().getSourceMob() instanceof CreeperUnit cUnit) {
             creeperUnit = cUnit;
@@ -315,10 +316,12 @@ public class BuildingServerEvents {
                     exp.damageSource = new EntityDamageSource("explosion", ghastUnit);
                 }
             }
+        } else if (evt.getExplosion().getSourceMob() instanceof PillagerUnit pUnit) {
+            pillagerUnit = pUnit;
         }
+
         // set fire to random blocks from a ghast fireball
         if (ghastUnit != null) {
-
             List<BlockPos> flammableBps = evt.getAffectedBlocks().stream().filter(bp -> {
                 BlockState bs = evt.getLevel().getBlockState(bp);
                 BlockState bsAbove = evt.getLevel().getBlockState(bp.above());
@@ -339,14 +342,15 @@ public class BuildingServerEvents {
         if (exp.getExploder() == null && exp.getSourceMob() == null && ghastUnit == null)
             evt.getAffectedEntities().clear();
 
+        // explosive arrows from mounted pillagers
         if (exp.getSourceMob() instanceof PillagerUnit pUnit && pUnit.isPassenger())
             for (Entity entity : evt.getAffectedEntities())
                 if (entity instanceof LivingEntity le)
                     le.setHealth(le.getHealth() - 2); // for some reason there's still iframes so we cant use hurt()
 
-        // apply creeper and ghast attack damage as bonus damage to buildings
+        // apply creeper, ghast and mounted pillager attack damage as bonus damage to buildings
         // this is dealt in addition to the actual blocks destroyed by the explosion itself
-        if (creeperUnit != null || ghastUnit != null) {
+        if (creeperUnit != null || ghastUnit != null || pillagerUnit != null) {
             Set<Building> affectedBuildings = new HashSet<>();
             for (BlockPos bp : evt.getAffectedBlocks()) {
                 Building building = BuildingUtils.findBuilding(false, bp);
@@ -357,10 +361,12 @@ public class BuildingServerEvents {
                 int atkDmg = 0;
                 if (ghastUnit != null) {
                     atkDmg = (int) ghastUnit.getUnitAttackDamage();
-                } else {
-                     atkDmg = (int) creeperUnit.getUnitAttackDamage();
+                } else if (creeperUnit != null) {
+                    atkDmg = (int) creeperUnit.getUnitAttackDamage();
                     if (creeperUnit.isPowered())
                         atkDmg *= 2;
+                } else if (pillagerUnit != null) {
+                    atkDmg = (int) pillagerUnit.getUnitAttackDamage();
                 }
                 building.destroyRandomBlocks(atkDmg);
             }

@@ -5,6 +5,10 @@ TODO bugs/features:
 QoL/Balance
 -----------
 Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but loses multishot
+    - TODO:
+        - Adjust goals to allow targeting buildings (reuse ghast attack goal?)
+        - (TEST) Ensure explosions from arrows damage buildings
+
 Let workers gather beehives
 villagers get stuck in the bridge if they fall in water
 

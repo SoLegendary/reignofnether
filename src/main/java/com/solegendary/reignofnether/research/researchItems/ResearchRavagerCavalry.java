@@ -58,7 +58,8 @@ public class ResearchRavagerCavalry extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Unlocks the ability for pillagers to mount ravagers.", Style.EMPTY)
+                FormattedCharSequence.forward("Unlocks the ability for pillagers to mount ravagers.", Style.EMPTY),
+                FormattedCharSequence.forward("Mounted pillagers lose multishot but gain explosive arrows.", Style.EMPTY)
             )
         );
     }
