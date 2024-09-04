@@ -19,8 +19,8 @@ import java.util.List;
 
 public class ResearchRavagerCavalry extends ProductionItem {
 
-    public final static String itemName = "Ravager Cavalry";
-    public final static ResourceCost cost = ResourceCosts.RESEARCH_RAVAGER_CAVALRY;
+    public final static String itemName = "Ravager Artillery";
+    public final static ResourceCost cost = ResourceCosts.RESEARCH_RAVAGER_ARTILLERY;
 
     public ResearchRavagerCavalry(ProductionBuilding building) {
         super(building, cost.ticks);
@@ -58,8 +58,8 @@ public class ResearchRavagerCavalry extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Unlocks the ability for pillagers to mount ravagers.", Style.EMPTY),
-                FormattedCharSequence.forward("Mounted pillagers lose multishot but gain explosive arrows.", Style.EMPTY)
+                FormattedCharSequence.forward("Unlocks the ability for pillagers to mount ravagers,", Style.EMPTY),
+                FormattedCharSequence.forward("gaining explosive arrows that shoot upwards like mortar.", Style.EMPTY)
             )
         );
     }

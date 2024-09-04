@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
@@ -33,6 +34,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.RegistryObject;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,10 +45,8 @@ import static com.solegendary.reignofnether.tutorial.TutorialStage.*;
 
 public class TutorialClientEvents {
 
-    // TODO: option to have fog of war locked in during tutorial (add more steps during movement and attack/defense stages)
-
     private static Minecraft MC = Minecraft.getInstance();
-    private static TutorialStage tutorialStage = EXPLAIN_BUILDINGS;
+    private static TutorialStage tutorialStage = INTRO;
     private static boolean enabled = false;
 
     private static int ticksToProgressStage = 0;
@@ -177,6 +177,18 @@ public class TutorialClientEvents {
 
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
+
+        if (Keybindings.ctrlMod.isDown() && Keybindings.altMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
+            nextStage();
+            specialMsg("Skipping tutorial stage... you are now on: " + getStage().name());
+        }
+
+
+        if (pressSpaceToContinue && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
+            pressSpaceToContinue = false;
+            nextStage();
+        }
+
         if (pressSpaceToContinue && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
             pressSpaceToContinue = false;
             nextStage();
@@ -245,6 +257,8 @@ public class TutorialClientEvents {
                 "ticks: " + ticksOnStage
         });
     } */
+
+
 
     private static void progressStage() {
         blockUpdateStage = false;
@@ -556,7 +570,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
-                    msg("Note that producing workers takes 50 FOOD each. We should have enough resources for 3 of them.");
+                    msg("Note that producing workers takes 50 FOOD each. We should have enough resources for quite a lot");
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 2) {
@@ -621,6 +635,7 @@ public class TutorialClientEvents {
                             specialMsg("Well done.");
                             clearHelpButtonText();
                             progressStageAfterDelay(100);
+                            break;
                         }
                     }
                 }
@@ -637,7 +652,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 1) {
-                    msg("Here's a beach with coal and iron we can get ore from.");
+                    msg("Here's a beach with coal and copper we can get ore from.");
                     OrthoviewClientEvents.forceMoveCam(ORE_POS, 50);
                     progressStageAfterDelay(120);
                 }
@@ -654,6 +669,7 @@ public class TutorialClientEvents {
                             specialMsg("Well done.");
                             clearHelpButtonText();
                             progressStageAfterDelay(100);
+                            break;
                         }
                     }
                 }
@@ -690,7 +706,7 @@ public class TutorialClientEvents {
                             LivingEntity targetEntity = villager.getTarget();
                             if (ResourceSources.isHuntableAnimal(targetEntity) &&
                                     targetEntity.getHealth() < targetEntity.getMaxHealth()) {
-                                msg("TIP: If your worker can't hold all the food after hunting an animal, it will drop the ground.");
+                                msg("TIP: If your worker can't hold all the food after hunting an animal, it will drop to the ground.");
                                 progressStage();
                             }
                         }
@@ -709,33 +725,22 @@ public class TutorialClientEvents {
                     }
                 }
                 else if (stageProgress == 6) {
-                    for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
-                        if (entity instanceof VillagerUnit villager) {
-                            for (ItemStack itemStack : villager.getItems()) {
-                                Resources res = Resources.getTotalResourcesFromItems(List.of(itemStack));
-                                if (res.food >= 100) {
-                                    specialMsg("Great work!");
-                                    clearHelpButtonText();
-                                    progressStageAfterDelay(100);
-                                    break;
-                                }
-                            }
-                        }
+                    for (LivingEntity entity : UnitClientEvents.getAllUnits())
+                        if (entity instanceof VillagerUnit villager)
+                            for (ItemStack itemStack : villager.getItems())
+                                if (Resources.getTotalResourcesFromItems(List.of(itemStack)).food >= 100)
+                                    villagersHoldingFood += 1;
+
+                    if (villagersHoldingFood > 0) {
+                        specialMsg("Great work!");
+                        clearHelpButtonText();
+                        progressStageAfterDelay(100);
                     }
                 }
                 else if (stageProgress == 7) {
                     msg("Your villager should now return the food to your town centre, but if they aren't, " +
                         "simply select the villager and RIGHT-CLICK your Town Centre.");
                     setHelpButtonText("Select your villager that hunted the pig and RIGHT-CLICK your Town Centre.");
-                    for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
-                        if (entity instanceof VillagerUnit villager) {
-                            for (ItemStack itemStack : villager.getItems()) {
-                                Resources res = Resources.getTotalResourcesFromItems(List.of(itemStack));
-                                if (res.food > 0)
-                                    villagersHoldingFood += 1;
-                            }
-                        }
-                    }
                     progressStage();
                 }
                 else if (stageProgress == 8) {
@@ -814,6 +819,7 @@ public class TutorialClientEvents {
                         if (building instanceof Barracks barracks && barracks.isBuilt) {
                             specialMsg("Great job.");
                             nextStageAfterDelay(100);
+                            break;
                         }
                     }
                 }
@@ -863,7 +869,7 @@ public class TutorialClientEvents {
                 else if (stageProgress == 2) {
                     msg("TIP: If you lose track of your military units, you can press K or click the button " +
                         "on the right to select all of them at once.");
-                    progressStageAfterDelay(200);
+                    nextStageAfterDelay(200);
                     TutorialServerboundPacket.doServerAction(TutorialAction.START_MONSTER_BASE);
                 }
             }

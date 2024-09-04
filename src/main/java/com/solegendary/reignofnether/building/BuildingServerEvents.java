@@ -308,6 +308,9 @@ public class BuildingServerEvents {
         if (evt.getExplosion().getSourceMob() instanceof CreeperUnit cUnit) {
             creeperUnit = cUnit;
         } // generic means it was from random blocks broken, so don't consider it or we might keep chaining
+        else if (evt.getExplosion().getSourceMob() instanceof PillagerUnit pUnit) {
+            pillagerUnit = pUnit;
+        }
         else if (exp.getDamageSource() != DamageSource.GENERIC) {
             for (Entity entity : evt.getAffectedEntities()) {
                 if (entity instanceof LargeFireball fireball &&
@@ -316,8 +319,6 @@ public class BuildingServerEvents {
                     exp.damageSource = new EntityDamageSource("explosion", ghastUnit);
                 }
             }
-        } else if (evt.getExplosion().getSourceMob() instanceof PillagerUnit pUnit) {
-            pillagerUnit = pUnit;
         }
 
         // set fire to random blocks from a ghast fireball

@@ -1,16 +1,28 @@
 
 
+
 TODO bugs/features:
+
+Save unit owners and buildings to the world to prevent loss of data on server shutdown
+    - Buildings & ownername
+    - Units & ownername
+    - RTSPlayers
+    - Resources
+
+- reset the tutorial map before loading it
+
+
+
+Pillagers mounted on ravagers gain explosive arrows and can attack buildings
+    - Pillagers don't attack buildings while mounted
+    - Pillagers try to attack buildings even when not mounted
+    - Add attack ground option
+
 
 QoL/Balance
 -----------
-Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but loses multishot
-    - TODO:
-        - Adjust goals to allow targeting buildings (reuse ghast attack goal?)
-        - (TEST) Ensure explosions from arrows damage buildings
-
-Let workers gather beehives
 villagers get stuck in the bridge if they fall in water
+    - apply some upwards velocity?
 
 
 Other fixes
@@ -23,11 +35,10 @@ does upgrading spiders while they're mounted crash the server??
 
 To test:
 -------
-progress pig hunting return step if ANY one villager returns food
 general tutorial completion
-don't tick during building explanation if a building is already selected to be built on hud
-arrow doesnt highlight barracks during explanation
-force player to place their capitol near the spot specified
+
+
+
 
 
 [FOG OF WAR] playtest checklist:
@@ -40,7 +51,9 @@ force player to place their capitol near the spot specified
 
 
 
-Balance additions
+
+
+Misc additions
 -----------------
 - change witches to auto attack like evokers, reduce cooldown, reduce potion strength and remove lingering effect
     - ability to toggle between potion types
@@ -54,6 +67,9 @@ Balance additions
 - give units smooth block climbing for 1-block-high ledges (horse/ravager move logic)
 - recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
     - most prevalent in 1v1 melee combat
+
+Let workers gather beehives
+
 
 
 
@@ -82,6 +98,10 @@ Bugs backlog
 - portal blocks crack when explored (because of updating fake frozen blocks)
 - minimap still shows physical blocks in fog until the camera moves (and replaces them with fake frozen blocks)
     - because the frozenchunk logic in MinimapClientEvents can save air
+
+(MacOS) minecraft title screen is messed up and doesn't retrieve the assets
+(MacOS) GUI scaling does not work
+(MacOS) macbooks dont have alt and ctrl (it's option and command)
 
 TODO vanilla player balancing/interaction (backlog)
 - Balance strong player actions using food:

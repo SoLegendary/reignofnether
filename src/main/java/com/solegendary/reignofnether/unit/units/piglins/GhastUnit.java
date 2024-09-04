@@ -160,7 +160,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     @Override public RangedFlyingAttackGroundGoal<?> getRangedAttackGroundGoal() {
         return attackGroundGoal;
     }
-    private RangedFlyingAttackBuildingGoal<?> attackBuildingGoal;
+    private RangedAttackBuildingGoal<?> attackBuildingGoal;
 
     public GhastUnit(EntityType<? extends Ghast> entityType, Level level) {
         super(entityType, level);
@@ -262,7 +262,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new UnitBowAttackGoal<>(this, getAttackCooldown());
         this.attackGroundGoal = new RangedFlyingAttackGroundGoal<>(this, this.attackGoal);
-        this.attackBuildingGoal = new RangedFlyingAttackBuildingGoal<>(this, this.attackGoal);
+        this.attackBuildingGoal = new RangedAttackBuildingGoal<>(this, this.attackGoal);
     }
 
     @Override
