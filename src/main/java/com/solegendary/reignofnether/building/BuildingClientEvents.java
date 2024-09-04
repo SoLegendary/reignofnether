@@ -181,7 +181,7 @@ public class BuildingClientEvents {
     // based on whether the location is valid or not
     // location should be 1 space above the selected spot
     public static void drawBuildingToPlace(PoseStack matrix, BlockPos originPos) {
-        boolean valid = isBuildingPlacementInvalid(originPos);
+        boolean valid = isBuildingPlacementValid(originPos);
 
         int minX = 999999;
         int minY = 999999;
@@ -240,14 +240,14 @@ public class BuildingClientEvents {
         MyRenderer.drawLineBox(matrix, aabb2, r, g, 0,0.25f);
     }
 
-    public static boolean isBuildingPlacementInvalid(BlockPos originPos) {
-        return isBuildingPlacementInAir(originPos) &&
-                isBuildingPlacementClipping(originPos) &&
-                isOverlappingAnyOtherBuilding() &&
-                !isNonPiglinOrOnNetherBlocks(originPos) &&
-                !isNonBridgeOrValidBridge(originPos) &&
-                !FogOfWarClientEvents.isInBrightChunk(originPos) &&
-                !isNotTutorialOrNearValidCapitolPosition(originPos);
+    public static boolean isBuildingPlacementValid(BlockPos originPos) {
+        return !isBuildingPlacementInAir(originPos) &&
+                !isBuildingPlacementClipping(originPos) &&
+                !isOverlappingAnyOtherBuilding() &&
+                isNonPiglinOrOnNetherBlocks(originPos) &&
+                isNonBridgeOrValidBridge(originPos) &&
+                FogOfWarClientEvents.isInBrightChunk(originPos) &&
+                isNotTutorialOrNearValidCapitolPosition(originPos);
     }
 
     public static void checkBuildingPlacementValidityWithMessages(BlockPos originPos) {
@@ -259,10 +259,10 @@ public class BuildingClientEvents {
             showTemporaryMessage("Too close to another building");
         else if (!isNonPiglinOrOnNetherBlocks(originPos))
             showTemporaryMessage("Must be built on nether terrain");
-        else if (!FogOfWarClientEvents.isInBrightChunk(originPos))
-            showTemporaryMessage("Area is unexplored");
         else if (!isNonBridgeOrValidBridge(originPos))
             showTemporaryMessage("Must be placed in water or lava");
+        else if (!FogOfWarClientEvents.isInBrightChunk(originPos))
+            showTemporaryMessage("Area is unexplored");
         else if (!isNotTutorialOrNearValidCapitolPosition(originPos)) {
             showTemporaryMessage("Build your town centre over here!");
             OrthoviewClientEvents.forceMoveCam(TutorialClientEvents.BUILD_CAM_POS, 50);
@@ -414,7 +414,7 @@ public class BuildingClientEvents {
         if (!buildingToPlace.getName().toLowerCase().contains("centre"))
             return true;
 
-        return TutorialClientEvents.BUILD_CAPITOL_POS.distSqr(originPos) <= 400;
+        return TutorialClientEvents.BUILD_CAPITOL_POS.distSqr(originPos) < 625; // 25 block range
     }
 
     // gets the cursor position rotated according to the preselected building
@@ -563,7 +563,7 @@ public class BuildingClientEvents {
             Building preSelBuilding = getPreselectedBuilding();
 
             // place a new building
-            if (buildingToPlace != null && isBuildingPlacementInvalid(pos) && MC.player != null) {
+            if (buildingToPlace != null && isBuildingPlacementValid(pos) && MC.player != null) {
                 String buildingName = (String) buildingToPlace.getField("buildingName").get(null);
 
                 ArrayList<Integer> builderIds = new ArrayList<>();

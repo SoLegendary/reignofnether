@@ -46,7 +46,7 @@ public class TutorialClientEvents {
     // TODO: option to have fog of war locked in during tutorial (add more steps during movement and attack/defense stages)
 
     private static Minecraft MC = Minecraft.getInstance();
-    private static TutorialStage tutorialStage = HUNT_ANIMALS;
+    private static TutorialStage tutorialStage = EXPLAIN_BUILDINGS;
     private static boolean enabled = false;
 
     private static int ticksToProgressStage = 0;
@@ -1030,7 +1030,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 2) {
-                    msg("TIP: Only melee units can damage buildings. Iron golems in particular do double damage to them.");
+                    msg("TIP: Only melee units can attack buildings. Iron golems in particular do double damage to them.");
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 3) {

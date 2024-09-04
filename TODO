@@ -20,7 +20,6 @@ does upgrading spiders while they're mounted crash the server??
 
 To test:
 -------
-Duplicate resources on logout/reset
 progress pig hunting return step if ANY one villager returns food
 general tutorial completion
 don't tick during building explanation if a building is already selected to be built on hud

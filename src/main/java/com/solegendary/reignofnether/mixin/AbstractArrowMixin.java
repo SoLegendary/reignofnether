@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -22,6 +23,7 @@ import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -219,6 +221,17 @@ public abstract class AbstractArrowMixin extends Projectile {
                 return;
             }
             this.piercingIgnoreEntityIds.add(entity.getId());
+        }
+
+        if (this.getOwner() instanceof PillagerUnit pUnit &&
+            !pUnit.getLevel().isClientSide() && pUnit.isPassenger()) {
+            pUnit.getLevel().explode(null, damagesource, null,
+                    pResult.getEntity().xo,
+                    pResult.getEntity().yo,
+                    pResult.getEntity().zo,
+                    1.0f,
+                    false,
+                    Explosion.BlockInteraction.BREAK);
         }
     }
 }
