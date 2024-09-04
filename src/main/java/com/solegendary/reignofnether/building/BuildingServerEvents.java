@@ -15,12 +15,14 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Explosion;
@@ -336,6 +338,11 @@ public class BuildingServerEvents {
 
         if (exp.getExploder() == null && exp.getSourceMob() == null && ghastUnit == null)
             evt.getAffectedEntities().clear();
+
+        if (exp.getSourceMob() instanceof PillagerUnit pUnit && pUnit.isPassenger())
+            for (Entity entity : evt.getAffectedEntities())
+                if (entity instanceof LivingEntity le)
+                    le.setHealth(le.getHealth() - 2); // for some reason there's still iframes so we cant use hurt()
 
         // apply creeper and ghast attack damage as bonus damage to buildings
         // this is dealt in addition to the actual blocks destroyed by the explosion itself

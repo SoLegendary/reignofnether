@@ -215,9 +215,10 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     @Override
     public void setupEquipmentAndUpgradesServer() {
         ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
-        if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchPillagerCrossbows.itemName))
+        if (isPassenger())
+            cbowStack.enchant(Enchantments.UNBREAKING, 1); // just to make it look enchanted for explosive arrows
+        else if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchPillagerCrossbows.itemName))
             cbowStack.enchant(Enchantments.MULTISHOT, 1);
-
         this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
     }
 

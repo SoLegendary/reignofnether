@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServer;
 import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
+import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.resources.ResourceSource;
@@ -36,6 +37,8 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -44,10 +47,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -534,5 +534,17 @@ public class UnitServerEvents {
         for (Entity entity : evt.getAffectedEntities())
             if (entity instanceof CreeperUnit cUnit)
                 UnitActionClientboundPacket.reflectUnitAction(cUnit.getOwnerName(), UnitAction.EXPLODE, new int[]{cUnit.getId()});
+    }
+
+    @SubscribeEvent
+    public static void onMount(EntityMountEvent evt) {
+        if (evt.getEntityMounting() instanceof PillagerUnit pUnit && !evt.getLevel().isClientSide()) {
+            ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
+            if (evt.isMounting())
+                cbowStack.enchant(Enchantments.UNBREAKING, 1); // just to make it look enchanted for explosive arrows
+            else if (ResearchServer.playerHasResearch(pUnit.getOwnerName(), ResearchPillagerCrossbows.itemName))
+                cbowStack.enchant(Enchantments.MULTISHOT, 1);
+            pUnit.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
+        }
     }
 }
