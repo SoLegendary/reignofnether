@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchAdvancedPortals;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -49,8 +50,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedBuilding;
-import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedEntity;
+import static com.solegendary.reignofnether.hud.HudClientEvents.*;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
 
 public class BuildingClientEvents {
@@ -181,7 +181,7 @@ public class BuildingClientEvents {
     // based on whether the location is valid or not
     // location should be 1 space above the selected spot
     public static void drawBuildingToPlace(PoseStack matrix, BlockPos originPos) {
-        boolean valid = isBuildingPlacementValid(originPos);
+        boolean valid = isBuildingPlacementInvalid(originPos);
 
         int minX = 999999;
         int minY = 999999;
@@ -240,13 +240,33 @@ public class BuildingClientEvents {
         MyRenderer.drawLineBox(matrix, aabb2, r, g, 0,0.25f);
     }
 
-    public static boolean isBuildingPlacementValid(BlockPos originPos) {
-        return !isBuildingPlacementInAir(originPos) &&
-               !isBuildingPlacementClipping(originPos) &&
-               !isOverlappingAnyOtherBuilding() &&
-                isNonPiglinOrOnNetherBlocks(originPos) &&
-                isNonBridgeOrValidBridge(originPos) &&
-                FogOfWarClientEvents.isInBrightChunk(originPos);
+    public static boolean isBuildingPlacementInvalid(BlockPos originPos) {
+        return isBuildingPlacementInAir(originPos) &&
+                isBuildingPlacementClipping(originPos) &&
+                isOverlappingAnyOtherBuilding() &&
+                !isNonPiglinOrOnNetherBlocks(originPos) &&
+                !isNonBridgeOrValidBridge(originPos) &&
+                !FogOfWarClientEvents.isInBrightChunk(originPos) &&
+                !isNotTutorialOrNearValidCapitolPosition(originPos);
+    }
+
+    public static void checkBuildingPlacementValidityWithMessages(BlockPos originPos) {
+        if (isBuildingPlacementInAir(originPos))
+            showTemporaryMessage("Ground is not flat enough");
+        else if (isBuildingPlacementClipping(originPos))
+            showTemporaryMessage("Ground is not flat enough");
+        else if (isOverlappingAnyOtherBuilding())
+            showTemporaryMessage("Too close to another building");
+        else if (!isNonPiglinOrOnNetherBlocks(originPos))
+            showTemporaryMessage("Must be built on nether terrain");
+        else if (!FogOfWarClientEvents.isInBrightChunk(originPos))
+            showTemporaryMessage("Area is unexplored");
+        else if (!isNonBridgeOrValidBridge(originPos))
+            showTemporaryMessage("Must be placed in water or lava");
+        else if (!isNotTutorialOrNearValidCapitolPosition(originPos)) {
+            showTemporaryMessage("Build your town centre over here!");
+            OrthoviewClientEvents.forceMoveCam(TutorialClientEvents.BUILD_CAM_POS, 50);
+        }
     }
 
     // disallow any building block from clipping into any other existing blocks
@@ -385,6 +405,16 @@ public class BuildingClientEvents {
         float percentWater = (float) waterBlocksClipping / (float) bridgeBlocks;
         return percentWater > MIN_BRIDGE_LIQUID_BLOCKS_PERCENT &&
                 percentWater < MAX_BRIDGE_LIQUID_BLOCKS_PERCENT;
+    }
+
+    private static boolean isNotTutorialOrNearValidCapitolPosition(BlockPos originPos) {
+        if (!TutorialClientEvents.isEnabled())
+            return true;
+
+        if (!buildingToPlace.getName().toLowerCase().contains("centre"))
+            return true;
+
+        return TutorialClientEvents.BUILD_CAPITOL_POS.distSqr(originPos) <= 400;
     }
 
     // gets the cursor position rotated according to the preselected building
@@ -533,7 +563,7 @@ public class BuildingClientEvents {
             Building preSelBuilding = getPreselectedBuilding();
 
             // place a new building
-            if (buildingToPlace != null && isBuildingPlacementValid(pos) && MC.player != null) {
+            if (buildingToPlace != null && isBuildingPlacementInvalid(pos) && MC.player != null) {
                 String buildingName = (String) buildingToPlace.getField("buildingName").get(null);
 
                 ArrayList<Integer> builderIds = new ArrayList<>();
@@ -611,8 +641,7 @@ public class BuildingClientEvents {
                     }
                 }
             } else {
-                if (!isBuildingPlacementValid(pos))
-                    HudClientEvents.showTemporaryMessage("Invalid building placement");
+                checkBuildingPlacementValidityWithMessages(pos);
             }
 
             // deselect any non-owned buildings if we managed to select them with owned buildings

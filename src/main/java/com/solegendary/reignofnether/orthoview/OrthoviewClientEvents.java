@@ -174,8 +174,10 @@ public class OrthoviewClientEvents {
         if (cameraLockTicksLeft > 0)
             cameraLockTicksLeft -= 1;
 
-        if (!OrthoviewClientEvents.isEnabled() || MC.player == null || MC.level == null)
+        if (!OrthoviewClientEvents.isEnabled() || MC.player == null || MC.level == null) {
+            forcePanTicksLeft = 0;
             return;
+        }
 
         if (MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-5,0)) &&
             MC.player.getOnPos().getY() <= ORTHOVIEW_PLAYER_MAX_Y)

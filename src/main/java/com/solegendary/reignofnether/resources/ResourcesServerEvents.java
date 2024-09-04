@@ -13,7 +13,6 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.stringtemplate.v4.ST;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,10 +97,31 @@ public class ResourcesServerEvents {
     }
 
     public static void assignResources(String playerName) {
-        Resources resources = new Resources(playerName,
-                STARTING_FOOD,
-                STARTING_WOOD,
-                STARTING_ORE);
+        for (Resources res : resourcesList) {
+            if (res.ownerName.equals(playerName)) {
+                if (TutorialServerEvents.isEnabled()) {
+                    res.food = STARTING_FOOD_TUTORIAL;
+                    res.wood = STARTING_WOOD_TUTORIAL;
+                    res.ore = STARTING_ORE_TUTORIAL;
+                } else {
+                    res.food = STARTING_FOOD;
+                    res.wood = STARTING_WOOD;
+                    res.ore = STARTING_ORE;
+                }
+            }
+        }
+        Resources resources;
+        if (TutorialServerEvents.isEnabled()) {
+            resources = new Resources(playerName,
+                    STARTING_FOOD_TUTORIAL,
+                    STARTING_WOOD_TUTORIAL,
+                    STARTING_ORE_TUTORIAL);
+        } else {
+            resources = new Resources(playerName,
+                    STARTING_FOOD,
+                    STARTING_WOOD,
+                    STARTING_ORE);
+        }
         resourcesList.add(resources);
         ResourcesClientboundPacket.syncResources(resourcesList);
     }

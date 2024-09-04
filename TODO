@@ -6,27 +6,26 @@ QoL/Balance
 -----------
 Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but loses multishot
 Let workers gather beehives
-
-Tutorial improvements
----------------------
-force player to place their capitol near the spot specified
-force pan camera to resources/build spots when you click the help button
-dont specify porkchops on return tip
-progress pig hunting return step if ANY one villager returns food
-add space to continue between each explanation step (buildings, barracks units)
-arrow doesnt highlight barracks during explanation
-limit to 1 house in the tutorial
 villagers get stuck in the bridge if they fall in water
-people may forget to press space to get their army after the bridge is first built
+
 
 Other fixes
 -----------
-rts reset did not reset client resources properly after a victory
-	- assignResources is done twice for some reason?
 does upgrading spiders while they're mounted crash the server??
     - while auto-mounting 5+ skeletons, have the spiders upgrade to poison spiders
     - related to new setupEquipment logic?
     - try on server
+    - maybe try changing convertTo logic to a flag inside of each unit to ensure it runs in sync with the tick()
+        - copy Mob.convertTo
+
+To test:
+-------
+Duplicate resources on logout/reset
+progress pig hunting return step if ANY one villager returns food
+general tutorial completion
+don't tick during building explanation if a building is already selected to be built on hud
+arrow doesnt highlight barracks during explanation
+force player to place their capitol near the spot specified
 
 
 [FOG OF WAR] playtest checklist:

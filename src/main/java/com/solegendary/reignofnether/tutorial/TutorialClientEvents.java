@@ -12,7 +12,6 @@ import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -20,7 +19,6 @@ import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.Faction;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
@@ -30,7 +28,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -49,7 +46,7 @@ public class TutorialClientEvents {
     // TODO: option to have fog of war locked in during tutorial (add more steps during movement and attack/defense stages)
 
     private static Minecraft MC = Minecraft.getInstance();
-    private static TutorialStage tutorialStage = INTRO;
+    private static TutorialStage tutorialStage = HUNT_ANIMALS;
     private static boolean enabled = false;
 
     private static int ticksToProgressStage = 0;
@@ -64,12 +61,14 @@ public class TutorialClientEvents {
     public static boolean pannedLeft = false;
     public static boolean pannedRight = false;
     public static boolean clickedMinimap = false;
+    private static int villagersHoldingFood = 0;
 
     private static final ArrayList<Building> damagedBuildings = new ArrayList<>();
 
     // all these positions are for camera only, actual spawn locations differ slightly on the serverside
     private static final Vec3i SPAWN_POS = new Vec3i(-2950, 0, -1166);
-    private static final Vec3i BUILD_POS = new Vec3i(-2944, 0, -1200);
+    public static final Vec3i BUILD_CAM_POS = new Vec3i(-2944, 0, -1200);
+    public static final Vec3i BUILD_CAPITOL_POS = new Vec3i(-2936, 67, -1217);
     private static final Vec3i WOOD_POS = new Vec3i(-2919, 0, -1196);
     private static final Vec3i ORE_POS = new Vec3i(-2951, 0, -1224);
     private static final Vec3i FOOD_POS = new Vec3i(-2939, 0, -1173);
@@ -506,7 +505,7 @@ public class TutorialClientEvents {
                 else if (stageProgress == 2) {
                     msg("This looks like a good spot for it, being flat ground, near lots of resources and with " +
                         "plenty of space around it for other buildings.");
-                    OrthoviewClientEvents.forceMoveCam(BUILD_POS, 50);
+                    OrthoviewClientEvents.forceMoveCam(BUILD_CAM_POS, 50);
                     progressStageAfterDelay(180);
                 }
                 else if (stageProgress == 3) {
@@ -725,13 +724,9 @@ public class TutorialClientEvents {
                     }
                 }
                 else if (stageProgress == 7) {
-                    msg("Your villager should now return some porkchops to your town centre, but if they aren't, " +
+                    msg("Your villager should now return the food to your town centre, but if they aren't, " +
                         "simply select the villager and RIGHT-CLICK your Town Centre.");
                     setHelpButtonText("Select your villager that hunted the pig and RIGHT-CLICK your Town Centre.");
-                    progressStage();
-                }
-                else if (stageProgress == 8) {
-                    int villagersHoldingFood = 0;
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
                         if (entity instanceof VillagerUnit villager) {
                             for (ItemStack itemStack : villager.getItems()) {
@@ -741,7 +736,20 @@ public class TutorialClientEvents {
                             }
                         }
                     }
-                    if (villagersHoldingFood == 0) {
+                    progressStage();
+                }
+                else if (stageProgress == 8) {
+                    int villagersHoldingFoodNow = 0;
+                    for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+                        if (entity instanceof VillagerUnit villager) {
+                            for (ItemStack itemStack : villager.getItems()) {
+                                Resources res = Resources.getTotalResourcesFromItems(List.of(itemStack));
+                                if (res.food > 0)
+                                    villagersHoldingFoodNow += 1;
+                            }
+                        }
+                    }
+                    if (villagersHoldingFoodNow < villagersHoldingFood) {
                         specialMsg("Excellent.");
                         clearHelpButtonText();
                         progressStageAfterDelay(100);
@@ -759,7 +767,8 @@ public class TutorialClientEvents {
                             "haven't already to check them out.");
                     setHelpButtonText("Select any worker to check out your new building options.");
                     shouldPauseTicking = () -> UnitClientEvents.getSelectedUnits().isEmpty() ||
-                            !(UnitClientEvents.getSelectedUnits().get(0) instanceof VillagerUnit);
+                            !(UnitClientEvents.getSelectedUnits().get(0) instanceof VillagerUnit) ||
+                            BuildingClientEvents.getBuildingToPlace() != null;
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 1 && hasUnitSelected("villager")) {
@@ -781,7 +790,10 @@ public class TutorialClientEvents {
                     clearHelpButtonText();
                     TutorialRendering.setButtonName(Barracks.buildingName);
                     msg("Finally, a barracks lets you start training soldiers to fight enemies.");
-                    nextStageAfterDelay(160);
+                    progressStageAfterDelay(160);
+                }
+                else {
+                    nextStage();
                 }
             }
             case BUILD_BASE -> {
@@ -851,11 +863,8 @@ public class TutorialClientEvents {
                 else if (stageProgress == 2) {
                     msg("TIP: If you lose track of your military units, you can press K or click the button " +
                         "on the right to select all of them at once.");
-                    progressStageAfterDelay(100);
+                    progressStageAfterDelay(200);
                     TutorialServerboundPacket.doServerAction(TutorialAction.START_MONSTER_BASE);
-                }
-                else if (stageProgress == 3) {
-                    nextStageAfterSpace();
                 }
             }
             case DEFEND_BASE -> {
@@ -1005,7 +1014,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 7) {
-                    nextStageAfterSpace();
+                    nextStage();
                 }
             }
             case ATTACK_ENEMY_BASE -> {
