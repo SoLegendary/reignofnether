@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
@@ -31,7 +32,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpiderUnit extends Spider implements Unit, AttackerUnit {
+public class SpiderUnit extends Spider implements Unit, AttackerUnit, ConvertableUnit {
     // region
     private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
     private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
@@ -107,6 +108,11 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit {
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
+    // ConvertableUnit
+    private boolean shouldDiscard = false;
+    public boolean shouldDiscard() { return shouldDiscard; }
+    public void setShouldDiscard(boolean discard) { this.shouldDiscard = discard; }
+
     // endregion
 
     final static public float attackDamage = 3.0f;
@@ -157,15 +163,18 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit {
     }
 
     public void tick() {
-        this.setCanPickUpLoot(false);
+        if (shouldDiscard) {
+            this.discard();
+        } else {
+            this.setCanPickUpLoot(false);
+            super.tick();
+            Unit.tick(this);
+            AttackerUnit.tick(this);
 
-        super.tick();
-        Unit.tick(this);
-        AttackerUnit.tick(this);
-
-        // apply slowness level 2 during daytime for a short time repeatedly
-        if (!this.level.isClientSide() && this.level.isDay() && !BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false))
-            this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 2, 1));
+            // apply slowness level 2 during daytime for a short time repeatedly
+            if (!this.level.isClientSide() && this.level.isDay() && !BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false))
+                this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 2, 1));
+        }
     }
 
     public void initialiseGoals() {

@@ -5,6 +5,8 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServer;
@@ -15,11 +17,11 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.*;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.monsters.DrownedUnit;
+import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -45,12 +47,15 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Convert;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,52 +87,14 @@ public class UnitServerEvents {
                 unitsToConvert.add(unit);
 
         for (LivingEntity unit : unitsToConvert) {
-            oldIds.add(unit.getId());
-            int newId = UnitServerEvents.convertToUnit(level, (Unit) unit, entityType);
-            newIds.add(newId);
+            if (unit instanceof ConvertableUnit cUnit) {
+                oldIds.add(unit.getId());
+                int newId = cUnit.convertToUnit(entityType);
+                newIds.add(newId);
+            }
         }
         if (oldIds.size() == newIds.size() && oldIds.size() > 0)
             UnitConvertClientboundPacket.syncConvertedUnits(ownerName, oldIds, newIds);
-    }
-
-    // returns the new unit's id
-    public static int convertToUnit(ServerLevel level, Unit oldUnit, EntityType<? extends Unit> entityType) {
-        LivingEntity oldEntity = (LivingEntity) oldUnit;
-        LivingEntity newEntity = (LivingEntity) entityType.create(level);
-
-        if (newEntity == null)
-            return -1;
-
-        newEntity.setHealth(oldEntity.getHealth());
-        for (MobEffectInstance effect : oldEntity.getActiveEffects())
-            newEntity.addEffect(effect);
-
-        newEntity.copyPosition(oldEntity);
-        ((Unit) newEntity).setOwnerName(oldUnit.getOwnerName());
-        level.addFreshEntity(newEntity);
-
-        for (ItemStack item : oldUnit.getItems())
-            ((Unit) newEntity).getItems().add(item);
-
-        UnitSyncClientboundPacket.sendSyncResourcesPacket((Unit) newEntity);
-
-        Entity vehicle = oldEntity.getVehicle();
-        if (vehicle != null) {
-            oldEntity.stopRiding();
-            newEntity.startRiding(vehicle, true);
-        }
-        if (oldEntity.isVehicle()) {
-            Entity passenger = oldEntity.getFirstPassenger();
-            if (passenger != null) {
-                passenger.stopRiding();
-                passenger.startRiding(newEntity, true);
-            }
-        }
-        newEntity.setYRot(oldEntity.getYRot());
-
-        // discard with a reflected packet so the client has a chance to sync goals, command groups and selections
-        //oldEntity.discard();
-        return newEntity.getId();
     }
 
     public static int getCurrentPopulation(ServerLevel level, String ownerName) {
@@ -534,5 +501,27 @@ public class UnitServerEvents {
         for (Entity entity : evt.getAffectedEntities())
             if (entity instanceof CreeperUnit cUnit)
                 UnitActionClientboundPacket.reflectUnitAction(cUnit.getOwnerName(), UnitAction.EXPLODE, new int[]{cUnit.getId()});
+    }
+
+    public static void debug1() {
+        convertAllToUnit(
+                "SoLegendary",
+                (ServerLevel) getAllUnits().get(0).getLevel(),
+                (LivingEntity entity) ->
+                        entity instanceof ZombieUnit sUnit &&
+                                sUnit.getOwnerName().equals("SoLegendary"),
+                EntityRegistrar.HUSK_UNIT.get()
+        );
+    }
+
+    public static void debug2() {
+        convertAllToUnit(
+                "SoLegendary",
+                (ServerLevel) getAllUnits().get(0).getLevel(),
+                (LivingEntity entity) ->
+                        entity instanceof ZombieUnit sUnit &&
+                                sUnit.getOwnerName().equals("SoLegendary"),
+                EntityRegistrar.DROWNED_UNIT.get()
+        );
     }
 }

@@ -51,5 +51,8 @@ public enum UnitAction {
 
     STARTRTS_VILLAGERS,
     STARTRTS_MONSTERS,
-    STARTRTS_PIGLINS
+    STARTRTS_PIGLINS,
+
+    DEBUG1,
+    DEBUG2
 }

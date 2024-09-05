@@ -12,14 +12,18 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
+import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
@@ -39,6 +43,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -745,8 +750,8 @@ public class UnitClientEvents {
         if (MC.level != null) {
             for (int id : oldUnitIds) {
                 Entity e = MC.level.getEntity(id);
-                if (e != null)
-                    e.discard();
+                if (e instanceof ConvertableUnit cUnit)
+                    cUnit.setShouldDiscard(true);
             }
         }
         sendUnitCommandManual(UnitAction.DISCARD, oldUnitIds);
@@ -944,4 +949,25 @@ public class UnitClientEvents {
         });
     }
      */
+
+    // prevent opening inventory with E or advancements with L
+    @SubscribeEvent
+    public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
+        if (Keybindings.altMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE && !getAllUnits().isEmpty()) {
+            PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
+                    "",
+                    UnitAction.DEBUG1, 0, new int[]{0},
+                    new BlockPos(0,0,0),
+                    new BlockPos(0,0,0)
+            ));
+        }
+        if (Keybindings.ctrlMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE && !getAllUnits().isEmpty()) {
+            PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
+                    "",
+                    UnitAction.DEBUG2, 0, new int[]{0},
+                    new BlockPos(0,0,0),
+                    new BlockPos(0,0,0)
+            ));
+        }
+    }
 }

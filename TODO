@@ -12,20 +12,10 @@ Save unit owners and buildings to the world to prevent loss of data on server sh
 - reset the tutorial map before loading it
 
 
-
 QoL/Balance
 -----------
 villagers get stuck in the bridge if they fall in water
     - apply some upwards velocity?
-
-
-Other fixes
------------
-does upgrading spiders while they're mounted crash the server??
-    - while auto-mounting 5+ skeletons, have the spiders upgrade to poison spiders
-    - try on server
-    - maybe try changing convertTo logic to a flag inside of each unit to ensure it runs in sync with the tick()
-        - copy Mob.convertTo
 
 To test:
 -------

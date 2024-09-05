@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
@@ -38,7 +39,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, RangedAttackerUnit {
+public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, RangedAttackerUnit, ConvertableUnit {
     // region
     private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
     private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
@@ -117,6 +118,11 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
+    // ConvertableUnit
+    private boolean shouldDiscard = false;
+    public boolean shouldDiscard() { return shouldDiscard; }
+    public void setShouldDiscard(boolean discard) { this.shouldDiscard = discard; }
+
     // endregion
 
     final static public float attackDamage = 4.0f;
@@ -169,17 +175,20 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     }
 
     public void tick() {
-        this.setCanPickUpLoot(true);
+        if (shouldDiscard)
+            this.discard();
+        else {
+            this.setCanPickUpLoot(true);
+            super.tick();
+            Unit.tick(this);
+            AttackerUnit.tick(this);
+            this.mountGoal.tick();
 
-        super.tick();
-        Unit.tick(this);
-        AttackerUnit.tick(this);
-        this.mountGoal.tick();
-
-        // need to do this outside the goal so it ticks down while not attacking
-        // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
-        if (attackGoal != null)
-            attackGoal.tickCooldown();
+            // need to do this outside the goal so it ticks down while not attacking
+            // only needed for attack goals created by reignofnether like RangedBowAttackUnitGoal
+            if (attackGoal != null)
+                attackGoal.tickCooldown();
+        }
     }
 
     @Override
