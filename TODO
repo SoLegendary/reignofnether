@@ -13,12 +13,6 @@ Save unit owners and buildings to the world to prevent loss of data on server sh
 
 
 
-Pillagers mounted on ravagers gain explosive arrows and can attack buildings
-    - Pillagers don't attack buildings while mounted
-    - Pillagers try to attack buildings even when not mounted
-    - Add attack ground option
-
-
 QoL/Balance
 -----------
 villagers get stuck in the bridge if they fall in water

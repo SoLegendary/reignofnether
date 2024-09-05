@@ -535,16 +535,4 @@ public class UnitServerEvents {
             if (entity instanceof CreeperUnit cUnit)
                 UnitActionClientboundPacket.reflectUnitAction(cUnit.getOwnerName(), UnitAction.EXPLODE, new int[]{cUnit.getId()});
     }
-
-    @SubscribeEvent
-    public static void onMount(EntityMountEvent evt) {
-        if (evt.getEntityMounting() instanceof PillagerUnit pUnit && !evt.getLevel().isClientSide()) {
-            ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
-            if (evt.isMounting())
-                cbowStack.enchant(Enchantments.UNBREAKING, 1); // just to make it look enchanted for explosive arrows
-            else if (ResearchServer.playerHasResearch(pUnit.getOwnerName(), ResearchPillagerCrossbows.itemName))
-                cbowStack.enchant(Enchantments.MULTISHOT, 1);
-            pUnit.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
-        }
-    }
 }

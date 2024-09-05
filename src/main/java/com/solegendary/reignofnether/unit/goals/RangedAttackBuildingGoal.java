@@ -65,6 +65,10 @@ public class RangedAttackBuildingGoal<T extends net.minecraft.world.entity.Mob> 
         }
     }
 
+    public void setBuildingTarget(Building building) {
+        this.buildingTarget = building;
+    }
+
     public Building getBuildingTarget() {
         return buildingTarget;
     }

@@ -367,7 +367,7 @@ public class BuildingServerEvents {
                     if (creeperUnit.isPowered())
                         atkDmg *= 2;
                 } else if (pillagerUnit != null) {
-                    atkDmg = (int) pillagerUnit.getUnitAttackDamage();
+                    atkDmg = (int) pillagerUnit.getUnitAttackDamage() / 2;
                 }
                 building.destroyRandomBlocks(atkDmg);
             }

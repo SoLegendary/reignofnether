@@ -51,136 +51,47 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     // region
     private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
     private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
-
-    public ArrayList<BlockPos> getCheckpoints() {
-        return checkpoints;
-    }
-
-    ;
-
-    public int getCheckpointTicksLeft() {
-        return checkpointTicksLeft;
-    }
-
-    public void setCheckpointTicksLeft(int ticks) {
-        checkpointTicksLeft = ticks;
-    }
-
+    public ArrayList<BlockPos> getCheckpoints() { return checkpoints; }
+    public int getCheckpointTicksLeft() { return checkpointTicksLeft; }
+    public void setCheckpointTicksLeft(int ticks) { checkpointTicksLeft = ticks; }
     private boolean isCheckpointGreen = true;
-
-    public boolean isCheckpointGreen() {
-        return isCheckpointGreen;
-    }
-
-    ;
-
-    public void setIsCheckpointGreen(boolean green) {
-        isCheckpointGreen = green;
-    }
-
-    ;
+    public boolean isCheckpointGreen() { return isCheckpointGreen; }
+    public void setIsCheckpointGreen(boolean green) { isCheckpointGreen = green; }
     private int entityCheckpointId = -1;
-
-    public int getEntityCheckpointId() {
-        return entityCheckpointId;
-    }
-
-    ;
-
-    public void setEntityCheckpointId(int id) {
-        entityCheckpointId = id;
-    }
-
-    ;
+    public int getEntityCheckpointId() { return entityCheckpointId; }
+    public void setEntityCheckpointId(int id) { entityCheckpointId = id; }
 
     GarrisonGoal garrisonGoal;
-
-    public GarrisonGoal getGarrisonGoal() {
-        return garrisonGoal;
-    }
-
-    public boolean canGarrison() {
-        return getGarrisonGoal() != null;
-    }
+    public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
+    public boolean canGarrison() { return getGarrisonGoal() != null; }
 
     UsePortalGoal usePortalGoal;
+    public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
+    public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public UsePortalGoal getUsePortalGoal() {
-        return usePortalGoal;
-    }
+    public Faction getFaction() { return Faction.VILLAGERS; }
 
-    public boolean canUsePortal() {
-        return getUsePortalGoal() != null;
-    }
+    public List<AbilityButton> getAbilityButtons() { return abilityButtons; }
+    public List<Ability> getAbilities() { return abilities; }
+    public List<ItemStack> getItems() { return items; }
 
-    public Faction getFaction() {
-        return Faction.VILLAGERS;
-    }
-
-    public List<AbilityButton> getAbilityButtons() {
-        return abilityButtons;
-    }
-
-    ;
-
-    public List<Ability> getAbilities() {
-        return abilities;
-    }
-
-    public List<ItemStack> getItems() {
-        return items;
-    }
-
-    ;
-
-    public MoveToTargetBlockGoal getMoveGoal() {
-        return moveGoal;
-    }
-
-    public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {
-        return targetGoal;
-    }
-
-    public Goal getAttackBuildingGoal() {
-        return attackBuildingGoal;
-    }
-
-    public Goal getAttackGoal() {
-        return attackGoal;
-    }
-
-    public ReturnResourcesGoal getReturnResourcesGoal() {
-        return returnResourcesGoal;
-    }
-
-    public int getMaxResources() {
-        return maxResources;
-    }
-
-    public MountGoal getMountGoal() {
-        return mountGoal;
-    }
+    public MoveToTargetBlockGoal getMoveGoal() { return moveGoal; }
+    public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() { return targetGoal; }
+    public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
+    public Goal getAttackGoal() { return attackGoal; }
+    public ReturnResourcesGoal getReturnResourcesGoal() { return returnResourcesGoal; }
+    public int getMaxResources() { return maxResources; }
+    public MountGoal getMountGoal() { return mountGoal; }
 
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
     public MountGoal mountGoal;
 
-    public BlockPos getAttackMoveTarget() {
-        return attackMoveTarget;
-    }
-
-    public LivingEntity getFollowTarget() {
-        return followTarget;
-    }
-
-    public boolean getHoldPosition() {
-        return holdPosition;
-    }
-
-    public void setHoldPosition(boolean holdPosition) {
-        this.holdPosition = holdPosition;
-    }
+    public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
+    public LivingEntity getFollowTarget() { return followTarget; }
+    public boolean getHoldPosition() { return holdPosition; }
+    public void setHoldPosition(boolean holdPosition) { this.holdPosition = holdPosition; }
 
     // if true causes moveGoal and attackGoal to work together to allow attack moving
     // moves to a block but will chase/attack nearby monsters in range up to a certain distance away
@@ -207,61 +118,21 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     }
 
     // combat stats
-    public boolean getWillRetaliate() {
-        return willRetaliate;
-    }
+    public boolean getWillRetaliate() { return willRetaliate; }
+    public int getAttackCooldown() { return (int) (20 / attacksPerSecond); }
+    public float getAttacksPerSecond() { return 20f / (getAttackCooldown() + 25); } // crossbow charge time is 25 ticks
+    public float getAggroRange() { return aggroRange; }
+    public boolean getAggressiveWhenIdle() { return aggressiveWhenIdle && !isVehicle(); }
+    public float getAttackRange() { return attackRange; }
+    public float getMovementSpeed() { return movementSpeed; }
+    public float getUnitAttackDamage() { return attackDamage; }
+    public float getUnitMaxHealth() { return maxHealth; }
+    public float getUnitArmorValue() { return armorValue; }
+    public int getPopCost() { return popCost; }
 
-    public int getAttackCooldown() {
-        return (int) (20 / attacksPerSecond);
-    }
-
-    public float getAttacksPerSecond() {
-        return 20f / (getAttackCooldown() + 25);
-    } // crossbow charge time is 25 ticks
-
-    public float getAggroRange() {
-        return aggroRange;
-    }
-
-    public boolean getAggressiveWhenIdle() {
-        return aggressiveWhenIdle && !isVehicle();
-    }
-
-    public float getAttackRange() {
-        return attackRange;
-    }
-
-    public float getMovementSpeed() {
-        return movementSpeed;
-    }
-
-    public float getUnitAttackDamage() {
-        return attackDamage;
-    }
-
-    public float getUnitMaxHealth() {
-        return maxHealth;
-    }
-
-    public float getUnitArmorValue() {
-        return armorValue;
-    }
-
-    public int getPopCost() {
-        return popCost;
-    }
-
-    public boolean canAttackBuildings() {
-        return getAttackBuildingGoal() != null;
-    }
-
-    public void setAttackMoveTarget(@Nullable BlockPos bp) {
-        this.attackMoveTarget = bp;
-    }
-
-    public void setFollowTarget(@Nullable LivingEntity target) {
-        this.followTarget = target;
-    }
+    public boolean canAttackBuildings() { return getAttackBuildingGoal() != null && isPassenger(); }
+    public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
+    public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
     // endregion
 
@@ -362,9 +233,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     @Override
     public void setupEquipmentAndUpgradesServer() {
         ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
-        if (isPassenger())
-            cbowStack.enchant(Enchantments.UNBREAKING, 1); // just to make it look enchanted for explosive arrows
-        else if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchPillagerCrossbows.itemName))
+        if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchPillagerCrossbows.itemName))
             cbowStack.enchant(Enchantments.MULTISHOT, 1);
         this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
     }
