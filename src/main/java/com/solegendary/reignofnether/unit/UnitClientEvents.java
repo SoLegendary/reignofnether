@@ -950,7 +950,7 @@ public class UnitClientEvents {
     }
      */
 
-    // prevent opening inventory with E or advancements with L
+    /*
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
         if (Keybindings.altMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE && !getAllUnits().isEmpty()) {
@@ -970,4 +970,5 @@ public class UnitClientEvents {
             ));
         }
     }
+     */
 }

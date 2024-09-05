@@ -63,7 +63,6 @@ public class UnitActionServerboundPacket {
             if (this.action == UnitAction.DEBUG2) {
                 UnitServerEvents.debug2();
             }
-
             UnitServerEvents.addActionItem(
                 this.ownerName,
                 this.action,

@@ -503,25 +503,7 @@ public class UnitServerEvents {
                 UnitActionClientboundPacket.reflectUnitAction(cUnit.getOwnerName(), UnitAction.EXPLODE, new int[]{cUnit.getId()});
     }
 
-    public static void debug1() {
-        convertAllToUnit(
-                "SoLegendary",
-                (ServerLevel) getAllUnits().get(0).getLevel(),
-                (LivingEntity entity) ->
-                        entity instanceof ZombieUnit sUnit &&
-                                sUnit.getOwnerName().equals("SoLegendary"),
-                EntityRegistrar.HUSK_UNIT.get()
-        );
-    }
+    public static void debug1() { }
 
-    public static void debug2() {
-        convertAllToUnit(
-                "SoLegendary",
-                (ServerLevel) getAllUnits().get(0).getLevel(),
-                (LivingEntity entity) ->
-                        entity instanceof ZombieUnit sUnit &&
-                                sUnit.getOwnerName().equals("SoLegendary"),
-                EntityRegistrar.DROWNED_UNIT.get()
-        );
-    }
+    public static void debug2() { }
 }
