@@ -57,6 +57,12 @@ public class UnitActionServerboundPacket {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
+            if (this.action == UnitAction.DEBUG1) {
+                UnitServerEvents.debug1();
+            }
+            if (this.action == UnitAction.DEBUG2) {
+                UnitServerEvents.debug2();
+            }
             UnitServerEvents.addActionItem(
                 this.ownerName,
                 this.action,

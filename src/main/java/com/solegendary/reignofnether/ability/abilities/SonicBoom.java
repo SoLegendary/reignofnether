@@ -1,8 +1,12 @@
 package com.solegendary.reignofnether.ability.abilities;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.ability.Ability;
@@ -62,19 +66,21 @@ public class SonicBoom extends Ability {
     }
 
     @Override
-    public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        if (level.isClientSide())
-            showTemporaryMessage("Must target an enemy unit!");
+    public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
+        if (targetEntity instanceof Unit unit && unit.equals(this.wardenUnit))
+            return;
+        ((WardenUnit) unitUsing).getSonicBoomGoal().setAbility(this);
+        ((WardenUnit) unitUsing).getSonicBoomGoal().setTarget(targetEntity);
     }
 
     @Override
-    public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
-        if (targetEntity instanceof Unit unit && unit.equals(this.wardenUnit)) {
-            if (level.isClientSide())
-                showTemporaryMessage("Must target an enemy unit!");
-            return;
+    public void use(Level level, Unit unitUsing, BlockPos targetBp) {
+        Building targetBuilding = BuildingUtils.findBuilding(level.isClientSide(), targetBp);
+        if (targetBuilding != null) {
+            ((WardenUnit) unitUsing).getSonicBoomGoal().setAbility(this);
+            ((WardenUnit) unitUsing).getSonicBoomGoal().setTarget(targetBuilding);
+        } else if (level.isClientSide()) {
+            HudClientEvents.showTemporaryMessage("Must target a unit or building.");
         }
-        ((WardenUnit) unitUsing).getSonicBoomGoal().setAbility(this);
-        ((WardenUnit) unitUsing).getSonicBoomGoal().setTarget(targetEntity);
     }
 }

@@ -16,24 +16,31 @@ import java.util.List;
 import java.util.Random;
 
 
-public class RangedFlyingAttackBuildingGoal<T extends net.minecraft.world.entity.Mob> extends Goal {
+public class RangedAttackBuildingGoal<T extends net.minecraft.world.entity.Mob> extends Goal {
     private final T mob;
-    private BlockPos groundTarget = null;
-    private final UnitBowAttackGoal<?> bowAttackGoal;
+    private BlockPos blockTarget = null;
+    private UnitBowAttackGoal<?> bowAttackGoal = null;
+    private UnitCrossbowAttackGoal<?> cbowAttackGoal = null;
     private Building buildingTarget = null;
 
-    public RangedFlyingAttackBuildingGoal(T mob, UnitBowAttackGoal<?> bowAttackGoal) {
+    public RangedAttackBuildingGoal(T mob, UnitBowAttackGoal<?> bowAttackGoal) {
         this.mob = mob;
         this.bowAttackGoal = bowAttackGoal;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
-    private void setNextGroundTarget() {
+    public RangedAttackBuildingGoal(T mob, UnitCrossbowAttackGoal<?> cbowAttackGoal) {
+        this.mob = mob;
+        this.cbowAttackGoal = cbowAttackGoal;
+        this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+    }
+
+    public void setNextBlockTarget() {
         if (this.buildingTarget != null && !buildingTarget.getBlocks().isEmpty()) {
             Random rand = new Random();
             List<BuildingBlock> nonAirBlocks = buildingTarget.getBlocks().stream().filter(b -> b.isPlaced(this.mob.level)).toList();
             BuildingBlock block = nonAirBlocks.get(rand.nextInt(nonAirBlocks.size()));
-            this.groundTarget = block.getBlockPos();
+            this.blockTarget = block.getBlockPos();
         }
     }
 
@@ -52,10 +59,14 @@ public class RangedFlyingAttackBuildingGoal<T extends net.minecraft.world.entity
             }
             else {
                 this.buildingTarget = BuildingUtils.findBuilding(false, blockPos);
-                setNextGroundTarget();
+                setNextBlockTarget();
             }
             this.start();
         }
+    }
+
+    public void setBuildingTarget(Building building) {
+        this.buildingTarget = building;
     }
 
     public Building getBuildingTarget() {
@@ -63,7 +74,7 @@ public class RangedFlyingAttackBuildingGoal<T extends net.minecraft.world.entity
     }
 
     public boolean canUse() {
-        return this.groundTarget != null;
+        return this.blockTarget != null;
     }
 
     public boolean canContinueToUse() {
@@ -79,7 +90,7 @@ public class RangedFlyingAttackBuildingGoal<T extends net.minecraft.world.entity
 
     public void stop() {
         super.stop();
-        groundTarget = null;
+        blockTarget = null;
         buildingTarget = null;
         this.mob.setAggressive(false);
     }
@@ -88,10 +99,10 @@ public class RangedFlyingAttackBuildingGoal<T extends net.minecraft.world.entity
         if (buildingTarget != null && buildingTarget.getBlocksPlaced() <= 0) {
             stop();
         }
-        if (groundTarget != null) {
-            float tx = groundTarget.getX() + 0.5f;
-            float ty = groundTarget.getY() + 0.5f;
-            float tz = groundTarget.getZ() + 0.5f;
+        if (blockTarget != null) {
+            float tx = blockTarget.getX() + 0.5f;
+            float ty = blockTarget.getY() + 0.5f;
+            float tz = blockTarget.getZ() + 0.5f;
 
             this.mob.getLookControl().setLookAt(tx, ty, tz);
 
@@ -104,21 +115,25 @@ public class RangedFlyingAttackBuildingGoal<T extends net.minecraft.world.entity
 
             if ((distToTarget > attackRange - 1) &&
                 !((Unit) this.mob).getHoldPosition()) {
-                this.moveTo(this.groundTarget);
+                this.moveTo(this.blockTarget);
             } else {
                 this.stopMoving();
             }
             if (distToTarget <= attackRange) { // start drawing bowstring
-                if (bowAttackGoal.getAttackCooldown() <= 0) {
-                    if (mob instanceof RangedAttackerUnit rangedAttackerUnit) {
-                        rangedAttackerUnit.performUnitRangedAttack(tx, ty, tz, 20);
-                        if (!mob.level.isClientSide() && buildingTarget != null)
-                            FogOfWarClientboundPacket.revealRangedUnit(buildingTarget.ownerName, mob.getId());
+                if (bowAttackGoal != null) {
+                    if (bowAttackGoal.getAttackCooldown() <= 0) {
+                        if (mob instanceof RangedAttackerUnit rangedAttackerUnit) {
+                            rangedAttackerUnit.performUnitRangedAttack(tx, ty, tz, 20);
+                            if (!mob.level.isClientSide() && buildingTarget != null)
+                                FogOfWarClientboundPacket.revealRangedUnit(buildingTarget.ownerName, mob.getId());
+                        }
+                        bowAttackGoal.setToMaxAttackCooldown();
+                        setNextBlockTarget();
                     }
-                    bowAttackGoal.setToMaxAttackCooldown();
-                    setNextGroundTarget();
                 }
             }
+            // handle crossbow attacks (ie. pillagers attacking buildings) in UnitCrossbowAttackGoal
+            // because we can't directly use mob.performUnitRangedAttack()
         }
     }
 

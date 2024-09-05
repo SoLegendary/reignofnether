@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
@@ -10,6 +11,7 @@ import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -116,8 +118,12 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
                     ((Unit) mob).setIsCheckpointGreen(false);
                 }
             }
-            else
+            else {
                 this.buildingTarget = BuildingUtils.findBuilding(false, blockPos);
+                if (this.mob.isVehicle() && this.mob.getFirstPassenger() instanceof AttackerUnit aUnit &&
+                    aUnit.getAttackBuildingGoal() instanceof RangedAttackBuildingGoal<?> rabg)
+                    rabg.setBuildingTarget(this.buildingTarget);
+            }
             calcMoveTarget();
             this.start();
         }

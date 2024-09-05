@@ -6,7 +6,7 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
 import com.solegendary.reignofnether.unit.goals.FlyingMoveToTargetGoal;
 import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
-import com.solegendary.reignofnether.unit.goals.RangedFlyingAttackBuildingGoal;
+import com.solegendary.reignofnether.unit.goals.RangedAttackBuildingGoal;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -45,7 +45,7 @@ public interface AttackerUnit {
     // move to a building and start attacking it
     public default void setAttackBuildingTarget(BlockPos preselectedBlockPos) {
         Goal attackBuildingGoal = this.getAttackBuildingGoal();
-        if (attackBuildingGoal instanceof RangedFlyingAttackBuildingGoal<?> rabg)
+        if (attackBuildingGoal instanceof RangedAttackBuildingGoal<?> rabg)
             rabg.setBuildingTarget(preselectedBlockPos);
         else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
             mabg.setBuildingTarget(preselectedBlockPos);
@@ -56,7 +56,7 @@ public interface AttackerUnit {
         unit.setAttackMoveTarget(null);
 
         Goal attackBuildingGoal = unit.getAttackBuildingGoal();
-        if (attackBuildingGoal instanceof RangedFlyingAttackBuildingGoal<?> rabg)
+        if (attackBuildingGoal instanceof RangedAttackBuildingGoal<?> rabg)
             rabg.stop();
         else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
             mabg.stopAttacking();
@@ -87,7 +87,7 @@ public interface AttackerUnit {
 
             boolean isAttackingBuilding = false;
             Goal attackBuildingGoal = attackerUnit.getAttackBuildingGoal();
-            if (attackBuildingGoal instanceof RangedFlyingAttackBuildingGoal<?> rabg)
+            if (attackBuildingGoal instanceof RangedAttackBuildingGoal<?> rabg)
                 isAttackingBuilding = rabg.getBuildingTarget() != null;
             else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
                 isAttackingBuilding = mabg.getBuildingTarget() != null;

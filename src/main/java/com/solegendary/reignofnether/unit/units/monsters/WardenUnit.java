@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.SonicBoom;
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -200,7 +201,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
         this.attackGoal = new MeleeAttackUnitGoal(this, getAttackCooldown(), false);
         this.attackBuildingGoal = new MeleeAttackBuildingGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
-        this.sonicBoomGoal = new SonicBoomGoal(this, SONIC_BOOM_CHANNEL_TICKS, SONIC_BOOM_RANGE, this::doSonicBoom);
+        this.sonicBoomGoal = new SonicBoomGoal(this, SONIC_BOOM_CHANNEL_TICKS, SONIC_BOOM_RANGE, this::doEntitySonicBoom, this::doBuildingSonicBoom);
     }
 
     @Override
@@ -225,16 +226,16 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
         this.sonicBoomGoal.stop();
     }
 
-    public void doSonicBoom(LivingEntity targetEntity) {
-        Vec3 headToChestOffset = this.position().add(0, 1.6, 0);
-        Vec3 targetPos = targetEntity.getEyePosition().subtract(headToChestOffset);
+    public void doEntitySonicBoom(LivingEntity targetEntity) {
+        Vec3 startPos = this.position().add(0, 1.6, 0);
+        Vec3 targetPos = targetEntity.getEyePosition().subtract(startPos);
         Vec3 normTargetPos = targetPos.normalize();
 
         this.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 1.0F);
         if (!this.level.isClientSide()) {
             ServerLevel level = (ServerLevel) this.level;
             for(int i = 1; i < Mth.floor(targetPos.length()) + 7; ++i) {
-                Vec3 particlePos = headToChestOffset.add(normTargetPos.scale(i));
+                Vec3 particlePos = startPos.add(normTargetPos.scale(i));
                 level.sendParticles(ParticleTypes.SONIC_BOOM, particlePos.x, particlePos.y, particlePos.z, 1, 0,0,0,0);
             }
         }
@@ -242,6 +243,26 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
         double knockbackY = 0.5 * (1.0 - targetEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
         double knockbackXZ = 2.0 * (1.0 - targetEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
         targetEntity.push(normTargetPos.x() * knockbackXZ, normTargetPos.y() * knockbackY, normTargetPos.z() * knockbackXZ);
+    }
+
+    public void doBuildingSonicBoom(Building targetBuilding) {
+        Vec3 startPos = this.position().add(0, 1.6, 0);
+        Vec3 targetPos = new Vec3(
+                targetBuilding.centrePos.getX() + 0.5f,
+                targetBuilding.minCorner.getY() + 1.5f,
+                targetBuilding.centrePos.getZ() + 0.5f)
+                .subtract(startPos);
+        Vec3 normTargetPos = targetPos.normalize();
+
+        this.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 1.0F);
+        if (!this.level.isClientSide()) {
+            ServerLevel level = (ServerLevel) this.level;
+            for(int i = 1; i < Mth.floor(targetPos.length()) + 7; ++i) {
+                Vec3 particlePos = startPos.add(normTargetPos.scale(i));
+                level.sendParticles(ParticleTypes.SONIC_BOOM, particlePos.x, particlePos.y, particlePos.z, 1, 0,0,0,0);
+            }
+        }
+        targetBuilding.destroyRandomBlocks((int) SONIC_BOOM_DAMAGE / 2);
     }
 
     public void startSonicBoomAnimation() {

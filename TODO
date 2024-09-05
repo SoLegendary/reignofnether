@@ -1,10 +1,26 @@
 
 
+
 TODO bugs/features:
 
+Save unit owners and buildings to the world to prevent loss of data on server shutdown
+    - Buildings & ownername
+    - Units & ownername
+    - RTSPlayers
+    - Resources
 
-minimap still shows physical blocks in fog until the camera moves (and replaces them with fake frozen blocks)
-    - because the frozenchunk logic in MinimapClientEvents can save air
+- reset the tutorial map before loading it
+
+
+QoL/Balance
+-----------
+villagers get stuck in the bridge if they fall in water
+    - apply some upwards velocity?
+
+To test:
+-------
+general tutorial completion
+
 
 
 
@@ -19,15 +35,10 @@ minimap still shows physical blocks in fog until the camera moves (and replaces 
 
 
 
-Balance additions
+
+
+Misc additions
 -----------------
-- Monsters and Villagers should have a late game ranged sieger
-    - VILLAGERS: Pillagers mounted on ravagers gain explosive arrows and can damage buildings, but loses multishot
-    - MONSTERS: Wardens can yamato gun buildings
-
-- Piglins should have a mid game melee sieger
-    - PIGLINS: ?
-
 - change witches to auto attack like evokers, reduce cooldown, reduce potion strength and remove lingering effect
     - ability to toggle between potion types
     - ability to toggle between auto-attack targets (ally or enemy)
@@ -40,6 +51,9 @@ Balance additions
 - give units smooth block climbing for 1-block-high ledges (horse/ravager move logic)
 - recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
     - most prevalent in 1v1 melee combat
+
+Let workers gather beehives
+
 
 
 
@@ -66,8 +80,12 @@ Bugs backlog
 - workers are not marked as idle until 15s after stopping gathering
 - turning on fog of war causes a crash when optifine is installed
 - portal blocks crack when explored (because of updating fake frozen blocks)
+- minimap still shows physical blocks in fog until the camera moves (and replaces them with fake frozen blocks)
+    - because the frozenchunk logic in MinimapClientEvents can save air
 
-
+(MacOS) minecraft title screen is messed up and doesn't retrieve the assets
+(MacOS) GUI scaling does not work
+(MacOS) macbooks dont have alt and ctrl (it's option and command)
 
 TODO vanilla player balancing/interaction (backlog)
 - Balance strong player actions using food:

@@ -15,12 +15,14 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Explosion;
@@ -301,10 +303,14 @@ public class BuildingServerEvents {
 
         GhastUnit ghastUnit = null;
         CreeperUnit creeperUnit = null;
+        PillagerUnit pillagerUnit = null;
 
         if (evt.getExplosion().getSourceMob() instanceof CreeperUnit cUnit) {
             creeperUnit = cUnit;
         } // generic means it was from random blocks broken, so don't consider it or we might keep chaining
+        else if (evt.getExplosion().getSourceMob() instanceof PillagerUnit pUnit) {
+            pillagerUnit = pUnit;
+        }
         else if (exp.getDamageSource() != DamageSource.GENERIC) {
             for (Entity entity : evt.getAffectedEntities()) {
                 if (entity instanceof LargeFireball fireball &&
@@ -314,9 +320,9 @@ public class BuildingServerEvents {
                 }
             }
         }
+
         // set fire to random blocks from a ghast fireball
         if (ghastUnit != null) {
-
             List<BlockPos> flammableBps = evt.getAffectedBlocks().stream().filter(bp -> {
                 BlockState bs = evt.getLevel().getBlockState(bp);
                 BlockState bsAbove = evt.getLevel().getBlockState(bp.above());
@@ -337,9 +343,15 @@ public class BuildingServerEvents {
         if (exp.getExploder() == null && exp.getSourceMob() == null && ghastUnit == null)
             evt.getAffectedEntities().clear();
 
-        // apply creeper and ghast attack damage as bonus damage to buildings
+        // explosive arrows from mounted pillagers
+        if (exp.getSourceMob() instanceof PillagerUnit pUnit && pUnit.isPassenger())
+            for (Entity entity : evt.getAffectedEntities())
+                if (entity instanceof LivingEntity le)
+                    le.setHealth(le.getHealth() - 2); // for some reason there's still iframes so we cant use hurt()
+
+        // apply creeper, ghast and mounted pillager attack damage as bonus damage to buildings
         // this is dealt in addition to the actual blocks destroyed by the explosion itself
-        if (creeperUnit != null || ghastUnit != null) {
+        if (creeperUnit != null || ghastUnit != null || pillagerUnit != null) {
             Set<Building> affectedBuildings = new HashSet<>();
             for (BlockPos bp : evt.getAffectedBlocks()) {
                 Building building = BuildingUtils.findBuilding(false, bp);
@@ -350,10 +362,12 @@ public class BuildingServerEvents {
                 int atkDmg = 0;
                 if (ghastUnit != null) {
                     atkDmg = (int) ghastUnit.getUnitAttackDamage();
-                } else {
-                     atkDmg = (int) creeperUnit.getUnitAttackDamage();
+                } else if (creeperUnit != null) {
+                    atkDmg = (int) creeperUnit.getUnitAttackDamage();
                     if (creeperUnit.isPowered())
                         atkDmg *= 2;
+                } else if (pillagerUnit != null) {
+                    atkDmg = (int) pillagerUnit.getUnitAttackDamage() / 2;
                 }
                 building.destroyRandomBlocks(atkDmg);
             }

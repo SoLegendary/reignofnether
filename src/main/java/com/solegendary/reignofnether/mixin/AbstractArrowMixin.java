@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -22,7 +23,9 @@ import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +35,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -220,5 +222,35 @@ public abstract class AbstractArrowMixin extends Projectile {
             }
             this.piercingIgnoreEntityIds.add(entity.getId());
         }
+
+        if (this.getOwner() instanceof PillagerUnit pUnit &&
+            !pUnit.getLevel().isClientSide() && pUnit.isPassenger()) {
+            pUnit.getLevel().explode(this, damagesource, null,
+                    pResult.getEntity().getEyePosition().x,
+                    pResult.getEntity().getEyePosition().y,
+                    pResult.getEntity().getEyePosition().z,
+                    1f,
+                    false,
+                    Explosion.BlockInteraction.NONE);
+        }
+    }
+
+    // replace bounce logic (on hitting an enemy at the time as another arrow) with pierce logic instead
+    @Inject(
+            method = "onHitBlock",
+            at = @At("HEAD")
+    )
+    protected void onHitBlock(BlockHitResult pResult, CallbackInfo ci) {
+        if (this.getOwner() instanceof PillagerUnit pUnit &&
+                !pUnit.getLevel().isClientSide() && pUnit.isPassenger()) {
+            pUnit.getLevel().explode(this, null, null,
+                    pResult.getLocation().x,
+                    pResult.getLocation().y,
+                    pResult.getLocation().z,
+                    1f,
+                    false,
+                    Explosion.BlockInteraction.NONE);
+        }
     }
 }
+

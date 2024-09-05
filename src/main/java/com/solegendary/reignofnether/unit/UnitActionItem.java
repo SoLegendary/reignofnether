@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.goals.ReturnResourcesGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -252,7 +253,8 @@ public class UnitActionItem {
                     ((LivingEntity) unit).kill();
                 }
                 case DISCARD -> {
-                    ((LivingEntity) unit).discard();
+                    if (unit instanceof ConvertableUnit cUnit)
+                        cUnit.setShouldDiscard(true);
                 }
 
                 // any other Ability not explicitly defined here

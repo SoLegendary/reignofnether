@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.ability.abilities.MountRavager;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -50,15 +51,15 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     // region
     private final ArrayList<BlockPos> checkpoints = new ArrayList<>();
     private int checkpointTicksLeft = UnitClientEvents.CHECKPOINT_TICKS_MAX;
-    public ArrayList<BlockPos> getCheckpoints() { return checkpoints; };
+    public ArrayList<BlockPos> getCheckpoints() { return checkpoints; }
     public int getCheckpointTicksLeft() { return checkpointTicksLeft; }
     public void setCheckpointTicksLeft(int ticks) { checkpointTicksLeft = ticks; }
     private boolean isCheckpointGreen = true;
-    public boolean isCheckpointGreen() { return isCheckpointGreen; };
-    public void setIsCheckpointGreen(boolean green) { isCheckpointGreen = green; };
+    public boolean isCheckpointGreen() { return isCheckpointGreen; }
+    public void setIsCheckpointGreen(boolean green) { isCheckpointGreen = green; }
     private int entityCheckpointId = -1;
-    public int getEntityCheckpointId() { return entityCheckpointId; };
-    public void setEntityCheckpointId(int id) { entityCheckpointId = id; };
+    public int getEntityCheckpointId() { return entityCheckpointId; }
+    public void setEntityCheckpointId(int id) { entityCheckpointId = id; }
 
     GarrisonGoal garrisonGoal;
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
@@ -68,17 +69,19 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;}
-    public List<ItemStack> getItems() {return items;};
-    public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
-    public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
-    public Goal getAttackBuildingGoal() {return attackBuildingGoal;}
-    public Goal getAttackGoal() {return attackGoal;}
-    public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
-    public int getMaxResources() {return maxResources;}
-    public MountGoal getMountGoal() {return mountGoal;}
+    public Faction getFaction() { return Faction.VILLAGERS; }
+
+    public List<AbilityButton> getAbilityButtons() { return abilityButtons; }
+    public List<Ability> getAbilities() { return abilities; }
+    public List<ItemStack> getItems() { return items; }
+
+    public MoveToTargetBlockGoal getMoveGoal() { return moveGoal; }
+    public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() { return targetGoal; }
+    public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
+    public Goal getAttackGoal() { return attackGoal; }
+    public ReturnResourcesGoal getReturnResourcesGoal() { return returnResourcesGoal; }
+    public int getMaxResources() { return maxResources; }
+    public MountGoal getMountGoal() { return mountGoal; }
 
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
@@ -97,8 +100,14 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     private boolean holdPosition = false;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
-    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
-    public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
+    public String getOwnerName() {
+        return this.entityData.get(ownerDataAccessor);
+    }
+
+    public void setOwnerName(String name) {
+        this.entityData.set(ownerDataAccessor, name);
+    }
+
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(PillagerUnit.class, EntityDataSerializers.STRING);
 
@@ -109,19 +118,19 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     }
 
     // combat stats
-    public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return 20f / (getAttackCooldown() + 25);} // crossbow charge time is 25 ticks
-    public float getAggroRange() {return aggroRange;}
-    public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage;}
-    public float getUnitMaxHealth() {return maxHealth;}
-    public float getUnitArmorValue() {return armorValue;}
-    public int getPopCost() {return popCost;}
-    public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
+    public boolean getWillRetaliate() { return willRetaliate; }
+    public int getAttackCooldown() { return (int) (20 / attacksPerSecond); }
+    public float getAttacksPerSecond() { return 20f / (getAttackCooldown() + 25); } // crossbow charge time is 25 ticks
+    public float getAggroRange() { return aggroRange; }
+    public boolean getAggressiveWhenIdle() { return aggressiveWhenIdle && !isVehicle(); }
+    public float getAttackRange() { return attackRange; }
+    public float getMovementSpeed() { return movementSpeed; }
+    public float getUnitAttackDamage() { return attackDamage; }
+    public float getUnitMaxHealth() { return maxHealth; }
+    public float getUnitArmorValue() { return armorValue; }
+    public int getPopCost() { return popCost; }
 
+    public boolean canAttackBuildings() { return getAttackBuildingGoal() != null && isPassenger(); }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
@@ -141,11 +150,17 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     public int maxResources = 100;
 
     public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
-    public int getFogRevealDuration() { return fogRevealDuration; }
-    public void setFogRevealDuration(int duration) { fogRevealDuration = duration; }
+
+    public int getFogRevealDuration() {
+        return fogRevealDuration;
+    }
+
+    public void setFogRevealDuration(int duration) {
+        fogRevealDuration = duration;
+    }
 
     private UnitCrossbowAttackGoal<? extends LivingEntity> attackGoal;
-    private MeleeAttackBuildingGoal attackBuildingGoal;
+    private RangedAttackBuildingGoal<?> attackBuildingGoal;
 
     private final List<AbilityButton> abilityButtons = new ArrayList<>();
     private final List<Ability> abilities = new ArrayList<>();
@@ -163,7 +178,9 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     }
 
     @Override
-    public boolean removeWhenFarAway(double d) { return false; }
+    public boolean removeWhenFarAway(double d) {
+        return false;
+    }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
@@ -190,6 +207,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         this.attackGoal = new UnitCrossbowAttackGoal<>(this, getAttackCooldown());
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
         this.mountGoal = new MountGoal(this);
+        this.attackBuildingGoal = new RangedAttackBuildingGoal<>(this, this.attackGoal);
     }
 
     @Override
@@ -217,7 +235,6 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
         if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchPillagerCrossbows.itemName))
             cbowStack.enchant(Enchantments.MULTISHOT, 1);
-
         this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
     }
 
@@ -237,6 +254,12 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     @Override
     public void shootCrossbowProjectile(LivingEntity pUser, LivingEntity pTarget, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
+
+        // bit of a hacky fix to attack buildings since this function is called from CrossbowItem
+        if (pTarget == null && this.getAttackBuildingGoal() instanceof RangedAttackBuildingGoal<?> rabg) {
+            shootCrossbowProjectileAtBuilding(pUser, rabg, pProjectile, pProjectileAngle, pVelocity);
+            return;
+        }
         double d0 = pTarget.getX() - pUser.getX();
         double d1 = pTarget.getZ() - pUser.getZ();
         double d2 = Math.sqrt(d0 * d0 + d1 * d1);
@@ -246,10 +269,26 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
             d1 -= (1.0f - pTarget.getEyeHeight());
 
         Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
-        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, (float)(14 - pUser.level.getDifficulty().getId() * 4));
+        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, (float) (14 - pUser.level.getDifficulty().getId() * 4));
         pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
 
         if (!level.isClientSide() && pTarget instanceof Unit unit)
             FogOfWarClientboundPacket.revealRangedUnit(unit.getOwnerName(), this.getId());
+    }
+
+    private void shootCrossbowProjectileAtBuilding(LivingEntity pUser, RangedAttackBuildingGoal<?> rabg, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
+        if (rabg.getBuildingTarget() == null) {
+            return;
+        }
+        double d0 = rabg.getBuildingTarget().centrePos.getX() - pUser.getX();
+        double d1 = rabg.getBuildingTarget().centrePos.getZ() - pUser.getZ();
+        double d3 = rabg.getBuildingTarget().centrePos.getY();
+
+        Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
+        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, (float) (14 - pUser.level.getDifficulty().getId() * 4));
+        pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
+
+        if (!level.isClientSide())
+            FogOfWarClientboundPacket.revealRangedUnit(rabg.getBuildingTarget().ownerName, this.getId());
     }
 }

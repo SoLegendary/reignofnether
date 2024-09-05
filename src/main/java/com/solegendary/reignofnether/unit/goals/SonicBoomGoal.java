@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import net.minecraft.world.entity.LivingEntity;
@@ -9,8 +10,9 @@ import java.util.function.Consumer;
 
 public class SonicBoomGoal extends AbstractCastTargetedSpellGoal {
 
-    public SonicBoomGoal(Mob mob, int channelTicks, int range, Consumer<LivingEntity> onCast) {
-        super(mob, channelTicks, range, false, onCast);
+    public SonicBoomGoal(Mob mob, int channelTicks, int range,
+                         Consumer<LivingEntity> onEntityCast, Consumer<Building> onBuildingCast) {
+        super(mob, channelTicks, range, onEntityCast, null, onBuildingCast);
     }
 
     @Override
@@ -32,7 +34,7 @@ public class SonicBoomGoal extends AbstractCastTargetedSpellGoal {
     public void stop() {
         // hack fix to stop a weird bug where it gets stopped unexpectedly (serverside)
         // happens when needing to move towards the target first
-        if (this.ticksCasting <= 2 && isInRange())
+        if (this.ticksCasting <= 3 && isInRange())
             return;
         super.stop();
     }
