@@ -61,19 +61,20 @@ public class BuildingServerEvents {
             return;
 
         ticksToSave += 1;
-        if (ticksToSave >= 200) {
+        if (ticksToSave == 2400) {
             SavedBuildingData data = SavedBuildingData.getInstance(evt.level);
-            getBuildings().forEach(b -> data.getBuildings().add(new SavedBuilding(
-                    b.originPos,
-                    evt.level,
-                    b.name,
-                    b.ownerName,
-                    b.rotation,
-                    b.isDiagonalBridge
-            )));
-            System.out.println("saved buildings!");
+            getBuildings().forEach(b -> {
+                data.getBuildings().add(new SavedBuilding(
+                        b.originPos,
+                        evt.level,
+                        b.name,
+                        b.ownerName,
+                        b.rotation,
+                        b.isDiagonalBridge
+                ));
+                System.out.println("saved building in serverevents: " + b.originPos);
+            });
             data.save();
-            ticksToSave = 0;
         }
     }
 
@@ -84,10 +85,11 @@ public class BuildingServerEvents {
         if (level != null) {
             SavedBuildingData data = SavedBuildingData.getInstance(level);
             data.getBuildings().forEach(b -> {
-                Building building = BuildingUtils.getNewBuilding(b.name, level, b.pos, b.rotation, b.ownerName, b.isDiagonalBridge);
+                Building building = BuildingUtils.getNewBuilding(b.name, level, b.originPos, b.rotation, b.ownerName, b.isDiagonalBridge);
                 BuildingServerEvents.getBuildings().add(building);
-                BuildingClientboundPacket.placeBuilding(b.pos, b.name, b.rotation, b.ownerName,0, b.isDiagonalBridge, false);
-                System.out.println("Loaded building: " + b.name + " " + b.pos);
+                BuildingClientboundPacket.placeBuilding(b.originPos, b.name, b.rotation, b.ownerName,0, b.isDiagonalBridge, false);
+
+                System.out.println("loaded building in serverevents: " + b.originPos);
             });
         }
     }
