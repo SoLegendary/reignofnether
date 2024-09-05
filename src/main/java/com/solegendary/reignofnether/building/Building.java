@@ -113,6 +113,8 @@ public abstract class Building {
     public final BlockPos maxCorner;
     public final BlockPos centrePos;
 
+    public boolean isDiagonalBridge = false;
+
     // blocks types that are placed automatically when the building is placed
     // used to control size of initial foundations while keeping it symmetrical
     public final ArrayList<Block> startingBlockTypes = new ArrayList<>();

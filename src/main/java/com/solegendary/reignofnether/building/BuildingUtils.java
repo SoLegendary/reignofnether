@@ -100,6 +100,9 @@ public class BuildingUtils {
 
     // given a string name return a new instance of that building
     public static Building getNewBuilding(String buildingName, Level level, BlockPos pos, Rotation rotation, String ownerName, boolean isDiagonalBridge) {
+        if (buildingName.toLowerCase().contains("bridge"))
+            ownerName = "";
+
         Building building = null;
         switch(buildingName) {
             case OakBridge.buildingName -> building = new OakBridge(level, pos, rotation, ownerName, isDiagonalBridge);

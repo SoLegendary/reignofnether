@@ -18,7 +18,6 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
@@ -36,6 +35,7 @@ import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
@@ -52,14 +52,49 @@ public class BuildingServerEvents {
 
     public static final ArrayList<NetherConversionZone> netherConversionZones = new ArrayList<>();
 
-    public static ArrayList<Building> getBuildings() {
-        return buildings;
+    public static ArrayList<Building> getBuildings() { return buildings; }
+
+    private static int ticksToSave = 0;
+    @SubscribeEvent
+    public static void saveBuildings(TickEvent.LevelTickEvent evt) {
+        if (evt.level.isClientSide() || evt.phase != TickEvent.Phase.END)
+            return;
+
+        ticksToSave += 1;
+        if (ticksToSave >= 200) {
+            SavedBuildingData data = SavedBuildingData.getInstance(evt.level);
+            getBuildings().forEach(b -> data.getBuildings().add(new SavedBuilding(
+                    b.originPos,
+                    evt.level,
+                    b.name,
+                    b.ownerName,
+                    b.rotation,
+                    b.isDiagonalBridge
+            )));
+            System.out.println("saved buildings!");
+            data.save();
+            ticksToSave = 0;
+        }
+    }
+
+    @SubscribeEvent
+    public static void loadBuildings(ServerStartedEvent evt) {
+        ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
+
+        if (level != null) {
+            SavedBuildingData data = SavedBuildingData.getInstance(level);
+            data.getBuildings().forEach(b -> {
+                Building building = BuildingUtils.getNewBuilding(b.name, level, b.pos, b.rotation, b.ownerName, b.isDiagonalBridge);
+                BuildingServerEvents.getBuildings().add(building);
+                BuildingClientboundPacket.placeBuilding(b.pos, b.name, b.rotation, b.ownerName,0, b.isDiagonalBridge, false);
+                System.out.println("Loaded building: " + b.name + " " + b.pos);
+            });
+        }
     }
 
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName,
                                      int[] builderUnitIds, boolean queue, boolean isDiagonalBridge) {
-        boolean isBridge = buildingName.toLowerCase().contains("bridge");
-        Building newBuilding = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, isBridge ? "" : ownerName, isDiagonalBridge);
+        Building newBuilding = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName, isDiagonalBridge);
         boolean buildingExists = false;
         for (Building building : buildings)
             if (building.originPos == pos) {
@@ -128,7 +163,7 @@ public class BuildingServerEvents {
                             newBuilding.startingBlockTypes.contains(block.getBlockState().getBlock()))
                         newBuilding.addToBlockPlaceQueue(block);
                 }
-                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, isBridge ? "" : ownerName,
+                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName,
                         newBuilding.blockPlaceQueue.size(), isDiagonalBridge, false);
 
                 ResourcesServerEvents.addSubtractResources(new Resources(
@@ -224,7 +259,7 @@ public class BuildingServerEvents {
                 building.rotation,
                 building.ownerName,
                 building.blockPlaceQueue.size(),
-                building instanceof AbstractBridge bridge && bridge.isDiagonal,
+                building instanceof AbstractBridge bridge && bridge.isDiagonalBridge,
                 true
             );
     }
@@ -394,7 +429,7 @@ public class BuildingServerEvents {
                         building.rotation,
                         building.ownerName,
                         building.blockPlaceQueue.size(),
-                        building instanceof AbstractBridge bridge && bridge.isDiagonal,
+                        building instanceof AbstractBridge bridge && bridge.isDiagonalBridge,
                         false
                 );
                 return;
