@@ -8,6 +8,7 @@ Save unit owners and buildings to the world to prevent loss of data on server sh
     - Units & ownername
     - RTSPlayers
     - Resources
+    - Nether conversion zones
 
 - reset the tutorial map before loading it
 

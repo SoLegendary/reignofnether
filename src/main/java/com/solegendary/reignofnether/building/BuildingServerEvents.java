@@ -54,28 +54,24 @@ public class BuildingServerEvents {
 
     public static ArrayList<Building> getBuildings() { return buildings; }
 
-    private static int ticksToSave = 0;
-    @SubscribeEvent
-    public static void saveBuildings(TickEvent.LevelTickEvent evt) {
-        if (evt.level.isClientSide() || evt.phase != TickEvent.Phase.END)
+    public static void saveBuildings() {
+        if (serverLevel == null)
             return;
 
-        ticksToSave += 1;
-        if (ticksToSave == 2400) {
-            SavedBuildingData data = SavedBuildingData.getInstance(evt.level);
-            getBuildings().forEach(b -> {
-                data.getBuildings().add(new SavedBuilding(
-                        b.originPos,
-                        evt.level,
-                        b.name,
-                        b.ownerName,
-                        b.rotation,
-                        b.isDiagonalBridge
-                ));
-                System.out.println("saved building in serverevents: " + b.originPos);
-            });
-            data.save();
-        }
+        BuildingSaveData data = BuildingSaveData.getInstance(serverLevel);
+        getBuildings().forEach(b -> {
+            data.buildings.add(new BuildingSave(
+                    b.originPos,
+                    serverLevel,
+                    b.name,
+                    b.ownerName,
+                    b.rotation,
+                    b.isDiagonalBridge
+            ));
+            System.out.println("saved building in serverevents: " + b.originPos);
+        });
+        data.save();
+        serverLevel.getDataStorage().save();
     }
 
     @SubscribeEvent
@@ -83,8 +79,8 @@ public class BuildingServerEvents {
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
 
         if (level != null) {
-            SavedBuildingData data = SavedBuildingData.getInstance(level);
-            data.getBuildings().forEach(b -> {
+            BuildingSaveData data = BuildingSaveData.getInstance(level);
+            data.buildings.forEach(b -> {
                 Building building = BuildingUtils.getNewBuilding(b.name, level, b.originPos, b.rotation, b.ownerName, b.isDiagonalBridge);
                 BuildingServerEvents.getBuildings().add(building);
                 BuildingClientboundPacket.placeBuilding(b.originPos, b.name, b.rotation, b.ownerName,0, b.isDiagonalBridge, false);
@@ -126,6 +122,8 @@ public class BuildingServerEvents {
 
             if (newBuilding.canAfford(ownerName)) {
                 buildings.add(newBuilding);
+                saveBuildings();
+
                 newBuilding.forceChunk(true);
 
                 int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
@@ -209,6 +207,7 @@ public class BuildingServerEvents {
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);
+        saveBuildings();
         FrozenChunkClientboundPacket.setBuildingDestroyedServerside(building.originPos);
 
         // AOE2-style refund: return the % of the non-built portion of the building
@@ -327,6 +326,9 @@ public class BuildingServerEvents {
             netherConversionZone.tick();
 
         netherConversionZones.removeIf(NetherConversionZone::isDone);
+
+        if (!buildingsToDestroy.isEmpty())
+            saveBuildings();
     }
 
     // cancel all explosion damage to non-building blocks

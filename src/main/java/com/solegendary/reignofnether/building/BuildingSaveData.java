@@ -14,31 +14,27 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 
-public class SavedBuildingData extends SavedData {
+public class BuildingSaveData extends SavedData {
 
-    private final ArrayList<SavedBuilding> buildings = new ArrayList<>();
+    public final ArrayList<BuildingSave> buildings = new ArrayList<>();
 
-    public ArrayList<SavedBuilding> getBuildings() {
-        return this.buildings;
-    }
-
-    private static SavedBuildingData create() {
-        return new SavedBuildingData();
+    private static BuildingSaveData create() {
+        return new BuildingSaveData();
     }
 
     @Nonnull
-    public static SavedBuildingData getInstance(LevelAccessor level) {
+    public static BuildingSaveData getInstance(LevelAccessor level) {
         MinecraftServer server = level.getServer();
         if (server == null) {
             return create();
         }
-        return server.overworld().getDataStorage().computeIfAbsent(SavedBuildingData::load, SavedBuildingData::create, "saved-building-data");
+        return server.overworld().getDataStorage().computeIfAbsent(BuildingSaveData::load, BuildingSaveData::create, "saved-building-data");
     }
 
-    public static SavedBuildingData load(CompoundTag tag) {
+    public static BuildingSaveData load(CompoundTag tag) {
         System.out.println("SavedBuildingData.load");
 
-        SavedBuildingData data = create();
+        BuildingSaveData data = create();
         ListTag ltag = (ListTag) tag.get("buildings");
 
         for (Tag ctag : ltag) {
@@ -49,9 +45,9 @@ public class SavedBuildingData extends SavedData {
             String ownerName = btag.getString("ownerName");
             Rotation rotation = Rotation.valueOf(btag.getString("rotation"));
             boolean isDiagonalBridge = btag.getBoolean("isDiagonalBridge");
-            data.getBuildings().add(new SavedBuilding(pos, level, name, ownerName, rotation, isDiagonalBridge));
+            data.buildings.add(new BuildingSave(pos, level, name, ownerName, rotation, isDiagonalBridge));
 
-            System.out.println("SavedBuildingData.load: " + pos);
+            System.out.println("SavedBuildingData.load: " + ownerName + "|" + name);
         }
         return data;
     }
@@ -61,7 +57,7 @@ public class SavedBuildingData extends SavedData {
         System.out.println("SavedBuildingData.save");
 
         ListTag list = new ListTag();
-        this.getBuildings().forEach(b -> {
+        this.buildings.forEach(b -> {
             CompoundTag cTag = new CompoundTag();
             cTag.putString("buildingName", b.name);
             cTag.putInt("x", b.originPos.getX());
@@ -72,7 +68,7 @@ public class SavedBuildingData extends SavedData {
             cTag.putBoolean("isDiagonalBridge", b.isDiagonalBridge);
             list.add(cTag);
 
-            System.out.println("SavedBuildingData.save: " + b.originPos);
+            System.out.println("SavedBuildingData.save: " + b.ownerName + "|" + b.name);
         });
         tag.put("buildings", list);
         return tag;

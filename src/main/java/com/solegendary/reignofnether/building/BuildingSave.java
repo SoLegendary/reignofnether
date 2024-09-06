@@ -5,7 +5,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 
 // contains all necessary data for a restarted server to recreate all buildings in the level
-public class SavedBuilding {
+public class BuildingSave {
 
     public BlockPos originPos;
     public Level level;
@@ -14,7 +14,7 @@ public class SavedBuilding {
     public Rotation rotation;
     public boolean isDiagonalBridge;
 
-    public SavedBuilding(BlockPos originPos, Level level, String name, String ownerName, Rotation rotation, boolean isDiagonalBridge) {
+    public BuildingSave(BlockPos originPos, Level level, String name, String ownerName, Rotation rotation, boolean isDiagonalBridge) {
         this.originPos = originPos;
         this.level = level;
         this.name = name;
