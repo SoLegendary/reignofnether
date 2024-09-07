@@ -9,7 +9,7 @@ public class UnitSave {
     public String uuid; // regular integer ID isn't consistent between server restarts
     // held resources are covered by ResourcesSaveData
 
-    public UnitSave(String name, String ownerName, String uuid, Resources resources) {
+    public UnitSave(String name, String ownerName, String uuid) {
         this.name = name;
         this.ownerName = ownerName;
         this.uuid = uuid;

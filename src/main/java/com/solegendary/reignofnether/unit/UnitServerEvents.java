@@ -94,8 +94,7 @@ public class UnitServerEvents {
                 data.units.add(new UnitSave(
                         e.getName().getString(),
                         unit.getOwnerName(),
-                        e.getStringUUID(),
-                        Resources.getTotalResourcesFromItems(unit.getItems())
+                        e.getStringUUID()
                 ));
                 System.out.println("saved unit in serverevents: " + unit.getOwnerName() + "|" + e.getName().getString() + "|" + e.getId());
             }
@@ -222,9 +221,6 @@ public class UnitServerEvents {
                 savedUnits.removeIf(su -> {
                     if (su.uuid.equals(entity.getStringUUID())) {
                         unit.setOwnerName(su.ownerName);
-                        unit.getItems().add(new ItemStack(Items.SUGAR, su.resources.food));
-                        unit.getItems().add(new ItemStack(Items.STICK, su.resources.wood));
-                        unit.getItems().add(new ItemStack(Items.STONE, su.resources.ore));
                         UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                         UnitSyncClientboundPacket.sendSyncOwnerNamePacket(unit);
                         System.out.println("loaded unit in serverevents: " + su.ownerName + "|" + su.name + "|" + su.uuid);

@@ -45,9 +45,8 @@ public class UnitSaveData extends SavedData {
                 String name = utag.getString("name");
                 String ownerName = utag.getString("ownerName");
                 String uuid = utag.getString("uuid");
-                Resources resources = new Resources("", utag.getInt("food"), utag.getInt("wood"), utag.getInt("ore"));
 
-                data.units.add(new UnitSave(name, ownerName, uuid, resources));
+                data.units.add(new UnitSave(name, ownerName, uuid));
                 System.out.println("SavedUnitData.load: " + ownerName + "|" + name + "|" + uuid);
             }
         }
@@ -65,9 +64,6 @@ public class UnitSaveData extends SavedData {
             cTag.putString("name", u.name);
             cTag.putString("ownerName", u.ownerName);
             cTag.putString("uuid", u.uuid);
-            cTag.putInt("food", u.resources.food);
-            cTag.putInt("wood", u.resources.wood);
-            cTag.putInt("ore", u.resources.ore);
             list.add(cTag);
 
             System.out.println("SavedUnitData.save: " + u.ownerName + "|" + u.name + "|" + u.uuid);
