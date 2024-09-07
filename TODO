@@ -4,12 +4,16 @@
 TODO bugs/features:
 
 Save unit owners and buildings to the world to prevent loss of data on server shutdown
-    - Unit resources need to be saved on every gather event... how do to this without affecting performance?
-    - RTSPlayers
-    - Resources
+    - Units: saved on every unit spawn including conversions
+    - RTSPlayers: saved on startRTS actions or defeats
+    - Resources: unit resources AND current resources both saved on server shutdown
+
     - Nether conversion zones
 
-- reset the tutorial map before loading it
+test server stop conditions:
+    - crash via unrelated exception (triggered by secret key combo?)
+    - closing the server window/ending the process
+    - regular shutdown
 
 
 QoL/Balance

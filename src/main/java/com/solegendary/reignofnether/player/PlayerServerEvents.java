@@ -86,8 +86,6 @@ public class PlayerServerEvents {
 
             rtsPlayers.clear();
             rtsPlayers.addAll(data.rtsPlayers);
-
-
         }
     }
 
@@ -463,6 +461,7 @@ public class PlayerServerEvents {
                     PlayerClientboundPacket.victory(rtsPlayer.name);
                 }
             }
+            saveRTSPlayers();
         }
     }
 

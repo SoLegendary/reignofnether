@@ -112,6 +112,7 @@ public class UnitServerEvents {
             if (level != null) {
                 UnitSaveData data = UnitSaveData.getInstance(level);
                 savedUnits.addAll(data.units); // actually assign the data in TickEvent as entities don't exist here yet
+                System.out.println("saved " + data.units.size() + " units in serverevents");
             }
         }
     }
