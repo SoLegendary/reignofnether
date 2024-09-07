@@ -11,9 +11,19 @@ Save unit owners and buildings to the world to prevent loss of data on server sh
     - Nether conversion zones
 
 test server stop conditions:
-    - crash via unrelated exception (triggered by secret key combo?)
     - closing the server window/ending the process
     - regular shutdown
+    - crash via unrelated exception (triggered by secret key combo?)
+    - [Singleplayer] exit and reenter world
+    - [Singleplayer] exit and close game then reenter world
+    - [Singleplayer] close window and reenter world
+    - [Singleplayer] crash via unrelated exception
+
+bugs:
+    - player is defeated on server close if they only had units
+        - maybe just accept it since this means its only the start of the game anyway?
+
+
 
 
 QoL/Balance
