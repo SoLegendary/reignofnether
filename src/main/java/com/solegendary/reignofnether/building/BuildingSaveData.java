@@ -37,17 +37,19 @@ public class BuildingSaveData extends SavedData {
         BuildingSaveData data = create();
         ListTag ltag = (ListTag) tag.get("buildings");
 
-        for (Tag ctag : ltag) {
-            CompoundTag btag = (CompoundTag) ctag;
-            BlockPos pos = new BlockPos(btag.getInt("x"), btag.getInt("y"), btag.getInt("z"));
-            Level level = ServerLifecycleHooks.getCurrentServer().getLevel(Level.OVERWORLD);
-            String name = btag.getString("buildingName");
-            String ownerName = btag.getString("ownerName");
-            Rotation rotation = Rotation.valueOf(btag.getString("rotation"));
-            boolean isDiagonalBridge = btag.getBoolean("isDiagonalBridge");
-            data.buildings.add(new BuildingSave(pos, level, name, ownerName, rotation, isDiagonalBridge));
+        if (ltag != null) {
+            for (Tag ctag : ltag) {
+                CompoundTag btag = (CompoundTag) ctag;
+                BlockPos pos = new BlockPos(btag.getInt("x"), btag.getInt("y"), btag.getInt("z"));
+                Level level = ServerLifecycleHooks.getCurrentServer().getLevel(Level.OVERWORLD);
+                String name = btag.getString("buildingName");
+                String ownerName = btag.getString("ownerName");
+                Rotation rotation = Rotation.valueOf(btag.getString("rotation"));
+                boolean isDiagonalBridge = btag.getBoolean("isDiagonalBridge");
+                data.buildings.add(new BuildingSave(pos, level, name, ownerName, rotation, isDiagonalBridge));
 
-            System.out.println("SavedBuildingData.load: " + ownerName + "|" + name);
+                System.out.println("SavedBuildingData.load: " + ownerName + "|" + name);
+            }
         }
         return data;
     }

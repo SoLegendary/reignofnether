@@ -1,9 +1,7 @@
 package com.solegendary.reignofnether.player;
 
 import com.mojang.datafixers.util.Pair;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingServerEvents;
-import com.solegendary.reignofnether.building.ProductionBuilding;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -30,10 +28,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
 
@@ -49,11 +49,13 @@ public class PlayerServerEvents {
     private static final GameType defaultGameMode = GameType.SPECTATOR;
     public static final ArrayList<ServerPlayer> players = new ArrayList<>();
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
-    private static final List<RTSPlayer> rtsPlayers = Collections.synchronizedList(new ArrayList<>()); // players that have run /startrts
+    public static final List<RTSPlayer> rtsPlayers = Collections.synchronizedList(new ArrayList<>()); // players that have run /startrts
 
     public static final int TICKS_TO_REVEAL = 60 * ResourceCost.TICKS_PER_SECOND;
 
     public static long rtsGameTicks = 0; // ticks up as long as there is at least 1 rtsPlayer
+
+    public static ServerLevel serverLevel = null;
 
     // warpten - faster building/unit production
     // operationcwal - faster resource gathering
@@ -65,66 +67,27 @@ public class PlayerServerEvents {
             "warpten", "operationcwal", "modifythephasevariance", "medievalman", "foodforthought"
     );
 
-    private static class RTSPlayer {
-        public String name;
-        public int id; // for AI, always negative
-        public int ticksWithoutCapitol = 0;
-        public Faction faction;
+    public static void saveRTSPlayers() {
+        if (serverLevel == null)
+            return;
+        RTSPlayerSaveData data = RTSPlayerSaveData.getInstance(serverLevel);
+        data.rtsPlayers.clear();
+        data.rtsPlayers.addAll(rtsPlayers);
+        data.save();
+        serverLevel.getDataStorage().save();
+    }
 
-        private RTSPlayer(ServerPlayer player, Faction faction) {
-            this.name = player.getName().getString();
-            this.id = player.getId();
-            this.faction = faction;
-        }
+    @SubscribeEvent
+    public static void loadRTSPlayers(ServerStartedEvent evt) {
+        ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
 
-        // bot
-        private RTSPlayer(String name, Faction faction) {
-            int minId = 0;
-            if (!rtsPlayers.isEmpty())
-                minId = Collections.min(rtsPlayers.stream().map(r -> r.id).toList());
-            if (minId >= 0)
-                this.id = -1;
-            else
-                this.id = minId - 1;
-            this.faction = faction;
-            this.name = name;
-        }
+        if (level != null) {
+            RTSPlayerSaveData data = RTSPlayerSaveData.getInstance(level);
 
-        public static RTSPlayer getNewPlayer(ServerPlayer player, Faction faction) {
-            return new RTSPlayer(player, faction);
-        }
+            rtsPlayers.clear();
+            rtsPlayers.addAll(data.rtsPlayers);
 
-        public static RTSPlayer getNewBot(String name, Faction faction) {
-            return new RTSPlayer(name, faction);
-        }
 
-        public boolean isBot() {
-            return id < 0;
-        }
-
-        public void tick() {
-            int numBuildingsOwned = BuildingServerEvents.getBuildings().stream().filter(
-                    b -> b.ownerName.equals(this.name)
-            ).toList().size();
-            int numCapitolsOwned = BuildingServerEvents.getBuildings().stream().filter(
-                    b -> b.ownerName.equals(this.name) && b.isCapitol
-            ).toList().size();
-
-            if (numBuildingsOwned > 0 && numCapitolsOwned == 0) {
-                if (ticksWithoutCapitol < TICKS_TO_REVEAL) {
-                    this.ticksWithoutCapitol += 1;
-                    if (ticksWithoutCapitol == TICKS_TO_REVEAL) {
-                        sendMessageToAllPlayers(this.name + " has not rebuilt their capitol and is being revealed!");
-                        FogOfWarClientboundPacket.revealOrHidePlayer(true, this.name);
-                    }
-                }
-            } else {
-                this.ticksWithoutCapitol = 0;
-            }
-        }
-
-        public boolean isRevealed() {
-            return this.ticksWithoutCapitol >= TICKS_TO_REVEAL;
         }
     }
 
@@ -164,6 +127,8 @@ public class PlayerServerEvents {
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
+        serverLevel = evt.getServer().getLevel(Level.OVERWORLD);
+
         synchronized (rtsPlayers) {
             if (evt.phase == TickEvent.Phase.END) {
                 for (RTSPlayer rtsPlayer : rtsPlayers)
@@ -285,6 +250,7 @@ public class PlayerServerEvents {
                 sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
             }
             PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
+            saveRTSPlayers();
         }
     }
 
@@ -324,6 +290,7 @@ public class PlayerServerEvents {
                 sendMessageToAllPlayers(bot.name + " (bot) has been added to the game!", true);
                 sendMessageToAllPlayers("There are now " + rtsPlayers.size() + " total RTS player(s)");
             }
+            saveRTSPlayers();
         }
     }
 
