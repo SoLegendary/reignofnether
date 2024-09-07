@@ -61,8 +61,8 @@ public class ResourcesServerEvents {
             data.resources.add(new Resources(
                     r.ownerName,
                     r.food + r.foodToAdd + unitFood,
-                    r.wood + r.woodToAdd + unitFood,
-                    r.ore + r.oreToAdd + unitFood
+                    r.wood + r.woodToAdd + unitWood,
+                    r.ore + r.oreToAdd + unitOre
             ));
             System.out.println("saved resources in serverevents: " + r.ownerName + "|" + r.food + "|" + r.wood + "|" + r.ore);
         });

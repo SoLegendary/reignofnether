@@ -28,6 +28,8 @@ bugs:
 
 QoL/Balance
 -----------
+allow selecting a building if the block ABOVE a preselected building is part of the building
+    - this handles being able to select hollow foundations easily like town centres
 villagers get stuck in the bridge if they fall in water
     - apply some upwards velocity?
 
