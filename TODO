@@ -4,8 +4,7 @@
 TODO bugs/features:
 
 Save unit owners and buildings to the world to prevent loss of data on server shutdown
-    - Buildings & ownername
-    - Units & ownername
+    - Unit resources need to be saved on every gather event... how do to this without affecting performance?
     - RTSPlayers
     - Resources
     - Nether conversion zones

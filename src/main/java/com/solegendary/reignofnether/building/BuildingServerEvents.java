@@ -59,6 +59,7 @@ public class BuildingServerEvents {
             return;
 
         BuildingSaveData data = BuildingSaveData.getInstance(serverLevel);
+        data.buildings.clear();
         getBuildings().forEach(b -> {
             data.buildings.add(new BuildingSave(
                     b.originPos,

@@ -4,15 +4,15 @@ import com.solegendary.reignofnether.resources.Resources;
 
 public class UnitSave {
 
-    public String name; // mob name, only used for debug logs
+    public String name;
     public String ownerName;
-    public int id;
+    public String uuid; // regular integer ID isn't consistent between server restarts
     public Resources resources;
 
-    public UnitSave(String name, String ownerName, int id, Resources resources) {
+    public UnitSave(String name, String ownerName, String uuid, Resources resources) {
         this.name = name;
         this.ownerName = ownerName;
-        this.id = id;
+        this.uuid = uuid;
         this.resources = resources;
     }
 }

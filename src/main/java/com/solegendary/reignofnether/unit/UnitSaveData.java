@@ -38,16 +38,18 @@ public class UnitSaveData extends SavedData {
         UnitSaveData data = create();
         ListTag ltag = (ListTag) tag.get("units");
 
-        for (Tag ctag : ltag) {
-            CompoundTag utag = (CompoundTag) ctag;
+        if (ltag != null) {
+            for (Tag ctag : ltag) {
+                CompoundTag utag = (CompoundTag) ctag;
 
-            String name = utag.getString("name");
-            String ownerName = utag.getString("ownerName");
-            int id = utag.getInt("id");
-            Resources resources = new Resources("", utag.getInt("food"), utag.getInt("wood"), utag.getInt("ore"));
+                String name = utag.getString("name");
+                String ownerName = utag.getString("ownerName");
+                String uuid = utag.getString("uuid");
+                Resources resources = new Resources("", utag.getInt("food"), utag.getInt("wood"), utag.getInt("ore"));
 
-            data.units.add(new UnitSave(name, ownerName, id, resources));
-            System.out.println("SavedUnitData.load: " + ownerName + "|" + name + "|" + id);
+                data.units.add(new UnitSave(name, ownerName, uuid, resources));
+                System.out.println("SavedUnitData.load: " + ownerName + "|" + name + "|" + uuid);
+            }
         }
         return data;
     }
@@ -62,13 +64,13 @@ public class UnitSaveData extends SavedData {
 
             cTag.putString("name", u.name);
             cTag.putString("ownerName", u.ownerName);
-            cTag.putInt("id", u.id);
+            cTag.putString("uuid", u.uuid);
             cTag.putInt("food", u.resources.food);
             cTag.putInt("wood", u.resources.wood);
             cTag.putInt("ore", u.resources.ore);
             list.add(cTag);
 
-            System.out.println("SavedUnitData.save: " + u.ownerName + "|" + u.name + "|" + u.id);
+            System.out.println("SavedUnitData.save: " + u.ownerName + "|" + u.name + "|" + u.uuid);
         });
         tag.put("units", list);
         return tag;

@@ -34,8 +34,15 @@ public class UnitSyncClientboundPacket {
 
     public static void sendLeavePacket(LivingEntity entity) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new UnitSyncClientboundPacket(UnitSyncAction.LEAVE_LEVEL,
-                entity.getId(),0,0,0,0,0,0,0,0, "")
+                new UnitSyncClientboundPacket(UnitSyncAction.LEAVE_LEVEL,
+                        entity.getId(),0,0,0,0,0,0,0,0, "")
+        );
+    }
+
+    public static void sendSyncOwnerNamePacket(Unit unit) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new UnitSyncClientboundPacket(UnitSyncAction.SYNC_OWNERNAME,
+                        ((LivingEntity) unit).getId(),0,0,0,0,0,0,0,0, "")
         );
     }
 
@@ -166,6 +173,7 @@ public class UnitSyncClientboundPacket {
                 () -> () -> {
                     switch (this.syncAction) {
                         case LEAVE_LEVEL -> UnitClientEvents.onEntityLeave(this.entityId);
+                        case SYNC_OWNERNAME -> UnitClientEvents.syncOwnerName(this.entityId, ownerName);
                         case SYNC_STATS -> UnitClientEvents.syncUnitStats(
                                 this.entityId,
                                 this.health,

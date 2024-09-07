@@ -113,7 +113,6 @@ public class BuildingClientboundPacket {
                         }
                         return;
                     }
-
                 }
                 switch (action) {
                     case PLACE -> BuildingClientEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.numQueuedBlocks, this.isDiagonalBridge, this.forPlayerLoggingIn);
