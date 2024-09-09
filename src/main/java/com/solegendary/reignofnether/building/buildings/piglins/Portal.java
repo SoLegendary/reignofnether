@@ -119,13 +119,20 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
     }
 
     @Override
+    public void setNetherZone(NetherZone nz) {
+        if (netherConversionZone == null) {
+            netherConversionZone = nz;
+            if (!level.isClientSide()) {
+                BuildingServerEvents.netherZones.add(netherConversionZone);
+                BuildingServerEvents.saveNetherZones();
+            }
+        }
+    }
+
+    @Override
     public void onBuilt() {
         super.onBuilt();
-        if (netherConversionZone == null) {
-            netherConversionZone = new NetherZone(centrePos.offset(0,-2,0), getMaxRange(), getStartingRange());
-            if (!level.isClientSide())
-                BuildingServerEvents.netherConversionZones.add(netherConversionZone);
-        }
+        setNetherZone(new NetherZone(centrePos.offset(0,-2,0), getMaxRange(), getStartingRange()));
     }
 
     public void disconnectPortal() {

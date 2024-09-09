@@ -50,18 +50,16 @@ public class BuildingServerEvents {
     // buildings that currently exist serverside
     private static final ArrayList<Building> buildings = new ArrayList<>();
 
-    public static final ArrayList<NetherZone> netherConversionZones = new ArrayList<>();
+    public static final ArrayList<NetherZone> netherZones = new ArrayList<>();
 
     public static ArrayList<Building> getBuildings() { return buildings; }
 
-    public static void saveBuildingsAndNetherZones() {
+    public static void saveBuildings() {
         if (serverLevel == null)
             return;
 
         BuildingSaveData buildingData = BuildingSaveData.getInstance(serverLevel);
         buildingData.buildings.clear();
-        NetherZoneSaveData netherData = NetherZoneSaveData.getInstance(serverLevel);
-        netherData.netherZones.clear();
 
         getBuildings().forEach(b -> {
             buildingData.buildings.add(new BuildingSave(
@@ -72,15 +70,23 @@ public class BuildingServerEvents {
                     b.rotation,
                     b.isDiagonalBridge
             ));
-            if (b instanceof NetherConvertingBuilding ncb) {
-                NetherZone nz = ncb.getZone();
-                netherData.netherZones.add(nz);
-            }
             System.out.println("saved buildings/nether in serverevents: " + b.originPos);
         });
         buildingData.save();
+        serverLevel.getDataStorage().save();
+    }
+
+    public static void saveNetherZones() {
+        if (serverLevel == null)
+            return;
+
+        NetherZoneSaveData netherData = NetherZoneSaveData.getInstance(serverLevel);
+        netherData.netherZones.clear();
+        netherData.netherZones.addAll(netherZones);
         netherData.save();
         serverLevel.getDataStorage().save();
+
+        System.out.println("saved " + netherZones.size() + " netherzones in serverevents");
     }
 
     @SubscribeEvent
@@ -96,6 +102,7 @@ public class BuildingServerEvents {
                 BuildingServerEvents.getBuildings().add(building);
                 BuildingClientboundPacket.placeBuilding(b.originPos, b.name, b.rotation, b.ownerName,0, b.isDiagonalBridge, false);
 
+                // setNetherZone can only be run once - this supercedes where it normally happens in tick() -> onBuilt()
                 if (b instanceof NetherConvertingBuilding ncb)
                     for (NetherZone nz : netherData.netherZones)
                         if (building.isPosInsideBuilding(nz.getOrigin())) {
@@ -139,7 +146,7 @@ public class BuildingServerEvents {
 
             if (newBuilding.canAfford(ownerName)) {
                 buildings.add(newBuilding);
-                saveBuildingsAndNetherZones();
+                saveBuildings();
 
                 newBuilding.forceChunk(true);
 
@@ -224,7 +231,10 @@ public class BuildingServerEvents {
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);
-        saveBuildingsAndNetherZones();
+        if (building instanceof NetherConvertingBuilding nb && nb.getZone() != null)
+            nb.getZone().startRestoring();
+
+        saveBuildings();
         FrozenChunkClientboundPacket.setBuildingDestroyedServerside(building.originPos);
 
         // AOE2-style refund: return the % of the non-built portion of the building
@@ -339,13 +349,17 @@ public class BuildingServerEvents {
         for (Building building : buildings)
             building.tick(serverLevel);
 
-        for (NetherZone netherConversionZone : netherConversionZones)
+        for (NetherZone netherConversionZone : netherZones)
             netherConversionZone.tick(serverLevel);
 
-        netherConversionZones.removeIf(NetherZone::isDone);
+        int nzSizeBefore = netherZones.size();
+        netherZones.removeIf(NetherZone::isDone);
+        int nzSizeAfter = netherZones.size();
+        if (nzSizeBefore != nzSizeAfter)
+            saveNetherZones();
 
         if (!buildingsToDestroy.isEmpty())
-            saveBuildingsAndNetherZones();
+            saveBuildings();
     }
 
     // cancel all explosion damage to non-building blocks

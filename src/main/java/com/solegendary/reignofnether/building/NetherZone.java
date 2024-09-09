@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -52,8 +51,6 @@ public class NetherZone {
                                          boolean isRestoring, int ticksLeft, int convertsAfterConstantRange) {
         return new NetherZone(origin, maxRange, range, isRestoring, ticksLeft, convertsAfterConstantRange);
     }
-
-
 
     public void startRestoring() {
         convertsAfterConstantRange = 0;
@@ -109,7 +106,7 @@ public class NetherZone {
             if (random.nextDouble() > chance)
                 continue;
 
-            for (NetherZone ncz : BuildingServerEvents.netherConversionZones)
+            for (NetherZone ncz : BuildingServerEvents.netherZones)
                 if (!ncz.isRestoring && bp.distSqr(ncz.origin) < ncz.maxRange * ncz.maxRange)
                     continue outerloop;
 

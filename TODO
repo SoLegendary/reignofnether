@@ -18,6 +18,8 @@ test server stop conditions:
     - [Singleplayer] close window and reenter world
     - [Singleplayer] crash via unrelated exception
 
+    - check no duplicates exist
+
 bugs:
     - player is defeated on server close if they only had units
         - maybe just accept it since this means its only the start of the game anyway?
