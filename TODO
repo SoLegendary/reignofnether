@@ -7,7 +7,6 @@ Save unit owners and buildings to the world to prevent loss of data on server sh
     - Units: saved on every unit spawn including conversions
     - RTSPlayers: saved on startRTS actions or defeats
     - Resources: unit resources AND current resources both saved on server shutdown
-
     - Nether conversion zones
 
 test server stop conditions:

@@ -53,11 +53,11 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
 
     public BlockPos destination; // for transport portals
 
-    public NetherConversionZone netherConversionZone;
+    public NetherZone netherConversionZone = null;
 
     @Override public double getMaxRange() { return 20; }
     @Override public double getStartingRange() { return 3; }
-    @Override public NetherConversionZone getZone() { return netherConversionZone; }
+    @Override public NetherZone getZone() { return netherConversionZone; }
 
     @Override
     public void tick(Level tickLevel) {
@@ -121,9 +121,11 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
     @Override
     public void onBuilt() {
         super.onBuilt();
-        netherConversionZone = new NetherConversionZone(level, centrePos.offset(0,-2,0), getMaxRange(), getStartingRange());
-        if (!level.isClientSide())
-            BuildingServerEvents.netherConversionZones.add(netherConversionZone);
+        if (netherConversionZone == null) {
+            netherConversionZone = new NetherZone(centrePos.offset(0,-2,0), getMaxRange(), getStartingRange());
+            if (!level.isClientSide())
+                BuildingServerEvents.netherConversionZones.add(netherConversionZone);
+        }
     }
 
     public void disconnectPortal() {

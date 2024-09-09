@@ -33,7 +33,7 @@ public class UnitSaveData extends SavedData {
     }
 
     public static UnitSaveData load(CompoundTag tag) {
-        System.out.println("SavedUnitData.load");
+        System.out.println("UnitSaveData.load");
 
         UnitSaveData data = create();
         ListTag ltag = (ListTag) tag.get("units");
@@ -47,7 +47,7 @@ public class UnitSaveData extends SavedData {
                 String uuid = utag.getString("uuid");
 
                 data.units.add(new UnitSave(name, ownerName, uuid));
-                System.out.println("SavedUnitData.load: " + ownerName + "|" + name + "|" + uuid);
+                System.out.println("UnitSaveData.load: " + ownerName + "|" + name + "|" + uuid);
             }
         }
         return data;
@@ -55,7 +55,7 @@ public class UnitSaveData extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        System.out.println("SavedUnitData.save");
+        System.out.println("UnitSaveData.save");
 
         ListTag list = new ListTag();
         this.units.forEach(u -> {
@@ -66,7 +66,7 @@ public class UnitSaveData extends SavedData {
             cTag.putString("uuid", u.uuid);
             list.add(cTag);
 
-            System.out.println("SavedUnitData.save: " + u.ownerName + "|" + u.name + "|" + u.uuid);
+            System.out.println("UnitSaveData.save: " + u.ownerName + "|" + u.name + "|" + u.uuid);
         });
         tag.put("units", list);
         return tag;

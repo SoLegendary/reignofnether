@@ -6,5 +6,7 @@ public interface NetherConvertingBuilding {
 
     double getStartingRange();
 
-    NetherConversionZone getZone();
+    NetherZone getZone();
+
+    void setNetherZone(NetherZone nz);
 }

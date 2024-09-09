@@ -50,18 +50,21 @@ public class BuildingServerEvents {
     // buildings that currently exist serverside
     private static final ArrayList<Building> buildings = new ArrayList<>();
 
-    public static final ArrayList<NetherConversionZone> netherConversionZones = new ArrayList<>();
+    public static final ArrayList<NetherZone> netherConversionZones = new ArrayList<>();
 
     public static ArrayList<Building> getBuildings() { return buildings; }
 
-    public static void saveBuildings() {
+    public static void saveBuildingsAndNetherZones() {
         if (serverLevel == null)
             return;
 
-        BuildingSaveData data = BuildingSaveData.getInstance(serverLevel);
-        data.buildings.clear();
+        BuildingSaveData buildingData = BuildingSaveData.getInstance(serverLevel);
+        buildingData.buildings.clear();
+        NetherZoneSaveData netherData = NetherZoneSaveData.getInstance(serverLevel);
+        netherData.netherZones.clear();
+
         getBuildings().forEach(b -> {
-            data.buildings.add(new BuildingSave(
+            buildingData.buildings.add(new BuildingSave(
                     b.originPos,
                     serverLevel,
                     b.name,
@@ -69,24 +72,37 @@ public class BuildingServerEvents {
                     b.rotation,
                     b.isDiagonalBridge
             ));
-            System.out.println("saved building in serverevents: " + b.originPos);
+            if (b instanceof NetherConvertingBuilding ncb) {
+                NetherZone nz = ncb.getZone();
+                netherData.netherZones.add(nz);
+            }
+            System.out.println("saved buildings/nether in serverevents: " + b.originPos);
         });
-        data.save();
+        buildingData.save();
+        netherData.save();
         serverLevel.getDataStorage().save();
     }
 
     @SubscribeEvent
-    public static void loadBuildings(ServerStartedEvent evt) {
+    public static void loadBuildingsAndNetherZones(ServerStartedEvent evt) {
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
 
         if (level != null) {
-            BuildingSaveData data = BuildingSaveData.getInstance(level);
-            data.buildings.forEach(b -> {
+            BuildingSaveData buildingData = BuildingSaveData.getInstance(level);
+            NetherZoneSaveData netherData = NetherZoneSaveData.getInstance(level);
+
+            buildingData.buildings.forEach(b -> {
                 Building building = BuildingUtils.getNewBuilding(b.name, level, b.originPos, b.rotation, b.ownerName, b.isDiagonalBridge);
                 BuildingServerEvents.getBuildings().add(building);
                 BuildingClientboundPacket.placeBuilding(b.originPos, b.name, b.rotation, b.ownerName,0, b.isDiagonalBridge, false);
 
-                System.out.println("loaded building in serverevents: " + b.originPos);
+                if (b instanceof NetherConvertingBuilding ncb)
+                    for (NetherZone nz : netherData.netherZones)
+                        if (building.isPosInsideBuilding(nz.getOrigin())) {
+                            ncb.setNetherZone(nz);
+                            break;
+                        }
+                System.out.println("loaded building/nether in serverevents: " + b.originPos);
             });
         }
     }
@@ -123,7 +139,7 @@ public class BuildingServerEvents {
 
             if (newBuilding.canAfford(ownerName)) {
                 buildings.add(newBuilding);
-                saveBuildings();
+                saveBuildingsAndNetherZones();
 
                 newBuilding.forceChunk(true);
 
@@ -208,7 +224,7 @@ public class BuildingServerEvents {
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);
-        saveBuildings();
+        saveBuildingsAndNetherZones();
         FrozenChunkClientboundPacket.setBuildingDestroyedServerside(building.originPos);
 
         // AOE2-style refund: return the % of the non-built portion of the building
@@ -323,13 +339,13 @@ public class BuildingServerEvents {
         for (Building building : buildings)
             building.tick(serverLevel);
 
-        for (NetherConversionZone netherConversionZone : netherConversionZones)
-            netherConversionZone.tick();
+        for (NetherZone netherConversionZone : netherConversionZones)
+            netherConversionZone.tick(serverLevel);
 
-        netherConversionZones.removeIf(NetherConversionZone::isDone);
+        netherConversionZones.removeIf(NetherZone::isDone);
 
         if (!buildingsToDestroy.isEmpty())
-            saveBuildings();
+            saveBuildingsAndNetherZones();
     }
 
     // cancel all explosion damage to non-building blocks

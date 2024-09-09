@@ -32,7 +32,7 @@ public class BuildingSaveData extends SavedData {
     }
 
     public static BuildingSaveData load(CompoundTag tag) {
-        System.out.println("SavedBuildingData.load");
+        System.out.println("BuildingSaveData.load");
 
         BuildingSaveData data = create();
         ListTag ltag = (ListTag) tag.get("buildings");
@@ -48,7 +48,7 @@ public class BuildingSaveData extends SavedData {
                 boolean isDiagonalBridge = btag.getBoolean("isDiagonalBridge");
                 data.buildings.add(new BuildingSave(pos, level, name, ownerName, rotation, isDiagonalBridge));
 
-                System.out.println("SavedBuildingData.load: " + ownerName + "|" + name);
+                System.out.println("BuildingSaveData.load: " + ownerName + "|" + name);
             }
         }
         return data;
@@ -56,7 +56,7 @@ public class BuildingSaveData extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        System.out.println("SavedBuildingData.save");
+        System.out.println("BuildingSaveData.save");
 
         ListTag list = new ListTag();
         this.buildings.forEach(b -> {
@@ -70,7 +70,7 @@ public class BuildingSaveData extends SavedData {
             cTag.putBoolean("isDiagonalBridge", b.isDiagonalBridge);
             list.add(cTag);
 
-            System.out.println("SavedBuildingData.save: " + b.ownerName + "|" + b.name);
+            System.out.println("BuildingSaveData.save: " + b.ownerName + "|" + b.name);
         });
         tag.put("buildings", list);
         return tag;
