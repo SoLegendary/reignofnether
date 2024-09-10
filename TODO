@@ -18,13 +18,14 @@ test server stop conditions:
     - [Singleplayer] close window and reenter world
     - [Singleplayer] crash via unrelated exception
 
+    - test that upgraded buildings retain their upgrade status (flag castle, lab rod, portal upgrades)
     - check no duplicates exist
 
 bugs:
     - player is defeated on server close if they only had units
         - maybe just accept it since this means its only the start of the game anyway?
 
-
+    - need to add isBuilt flag and portal type
 
 
 QoL/Balance

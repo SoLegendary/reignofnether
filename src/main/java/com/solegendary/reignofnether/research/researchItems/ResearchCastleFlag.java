@@ -28,7 +28,7 @@ public class ResearchCastleFlag extends ProductionItem {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (this.building instanceof Castle castle)
-                castle.changeStructure("castle_with_flag");
+                castle.changeStructure(Castle.upgradedStructureName);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;

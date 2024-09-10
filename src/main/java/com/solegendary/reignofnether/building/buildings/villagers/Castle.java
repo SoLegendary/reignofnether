@@ -33,6 +33,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
 
     public final static String buildingName = "Castle";
     public final static String structureName = "castle";
+    public final static String upgradedStructureName = "castle";
     public final static ResourceCost cost = ResourceCosts.CASTLE;
 
     private final static int MAX_OCCUPANTS = 10;

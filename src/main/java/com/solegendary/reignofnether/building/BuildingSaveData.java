@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -46,7 +47,10 @@ public class BuildingSaveData extends SavedData {
                 String ownerName = btag.getString("ownerName");
                 Rotation rotation = Rotation.valueOf(btag.getString("rotation"));
                 boolean isDiagonalBridge = btag.getBoolean("isDiagonalBridge");
-                data.buildings.add(new BuildingSave(pos, level, name, ownerName, rotation, isDiagonalBridge));
+                boolean isStructureUpgraded = btag.getBoolean("isStructureUpgraded");
+                Portal.PortalType portalType = Portal.PortalType.valueOf(btag.getString("portalType"));
+                data.buildings.add(new BuildingSave(pos, level, name, ownerName, rotation, isDiagonalBridge,
+                                                    isStructureUpgraded, portalType));
 
                 System.out.println("BuildingSaveData.load: " + ownerName + "|" + name);
             }

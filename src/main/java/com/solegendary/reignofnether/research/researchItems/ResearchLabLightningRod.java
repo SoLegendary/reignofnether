@@ -27,7 +27,7 @@ public class ResearchLabLightningRod extends ProductionItem {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (this.building instanceof Laboratory lab)
-                lab.changeStructure("laboratory_lightning");
+                lab.changeStructure(Laboratory.upgradedStructureName);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;

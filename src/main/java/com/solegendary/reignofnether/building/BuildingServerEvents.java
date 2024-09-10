@@ -1,8 +1,11 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
+import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -36,8 +39,10 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import javax.sound.sampled.Port;
 import java.util.*;
 
 public class BuildingServerEvents {
@@ -62,13 +67,25 @@ public class BuildingServerEvents {
         buildingData.buildings.clear();
 
         getBuildings().forEach(b -> {
+            boolean isStructureUpgraded = false;
+            Portal.PortalType portalType = null;
+            if (b instanceof Portal portal && portal.portalType != Portal.PortalType.BASIC) {
+                portalType = portal.portalType;
+                isStructureUpgraded = true;
+            }
+            else if (b instanceof Castle castle && castle.isUpgraded() ||
+                     b instanceof Laboratory lab && lab.isUpgraded())
+                isStructureUpgraded = true;
+
             buildingData.buildings.add(new BuildingSave(
                     b.originPos,
                     serverLevel,
                     b.name,
                     b.ownerName,
                     b.rotation,
-                    b.isDiagonalBridge
+                    b.isDiagonalBridge,
+                    isStructureUpgraded,
+                    portalType
             ));
             System.out.println("saved buildings/nether in serverevents: " + b.originPos);
         });
@@ -102,6 +119,14 @@ public class BuildingServerEvents {
                 BuildingServerEvents.getBuildings().add(building);
                 BuildingClientboundPacket.placeBuilding(b.originPos, b.name, b.rotation, b.ownerName,0, b.isDiagonalBridge, false);
 
+                if (b.isStructureUpgraded) {
+                    if (building instanceof Castle castle)
+                        castle.changeStructure(Castle.upgradedStructureName);
+                    else if (building instanceof Laboratory lab)
+                        lab.changeStructure(Laboratory.upgradedStructureName);
+                    else if (building instanceof Portal portal)
+                        portal.changeStructure(b.portalType);
+                }
                 // setNetherZone can only be run once - this supercedes where it normally happens in tick() -> onBuilt()
                 if (b instanceof NetherConvertingBuilding ncb)
                     for (NetherZone nz : netherData.netherZones)
@@ -112,6 +137,11 @@ public class BuildingServerEvents {
                 System.out.println("loaded building/nether in serverevents: " + b.originPos);
             });
         }
+    }
+
+    @SubscribeEvent
+    public static void onServerStop(ServerStoppingEvent evt) {
+        saveNetherZones();
     }
 
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName,
@@ -231,8 +261,10 @@ public class BuildingServerEvents {
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);
-        if (building instanceof NetherConvertingBuilding nb && nb.getZone() != null)
+        if (building instanceof NetherConvertingBuilding nb && nb.getZone() != null) {
             nb.getZone().startRestoring();
+            saveNetherZones();
+        }
 
         saveBuildings();
         FrozenChunkClientboundPacket.setBuildingDestroyedServerside(building.originPos);
@@ -335,8 +367,10 @@ public class BuildingServerEvents {
         List<Building> buildingsToDestroy = buildings.stream().filter(Building::shouldBeDestroyed).toList();
         buildings.removeIf(b -> {
             if (b.shouldBeDestroyed()) {
-                if (b instanceof NetherConvertingBuilding nb && nb.getZone() != null)
+                if (b instanceof NetherConvertingBuilding nb && nb.getZone() != null) {
                     nb.getZone().startRestoring();
+                    saveNetherZones();
+                }
                 FrozenChunkClientboundPacket.setBuildingDestroyedServerside(b.originPos);
                 return true;
             }

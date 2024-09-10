@@ -84,7 +84,7 @@ public class ResourcesServerEvents {
     }
 
     @SubscribeEvent
-    public static void onWorldTick(ServerStoppingEvent evt) {
+    public static void onServerStopping(ServerStoppingEvent evt) {
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
         if (level != null)
             saveResources(level);
