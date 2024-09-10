@@ -2,11 +2,10 @@ package com.solegendary.reignofnether.player;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
@@ -165,8 +164,8 @@ public class PlayerServerEvents {
             if (entity instanceof Unit unit)
                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
 
-        ResearchServer.syncResearch(playerName);
-        ResearchServer.syncCheats(playerName);
+        ResearchServerEvents.syncResearch(playerName);
+        ResearchServerEvents.syncCheats(playerName);
 
         if (orthoviewPlayers.stream().map(Entity::getId).toList().contains(evt.getEntity().getId())) {
             orthoviewPlayers.add((ServerPlayer) evt.getEntity());
@@ -325,14 +324,14 @@ public class PlayerServerEvents {
 
             for (String cheatName : singleWordCheats) {
                 if (words.length == 1 && words[0].equalsIgnoreCase(cheatName)) {
-                    if (ResearchServer.playerHasCheat(playerName, cheatName) && !cheatName.equals("medievalman")) {
-                        ResearchServer.removeCheat(playerName, cheatName);
+                    if (ResearchServerEvents.playerHasCheat(playerName, cheatName) && !cheatName.equals("medievalman")) {
+                        ResearchServerEvents.removeCheat(playerName, cheatName);
                         ResearchClientboundPacket.removeCheat(playerName, cheatName);
                         evt.setCanceled(true);
                         sendMessageToAllPlayers(playerName + " disabled cheat: " + cheatName);
                     }
                     else {
-                        ResearchServer.addCheat(playerName, cheatName);
+                        ResearchServerEvents.addCheat(playerName, cheatName);
                         ResearchClientboundPacket.addCheat(playerName, cheatName);
                         evt.setCanceled(true);
                         sendMessageToAllPlayers(playerName + " enabled cheat: " + cheatName);
@@ -344,7 +343,7 @@ public class PlayerServerEvents {
             if (words.length == 1 && words[0].equalsIgnoreCase("allcheats")) {
                 ResourcesServerEvents.addSubtractResources(new Resources(playerName, 99999, 99999, 99999));
                 for (String cheatName : singleWordCheats) {
-                    ResearchServer.addCheat(playerName, cheatName);
+                    ResearchServerEvents.addCheat(playerName, cheatName);
                     ResearchClientboundPacket.addCheat(playerName, cheatName);
                     evt.setCanceled(true);
                 }
@@ -480,8 +479,8 @@ public class PlayerServerEvents {
                 }
             }
             BuildingServerEvents.getBuildings().clear();
-            ResearchServer.removeAllResearch();
-            ResearchServer.removeAllCheats();
+            ResearchServerEvents.removeAllResearch();
+            ResearchServerEvents.removeAllCheats();
 
             PlayerClientboundPacket.resetRTS();
 

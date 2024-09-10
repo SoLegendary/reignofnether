@@ -3,11 +3,10 @@ package com.solegendary.reignofnether.unit.units.monsters;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.monsters.*;
 import com.solegendary.reignofnether.building.buildings.monsters.SpruceBridge;
-import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchResourceCapacity;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -287,7 +286,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
-        if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchResourceCapacity.itemName))
+        if (ResearchServerEvents.playerHasResearch(this.getOwnerName(), ResearchResourceCapacity.itemName))
             this.maxResources = 200;
     }
 }

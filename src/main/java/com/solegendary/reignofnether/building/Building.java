@@ -15,7 +15,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
@@ -455,7 +455,7 @@ public abstract class Building {
         totalBlocksEverBroken += 1;
         Random rand = new Random();
 
-        if (this.getFaction() == Faction.MONSTERS && ResearchServer.playerHasResearch(this.ownerName, ResearchSilverfish.itemName))
+        if (this.getFaction() == Faction.MONSTERS && ResearchServerEvents.playerHasResearch(this.ownerName, ResearchSilverfish.itemName))
             randomSilverfishSpawn(pos);
 
         // when a player breaks a block that's part of the building:
@@ -586,7 +586,7 @@ public abstract class Building {
                 if (msToNextBuild > msPerBuild)
                     msToNextBuild = msPerBuild;
 
-                if (ResearchServer.playerHasCheat(this.ownerName, "warpten"))
+                if (ResearchServerEvents.playerHasCheat(this.ownerName, "warpten"))
                     msToNextBuild -= 500;
                 else
                     msToNextBuild -= 50;

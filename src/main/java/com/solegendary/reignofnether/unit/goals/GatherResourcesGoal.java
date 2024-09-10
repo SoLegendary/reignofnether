@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -254,7 +254,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                     }
                 }
                 else {
-                    if (ResearchServer.playerHasCheat(((Unit) mob).getOwnerName(), "operationcwal"))
+                    if (ResearchServerEvents.playerHasCheat(((Unit) mob).getOwnerName(), "operationcwal"))
                         this.gatherTicksLeft -= (TICK_CD / 2) * 10;
                     else
                         this.gatherTicksLeft -= (TICK_CD / 2);

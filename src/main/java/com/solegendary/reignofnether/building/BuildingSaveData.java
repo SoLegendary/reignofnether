@@ -46,11 +46,12 @@ public class BuildingSaveData extends SavedData {
                 String name = btag.getString("buildingName");
                 String ownerName = btag.getString("ownerName");
                 Rotation rotation = Rotation.valueOf(btag.getString("rotation"));
+                boolean isBuilt = btag.getBoolean("isBuilt");
                 boolean isDiagonalBridge = btag.getBoolean("isDiagonalBridge");
                 boolean isStructureUpgraded = btag.getBoolean("isStructureUpgraded");
                 Portal.PortalType portalType = Portal.PortalType.valueOf(btag.getString("portalType"));
                 data.buildings.add(new BuildingSave(pos, level, name, ownerName, rotation, isDiagonalBridge,
-                                                    isStructureUpgraded, portalType));
+                                                    isBuilt, isStructureUpgraded, portalType));
 
                 System.out.println("BuildingSaveData.load: " + ownerName + "|" + name);
             }
@@ -72,6 +73,9 @@ public class BuildingSaveData extends SavedData {
             cTag.putString("rotation", b.rotation.name());
             cTag.putString("ownerName", b.ownerName);
             cTag.putBoolean("isDiagonalBridge", b.isDiagonalBridge);
+            cTag.putBoolean("isBuilt", b.isBuilt);
+            cTag.putBoolean("isStructureUpgraded", b.isStructureUpgraded);
+            cTag.putString("portalType", b.portalType.name());
             list.add(cTag);
 
             System.out.println("BuildingSaveData.save: " + b.ownerName + "|" + b.name);

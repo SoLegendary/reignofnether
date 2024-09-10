@@ -13,17 +13,19 @@ public class BuildingSave {
     public String name;
     public String ownerName;
     public Rotation rotation;
+    public boolean isBuilt;
     public boolean isDiagonalBridge;
     public boolean isStructureUpgraded; // castle flag, lab rod, etc.
     Portal.PortalType portalType;
 
-    public BuildingSave(BlockPos originPos, Level level, String name, String ownerName, Rotation rotation,
+    public BuildingSave(BlockPos originPos, Level level, String name, String ownerName, Rotation rotation, boolean isBuilt,
                         boolean isDiagonalBridge, boolean isStructureUpgraded, Portal.PortalType portalType) {
         this.originPos = originPos;
         this.level = level;
         this.name = name;
         this.ownerName = ownerName;
         this.rotation = rotation;
+        this.isBuilt = isBuilt;
         this.isDiagonalBridge = isDiagonalBridge;
         this.isStructureUpgraded = isStructureUpgraded;
         this.portalType = portalType;

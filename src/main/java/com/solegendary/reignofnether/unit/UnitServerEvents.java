@@ -5,18 +5,14 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
-import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
-import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
-import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -40,15 +36,12 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.*;
@@ -56,13 +49,10 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Convert;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
@@ -274,7 +264,7 @@ public class UnitServerEvents {
 
         if (evt.getEntity().getLastHurtByMob() instanceof Unit unit &&
             (evt.getEntity().getLastHurtByMob() instanceof WitherSkeletonUnit || evt.getSource().getMsgId().equals("wither")) &&
-            ResearchServer.playerHasResearch(unit.getOwnerName(), ResearchWitherClouds.itemName)) {
+            ResearchServerEvents.playerHasResearch(unit.getOwnerName(), ResearchWitherClouds.itemName)) {
 
             AreaEffectCloud aec = new AreaEffectCloud(evt.getEntity().level, evt.getEntity().getX(), evt.getEntity().getY(), evt.getEntity().getZ());
             aec.setOwner(evt.getEntity());
@@ -427,7 +417,7 @@ public class UnitServerEvents {
         Entity shooter = evt.getSource().getEntity();
 
         if (shooter instanceof HeadhunterUnit headhunterUnit && projectile instanceof ThrownTrident) {
-            return !ResearchServer.playerHasResearch(headhunterUnit.getOwnerName(), ResearchHeavyTridents.itemName);
+            return !ResearchServerEvents.playerHasResearch(headhunterUnit.getOwnerName(), ResearchHeavyTridents.itemName);
         }
         if (projectile instanceof Fireball && shooter instanceof BlazeUnit)
             return true;

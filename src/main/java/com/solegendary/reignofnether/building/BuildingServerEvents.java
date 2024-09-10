@@ -9,7 +9,7 @@ import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -42,7 +42,6 @@ import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import javax.sound.sampled.Port;
 import java.util.*;
 
 public class BuildingServerEvents {
@@ -83,6 +82,7 @@ public class BuildingServerEvents {
                     b.name,
                     b.ownerName,
                     b.rotation,
+                    b.isBuilt,
                     b.isDiagonalBridge,
                     isStructureUpgraded,
                     portalType
@@ -116,6 +116,7 @@ public class BuildingServerEvents {
 
             buildingData.buildings.forEach(b -> {
                 Building building = BuildingUtils.getNewBuilding(b.name, level, b.originPos, b.rotation, b.ownerName, b.isDiagonalBridge);
+                building.isBuilt = b.isBuilt;
                 BuildingServerEvents.getBuildings().add(building);
                 BuildingClientboundPacket.placeBuilding(b.originPos, b.name, b.rotation, b.ownerName,0, b.isDiagonalBridge, false);
 
@@ -284,7 +285,7 @@ public class BuildingServerEvents {
     }
 
     public static int getTotalPopulationSupply(String ownerName) {
-        if (ResearchServer.playerHasCheat(ownerName, "foodforthought"))
+        if (ResearchServerEvents.playerHasCheat(ownerName, "foodforthought"))
             return Integer.MAX_VALUE;
 
         int totalPopulationSupply = 0;

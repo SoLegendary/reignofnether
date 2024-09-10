@@ -10,12 +10,11 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -36,7 +35,7 @@ public class ResearchPoisonSpiders extends ProductionItem {
             if (level.isClientSide())
                 ResearchClient.addResearch(this.building.ownerName, ResearchPoisonSpiders.itemName);
             else {
-                ResearchServer.addResearch(this.building.ownerName, ResearchPoisonSpiders.itemName);
+                ResearchServerEvents.addResearch(this.building.ownerName, ResearchPoisonSpiders.itemName);
 
                 // convert all spiders into poison spiders with the same stats/inventory/etc.
                 UnitServerEvents.convertAllToUnit(

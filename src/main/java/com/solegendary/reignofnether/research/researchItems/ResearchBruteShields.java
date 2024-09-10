@@ -7,7 +7,7 @@ import com.solegendary.reignofnether.building.ProductionItem;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -31,7 +31,7 @@ public class ResearchBruteShields extends ProductionItem {
             if (level.isClientSide())
                 ResearchClient.addResearch(this.building.ownerName, ResearchBruteShields.itemName);
             else {
-                ResearchServer.addResearch(this.building.ownerName, ResearchBruteShields.itemName);
+                ResearchServerEvents.addResearch(this.building.ownerName, ResearchBruteShields.itemName);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())
                     if (unit instanceof BruteUnit vUnit && vUnit.getOwnerName().equals(building.ownerName))
                         vUnit.setupEquipmentAndUpgradesServer();

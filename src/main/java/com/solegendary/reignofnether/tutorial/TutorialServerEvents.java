@@ -7,12 +7,11 @@ import com.solegendary.reignofnether.building.buildings.villagers.Barracks;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
@@ -24,13 +23,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-
-import java.util.ArrayList;
 
 import static com.solegendary.reignofnether.unit.UnitServerEvents.spawnMobs;
 
@@ -108,7 +104,7 @@ public class TutorialServerEvents {
     // also officially adds the tutorial bot to the game as an RTSPlayer
     public static void spawnMonsterWorkers() {
         PlayerServerEvents.startRTSBot(TUTORIAL_ENEMY_NAME, Vec3.atCenterOf(MAUSOLEUM_POS), Faction.MONSTERS);
-        ResearchServer.addCheat(TUTORIAL_ENEMY_NAME, "warpten");
+        ResearchServerEvents.addCheat(TUTORIAL_ENEMY_NAME, "warpten");
         ResourcesServerEvents.addSubtractResources(new Resources(TUTORIAL_ENEMY_NAME, 10000, 10000, 10000));
     }
 

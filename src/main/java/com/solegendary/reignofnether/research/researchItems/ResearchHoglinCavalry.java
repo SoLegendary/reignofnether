@@ -1,15 +1,13 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
 import com.solegendary.reignofnether.building.ProductionItem;
-import com.solegendary.reignofnether.building.buildings.monsters.SpiderLair;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Style;
@@ -30,7 +28,7 @@ public class ResearchHoglinCavalry extends ProductionItem {
             if (level.isClientSide())
                 ResearchClient.addResearch(this.building.ownerName, ResearchHoglinCavalry.itemName);
             else {
-                ResearchServer.addResearch(this.building.ownerName, ResearchHoglinCavalry.itemName);
+                ResearchServerEvents.addResearch(this.building.ownerName, ResearchHoglinCavalry.itemName);
             }
         };
         this.foodCost = cost.food;
