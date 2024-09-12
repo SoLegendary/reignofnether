@@ -102,6 +102,22 @@ public class TutorialClientEvents {
             List.of(FormattedCharSequence.forward("Tutorial Help", Style.EMPTY))
     );
 
+    public static void loadStage(TutorialStage stage) {
+        if (stage == INTRO)
+            return;
+
+        tutorialStage = stage;
+        ticksOnStage = 0;
+        stageProgress = 0;
+        blockUpdateStage = false;
+        clearHelpButtonText();
+        TutorialRendering.clearButtonName();
+        updateStage();
+        shouldPauseTicking = () -> false;
+
+        specialMsg("Welcome back... resuming at stage: " + tutorialStage.name());
+    }
+
     private static void setHelpButtonText(String text) {
         helpButtonClicks = 0;
         helpButtonText = text;
@@ -141,6 +157,7 @@ public class TutorialClientEvents {
         TutorialRendering.clearButtonName();
         updateStage();
         shouldPauseTicking = () -> false;
+        TutorialServerboundPacket.saveStage(tutorialStage);
     }
     private static void prevStage() {
         tutorialStage = tutorialStage.prev();
@@ -151,6 +168,7 @@ public class TutorialClientEvents {
         TutorialRendering.clearButtonName();
         updateStage();
         shouldPauseTicking = () -> false;
+        TutorialServerboundPacket.saveStage(tutorialStage);
     }
 
     // check if we need to render an arrow to point at the next button
@@ -197,7 +215,7 @@ public class TutorialClientEvents {
 
     @SubscribeEvent
     public static void TickEvent(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || MC.isPaused() || !isEnabled())
+        if (evt.phase != TickEvent.Phase.END || MC.isPaused() || !isEnabled() || !OrthoviewClientEvents.isEnabled())
             return;
 
         if (shouldPauseTicking.get())

@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.buildings.villagers.Barracks;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.research.ResearchSaveData;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
@@ -23,9 +24,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import static com.solegendary.reignofnether.unit.UnitServerEvents.spawnMobs;
@@ -63,6 +66,27 @@ public class TutorialServerEvents {
         return null;
     }
 
+    public static void saveStage(TutorialStage stage) {
+        ServerLevel serverLevel = getServerLevel();
+        if (serverLevel != null) {
+            TutorialSaveData tutorialData = TutorialSaveData.getInstance(serverLevel);
+            tutorialData.stage = stage;
+            tutorialData.save();
+            serverLevel.getDataStorage().save();
+            System.out.println("saved tutorialStage in serverevents");
+        }
+    }
+
+    @SubscribeEvent
+    public static void loadStage(ServerStartedEvent evt) {
+        ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
+        if (level != null) {
+            TutorialSaveData tutorialData = TutorialSaveData.getInstance(level);
+            TutorialClientboundPacket.loadTutorialStage(tutorialData.stage);
+            System.out.println("loaded tutorialStage in serverevents");
+        }
+    }
+
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         MinecraftServer server = evt.getEntity().getServer();
@@ -76,6 +100,7 @@ public class TutorialServerEvents {
                 levelName.equals(TUTORIAL_MAP_NAME)) {
             TutorialClientboundPacket.enableTutorial();
             enabled = true;
+            loadStage();
         } else {
             TutorialClientboundPacket.disableTutorial();
             enabled = false;

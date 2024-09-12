@@ -48,6 +48,7 @@ public class ResearchServerEvents {
 
     public static void removeAllResearch() {
         researchItems.clear();
+        saveResearch();
     }
 
     public static void syncResearch(String playerName) {
@@ -58,10 +59,11 @@ public class ResearchServerEvents {
 
     public static void addResearch(String playerName, String researchItemName) {
         researchItems.add(new Pair<>(playerName, researchItemName));
-        sa
+        saveResearch();
     }
     public static void removeResearch(String playerName, String researchItemName) {
         researchItems.removeIf(p -> p.getFirst().equals(playerName) && p.getSecond().equals(researchItemName));
+        saveResearch();
     }
     public static boolean playerHasResearch(String playerName, String researchItemName) {
         if (playerHasCheat(playerName, "medievalman"))

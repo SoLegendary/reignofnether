@@ -5,9 +5,11 @@ public enum TutorialAction {
     // clientbound
     ENABLE,
     DISABLE,
-    UPDATE_STAGE,
+    LOAD_STAGE,
 
     // serverbound
+    SAVE_STAGE,
+
     SET_NIGHT_TIME,
     SET_DAY_TIME,
     SPAWN_ANIMALS,
