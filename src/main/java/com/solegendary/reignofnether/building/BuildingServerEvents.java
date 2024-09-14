@@ -66,15 +66,10 @@ public class BuildingServerEvents {
         buildingData.buildings.clear();
 
         getBuildings().forEach(b -> {
-            boolean isStructureUpgraded = false;
+            boolean isUpgraded = b.isUpgraded();
             Portal.PortalType portalType = null;
-            if (b instanceof Portal portal && portal.portalType != Portal.PortalType.BASIC) {
+            if (b instanceof Portal portal && portal.portalType != Portal.PortalType.BASIC)
                 portalType = portal.portalType;
-                isStructureUpgraded = true;
-            }
-            else if (b instanceof Castle castle && castle.isUpgraded() ||
-                     b instanceof Laboratory lab && lab.isUpgraded())
-                isStructureUpgraded = true;
 
             buildingData.buildings.add(new BuildingSave(
                     b.originPos,
@@ -82,9 +77,9 @@ public class BuildingServerEvents {
                     b.name,
                     b.ownerName,
                     b.rotation,
-                    b.isBuilt,
                     b.isDiagonalBridge,
-                    isStructureUpgraded,
+                    b.isBuilt,
+                    isUpgraded,
                     portalType
             ));
             System.out.println("saved buildings/nether in serverevents: " + b.originPos);
@@ -120,19 +115,14 @@ public class BuildingServerEvents {
                 if (building != null) {
                     building.isBuilt = b.isBuilt;
                     BuildingServerEvents.getBuildings().add(building);
-                    BuildingClientboundPacket.placeBuilding(b.originPos, b.name, b.rotation, b.ownerName,0, b.isDiagonalBridge, false);
 
-                    if (b.isStructureUpgraded) {
-                        if (building instanceof Castle castle) {
+                    if (b.isUpgraded) {
+                        if (building instanceof Castle castle)
                             castle.changeStructure(Castle.upgradedStructureName);
-                        }
-                        else if (building instanceof Laboratory lab) {
+                        else if (building instanceof Laboratory lab)
                             lab.changeStructure(Laboratory.upgradedStructureName);
-                        }
-                        else if (building instanceof Portal portal) {
+                        else if (building instanceof Portal portal)
                             portal.changeStructure(b.portalType);
-                            BuildingClientboundPacket.changePortal(building.originPos, Portal.PortalType.CIVILIAN.name());
-                        }
                     }
                     // setNetherZone can only be run once - this supercedes where it normally happens in tick() -> onBuilt()
                     if (building instanceof NetherConvertingBuilding ncb)
@@ -150,6 +140,7 @@ public class BuildingServerEvents {
     @SubscribeEvent
     public static void onServerStop(ServerStoppingEvent evt) {
         saveNetherZones();
+        saveBuildings();
     }
 
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName,
@@ -184,7 +175,6 @@ public class BuildingServerEvents {
 
             if (newBuilding.canAfford(ownerName)) {
                 buildings.add(newBuilding);
-                saveBuildings();
 
                 newBuilding.forceChunk(true);
 
@@ -225,8 +215,8 @@ public class BuildingServerEvents {
                             newBuilding.startingBlockTypes.contains(block.getBlockState().getBlock()))
                         newBuilding.addToBlockPlaceQueue(block);
                 }
-                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName,
-                        newBuilding.blockPlaceQueue.size(), isDiagonalBridge, false);
+                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName, newBuilding.blockPlaceQueue.size(),
+                        isDiagonalBridge, false, false, Portal.PortalType.BASIC, false);
 
                 ResourcesServerEvents.addSubtractResources(new Resources(
                     newBuilding.ownerName,
@@ -273,8 +263,6 @@ public class BuildingServerEvents {
             nb.getZone().startRestoring();
             saveNetherZones();
         }
-
-        saveBuildings();
         FrozenChunkClientboundPacket.setBuildingDestroyedServerside(building.originPos);
 
         // AOE2-style refund: return the % of the non-built portion of the building
@@ -328,8 +316,12 @@ public class BuildingServerEvents {
                 building.ownerName,
                 building.blockPlaceQueue.size(),
                 building instanceof AbstractBridge bridge && bridge.isDiagonalBridge,
+                building.isBuilt,
+                building.isUpgraded(),
+                building instanceof Portal p ? p.portalType : Portal.PortalType.BASIC,
                 true
             );
+        System.out.println("Synced " + buildings.size() + " buildings with player logged in");
     }
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions
@@ -399,9 +391,6 @@ public class BuildingServerEvents {
         int nzSizeAfter = netherZones.size();
         if (nzSizeBefore != nzSizeAfter)
             saveNetherZones();
-
-        if (!buildingsToDestroy.isEmpty())
-            saveBuildings();
     }
 
     // cancel all explosion damage to non-building blocks
@@ -507,6 +496,9 @@ public class BuildingServerEvents {
                         building.ownerName,
                         building.blockPlaceQueue.size(),
                         building instanceof AbstractBridge bridge && bridge.isDiagonalBridge,
+                        building.isBuilt,
+                        building.isUpgraded(),
+                        building instanceof Portal p ? p.portalType : Portal.PortalType.BASIC,
                         false
                 );
                 return;

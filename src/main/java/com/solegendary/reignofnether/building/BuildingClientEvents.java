@@ -3,8 +3,10 @@ package com.solegendary.reignofnether.building;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -746,7 +748,8 @@ public class BuildingClientEvents {
 
     // place a building clientside that has already been registered on serverside
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName,
-                                     int numBlocksToPlace, boolean isDiagonalBridge, boolean forPlayerLoggingIn) {
+                                     int numBlocksToPlace, boolean isDiagonalBridge, boolean isUpgraded,
+                                     boolean isBuilt, Portal.PortalType portalType, boolean forPlayerLoggingIn) {
 
         for (Building building : buildings)
             if (!buildingName.toLowerCase().contains("bridge") &&
@@ -761,6 +764,19 @@ public class BuildingClientEvents {
             numBlocksToPlace -= 1;
         }
         if (newBuilding != null && MC.player != null) {
+            newBuilding.isBuilt = isBuilt;
+
+            if (isBuilt && forPlayerLoggingIn)
+                newBuilding.highestBlockCountReached = newBuilding.getBlocksTotal();
+
+            if (isUpgraded) {
+                if (newBuilding instanceof Castle castle)
+                    castle.changeStructure(Castle.upgradedStructureName);
+                else if (newBuilding instanceof Laboratory lab)
+                    lab.changeStructure(Laboratory.upgradedStructureName);
+                else if (newBuilding instanceof Portal portal)
+                    portal.changeStructure(portalType);
+            }
             buildings.add(newBuilding);
 
             if (FogOfWarClientEvents.isEnabled())

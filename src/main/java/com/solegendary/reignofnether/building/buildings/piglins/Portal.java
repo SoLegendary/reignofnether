@@ -208,10 +208,9 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
             super.refreshBlocks();
             this.portalType = portalType;
         }
-        if (!getLevel().isClientSide())
-            BuildingServerEvents.saveBuildings();
     }
 
+    @Override
     public boolean isUpgraded() {
         return portalType != PortalType.BASIC;
     }

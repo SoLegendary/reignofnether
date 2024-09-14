@@ -48,6 +48,7 @@ import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -73,7 +74,8 @@ public class UnitServerEvents {
 
     public static final ArrayList<UnitSave> savedUnits = new ArrayList<>();
 
-    public static void saveUnits() {
+    @SubscribeEvent
+    public static void saveUnits(ServerStoppingEvent evt) {
         if (serverLevel == null)
             return;
 
@@ -203,9 +205,6 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof Unit unit &&
             evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
             allUnits.add(entity);
-
-            if (!evt.loadedFromDisk())
-                saveUnits();
 
             synchronized (savedUnits) {
                 savedUnits.removeIf(su -> {

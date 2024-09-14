@@ -4,9 +4,9 @@
 TODO bugs/features:
 
 Save unit owners and buildings to the world to prevent loss of data on server shutdown
-    - NetherZones: saved on creation, flip, deletion and server shutdown
     - Portal and other upgraded structures
 
+TODO: ResourcesSaveData: refund all items in production since they'll be cancelled
 
 
 

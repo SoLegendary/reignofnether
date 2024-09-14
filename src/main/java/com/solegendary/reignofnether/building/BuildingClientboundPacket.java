@@ -26,39 +26,49 @@ public class BuildingClientboundPacket {
     public int blocksPlaced; // for syncing out-of-view clientside buildings
     public int numQueuedBlocks; // used for delaying destroy checks clientside
     public boolean isDiagonalBridge;
+    public boolean isUpgraded;
+    public boolean isBuilt;
+    public Portal.PortalType portalType;
     public boolean forPlayerLoggingIn; // is this placement for someone logging in currently joined?
 
-    public static void placeBuilding(BlockPos buildingPos, String itemName, Rotation rotation, String ownerName, int numQueuedBlocks, boolean isDiagonalBridge, boolean forPlayerLoggingIn) {
+    public static void placeBuilding(BlockPos buildingPos, String itemName, Rotation rotation, String ownerName, int numQueuedBlocks,
+                                     boolean isDiagonalBridge, boolean isUpgraded, boolean isBuilt, Portal.PortalType portalType, boolean forPlayerLoggingIn) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new BuildingClientboundPacket(BuildingAction.PLACE,
-                    itemName, buildingPos, rotation, ownerName, 0, numQueuedBlocks, isDiagonalBridge, forPlayerLoggingIn));
+                    itemName, buildingPos, rotation, ownerName, 0, numQueuedBlocks,
+                    isDiagonalBridge, isUpgraded, isBuilt, portalType, forPlayerLoggingIn));
     }
     public static void syncBuilding(BlockPos buildingPos, int blocksPlaced) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new BuildingClientboundPacket(BuildingAction.SYNC_BLOCKS,
-                        "", buildingPos, Rotation.NONE, "", blocksPlaced, 0, false, false));
+                        "", buildingPos, Rotation.NONE, "", blocksPlaced, 0,
+                        false, false, false, Portal.PortalType.BASIC, false));
     }
     public static void startProduction(BlockPos buildingPos, String itemName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new BuildingClientboundPacket(
             BuildingAction.START_PRODUCTION,
-            itemName, buildingPos, Rotation.NONE, "", 0, 0, false, false));
+            itemName, buildingPos, Rotation.NONE, "", 0, 0, false,
+                    false, false, Portal.PortalType.BASIC, false));
     }
     public static void cancelProduction(BlockPos buildingPos, String itemName, boolean frontItem) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new BuildingClientboundPacket(
                         frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
-                        itemName, buildingPos, Rotation.NONE, "", 0, 0, false, false));
+                        itemName, buildingPos, Rotation.NONE, "", 0, 0,
+                        false, false, false, Portal.PortalType.BASIC, false));
     }
     public static void changePortal(BlockPos buildingPos, String portalType) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new BuildingClientboundPacket(
                         BuildingAction.CHANGE_PORTAL, portalType, buildingPos,
-                        Rotation.NONE, "", 0, 0, false, false));
+                        Rotation.NONE, "", 0, 0, false, false,
+                        false, Portal.PortalType.BASIC, false));
     }
 
     public BuildingClientboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, Rotation rotation, String ownerName,
-                                     int blocksPlaced, int numQueuedBlocks, boolean isDiagonalBridge, boolean forPlayerLoggingIn) {
+                                     int blocksPlaced, int numQueuedBlocks, boolean isDiagonalBridge, boolean isUpgraded,
+                                     boolean isBuilt, Portal.PortalType portalType, boolean forPlayerLoggingIn) {
         this.action = action;
         this.itemName = itemName;
         this.buildingPos = buildingPos;
@@ -67,6 +77,9 @@ public class BuildingClientboundPacket {
         this.blocksPlaced = blocksPlaced;
         this.numQueuedBlocks = numQueuedBlocks;
         this.isDiagonalBridge = isDiagonalBridge;
+        this.isBuilt = isBuilt;
+        this.isUpgraded = isUpgraded;
+        this.portalType = portalType;
         this.forPlayerLoggingIn = forPlayerLoggingIn;
     }
 
@@ -79,6 +92,9 @@ public class BuildingClientboundPacket {
         this.blocksPlaced = buffer.readInt();
         this.numQueuedBlocks = buffer.readInt();
         this.isDiagonalBridge = buffer.readBoolean();
+        this.isBuilt = buffer.readBoolean();
+        this.isUpgraded = buffer.readBoolean();
+        this.portalType = buffer.readEnum(Portal.PortalType.class);
         this.forPlayerLoggingIn = buffer.readBoolean();
     }
 
@@ -91,6 +107,9 @@ public class BuildingClientboundPacket {
         buffer.writeInt(this.blocksPlaced);
         buffer.writeInt(this.numQueuedBlocks);
         buffer.writeBoolean(this.isDiagonalBridge);
+        buffer.writeBoolean(this.isBuilt);
+        buffer.writeBoolean(this.isUpgraded);
+        buffer.writeEnum(this.portalType);
         buffer.writeBoolean(this.forPlayerLoggingIn);
     }
 
@@ -115,7 +134,8 @@ public class BuildingClientboundPacket {
                     }
                 }
                 switch (action) {
-                    case PLACE -> BuildingClientEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName, this.numQueuedBlocks, this.isDiagonalBridge, this.forPlayerLoggingIn);
+                    case PLACE -> BuildingClientEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName,
+                            this.numQueuedBlocks, this.isDiagonalBridge, this.isBuilt, this.isUpgraded, this.portalType, this.forPlayerLoggingIn);
                     case SYNC_BLOCKS -> BuildingClientEvents.syncBuildingBlocks(building, this.blocksPlaced);
                     case START_PRODUCTION -> {
                         ProductionBuilding.startProductionItem((ProductionBuilding) building, this.itemName, this.buildingPos);

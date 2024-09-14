@@ -82,6 +82,7 @@ public class Laboratory extends ProductionBuilding {
     }
 
     // check that the lightning rod is built based on existing placed blocks
+    @Override
     public boolean isUpgraded() {
         for (BuildingBlock block : blocks)
             if (block.getBlockState().getBlock() == Blocks.LIGHTNING_ROD)
@@ -93,8 +94,6 @@ public class Laboratory extends ProductionBuilding {
         ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocks(newStructureName, this.getLevel());
         this.blocks = getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation);
         super.refreshBlocks();
-        if (!getLevel().isClientSide())
-            BuildingServerEvents.saveBuildings();
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

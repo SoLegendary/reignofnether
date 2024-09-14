@@ -114,11 +114,10 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
         ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocks(newStructureName, this.getLevel());
         this.blocks = getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation);
         super.refreshBlocks();
-        if (!getLevel().isClientSide())
-            BuildingServerEvents.saveBuildings();
     }
 
     // check that the flag is built based on existing placed blocks
+    @Override
     public boolean isUpgraded() {
         for (BuildingBlock block : blocks)
             if (block.getBlockState().getBlock() == Blocks.WHITE_WOOL ||

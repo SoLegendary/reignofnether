@@ -774,4 +774,8 @@ public abstract class Building {
                     if (fc.building != null && fc.building.originPos.equals(originPos))
                         fc.removeOnExplore = true;
     }
+
+    public boolean isUpgraded() {
+        return false;
+    }
 }
