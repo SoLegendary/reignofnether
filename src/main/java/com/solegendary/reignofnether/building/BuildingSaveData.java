@@ -75,7 +75,7 @@ public class BuildingSaveData extends SavedData {
             cTag.putBoolean("isDiagonalBridge", b.isDiagonalBridge);
             cTag.putBoolean("isBuilt", b.isBuilt);
             cTag.putBoolean("isStructureUpgraded", b.isStructureUpgraded);
-            cTag.putString("portalType", b.portalType.name());
+            cTag.putString("portalType", b.portalType != null ? b.portalType.name() : Portal.PortalType.BASIC.name());
             list.add(cTag);
 
             System.out.println("BuildingSaveData.save: " + b.ownerName + "|" + b.name);

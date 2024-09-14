@@ -4,13 +4,10 @@
 TODO bugs/features:
 
 Save unit owners and buildings to the world to prevent loss of data on server shutdown
-    - Units: saved on every unit spawn including conversions
-    - RTSPlayers: saved on startRTS actions or defeats
-    - Resources: unit resources AND current resources both saved on server shutdown
     - NetherZones: saved on creation, flip, deletion and server shutdown
+    - Portal and other upgraded structures
 
-    - Research: saved on addition and server shutdown
-    - Tutorial
+
 
 
 test server stop conditions:

@@ -19,7 +19,6 @@ public class ResearchServerEvents {
 
     private static ServerLevel serverLevel = null;
 
-    @SubscribeEvent
     public static void saveResearch() {
         if (serverLevel != null) {
             ResearchSaveData researchData = ResearchSaveData.getInstance(serverLevel);
@@ -41,6 +40,8 @@ public class ResearchServerEvents {
             ResearchSaveData researchData = ResearchSaveData.getInstance(level);
             researchItems.clear();
             researchItems.addAll(researchData.researchItems);
+            for (Pair<String, String> researchItem : researchItems)
+                syncResearch(researchItem.getFirst());
 
             System.out.println("loaded " + researchItems.size() + " researchItems in serverevents");
         }

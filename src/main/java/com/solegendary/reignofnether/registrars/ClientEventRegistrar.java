@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
@@ -64,5 +65,6 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(ResourcesServerEvents.class);
         vanillaEventBus.register(TPSServerEvents.class);
         vanillaEventBus.register(FogOfWarServerEvents.class);
+        vanillaEventBus.register(ResearchServerEvents.class);
     }
 }

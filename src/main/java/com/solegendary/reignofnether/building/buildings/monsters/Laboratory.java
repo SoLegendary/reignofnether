@@ -93,6 +93,8 @@ public class Laboratory extends ProductionBuilding {
         ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocks(newStructureName, this.getLevel());
         this.blocks = getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation);
         super.refreshBlocks();
+        if (!getLevel().isClientSide())
+            BuildingServerEvents.saveBuildings();
     }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

@@ -116,26 +116,33 @@ public class BuildingServerEvents {
 
             buildingData.buildings.forEach(b -> {
                 Building building = BuildingUtils.getNewBuilding(b.name, level, b.originPos, b.rotation, b.ownerName, b.isDiagonalBridge);
-                building.isBuilt = b.isBuilt;
-                BuildingServerEvents.getBuildings().add(building);
-                BuildingClientboundPacket.placeBuilding(b.originPos, b.name, b.rotation, b.ownerName,0, b.isDiagonalBridge, false);
 
-                if (b.isStructureUpgraded) {
-                    if (building instanceof Castle castle)
-                        castle.changeStructure(Castle.upgradedStructureName);
-                    else if (building instanceof Laboratory lab)
-                        lab.changeStructure(Laboratory.upgradedStructureName);
-                    else if (building instanceof Portal portal)
-                        portal.changeStructure(b.portalType);
-                }
-                // setNetherZone can only be run once - this supercedes where it normally happens in tick() -> onBuilt()
-                if (b instanceof NetherConvertingBuilding ncb)
-                    for (NetherZone nz : netherData.netherZones)
-                        if (building.isPosInsideBuilding(nz.getOrigin())) {
-                            ncb.setNetherZone(nz);
-                            break;
+                if (building != null) {
+                    building.isBuilt = b.isBuilt;
+                    BuildingServerEvents.getBuildings().add(building);
+                    BuildingClientboundPacket.placeBuilding(b.originPos, b.name, b.rotation, b.ownerName,0, b.isDiagonalBridge, false);
+
+                    if (b.isStructureUpgraded) {
+                        if (building instanceof Castle castle) {
+                            castle.changeStructure(Castle.upgradedStructureName);
                         }
-                System.out.println("loaded building/nether in serverevents: " + b.originPos);
+                        else if (building instanceof Laboratory lab) {
+                            lab.changeStructure(Laboratory.upgradedStructureName);
+                        }
+                        else if (building instanceof Portal portal) {
+                            portal.changeStructure(b.portalType);
+                            BuildingClientboundPacket.changePortal(building.originPos, Portal.PortalType.CIVILIAN.name());
+                        }
+                    }
+                    // setNetherZone can only be run once - this supercedes where it normally happens in tick() -> onBuilt()
+                    if (building instanceof NetherConvertingBuilding ncb)
+                        for (NetherZone nz : netherData.netherZones)
+                            if (building.isPosInsideBuilding(nz.getOrigin())) {
+                                ncb.setNetherZone(nz);
+                                break;
+                            }
+                    System.out.println("loaded building/nether in serverevents: " + b.originPos);
+                }
             });
         }
     }

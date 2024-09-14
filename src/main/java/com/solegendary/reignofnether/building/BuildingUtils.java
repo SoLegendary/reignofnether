@@ -127,9 +127,11 @@ public class BuildingUtils {
             case DarkWatchtower.buildingName -> building = new DarkWatchtower(level, pos, rotation, ownerName);
             case Castle.buildingName -> building = new Castle(level, pos, rotation, ownerName);
             case Stronghold.buildingName -> building = new Stronghold(level, pos, rotation, ownerName);
-
             case CentralPortal.buildingName -> building = new CentralPortal(level, pos, rotation, ownerName);
-            case Portal.buildingName -> building = new Portal(level, pos, rotation, ownerName);
+            case Portal.buildingName,
+                 Portal.buildingNameMilitary,
+                 Portal.buildingNameCivilian,
+                 Portal.buildingNameTransport -> building = new Portal(level, pos, rotation, ownerName);
             case NetherwartFarm.buildingName -> building = new NetherwartFarm(level, pos, rotation, ownerName);
             case Bastion.buildingName -> building = new Bastion(level, pos, rotation, ownerName);
             case HoglinStables.buildingName -> building = new HoglinStables(level, pos, rotation, ownerName);
