@@ -103,8 +103,10 @@ public class TutorialClientEvents {
     );
 
     public static void loadStage(TutorialStage stage) {
-        if (stage == INTRO)
+        if (stage == null || stage == getStage() || stage == INTRO || stage == COMPLETED)
             return;
+
+        specialMsg("Welcome back... resuming at stage: " + stage.name().replace("_", " "));
 
         tutorialStage = stage;
         ticksOnStage = 0;
@@ -114,8 +116,6 @@ public class TutorialClientEvents {
         TutorialRendering.clearButtonName();
         updateStage();
         shouldPauseTicking = () -> false;
-
-        specialMsg("Welcome back... resuming at stage: " + tutorialStage.name());
     }
 
     private static void setHelpButtonText(String text) {
@@ -1106,7 +1106,13 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 5) {
                     specialMsg("Tutorial mode disabled");
+                    nextStage();
+                }
+            }
+            case COMPLETED -> {
+                if (stageProgress == 0) {
                     setEnabled(false);
+                    progressStage();
                 }
             }
         }

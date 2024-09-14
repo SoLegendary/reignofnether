@@ -7,7 +7,6 @@ import com.solegendary.reignofnether.building.buildings.villagers.Barracks;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.research.ResearchSaveData;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
@@ -28,7 +27,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import static com.solegendary.reignofnether.unit.UnitServerEvents.spawnMobs;
@@ -77,14 +75,13 @@ public class TutorialServerEvents {
         }
     }
 
-    @SubscribeEvent
-    public static void loadStage(ServerStartedEvent evt) {
-        ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
+    public static TutorialStage loadStage(ServerLevel level) {
         if (level != null) {
-            TutorialSaveData tutorialData = TutorialSaveData.getInstance(level);
-            TutorialClientboundPacket.loadTutorialStage(tutorialData.stage);
-            System.out.println("loaded tutorialStage in serverevents");
+            TutorialStage stage = TutorialSaveData.getInstance(level).stage;
+            System.out.println("loaded tutorialStage in serverevents: " + stage);
+            return stage;
         }
+        return null;
     }
 
     @SubscribeEvent
@@ -98,9 +95,16 @@ public class TutorialServerEvents {
         if (evt.getEntity().getLevel() instanceof ServerLevel serverLevel &&
                 serverLevel.getSeed() == TUTORIAL_MAP_SEED &&
                 levelName.equals(TUTORIAL_MAP_NAME)) {
+
+            TutorialStage stage = loadStage(server.getLevel(Level.OVERWORLD));
+
+            if (stage == TutorialStage.COMPLETED)
+                return;
+            else if (stage != null)
+                TutorialClientboundPacket.loadTutorialStage(stage);
+
             TutorialClientboundPacket.enableTutorial();
             enabled = true;
-            loadStage();
         } else {
             TutorialClientboundPacket.disableTutorial();
             enabled = false;

@@ -10,6 +10,7 @@ Save unit owners and buildings to the world to prevent loss of data on server sh
     - NetherZones: saved on creation, flip, deletion and server shutdown
 
     - Research: saved on addition and server shutdown
+    - Tutorial
 
 
 test server stop conditions:

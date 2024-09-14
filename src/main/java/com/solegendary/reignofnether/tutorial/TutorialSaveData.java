@@ -21,7 +21,7 @@ public class TutorialSaveData extends SavedData {
         if (server == null) {
             return create();
         }
-        return server.overworld().getDataStorage().computeIfAbsent(TutorialSaveData::load, TutorialSaveData::create, "saved-resources-data");
+        return server.overworld().getDataStorage().computeIfAbsent(TutorialSaveData::load, TutorialSaveData::create, "saved-tutorial-data");
     }
 
     public static TutorialSaveData load(CompoundTag tag) {
