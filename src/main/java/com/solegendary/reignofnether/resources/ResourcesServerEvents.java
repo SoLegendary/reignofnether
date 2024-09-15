@@ -44,10 +44,11 @@ public class ResourcesServerEvents {
         ResourcesSaveData data = ResourcesSaveData.getInstance(serverLevel);
         data.resources.clear();
         resourcesList.forEach(r -> {
+
+            // add all unit held resources to resources so we don't have to save unit items
             int unitFood = 0;
             int unitWood = 0;
             int unitOre = 0;
-
             for (LivingEntity le : UnitServerEvents.getAllUnits()) {
                 if (le instanceof Unit u && u.getOwnerName().equals(r.ownerName)) {
                     Resources unitRes = Resources.getTotalResourcesFromItems(u.getItems());
@@ -56,11 +57,24 @@ public class ResourcesServerEvents {
                     unitOre += unitRes.ore;
                 }
             }
+            // add all production item costs since they will be cancelled on server shutdown
+            int prodFood = 0;
+            int prodWood = 0;
+            int prodOre = 0;
+            for (Building building : BuildingServerEvents.getBuildings()) {
+                if (building instanceof ProductionBuilding pBuilding) {
+                    for (ProductionItem item : pBuilding.productionQueue) {
+                        prodFood += item.foodCost;
+                        prodWood += item.woodCost;
+                        prodOre += item.oreCost;
+                    }
+                }
+            }
             data.resources.add(new Resources(
                     r.ownerName,
-                    r.food + r.foodToAdd + unitFood,
-                    r.wood + r.woodToAdd + unitWood,
-                    r.ore + r.oreToAdd + unitOre
+                    r.food + r.foodToAdd + unitFood + prodFood,
+                    r.wood + r.woodToAdd + unitWood + prodWood,
+                    r.ore + r.oreToAdd + unitOre + prodOre
             ));
             System.out.println("saved resources in serverevents: " + r.ownerName + "|" + r.food + "|" + r.wood + "|" + r.ore);
         });
