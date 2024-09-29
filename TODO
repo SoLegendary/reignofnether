@@ -3,7 +3,6 @@
 
 TODO bugs/features:
 
-
 QoL/Balance
 -----------
 villagers get stuck in the bridge if they fall in water
@@ -16,9 +15,6 @@ To test:
 -------
 multiplayer testing of data saves
 3+ player FFA for stress testing
-rally point to entities
-    - can't rally to enemies
-
 
 
 Misc additions

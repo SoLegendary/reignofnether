@@ -71,7 +71,7 @@ public abstract class ProductionBuilding extends Building {
     public void setRallyPointEntity(LivingEntity entity) {
         if (!canSetRallyPoint || entity == null)
             return;
-        else if (UnitClientEvents.getPlayerToEntityRelationship(this.rallyPointEntity) != Relationship.HOSTILE)
+        else if (!(entity instanceof Unit unit) || unit.getOwnerName().equals(this.ownerName))
             this.rallyPointEntity = entity;
         this.rallyPoint = null;
     }
@@ -119,13 +119,14 @@ public abstract class ProductionBuilding extends Building {
             unit.setOwnerName(ownerName);
             unit.setupEquipmentAndUpgradesServer();
 
-            if (rallyPointEntity != null) {
-                if (ResourceSources.isHuntableAnimal(rallyPointEntity)) {
+            LivingEntity rallyEntity = getRallyPointEntity();
+            if (rallyEntity != null) {
+                if (ResourceSources.isHuntableAnimal(rallyEntity)) {
                     CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
                         UnitServerEvents.addActionItem(
                                 this.ownerName,
                                 UnitAction.ATTACK,
-                                rallyPointEntity.getId(),
+                                rallyEntity.getId(),
                                 new int[] { entity.getId() },
                                 rallyPoint,
                                 new BlockPos(0,0,0)
@@ -136,7 +137,7 @@ public abstract class ProductionBuilding extends Building {
                         UnitServerEvents.addActionItem(
                                 this.ownerName,
                                 UnitAction.FOLLOW,
-                                rallyPointEntity.getId(),
+                                rallyEntity.getId(),
                                 new int[] { entity.getId() },
                                 rallyPoint,
                                 new BlockPos(0,0,0)
