@@ -195,12 +195,13 @@ public class TutorialClientEvents {
 
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
 
         if (Keybindings.ctrlMod.isDown() && Keybindings.altMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
             nextStage();
             specialMsg("Skipping tutorial stage... you are now on: " + getStage().name());
         }
-
 
         if (pressSpaceToContinue && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
             pressSpaceToContinue = false;
@@ -726,6 +727,7 @@ public class TutorialClientEvents {
                                     targetEntity.getHealth() < targetEntity.getMaxHealth()) {
                                 msg("TIP: If your worker can't hold all the food after hunting an animal, it will drop to the ground.");
                                 progressStage();
+                                break;
                             }
                         }
                     }
@@ -738,6 +740,7 @@ public class TutorialClientEvents {
                                     targetEntity.getHealth() < targetEntity.getMaxHealth() / 2) {
                                 msg("TIP: Dropped items like food and saplings can be picked by ANY unit and returned for resources.");
                                 progressStage();
+                                break;
                             }
                         }
                     }

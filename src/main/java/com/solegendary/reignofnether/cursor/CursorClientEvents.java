@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkServerboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -176,13 +177,19 @@ public class CursorClientEvents {
             cursorWorldPos = new Vector3d(hitPos.x, hitPos.y, hitPos.z);
             preselectedBlockPos = new BlockPos(hitPos);
 
+            boolean usingPosAbove = false;
+
             // if we clipped a non-solid block (eg. tall grass) search adjacent blocks for a next-best match
             if (!MC.level.getBlockState(preselectedBlockPos).getMaterial().isSolidBlocking()) {
                 preselectedBlockPos = getRefinedBlockPos(preselectedBlockPos, cursorWorldPosNear);
                 // disallow selecting a block just below a fluid block
-                if (MC.level.getBlockState(preselectedBlockPos.above()).getMaterial().isLiquid())
+                if (MC.level.getBlockState(preselectedBlockPos.above()).getMaterial().isLiquid()) {
                     preselectedBlockPos = preselectedBlockPos.above();
+                    usingPosAbove = true;
+                }
             }
+            if (!usingPosAbove && BuildingUtils.isPosInsideAnyBuilding(true, preselectedBlockPos.above()))
+                preselectedBlockPos = preselectedBlockPos.above();
         }
 
         // ****************************************

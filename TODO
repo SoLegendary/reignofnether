@@ -3,54 +3,21 @@
 
 TODO bugs/features:
 
-Save unit owners and buildings to the world to prevent loss of data on server shutdown
-    - Portal and other upgraded structures
-
-
-
-test server stop conditions:
-    - closing the server window/ending the process
-    - regular shutdown
-    - crash via unrelated exception (triggered by secret key combo?)
-    - [Singleplayer] exit and reenter world
-    - [Singleplayer] exit and close game then reenter world
-    - [Singleplayer] close window and reenter world
-    - [Singleplayer] crash via unrelated exception
-
-    - test that upgraded buildings retain their upgrade status (flag castle, lab rod, portal upgrades)
-    - check no duplicates exist
-
-bugs:
-    - player is defeated on server close if they only had units
-        - maybe just accept it since this means its only the start of the game anyway?
-
-    - need to add isBuilt flag and portal type
-
 
 QoL/Balance
 -----------
-allow selecting a building if the block ABOVE a preselected building is part of the building
-    - this handles being able to select hollow foundations easily like town centres
 villagers get stuck in the bridge if they fall in water
     - apply some upwards velocity?
+- Villagers get stuck inside buildings after construction sometimes
+
+
 
 To test:
 -------
-general tutorial completion
-
-
-
-
-
-[FOG OF WAR] playtest checklist:
---------------------------------
-- buildings destroyed offscreen are updated correctly
-- buildings placed offscreen are updated correctly
-- destroyed buildings no longer have frozenchunks
-- explored frozenchunks should not have any unsynced blocks
-- night-warping buildings that are destroyed serverside but unexplored clientside should have their night-warping abilities disabled
-
-
+multiplayer testing of data saves
+3+ player FFA for stress testing
+rally point to entities
+    - can't rally to enemies
 
 
 
@@ -72,23 +39,29 @@ Misc additions
 Let workers gather beehives
 
 
-
-
 New Upgrades
 ------------
-MONSTERS: Upgrade for watchtowers to come with a shulker in the centre
+MONSTERS: Upgrade for dark watchtowers to come with a shulker in the centre
 PIGLINS: Upgrade for ghasts to spread nether on hit (solves issue of spreading base over water)
 VILLAGERS: New potions for witches
 
 New Units
 ---------
 MONSTERS: Endermen who can't attack but have a cooldown ability to place shulker boxes (with limited lifespan) (research extends lifespan)
-    - comes from ender portal building
+    - comes from end portal building
 PIGLINS: Magma cubes (research make melee attacks set enemies on fire)
     - comes from mother cube building - giant building that looks exactly like a magma cube
 VILLAGERS: Illusioner - hallucination ability, targeted invisibility (research unlocks second ability)
     - comes from new supplementary building ala-library
 
+
+Limitations of save data
+------------------------
+Goals reset - all units stop what they're doing
+Production items and held resources are all deposited/refunded automatically
+Buildings revealed in fog on minimaps are removed
+Control groups are lost
+Transport portal links are lost
 
 
 Bugs backlog
@@ -103,6 +76,9 @@ Bugs backlog
 (MacOS) minecraft title screen is messed up and doesn't retrieve the assets
 (MacOS) GUI scaling does not work
 (MacOS) macbooks dont have alt and ctrl (it's option and command)
+
+
+
 
 TODO vanilla player balancing/interaction (backlog)
 - Balance strong player actions using food:

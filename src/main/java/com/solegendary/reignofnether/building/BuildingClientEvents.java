@@ -485,16 +485,31 @@ public class BuildingClientEvents {
 
         // draw rally point and line
         for (Building selBuilding : selectedBuildings) {
-            if (selBuilding instanceof ProductionBuilding selProdBuilding && selProdBuilding.getRallyPoint() != null) {
+            if (selBuilding instanceof ProductionBuilding selProdBuilding) {
                 float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
-                MyRenderer.drawBlockFace(evt.getPoseStack(),
-                        Direction.UP,
-                        selProdBuilding.getRallyPoint(),
-                        0, 1, 0, a);
-                MyRenderer.drawLine(evt.getPoseStack(),
-                        selProdBuilding.centrePos,
-                        selProdBuilding.getRallyPoint(),
-                        0, 1, 0, a);
+
+                if (selProdBuilding.getRallyPoint() != null) {
+                    MyRenderer.drawBlockFace(evt.getPoseStack(),
+                            Direction.UP,
+                            selProdBuilding.getRallyPoint(),
+                            0, 1, 0, a);
+                    MyRenderer.drawLine(evt.getPoseStack(),
+                            selProdBuilding.centrePos,
+                            selProdBuilding.getRallyPoint(),
+                            0, 1, 0, a);
+                }
+                else if (selProdBuilding.getRallyPointEntity() != null) {
+                    LivingEntity le = selProdBuilding.getRallyPointEntity();
+                    MyRenderer.drawLine(evt.getPoseStack(),
+                            new Vec3(
+                                selProdBuilding.centrePos.getX(),
+                                selProdBuilding.centrePos.getY(),
+                                selProdBuilding.centrePos.getZ()
+                            ),
+                            new Vec3(le.getX(), le.getEyeY(), le.getZ()),
+                            0, 1, 0, a);
+                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), le.getBoundingBox(), 0, 1.0f, 0,  a, false);
+                }
             }
             if (selBuilding instanceof Portal portal && portal.destination != null) {
                 float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
@@ -658,12 +673,22 @@ public class BuildingClientEvents {
             if (!Keybindings.altMod.isDown()) {
                 for (Building selBuilding : selectedBuildings) {
                     if (selBuilding instanceof ProductionBuilding selProdBuilding && getPlayerToBuildingRelationship(selBuilding) == Relationship.OWNED) {
-                        BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();
-                        selProdBuilding.setRallyPoint(rallyPoint);
-                        BuildingServerboundPacket.setRallyPoint(
-                                selBuilding.originPos,
-                                rallyPoint
-                        );
+                        if (!UnitClientEvents.getPreselectedUnits().isEmpty()) {
+                            LivingEntity rallyPointEntity = UnitClientEvents.getPreselectedUnits().get(0);
+                            selProdBuilding.setRallyPointEntity(rallyPointEntity);
+                            BuildingServerboundPacket.setRallyPointEntity(
+                                    selBuilding.originPos,
+                                    rallyPointEntity.getId()
+                            );
+                        }
+                        else {
+                            BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();
+                            selProdBuilding.setRallyPoint(rallyPoint);
+                            BuildingServerboundPacket.setRallyPoint(
+                                    selBuilding.originPos,
+                                    rallyPoint
+                            );
+                        }
                     }
                 }
             }
