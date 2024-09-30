@@ -475,8 +475,8 @@ public class PlayerServerEvents {
             for (Building building : BuildingServerEvents.getBuildings()) {
                 if (building instanceof ProductionBuilding productionBuilding) {
                     productionBuilding.productionQueue.clear();
-                    building.destroy((ServerLevel) building.getLevel());
                 }
+                building.destroy((ServerLevel) building.getLevel());
             }
             BuildingServerEvents.getBuildings().clear();
             ResearchServerEvents.removeAllResearch();

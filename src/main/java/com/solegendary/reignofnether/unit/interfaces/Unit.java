@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
@@ -176,6 +178,12 @@ public interface Unit {
                     (NetherBlocks.isNetherBlock(le.level, le.getOnPos()) || unit instanceof GhastUnit)) {
                 le.heal(1);
             }
+        }
+
+        if (le.isInWater() &&
+            BuildingUtils.findBuilding(le.level.isClientSide(), le.getOnPos().above()) instanceof AbstractBridge) {
+            System.out.println(le.getName() + " is stuck in bridge!");
+            le.setDeltaMovement(0,0.15,0);
         }
     }
 

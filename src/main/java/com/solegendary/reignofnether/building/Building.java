@@ -230,6 +230,7 @@ public abstract class Building {
 
     // returns the lowest Y value block in this.blocks to the given blockPos
     // radius offset is the distance away from the building itself to have the returned pos
+    // excludes positions inside the building so that workers  move out of the building foundations
     public BlockPos getClosestGroundPos(BlockPos bpTarget, int radiusOffset) {
         float minDist = 999999;
         BlockPos minPos = this.minCorner;
@@ -243,6 +244,9 @@ public abstract class Building {
         for (int x = minX; x < maxX; x++) {
             for (int z = minZ; z < maxZ; z++) {
                 BlockPos bp = new BlockPos(x,minY,z);
+                if (!(this instanceof AbstractBridge) && isPosInsideBuilding(bp))
+                    continue;
+
                 float dist = (float) bpTarget.distToCenterSqr(bp.getX(), bp.getY(), bp.getZ());
 
                 if (dist < minDist) {

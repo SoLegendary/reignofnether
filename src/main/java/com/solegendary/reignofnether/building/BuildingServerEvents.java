@@ -13,9 +13,11 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.packets.UnitActionClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
@@ -250,6 +252,19 @@ public class BuildingServerEvents {
                     ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.WOOD, newBuilding.woodCost),
                     ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.ORE, newBuilding.oreCost)
                 );
+
+            for (LivingEntity entity : UnitServerEvents.getAllUnits())
+                if (entity instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
+                    newBuilding.isPosInsideBuilding(entity.getOnPos().above().above())) {
+                    if (Arrays.stream(builderUnitIds).noneMatch(id -> id == entity.getId()))
+                        UnitServerEvents.addActionItem(
+                                unit.getOwnerName(),
+                                UnitAction.MOVE, -1,
+                                new int[]{entity.getId()},
+                                newBuilding.getClosestGroundPos(entity.getOnPos(), 2),
+                                new BlockPos(0,0,0)
+                        );
+                }
         }
     }
 

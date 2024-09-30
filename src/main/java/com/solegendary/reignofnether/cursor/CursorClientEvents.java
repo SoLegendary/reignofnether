@@ -188,7 +188,9 @@ public class CursorClientEvents {
                     usingPosAbove = true;
                 }
             }
-            if (!usingPosAbove && BuildingUtils.isPosInsideAnyBuilding(true, preselectedBlockPos.above()))
+            if (!usingPosAbove &&
+                !BuildingUtils.isPosInsideAnyBuilding(true, preselectedBlockPos) &&
+                BuildingUtils.isPosInsideAnyBuilding(true, preselectedBlockPos.above()))
                 preselectedBlockPos = preselectedBlockPos.above();
         }
 

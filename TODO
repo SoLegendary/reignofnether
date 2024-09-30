@@ -3,14 +3,6 @@
 
 TODO bugs/features:
 
-QoL/Balance
------------
-villagers get stuck in the bridge if they fall in water
-    - apply some upwards velocity?
-- Villagers get stuck inside buildings after construction sometimes
-
-
-
 To test:
 -------
 multiplayer testing of data saves
@@ -28,7 +20,6 @@ Misc additions
     - wheat -> potatoes
     - red nylium netherwart -> green nylium
 
-- give units smooth block climbing for 1-block-high ledges (horse/ravager move logic)
 - recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
     - most prevalent in 1v1 melee combat
 
