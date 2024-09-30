@@ -46,12 +46,13 @@ public class BuildingSaveData extends SavedData {
                 String name = btag.getString("buildingName");
                 String ownerName = btag.getString("ownerName");
                 Rotation rotation = Rotation.valueOf(btag.getString("rotation"));
+                BlockPos rallyPoint = new BlockPos(btag.getInt("rallyX"), btag.getInt("rallyY"), btag.getInt("rallyZ"));
                 boolean isDiagonalBridge = btag.getBoolean("isDiagonalBridge");
                 boolean isBuilt = btag.getBoolean("isBuilt");
                 boolean isUpgraded = btag.getBoolean("isUpgraded");
                 Portal.PortalType portalType = Portal.PortalType.valueOf(btag.getString("portalType"));
-                data.buildings.add(new BuildingSave(pos, level, name, ownerName, rotation, isDiagonalBridge,
-                                                    isBuilt, isUpgraded, portalType));
+                data.buildings.add(new BuildingSave(pos, level, name, ownerName, rotation, rallyPoint,
+                                                    isDiagonalBridge, isBuilt, isUpgraded, portalType));
                 System.out.println("BuildingSaveData.load: " + ownerName + "|" + name);
             }
         }
@@ -70,6 +71,9 @@ public class BuildingSaveData extends SavedData {
             cTag.putInt("y", b.originPos.getY());
             cTag.putInt("z", b.originPos.getZ());
             cTag.putString("rotation", b.rotation.name());
+            cTag.putInt("rallyX", b.rallyPoint != null ? b.rallyPoint.getX() : b.originPos.getX());
+            cTag.putInt("rallyY", b.rallyPoint != null ? b.rallyPoint.getY() : b.originPos.getY());
+            cTag.putInt("rallyZ", b.rallyPoint != null ? b.rallyPoint.getZ() : b.originPos.getZ());
             cTag.putString("ownerName", b.ownerName);
             cTag.putBoolean("isDiagonalBridge", b.isDiagonalBridge);
             cTag.putBoolean("isBuilt", b.isBuilt);

@@ -442,6 +442,14 @@ public abstract class Building {
             if (serverLevel.getBlockState(block.getBlockPos()).getBlock() == Blocks.SCAFFOLDING)
                 serverLevel.destroyBlock(block.getBlockPos(), false);
         });
+        // we don't save scaffoldBlocks in saveBuildings() so this covers that
+        if (this.scaffoldBlocks.isEmpty()) {
+            for (int x = minCorner.getX(); x <= maxCorner.getX(); x++)
+                for (int y = minCorner.getY() - 3; y < minCorner.getY(); y++)
+                    for (int z = minCorner.getZ(); z <= maxCorner.getZ(); z++)
+                        if (serverLevel.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.SCAFFOLDING)
+                            serverLevel.destroyBlock(new BlockPos(x, y, z), false);
+        }
 
         if (!this.level.isClientSide() && isRTSPlayer(this.ownerName)) {
             if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 0) {

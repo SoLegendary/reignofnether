@@ -79,6 +79,7 @@ public class BuildingServerEvents {
                     b.name,
                     b.ownerName,
                     b.rotation,
+                    b instanceof ProductionBuilding pb ? pb.getRallyPoint() : b.originPos,
                     b.isDiagonalBridge,
                     b.isBuilt,
                     isUpgraded,
@@ -117,6 +118,9 @@ public class BuildingServerEvents {
                 if (building != null) {
                     building.isBuilt = b.isBuilt;
                     BuildingServerEvents.getBuildings().add(building);
+
+                    if (building instanceof ProductionBuilding pb)
+                        pb.setRallyPoint(b.rallyPoint);
 
                     if (b.isUpgraded) {
                         if (building instanceof Castle castle)

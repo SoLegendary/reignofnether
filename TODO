@@ -8,6 +8,10 @@ To test:
 multiplayer testing of data saves
 3+ player FFA for stress testing
 
+(server) units stuck in bridges
+(server) workers move away from foundations
+(server) rally point to entities
+
 
 Misc additions
 -----------------
@@ -49,6 +53,7 @@ Production items and held resources are all deposited/refunded automatically
 Buildings revealed in fog on minimaps are removed
 Control groups are lost
 Transport portal links are lost
+Entity rally points are lost (and client rallyPos is lost)
 
 
 Bugs backlog

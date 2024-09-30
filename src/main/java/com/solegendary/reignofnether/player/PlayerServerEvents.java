@@ -486,7 +486,9 @@ public class PlayerServerEvents {
 
             if (!TutorialServerEvents.isEnabled())
                 sendMessageToAllPlayers("Match has been reset!", true);
+
+            ResourcesServerEvents.resourcesList.clear();
+            saveRTSPlayers();
         }
-        ResourcesServerEvents.resourcesList.clear();
     }
 }
