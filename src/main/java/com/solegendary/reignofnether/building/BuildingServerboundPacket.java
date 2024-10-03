@@ -4,6 +4,8 @@ import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -45,6 +47,11 @@ public class BuildingServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.SET_RALLY_POINT,
                 "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
+    }
+    public static void setRallyPointEntity(BlockPos buildingPos, int entityId) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.SET_RALLY_POINT_ENTITY,
+                "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[]{ entityId }, false));
     }
     public static void startProduction(BlockPos buildingPos, String itemName) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
@@ -127,6 +134,13 @@ public class BuildingServerboundPacket {
                 case SET_RALLY_POINT -> {
                     if (building instanceof ProductionBuilding productionBuilding)
                         productionBuilding.setRallyPoint(rallyPos);
+                }
+                case SET_RALLY_POINT_ENTITY -> {
+                    if (building instanceof ProductionBuilding productionBuilding) {
+                        Entity e = building.level.getEntity(this.builderUnitIds[0]);
+                        if (e instanceof LivingEntity le)
+                            productionBuilding.setRallyPointEntity(le);
+                    }
                 }
                 case START_PRODUCTION -> {
                     boolean prodSuccess = ProductionBuilding.startProductionItem(((ProductionBuilding) building), this.itemName, this.buildingPos);

@@ -31,11 +31,11 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
     public final static String structureName = "central_portal";
     public final static ResourceCost cost = ResourceCosts.CENTRAL_PORTAL;
 
-    public NetherConversionZone netherConversionZone;
+    public NetherZone netherConversionZone = null;
 
     @Override public double getMaxRange() { return 30; }
     @Override public double getStartingRange() { return 6; }
-    @Override public NetherConversionZone getZone() { return netherConversionZone; }
+    @Override public NetherZone getZone() { return netherConversionZone; }
 
     @Override
     public void tick(Level tickLevel) {
@@ -77,11 +77,20 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
     }
 
     @Override
+    public void setNetherZone(NetherZone nz) {
+        if (netherConversionZone == null) {
+            netherConversionZone = nz;
+            if (!level.isClientSide()) {
+                BuildingServerEvents.netherZones.add(netherConversionZone);
+                BuildingServerEvents.saveNetherZones();
+            }
+        }
+    }
+
+    @Override
     public void onBuilt() {
         super.onBuilt();
-        netherConversionZone = new NetherConversionZone(level, centrePos.offset(0,-6,0), getMaxRange(), getStartingRange());
-        if (!level.isClientSide())
-            BuildingServerEvents.netherConversionZones.add(netherConversionZone);
+        setNetherZone(new NetherZone(centrePos.offset(0,-6,0), getMaxRange(), getStartingRange()));
     }
 
     @Override

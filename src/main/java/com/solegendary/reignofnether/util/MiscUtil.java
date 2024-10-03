@@ -2,8 +2,8 @@ package com.solegendary.reignofnether.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3d;
-import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
@@ -172,7 +172,7 @@ public class MiscUtil {
         return retBps;
     }
 
-    public static Mob findClosestAttackableEnemy(Mob unitMob, float range, ServerLevel level) {
+    public static Mob findClosestAttackableUnit(Mob unitMob, float range, ServerLevel level) {
         List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
                 new Vector3d(unitMob.position().x, unitMob.position().y, unitMob.position().z),
                 range,
@@ -185,7 +185,7 @@ public class MiscUtil {
             Relationship rs = UnitServerEvents.getUnitToEntityRelationship((Unit) unitMob, tMob);
             // don't let melee units aggro against flying units
             if (tMob instanceof Unit unit && unit.getMoveGoal() instanceof FlyingMoveToTargetGoal &&
-                unitMob instanceof AttackerUnit attackerUnit && attackerUnit.getAttackGoal() instanceof MeleeAttackUnitGoal)
+                    unitMob instanceof AttackerUnit attackerUnit && attackerUnit.getAttackGoal() instanceof MeleeAttackUnitGoal)
                 continue;
             if (rs == Relationship.HOSTILE && tMob.getId() != unitMob.getId() && hasLineOfSightForAttacks(unitMob, tMob))
                 nearbyHostileMobs.add(tMob);
@@ -196,11 +196,34 @@ public class MiscUtil {
         for (Mob pfMob : nearbyHostileMobs) {
             double dist = unitMob.position().distanceTo(pfMob.position());
             if (dist < closestDist) {
-                closestDist = unitMob.position().distanceTo(pfMob.position());
+                closestDist = dist;
                 closestMob = pfMob;
             }
         }
         return closestMob;
+    }
+
+    public static Building findClosestAttackableBuilding(Mob unitMob, float range, ServerLevel level) {
+        List<Building> buildings;
+        if (unitMob.level.isClientSide())
+            buildings = BuildingClientEvents.getBuildings();
+        else
+            buildings = BuildingServerEvents.getBuildings();
+
+        double closestDist = range;
+        Building closestBuilding = null;
+        for (Building building : buildings) {
+            if (unitMob instanceof Unit unit && !unit.getOwnerName().equals(building.ownerName) &&
+                !building.ownerName.isBlank()) {
+                BlockPos attackPos = building.getClosestGroundPos(unitMob.getOnPos(), 1);
+                double dist = Math.sqrt(unitMob.getOnPos().distSqr(attackPos));
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestBuilding = building;
+                }
+            }
+        }
+        return closestBuilding;
     }
 
     private static boolean hasLineOfSightForAttacks(Mob mob, Mob targetMob) {

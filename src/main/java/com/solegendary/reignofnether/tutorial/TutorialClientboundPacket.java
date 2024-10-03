@@ -13,30 +13,34 @@ import java.util.function.Supplier;
 public class TutorialClientboundPacket {
 
     private final TutorialAction action;
+    private final TutorialStage stage;
 
     public static void enableTutorial() {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new TutorialClientboundPacket(TutorialAction.ENABLE));
+                new TutorialClientboundPacket(TutorialAction.ENABLE, TutorialStage.INTRO));
     }
     public static void disableTutorial() {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new TutorialClientboundPacket(TutorialAction.DISABLE));
+                new TutorialClientboundPacket(TutorialAction.DISABLE, TutorialStage.INTRO));
     }
-    public static void updateTutorialStage() {
+    public static void loadTutorialStage(TutorialStage stage) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new TutorialClientboundPacket(TutorialAction.UPDATE_STAGE));
+                new TutorialClientboundPacket(TutorialAction.LOAD_STAGE, stage));
     }
 
-    public TutorialClientboundPacket(TutorialAction action) {
+    public TutorialClientboundPacket(TutorialAction action, TutorialStage stage) {
         this.action = action;
+        this.stage = stage;
     }
 
     public TutorialClientboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(TutorialAction.class);
+        this.stage = buffer.readEnum(TutorialStage.class);
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
+        buffer.writeEnum(this.stage);
     }
 
     // client-side packet-consuming functions
@@ -49,7 +53,7 @@ public class TutorialClientboundPacket {
                     switch (action) {
                         case ENABLE -> TutorialClientEvents.setEnabled(true);
                         case DISABLE -> TutorialClientEvents.setEnabled(false);
-                        case UPDATE_STAGE -> TutorialClientEvents.updateStage();
+                        case LOAD_STAGE -> TutorialClientEvents.loadStage(stage);
                     }
                 });
         });

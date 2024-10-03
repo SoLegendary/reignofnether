@@ -1,14 +1,14 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.researchItems.*;
+import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
-import com.solegendary.reignofnether.resources.ResourceName;
-import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
-import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -17,10 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
@@ -41,6 +38,7 @@ public abstract class ProductionBuilding extends Building {
 
     // spawn point relative to building origin to spawn units
     private BlockPos rallyPoint;
+    private LivingEntity rallyPointEntity;
     public boolean canSetRallyPoint = true;
     protected float spawnRadiusOffset = -0.5f;
 
@@ -48,8 +46,16 @@ public abstract class ProductionBuilding extends Building {
         super(level, originPos, rotation, ownerName, blocks, isCapitol);
     }
 
-    public BlockPos getRallyPoint() {
-        return this.rallyPoint;
+    public BlockPos getRallyPoint() { return this.rallyPoint; }
+
+    public LivingEntity getRallyPointEntity() {
+        if (this.rallyPointEntity == null)
+            return null;
+        if (!this.rallyPointEntity.isAlive()) {
+            this.rallyPointEntity = null;
+            return null;
+        }
+        return this.rallyPointEntity;
     }
 
     public void setRallyPoint(BlockPos rallyPoint) {
@@ -59,6 +65,15 @@ public abstract class ProductionBuilding extends Building {
             this.rallyPoint = null;
         else
             this.rallyPoint = rallyPoint;
+        this.rallyPointEntity = null;
+    }
+
+    public void setRallyPointEntity(LivingEntity entity) {
+        if (!canSetRallyPoint || entity == null)
+            return;
+        else if (!(entity instanceof Unit unit) || unit.getOwnerName().equals(this.ownerName))
+            this.rallyPointEntity = entity;
+        this.rallyPoint = null;
     }
 
     private boolean isProducing() {
@@ -104,16 +119,43 @@ public abstract class ProductionBuilding extends Building {
             unit.setOwnerName(ownerName);
             unit.setupEquipmentAndUpgradesServer();
 
-            CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
-                UnitServerEvents.addActionItem(
-                        this.ownerName,
-                        UnitAction.MOVE,
-                        -1,
-                        new int[] { entity.getId() },
-                        rallyPoint,
-                        new BlockPos(0,0,0)
-                );
-            });
+            LivingEntity rallyEntity = getRallyPointEntity();
+            if (rallyEntity != null) {
+                if (ResourceSources.isHuntableAnimal(rallyEntity)) {
+                    CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
+                        UnitServerEvents.addActionItem(
+                                this.ownerName,
+                                UnitAction.ATTACK,
+                                rallyEntity.getId(),
+                                new int[] { entity.getId() },
+                                rallyPoint,
+                                new BlockPos(0,0,0)
+                        );
+                    });
+                } else {
+                    CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
+                        UnitServerEvents.addActionItem(
+                                this.ownerName,
+                                UnitAction.FOLLOW,
+                                rallyEntity.getId(),
+                                new int[] { entity.getId() },
+                                rallyPoint,
+                                new BlockPos(0,0,0)
+                        );
+                    });
+                }
+            } else {
+                CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
+                    UnitServerEvents.addActionItem(
+                            this.ownerName,
+                            UnitAction.MOVE,
+                            -1,
+                            new int[] { entity.getId() },
+                            rallyPoint,
+                            new BlockPos(0,0,0)
+                    );
+                });
+            }
         }
     }
 

@@ -15,13 +15,11 @@ import java.util.List;
 
 public abstract class AbstractBridge extends Building {
 
-    public final boolean isDiagonal;
-
     public final float MELEE_DAMAGE_MULTIPLIER = 0.05f;
 
-    public AbstractBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName, boolean isDiagonal, ArrayList<BuildingBlock> culledBlocks) {
+    public AbstractBridge(Level level, BlockPos originPos, Rotation rotation, String ownerName, boolean isDiagonalBridge, ArrayList<BuildingBlock> culledBlocks) {
         super(level, originPos, rotation, ownerName, culledBlocks,false);
-        this.isDiagonal = isDiagonal;
+        this.isDiagonalBridge = isDiagonalBridge;
     }
 
     @Override

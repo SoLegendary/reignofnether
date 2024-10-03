@@ -1,24 +1,28 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
+import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.packets.UnitActionClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
@@ -36,6 +40,8 @@ import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
@@ -50,16 +56,102 @@ public class BuildingServerEvents {
     // buildings that currently exist serverside
     private static final ArrayList<Building> buildings = new ArrayList<>();
 
-    public static final ArrayList<NetherConversionZone> netherConversionZones = new ArrayList<>();
+    public static final ArrayList<NetherZone> netherZones = new ArrayList<>();
 
-    public static ArrayList<Building> getBuildings() {
-        return buildings;
+    public static ArrayList<Building> getBuildings() { return buildings; }
+
+    public static void saveBuildings() {
+        if (serverLevel == null)
+            return;
+
+        BuildingSaveData buildingData = BuildingSaveData.getInstance(serverLevel);
+        buildingData.buildings.clear();
+
+        getBuildings().forEach(b -> {
+            boolean isUpgraded = b.isUpgraded();
+            Portal.PortalType portalType = null;
+            if (b instanceof Portal portal && portal.portalType != Portal.PortalType.BASIC)
+                portalType = portal.portalType;
+
+            buildingData.buildings.add(new BuildingSave(
+                    b.originPos,
+                    serverLevel,
+                    b.name,
+                    b.ownerName,
+                    b.rotation,
+                    b instanceof ProductionBuilding pb ? pb.getRallyPoint() : b.originPos,
+                    b.isDiagonalBridge,
+                    b.isBuilt,
+                    isUpgraded,
+                    portalType
+            ));
+            System.out.println("saved buildings/nether in serverevents: " + b.originPos);
+        });
+        buildingData.save();
+        serverLevel.getDataStorage().save();
+    }
+
+    public static void saveNetherZones() {
+        if (serverLevel == null)
+            return;
+
+        NetherZoneSaveData netherData = NetherZoneSaveData.getInstance(serverLevel);
+        netherData.netherZones.clear();
+        netherData.netherZones.addAll(netherZones);
+        netherData.save();
+        serverLevel.getDataStorage().save();
+
+        System.out.println("saved " + netherZones.size() + " netherzones in serverevents");
+    }
+
+    @SubscribeEvent
+    public static void loadBuildingsAndNetherZones(ServerStartedEvent evt) {
+        ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
+
+        if (level != null) {
+            BuildingSaveData buildingData = BuildingSaveData.getInstance(level);
+            NetherZoneSaveData netherData = NetherZoneSaveData.getInstance(level);
+
+            buildingData.buildings.forEach(b -> {
+                Building building = BuildingUtils.getNewBuilding(b.name, level, b.originPos, b.rotation, b.ownerName, b.isDiagonalBridge);
+
+                if (building != null) {
+                    building.isBuilt = b.isBuilt;
+                    BuildingServerEvents.getBuildings().add(building);
+
+                    if (building instanceof ProductionBuilding pb)
+                        pb.setRallyPoint(b.rallyPoint);
+
+                    if (b.isUpgraded) {
+                        if (building instanceof Castle castle)
+                            castle.changeStructure(Castle.upgradedStructureName);
+                        else if (building instanceof Laboratory lab)
+                            lab.changeStructure(Laboratory.upgradedStructureName);
+                        else if (building instanceof Portal portal)
+                            portal.changeStructure(b.portalType);
+                    }
+                    // setNetherZone can only be run once - this supercedes where it normally happens in tick() -> onBuilt()
+                    if (building instanceof NetherConvertingBuilding ncb)
+                        for (NetherZone nz : netherData.netherZones)
+                            if (building.isPosInsideBuilding(nz.getOrigin())) {
+                                ncb.setNetherZone(nz);
+                                break;
+                            }
+                    System.out.println("loaded building/nether in serverevents: " + b.originPos);
+                }
+            });
+        }
+    }
+
+    @SubscribeEvent
+    public static void onServerStop(ServerStoppingEvent evt) {
+        saveNetherZones();
+        saveBuildings();
     }
 
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName,
                                      int[] builderUnitIds, boolean queue, boolean isDiagonalBridge) {
-        boolean isBridge = buildingName.toLowerCase().contains("bridge");
-        Building newBuilding = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, isBridge ? "" : ownerName, isDiagonalBridge);
+        Building newBuilding = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName, isDiagonalBridge);
         boolean buildingExists = false;
         for (Building building : buildings)
             if (building.originPos == pos) {
@@ -89,6 +181,7 @@ public class BuildingServerEvents {
 
             if (newBuilding.canAfford(ownerName)) {
                 buildings.add(newBuilding);
+
                 newBuilding.forceChunk(true);
 
                 int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
@@ -128,8 +221,8 @@ public class BuildingServerEvents {
                             newBuilding.startingBlockTypes.contains(block.getBlockState().getBlock()))
                         newBuilding.addToBlockPlaceQueue(block);
                 }
-                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, isBridge ? "" : ownerName,
-                        newBuilding.blockPlaceQueue.size(), isDiagonalBridge, false);
+                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName, newBuilding.blockPlaceQueue.size(),
+                        isDiagonalBridge, false, false, Portal.PortalType.BASIC, false);
 
                 ResourcesServerEvents.addSubtractResources(new Resources(
                     newBuilding.ownerName,
@@ -163,6 +256,19 @@ public class BuildingServerEvents {
                     ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.WOOD, newBuilding.woodCost),
                     ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.ORE, newBuilding.oreCost)
                 );
+
+            for (LivingEntity entity : UnitServerEvents.getAllUnits())
+                if (entity instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
+                    newBuilding.isPosInsideBuilding(entity.getOnPos().above().above())) {
+                    if (Arrays.stream(builderUnitIds).noneMatch(id -> id == entity.getId()))
+                        UnitServerEvents.addActionItem(
+                                unit.getOwnerName(),
+                                UnitAction.MOVE, -1,
+                                new int[]{entity.getId()},
+                                newBuilding.getClosestGroundPos(entity.getOnPos(), 2),
+                                new BlockPos(0,0,0)
+                        );
+                }
         }
     }
 
@@ -172,6 +278,10 @@ public class BuildingServerEvents {
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);
+        if (building instanceof NetherConvertingBuilding nb && nb.getZone() != null) {
+            nb.getZone().startRestoring();
+            saveNetherZones();
+        }
         FrozenChunkClientboundPacket.setBuildingDestroyedServerside(building.originPos);
 
         // AOE2-style refund: return the % of the non-built portion of the building
@@ -189,7 +299,7 @@ public class BuildingServerEvents {
     }
 
     public static int getTotalPopulationSupply(String ownerName) {
-        if (ResearchServer.playerHasCheat(ownerName, "foodforthought"))
+        if (ResearchServerEvents.playerHasCheat(ownerName, "foodforthought"))
             return Integer.MAX_VALUE;
 
         int totalPopulationSupply = 0;
@@ -224,9 +334,13 @@ public class BuildingServerEvents {
                 building.rotation,
                 building.ownerName,
                 building.blockPlaceQueue.size(),
-                building instanceof AbstractBridge bridge && bridge.isDiagonal,
+                building instanceof AbstractBridge bridge && bridge.isDiagonalBridge,
+                building.isBuilt,
+                building.isUpgraded(),
+                building instanceof Portal p ? p.portalType : Portal.PortalType.BASIC,
                 true
             );
+        System.out.println("Synced " + buildings.size() + " buildings with player logged in");
     }
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions
@@ -272,8 +386,10 @@ public class BuildingServerEvents {
         List<Building> buildingsToDestroy = buildings.stream().filter(Building::shouldBeDestroyed).toList();
         buildings.removeIf(b -> {
             if (b.shouldBeDestroyed()) {
-                if (b instanceof NetherConvertingBuilding nb && nb.getZone() != null)
+                if (b instanceof NetherConvertingBuilding nb && nb.getZone() != null) {
                     nb.getZone().startRestoring();
+                    saveNetherZones();
+                }
                 FrozenChunkClientboundPacket.setBuildingDestroyedServerside(b.originPos);
                 return true;
             }
@@ -286,10 +402,14 @@ public class BuildingServerEvents {
         for (Building building : buildings)
             building.tick(serverLevel);
 
-        for (NetherConversionZone netherConversionZone : netherConversionZones)
-            netherConversionZone.tick();
+        for (NetherZone netherConversionZone : netherZones)
+            netherConversionZone.tick(serverLevel);
 
-        netherConversionZones.removeIf(NetherConversionZone::isDone);
+        int nzSizeBefore = netherZones.size();
+        netherZones.removeIf(NetherZone::isDone);
+        int nzSizeAfter = netherZones.size();
+        if (nzSizeBefore != nzSizeAfter)
+            saveNetherZones();
     }
 
     // cancel all explosion damage to non-building blocks
@@ -394,7 +514,10 @@ public class BuildingServerEvents {
                         building.rotation,
                         building.ownerName,
                         building.blockPlaceQueue.size(),
-                        building instanceof AbstractBridge bridge && bridge.isDiagonal,
+                        building instanceof AbstractBridge bridge && bridge.isDiagonalBridge,
+                        building.isBuilt,
+                        building.isUpgraded(),
+                        building instanceof Portal p ? p.portalType : Portal.PortalType.BASIC,
                         false
                 );
                 return;

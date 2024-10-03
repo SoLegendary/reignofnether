@@ -7,7 +7,6 @@ import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile;
-import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FrozenChunk;
@@ -16,7 +15,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
@@ -30,7 +29,6 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.unit.units.monsters.SilverfishUnit;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -50,7 +48,6 @@ import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.world.ForgeChunkManager;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.*;
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
@@ -112,6 +109,8 @@ public abstract class Building {
     public final BlockPos minCorner;
     public final BlockPos maxCorner;
     public final BlockPos centrePos;
+
+    public boolean isDiagonalBridge = false;
 
     // blocks types that are placed automatically when the building is placed
     // used to control size of initial foundations while keeping it symmetrical
@@ -231,6 +230,7 @@ public abstract class Building {
 
     // returns the lowest Y value block in this.blocks to the given blockPos
     // radius offset is the distance away from the building itself to have the returned pos
+    // excludes positions inside the building so that workers  move out of the building foundations
     public BlockPos getClosestGroundPos(BlockPos bpTarget, int radiusOffset) {
         float minDist = 999999;
         BlockPos minPos = this.minCorner;
@@ -244,6 +244,9 @@ public abstract class Building {
         for (int x = minX; x < maxX; x++) {
             for (int z = minZ; z < maxZ; z++) {
                 BlockPos bp = new BlockPos(x,minY,z);
+                if (!(this instanceof AbstractBridge) && isPosInsideBuilding(bp))
+                    continue;
+
                 float dist = (float) bpTarget.distToCenterSqr(bp.getX(), bp.getY(), bp.getZ());
 
                 if (dist < minDist) {
@@ -439,6 +442,14 @@ public abstract class Building {
             if (serverLevel.getBlockState(block.getBlockPos()).getBlock() == Blocks.SCAFFOLDING)
                 serverLevel.destroyBlock(block.getBlockPos(), false);
         });
+        // we don't save scaffoldBlocks in saveBuildings() so this covers that
+        if (this.scaffoldBlocks.isEmpty()) {
+            for (int x = minCorner.getX(); x <= maxCorner.getX(); x++)
+                for (int y = minCorner.getY() - 3; y < minCorner.getY(); y++)
+                    for (int z = minCorner.getZ(); z <= maxCorner.getZ(); z++)
+                        if (serverLevel.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.SCAFFOLDING)
+                            serverLevel.destroyBlock(new BlockPos(x, y, z), false);
+        }
 
         if (!this.level.isClientSide() && isRTSPlayer(this.ownerName)) {
             if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 0) {
@@ -456,7 +467,7 @@ public abstract class Building {
         totalBlocksEverBroken += 1;
         Random rand = new Random();
 
-        if (this.getFaction() == Faction.MONSTERS && ResearchServer.playerHasResearch(this.ownerName, ResearchSilverfish.itemName))
+        if (this.getFaction() == Faction.MONSTERS && ResearchServerEvents.playerHasResearch(this.ownerName, ResearchSilverfish.itemName))
             randomSilverfishSpawn(pos);
 
         // when a player breaks a block that's part of the building:
@@ -587,7 +598,7 @@ public abstract class Building {
                 if (msToNextBuild > msPerBuild)
                     msToNextBuild = msPerBuild;
 
-                if (ResearchServer.playerHasCheat(this.ownerName, "warpten"))
+                if (ResearchServerEvents.playerHasCheat(this.ownerName, "warpten"))
                     msToNextBuild -= 500;
                 else
                     msToNextBuild -= 50;
@@ -774,5 +785,9 @@ public abstract class Building {
                 for (FrozenChunk fc : FogOfWarClientEvents.frozenChunks)
                     if (fc.building != null && fc.building.originPos.equals(originPos))
                         fc.removeOnExplore = true;
+    }
+
+    public boolean isUpgraded() {
+        return false;
     }
 }

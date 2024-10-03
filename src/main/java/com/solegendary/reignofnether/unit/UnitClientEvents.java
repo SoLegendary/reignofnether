@@ -269,6 +269,13 @@ public class UnitClientEvents {
         return ResourceName.NONE;
     }
 
+    public static void syncOwnerName(int entityId, String ownerName) {
+        for(LivingEntity entity : allUnits)
+            if (entity.getId() == entityId && MC.level != null)
+                if (entity instanceof Unit unit)
+                    unit.setOwnerName(ownerName);
+    }
+
     /**
      * Update data on a unit from serverside, mainly to ensure unit HUD data is up-to-date
      * Only try to update health and pos if out of view

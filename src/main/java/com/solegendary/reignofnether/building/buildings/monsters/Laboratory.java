@@ -29,6 +29,7 @@ public class Laboratory extends ProductionBuilding {
 
     public final static String buildingName = "Laboratory";
     public final static String structureName = "laboratory";
+    public final static String upgradedStructureName = "laboratory_lightning";
     public final static ResourceCost cost = ResourceCosts.LABORATORY;
 
     public Laboratory(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
@@ -81,6 +82,7 @@ public class Laboratory extends ProductionBuilding {
     }
 
     // check that the lightning rod is built based on existing placed blocks
+    @Override
     public boolean isUpgraded() {
         for (BuildingBlock block : blocks)
             if (block.getBlockState().getBlock() == Blocks.LIGHTNING_ROD)

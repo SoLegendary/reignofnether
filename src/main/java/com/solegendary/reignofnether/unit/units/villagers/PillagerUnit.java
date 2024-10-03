@@ -3,11 +3,10 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.ability.abilities.MountRavager;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
-import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -233,7 +232,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     @Override
     public void setupEquipmentAndUpgradesServer() {
         ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
-        if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchPillagerCrossbows.itemName))
+        if (ResearchServerEvents.playerHasResearch(this.getOwnerName(), ResearchPillagerCrossbows.itemName))
             cbowStack.enchant(Enchantments.MULTISHOT, 1);
         this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
     }

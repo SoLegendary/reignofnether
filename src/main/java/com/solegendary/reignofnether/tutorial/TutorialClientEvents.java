@@ -102,6 +102,22 @@ public class TutorialClientEvents {
             List.of(FormattedCharSequence.forward("Tutorial Help", Style.EMPTY))
     );
 
+    public static void loadStage(TutorialStage stage) {
+        if (stage == null || stage == getStage() || stage == INTRO || stage == COMPLETED)
+            return;
+
+        specialMsg("Welcome back... resuming at stage: " + stage.name().replace("_", " "));
+
+        tutorialStage = stage;
+        ticksOnStage = 0;
+        stageProgress = 0;
+        blockUpdateStage = false;
+        clearHelpButtonText();
+        TutorialRendering.clearButtonName();
+        updateStage();
+        shouldPauseTicking = () -> false;
+    }
+
     private static void setHelpButtonText(String text) {
         helpButtonClicks = 0;
         helpButtonText = text;
@@ -141,6 +157,7 @@ public class TutorialClientEvents {
         TutorialRendering.clearButtonName();
         updateStage();
         shouldPauseTicking = () -> false;
+        TutorialServerboundPacket.saveStage(tutorialStage);
     }
     private static void prevStage() {
         tutorialStage = tutorialStage.prev();
@@ -151,6 +168,7 @@ public class TutorialClientEvents {
         TutorialRendering.clearButtonName();
         updateStage();
         shouldPauseTicking = () -> false;
+        TutorialServerboundPacket.saveStage(tutorialStage);
     }
 
     // check if we need to render an arrow to point at the next button
@@ -177,12 +195,13 @@ public class TutorialClientEvents {
 
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
 
         if (Keybindings.ctrlMod.isDown() && Keybindings.altMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
             nextStage();
             specialMsg("Skipping tutorial stage... you are now on: " + getStage().name());
         }
-
 
         if (pressSpaceToContinue && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
             pressSpaceToContinue = false;
@@ -197,7 +216,7 @@ public class TutorialClientEvents {
 
     @SubscribeEvent
     public static void TickEvent(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || MC.isPaused() || !isEnabled())
+        if (evt.phase != TickEvent.Phase.END || MC.isPaused() || !isEnabled() || !OrthoviewClientEvents.isEnabled())
             return;
 
         if (shouldPauseTicking.get())
@@ -708,6 +727,7 @@ public class TutorialClientEvents {
                                     targetEntity.getHealth() < targetEntity.getMaxHealth()) {
                                 msg("TIP: If your worker can't hold all the food after hunting an animal, it will drop to the ground.");
                                 progressStage();
+                                break;
                             }
                         }
                     }
@@ -720,6 +740,7 @@ public class TutorialClientEvents {
                                     targetEntity.getHealth() < targetEntity.getMaxHealth() / 2) {
                                 msg("TIP: Dropped items like food and saplings can be picked by ANY unit and returned for resources.");
                                 progressStage();
+                                break;
                             }
                         }
                     }
@@ -1036,14 +1057,14 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 2) {
-                    msg("TIP: Only melee units can attack buildings. Iron golems in particular do double damage to them.");
+                    msg("TIP: Most ranged units can't attack buildings. Order them to attack units instead!");
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 3) {
                     for (Building building : BuildingClientEvents.getBuildings()) {
                         if (building.getFaction() == Faction.MONSTERS && building.getHealth() < building.getMaxHealth()) {
                             msg("TIP: The monsters' capitol, the Mausoleum, produces an artificial night time around it. " +
-                                    "If you can destroy it during the day, undead units will burn under the sunlight.");
+                                    "If you can destroy it during the day, undead units will burn under the sun.");
                             progressStage();
                             break;
                         }
@@ -1088,7 +1109,13 @@ public class TutorialClientEvents {
                 }
                 else if (stageProgress == 5) {
                     specialMsg("Tutorial mode disabled");
+                    nextStage();
+                }
+            }
+            case COMPLETED -> {
+                if (stageProgress == 0) {
                     setEnabled(false);
+                    progressStage();
                 }
             }
         }

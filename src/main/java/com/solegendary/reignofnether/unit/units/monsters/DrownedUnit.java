@@ -194,4 +194,9 @@ public class DrownedUnit extends Drowned implements Unit, AttackerUnit {
         this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
         this.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
     }
+
+    @Override
+    protected float getWaterSlowDown() {
+        return 0.96F;
+    }
 }

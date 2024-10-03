@@ -4,10 +4,9 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.ToggleShield;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchBruteShields;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -213,7 +212,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
         axeStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
         this.setItemSlot(EquipmentSlot.MAINHAND, axeStack);
 
-        if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchBruteShields.itemName)) {
+        if (ResearchServerEvents.playerHasResearch(this.getOwnerName(), ResearchBruteShields.itemName)) {
             ItemStack shieldStack = new ItemStack(Items.SHIELD);
             this.setItemSlot(EquipmentSlot.OFFHAND, shieldStack);
         }

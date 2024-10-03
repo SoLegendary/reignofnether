@@ -9,11 +9,8 @@ import com.solegendary.reignofnether.building.buildings.monsters.SpruceBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.OakBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
-import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
@@ -100,6 +97,9 @@ public class BuildingUtils {
 
     // given a string name return a new instance of that building
     public static Building getNewBuilding(String buildingName, Level level, BlockPos pos, Rotation rotation, String ownerName, boolean isDiagonalBridge) {
+        if (buildingName.toLowerCase().contains("bridge"))
+            ownerName = "";
+
         Building building = null;
         switch(buildingName) {
             case OakBridge.buildingName -> building = new OakBridge(level, pos, rotation, ownerName, isDiagonalBridge);
@@ -127,9 +127,11 @@ public class BuildingUtils {
             case DarkWatchtower.buildingName -> building = new DarkWatchtower(level, pos, rotation, ownerName);
             case Castle.buildingName -> building = new Castle(level, pos, rotation, ownerName);
             case Stronghold.buildingName -> building = new Stronghold(level, pos, rotation, ownerName);
-
             case CentralPortal.buildingName -> building = new CentralPortal(level, pos, rotation, ownerName);
-            case Portal.buildingName -> building = new Portal(level, pos, rotation, ownerName);
+            case Portal.buildingName,
+                 Portal.buildingNameMilitary,
+                 Portal.buildingNameCivilian,
+                 Portal.buildingNameTransport -> building = new Portal(level, pos, rotation, ownerName);
             case NetherwartFarm.buildingName -> building = new NetherwartFarm(level, pos, rotation, ownerName);
             case Bastion.buildingName -> building = new Bastion(level, pos, rotation, ownerName);
             case HoglinStables.buildingName -> building = new HoglinStables(level, pos, rotation, ownerName);

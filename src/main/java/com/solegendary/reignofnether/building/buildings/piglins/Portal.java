@@ -47,17 +47,27 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
 
     public final static String buildingName = "Basic Portal";
     public final static String structureName = "portal_basic";
+
+    public final static String buildingNameCivilian = "Civilian Portal";
+    public final static String structureNameCivilian = "portal_civilian";
+
+    public final static String buildingNameMilitary = "Military Portal";
+    public final static String structureNameMilitary = "portal_military";
+
+    public final static String buildingNameTransport = "Transport Portal";
+    public final static String structureNameTransport = "portal_transport";
+
     public final static ResourceCost cost = ResourceCosts.BASIC_PORTAL;
 
     public PortalType portalType = PortalType.BASIC;
 
     public BlockPos destination; // for transport portals
 
-    public NetherConversionZone netherConversionZone;
+    public NetherZone netherConversionZone = null;
 
     @Override public double getMaxRange() { return 20; }
     @Override public double getStartingRange() { return 3; }
-    @Override public NetherConversionZone getZone() { return netherConversionZone; }
+    @Override public NetherZone getZone() { return netherConversionZone; }
 
     @Override
     public void tick(Level tickLevel) {
@@ -119,11 +129,20 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
     }
 
     @Override
+    public void setNetherZone(NetherZone nz) {
+        if (netherConversionZone == null) {
+            netherConversionZone = nz;
+            if (!level.isClientSide()) {
+                BuildingServerEvents.netherZones.add(netherConversionZone);
+                BuildingServerEvents.saveNetherZones();
+            }
+        }
+    }
+
+    @Override
     public void onBuilt() {
         super.onBuilt();
-        netherConversionZone = new NetherConversionZone(level, centrePos.offset(0,-2,0), getMaxRange(), getStartingRange());
-        if (!level.isClientSide())
-            BuildingServerEvents.netherConversionZones.add(netherConversionZone);
+        setNetherZone(new NetherZone(centrePos.offset(0,-2,0), getMaxRange(), getStartingRange()));
     }
 
     public void disconnectPortal() {
@@ -148,10 +167,10 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
         String newStructureName = "";
         switch (portalType) {
             case CIVILIAN -> {
-                this.name = "Civilian Portal";
+                this.name = buildingNameCivilian;
                 this.portraitBlock = Blocks.CYAN_GLAZED_TERRACOTTA;
                 this.icon = new ResourceLocation("minecraft", "textures/block/cyan_glazed_terracotta.png");
-                newStructureName = "portal_civilian";
+                newStructureName = structureNameCivilian;
                 this.canAcceptResources = true;
                 popSupply = CIVILIIAN_PORTAL_POPULATION_SUPPLY;
                 if (this.getLevel().isClientSide()) {
@@ -161,10 +180,10 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
                 }
             }
             case MILITARY -> {
-                this.name = "Military Portal";
+                this.name = buildingNameMilitary;
                 this.portraitBlock = Blocks.RED_GLAZED_TERRACOTTA;
                 this.icon = new ResourceLocation("minecraft", "textures/block/red_glazed_terracotta.png");
-                newStructureName = "portal_military";
+                newStructureName = structureNameMilitary;
                 this.canSetRallyPoint = true;
                 if (this.getLevel().isClientSide())
                     this.productionButtons = Arrays.asList(
@@ -177,10 +196,10 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
                     );
             }
             case TRANSPORT -> {
-                this.name = "Transport Portal";
+                this.name = buildingNameTransport;
                 this.portraitBlock = Blocks.BLUE_GLAZED_TERRACOTTA;
                 this.icon = new ResourceLocation("minecraft", "textures/block/blue_glazed_terracotta.png");
-                newStructureName = "portal_transport";
+                newStructureName = structureNameTransport;
             }
         }
         if (!newStructureName.isEmpty()) {
@@ -191,6 +210,7 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
         }
     }
 
+    @Override
     public boolean isUpgraded() {
         return portalType != PortalType.BASIC;
     }

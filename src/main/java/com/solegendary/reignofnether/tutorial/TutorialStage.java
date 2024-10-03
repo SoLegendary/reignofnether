@@ -38,7 +38,8 @@ public enum TutorialStage {
     REPAIR_BUILDING,
     BUILD_BRIDGE, // once completed, spawn in free army including iron golems
     ATTACK_ENEMY_BASE, // completed once enemy capitol is destroyed
-    OUTRO;
+    OUTRO,
+    COMPLETED;
 
     public TutorialStage prev() {
         return values()[ordinal() - 1];

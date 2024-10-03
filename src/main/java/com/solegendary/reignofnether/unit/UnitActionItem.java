@@ -13,10 +13,12 @@ import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import org.lwjgl.system.MathUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -187,7 +189,7 @@ public class UnitActionItem {
                 }
                 case ATTACK_BUILDING -> {
                     // if the unit can't actually attack just treat this as a move action
-                    if (unit instanceof AttackerUnit attackerUnit && attackerUnit.canAttackBuildings())
+                    if (unit instanceof AttackerUnit attackerUnit)
                         attackerUnit.setAttackBuildingTarget(preselectedBlockPos);
                     else
                         unit.setMoveTarget(preselectedBlockPos);

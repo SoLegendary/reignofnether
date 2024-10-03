@@ -5,13 +5,10 @@ import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
-import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
-import com.solegendary.reignofnether.research.researchItems.ResearchPillagerCrossbows;
 import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.resources.ResourceSource;
@@ -39,23 +36,20 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.ExplosionEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Convert;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,12 +63,50 @@ public class UnitServerEvents {
     private static final int UNIT_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
     private static int unitSyncTicks = UNIT_SYNC_TICKS_MAX;
 
+    private static ServerLevel serverLevel = null;
+
     private static final List<UnitActionItem> unitActionQueue = Collections.synchronizedList(new ArrayList<>());
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
     private static final ArrayList<Pair<Integer, ChunkAccess>> forcedUnitChunks = new ArrayList<>();
 
     public static ArrayList<LivingEntity> getAllUnits() { return allUnits; }
+
+    public static final ArrayList<UnitSave> savedUnits = new ArrayList<>();
+
+    @SubscribeEvent
+    public static void saveUnits(ServerStoppingEvent evt) {
+        if (serverLevel == null)
+            return;
+
+        UnitSaveData data = UnitSaveData.getInstance(serverLevel);
+        data.units.clear();
+        getAllUnits().forEach(e -> {
+            if (e instanceof Unit unit) {
+                data.units.add(new UnitSave(
+                        e.getName().getString(),
+                        unit.getOwnerName(),
+                        e.getStringUUID()
+                ));
+                System.out.println("saved unit in serverevents: " + unit.getOwnerName() + "|" + e.getName().getString() + "|" + e.getId());
+            }
+        });
+        data.save();
+        serverLevel.getDataStorage().save();
+    }
+
+    @SubscribeEvent
+    public static void loadUnits(ServerStartedEvent evt) {
+        ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
+
+        synchronized (savedUnits) {
+            if (level != null) {
+                UnitSaveData data = UnitSaveData.getInstance(level);
+                savedUnits.addAll(data.units); // actually assign the data in TickEvent as entities don't exist here yet
+                System.out.println("saved " + data.units.size() + " units in serverevents");
+            }
+        }
+    }
 
     // convert all entities that match the condition to the given unit type
     public static void convertAllToUnit(String ownerName, ServerLevel level, Predicate<LivingEntity> entityCondition, EntityType<? extends Unit> entityType) {
@@ -170,10 +202,22 @@ public class UnitServerEvents {
             mob.setItemSlot(EquipmentSlot.FEET, ItemStack.EMPTY);
         }
 
-        if (evt.getEntity() instanceof Unit &&
+        if (evt.getEntity() instanceof Unit unit &&
             evt.getEntity() instanceof LivingEntity entity && !evt.getLevel().isClientSide) {
             allUnits.add(entity);
 
+            synchronized (savedUnits) {
+                savedUnits.removeIf(su -> {
+                    if (su.uuid.equals(entity.getStringUUID())) {
+                        unit.setOwnerName(su.ownerName);
+                        UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
+                        UnitSyncClientboundPacket.sendSyncOwnerNamePacket(unit);
+                        System.out.println("loaded unit in serverevents: " + su.ownerName + "|" + su.name + "|" + su.uuid);
+                        return true;
+                    }
+                    return false;
+                });
+            }
             ((Unit) entity).setupEquipmentAndUpgradesServer();
 
             ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
@@ -219,7 +263,7 @@ public class UnitServerEvents {
 
         if (evt.getEntity().getLastHurtByMob() instanceof Unit unit &&
             (evt.getEntity().getLastHurtByMob() instanceof WitherSkeletonUnit || evt.getSource().getMsgId().equals("wither")) &&
-            ResearchServer.playerHasResearch(unit.getOwnerName(), ResearchWitherClouds.itemName)) {
+            ResearchServerEvents.playerHasResearch(unit.getOwnerName(), ResearchWitherClouds.itemName)) {
 
             AreaEffectCloud aec = new AreaEffectCloud(evt.getEntity().level, evt.getEntity().getX(), evt.getEntity().getY(), evt.getEntity().getZ());
             aec.setOwner(evt.getEntity());
@@ -297,6 +341,8 @@ public class UnitServerEvents {
         if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
             return;
 
+        serverLevel = (ServerLevel) evt.level;
+
         unitSyncTicks -= 1;
         if (unitSyncTicks <= 0) {
             unitSyncTicks = UNIT_SYNC_TICKS_MAX;
@@ -370,7 +416,7 @@ public class UnitServerEvents {
         Entity shooter = evt.getSource().getEntity();
 
         if (shooter instanceof HeadhunterUnit headhunterUnit && projectile instanceof ThrownTrident) {
-            return !ResearchServer.playerHasResearch(headhunterUnit.getOwnerName(), ResearchHeavyTridents.itemName);
+            return !ResearchServerEvents.playerHasResearch(headhunterUnit.getOwnerName(), ResearchHeavyTridents.itemName);
         }
         if (projectile instanceof Fireball && shooter instanceof BlazeUnit)
             return true;

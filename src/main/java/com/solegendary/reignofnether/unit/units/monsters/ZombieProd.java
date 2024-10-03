@@ -6,7 +6,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchDrowned;
 import com.solegendary.reignofnether.research.researchItems.ResearchHusks;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -28,9 +28,9 @@ public class ZombieProd extends ProductionItem {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide()) {
-                if (ResearchServer.playerHasResearch(this.building.ownerName, ResearchHusks.itemName))
+                if (ResearchServerEvents.playerHasResearch(this.building.ownerName, ResearchHusks.itemName))
                     building.produceUnit((ServerLevel) level, EntityRegistrar.HUSK_UNIT.get(), building.ownerName, true);
-                else if (ResearchServer.playerHasResearch(this.building.ownerName, ResearchDrowned.itemName))
+                else if (ResearchServerEvents.playerHasResearch(this.building.ownerName, ResearchDrowned.itemName))
                     building.produceUnit((ServerLevel) level, EntityRegistrar.DROWNED_UNIT.get(), building.ownerName, true);
                 else
                     building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get(), building.ownerName, true);

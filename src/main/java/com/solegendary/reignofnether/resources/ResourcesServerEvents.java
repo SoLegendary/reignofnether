@@ -1,9 +1,13 @@
 package com.solegendary.reignofnether.resources;
 
-import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -11,6 +15,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -29,6 +35,72 @@ public class ResourcesServerEvents {
     public static final int STARTING_FOOD = 100;
     public static final int STARTING_WOOD = 400;
     public static final int STARTING_ORE = 150;
+
+    // to avoid having to save units too often add on all unit resources here too and just add directly on load
+    public static void saveResources(ServerLevel serverLevel) {
+        if (serverLevel == null)
+            return;
+
+        ResourcesSaveData data = ResourcesSaveData.getInstance(serverLevel);
+        data.resources.clear();
+        resourcesList.forEach(r -> {
+
+            // add all unit held resources to resources so we don't have to save unit items
+            int unitFood = 0;
+            int unitWood = 0;
+            int unitOre = 0;
+            for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+                if (le instanceof Unit u && u.getOwnerName().equals(r.ownerName)) {
+                    Resources unitRes = Resources.getTotalResourcesFromItems(u.getItems());
+                    unitFood += unitRes.food;
+                    unitWood += unitRes.wood;
+                    unitOre += unitRes.ore;
+                }
+            }
+            // add all production item costs since they will be cancelled on server shutdown
+            int prodFood = 0;
+            int prodWood = 0;
+            int prodOre = 0;
+            for (Building building : BuildingServerEvents.getBuildings()) {
+                if (building instanceof ProductionBuilding pBuilding) {
+                    for (ProductionItem item : pBuilding.productionQueue) {
+                        prodFood += item.foodCost;
+                        prodWood += item.woodCost;
+                        prodOre += item.oreCost;
+                    }
+                }
+            }
+            data.resources.add(new Resources(
+                    r.ownerName,
+                    r.food + r.foodToAdd + unitFood + prodFood,
+                    r.wood + r.woodToAdd + unitWood + prodWood,
+                    r.ore + r.oreToAdd + unitOre + prodOre
+            ));
+            System.out.println("saved resources in serverevents: " + r.ownerName + "|" + r.food + "|" + r.wood + "|" + r.ore);
+        });
+        data.save();
+        serverLevel.getDataStorage().save();
+    }
+
+    @SubscribeEvent
+    public static void loadResources(ServerStartedEvent evt) {
+        ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
+
+        if (level != null) {
+            ResourcesSaveData data = ResourcesSaveData.getInstance(level);
+            resourcesList.clear();
+            resourcesList.addAll(data.resources);
+
+            System.out.println("saved " + data.resources.size() + " resources in serverevents");
+        }
+    }
+
+    @SubscribeEvent
+    public static void onServerStopping(ServerStoppingEvent evt) {
+        ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
+        if (level != null)
+            saveResources(level);
+    }
 
     public static void resetResources(String playerName) {
         for (Resources resources : resourcesList) {

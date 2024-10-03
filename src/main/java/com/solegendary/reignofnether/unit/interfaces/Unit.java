@@ -1,10 +1,11 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
-import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchFireResistance;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -158,7 +159,7 @@ public interface Unit {
                 unit.setMoveTarget(unit.getFollowTarget().blockPosition());
 
             // remove fire from piglin units if they have research
-            boolean hasImmunityResearch = ResearchServer.playerHasResearch(unit.getOwnerName(), ResearchFireResistance.itemName);
+            boolean hasImmunityResearch = ResearchServerEvents.playerHasResearch(unit.getOwnerName(), ResearchFireResistance.itemName);
             if (hasImmunityResearch && unit.getFaction() == Faction.PIGLINS)
                 unitMob.setRemainingFireTicks(0);
         }
@@ -177,6 +178,11 @@ public interface Unit {
                     (NetherBlocks.isNetherBlock(le.level, le.getOnPos()) || unit instanceof GhastUnit)) {
                 le.heal(1);
             }
+        }
+
+        if (le.isInWater() && // stuck in bridge
+            BuildingUtils.findBuilding(le.level.isClientSide(), le.getOnPos().above()) instanceof AbstractBridge) {
+            le.setDeltaMovement(0,0.2,0);
         }
     }
 

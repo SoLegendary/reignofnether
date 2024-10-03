@@ -10,22 +10,30 @@ import java.util.function.Supplier;
 public class TutorialServerboundPacket {
 
     TutorialAction action;
+    TutorialStage stage;
 
     public static void doServerAction(TutorialAction action) {
-        PacketHandler.INSTANCE.sendToServer(new TutorialServerboundPacket(action));
+        PacketHandler.INSTANCE.sendToServer(new TutorialServerboundPacket(action, TutorialStage.INTRO));
+    }
+
+    public static void saveStage(TutorialStage stage) {
+        PacketHandler.INSTANCE.sendToServer(new TutorialServerboundPacket(TutorialAction.SAVE_STAGE, stage));
     }
 
     // packet-handler functions
-    public TutorialServerboundPacket(TutorialAction action) {
+    public TutorialServerboundPacket(TutorialAction action, TutorialStage stage) {
         this.action = action;
+        this.stage = stage;
     }
 
     public TutorialServerboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(TutorialAction.class);
+        this.stage = buffer.readEnum(TutorialStage.class);
     }
 
     public void encode(FriendlyByteBuf buffer)  {
         buffer.writeEnum(this.action);
+        buffer.writeEnum(this.stage);
     }
 
     // server-side packet-consuming functions
@@ -33,6 +41,8 @@ public class TutorialServerboundPacket {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
             switch (action) {
+                case SAVE_STAGE -> TutorialServerEvents.saveStage(stage);
+
                 case SET_DAY_TIME -> TutorialServerEvents.setDayTime();
                 case SET_NIGHT_TIME -> TutorialServerEvents.setNightTime();
                 case SPAWN_ANIMALS -> TutorialServerEvents.spawnAnimals();

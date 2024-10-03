@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchVindicatorAxes;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -221,7 +221,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         // weapon is purely visual, damage is based solely on entity attribute ATTACK_DAMAGE
         Item axe = Items.IRON_AXE;
         int damageMod = 0;
-        if (ResearchServer.playerHasResearch(this.getOwnerName(), ResearchVindicatorAxes.itemName)) {
+        if (ResearchServerEvents.playerHasResearch(this.getOwnerName(), ResearchVindicatorAxes.itemName)) {
             axe = Items.DIAMOND_AXE;
             damageMod = 2;
         }

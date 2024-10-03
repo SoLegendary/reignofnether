@@ -6,7 +6,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchStrays;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -27,7 +27,7 @@ public class SkeletonProd extends ProductionItem {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
             if (!level.isClientSide()) {
-                if (ResearchServer.playerHasResearch(this.building.ownerName, ResearchStrays.itemName))
+                if (ResearchServerEvents.playerHasResearch(this.building.ownerName, ResearchStrays.itemName))
                     building.produceUnit((ServerLevel) level, EntityRegistrar.STRAY_UNIT.get(), building.ownerName, true);
                 else
                     building.produceUnit((ServerLevel) level, EntityRegistrar.SKELETON_UNIT.get(), building.ownerName, true);

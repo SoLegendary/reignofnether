@@ -3,8 +3,10 @@ package com.solegendary.reignofnether.building;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -483,16 +485,31 @@ public class BuildingClientEvents {
 
         // draw rally point and line
         for (Building selBuilding : selectedBuildings) {
-            if (selBuilding instanceof ProductionBuilding selProdBuilding && selProdBuilding.getRallyPoint() != null) {
+            if (selBuilding instanceof ProductionBuilding selProdBuilding) {
                 float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
-                MyRenderer.drawBlockFace(evt.getPoseStack(),
-                        Direction.UP,
-                        selProdBuilding.getRallyPoint(),
-                        0, 1, 0, a);
-                MyRenderer.drawLine(evt.getPoseStack(),
-                        selProdBuilding.centrePos,
-                        selProdBuilding.getRallyPoint(),
-                        0, 1, 0, a);
+
+                if (selProdBuilding.getRallyPoint() != null) {
+                    MyRenderer.drawBlockFace(evt.getPoseStack(),
+                            Direction.UP,
+                            selProdBuilding.getRallyPoint(),
+                            0, 1, 0, a);
+                    MyRenderer.drawLine(evt.getPoseStack(),
+                            selProdBuilding.centrePos,
+                            selProdBuilding.getRallyPoint(),
+                            0, 1, 0, a);
+                }
+                else if (selProdBuilding.getRallyPointEntity() != null) {
+                    LivingEntity le = selProdBuilding.getRallyPointEntity();
+                    MyRenderer.drawLine(evt.getPoseStack(),
+                            new Vec3(
+                                selProdBuilding.centrePos.getX(),
+                                selProdBuilding.centrePos.getY(),
+                                selProdBuilding.centrePos.getZ()
+                            ),
+                            new Vec3(le.getX(), le.getEyeY(), le.getZ()),
+                            0, 1, 0, a);
+                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), le.getBoundingBox(), 0, 1.0f, 0,  a, false);
+                }
             }
             if (selBuilding instanceof Portal portal && portal.destination != null) {
                 float a = MiscUtil.getOscillatingFloat(0.25f,0.75f);
@@ -656,12 +673,22 @@ public class BuildingClientEvents {
             if (!Keybindings.altMod.isDown()) {
                 for (Building selBuilding : selectedBuildings) {
                     if (selBuilding instanceof ProductionBuilding selProdBuilding && getPlayerToBuildingRelationship(selBuilding) == Relationship.OWNED) {
-                        BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();
-                        selProdBuilding.setRallyPoint(rallyPoint);
-                        BuildingServerboundPacket.setRallyPoint(
-                                selBuilding.originPos,
-                                rallyPoint
-                        );
+                        if (!UnitClientEvents.getPreselectedUnits().isEmpty()) {
+                            LivingEntity rallyPointEntity = UnitClientEvents.getPreselectedUnits().get(0);
+                            selProdBuilding.setRallyPointEntity(rallyPointEntity);
+                            BuildingServerboundPacket.setRallyPointEntity(
+                                    selBuilding.originPos,
+                                    rallyPointEntity.getId()
+                            );
+                        }
+                        else {
+                            BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();
+                            selProdBuilding.setRallyPoint(rallyPoint);
+                            BuildingServerboundPacket.setRallyPoint(
+                                    selBuilding.originPos,
+                                    rallyPoint
+                            );
+                        }
                     }
                 }
             }
@@ -746,7 +773,8 @@ public class BuildingClientEvents {
 
     // place a building clientside that has already been registered on serverside
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName,
-                                     int numBlocksToPlace, boolean isDiagonalBridge, boolean forPlayerLoggingIn) {
+                                     int numBlocksToPlace, boolean isDiagonalBridge, boolean isUpgraded,
+                                     boolean isBuilt, Portal.PortalType portalType, boolean forPlayerLoggingIn) {
 
         for (Building building : buildings)
             if (!buildingName.toLowerCase().contains("bridge") &&
@@ -761,6 +789,19 @@ public class BuildingClientEvents {
             numBlocksToPlace -= 1;
         }
         if (newBuilding != null && MC.player != null) {
+            newBuilding.isBuilt = isBuilt;
+
+            if (isBuilt && forPlayerLoggingIn)
+                newBuilding.highestBlockCountReached = newBuilding.getBlocksTotal();
+
+            if (isUpgraded) {
+                if (newBuilding instanceof Castle castle)
+                    castle.changeStructure(Castle.upgradedStructureName);
+                else if (newBuilding instanceof Laboratory lab)
+                    lab.changeStructure(Laboratory.upgradedStructureName);
+                else if (newBuilding instanceof Portal portal)
+                    portal.changeStructure(portalType);
+            }
             buildings.add(newBuilding);
 
             if (FogOfWarClientEvents.isEnabled())

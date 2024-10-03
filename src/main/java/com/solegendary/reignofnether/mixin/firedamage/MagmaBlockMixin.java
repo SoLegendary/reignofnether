@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.mixin.firedamage;
 
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchFireResistance;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
@@ -36,7 +36,7 @@ public abstract class MagmaBlockMixin {
         if (pLevel.isClientSide())
             hasImmunityResearch = ResearchClient.hasResearch(ResearchFireResistance.itemName);
         else if (pEntity instanceof Unit unit)
-            hasImmunityResearch = ResearchServer.playerHasResearch(unit.getOwnerName(), ResearchFireResistance.itemName);
+            hasImmunityResearch = ResearchServerEvents.playerHasResearch(unit.getOwnerName(), ResearchFireResistance.itemName);
 
         boolean isPiglinFaction = pEntity instanceof Unit unit && unit.getFaction() == Faction.PIGLINS;
         boolean isDamageTick = pEntity.tickCount % DAMAGE_DELAY == 0;

@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.ResearchServer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -100,7 +100,7 @@ public abstract class ProductionItem {
     // return true if the tick finished
     public boolean tick(Level level) {
         if ((level.isClientSide() && ResearchClient.hasCheat("warpten")) ||
-            (!level.isClientSide() && ResearchServer.playerHasCheat(this.building.ownerName, "warpten")))
+            (!level.isClientSide() && ResearchServerEvents.playerHasCheat(this.building.ownerName, "warpten")))
             this.ticksLeft -= 10;
         else
             this.ticksLeft -= 1;

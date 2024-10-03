@@ -1,16 +1,55 @@
 package com.solegendary.reignofnether.research;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
+import com.solegendary.reignofnether.building.buildings.villagers.Castle;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 
 // class to track status of research items for all players
-public class ResearchServer {
+public class ResearchServerEvents {
 
-    final private static ArrayList<Pair<String, String>> researchItems = new ArrayList<>();
+    private static final ArrayList<Pair<String, String>> researchItems = new ArrayList<>();
+
+    private static ServerLevel serverLevel = null;
+
+    public static void saveResearch() {
+        if (serverLevel != null) {
+            ResearchSaveData researchData = ResearchSaveData.getInstance(serverLevel);
+            researchData.researchItems.clear();
+            researchData.researchItems.addAll(researchItems);
+            researchData.save();
+            serverLevel.getDataStorage().save();
+
+            System.out.println("saved " + researchItems.size() + " researchItems in serverevents");
+        }
+    }
+
+    @SubscribeEvent
+    public static void loadResearch(ServerStartedEvent evt) {
+        ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
+
+        if (level != null) {
+            serverLevel = level;
+            ResearchSaveData researchData = ResearchSaveData.getInstance(level);
+            researchItems.clear();
+            researchItems.addAll(researchData.researchItems);
+            for (Pair<String, String> researchItem : researchItems)
+                syncResearch(researchItem.getFirst());
+
+            System.out.println("loaded " + researchItems.size() + " researchItems in serverevents");
+        }
+    }
 
     public static void removeAllResearch() {
         researchItems.clear();
+        saveResearch();
     }
 
     public static void syncResearch(String playerName) {
@@ -21,9 +60,11 @@ public class ResearchServer {
 
     public static void addResearch(String playerName, String researchItemName) {
         researchItems.add(new Pair<>(playerName, researchItemName));
+        saveResearch();
     }
     public static void removeResearch(String playerName, String researchItemName) {
         researchItems.removeIf(p -> p.getFirst().equals(playerName) && p.getSecond().equals(researchItemName));
+        saveResearch();
     }
     public static boolean playerHasResearch(String playerName, String researchItemName) {
         if (playerHasCheat(playerName, "medievalman"))
