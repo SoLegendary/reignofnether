@@ -108,6 +108,7 @@ public class CursorClientEvents {
         if (!OrthoviewClientEvents.isEnabled() || !(evt.getScreen() instanceof TopdownGui)) {
             if (GLFW.glfwRawMouseMotionSupported()) // raw mouse increases sensitivity massively for some reason
                 GLFW.glfwSetInputMode(window, GLFW.GLFW_RAW_MOUSE_MOTION, GLFW.GLFW_TRUE);
+            GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
             return;
         }
         if (MC.player == null || MC.level == null) return;

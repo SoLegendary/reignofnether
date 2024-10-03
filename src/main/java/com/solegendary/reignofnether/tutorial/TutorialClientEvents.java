@@ -1057,14 +1057,14 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 2) {
-                    msg("TIP: Only melee units can attack buildings. Iron golems in particular do double damage to them.");
+                    msg("TIP: Most ranged units can't attack buildings. Order them to attack units instead!");
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 3) {
                     for (Building building : BuildingClientEvents.getBuildings()) {
                         if (building.getFaction() == Faction.MONSTERS && building.getHealth() < building.getMaxHealth()) {
                             msg("TIP: The monsters' capitol, the Mausoleum, produces an artificial night time around it. " +
-                                    "If you can destroy it during the day, undead units will burn under the sunlight.");
+                                    "If you can destroy it during the day, undead units will burn under the sun.");
                             progressStage();
                             break;
                         }

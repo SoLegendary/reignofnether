@@ -3,14 +3,21 @@
 
 TODO bugs/features:
 
+netherzones are lost if the server ends while its restoring
+
+players in orthoview shouldn't be visible to anyone
+
+
 To test:
 -------
 multiplayer testing of data saves
 3+ player FFA for stress testing
 
-(server) units stuck in bridges
-(server) workers move away from foundations
-(server) rally point to entities
+attack move and idle attacks should target buildings
+ranged units should attack move instead when asked to attack a building
+
+
+
 
 
 Misc additions

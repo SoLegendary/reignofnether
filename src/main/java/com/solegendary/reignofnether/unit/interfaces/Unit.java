@@ -180,10 +180,9 @@ public interface Unit {
             }
         }
 
-        if (le.isInWater() &&
+        if (le.isInWater() && // stuck in bridge
             BuildingUtils.findBuilding(le.level.isClientSide(), le.getOnPos().above()) instanceof AbstractBridge) {
-            System.out.println(le.getName() + " is stuck in bridge!");
-            le.setDeltaMovement(0,0.15,0);
+            le.setDeltaMovement(0,0.2,0);
         }
     }
 
