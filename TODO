@@ -7,14 +7,29 @@ netherzones are lost if the server ends while its restoring
 
 players in orthoview shouldn't be visible to anyone
 
+show players on holding tab just like in vanilla
+
+fog updated by a moving unit sometimes is grey when you move cam over to them instantly
+
+military units idle aggro on animals
+    - or just spider jockeys?
+
+some buildings already explored in fog still show some fake blocks
+
+add in build range limit set where you started, cannot ever move
+	- all players can build within each others limits
+
+should not give spiders as an option after upgrading
+
+chat message validation failure?
+    - may need minecraft version update
+
 
 To test:
 -------
 multiplayer testing of data saves
 3+ player FFA for stress testing
 
-attack move and idle attacks should target buildings
-ranged units should attack move instead when asked to attack a building
 
 
 
