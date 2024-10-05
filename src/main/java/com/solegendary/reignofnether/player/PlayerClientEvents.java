@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -13,11 +14,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.world.scores.Objective;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.lwjgl.glfw.GLFW;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
 
@@ -141,6 +145,19 @@ public class PlayerClientEvents {
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (evt.phase == TickEvent.Phase.END)
             rtsGameTicks += 1;
+    }
+
+    // allow tab player list menu on the orthoview screen
+    @SubscribeEvent
+    public static void onScreenRender(ScreenEvent.Render evt) {
+        if (OrthoviewClientEvents.isEnabled() && Keybindings.showPlayers.isDown() && MC.level != null) {
+            if (!MC.isLocalServer()) {
+                MC.gui.getTabList().setVisible(true);
+                MC.gui.getTabList().render(evt.getPoseStack(), MC.getWindow().getGuiScaledWidth(), MC.level.getScoreboard(), null);
+            } else {
+                MC.gui.getTabList().setVisible(false);
+            }
+        }
     }
 
     public static void syncRtsGameTime(Long gameTicks) {

@@ -5,6 +5,11 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.research.researchItems.ResearchDrowned;
+import com.solegendary.reignofnether.research.researchItems.ResearchHusks;
+import com.solegendary.reignofnether.research.researchItems.ResearchPoisonSpiders;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Style;
@@ -25,11 +30,27 @@ public class SpiderProd extends ProductionItem {
         this.onComplete = (Level level) -> {
             if (!level.isClientSide())
                 building.produceUnit((ServerLevel) level, EntityRegistrar.SPIDER_UNIT.get(), building.ownerName, true);
+            else if (ResearchServerEvents.playerHasResearch(this.building.ownerName, ResearchPoisonSpiders.itemName))
+                building.produceUnit((ServerLevel) level, EntityRegistrar.POISON_SPIDER_UNIT.get(), building.ownerName, true);
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
         this.oreCost = cost.ore;
         this.popCost = cost.population;
+    }
+
+    private static ResourceLocation getIcon() {
+        if (ResearchClient.hasResearch(PoisonSpiderProd.itemName))
+            return new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png");
+        else
+            return new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/spider.png");
+    }
+
+    private static String getCancelName() {
+        if (ResearchClient.hasResearch(PoisonSpiderProd.itemName))
+            return "Poison Spider";
+        else
+            return "Spider";
     }
 
     public String getItemName() {
@@ -40,10 +61,10 @@ public class SpiderProd extends ProductionItem {
         return new Button(
             SpiderProd.itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/spider.png"),
+            getIcon(),
             hotkey,
             () -> false,
-            () -> false,
+            () -> ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
@@ -64,7 +85,7 @@ public class SpiderProd extends ProductionItem {
         return new Button(
                 SpiderProd.itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/spider.png"),
+                getIcon(),
                 (Keybinding) null,
                 () -> false,
                 () -> false,

@@ -5,24 +5,17 @@ TODO bugs/features:
 
 netherzones are lost if the server ends while its restoring
 
-players in orthoview shouldn't be visible to anyone
-
-show players on holding tab just like in vanilla
-
-fog updated by a moving unit sometimes is grey when you move cam over to them instantly
-
-military units idle aggro on animals
-    - or just spider jockeys?
-
-some buildings already explored in fog still show some fake blocks
-
 add in build range limit set where you started, cannot ever move
 	- all players can build within each others limits
 
-should not give spiders as an option after upgrading
 
-chat message validation failure?
-    - may need minecraft version update
+when a fog chunk is explored while not being directly looked at, sometimes
+those chunks remain grey even when a unit is in range of it
+
+when a fog chunk is UNexplored while not being directly looked at, sometimes
+enemy buildings do not sync their fake blocks.
+
+
 
 
 To test:
@@ -30,7 +23,9 @@ To test:
 multiplayer testing of data saves
 3+ player FFA for stress testing
 
-
+spiderProd after poison spider upgrade
+    - cancel button icon/name
+    - spider produces poison spider if upgraded in progress
 
 
 
