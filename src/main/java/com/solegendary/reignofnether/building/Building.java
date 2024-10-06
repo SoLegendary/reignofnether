@@ -791,27 +791,4 @@ public abstract class Building {
     public boolean isUpgraded() {
         return false;
     }
-
-
-    public List<BlockPos> getSolidBps() {
-        return this.blocks.stream()
-                .filter(bb -> !bb.getBlockState().isAir())
-                .map(BuildingBlock::getBlockPos)
-                .toList();
-    }
-
-    public List<BlockPos> getSolidFrozenBps() {
-
-        List<BlockPos> solidBps = getSolidBps();
-
-        ArrayList<BlockPos> bps = new ArrayList<>();
-        for (FrozenChunk frozenChunk : FogOfWarClientEvents.frozenChunks)
-            if (frozenChunk.building == this)
-                for (BlockPos bp : frozenChunk.blocks.keySet())
-                    if (solidBps.contains(bp) && !frozenChunk.blocks.get(bp).isAir())
-                        bps.add(bp);
-
-        // remove duplicates by converting to set
-        return new HashSet<>(bps).stream().toList();
-    }
 }
