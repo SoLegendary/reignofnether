@@ -12,10 +12,6 @@ add in build range limit set where you started, cannot ever move
 when a fog chunk is explored while not being directly looked at, sometimes
 those chunks remain grey even when a unit is in range of it
 
-when a fog chunk is UNexplored while not being directly looked at, sometimes
-enemy buildings do not sync their fake blocks.
-
-
 
 
 To test:

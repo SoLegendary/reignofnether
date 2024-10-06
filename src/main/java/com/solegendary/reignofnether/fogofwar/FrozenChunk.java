@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.fogofwar;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
-import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -62,7 +61,7 @@ public class FrozenChunk {
         if (MC.level == null)
             return;
 
-        System.out.println("Starting to save blocks at: " + this.origin);
+        //System.out.println("Starting to save REAL blocks at: " + this.origin);
 
         ArrayList<BuildingBlock> bbs = new ArrayList<>();
         for (BuildingBlock bb : building.getBlocks())
@@ -71,27 +70,14 @@ public class FrozenChunk {
 
         for (int x = 0; x <= 16; x++) {
             for (int y = 0; y <= 16; y++) {
-                outerloop:
                 for (int z = 0; z <= 16; z++) {
                     BlockPos bp = origin.offset(x,y,z);
                     BlockState bs = MC.level.getBlockState(bp);
-
-                    for (BuildingBlock bb : bbs) {
-                        if (bb.getBlockPos().equals(bp)) {
-                            if (building instanceof AbstractBridge &&
-                                !(bb.getBlockState().getBlock() instanceof WallBlock) &&
-                                !(bb.getBlockState().getBlock() instanceof FenceBlock))
-                                saveBlock(bb.getBlockPos(), Blocks.WATER.defaultBlockState(), bbs);
-                            else
-                                saveBlock(bb.getBlockPos(), Blocks.AIR.defaultBlockState(), bbs);
-                            continue outerloop;
-                        }
-                    }
-                    saveBlock(bp, MC.level.getBlockState(bp), new ArrayList<>());
+                    saveBlock(bp, bs, new ArrayList<>());
                 }
             }
         }
-        //System.out.println("completed saved blocks at: " + origin);
+        //System.out.println("Completed saved REAL blocks (" + bbs.size() + ") at: " + origin);
 
         hasFakeBlocks = false;
         unsaved = false;
@@ -105,6 +91,8 @@ public class FrozenChunk {
     public void saveFakeBlocks() {
         if (MC.level == null)
             return;
+
+        System.out.println("Starting to save FAKE blocks at: " + this.origin);
 
         ArrayList<BuildingBlock> bbs = new ArrayList<>();
         for (BuildingBlock bb : building.getBlocks())
@@ -171,6 +159,13 @@ public class FrozenChunk {
     public void loadBlocks() {
         if (MC.level == null)
             return;
+        /*
+        if (hasFakeBlocks)
+            System.out.println("loaded FrozenChunk (FAKE blocks) at: " + origin);
+        else
+            System.out.println("loaded FrozenChunk (REAL blocks) at: " + origin);
+         */
+
         for (BlockPos bp : blocks.keySet()) {
             MC.level.setBlockAndUpdate(bp, blocks.get(bp));
         }

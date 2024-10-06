@@ -48,6 +48,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.world.ForgeChunkManager;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.*;
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
@@ -97,7 +98,7 @@ public abstract class Building {
     private final long TICKS_TO_EXTINGUISH = 100;
 
     private final long TICKS_TO_SPAWN_ANIMALS_MAX = 1200; // how often we attempt to spawn animals around each
-    private long ticksToSpawnAnimals = TICKS_TO_SPAWN_ANIMALS_MAX; // spawn once immediately on placement
+    private long ticksToSpawnAnimals = TICKS_TO_SPAWN_ANIMALS_MAX - 100; // spawn once immediately on placement
     private final int MAX_ANIMALS = 8;
     private final int ANIMAL_SPAWN_RANGE = 100; // block range to check and spawn animals in
 
@@ -789,5 +790,28 @@ public abstract class Building {
 
     public boolean isUpgraded() {
         return false;
+    }
+
+
+    public List<BlockPos> getSolidBps() {
+        return this.blocks.stream()
+                .filter(bb -> !bb.getBlockState().isAir())
+                .map(BuildingBlock::getBlockPos)
+                .toList();
+    }
+
+    public List<BlockPos> getSolidFrozenBps() {
+
+        List<BlockPos> solidBps = getSolidBps();
+
+        ArrayList<BlockPos> bps = new ArrayList<>();
+        for (FrozenChunk frozenChunk : FogOfWarClientEvents.frozenChunks)
+            if (frozenChunk.building == this)
+                for (BlockPos bp : frozenChunk.blocks.keySet())
+                    if (solidBps.contains(bp) && !frozenChunk.blocks.get(bp).isAir())
+                        bps.add(bp);
+
+        // remove duplicates by converting to set
+        return new HashSet<>(bps).stream().toList();
     }
 }

@@ -164,7 +164,7 @@ public abstract class LevelRendererMixin {
                         frozenChunk.loadBlocks();
                         loadedFcOrigins.add(frozenChunk.origin);
                     } else {
-                        System.out.println("skipped loading (faked) frozen blocks at: " + frozenChunk.origin);
+                        System.out.println("skipped loading frozen blocks at: " + frozenChunk.origin);
                     }
                 }
             }
