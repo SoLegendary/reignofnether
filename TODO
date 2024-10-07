@@ -8,10 +8,11 @@ netherzones are lost if the server ends while its restoring
 add in build range limit set where you started, cannot ever move
 	- all players can build within each others limits
 
+adjust [semiFrozenChunks.add(originPos);] to reduce lag in first-person cam
 
 when a fog chunk is explored while not being directly looked at, sometimes
 those chunks remain grey even when a unit is in range of it
-
+    - add a chunk to chunkOriginsToRefresh whenever it's explored but wasn't in the frustum at the time
 
 
 To test:

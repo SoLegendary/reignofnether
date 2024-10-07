@@ -86,12 +86,33 @@ public abstract class LevelRendererMixin {
         } else {
             this.minecraft.getProfiler().push("apply_frustum");
             this.renderChunksInFrustum.clear();
+            Set<ChunkPos> chunksToRefreshDone = new HashSet<>();
+
+            int chunksDirtied = 0;
 
             for (LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunkStorage.get().renderChunks) {
                 if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox())) {
                     this.renderChunksInFrustum.add(chunkInfo);
                 }
+                if (minecraft.level != null) {
+                    ChunkPos cpos = minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
+                    if (FogOfWarClientEvents.chunksToRefresh.contains(cpos)) {
+                        chunkInfo.chunk.setDirty(true);
+                        chunksToRefreshDone.add(cpos);
+                        chunksDirtied += 1;
+                    }
+                }
             }
+            if (chunksDirtied > 0)
+                System.out.println("set renderChunks dirty: " + chunksDirtied);
+
+            FogOfWarClientEvents.chunksToRefresh.removeAll(chunksToRefreshDone);
+
+            if (chunksToRefreshDone.size() > 0)
+                System.out.println("refreshed " + chunksToRefreshDone.size() + " chunks, " + FogOfWarClientEvents.chunksToRefresh.size() + " remaining");
+
+            FogOfWarClientEvents.renderChunksInFrustum.clear();
+            FogOfWarClientEvents.renderChunksInFrustum.addAll(renderChunksInFrustum);
 
             this.minecraft.getProfiler().pop();
         }

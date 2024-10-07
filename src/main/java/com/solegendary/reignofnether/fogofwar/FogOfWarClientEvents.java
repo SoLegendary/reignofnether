@@ -4,20 +4,19 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
-import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -33,8 +32,11 @@ import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
 
@@ -66,6 +68,13 @@ public class FogOfWarClientEvents {
     private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
 
     public static boolean movedToCapitol = false;
+
+    // mark these renderChunks as dirty the next time they're rendered
+    // this is so we chunks that were explored while not in frustum have lighting updated correctly
+    public static Set<ChunkPos> chunksToRefresh = new HashSet<>();
+
+    public static ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum = new ObjectArrayList<>();
+
 
 
     public static void revealOrHidePlayer(boolean reveal, String playerName) {
@@ -145,8 +154,13 @@ public class FogOfWarClientEvents {
                         MC.player.sendSystemMessage(Component.literal(""));
                         MC.player.sendSystemMessage(Component.literal("[WARNING]").withStyle(Style.EMPTY.withBold(true)));
                         MC.player.sendSystemMessage(Component.literal(
-                        "You are about to enable fog of war for the server. This is an experimental feature and can cause serious lag and/or crashing, " +
-                                "ESPECIALLY for anyone with Optifine enabled. If you are prepared for this, then use /rts-fog enable again to continue."));
+                        "You are about to enable fog of war for all players. This is an experimental feature with several issues:"));
+                        MC.player.sendSystemMessage(Component.literal(""));
+                        MC.player.sendSystemMessage(Component.literal("- ALL PLAYERS WITH OPTIFINE WILL CRASH"));
+                        MC.player.sendSystemMessage(Component.literal("- May cause chunk rendering bugs"));
+                        MC.player.sendSystemMessage(Component.literal("- Significantly raises CPU usage"));
+                        MC.player.sendSystemMessage(Component.literal(""));
+                        MC.player.sendSystemMessage(Component.literal("Use /rts-fog enable again to confirm."));
                     } else {
                         setServerFog(true);
                     }
@@ -330,6 +344,18 @@ public class FogOfWarClientEvents {
 
     // triggered when a chunk goes from dark to bright
     public static void onChunkExplore(ChunkPos cpos) {
+        if (MC.level == null)
+            return;
+
+        Set<ChunkPos> chunksInFrustum = renderChunksInFrustum.stream()
+                .map(rci -> MC.level.getChunk(rci.chunk.getOrigin()).getPos())
+                .collect(Collectors.toSet());
+
+        if (!chunksInFrustum.contains(cpos)) {
+            System.out.println("explored chunk outside of frustum at: " + cpos);
+            chunksToRefresh.add(cpos);
+        }
+
         frozenChunks.removeIf(fc -> fc.removeOnExplore && MC.level.getChunk(fc.origin).getPos().equals(cpos));
 
         for (FrozenChunk frozenChunk : frozenChunks)
@@ -410,21 +436,6 @@ public class FogOfWarClientEvents {
         SoundClientEvents.mutedBps.clear();
     }
 
-
-    /*
-    @SubscribeEvent
-    public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
-        // select a moused over entity by left clicking it
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-            if (MC.level != null)
-                MC.level.setBlockAndUpdate(CursorClientEvents.getPreselectedBlockPos().above(), Blocks.SUNFLOWER.defaultBlockState());
-        }
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-            if (MC.level != null)
-                FrozenChunkServerboundPacket.syncServerBlocks(CursorClientEvents.getPreselectedBlockPos().offset(-8,-8,-8));
-        }
-    }
-     */
 
     /*
     @SubscribeEvent
