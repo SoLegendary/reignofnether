@@ -56,7 +56,7 @@ import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessag
 
 public abstract class Building {
 
-    public boolean isExploredClientside = false;
+    public boolean isExploredClientside = false; // show on minimap
     public boolean isDestroyedServerside = false;
     public boolean isBuiltServerside = false;
 
@@ -98,7 +98,7 @@ public abstract class Building {
     private final long TICKS_TO_EXTINGUISH = 100;
 
     private final long TICKS_TO_SPAWN_ANIMALS_MAX = 1200; // how often we attempt to spawn animals around each
-    private long ticksToSpawnAnimals = TICKS_TO_SPAWN_ANIMALS_MAX - 100; // spawn once immediately on placement
+    private long ticksToSpawnAnimals = TICKS_TO_SPAWN_ANIMALS_MAX - 100; // spawn once soon after placement
     private final int MAX_ANIMALS = 8;
     private final int ANIMAL_SPAWN_RANGE = 100; // block range to check and spawn animals in
 
@@ -544,6 +544,12 @@ public abstract class Building {
             FrozenChunkClientboundPacket.setBuildingBuiltServerside(this.originPos);
         else
             TutorialClientEvents.updateStage();
+
+        // prevent showing blocks on minimap unless previously explored
+        if (this.level.isClientSide() && !isExploredClientside)
+            for (BuildingBlock bb : blocks)
+                if (!this.level.getBlockState(bb.getBlockPos()).isAir())
+                    this.level.setBlockAndUpdate(bb.getBlockPos(), Blocks.AIR.defaultBlockState());
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) { }
@@ -630,11 +636,12 @@ public abstract class Building {
             }
         }
 
-        if (this.level.isClientSide && !FogOfWarClientEvents.isEnabled())
+        if (this.level.isClientSide &&
+            (!FogOfWarClientEvents.isEnabled() || FogOfWarClientEvents.isInBrightChunk(originPos)))
             isExploredClientside = true;
 
-        // check and do animal spawns around capitols for consistent hunting sources\
-        if (isCapitol) {
+        // check and do animal spawns around capitols for consistent hunting sources
+        if (isCapitol && isBuilt) {
             ticksToSpawnAnimals += 1;
             if (ticksToSpawnAnimals >= TICKS_TO_SPAWN_ANIMALS_MAX) {
                 ticksToSpawnAnimals = 0;
