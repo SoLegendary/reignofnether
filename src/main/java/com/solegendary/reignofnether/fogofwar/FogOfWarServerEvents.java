@@ -28,7 +28,7 @@ public class FogOfWarServerEvents {
 
     public static void setEnabled(boolean value) {
         enabled = value;
-        sendMessageToAllPlayers((enabled ? "Enabled" : "Disabled") + " fog of war for all players");
+        sendMessageToAllPlayers((enabled ? "Enabled" : "Disabled") + " fog of war for all players", true);
         syncClientFog();
     }
 

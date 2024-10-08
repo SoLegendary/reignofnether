@@ -3,9 +3,11 @@
 
 TODO bugs/features:
 
+set worldspawn in tutorial map
 
-add in build range limit set where you started, cannot ever move
-	- all players can build within each others limits
+add in build range limit settable by command /rts-border
+    - refresh chunks (allChanged) after changing any worldborder settings (use mixin to detect a call)
+    - prevent building or starting the game outside of the worldborder
 
 don't show nether blocks in fog on minimap
 

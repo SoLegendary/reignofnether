@@ -44,6 +44,8 @@ import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.s
 public class FogOfWarClientEvents {
     public static final float BRIGHT = 1.0f;
     public static final float DARK = 0.35f;
+    public static final float EXTRA_DARK = 0.10f;
+
     public static final int CHUNK_VIEW_DIST = 1;
     public static final int CHUNK_FAR_VIEW_DIST = 2;
     private static final Minecraft MC = Minecraft.getInstance();
@@ -162,6 +164,7 @@ public class FogOfWarClientEvents {
                         MC.player.sendSystemMessage(Component.literal("- Significantly raises CPU usage"));
                         MC.player.sendSystemMessage(Component.literal(""));
                         MC.player.sendSystemMessage(Component.literal("Use /rts-fog enable again to confirm."));
+                        MC.player.sendSystemMessage(Component.literal(""));
                     } else {
                         setServerFog(true);
                     }
@@ -180,15 +183,21 @@ public class FogOfWarClientEvents {
 
     // returns the shade modifier that should be applied at a given position based on the fog of war state there
     public static float getPosBrightness(BlockPos pPos) {
-        if (!isEnabled() || MC.level == null)
+        if (MC.level == null) //!isEnabled() ||
             return BRIGHT;
+
+        if (!MC.level.getWorldBorder().isWithinBounds(pPos))
+            return EXTRA_DARK;
 
         // first check if the ChunkPos is already occupied as this is faster
         for (ChunkPos chunkPos : brightChunks)
             if (new ChunkPos(pPos).equals(chunkPos))
                 return BRIGHT;
 
-        return DARK;
+        if (isEnabled())
+            return DARK;
+        else
+            return BRIGHT;
     }
 
     public static boolean isBuildingInBrightChunk(Building building) {
@@ -230,10 +239,11 @@ public class FogOfWarClientEvents {
     @SubscribeEvent
     // hudSelectedEntity and portraitRendererUnit should be assigned in the same event to avoid desyncs
     public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
-        if (!isEnabled())
+        if (MC.level != null && !MC.level.getWorldBorder().isWithinBounds(evt.getEntity().getOnPos())) {
+            evt.setCanceled(true);
             return;
-
-        // don't render entities in non-bright chunks
+        }
+        // don't render entities in non-bright chunks or outside of world border
         if (isInBrightChunk(evt.getEntity()))
             return;
 
@@ -454,11 +464,12 @@ public class FogOfWarClientEvents {
         SoundClientEvents.mutedBps.clear();
     }
 
-
+    /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
         MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
                 "semiFrozenChunks: " + semiFrozenChunks.size(),
         });
     }
+     */
 }

@@ -292,8 +292,12 @@ public class MinimapClientEvents {
                 int x0 = x - xc_world + worldRadius;
                 int z0 = z - zc_world + worldRadius;
 
-                if (!FogOfWarClientEvents.isInBrightChunk(new BlockPos(x,0,z)))
+                BlockPos pos = new BlockPos(x,0,z);
+                if (!MC.level.getWorldBorder().isWithinBounds(pos))
+                    rgb = MiscUtil.shadeHexRGB(rgb, 0.15f);
+                else if (!FogOfWarClientEvents.isInBrightChunk(pos))
                     rgb = MiscUtil.shadeHexRGB(rgb, 0.40f);
+
 
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
                 mapColoursTerrain[x0][z0] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);

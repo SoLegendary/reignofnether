@@ -43,7 +43,7 @@ public abstract class ModelBlockRendererMixin {
                 pBrightness2 == pBrightness3 &&
                 pBrightness3 == 1.0f;
 
-        if (!FogOfWarClientEvents.isEnabled() || !allBrightnesses1)
+        if (!allBrightnesses1) //!FogOfWarClientEvents.isEnabled() ||
             return;
 
         ci.cancel();
