@@ -211,6 +211,7 @@ public abstract class LevelRendererMixin {
         BlockPos blockpos = pCamera.getBlockPosition();
         List<ChunkRenderDispatcher.RenderChunk> list = Lists.newArrayList();
         Set<ChunkPos> rerenderChunksToRemove = ConcurrentHashMap.newKeySet();
+        Set<ChunkPos> enemyOccupiedChunks = FogOfWarClientEvents.getEnemyOccupiedChunks();
 
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
 
@@ -228,7 +229,7 @@ public abstract class LevelRendererMixin {
                             .map(fc -> fc.origin)
                             .toList().contains(originPos))
                     continue;
-                else if (OrthoviewClientEvents.isEnabled() || distToChunk(chunkPos) <= minecraft.levelRenderer.getLastViewDistance())
+                else if (enemyOccupiedChunks.contains(chunkPos))
                     semiFrozenChunks.add(originPos);
             }
             ChunkRenderDispatcher.RenderChunk renderChunk = chunkInfo.chunk;

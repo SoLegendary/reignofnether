@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
@@ -239,19 +240,36 @@ public class FogOfWarClientEvents {
         evt.setCanceled(true);
     }
 
+    // returns all chunks that are occupied by an opponent's building and/or unit
+    public static Set<ChunkPos> getEnemyOccupiedChunks() {
+        Set<ChunkPos> enemyOccupiedChunks = ConcurrentHashMap.newKeySet();
+
+        for (LivingEntity entity : UnitClientEvents.getAllUnits())
+            if (UnitClientEvents.getPlayerToEntityRelationship(entity) != Relationship.OWNED)
+                enemyOccupiedChunks.add(new ChunkPos(entity.getOnPos()));
+
+        for (Building building : BuildingClientEvents.getBuildings())
+            if (BuildingClientEvents.getPlayerToBuildingRelationship(building) != Relationship.OWNED &&
+                    !isPlayerRevealed(building.ownerName) && MC.level != null)
+                enemyOccupiedChunks.addAll(building.getRenderChunkOrigins(true)
+                        .stream().map(bp -> MC.level.getChunk(bp).getPos()).toList());
+
+        return enemyOccupiedChunks;
+    }
+
     public static void updateFogChunks() {
         brightChunks.clear();
-        Set<ChunkPos> occupiedChunks = ConcurrentHashMap.newKeySet();
-        Set<ChunkPos> occupiedFarviewChunks = ConcurrentHashMap.newKeySet();
+        Set<ChunkPos> viewerChunks = ConcurrentHashMap.newKeySet();
+        Set<ChunkPos> farViewerChunks = ConcurrentHashMap.newKeySet();
 
         // get chunks that have units/buildings that can see
         for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
             if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
                     (entity instanceof Unit unit && isPlayerRevealed(unit.getOwnerName()))) {
                 if (entity instanceof GhastUnit)
-                    occupiedFarviewChunks.add(new ChunkPos(entity.getOnPos()));
+                    farViewerChunks.add(new ChunkPos(entity.getOnPos()));
                 else
-                    occupiedChunks.add(new ChunkPos(entity.getOnPos()));
+                    viewerChunks.add(new ChunkPos(entity.getOnPos()));
             }
         }
         for (Building building : BuildingClientEvents.getBuildings()) {
@@ -259,18 +277,18 @@ public class FogOfWarClientEvents {
                     isPlayerRevealed(building.ownerName)) {
                 if ((building instanceof GarrisonableBuilding && GarrisonableBuilding.getNumOccupants(building) > 0 && building.isBuilt) ||
                         building.isCapitol)
-                    occupiedFarviewChunks.add(new ChunkPos(building.centrePos));
+                    farViewerChunks.add(new ChunkPos(building.centrePos));
                 else
-                    occupiedChunks.add(new ChunkPos(building.centrePos));
+                    viewerChunks.add(new ChunkPos(building.centrePos));
             }
         }
 
-        for (ChunkPos chunkPos : occupiedChunks)
+        for (ChunkPos chunkPos : viewerChunks)
             for (int x = -CHUNK_VIEW_DIST; x <= CHUNK_VIEW_DIST; x++)
                 for (int z = -CHUNK_VIEW_DIST; z <= CHUNK_VIEW_DIST; z++)
                     brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
 
-        for (ChunkPos chunkPos : occupiedFarviewChunks)
+        for (ChunkPos chunkPos : farViewerChunks)
             for (int x = -CHUNK_FAR_VIEW_DIST; x <= CHUNK_FAR_VIEW_DIST; x++)
                 for (int z = -CHUNK_FAR_VIEW_DIST; z <= CHUNK_FAR_VIEW_DIST; z++)
                     brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
@@ -437,19 +455,10 @@ public class FogOfWarClientEvents {
     }
 
 
-    /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        if (MC.level == null)
-            return;
-
-        ChunkPos cpos = MC.level.getChunk(CursorClientEvents.getPreselectedBlockPos()).getPos();
-
         MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "x: " + cpos.x,
-                "z: " + cpos.z,
-                "xo: " + cpos.getWorldPosition().getX(),
-                "zo: " + cpos.getWorldPosition().getZ()
+                "semiFrozenChunks: " + semiFrozenChunks.size(),
         });
-    } */
+    }
 }
