@@ -14,7 +14,6 @@ public class NetherZone {
     private final int MAX_TICKS = 5;
     private final int MAX_CONVERTS_AFTER_CONSTANT_RANGE = 60; // to prevent continuously processing
 
-
     private final BlockPos origin;
     private final Random random = new Random();
 

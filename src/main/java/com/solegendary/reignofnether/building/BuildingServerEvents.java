@@ -111,6 +111,7 @@ public class BuildingServerEvents {
         if (level != null) {
             BuildingSaveData buildingData = BuildingSaveData.getInstance(level);
             NetherZoneSaveData netherData = NetherZoneSaveData.getInstance(level);
+            ArrayList<BlockPos> placedNZs = new ArrayList<>();
 
             buildingData.buildings.forEach(b -> {
                 Building building = BuildingUtils.getNewBuilding(b.name, level, b.originPos, b.rotation, b.ownerName, b.isDiagonalBridge);
@@ -135,9 +136,17 @@ public class BuildingServerEvents {
                         for (NetherZone nz : netherData.netherZones)
                             if (building.isPosInsideBuilding(nz.getOrigin())) {
                                 ncb.setNetherZone(nz);
+                                placedNZs.add(nz.getOrigin());
+                                System.out.println("loaded netherzone for: " + b.name + "|" + b.originPos);
                                 break;
                             }
-                    System.out.println("loaded building/nether in serverevents: " + b.originPos);
+                    System.out.println("loaded building in serverevents: " + b.name + "|" + b.originPos);
+                }
+            });
+            netherData.netherZones.forEach(nz -> {
+                if (!placedNZs.contains(nz.getOrigin())) {
+                    BuildingServerEvents.netherZones.add(nz);
+                    System.out.println("loaded orphaned netherzone: " + nz.getOrigin());
                 }
             });
         }

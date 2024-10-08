@@ -3,12 +3,11 @@
 
 TODO bugs/features:
 
-netherzones are lost if the server ends while its restoring
 
 add in build range limit set where you started, cannot ever move
 	- all players can build within each others limits
 
-adjust [semiFrozenChunks.add(originPos);] to reduce lag in first-person cam
+don't show nether blocks in fog on minimap
 
 
 To test:
@@ -20,9 +19,13 @@ spiderProd after poison spider upgrade
     - cancel button icon/name
     - spider produces poison spider if upgraded in progress
 
-(server) fog chunks updated when exploring outside of frustum
-(server) fake blocks are updated correctly once explored and looked at again
-(server) buildings in fog should disappear on minimap once built
+fog changes and optimisations (test in server!)
+    - fog chunks updated when exploring outside of frustum
+    - fake blocks are updated correctly once explored and looked at again
+    - buildings in fog should disappear on minimap once built
+    - lag in first-person mode
+    - semifrozen chunks in first-person mode
+
 
 
 Misc additions
