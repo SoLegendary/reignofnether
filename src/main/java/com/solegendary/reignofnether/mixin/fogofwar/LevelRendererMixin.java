@@ -229,7 +229,7 @@ public abstract class LevelRendererMixin {
                             .map(fc -> fc.origin)
                             .toList().contains(originPos))
                     continue;
-                else if (enemyOccupiedChunks.contains(chunkPos))
+                else if (OrthoviewClientEvents.isEnabled() || enemyOccupiedChunks.contains(chunkPos))
                     semiFrozenChunks.add(originPos);
             }
             ChunkRenderDispatcher.RenderChunk renderChunk = chunkInfo.chunk;
