@@ -214,6 +214,12 @@ public class PlayerServerEvents {
                 serverPlayer.sendSystemMessage(Component.literal(""));
                 return;
             }
+            if (serverPlayer.getLevel().getWorldBorder().getDistanceToBorder(pos.x, pos.z) < 1) {
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                serverPlayer.sendSystemMessage(Component.literal("Cannot start outside map border"));
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                return;
+            }
 
             EntityType<? extends Unit> entityType = switch(faction) {
                 case VILLAGERS -> EntityRegistrar.VILLAGER_UNIT.get();

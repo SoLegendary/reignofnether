@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -249,11 +250,14 @@ public class BuildingClientEvents {
                 isNonPiglinOrOnNetherBlocks(originPos) &&
                 isNonBridgeOrValidBridge(originPos) &&
                 FogOfWarClientEvents.isInBrightChunk(originPos) &&
+                isBuildingPlacementWithinWorldBorder(originPos) &&
                 isNotTutorialOrNearValidCapitolPosition(originPos);
     }
 
     public static void checkBuildingPlacementValidityWithMessages(BlockPos originPos) {
-        if (isBuildingPlacementInAir(originPos))
+        if (!isBuildingPlacementWithinWorldBorder(originPos))
+            showTemporaryMessage("Outside or too close to map border");
+        else if (isBuildingPlacementInAir(originPos))
             showTemporaryMessage("Ground is not flat enough");
         else if (isBuildingPlacementClipping(originPos))
             showTemporaryMessage("Ground is not flat enough");
@@ -269,6 +273,7 @@ public class BuildingClientEvents {
             showTemporaryMessage("Build your town centre over here!");
             OrthoviewClientEvents.forceMoveCam(TutorialClientEvents.BUILD_CAM_POS, 50);
         }
+
     }
 
     // disallow any building block from clipping into any other existing blocks
@@ -418,6 +423,43 @@ public class BuildingClientEvents {
 
         return TutorialClientEvents.BUILD_CAPITOL_POS.distSqr(originPos) < 625; // 25 block range
     }
+
+    private static boolean isBuildingPlacementWithinWorldBorder(BlockPos originPos) {
+        if (MC.level == null || buildingToPlace == null)
+            return false;
+
+        int minX = 999999;
+        int minZ = 999999;
+        int maxX = -999999;
+        int maxZ = -999999;
+
+        for (BlockPos bp : blocksToDraw.stream().map(BuildingBlock::getBlockPos).toList()) {
+            if (bp.getX() < minX)
+                minX = bp.getX();
+            if (bp.getZ() < minZ)
+                minZ = bp.getZ();
+            if (bp.getX() > maxX)
+                maxX = bp.getX();
+            if (bp.getZ() > maxZ)
+                maxZ = bp.getZ();
+        }
+        int buildingRadius = Math.max(maxZ - minZ, maxX - minX) / 2;
+
+        BlockPos cursorPos = CursorClientEvents.getPreselectedBlockPos();
+        return MC.level.getWorldBorder().getDistanceToBorder(cursorPos.getX(), cursorPos.getZ()) > buildingRadius;
+    }
+
+    /*
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        if (MC.level == null)
+            return;
+
+        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+                "dist to border: " + MC.level.getWorldBorder().getDistanceToBorder(cursorPos.getX(), cursorPos.getZ()),
+        });
+    }
+     */
 
     // gets the cursor position rotated according to the preselected building
     private static BlockPos getOriginPos() {
