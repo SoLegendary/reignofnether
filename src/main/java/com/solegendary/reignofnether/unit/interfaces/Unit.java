@@ -184,6 +184,9 @@ public interface Unit {
             BuildingUtils.findBuilding(le.level.isClientSide(), le.getOnPos().above()) instanceof AbstractBridge) {
             le.setDeltaMovement(0,0.2,0);
         }
+
+        if (!le.getLevel().getWorldBorder().isWithinBounds(le.getOnPos()))
+            le.kill();
     }
 
     public static boolean atMaxResources(Unit unit) {

@@ -22,13 +22,11 @@ public abstract class ItemEntityRendererMixin {
             cancellable = true
     )
     public void render(ItemEntity pEntity, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight, CallbackInfo ci) {
-        if (!FogOfWarClientEvents.isEnabled())
-            return;
-
         boolean shouldRender = false;
         BlockPos bp = pEntity.getOnPos();
 
-        if (FogOfWarClientEvents.isInBrightChunk(pEntity))
+        if (FogOfWarClientEvents.isInBrightChunk(pEntity) &&
+            pEntity.level.getWorldBorder().isWithinBounds(bp))
             shouldRender = true;
 
         if (!shouldRender)

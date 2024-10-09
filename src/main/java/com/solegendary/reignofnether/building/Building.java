@@ -403,6 +403,8 @@ public abstract class Building {
     }
 
     public boolean shouldBeDestroyed() {
+        if (!this.level.getWorldBorder().isWithinBounds(centrePos))
+            return true;
         if (this.level.isClientSide() && (!FogOfWarClientEvents.isBuildingInBrightChunk(this) || !isDestroyedServerside))
             return false;
         if (blockPlaceQueue.size() > 0)

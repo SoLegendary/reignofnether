@@ -5,11 +5,6 @@ TODO bugs/features:
 
 set worldspawn in tutorial map
 
-add in build range limit settable by command /rts-border
-    - refresh chunks (allChanged) after changing any worldborder settings (use mixin to detect a call)
-    - prevent building or starting the game outside of the worldborder
-    - can't gather resources outside of world border
-    - check that optifine (on actual client) doesn't crash
 
 To test:
 -------
@@ -27,6 +22,12 @@ fog changes and optimisations (test in server!)
     - lag in first-person mode
     - semifrozen chunks in first-person mode
 
+test world border in multiplayer
+    - refresh chunks (allChanged) after changing any worldborder settings (use Listener to detect a call)
+    - prevent building or starting the game outside of the worldborder
+    - can't gather resources outside of world border
+    - units and buildings caught outside of border should be destroyed
+    - don't render units or items outside of border
 
 
 Misc additions
@@ -76,7 +77,7 @@ Bugs backlog
 ------------
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - workers are not marked as idle until 15s after stopping gathering
-- fog of war crashes optifine users
+- cannot launch at all with optifine
 - your portal blocks crack when explored by an opponent (muting function only applies for the opponent)
 - minimap still shows nether blocks in fog until the camera moves (and replaces them with fake frozen blocks)
 

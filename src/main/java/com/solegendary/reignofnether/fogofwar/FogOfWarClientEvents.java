@@ -13,7 +13,6 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
-import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
@@ -33,7 +32,6 @@ import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,8 +60,7 @@ public class FogOfWarClientEvents {
     // chunkInfos that should never be updated, even if the client does a reset or moves the camera out of range
     public static final Set<FrozenChunk> frozenChunks = ConcurrentHashMap.newKeySet();
 
-    // have we already warned the client about using Optifine?
-    public static boolean fogOptifineWarningSent = false;
+    public static boolean fogEnableWarningSent = false;
 
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = false;
@@ -152,8 +149,8 @@ public class FogOfWarClientEvents {
                     //    MC.player.sendSystemMessage(Component.literal("Fog of war is not available in the tutorial."));
                     //    return -1;
                     //}
-                    if (!fogOptifineWarningSent) {
-                        fogOptifineWarningSent = true;
+                    if (!fogEnableWarningSent) {
+                        fogEnableWarningSent = true;
                         MC.player.sendSystemMessage(Component.literal(""));
                         MC.player.sendSystemMessage(Component.literal("[WARNING]").withStyle(Style.EMPTY.withBold(true)));
                         MC.player.sendSystemMessage(Component.literal(

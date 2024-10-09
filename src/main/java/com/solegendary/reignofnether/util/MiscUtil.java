@@ -245,7 +245,8 @@ public class MiscUtil {
             List<T> entitiesInRange = new ArrayList<>();
 
             for (Entity entity : entities)
-                if (entity.position().distanceTo(new Vec3(pos.x, pos.y, pos.z)) <= range)
+                if (entity.position().distanceTo(new Vec3(pos.x, pos.y, pos.z)) <= range &&
+                    entity.level.getWorldBorder().isWithinBounds(entity.getOnPos()))
                     entitiesInRange.add((T) entity);
 
             return entitiesInRange;
