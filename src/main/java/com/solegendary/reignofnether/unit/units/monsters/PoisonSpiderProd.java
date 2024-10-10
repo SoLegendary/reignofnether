@@ -46,8 +46,8 @@ public class PoisonSpiderProd extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
             hotkey,
             () -> false,
-            () -> !ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
-            () -> true,
+            () -> false,
+            () -> ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
@@ -57,7 +57,9 @@ public class PoisonSpiderProd extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("A spider fanged with deadly poison.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Spiders move much more slowly under sunlight.", Style.EMPTY)
+                FormattedCharSequence.forward("Spiders move much more slowly under sunlight.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires an upgrade at the Laboratory.", Style.EMPTY)
             )
         );
     }

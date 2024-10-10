@@ -83,7 +83,7 @@ public class MinimapClientEvents {
     public static final ArrayList<MinimapUnit> minimapUnits = new ArrayList<>();
 
     private static final float DARK = 0.40f;
-    private static final float EXTRA_DARK = 0.15f;
+    private static final float EXTRA_DARK = 0.10f;
 
     // objects for tracking serverside Units that don't yet exist on clientside
     private static class MinimapUnit {
