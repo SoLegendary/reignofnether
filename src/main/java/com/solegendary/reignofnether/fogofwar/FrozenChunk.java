@@ -92,7 +92,7 @@ public class FrozenChunk {
         if (MC.level == null)
             return;
 
-        System.out.println("Starting to save FAKE blocks at: " + this.origin);
+        //System.out.println("Starting to save FAKE blocks at: " + this.origin);
 
         ArrayList<BuildingBlock> bbs = new ArrayList<>();
         for (BuildingBlock bb : building.getBlocks())

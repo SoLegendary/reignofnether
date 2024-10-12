@@ -103,13 +103,13 @@ public abstract class LevelRendererMixin {
                     }
                 }
             }
-            if (chunksDirtied > 0)
-                System.out.println("set renderChunks dirty: " + chunksDirtied);
+            // if (chunksDirtied > 0)
+            //    System.out.println("set renderChunks dirty: " + chunksDirtied);
 
             FogOfWarClientEvents.chunksToRefresh.removeAll(chunksToRefreshDone);
 
-            if (chunksToRefreshDone.size() > 0)
-                System.out.println("refreshed " + chunksToRefreshDone.size() + " chunks, " + FogOfWarClientEvents.chunksToRefresh.size() + " remaining");
+            //if (chunksToRefreshDone.size() > 0)
+            //    System.out.println("refreshed " + chunksToRefreshDone.size() + " chunks, " + FogOfWarClientEvents.chunksToRefresh.size() + " remaining");
 
             FogOfWarClientEvents.renderChunksInFrustum.clear();
             FogOfWarClientEvents.renderChunksInFrustum.addAll(renderChunksInFrustum);
@@ -181,11 +181,9 @@ public abstract class LevelRendererMixin {
                     !isInBrightChunk(frozenChunk.origin) &&
                     !loadedFcOrigins.contains(frozenChunk.origin)) {
                     if (!frozenChunk.unsaved) {
-                        System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
+                        //System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
                         frozenChunk.loadBlocks();
                         loadedFcOrigins.add(frozenChunk.origin);
-                    } else {
-                        System.out.println("skipped loading frozen blocks at: " + frozenChunk.origin);
                     }
                 }
             }
@@ -197,10 +195,8 @@ public abstract class LevelRendererMixin {
                     !isInBrightChunk(frozenChunk.origin) &&
                     !loadedFcOrigins.contains(frozenChunk.origin)) {
                     if (!frozenChunk.unsaved) {
-                        System.out.println("loaded (faked) frozen blocks at: " + frozenChunk.origin);
+                        //System.out.println("loaded (faked) frozen blocks at: " + frozenChunk.origin);
                         frozenChunk.loadBlocks();
-                    } else {
-                        System.out.println("skipped loading (faked) frozen blocks at: " + frozenChunk.origin);
                     }
                 }
             }
