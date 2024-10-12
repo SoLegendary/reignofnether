@@ -33,11 +33,13 @@ And many more that I've yet to think of...
 
 # Datapack
 https://github.com/SoLegendary/reignofnether_datapack
+
 Use this datapack for generating RTS-friendly worlds (see the curseforge page for more details)
 
 
 # Release
 The Curseforge mod page and release files are available here:
+
 https://www.curseforge.com/minecraft/mc-mods/reign-of-nether-rts-in-minecraft
 
 # Other stuff
