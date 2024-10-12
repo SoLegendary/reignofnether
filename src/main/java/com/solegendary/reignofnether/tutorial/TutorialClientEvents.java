@@ -47,7 +47,7 @@ import static com.solegendary.reignofnether.tutorial.TutorialStage.*;
 public class TutorialClientEvents {
 
     private static Minecraft MC = Minecraft.getInstance();
-    private static TutorialStage tutorialStage = INTRO;
+    private static TutorialStage tutorialStage = BUILD_BASE;
     private static boolean enabled = false;
 
     private static int ticksToProgressStage = 0;
@@ -865,7 +865,10 @@ public class TutorialClientEvents {
                     clearHelpButtonText();
                     TutorialRendering.setButtonName(PillagerProd.itemName);
                     msg("Pillagers are ranged units which attack slowly but with high damage.");
-                    nextStageAfterDelay(160);
+                    progressStageAfterDelay(160);
+                }
+                else if (stageProgress == 3) {
+                    nextStage();
                 }
             }
             case BUILD_ARMY -> {
