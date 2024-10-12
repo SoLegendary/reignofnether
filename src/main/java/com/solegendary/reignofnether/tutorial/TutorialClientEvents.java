@@ -47,7 +47,7 @@ import static com.solegendary.reignofnether.tutorial.TutorialStage.*;
 public class TutorialClientEvents {
 
     private static Minecraft MC = Minecraft.getInstance();
-    private static TutorialStage tutorialStage = BUILD_BASE;
+    private static TutorialStage tutorialStage = INTRO;
     private static boolean enabled = false;
 
     private static int ticksToProgressStage = 0;
