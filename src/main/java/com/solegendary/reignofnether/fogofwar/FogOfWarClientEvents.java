@@ -158,7 +158,7 @@ public class FogOfWarClientEvents {
                         MC.player.sendSystemMessage(Component.literal(""));
                         MC.player.sendSystemMessage(Component.literal("- ALL PLAYERS WITH OPTIFINE WILL CRASH"));
                         MC.player.sendSystemMessage(Component.literal("- May cause chunk rendering bugs"));
-                        MC.player.sendSystemMessage(Component.literal("- Significantly raises CPU usage"));
+                        MC.player.sendSystemMessage(Component.literal("- Ups CPU usage (lower chunk render distance to help)"));
                         MC.player.sendSystemMessage(Component.literal(""));
                         MC.player.sendSystemMessage(Component.literal("Use /rts-fog enable again to confirm."));
                         MC.player.sendSystemMessage(Component.literal(""));

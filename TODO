@@ -11,19 +11,15 @@ To test:
 multiplayer testing of data saves
 3+ player FFA for stress testing
 
-spiderProd after poison spider upgrade
-    - cancel button icon/name
-    - spider produces poison spider if upgraded in progress
-
 fog changes and optimisations (test in server!)
     - fog chunks updated when exploring outside of frustum
     - fake blocks are updated correctly once explored and looked at again
     - buildings in fog should disappear on minimap once built
-    - lag in first-person mode
+    - lag in first-person mode (with short view range)
     - semifrozen chunks in first-person mode
 
 test world border in multiplayer
-    - refresh chunks (allChanged) after changing any worldborder settings (use Listener to detect a call)
+    - refresh chunks (allChanged) after changing any worldborder settings
     - prevent building or starting the game outside of the worldborder
     - can't gather resources outside of world border
     - units and buildings caught outside of border should be destroyed

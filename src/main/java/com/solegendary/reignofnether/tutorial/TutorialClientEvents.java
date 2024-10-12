@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -996,7 +997,11 @@ public class TutorialClientEvents {
             case BUILD_BRIDGE -> {
                 if (stageProgress == 0) {
                     OrthoviewClientEvents.forceMoveCam(MONSTER_BASE_POS, 80);
-                    msg("The monsters have a base across the river, we should destroy it before they attack again.");
+                    if (FogOfWarClientEvents.isEnabled())
+                        msg("The monsters have a base across the river (but you can't see it yet because " +
+                            "fog of war is enabled). We should destroy it before they attack again.");
+                    else
+                        msg("The monsters have a base across the river, we should destroy it before they attack again.");
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
