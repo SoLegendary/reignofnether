@@ -496,6 +496,8 @@ public class PlayerServerEvents {
 
             ResourcesServerEvents.resourcesList.clear();
             saveRTSPlayers();
+
+            BuildingServerEvents.netherZones.forEach(NetherZone::startRestoring);
         }
     }
 }
