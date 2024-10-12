@@ -82,6 +82,9 @@ public class MinimapClientEvents {
 
     public static final ArrayList<MinimapUnit> minimapUnits = new ArrayList<>();
 
+    private static final float DARK = 0.40f;
+    private static final float EXTRA_DARK = 0.10f;
+
     // objects for tracking serverside Units that don't yet exist on clientside
     private static class MinimapUnit {
         public BlockPos pos;
@@ -292,8 +295,12 @@ public class MinimapClientEvents {
                 int x0 = x - xc_world + worldRadius;
                 int z0 = z - zc_world + worldRadius;
 
-                if (!FogOfWarClientEvents.isInBrightChunk(new BlockPos(x,0,z)))
-                    rgb = MiscUtil.shadeHexRGB(rgb, 0.40f);
+                BlockPos pos = new BlockPos(x,0,z);
+                if (!MC.level.getWorldBorder().isWithinBounds(pos))
+                    rgb = MiscUtil.shadeHexRGB(rgb, EXTRA_DARK);
+                else if (!FogOfWarClientEvents.isInBrightChunk(pos))
+                    rgb = MiscUtil.shadeHexRGB(rgb, DARK);
+
 
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
                 mapColoursTerrain[x0][z0] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);

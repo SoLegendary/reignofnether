@@ -183,6 +183,7 @@ public class PlayerServerEvents {
                 serverPlayer.sendSystemMessage(Component.literal("As a server op you may use:"));
                 serverPlayer.sendSystemMessage(Component.literal("/rts-fog enable | disable"));
                 serverPlayer.sendSystemMessage(Component.literal("/rts-reset"));
+                serverPlayer.sendSystemMessage(Component.literal(""));
             }
         }
         if (isRTSPlayer(playerName))
@@ -210,6 +211,12 @@ public class PlayerServerEvents {
             if (isRTSPlayer(serverPlayer.getId())) {
                 serverPlayer.sendSystemMessage(Component.literal(""));
                 serverPlayer.sendSystemMessage(Component.literal("You already started your RTS match!"));
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                return;
+            }
+            if (serverPlayer.getLevel().getWorldBorder().getDistanceToBorder(pos.x, pos.z) < 1) {
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                serverPlayer.sendSystemMessage(Component.literal("Cannot start outside map border"));
                 serverPlayer.sendSystemMessage(Component.literal(""));
                 return;
             }

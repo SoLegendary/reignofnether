@@ -396,6 +396,9 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
         Entity entity = evt.getEntity();
+        if (!evt.getLevel().getWorldBorder().isWithinBounds(entity.getOnPos()))
+            return;
+
         if (entity instanceof Unit unit && evt.getLevel().isClientSide) {
             TutorialClientEvents.updateStage();
 

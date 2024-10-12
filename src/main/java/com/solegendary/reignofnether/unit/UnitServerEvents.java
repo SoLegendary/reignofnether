@@ -317,6 +317,7 @@ public class UnitServerEvents {
         if (ResourceSources.isHuntableAnimal(evt.getEntity()) &&
             !evt.getSource().isMagic() &&
             evt.getSource().getEntity() instanceof Unit unit &&
+            evt.getSource().getEntity() instanceof WorkerUnit &&
             evt.getSource().getEntity() instanceof Mob mob &&
             mob.canPickUpLoot() &&
             !Unit.atMaxResources(unit)) {
@@ -324,6 +325,7 @@ public class UnitServerEvents {
             evt.setCanceled(true);
             for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal((Animal) evt.getEntity())) {
                 ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
+
                 if (res != null) {
                     unit.getItems().add(itemStack);
                 }

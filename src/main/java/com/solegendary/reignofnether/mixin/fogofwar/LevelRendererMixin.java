@@ -86,12 +86,33 @@ public abstract class LevelRendererMixin {
         } else {
             this.minecraft.getProfiler().push("apply_frustum");
             this.renderChunksInFrustum.clear();
+            Set<ChunkPos> chunksToRefreshDone = new HashSet<>();
+
+            int chunksDirtied = 0;
 
             for (LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunkStorage.get().renderChunks) {
                 if (pFrustum.isVisible(chunkInfo.chunk.getBoundingBox())) {
                     this.renderChunksInFrustum.add(chunkInfo);
                 }
+                if (minecraft.level != null) {
+                    ChunkPos cpos = minecraft.level.getChunk(chunkInfo.chunk.getOrigin()).getPos();
+                    if (FogOfWarClientEvents.chunksToRefresh.contains(cpos)) {
+                        chunkInfo.chunk.setDirty(true);
+                        chunksToRefreshDone.add(cpos);
+                        chunksDirtied += 1;
+                    }
+                }
             }
+            // if (chunksDirtied > 0)
+            //    System.out.println("set renderChunks dirty: " + chunksDirtied);
+
+            FogOfWarClientEvents.chunksToRefresh.removeAll(chunksToRefreshDone);
+
+            //if (chunksToRefreshDone.size() > 0)
+            //    System.out.println("refreshed " + chunksToRefreshDone.size() + " chunks, " + FogOfWarClientEvents.chunksToRefresh.size() + " remaining");
+
+            FogOfWarClientEvents.renderChunksInFrustum.clear();
+            FogOfWarClientEvents.renderChunksInFrustum.addAll(renderChunksInFrustum);
 
             this.minecraft.getProfiler().pop();
         }
@@ -160,11 +181,9 @@ public abstract class LevelRendererMixin {
                     !isInBrightChunk(frozenChunk.origin) &&
                     !loadedFcOrigins.contains(frozenChunk.origin)) {
                     if (!frozenChunk.unsaved) {
-                        System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
+                        //System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
                         frozenChunk.loadBlocks();
                         loadedFcOrigins.add(frozenChunk.origin);
-                    } else {
-                        System.out.println("skipped loading (faked) frozen blocks at: " + frozenChunk.origin);
                     }
                 }
             }
@@ -176,10 +195,8 @@ public abstract class LevelRendererMixin {
                     !isInBrightChunk(frozenChunk.origin) &&
                     !loadedFcOrigins.contains(frozenChunk.origin)) {
                     if (!frozenChunk.unsaved) {
-                        System.out.println("loaded (faked) frozen blocks at: " + frozenChunk.origin);
+                        //System.out.println("loaded (faked) frozen blocks at: " + frozenChunk.origin);
                         frozenChunk.loadBlocks();
-                    } else {
-                        System.out.println("skipped loading (faked) frozen blocks at: " + frozenChunk.origin);
                     }
                 }
             }
@@ -190,6 +207,7 @@ public abstract class LevelRendererMixin {
         BlockPos blockpos = pCamera.getBlockPosition();
         List<ChunkRenderDispatcher.RenderChunk> list = Lists.newArrayList();
         Set<ChunkPos> rerenderChunksToRemove = ConcurrentHashMap.newKeySet();
+        Set<ChunkPos> enemyOccupiedChunks = FogOfWarClientEvents.getEnemyOccupiedChunks();
 
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
 
@@ -207,7 +225,7 @@ public abstract class LevelRendererMixin {
                             .map(fc -> fc.origin)
                             .toList().contains(originPos))
                     continue;
-                else if (OrthoviewClientEvents.isEnabled() || distToChunk(chunkPos) <= minecraft.levelRenderer.getLastViewDistance())
+                else if (OrthoviewClientEvents.isEnabled() || enemyOccupiedChunks.contains(chunkPos))
                     semiFrozenChunks.add(originPos);
             }
             ChunkRenderDispatcher.RenderChunk renderChunk = chunkInfo.chunk;

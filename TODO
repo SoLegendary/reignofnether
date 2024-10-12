@@ -3,9 +3,6 @@
 
 TODO bugs/features:
 
-netherzones are lost if the server ends while its restoring
-
-players in orthoview shouldn't be visible to anyone
 
 
 To test:
@@ -13,44 +10,16 @@ To test:
 multiplayer testing of data saves
 3+ player FFA for stress testing
 
-attack move and idle attacks should target buildings
-ranged units should attack move instead when asked to attack a building
 
 
 
-
-
-Misc additions
------------------
-- change witches to auto attack like evokers, reduce cooldown, reduce potion strength and remove lingering effect
-    - ability to toggle between potion types
-    - ability to toggle between auto-attack targets (ally or enemy)
-
-- add a tier of farm upgrades to each faction
-    - pumpkins -> carved pumpkins
-    - wheat -> potatoes
-    - red nylium netherwart -> green nylium
-
+Backlog misc improvements
+-------------------------
 - recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
     - most prevalent in 1v1 melee combat
 
 Let workers gather beehives
 
-
-New Upgrades
-------------
-MONSTERS: Upgrade for dark watchtowers to come with a shulker in the centre
-PIGLINS: Upgrade for ghasts to spread nether on hit (solves issue of spreading base over water)
-VILLAGERS: New potions for witches
-
-New Units
----------
-MONSTERS: Endermen who can't attack but have a cooldown ability to place shulker boxes (with limited lifespan) (research extends lifespan)
-    - comes from end portal building
-PIGLINS: Magma cubes (research make melee attacks set enemies on fire)
-    - comes from mother cube building - giant building that looks exactly like a magma cube
-VILLAGERS: Illusioner - hallucination ability, targeted invisibility (research unlocks second ability)
-    - comes from new supplementary building ala-library
 
 
 Limitations of save data
@@ -67,42 +36,12 @@ Bugs backlog
 ------------
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - workers are not marked as idle until 15s after stopping gathering
-- turning on fog of war causes a crash when optifine is installed
-- portal blocks crack when explored (because of updating fake frozen blocks)
-- minimap still shows physical blocks in fog until the camera moves (and replaces them with fake frozen blocks)
-    - because the frozenchunk logic in MinimapClientEvents can save air
+- cannot launch at all with optifine
+- your portal blocks crack when explored by an opponent (muting function only applies for the opponent)
+- minimap still shows nether blocks in fog until the camera moves (and replaces them with fake frozen blocks)
 
 (MacOS) minecraft title screen is messed up and doesn't retrieve the assets
 (MacOS) GUI scaling does not work
 (MacOS) macbooks dont have alt and ctrl (it's option and command)
 
 
-
-
-TODO vanilla player balancing/interaction (backlog)
-- Balance strong player actions using food:
-    - sprinting (very high)
-    - attacking (medium)
-    - gathering (low)
-    - walking and jumping (low)
-- Attacking any melee unit that's targeting a player should immediately deal its melee damage to them
-- Punching disabled, combat and resource gathering can only be done if the player has tools/weapons
-- Turned into a ghost on death - must walk back to a capitol building to be resurrected for a resource cost
-- Tools/weapons provided by the RTS player using resources
-- Items/utilities for non-RTS players should be produced at existing buildings:
-    - Villagers
-        - Stockpile - Wooden axe/pickaxe/shovel/hoe
-        - Barracks - Weapons
-        - Blacksmith - Armour
-        - Arcane Tower - Potions
-        - Library - Enchanting table
-    - Monsters
-        - Stockpile - Wooden axe/pickaxe/shovel/hoe
-        - Laboratory - Armour + Potions
-        - Dungeon - Weapons (via chests)
-        - Mausoleum - Enchanting table (after upgrade)
-    - Piglins
-        - Military portal - Weapons + armor
-        - Civilian Portal - Wooden axe/pickaxe/shovel/hoe
-        - Flame Sanctuary - potions
-        - Wither shrine - Enchanting table

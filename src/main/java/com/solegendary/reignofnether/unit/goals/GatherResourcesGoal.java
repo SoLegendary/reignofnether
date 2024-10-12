@@ -59,24 +59,14 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     private ResourceSource targetResourceSourceSaved = null;
     private Building targetFarmSaved = null;
 
-    public boolean isValidBlockAnyResourceType(BlockPos bp) {
-        ResourceName originalResName = this.targetResourceName;
-        for (ResourceName resourceName : ResourceName.values()) {
-            this.targetResourceName = resourceName;
-            if (BLOCK_CONDITION.test(bp)) {
-                this.targetResourceName = originalResName;
-                return true;
-            }
-        }
-        this.targetResourceName = originalResName;
-        return false;
-    }
-
     // whenever we attempt to assign a block as a target it must pass this test
     private final Predicate<BlockPos> BLOCK_CONDITION = bp -> {
         BlockState bs = mob.level.getBlockState(bp);
         BlockState bsAbove = mob.level.getBlockState(bp.above());
         ResourceSource resBlock = ResourceSources.getFromBlockPos(bp, mob.level);
+
+        if (!mob.level.getWorldBorder().isWithinBounds(bp))
+            return false;
 
         // is a valid resource block and meets the target ResourceSource's blockstate condition
         if (resBlock == null || resBlock.resourceName != targetResourceName) // || resBlock.name.equals("Leaves")

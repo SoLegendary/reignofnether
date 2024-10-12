@@ -47,8 +47,8 @@ public class StrayProd extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
             hotkey,
             () -> false,
-            () -> !ResearchClient.hasResearch(ResearchStrays.itemName),
-            () -> true,
+            () -> false,
+            () -> ResearchClient.hasResearch(ResearchStrays.itemName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
@@ -58,7 +58,9 @@ public class StrayProd extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("An chilling variant of the skeleton that fires slowing arrows.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Strays will burn under sunlight.", Style.EMPTY)
+                FormattedCharSequence.forward("Strays will burn under sunlight.", Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward("Requires an upgrade at the Laboratory.", Style.EMPTY)
             )
         );
     }

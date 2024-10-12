@@ -73,7 +73,7 @@ public class NetherZoneSaveData extends SavedData {
             cTag.putInt("converts", nz.getConvertsAfterConstantRange());
             list.add(cTag);
 
-            System.out.println("NetherZoneSaveData.save: " + nz.getOrigin() + "|" + nz.getRange() + "/" + nz.getMaxRange() + "|" + nz.isRestoring());
+            System.out.println("NetherZoneSaveData.save: " + nz.getOrigin() + "|" + (int) nz.getRange() + "/" + (int) nz.getMaxRange() + "|" + nz.isRestoring());
         });
         tag.put("netherzones", list);
         return tag;
