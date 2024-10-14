@@ -1,14 +1,10 @@
 
 
-
-TODO bugs/features:
-
-
-
 To test:
 -------
-multiplayer testing of data saves
-3+ player FFA for stress testing
+Fire immunity for grunts
+    - make sure no other units got immunity
+    - check research immunity still works
 
 
 
@@ -19,6 +15,8 @@ Backlog misc improvements
     - most prevalent in 1v1 melee combat
 
 Let workers gather beehives
+
+Do a 4+ player FFA for stress testing
 
 
 

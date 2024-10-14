@@ -1,4 +1,32 @@
 
+MORE SINGLEPLAYER CONTENT
+-------------------------
+
+> ALTERNATE MAPS (easy)
+More sample clean maps on different seeds and borders set
+    - Name them like AOE2 does (desert gold rush, black forest, rivers, etc.)
+Build a base of each faction with units included and leave them to be destroyed
+    - Won't have AI, but will give solo players something to do at least
+
+> WAVE SURVIVAL (medium)
+Probably easier to implement than full bots since they wouldn't need base building
+Use logic from spawning animals for finding spawn locations
+Once spawned, repeatedly attack move towards your base
+Difficulty settings based on time allowed to prep each day:
+    - easy = 10mins (vanilla)
+    - medium = 8mins
+    - hard = 6mins
+Set maps and borders like the tutorial to prevent terrain cheesing (eg. starting on an island)
+    - Or just give all the enemy mobs frostwalker?
+Endless, until you eventually die or lag out
+
+> BOTS (hard)
+Retrofit some code from the tutorial logic
+Need to generalise unit actions and make sure they're reliable (eg. repeating movement incase units get stuck)
+Should be able work against multiple real players and other bots too
+
+
+
 ECONOMIC/UTILITY UPGRADES FOR EACH RACE
 ---------------------------------------
 Villager professions
@@ -61,6 +89,7 @@ Must first solve issue of lag in fog of war when in vanilla cam
     - walking and jumping (low usage)
 
 - Attacking any melee unit that's targeting a player should immediately deal its melee damage to them
+    - Otherwise, kiting melee units is too easy
 - Punching disabled, combat and resource gathering can only be done if the player has tools/weapons
 - Turned into a ghost on death - must walk back to a capitol building to be resurrected for a resource cost
 - Tools/weapons provided by the RTS player using resources
