@@ -1,10 +1,18 @@
 
+1.19.2-1.0.2 - New singleplayer map
+-----------------------------------
+Map where player starts in the centre, surrounded by 3 static enemy bases (though no AI of course)
+    - Create lots of defenses and a good variety of buildings to make up for no AI
+Have other people loading into the map not see any buildings through fog except for enemy castles
+    - will need to fix fog code for this
+    - add fog setting to save files
+        - check this doesnt break old maps
+
+
+
 
 To test:
 -------
-Fire immunity for grunts
-    - make sure no other units got immunity
-    - check research immunity still works
 
 
 
