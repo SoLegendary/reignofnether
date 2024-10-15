@@ -27,7 +27,7 @@ public class DarkWatchtower extends Building implements GarrisonableBuilding {
     public final static String structureName = "dark_watchtower";
     public final static ResourceCost cost = ResourceCosts.DARK_WATCHTOWER;
 
-    private final static int MAX_OCCUPANTS = 5;
+    private final static int MAX_OCCUPANTS = 3;
 
     public DarkWatchtower(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -50,7 +50,7 @@ public class DarkWatchtower extends Building implements GarrisonableBuilding {
     public Faction getFaction() {return Faction.MONSTERS;}
 
     // don't use this for abilities as it may not be balanced
-    public int getAttackRange() { return 24; }
+    public int getAttackRange() { return 25; }
     // bonus for units attacking garrisoned units
     public int getExternalAttackRangeBonus() { return 10; }
 

@@ -129,12 +129,12 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     final static public float attackDamage = 6.0f;
     final static public float attacksPerSecond = 0.15f;
-    final static public float attackRange = 40; // only used by ranged units or melee building attackers
+    final static public float attackRange = 30; // only used by ranged units or melee building attackers
     final static public float aggroRange = 30;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
 
-    final static public float maxHealth = 30.0f;
+    final static public float maxHealth = 50.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public int popCost = ResourceCosts.GHAST.population;

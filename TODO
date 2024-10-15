@@ -9,10 +9,26 @@ Have other people loading into the map not see any buildings through fog except 
         - check this doesnt break old maps
 
 
+Bugfixes
+--------
+[✔] castle upgrade issues
+[✔] pillager mounting ravager upgrade missing
+[✔] [#31] Workers returning a resource should count towards assigned number
+[✔] [#32] Zombie villagers trample pumpkins (needs server test)
+[❌] [#29] Resources go negative after a match is done
+    - make sure we're removing players' resources on each end condition, including:
+        - defeat()
+        - resetRTS()
 
 
-To test:
--------
+Balancing
+---------
+[Needs testing] Lower ghast range to be within tower range
+[Needs testing] Raise ghast health so they can reasonably take down a garrisoned tower before dying
+
+Reduce tower garrison limit to 3
+Raise capitol-animal spawn rate to 90s
+Raise wood cost of farms
 
 
 

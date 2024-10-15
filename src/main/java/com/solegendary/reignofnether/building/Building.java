@@ -97,7 +97,7 @@ public abstract class Building {
     private long ticksToExtinguish = 0;
     private final long TICKS_TO_EXTINGUISH = 100;
 
-    private final long TICKS_TO_SPAWN_ANIMALS_MAX = 1200; // how often we attempt to spawn animals around each
+    private final long TICKS_TO_SPAWN_ANIMALS_MAX = 1800; // how often we attempt to spawn animals around each
     private long ticksToSpawnAnimals = TICKS_TO_SPAWN_ANIMALS_MAX - 100; // spawn once soon after placement
     private final int MAX_ANIMALS = 8;
     private final int ANIMAL_SPAWN_RANGE = 100; // block range to check and spawn animals in

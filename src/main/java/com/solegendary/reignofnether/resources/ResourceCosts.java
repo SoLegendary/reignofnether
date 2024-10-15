@@ -30,7 +30,7 @@ public class ResourceCosts {
     }
 
     public static final int REPLANT_WOOD_COST = 1;
-    public static final int REDUCED_REPLANT_WOOD_COST = 1;
+    public static final int REDUCED_REPLANT_WOOD_COST = 0;
     public static final int MAX_POPULATION = 100; // max possible pop you can have regardless of buildings
 
     // ******************* UNITS ******************* //
@@ -77,7 +77,7 @@ public class ResourceCosts {
     // Monsters
     public static ResourceCost MAUSOLEUM = ResourceCost.Building(0,300,150, 10);
     public static ResourceCost HAUNTED_HOUSE = ResourceCost.Building(0,100,0, 10);
-    public static ResourceCost PUMPKIN_FARM = ResourceCost.Building(0,150,0, 0);
+    public static ResourceCost PUMPKIN_FARM = ResourceCost.Building(0,200,0, 0);
     public static ResourceCost GRAVEYARD = ResourceCost.Building(0,150,0, 0);
     public static ResourceCost SPIDER_LAIR = ResourceCost.Building(0,150,75, 0);
     public static ResourceCost DUNGEON = ResourceCost.Building(0,150,75, 0);
@@ -88,7 +88,7 @@ public class ResourceCosts {
     // Villagers
     public static ResourceCost TOWN_CENTRE = ResourceCost.Building(0,300,150, 10);
     public static ResourceCost VILLAGER_HOUSE = ResourceCost.Building(0,100,0, 10);
-    public static ResourceCost WHEAT_FARM = ResourceCost.Building(0,100,0, 0);
+    public static ResourceCost WHEAT_FARM = ResourceCost.Building(0,150,0, 0);
     public static ResourceCost BARRACKS = ResourceCost.Building(0,150,0, 0);
     public static ResourceCost BLACKSMITH = ResourceCost.Building(0,250,150, 0);
     public static ResourceCost ARCANE_TOWER = ResourceCost.Building(0,200,100, 0);
@@ -100,7 +100,7 @@ public class ResourceCosts {
     // Piglins
     public static ResourceCost CENTRAL_PORTAL = ResourceCost.Building(0,300,150, 10);
     public static ResourceCost BASIC_PORTAL = ResourceCost.Building(0, 75, 0, 0);
-    public static ResourceCost NETHERWART_FARM = ResourceCost.Building(0, 100, 0, 0);
+    public static ResourceCost NETHERWART_FARM = ResourceCost.Building(0, 150, 0, 0);
     public static ResourceCost BASTION = ResourceCost.Building(0, 150, 100, 0);
     public static ResourceCost HOGLIN_STABLES = ResourceCost.Building(0, 250, 0, 0);
     public static ResourceCost FLAME_SANCTUARY = ResourceCost.Building(0, 300, 150, 0);
