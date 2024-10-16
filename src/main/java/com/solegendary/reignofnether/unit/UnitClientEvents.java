@@ -842,8 +842,6 @@ public class UnitClientEvents {
     }
 
     public static void addUnitPoofs(Level level, Entity entity) {
-        if (MC.player != null && MC.player.distanceToSqr(entity) > 10000)
-            return;
         RandomSource rand = RandomSource.create();
         for(int j = 0; j < 35; ++j) {
             double d0 = rand.nextGaussian() * 0.2;
