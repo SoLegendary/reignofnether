@@ -17,7 +17,7 @@ Removed a duplicate line in the clock tooltip
 
 Quality of Life Features
 ------------------------
-[❌] Pressing same control group key again will now cycle between the selected unit type
+[✔] Pressing same control group key again will now cycle between the selected unit type
 [❌] Radius indicator around monster capitol and stronghold to better indicate range of night
     (can use this same code for ability range indicators too)
 [❌] More shift click queue commands
