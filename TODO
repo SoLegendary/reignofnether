@@ -4,57 +4,40 @@
 
 Bugfixes
 --------
-[✔] Fixed the castle's building upgrade not working
-[✔] Fixed the pillager mounting ravager upgrade being missing
-[✔] [#31] Workers returning a resource should count towards assigned number
-[✔] [#32] Farm crops can no longer be trampled
-[✔] Reduced occurrence of sonic booms randomly not working (please tell me if this still happens)
-Removed a duplicate line in the clock tooltip
 [❌] [#29] Resources go negative after a match is done
     - make sure we're removing players' resources on each end condition, including:
         - defeat()
         - resetRTS()
+[❌] On a server match, population appears to be incorrect a lot
+    - Server mismatches client
+    - Specatators see different to client
+    - Unupgraded portals are somehow worth 10 supply
+
+F5 mode causes rendering issues in orthoview
+
 
 Quality of Life Features
 ------------------------
-[✔] Pressing same control group key again will now cycle through the selected unit types
+[❌] Middle mouse button to drag camera
 [❌] Radius indicator around monster capitol and stronghold to better indicate range of night
     (can use this same code for ability range indicators too)
 [❌] More shift click queue commands
     - Build already-placed foundations
     - Repair damaged buildings
     - Move units
+[❌] Hovering buttons (or some other indicator) for idle farms
+    - Clicking said button will assign the nearest idle villager to it
+
 
 Balancing
 ---------
-Lowered ghast range from 40 to 30
-Garrisoned ranged units get an additional +10 bonus range against ghasts
-Raised ghast health from 30 to 60 so that groups can still reasonably take down garrisons
-Lowered ghast movespeed from 25 to 22
-Raised iron golem movespeed from 20 to 22
-Warden sonic boom damage increased from 60 to 75. It can now 1-shot all units except iron golems, ravagers and other wardens.
-Warden sonic booms now get +10 range after the target is acquired, so enemies can't run away as easily.
-Reduced watchtower garrison limit from 5 to 3 and bastions from 5 to 4
-Reduced all castle-type building garrison limits from 10 to 7
-Reduced all repair speeds by 25%
-Raised watchtower build times by 25%
-Raise capitols' animal spawn interval from 60s to 90s
-Raise wood cost of all farms by 50
 
 
 
 
 
 TODO BACKLOG
-
-Backlog misc improvements
--------------------------
-- recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
-    - most prevalent in 1v1 melee combat
-
-Let workers gather beehives
-
-
+------------
 
 Limitations of save data
 ------------------------
@@ -70,9 +53,11 @@ Bugs backlog
 ------------
 - time set causes desyncs when done with /gamerule dodaynightcycle false
 - workers are not marked as idle until 15s after stopping gathering
-- cannot launch at all with optifine
 - your portal blocks crack when explored by an opponent (muting function only applies for the opponent)
 - minimap still shows nether blocks in fog until the camera moves (and replaces them with fake frozen blocks)
+- beehives are not gatherable
+- recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
+    - most prevalent in 1v1 melee combat
 
 (MacOS) minecraft title screen is messed up and doesn't retrieve the assets
 (MacOS) GUI scaling does not work
