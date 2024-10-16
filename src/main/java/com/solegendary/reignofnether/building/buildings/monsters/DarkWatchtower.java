@@ -40,7 +40,7 @@ public class DarkWatchtower extends Building implements GarrisonableBuilding {
         this.woodCost = cost.wood;
         this.oreCost = cost.ore;
         this.popSupply = cost.population;
-        this.buildTimeModifier = 0.8f;
+        this.buildTimeModifier = 1.0f;
 
         this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICKS);
         this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICK_SLAB);
@@ -50,7 +50,7 @@ public class DarkWatchtower extends Building implements GarrisonableBuilding {
     public Faction getFaction() {return Faction.MONSTERS;}
 
     // don't use this for abilities as it may not be balanced
-    public int getAttackRange() { return 25; }
+    public int getAttackRange() { return 24; }
     // bonus for units attacking garrisoned units
     public int getExternalAttackRangeBonus() { return 10; }
 

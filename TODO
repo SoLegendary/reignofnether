@@ -1,30 +1,45 @@
 
-1.19.2-1.0.2 - New singleplayer map
------------------------------------
-Map where player starts in the centre, surrounded by 3 static enemy bases (though no AI of course)
-    - Create lots of defenses and a good variety of buildings to make up for no AI
-
+1.19.2-1.0.2
+------------
 
 Bugfixes
 --------
-[✔] castle upgrade issues
-[✔] pillager mounting ravager upgrade missing
+[✔] Fixed the castle's building upgrade not working
+[✔] Fixed the pillager mounting ravager upgrade being missing
 [✔] [#31] Workers returning a resource should count towards assigned number
-[✔] [#32] Zombie villagers trample pumpkins (needs server test)
+[✔] [#32] Farm crops can no longer be trampled
+[✔] Reduced occurrence of sonic booms randomly not working (please tell me if this still happens)
+Removed a duplicate line in the clock tooltip
 [❌] [#29] Resources go negative after a match is done
     - make sure we're removing players' resources on each end condition, including:
         - defeat()
         - resetRTS()
 
+Quality of Life Features
+------------------------
+[❌] Pressing same control group key again will now cycle between the selected unit type
+[❌] Radius indicator around monster capitol and stronghold to better indicate range of night
+    (can use this same code for ability range indicators too)
+[❌] More shift click queue commands
+    - Build already-placed foundations
+    - Repair damaged buildings
+    - Move units
 
 Balancing
 ---------
-[Needs testing] Lower ghast range to be within tower range
-[Needs testing] Raise ghast health so they can reasonably take down a garrisoned tower before dying
-
-Reduce tower garrison limit to 3
-Raise capitol-animal spawn rate to 90s
-Raise wood cost of farms
+Lowered ghast range from 40 to 30
+Garrisoned ranged units get an additional +10 bonus range against ghasts
+Raised ghast health from 30 to 60 so that groups can still reasonably take down garrisons
+Lowered ghast movespeed from 25 to 22
+Raised iron golem movespeed from 20 to 22
+Warden sonic boom damage increased from 60 to 75. It can now 1-shot all units except iron golems, ravagers and other wardens.
+Warden sonic booms now get +10 range after the target is acquired, so enemies can't run away as easily.
+Reduced watchtower garrison limit from 5 to 3 and bastions from 5 to 4
+Reduced all castle-type building garrison limits from 10 to 7
+Reduced all repair speeds by 25%
+Raised watchtower build times by 25%
+Raise capitols' animal spawn interval from 60s to 90s
+Raise wood cost of all farms by 50
 
 
 
@@ -38,8 +53,6 @@ Backlog misc improvements
     - most prevalent in 1v1 melee combat
 
 Let workers gather beehives
-
-Do a 4+ player FFA for stress testing
 
 
 

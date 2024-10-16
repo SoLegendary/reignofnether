@@ -36,7 +36,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
     public final static String upgradedStructureName = "castle_with_flag";
     public final static ResourceCost cost = ResourceCosts.CASTLE;
 
-    private final static int MAX_OCCUPANTS = 10;
+    private final static int MAX_OCCUPANTS = 7;
 
     public Castle(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);

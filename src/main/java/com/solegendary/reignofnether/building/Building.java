@@ -83,6 +83,7 @@ public abstract class Building {
     protected float explodeRadius = 2.0f;
     protected float fireThreshold = 0.75f; // if building has less %hp than this, explosions caused can make fires
     protected float buildTimeModifier = 1.0f; // only affects non-built buildings, not repair times
+    protected float repairTimeModifier = 1.25f; // only affects built buildings
     protected int highestBlockCountReached = 2; // effective max health of the building
 
     protected ArrayList<BuildingBlock> scaffoldBlocks = new ArrayList<>();
@@ -603,6 +604,8 @@ public abstract class Building {
                 int msPerBuild = (2 * BASE_MS_PER_BUILD) / (builderCount + 1);
                 if (!isBuilt)
                     msPerBuild *= buildTimeModifier;
+                else
+                    msPerBuild *= repairTimeModifier;
 
                 if (msToNextBuild > msPerBuild)
                     msToNextBuild = msPerBuild;

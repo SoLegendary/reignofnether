@@ -57,6 +57,8 @@ public class HudClientEvents {
     private static final int MAX_BUTTONS_PER_ROW = 6;
 
     public static final ArrayList<ControlGroup> controlGroups = new ArrayList<>(10);
+    public static int lastSelCtrlGroupKey = -1;
+
     private static final ArrayList<Button> buildingButtons = new ArrayList<>();
     private static final ArrayList<Button> unitButtons = new ArrayList<>();
     private static final ArrayList<Button> productionButtons = new ArrayList<>();

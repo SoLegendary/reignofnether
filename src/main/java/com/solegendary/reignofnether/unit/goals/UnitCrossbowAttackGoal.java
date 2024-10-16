@@ -29,6 +29,8 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
     private int attackCooldown;
     private int attackCooldownMax;
 
+    private static final int GARRISON_BONUS_RANGE_TO_GHASTS = 10;
+
     public UnitCrossbowAttackGoal(T mob, int attackCooldown) {
         this.mob = mob;
         this.attackCooldownMax = attackCooldown;
@@ -139,8 +141,11 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
                     this.mob.getNavigation().stop();
                 }
             }
-            if (isGarrisoned)
+            if (isGarrisoned) {
                 attackRange = garr.getAttackRange();
+                if (target instanceof GhastUnit ghastUnit)
+                    attackRange += GARRISON_BONUS_RANGE_TO_GHASTS;
+            }
             else if (isTargetGarrisoned)
                 attackRange += targetGarr.getExternalAttackRangeBonus();
             else if (target instanceof GhastUnit ghastUnit)

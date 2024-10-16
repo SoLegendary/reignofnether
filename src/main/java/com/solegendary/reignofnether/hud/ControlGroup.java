@@ -18,6 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getPlayerToBuildingRelationship;
@@ -45,12 +46,14 @@ public class ControlGroup {
     public ControlGroup() { }
 
     public int getKey() {
-        return this.keybinding.key;
+        return keybinding != null ? keybinding.key : -1;
     }
 
     public void clearAll() {
         this.entityIds.clear();
         this.buildingBps.clear();
+        if (HudClientEvents.lastSelCtrlGroupKey == this.getKey())
+            HudClientEvents.lastSelCtrlGroupKey = -1;
     }
 
     public boolean isEmpty() {
@@ -99,6 +102,7 @@ public class ControlGroup {
     }
 
     // selects the control group's assigned entities/buildings
+    // if it's already selected then just cycle the hudSelectedEntity
     public void loadToSelected() {
         Minecraft MC = Minecraft.getInstance();
         Player player = MC.player;
@@ -120,6 +124,28 @@ public class ControlGroup {
                         OrthoviewClientEvents.centreCameraOnPos(entities.get(0).getX(), entities.get(0).getZ());
                 }
             }
+            // press again to cycle between selected unit type in the group
+            if (HudClientEvents.lastSelCtrlGroupKey == this.getKey()) {
+                List<LivingEntity> entities = getAllUnits().stream()
+                        .filter(e -> entityIds.contains(e.getId()) && e instanceof Unit)
+                        .sorted(Comparator.comparing(HudClientEvents::getSimpleEntityName))
+                        .toList();
+
+                String hudSelectedEntityName = HudClientEvents.getSimpleEntityName(hudSelectedEntity);
+                String lastEntityName = "";
+                boolean cycled = false;
+                for (LivingEntity entity : entities) {
+                    String currentEntityName = HudClientEvents.getSimpleEntityName(entity);
+                    if (lastEntityName.equals(hudSelectedEntityName) && !currentEntityName.equals(lastEntityName)) {
+                        hudSelectedEntity = entity;
+                        cycled = true;
+                        break;
+                    }
+                    lastEntityName = currentEntityName;
+                }
+                if (!cycled)
+                    hudSelectedEntity = entities.get(0);
+            }
         }
         else if (buildingBps.size() > 0) {
             UnitClientEvents.clearSelectedUnits();
@@ -137,7 +163,9 @@ public class ControlGroup {
                         OrthoviewClientEvents.centreCameraOnPos(building.centrePos.getX(), building.centrePos.getZ());
             }
         }
+
         lastClickTime = System.currentTimeMillis();
+        HudClientEvents.lastSelCtrlGroupKey = this.getKey();
     }
 
     public Button getButton() {

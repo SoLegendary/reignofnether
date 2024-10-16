@@ -34,6 +34,8 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
     private int attackTime = -1;
     private int seeTime; // how long we have seen the target for
 
+    private static final int GARRISON_BONUS_RANGE_TO_GHASTS = 10;
+
     public UnitBowAttackGoal(T mob, int attackCooldown) {
         this.mob = mob;
         this.attackCooldownMax = attackCooldown;
@@ -123,8 +125,11 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
             float attackRange = ((AttackerUnit) this.mob).getAttackRange();
 
             if (!(this.mob instanceof GhastUnit)) {
-                if (isGarrisoned)
+                if (isGarrisoned) {
                     attackRange = garr.getAttackRange();
+                    if (target instanceof GhastUnit ghastUnit)
+                        attackRange += GARRISON_BONUS_RANGE_TO_GHASTS;
+                }
                 else if (isTargetGarrisoned)
                     attackRange += targetGarr.getExternalAttackRangeBonus();
                 else if (target instanceof GhastUnit ghastUnit)

@@ -31,7 +31,7 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuilding 
     public final static String structureName = "bastion";
     public final static ResourceCost cost = ResourceCosts.BASTION;
 
-    private final static int MAX_OCCUPANTS = 3;
+    private final static int MAX_OCCUPANTS = 4;
 
     public Bastion(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -64,7 +64,7 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuilding 
     public Faction getFaction() {return Faction.PIGLINS;}
 
     // don't use this for abilities as it may not be balanced
-    public int getAttackRange() { return 25; }
+    public int getAttackRange() { return 24; }
     // bonus for units attacking garrisoned units
     public int getExternalAttackRangeBonus() { return 10; }
 
