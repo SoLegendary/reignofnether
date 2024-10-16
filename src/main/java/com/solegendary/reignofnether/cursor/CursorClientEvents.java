@@ -304,31 +304,35 @@ public class CursorClientEvents {
             // for single-click selection, see UnitClientEvents
             // except if attack-moving or no owned units are preselected (to prevent deselection)
             ArrayList<LivingEntity> preselectedUnit = UnitClientEvents.getPreselectedUnits();
-            if (preselectedUnit.size() > 0 && !cursorLeftClickDownPos.equals(cursorLeftClickDragPos)) {
+            if (!preselectedUnit.isEmpty()) {
+                if (!cursorLeftClickDownPos.equals(cursorLeftClickDragPos)) {
 
-                // only act if there is at least 1 owned entity so we don't deselect things by box selecting only non-owned entities
-                int ownedEntities = 0;
-                for (LivingEntity unit : preselectedUnit)
-                    if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
-                        ownedEntities += 1;
-
-                if (ownedEntities > 0) {
-                    ArrayList<LivingEntity> unitsToAdd = new ArrayList<>();
+                    // only act if there is at least 1 owned entity so we don't deselect things by box selecting only non-owned entities
+                    int ownedEntities = 0;
                     for (LivingEntity unit : preselectedUnit)
                         if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
-                            unitsToAdd.add(unit);
+                            ownedEntities += 1;
 
-                    if (Keybindings.shiftMod.isDown()) {
-                        List<Integer> selectedIds = UnitClientEvents.getSelectedUnits().stream().map(Entity::getId).toList();
-                        unitsToAdd.removeIf(e -> selectedIds.contains(e.getId()));
-                    } else {
-                        UnitClientEvents.clearSelectedUnits();
+                    if (ownedEntities > 0) {
+                        ArrayList<LivingEntity> unitsToAdd = new ArrayList<>();
+                        for (LivingEntity unit : preselectedUnit)
+                            if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED)
+                                unitsToAdd.add(unit);
+
+                        if (Keybindings.shiftMod.isDown()) {
+                            List<Integer> selectedIds = UnitClientEvents.getSelectedUnits().stream().map(Entity::getId).toList();
+                            unitsToAdd.removeIf(e -> selectedIds.contains(e.getId()));
+                        } else {
+                            UnitClientEvents.clearSelectedUnits();
+                        }
+
+                        for (LivingEntity unit : unitsToAdd)
+                            UnitClientEvents.addSelectedUnit(unit);
                     }
 
-                    for (LivingEntity unit : unitsToAdd)
-                        UnitClientEvents.addSelectedUnit(unit);
                 }
-
+            } else {
+                UnitClientEvents.clearSelectedUnits();
             }
             cursorLeftClickDownPos = new Vec2(-1,-1);
             cursorLeftClickDragPos = new Vec2(-1,-1);
