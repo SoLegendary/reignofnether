@@ -57,6 +57,8 @@ public class HudClientEvents {
     private static final int MAX_BUTTONS_PER_ROW = 6;
 
     public static final ArrayList<ControlGroup> controlGroups = new ArrayList<>(10);
+    public static int lastSelCtrlGroupKey = -1;
+
     private static final ArrayList<Button> buildingButtons = new ArrayList<>();
     private static final ArrayList<Button> unitButtons = new ArrayList<>();
     private static final ArrayList<Button> productionButtons = new ArrayList<>();
@@ -697,16 +699,36 @@ public class HudClientEvents {
                 // worker count assigned to each resource
                 if (resName != ResourceName.NONE) {
                     String finalSelPlayerName = selPlayerName;
-                    int numWorkersAssigned = UnitClientEvents.getAllUnits().stream().filter(
-                            u -> u instanceof WorkerUnit wu && u instanceof Unit unit && !UnitClientEvents.idleWorkerIds.contains(u.getId()) &&
-                                    unit.getOwnerName().equals(finalSelPlayerName) &&
-                                    wu.getGatherResourceGoal().getTargetResourceName().equals(resName)
-                    ).toList().size();
+
                     int numWorkersHunting = UnitClientEvents.getAllUnits().stream().filter(
-                            u -> u instanceof WorkerUnit wu && u instanceof Unit unit &&
-                                    unit.getOwnerName().equals(finalSelPlayerName) &&
-                                    ResourceSources.isHuntableAnimal(unit.getTargetGoal().getTarget())
+                            le -> le instanceof WorkerUnit wu && le instanceof Unit u &&
+                                    u.getOwnerName().equals(finalSelPlayerName) &&
+                                    ResourceSources.isHuntableAnimal(u.getTargetGoal().getTarget())
                     ).toList().size();
+
+                    // we can only see ReturnResourcesGoal data on server, so we can't use that here
+                    int numWorkersAssigned = 0;
+                    for (LivingEntity le : UnitClientEvents.getAllUnits()) {
+                        if (le instanceof Unit u && le instanceof WorkerUnit wu &&
+                            u.getOwnerName().equals(finalSelPlayerName) &&
+                            !UnitClientEvents.idleWorkerIds.contains(le.getId())) {
+
+                            boolean alreadyAssigned = false;
+
+                            if (u.getReturnResourcesGoal() != null) {
+                                Resources res = Resources.getTotalResourcesFromItems(u.getItems());
+                                if (resName == ResourceName.FOOD && res.food > 0 ||
+                                    resName == ResourceName.WOOD && res.wood > 0 ||
+                                    resName == ResourceName.ORE && res.ore > 0) {
+                                    numWorkersAssigned += 1;
+                                    alreadyAssigned = true;
+                                }
+                            }
+                            if (!alreadyAssigned && wu.getGatherResourceGoal().getTargetResourceName().equals(resName))
+                                numWorkersAssigned += 1;
+                        }
+                    }
+
                     if (resName == ResourceName.FOOD)
                         numWorkersAssigned += numWorkersHunting;
 

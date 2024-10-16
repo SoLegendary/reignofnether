@@ -31,7 +31,7 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuilding 
     public final static String structureName = "bastion";
     public final static ResourceCost cost = ResourceCosts.BASTION;
 
-    private final static int MAX_OCCUPANTS = 5;
+    private final static int MAX_OCCUPANTS = 4;
 
     public Bastion(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);

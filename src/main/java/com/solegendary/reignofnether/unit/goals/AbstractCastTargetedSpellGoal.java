@@ -14,14 +14,14 @@ import java.util.function.Consumer;
 
 public abstract class AbstractCastTargetedSpellGoal extends MoveToTargetBlockGoal {
 
-    private LivingEntity targetEntity = null;
-    private Ability ability; // used for syncing cooldown with clientside
+    protected LivingEntity targetEntity = null;
+    protected Ability ability; // used for syncing cooldown with clientside
     protected int ticksCasting = 0; // how long have we spent trying to cast this spell
     public boolean isCasting() { return isCasting; }
     protected final int channelTicks; // max time required to cast a spell
     protected boolean isCasting = false;
-    private BlockPos castTarget = null; // pos that the spell will be cast at
-    private final int range;
+    protected BlockPos castTarget = null; // pos that the spell will be cast at
+    protected final int range;
     public Consumer<LivingEntity> onEntityCast;
     public Consumer<BlockPos> onGroundCast;
     public Consumer<Building> onBuildingCast;

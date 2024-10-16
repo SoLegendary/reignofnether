@@ -35,7 +35,7 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
     public final static String structureName = "fortress";
     public final static ResourceCost cost = ResourceCosts.FORTRESS;
 
-    private final static int MAX_OCCUPANTS = 10;
+    private final static int MAX_OCCUPANTS = 7;
 
     public Fortress(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);

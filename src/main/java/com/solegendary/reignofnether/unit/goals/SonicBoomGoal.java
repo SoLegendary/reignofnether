@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 
@@ -31,10 +32,27 @@ public class SonicBoomGoal extends AbstractCastTargetedSpellGoal {
     }
 
     @Override
+    protected boolean isInRange() {
+        int finalRange = range;
+        if (isCasting())
+            finalRange += 10;
+
+        if (moveTarget != null && MyMath.distance(
+                this.mob.getX(), this.mob.getZ(),
+                moveTarget.getX(), moveTarget.getZ()) <= finalRange)
+            return true;
+        if (castTarget != null && MyMath.distance(
+                this.mob.getX(), this.mob.getZ(),
+                castTarget.getX(), castTarget.getZ()) <= finalRange)
+            return true;
+        return false;
+    }
+
+    @Override
     public void stop() {
         // hack fix to stop a weird bug where it gets stopped unexpectedly (serverside)
         // happens when needing to move towards the target first
-        if (this.ticksCasting <= 3 && isInRange())
+        if (this.ticksCasting <= 5 && isInRange())
             return;
         super.stop();
     }

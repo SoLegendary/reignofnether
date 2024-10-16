@@ -1,17 +1,51 @@
 
+1.19.2-1.0.2
+------------
+
+Bugfixes
+--------
+[✔] Fixed the castle's building upgrade not working
+[✔] Fixed the pillager mounting ravager upgrade being missing
+[✔] [#31] Workers returning a resource should count towards assigned number
+[✔] [#32] Farm crops can no longer be trampled
+[✔] Reduced occurrence of sonic booms randomly not working (please tell me if this still happens)
+Removed a duplicate line in the clock tooltip
+[❌] [#29] Resources go negative after a match is done
+    - make sure we're removing players' resources on each end condition, including:
+        - defeat()
+        - resetRTS()
+
+Quality of Life Features
+------------------------
+[✔] Pressing same control group key again will now cycle through the selected unit types
+[❌] Radius indicator around monster capitol and stronghold to better indicate range of night
+    (can use this same code for ability range indicators too)
+[❌] More shift click queue commands
+    - Build already-placed foundations
+    - Repair damaged buildings
+    - Move units
+
+Balancing
+---------
+Lowered ghast range from 40 to 30
+Garrisoned ranged units get an additional +10 bonus range against ghasts
+Raised ghast health from 30 to 60 so that groups can still reasonably take down garrisons
+Lowered ghast movespeed from 25 to 22
+Raised iron golem movespeed from 20 to 22
+Warden sonic boom damage increased from 60 to 75. It can now 1-shot all units except iron golems, ravagers and other wardens.
+Warden sonic booms now get +10 range after the target is acquired, so enemies can't run away as easily.
+Reduced watchtower garrison limit from 5 to 3 and bastions from 5 to 4
+Reduced all castle-type building garrison limits from 10 to 7
+Reduced all repair speeds by 25%
+Raised watchtower build times by 25%
+Raise capitols' animal spawn interval from 60s to 90s
+Raise wood cost of all farms by 50
 
 
-TODO bugs/features:
 
 
 
-To test:
--------
-multiplayer testing of data saves
-3+ player FFA for stress testing
-
-
-
+TODO BACKLOG
 
 Backlog misc improvements
 -------------------------

@@ -136,7 +136,6 @@ public class TimeClientEvents {
                     FormattedCharSequence.forward("Time is distorted to midnight", Style.EMPTY.withBold(true)),
                     FormattedCharSequence.forward("Real time: " + timeStr, Style.EMPTY),
                     timeUntilStr,
-                    FormattedCharSequence.forward("" + timeStr, Style.EMPTY),
                     gameLengthStr
                 );
 

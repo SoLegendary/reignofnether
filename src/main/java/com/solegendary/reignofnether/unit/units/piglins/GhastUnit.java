@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.AttackGround;
+import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -129,14 +130,14 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     final static public float attackDamage = 6.0f;
     final static public float attacksPerSecond = 0.15f;
-    final static public float attackRange = 40; // only used by ranged units or melee building attackers
+    final static public float attackRange = 30; // only used by ranged units or melee building attackers
     final static public float aggroRange = 30;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
 
-    final static public float maxHealth = 30.0f;
+    final static public float maxHealth = 60.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.25f;
+    final static public float movementSpeed = 0.22f;
     final static public int popCost = ResourceCosts.GHAST.population;
     public int maxResources = 100;
 

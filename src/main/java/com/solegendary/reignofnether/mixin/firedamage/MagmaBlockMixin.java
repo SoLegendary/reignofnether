@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchFireResistance;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.GruntUnit;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
@@ -43,6 +44,7 @@ public abstract class MagmaBlockMixin {
 
         if (!pEntity.isSteppingCarefully() &&
             pEntity instanceof LivingEntity &&
+            !(pEntity instanceof GruntUnit) &&
             !EnchantmentHelper.hasFrostWalker((LivingEntity)pEntity) &&
             !(isPiglinFaction && hasImmunityResearch) && isDamageTick) {
             pEntity.hurt(DamageSource.HOT_FLOOR, DAMAGE);

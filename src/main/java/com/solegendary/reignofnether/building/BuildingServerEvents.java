@@ -514,6 +514,12 @@ public class BuildingServerEvents {
             evt.setCanceled(true);
     }
 
+    @SubscribeEvent
+    public static void onCropTrample(BlockEvent.FarmlandTrampleEvent evt) {
+        if (BuildingUtils.isPosInsideAnyBuilding(evt.getEntity().getLevel().isClientSide(), evt.getPos()))
+            evt.setCanceled(true);
+    }
+
     public static void replaceClientBuilding(BlockPos buildingPos) {
         for (Building building : buildings) {
             if (building.originPos.equals(buildingPos)) {

@@ -347,7 +347,8 @@ public class PlayerServerEvents {
             }
 
             // apply all cheats - NOTE can cause concurrentModificationException clientside
-            if (words.length == 1 && words[0].equalsIgnoreCase("allcheats")) {
+            if (words.length == 1 && words[0].equalsIgnoreCase("allcheats") &&
+                (playerName.equalsIgnoreCase("solegendary") || playerName.equalsIgnoreCase("altsolegendary"))) {
                 ResourcesServerEvents.addSubtractResources(new Resources(playerName, 99999, 99999, 99999));
                 for (String cheatName : singleWordCheats) {
                     ResearchServerEvents.addCheat(playerName, cheatName);

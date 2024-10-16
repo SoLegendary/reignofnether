@@ -32,7 +32,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
     public final static ResourceCost cost = ResourceCosts.STRONGHOLD;
     public final static int nightRange = 60;
 
-    private final static int MAX_OCCUPANTS = 10;
+    private final static int MAX_OCCUPANTS = 7;
 
     public Stronghold(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);

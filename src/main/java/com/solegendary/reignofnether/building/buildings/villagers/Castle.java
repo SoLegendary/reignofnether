@@ -33,10 +33,10 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
 
     public final static String buildingName = "Castle";
     public final static String structureName = "castle";
-    public final static String upgradedStructureName = "castle";
+    public final static String upgradedStructureName = "castle_with_flag";
     public final static ResourceCost cost = ResourceCosts.CASTLE;
 
-    private final static int MAX_OCCUPANTS = 10;
+    private final static int MAX_OCCUPANTS = 7;
 
     public Castle(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -63,9 +63,10 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
         if (level.isClientSide()) {
             this.productionButtons = Arrays.asList(
                 RavagerProd.getStartButton(this, Keybindings.keyQ),
-                ResearchCastleFlag.getStartButton(this, Keybindings.keyW)
+                ResearchRavagerCavalry.getStartButton(this, Keybindings.keyW),
+                ResearchCastleFlag.getStartButton(this, Keybindings.keyE)
             );
-            this.abilityButtons.add(promoteIllager.getButton(Keybindings.keyW));
+            this.abilityButtons.add(promoteIllager.getButton(Keybindings.keyE));
         }
     }
 
