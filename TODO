@@ -10,34 +10,41 @@ Bugfixes
 [✔] Spiders can no longer spawn out of lairs as vanilla jockeys and crash the game
 
 [✔] Liquid blocks that are part of a building can now be destroyed on damage.
-    This means flame Sanctuaries are no longer indestructible and damaged farms can dry up.
+    This means Flame Sanctuaries are no longer indestructible and damaged wheat/pumpkin farms can dry up.
 
-[❌] nametags can't be rendered in portrait view and crash the game
+[✔] Fixed crash related to deselecting and reselecting control groups
 
-[❌] [needs investigation] Repeatedly pressing hotkeys (or maybe control groups?) causes crashes
-    "crash after pressing two shortcut unit keys at the same time" -areaxis
+[✔] Fixed crash when selecting a nametagged unit
 
+[✔] Enabling F12 cam now forces you out of 3rd person cam so that you don't get rendering issues
 
+[❌] Iron golems attack friendly units on attack move
 
 
 [❌] On a server match, population appears to be incorrect a lot
     - Server mismatches client
-    - Specatators see different to client
+    - Spectators see different to client
     - Unupgraded portals are somehow worth 10 supply
 
 
-[❌] [needs investigation] F5 mode causes rendering issues in orthoview
+
 
 [❌] [#29] Resources go negative after a match is done
     - make sure we're removing players' resources on each end condition, including:
         - defeat()
         - resetRTS()
 
-
-
 [❌] [performance] joining a loaded server causes huge lag
 
 [❌] Logic for breaking trees also breaks all wooden buildings that aren't supported
+
+
+Balancing
+---------
+[❌] Allow garrisoned units to be shot at, but at 1/2 damage
+    - have half of projectiles blocked by the battlements
+    - if STILL too powerful, cause all explosive damage to directly hit garrisoned units too at 1/4 damage
+
 
 
 
@@ -59,11 +66,6 @@ Quality of Life Features
 [❌] Hovering buttons (or some other indicator) for idle farms
     - Clicking said button will assign the nearest idle villager to it
 
-
-Balancing
----------
-[❌] Allow garrisoned units to be shot at, but at 1/2 damage
-    - if STILL too powerful, cause all explosive damage to directly hit garrisoned units too at 1/4 damage
 
 
 
