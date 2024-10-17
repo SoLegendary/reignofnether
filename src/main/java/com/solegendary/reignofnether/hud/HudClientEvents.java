@@ -89,12 +89,21 @@ public class HudClientEvents {
 
     // eg. entity.reignofnether.zombie_unit -> zombie
     public static String getSimpleEntityName(Entity entity) {
-        if (entity instanceof Unit)
-            return entity.getName().getString()
-                .replace(" ","")
-                .replace("entity.reignofnether.","")
-                .replace("_unit","")
-                .replace(".none","");
+        if (entity instanceof Unit) {
+            if (entity.hasCustomName()) {
+                return entity.getType().getDescription().getString()
+                        .replace(" ","")
+                        .replace("entity.reignofnether.","")
+                        .replace("_unit","")
+                        .replace(".none","");
+            } else {
+                return entity.getName().getString()
+                        .replace(" ","")
+                        .replace("entity.reignofnether.","")
+                        .replace("_unit","")
+                        .replace(".none","");
+            }
+        }
         else
             return entity.getName().getString();
     }
@@ -382,6 +391,9 @@ public class HudClientEvents {
 
             // write capitalised unit name
             String name = getSimpleEntityName(hudSelectedEntity).replace("_"," ");
+            if (hudSelectedEntity.hasCustomName())
+                name = hudSelectedEntity.getCustomName().getString();
+
             String nameCap = name.substring(0, 1).toUpperCase() + name.substring(1);
 
             unitPortraitZone = portraitRendererUnit.render(
