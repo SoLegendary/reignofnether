@@ -4,34 +4,65 @@
 
 Bugfixes
 --------
-[❌] [#29] Resources go negative after a match is done
-    - make sure we're removing players' resources on each end condition, including:
-        - defeat()
-        - resetRTS()
+
+[✔] /rts-reset now works from command blocks
+
+[✔] Spiders can no longer spawn out of lairs as vanilla jockeys which crashed the game
+
+[❌] Flame Sanctuaries are indestructible
+
+[❌] nametags can't be rendered in portrait view and crash the game
+
+[❌] [needs investigation] Repeatedly pressing hotkeys (or maybe control groups?) causes crashes
+    "crash after pressing two shortcut unit keys at the same time" -areaxis
+
+
+
+
 [❌] On a server match, population appears to be incorrect a lot
     - Server mismatches client
     - Specatators see different to client
     - Unupgraded portals are somehow worth 10 supply
 
-F5 mode causes rendering issues in orthoview
+
+[❌] [needs investigation] F5 mode causes rendering issues in orthoview
+
+[❌] [#29] Resources go negative after a match is done
+    - make sure we're removing players' resources on each end condition, including:
+        - defeat()
+        - resetRTS()
+
+
+
+[❌] [performance] joining a loaded server causes huge lag
+
+[❌] Logic for breaking trees also breaks all wooden buildings that aren't supported
+
 
 
 Quality of Life Features
 ------------------------
-[❌] Middle mouse button to drag camera
+[❌] Banners and coloured minimap indicators for each player (each new player to join gets the next colour in order)\
+        - place banners after building completion
+        - use coloured
+        - reserve yellow for neutral
+
 [❌] Radius indicator around monster capitol and stronghold to better indicate range of night
     (can use this same code for ability range indicators too)
+
 [❌] More shift click queue commands
     - Build already-placed foundations
     - Repair damaged buildings
     - Move units
+
 [❌] Hovering buttons (or some other indicator) for idle farms
     - Clicking said button will assign the nearest idle villager to it
 
 
 Balancing
 ---------
-
+[❌] Allow garrisoned units to be shot at, but at 1/2 damage
+    - if STILL too powerful, cause all explosive damage to directly hit garrisoned units too at 1/4 damage
 
 
 
