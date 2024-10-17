@@ -7,9 +7,10 @@ Bugfixes
 
 [✔] /rts-reset now works from command blocks
 
-[✔] Spiders can no longer spawn out of lairs as vanilla jockeys which crashed the game
+[✔] Spiders can no longer spawn out of lairs as vanilla jockeys and crash the game
 
-[❌] Flame Sanctuaries are indestructible
+[✔] Liquid blocks that are part of a building can now be destroyed on damage.
+    This means flame Sanctuaries are no longer indestructible and damaged farms can dry up.
 
 [❌] nametags can't be rendered in portrait view and crash the game
 
