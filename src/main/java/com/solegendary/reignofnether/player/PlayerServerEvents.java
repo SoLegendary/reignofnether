@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -29,6 +30,8 @@ import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -470,6 +473,15 @@ public class PlayerServerEvents {
             }
             saveRTSPlayers();
         }
+    }
+
+    @SubscribeEvent
+    public static void onRegisterCommand(RegisterCommandsEvent evt) {
+        evt.getDispatcher().register(Commands.literal("rts-reset")
+                .executes((command) -> {
+                    resetRTS();
+                    return 1;
+                }));
     }
 
     public static void resetRTS() {

@@ -375,7 +375,7 @@ public abstract class Building {
                         level.destroyBlock(new BlockPos(x,y,z), false);
     }
 
-    // are we allowed to destroy this blockPos using
+    // are we allowed to destroy this blockPos using destroyRandomBlocks
     public boolean canDestroyBlock(BlockPos relativeBp) {
         return true;
     }
@@ -384,8 +384,9 @@ public abstract class Building {
         if (getLevel().isClientSide())
             return;
         ArrayList<BuildingBlock> placedBlocks = new ArrayList<>(blocks.stream().filter(
-                b -> { // avoid destroying blocks adjacent to liquids unless its a bridge
+                b -> { // avoid destroying blocks adjacent to liquids unless its a bridge or is itself a liquid
                     if (!(this instanceof AbstractBridge) &&
+                        !(this.level.getBlockState(b.getBlockPos()).getMaterial().isLiquid()) &&
                         (this.level.getBlockState(b.getBlockPos().above()).getMaterial().isLiquid() ||
                         this.level.getBlockState(b.getBlockPos().north()).getMaterial().isLiquid() ||
                         this.level.getBlockState(b.getBlockPos().south()).getMaterial().isLiquid() ||
@@ -402,7 +403,10 @@ public abstract class Building {
         for (int i = 0; i < amount && i < placedBlocks.size(); i++) {
             BlockPos bp = placedBlocks.get(i).getBlockPos();
             this.onBlockBreak((ServerLevel) getLevel(), bp, false);
-            getLevel().destroyBlock(bp, false);
+            if (getLevel().getBlockState(bp).getMaterial().isLiquid())
+                getLevel().setBlockAndUpdate(bp, Blocks.AIR.defaultBlockState());
+            else
+                getLevel().destroyBlock(bp, false);
         }
         if (amount > 0)
             AttackWarningClientboundPacket.sendWarning(ownerName, BuildingUtils.getCentrePos(getBlocks()));

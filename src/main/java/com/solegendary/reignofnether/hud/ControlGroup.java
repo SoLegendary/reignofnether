@@ -134,20 +134,22 @@ public class ControlGroup {
                         .sorted(Comparator.comparing(HudClientEvents::getSimpleEntityName))
                         .toList();
 
-                String hudSelectedEntityName = HudClientEvents.getSimpleEntityName(hudSelectedEntity);
-                String lastEntityName = "";
-                boolean cycled = false;
-                for (LivingEntity entity : entities) {
-                    String currentEntityName = HudClientEvents.getSimpleEntityName(entity);
-                    if (lastEntityName.equals(hudSelectedEntityName) && !currentEntityName.equals(lastEntityName)) {
-                        hudSelectedEntity = entity;
-                        cycled = true;
-                        break;
+                if (hudSelectedEntity != null) {
+                    String hudSelectedEntityName = HudClientEvents.getSimpleEntityName(hudSelectedEntity);
+                    String lastEntityName = "";
+                    boolean cycled = false;
+                    for (LivingEntity entity : entities) {
+                        String currentEntityName = HudClientEvents.getSimpleEntityName(entity);
+                        if (lastEntityName.equals(hudSelectedEntityName) && !currentEntityName.equals(lastEntityName)) {
+                            hudSelectedEntity = entity;
+                            cycled = true;
+                            break;
+                        }
+                        lastEntityName = currentEntityName;
                     }
-                    lastEntityName = currentEntityName;
+                    if (!cycled)
+                        hudSelectedEntity = entities.get(0);
                 }
-                if (!cycled)
-                    hudSelectedEntity = entities.get(0);
             }
         }
         else if (buildingBps.size() > 0) {
