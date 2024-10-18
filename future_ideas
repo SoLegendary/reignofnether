@@ -2,12 +2,6 @@
 MORE SINGLEPLAYER CONTENT
 -------------------------
 
-> ALTERNATE MAPS (easy)
-More sample clean maps on different seeds and borders set
-    - Name them like AOE2 does (desert gold rush, black forest, rivers, etc.)
-Build a base of each faction with units included and leave them to be destroyed
-    - Won't have AI, but will give solo players something to do at least
-
 > WAVE SURVIVAL (medium)
 Probably easier to implement than full bots since they wouldn't need base building
 Use logic from spawning animals for finding spawn locations
@@ -26,46 +20,6 @@ Need to generalise unit actions and make sure they're reliable (eg. repeating mo
 Should be able work against multiple real players and other bots too
 
 
-
-ECONOMIC/UTILITY UPGRADES FOR EACH RACE
----------------------------------------
-Villager professions
-    - send a villager into a university building to have them trained in a profession
-    - engineer: (armorer skin): build faster
-    - farmer: bonus food from farms
-    - hunters (weaponsmith skin): 2x damage, has stone sword instead of wood
-    - cartographer: extended sight range
-    - miner (stonecutter skin): mine faster
-    - lumberjack (fletcher skin): chop faster
-
-Endermen (monsters)
-    - upgrade to gather resources faster than zombie villagers and can auto-teleport to return resources faster
-    - upgrade to allow building faster than zombie villagers
-    - takes 2 pop and costs > 2x resources
-    - if non-empty inventory, shows the highest resource block held in hand
-    - upgrade to allow placing shulkers with limited lifespan on cd
-    - low damage (2), non aggressive
-    - place a shulker on a tower to upgrade it
-
-Warp portals (piglins)
-    - protoss-style warpgate production
-    - Civilian warp portal: can warp in workers
-    - Military warp portal: can warp in ground units
-    - needs a cool fiery spawn animation
-    - can warp in anywhere near another portal of any type or central portal
-
-
-
-Misc additions
----------------
-- change witches to auto attack like evokers, reduce cooldown, reduce potion strength and remove lingering effect
-    - ability to toggle between potion types
-    - ability to toggle between auto-attack targets (ally or enemy)
-
-- add a tier of farm upgrades to each faction
-    - pumpkins -> carved pumpkins
-    - wheat -> potatoes
-    - red nylium netherwart -> green nylium
 
 
 

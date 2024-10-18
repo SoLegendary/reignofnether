@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.tutorial.TutorialRendering;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -213,6 +214,7 @@ public class OrthoviewClientEvents {
             TopdownGuiServerboundPacket.openTopdownGui(MC.player.getId());
             MC.options.cloudStatus().set(CloudStatus.OFF);
             MC.options.hideGui = false; // for some reason, when gui is hidden, shape rendering goes whack
+            MC.options.setCameraType(CameraType.FIRST_PERSON);
         }
         else {
             PlayerServerboundPacket.disableOrthoview();
