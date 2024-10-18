@@ -14,6 +14,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
@@ -22,7 +25,7 @@ import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitComman
 public class ActionButtons {
 
     public static final Button BUILD_REPAIR = new Button(
-            "Build/Repair",
+            Component.translatable("button.build_repair").getString(),
             Button.itemIconSize,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shovel.png"),
             Keybindings.build,
@@ -31,93 +34,92 @@ public class ActionButtons {
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.BUILD_REPAIR),
             null,
-            List.of(FormattedCharSequence.forward("Build/Repair", Style.EMPTY))
-    );
+            List.of(FormattedCharSequence.forward(Component.translatable("button.build_repair").getString(),
+                    Style.EMPTY)));
+            
     public static final Button GATHER = new Button(
-            "Gather",
+            Component.translatable("button.gather").getString(),
             Button.itemIconSize,
-            null, // changes depending on the gather target
+            null,
             Keybindings.gather,
             () -> UnitClientEvents.getSelectedUnitResourceTarget() != ResourceName.NONE,
             () -> false,
             () -> true,
-            () -> sendUnitCommand(UnitAction.TOGGLE_GATHER_TARGET),
-            null,
-            null
-    );
+            () -> sendUnitCommand(UnitAction.TOGGLE_GATHER_TARGET), null,
+            null);
+
     public static final Button ATTACK = new Button(
-        "Attack",
-        Button.itemIconSize,
-        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sword.png"),
-        Keybindings.attack,
-        () -> CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK,
-        () -> false,
-        () -> true,
-        () -> CursorClientEvents.setLeftClickAction(UnitAction.ATTACK),
-        null,
-        List.of(FormattedCharSequence.forward("Attack", Style.EMPTY))
-    );
+            Component.translatable("button.attack").getString(),
+            Button.itemIconSize,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sword.png"),
+            Keybindings.attack,
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK,
+            () -> false,
+            () -> true,
+            () -> CursorClientEvents.setLeftClickAction(UnitAction.ATTACK),
+            null,
+            List.of(FormattedCharSequence.forward(Component.translatable("button.attack").getString(), Style.EMPTY)));
+
     public static final Button STOP = new Button(
-        "Stop",
-        Button.itemIconSize,
-        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
-        Keybindings.stop,
-        () -> false, // except if currently clicked on
-        () -> false,
-        () -> true,
-        () -> sendUnitCommand(UnitAction.STOP),
-        null,
-        List.of(FormattedCharSequence.forward("Stop", Style.EMPTY))
-    );
+            Component.translatable("button.stop").getString(),
+            Button.itemIconSize,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
+            Keybindings.stop,
+            () -> false,
+            () -> false,
+            () -> true,
+            () -> sendUnitCommand(UnitAction.STOP),
+            null,
+            List.of(FormattedCharSequence.forward(Component.translatable("button.stop").getString(), Style.EMPTY)));
+
     public static final Button HOLD = new Button(
-        "Hold Position",
-        Button.itemIconSize,
-        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chestplate.png"),
-        Keybindings.hold,
-        () -> {
-            LivingEntity entity = HudClientEvents.hudSelectedEntity;
-            return entity instanceof Unit unit && unit.getHoldPosition();
-        },
-        () -> false,
-        () -> true,
-        () -> sendUnitCommand(UnitAction.HOLD),
-        null,
-        List.of(FormattedCharSequence.forward("Hold Position", Style.EMPTY))
-    );
+            Component.translatable("button.hold_position").getString(),
+            Button.itemIconSize,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chestplate.png"),
+            Keybindings.hold,
+            () -> {
+                LivingEntity entity = HudClientEvents.hudSelectedEntity;
+                return entity instanceof Unit unit && unit.getHoldPosition();
+            },
+            () -> false,
+            () -> true,
+            () -> sendUnitCommand(UnitAction.HOLD),
+            null,
+            List.of(FormattedCharSequence.forward(Component.translatable("button.hold_position").getString(), Style.EMPTY)));
+
     public static final Button MOVE = new Button(
-        "Move",
-        Button.itemIconSize,
-        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/boots.png"),
-        Keybindings.move,
-        () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOVE,
-        () -> false,
-        () -> true,
-        () -> CursorClientEvents.setLeftClickAction(UnitAction.MOVE),
-        null,
-        List.of(FormattedCharSequence.forward("Move", Style.EMPTY))
-    );
+            Component.translatable("button.move").getString(),
+            Button.itemIconSize,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/boots.png"),
+            Keybindings.move,
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOVE,
+            () -> false,
+            () -> true,
+            () -> CursorClientEvents.setLeftClickAction(UnitAction.MOVE),
+            null,
+            List.of(FormattedCharSequence.forward(Component.translatable("button.move").getString(), Style.EMPTY)));
+
     public static final Button GARRISON = new Button(
-        "Garrison",
-        Button.itemIconSize,
-        new ResourceLocation("minecraft", "textures/block/ladder.png"),
-        Keybindings.garrison,
-        () -> CursorClientEvents.getLeftClickAction() == UnitAction.GARRISON,
-        () -> false,
-        () -> true,
-        () -> CursorClientEvents.setLeftClickAction(UnitAction.GARRISON),
-        null,
-        List.of(FormattedCharSequence.forward("Garrison", Style.EMPTY))
-    );
+            Component.translatable("button.garrison").getString(),
+            Button.itemIconSize,
+            new ResourceLocation("minecraft", "textures/block/ladder.png"),
+            Keybindings.garrison,
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.GARRISON,
+            () -> false,
+            () -> true,
+            () -> CursorClientEvents.setLeftClickAction(UnitAction.GARRISON),
+            null,
+            List.of(FormattedCharSequence.forward(Component.translatable("button.garrison").getString(), Style.EMPTY)));
+
     public static final Button UNGARRISON = new Button(
-        "Ungarrison",
-        Button.itemIconSize,
-        new ResourceLocation("minecraft", "textures/block/oak_trapdoor.png"),
-        Keybindings.garrison,
-        () -> false,
-        () -> false,
-        () -> true,
-        () -> sendUnitCommand(UnitAction.UNGARRISON),
-        null,
-        List.of(FormattedCharSequence.forward("Ungarrison", Style.EMPTY))
-    );
+            Component.translatable("button.ungarrison").getString(),
+            Button.itemIconSize,
+            new ResourceLocation("minecraft", "textures/block/oak_trapdoor.png"),
+            Keybindings.garrison,
+            () -> false,
+            () -> false,
+            () -> true,
+            () -> sendUnitCommand(UnitAction.UNGARRISON),
+            null,
+            List.of(FormattedCharSequence.forward(Component.translatable("button.ungarrison").getString(), Style.EMPTY)));
 }
