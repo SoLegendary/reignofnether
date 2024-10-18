@@ -35,6 +35,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
@@ -138,18 +139,18 @@ public class MinimapClientEvents {
 
     public static Button getToggleSizeButton() {
         return new Button(
-            largeMap ? "Close" : "Open large map",
-            14,
-            largeMap ? new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png") :
+                largeMap ? "Close" : "Open large map",
+                14,
+                largeMap ? new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png") :
                         new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
-            Keybindings.keyM,
-            () -> false,
-            () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK),
-            () -> true,
-            () -> shouldToggleSize = true,
-            () -> { },
-            List.of(FormattedCharSequence.forward(largeMap ? "Close" : "Open large map", Style.EMPTY))
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                Keybindings.keyM,
+                () -> false,
+                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK),
+                () -> true,
+                () -> shouldToggleSize = true,
+                () -> { },
+                List.of(FormattedCharSequence.forward(largeMap ? "Close" : "Open large map", Style.EMPTY))
         );
     }
 
@@ -247,7 +248,13 @@ public class MinimapClientEvents {
                 int y = MC.level.getChunkAt(new BlockPos(x,0,z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                 BlockState bs;
                 do {
-                    bs = MC.level.getBlockState(new BlockPos(x,y,z));
+                    bs = MC.level.getBlockState(new BlockPos(x, y, z));
+                    if (bs.getBlock() instanceof SnowLayerBlock) {
+                        int layers = bs.getValue(SnowLayerBlock.LAYERS);
+                        y += (int) (layers * (1.0F / 8.0F));
+
+                        break;
+                    }
                     if (!bs.getMaterial().isSolid() && !bs.getMaterial().isLiquid() && y > 0)
                         y -= 1;
                     else
@@ -257,15 +264,26 @@ public class MinimapClientEvents {
                 int yNorth = MC.level.getChunkAt(new BlockPos(x,0,z-1)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z-1);
                 BlockState bsNorth;
                 do {
-                    bsNorth = MC.level.getBlockState(new BlockPos(x,yNorth,z-1));
+                    bsNorth = MC.level.getBlockState(new BlockPos(x, yNorth, z-1));
+                    if (bsNorth.getBlock() instanceof SnowLayerBlock) {
+                        int layersNorth = bsNorth.getValue(SnowLayerBlock.LAYERS);
+
+                        yNorth += (int) (layersNorth * (1.0F / 8.0F));
+
+                        break;
+                    }
                     if (!bsNorth.getMaterial().isSolid() && !bsNorth.getMaterial().isLiquid() && yNorth > 0)
                         yNorth -= 1;
                     else
                         break;
                 } while (true);
 
+
                 Material mat = MC.level.getBlockState(new BlockPos(x,yNorth,z-1)).getMaterial();
                 int rgb = mat.getColor().col;
+                if (bs.getBlock() instanceof SnowLayerBlock) {
+                    rgb = 0xFFFFFF;
+                }
 
                 // shade blocks to give elevation effects, excluding liquids and nonblocking blocks (eg. grass, flowers)
                 if (!mat.isLiquid()) {
@@ -460,7 +478,7 @@ public class MinimapClientEvents {
     // checks whether a given X Z in the world is part of our map
     public static boolean isWorldXZinsideMap(int x, int z) {
         return x >= xc_world - worldRadius && x < xc_world + worldRadius &&
-               z >= zc_world - worldRadius && z < zc_world + worldRadius;
+                z >= zc_world - worldRadius && z < zc_world + worldRadius;
     }
 
     private static void renderMap(PoseStack stack)
@@ -541,9 +559,9 @@ public class MinimapClientEvents {
     public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
         // when clicking on map move player there
         if (OrthoviewClientEvents.isEnabled() &&
-            evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 &&
-            !Keybindings.shiftMod.isDown() &&
-            !OrthoviewClientEvents.isCameraLocked()) {
+                evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 &&
+                !Keybindings.shiftMod.isDown() &&
+                !OrthoviewClientEvents.isCameraLocked()) {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
             if (MC.player != null && moveTo != null) {
                 PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
@@ -575,9 +593,9 @@ public class MinimapClientEvents {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
             if (UnitClientEvents.getSelectedUnits().size() > 0 && moveTo != null) {
                 UnitClientEvents.sendUnitCommandManual(
-                    UnitAction.MOVE, -1,
-                    UnitClientEvents.getSelectedUnits().stream().mapToInt(Entity::getId).toArray(),
-                    moveTo
+                        UnitAction.MOVE, -1,
+                        UnitClientEvents.getSelectedUnits().stream().mapToInt(Entity::getId).toArray(),
+                        moveTo
                 );
             }
         }
@@ -586,7 +604,7 @@ public class MinimapClientEvents {
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiOverlayEvent.Post evt) {
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() ||
-            !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
+                !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
             return;
 
         // toggle here to ensure it doesn't happen in the middle of the updates

@@ -22,6 +22,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -240,6 +242,15 @@ public interface Unit {
         if (unit instanceof BruteUnit brute && brute.isHoldingUpShield) {
             return 0.5f;
         }
+
+        Mob unitMob = (Mob) unit;
+        BlockPos pos = unitMob.getOnPos();
+        Block block = unitMob.level.getBlockState(pos).getBlock();
+
+        if (block == Blocks.DIRT_PATH) {
+            return 1.2f;
+        }
+
         return 1.0f;
     }
 }
