@@ -94,8 +94,8 @@ public class OrthoviewClientEvents {
     private static float mouseLeftDownY = 0;
 
     // by default orthoview players stay at BASE_Y, but can be raised to as high as MAX_Y if they are clipping terrain
-    private static final double ORTHOVIEW_PLAYER_BASE_Y = 85;
-    private static final double ORTHOVIEW_PLAYER_MAX_Y = 105;
+    public static final double ORTHOVIEW_PLAYER_BASE_Y = 85;
+    public static final double ORTHOVIEW_PLAYER_MAX_Y = 105;
 
     public static boolean isEnabled() {
         return enabled;

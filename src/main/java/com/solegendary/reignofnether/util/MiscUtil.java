@@ -99,7 +99,7 @@ public class MiscUtil {
         do {
             bs = level.getBlockState(new BlockPos(blockPos.getX(), y, blockPos.getZ()));
             y -= 1;
-        } while(bs.isAir() && y > 0);
+        } while(bs.isAir() && y > -63);
 
         return new BlockPos(blockPos.getX(), y, blockPos.getZ());
     }

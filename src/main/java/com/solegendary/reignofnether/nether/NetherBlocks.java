@@ -227,7 +227,7 @@ public class NetherBlocks {
         MAPPINGS.put(BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get(),
             List.of(
                 Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES,
-                Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES
+                Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES, Blocks.AZALEA_LEAVES
             ));
         MAPPINGS.put(Blocks.NETHER_QUARTZ_ORE,
             List.of(

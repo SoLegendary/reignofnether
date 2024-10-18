@@ -63,6 +63,9 @@ public class UnitServerEvents {
     private static final int UNIT_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
     private static int unitSyncTicks = UNIT_SYNC_TICKS_MAX;
 
+    // max possible pop you can have regardless of buildings, adjustable via thereisnospoon cheat
+    public static int hardCapPopulation = ResourceCosts.DEFAULT_HARD_CAP_POPULATION;
+
     private static ServerLevel serverLevel = null;
 
     private static final List<UnitActionItem> unitActionQueue = Collections.synchronizedList(new ArrayList<>());
@@ -463,8 +466,12 @@ public class UnitServerEvents {
         if (evt.getSource() == DamageSource.WITHER)
             evt.setAmount(evt.getAmount() * 2);
 
-        if (evt.getSource().getEntity() instanceof GhastUnit)
-            evt.setAmount(evt.getAmount() / 2);
+        // halve direct ghast damage since they get bonus damage from launching units into the air
+        if (evt.getSource().getEntity() instanceof GhastUnit) {
+            // (unless its to a garrisoned unit)
+            if (!(evt.getEntity() instanceof Unit unit && GarrisonableBuilding.getGarrison(unit) != null))
+                evt.setAmount(evt.getAmount() / 2);
+        }
 
         // ensure projectiles from units do the damage of the unit, not the item
         if (evt.getSource().isProjectile() && evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)

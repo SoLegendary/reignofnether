@@ -13,5 +13,7 @@ public enum PlayerAction {
     DISABLE_RTS,
     ENABLE_RTS,
     RESET_RTS,
-    SYNC_RTS_GAME_TIME
+    SYNC_RTS_GAME_TIME,
+    LOCK_RTS,
+    UNLOCK_RTS
 }

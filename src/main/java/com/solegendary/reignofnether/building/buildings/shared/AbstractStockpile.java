@@ -111,16 +111,16 @@ public abstract class AbstractStockpile extends ProductionBuilding {
     }
 
     // collect items placed manually inside the chests by players
-    public void checkAndConsumeChestItems() {
-        if (!this.getLevel().isClientSide()) {
+    public static void checkAndConsumeChestItems(Building building) {
+        if (!building.getLevel().isClientSide()) {
             BlockPos textPos = null;
             int food = 0;
             int wood = 0;
             int ore = 0;
 
-            for (BuildingBlock block : blocks) {
+            for (BuildingBlock block : building.getBlocks()) {
                 if (block.getBlockState().getBlock() == Blocks.CHEST) {
-                    BlockEntity blockEntity = this.getLevel().getBlockEntity(block.getBlockPos());
+                    BlockEntity blockEntity = building.getLevel().getBlockEntity(block.getBlockPos());
                     if (blockEntity instanceof ChestBlockEntity chest) {
 
                         for (int i = 0; i < chest.items.size(); i++) {
@@ -134,12 +134,11 @@ public abstract class AbstractStockpile extends ProductionBuilding {
                                 textPos = block.getBlockPos().offset(0,-2,0);
                             }
                         }
-
                     }
                 }
             }
             if (food > 0 || wood > 0 || ore > 0) {
-                Resources res = new Resources(this.ownerName, food, wood, ore);
+                Resources res = new Resources(building.ownerName, food, wood, ore);
                 ResourcesServerEvents.addSubtractResources(res);
                 ResourcesClientboundPacket.showFloatingText(res, textPos);
             }

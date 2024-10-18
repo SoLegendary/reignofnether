@@ -2,61 +2,81 @@
 1.19.2-1.0.2
 ------------
 
+[✔] Done and tested
+[🟡] Partially done, only has a workaround and/or needs testing
+[❌] Not done, top ones are roughly of higher priority
+
 Bugfixes
 --------
+[✔] Fixed Azalea leaves not being nether-converted
 
-[✔] /rts-reset now works from command blocks
+[✔] Regular TNT can now damage buildings with the same damage as regular creepers (20) and can set off other TNTs
 
-[✔] Spiders can no longer spawn out of lairs as vanilla jockeys and crash the game
+[✔] Having many buildings selected no longer has messed up HUD rendering
 
-[✔] Liquid blocks that are part of a building can now be destroyed on damage.
-    This means Flame Sanctuaries are no longer indestructible and damaged wheat/pumpkin farms can dry up.
+[✔] Crimson and Warped Hyphae are now gatherable by workers
 
-[✔] Fixed crash related to deselecting and reselecting control groups
+[✔] Planks and stripped logs are no longer gatherable by workers and will no longer chain-break when broken in the air
+    The only gatherable and chain-breakable blocks are now logs, wood blocks and mushroom/wart stems
 
-[✔] Fixed crash when selecting a nametagged unit
+[✔] Units in production queues now pause at 99% in red text if you dropped below max population while it was building
 
-[✔] Enabling F12 cam now forces you out of 3rd person cam so that you don't get rendering issues
+[✔] Non-ops can no longer use /rts-reset
 
-[❌] Iron golems attack friendly units on attack move
+[✔] Resources no longer act strangely (go negative, have doubled costs, etc.) after a match is restarted or a player is defeated
 
+[❌] Let mapmakers set the default Y level of their world and have it sync to clients on login
+    - This solves rendering issues on worlds where the default is far from Y=64
 
 [❌] On a server match, population appears to be incorrect a lot
     - Server mismatches client
-    - Spectators see different to client
+    - Specatators see different to client
     - Unupgraded portals are somehow worth 10 supply
 
+[❌] Building on top of a unit causes crash
+    - probably because of moving out of the way logic
+    - need crash logs
 
+[❌] Water in farms no longer freeze up
 
+[❌] Iron golems attack your villagers sometimes
+    - Maybe because they're actually vindicators in a villager skin?
 
-[❌] [#29] Resources go negative after a match is done
-    - make sure we're removing players' resources on each end condition, including:
-        - defeat()
-        - resetRTS()
+[❌] Joining a world causes a lot of lag if a match is already started
+    - Create an experimental branch where building syncing is toggleable
+    - Will need volunteer helpers to test
+    - Review code and see if direct optimisations can be made
+    - Maybe can buffer the syncing (eg. only allow 1 building sync per second, across all players) so it doesn't collapse the server
 
-[❌] [performance] joining a loaded server causes huge lag
-
-[❌] Logic for breaking trees also breaks all wooden buildings that aren't supported
-
-
-Balancing
----------
-[❌] Allow garrisoned units to be shot at, but at 1/2 damage
-    - have half of projectiles blocked by the battlements
-    - if STILL too powerful, cause all explosive damage to directly hit garrisoned units too at 1/4 damage
-
+[❌] On a server, unloaded workers stop gathering stuff
+    - Relook at forced chunks?
 
 
 
 Quality of Life Features
 ------------------------
-[❌] Banners and coloured minimap indicators for each player (each new player to join gets the next colour in order)\
-        - place banners after building completion
-        - use coloured
-        - reserve yellow for neutral
+
+[🟡] /rts-lock/unlock to prevent new players joining the match
+
+[❌] /server-lock/unlock to prevent new players from logging onto the server at all
+
+[✔] Pressing alt now cancels your building placement so you don't accidentally place it while dragging the camera
+
+[✔] Vanilla players can now drop off resources into stockpile chests (and chests for this purpose have been added to civilian portals)
+    - This was actually designed previously, just was only working for villager stockpiles until now
+
+[✔] New cheat code: thereisnospoon X - sets everyone's hard capped max population to X
+    - The current max value is now shown on the tooltip to the left of the bed icon
+    - Like most other cheats, this won't save between server restarts
+    - foodforthought now allows you to only ignore the soft cap (ie. houses are no longer needed), but
+        cannot go higher than what has been set with thereisnospoon
 
 [❌] Radius indicator around monster capitol and stronghold to better indicate range of night
     (can use this same code for ability range indicators too)
+
+[❌] Flatten terrain ability
+    - Require that villagers work on it like a building
+    - Will need a new flatten zone object (no need to save it)
 
 [❌] More shift click queue commands
     - Build already-placed foundations
@@ -65,6 +85,19 @@ Quality of Life Features
 
 [❌] Hovering buttons (or some other indicator) for idle farms
     - Clicking said button will assign the nearest idle villager to it
+
+
+Balancing
+---------
+[✔] Any explosive damage to a garrison now deals a random amount that damage directly to all garrisoned units
+    (This averages out to 1/2 of the explosion damage)
+
+[✔] Reduced ghast health from 60 to 50 to compensate for the above
+
+[🟡] Garrison units should be attackable by ground ranged units but only at 1/2 accuracy
+    - Implement the nophysics mixin for arrows and blaze fireballs but have it not work 1/2 of the time
+        - Turns out its kinda hard to do make arrows noclip the battlements but also collide with enemies
+
 
 
 

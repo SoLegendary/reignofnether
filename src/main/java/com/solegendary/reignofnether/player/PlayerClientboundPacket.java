@@ -53,6 +53,16 @@ public class PlayerClientboundPacket {
                 new PlayerClientboundPacket(PlayerAction.SYNC_RTS_GAME_TIME, "", rtsGameTicks));
     }
 
+    public static void lockRTS(String playerName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.LOCK_RTS, playerName, 0L));
+    }
+
+    public static void unlockRTS(String playerName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.UNLOCK_RTS, playerName, 0L));
+    }
+
     public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long rtsGameTime) {
         this.playerAction = playerAction;
         this.playerName = playerName;
@@ -85,6 +95,8 @@ public class PlayerClientboundPacket {
                             case ENABLE_RTS -> PlayerClientEvents.enableRTS(playerName);
                             case RESET_RTS -> PlayerClientEvents.resetRTS();
                             case SYNC_RTS_GAME_TIME -> PlayerClientEvents.syncRtsGameTime(rtsGameTime);
+                            case LOCK_RTS -> PlayerClientEvents.setRTSLock(true);
+                            case UNLOCK_RTS -> PlayerClientEvents.setRTSLock(false);
                         }
                         success.set(true);
                     });

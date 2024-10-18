@@ -26,6 +26,7 @@ Reign of Nether doesn't try to imitate one of these games exactly, but instead a
 | Monsters Race | ✔ |  |  
 | Piglins Race | ✔ |  |  
 | Fog of war | 🟡 | Still has performance issues and some bugs |  
+| Singleplayer modes | ❌ | Planning a wave survival mode! |  
 | Improved vanilla player features | ❌ | Give vanilla-mode players more interaction with their RTS teammates |
 | Teams | ❌ | Including resource trading, shared unit control, etc. |
 

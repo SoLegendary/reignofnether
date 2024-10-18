@@ -6,8 +6,6 @@ import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
@@ -72,6 +70,14 @@ public class PlayerServerboundPacket {
                     PlayerAction.DEFEAT, MC.player.getId(), 0d,0d,0d));
         }
     }
+    public static void lockRTS() {
+        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+                PlayerAction.LOCK_RTS, 0,0d,0d,0d));
+    }
+    public static void unlockRTS() {
+        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+                PlayerAction.UNLOCK_RTS, 0,0d,0d,0d));
+    }
 
     // packet-handler functions
     public PlayerServerboundPacket(PlayerAction action, int playerId, Double x, Double y, Double z) {
@@ -111,6 +117,8 @@ public class PlayerServerboundPacket {
                 case START_RTS_PIGLINS -> PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.PIGLINS);
                 case DEFEAT -> PlayerServerEvents.defeat(this.playerId, "surrendered");
                 case RESET_RTS -> PlayerServerEvents.resetRTS();
+                case LOCK_RTS -> PlayerServerEvents.setRTSLock(true);
+                case UNLOCK_RTS -> PlayerServerEvents.setRTSLock(false);
             }
             success.set(true);
         });

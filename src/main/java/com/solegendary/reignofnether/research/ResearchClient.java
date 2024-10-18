@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.research;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.unit.UnitActionItem;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
@@ -50,6 +51,12 @@ public class ResearchClient {
     public static void removeAllCheats() {
         synchronized (cheatItems) {
             cheatItems.clear();
+        }
+    }
+
+    public static void addCheatWithValue(String cheatItemName, int value) {
+        if (cheatItemName.equals("thereisnospoon")) {
+            UnitClientEvents.maxPopulation = value;
         }
     }
 

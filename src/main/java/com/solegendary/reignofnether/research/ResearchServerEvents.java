@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.research;
 
 import com.mojang.datafixers.util.Pair;
-import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
-import com.solegendary.reignofnether.building.buildings.piglins.Portal;
-import com.solegendary.reignofnether.building.buildings.villagers.Castle;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.server.ServerStartedEvent;
@@ -85,6 +82,8 @@ public class ResearchServerEvents {
         for (Pair<String, String> cheatItem : cheatItems)
             if (playerName.equals(cheatItem.getFirst()))
                 ResearchClientboundPacket.addCheat(cheatItem.getFirst(), cheatItem.getSecond());
+
+        ResearchClientboundPacket.addCheatWithValue(playerName, "thereisnospoon", UnitServerEvents.hardCapPopulation);
     }
 
     public static void addCheat(String playerName, String cheatItemName) {

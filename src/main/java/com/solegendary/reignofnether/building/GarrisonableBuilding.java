@@ -23,6 +23,23 @@ public interface GarrisonableBuilding {
 
     boolean isFull();
 
+    // will only return actual Units, not any other LivingEntity
+    public default List<LivingEntity> getOccupants() {
+        if (this instanceof Building building) {
+            if (building.level.isClientSide())
+                return UnitClientEvents.getAllUnits().stream()
+                        .filter(le -> le instanceof Unit u &&
+                                GarrisonableBuilding.getGarrison(u) == this)
+                        .toList();
+            else
+                return UnitServerEvents.getAllUnits().stream()
+                        .filter(le -> le instanceof Unit u &&
+                                GarrisonableBuilding.getGarrison(u) == this)
+                        .toList();
+        }
+        return List.of();
+    }
+
     static GarrisonableBuilding getGarrison(Unit unit) {
         List<Building> buildings;
         if (((Entity) unit).getLevel().isClientSide())
