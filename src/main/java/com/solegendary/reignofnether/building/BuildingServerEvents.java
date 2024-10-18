@@ -17,7 +17,6 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.unit.packets.UnitActionClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
@@ -314,13 +313,13 @@ public class BuildingServerEvents {
 
     public static int getTotalPopulationSupply(String ownerName) {
         if (ResearchServerEvents.playerHasCheat(ownerName, "foodforthought"))
-            return Integer.MAX_VALUE;
+            return UnitServerEvents.hardCapPopulation;
 
         int totalPopulationSupply = 0;
         for (Building building : buildings)
             if (building.ownerName.equals(ownerName) && building.isBuilt)
                 totalPopulationSupply += building.popSupply;
-        return Math.min(ResourceCosts.MAX_POPULATION, totalPopulationSupply);
+        return Math.min(UnitServerEvents.hardCapPopulation, totalPopulationSupply);
     }
 
     // similar to BuildingClientEvents getPlayerToBuildingRelationship: given a Unit and Building, what is the relationship between them

@@ -30,7 +30,6 @@ import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
@@ -53,6 +52,8 @@ public class PlayerServerEvents {
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
     public static final List<RTSPlayer> rtsPlayers = Collections.synchronizedList(new ArrayList<>()); // players that have run /startrts
 
+    public static final int ORTHOVIEW_PLAYER_BASE_Y = 85;
+
     public static final int TICKS_TO_REVEAL = 60 * ResourceCost.TICKS_PER_SECOND;
 
     public static long rtsGameTicks = 0; // ticks up as long as there is at least 1 rtsPlayer
@@ -64,7 +65,8 @@ public class PlayerServerEvents {
     // modifythephasevariance - ignore building requirements
     // medievalman - get all research (cannot reverse)
     // greedisgood X - gain X of each resource
-    // foodforthought - unlimited population
+    // thereisnospoon X - set hard population cap for everyone to X
+    // foodforthought - ignore soft population caps
     public static final List<String> singleWordCheats = List.of(
             "warpten", "operationcwal", "modifythephasevariance", "medievalman", "foodforthought"
     );
@@ -158,7 +160,7 @@ public class PlayerServerEvents {
         if (isRTSPlayer(playerName)) {
             for (Building building : BuildingServerEvents.getBuildings()) {
                 if (building.ownerName.equals(playerName)) {
-                    movePlayer(serverPlayer.getId(), 0,85,0);
+                    movePlayer(serverPlayer.getId(), 0,ORTHOVIEW_PLAYER_BASE_Y,0);
                     break;
                 }
             }
@@ -320,12 +322,24 @@ public class PlayerServerEvents {
             String[] words = msg.split(" ");
             String playerName = evt.getPlayer().getName().getString();
 
-            if (words.length == 2 && words[0].equalsIgnoreCase("greedisgood")) {
+            if (words.length == 2) {
                 try {
-                    int amount = Integer.parseInt(words[1]);
-                    ResourcesServerEvents.addSubtractResources(new Resources(playerName, amount, amount, amount));
-                    evt.setCanceled(true);
-                    sendMessageToAllPlayers(playerName + " used cheat: " + words[0] + " " + amount);
+                    if (words[0].equalsIgnoreCase("greedisgood")) {
+                        int amount = Integer.parseInt(words[1]);
+                        if (amount > 0) {
+                            ResourcesServerEvents.addSubtractResources(new Resources(playerName, amount, amount, amount));
+                            evt.setCanceled(true);
+                            sendMessageToAllPlayers(playerName + " used cheat: " + words[0] + " " + amount);
+                        }
+                    } else if (words[0].equalsIgnoreCase("thereisnospoon")) {
+                        int amount = Integer.parseInt(words[1]);
+                        if (amount > 0) {
+                            UnitServerEvents.hardCapPopulation = amount;
+                            ResearchClientboundPacket.addCheatWithValue(playerName, words[0], amount);
+                            evt.setCanceled(true);
+                            sendMessageToAllPlayers(playerName + " used cheat: " + words[0] + " " + amount);
+                        }
+                    }
                 }
                 catch(NumberFormatException err) {
                     System.out.println(err);
@@ -353,6 +367,9 @@ public class PlayerServerEvents {
             if (words.length == 1 && words[0].equalsIgnoreCase("allcheats") &&
                 (playerName.equalsIgnoreCase("solegendary") || playerName.equalsIgnoreCase("altsolegendary"))) {
                 ResourcesServerEvents.addSubtractResources(new Resources(playerName, 99999, 99999, 99999));
+                UnitServerEvents.hardCapPopulation = 99999;
+                ResearchClientboundPacket.addCheatWithValue(playerName, "thereisnospoon", 99999);
+
                 for (String cheatName : singleWordCheats) {
                     ResearchServerEvents.addCheat(playerName, cheatName);
                     ResearchClientboundPacket.addCheat(playerName, cheatName);
@@ -473,6 +490,7 @@ public class PlayerServerEvents {
             }
             saveRTSPlayers();
         }
+        ResourcesServerEvents.resourcesList.removeIf(rl -> rl.ownerName.equals(playerName));
     }
 
     @SubscribeEvent

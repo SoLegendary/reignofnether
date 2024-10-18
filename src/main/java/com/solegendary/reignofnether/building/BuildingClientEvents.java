@@ -41,11 +41,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -62,12 +60,15 @@ public class BuildingClientEvents {
     static final Minecraft MC = Minecraft.getInstance();
 
     public static int getTotalPopulationSupply(String playerName) {
+        if (ResearchClient.hasResearch("foodforthought"))
+            return UnitClientEvents.maxPopulation;
+
         int totalPopulationSupply = 0;
         for (Building building : buildings)
             if (building.ownerName.equals(playerName) && building.isBuilt)
                 totalPopulationSupply += building.popSupply;
 
-        return Math.min(ResourceCosts.MAX_POPULATION, totalPopulationSupply);
+        return Math.min(UnitClientEvents.maxPopulation, totalPopulationSupply);
     }
     // clientside buildings used for tracking position (for cursor selection)
     private static final ArrayList<Building> buildings = new ArrayList<>();

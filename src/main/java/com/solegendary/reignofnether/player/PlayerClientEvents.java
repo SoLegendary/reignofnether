@@ -43,8 +43,11 @@ public class PlayerClientEvents {
                 }));
         evt.getDispatcher().register(Commands.literal("rts-reset")
                 .executes((command) -> {
-                    PlayerServerboundPacket.resetRTS();
-                    return 1;
+                    if (MC.player != null && MC.player.hasPermissions(4)) {
+                        PlayerServerboundPacket.resetRTS();
+                        return 1;
+                    }
+                    return 0;
                 }));
         evt.getDispatcher().register(Commands.literal("rts-help")
                 .executes((command) -> {
@@ -85,6 +88,8 @@ public class PlayerClientEvents {
         disableRTS(playerName);
         MC.gui.setTitle(Component.literal("You have been defeated"));
         MC.player.playSound(SoundRegistrar.DEFEAT.get(), 0.5f, 1.0f);
+
+        ResourcesClientEvents.resourcesList.removeIf(r -> r.ownerName.equals(MC.player.getName().getString()));
     }
 
     public static void victory(String playerName) {

@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
@@ -158,8 +160,9 @@ public class BuildingServerboundPacket {
                         BuildingClientboundPacket.cancelProduction(buildingPos, itemName, false);
                 }
                 case CHECK_STOCKPILE_CHEST -> {
-                    if (building instanceof OakStockpile stockpile)
-                        stockpile.checkAndConsumeChestItems();
+                    if (building instanceof AbstractStockpile ||
+                        building instanceof Portal portal && portal.portalType == Portal.PortalType.CIVILIAN)
+                        AbstractStockpile.checkAndConsumeChestItems(building);
                 }
                 case REQUEST_REPLACEMENT -> {
                     BuildingServerEvents.replaceClientBuilding(buildingPos);

@@ -12,18 +12,37 @@ Bugfixes
 
 [✔] Regular TNT can now damage buildings with the same damage as regular creepers (20) and can set off other TNTs
 
-[❌] Water in farms no longer freeze up
+[✔] Having many buildings selected no longer has messed up HUD rendering
 
-[❌] Planks and plank-related blocks are no longer seen as resources by workers and will no longer chain-break when broken
+[✔] Crimson and Warped Hyphae are now gatherable by workers
 
-[❌] Queued units should pause at 99% with a warning if you are at the popcap
-    - eg. by destroying a house during production
+[✔] Planks and stripped logs are no longer gatherable by workers and will no longer chain-break when broken in the air
+    The only gatherable and chain-breakable blocks are now logs, wood blocks and mushroom/wart stems
+
+[✔] Units in production queues now pause at 99% in red text if you dropped below max population while it was building
+
+[✔] Non-ops can no longer use /rts-reset
+
+
+
+[🟡] [#29] Resources go negative after a match is done
+    - make sure we're removing players' resources on each end condition, including:
+        - defeat()
+        - resetRTS()
+
+[❌] Let mapmakers set the default Y level of their world and have it sync to clients on login
+    - This solves rendering issues on worlds where the default is far from Y=64
+
+[❌] On a server match, population appears to be incorrect a lot
+    - Server mismatches client
+    - Specatators see different to client
+    - Unupgraded portals are somehow worth 10 supply
 
 [❌] Building on top of a unit causes crash
     - probably because of moving out of the way logic
     - need crash logs
 
-[❌] Even non-ops can use /rts-reset
+[❌] Water in farms no longer freeze up
 
 [❌] Iron golems attack your villagers sometimes
     - Maybe because they're actually vindicators in a villager skin?
@@ -34,16 +53,6 @@ Bugfixes
     - Review code and see if direct optimisations can be made
     - Maybe can buffer the syncing (eg. only allow 1 building sync per second, across all players) so it doesn't collapse the server
 
-[❌] [#29] Resources go negative after a match is done
-    - make sure we're removing players' resources on each end condition, including:
-        - defeat()
-        - resetRTS()
-
-[❌] On a server match, population appears to be incorrect a lot
-    - Server mismatches client
-    - Specatators see different to client
-    - Unupgraded portals are somehow worth 10 supply
-
 [❌] On a server, unloaded workers stop gathering stuff
     - Relook at forced chunks?
 
@@ -52,26 +61,33 @@ Bugfixes
 Quality of Life Features
 ------------------------
 
+[❌] /rts-lock/unlock to prevent new players joining the match
+
+[❌] /rts-hard-lock/unlock to prevent new players from logging onto the server at all
+
 [✔] Pressing alt now cancels your building placement so you don't accidentally place it while dragging the camera
 
-[❌] The foodforthought cheatcode now has an X value (if omitted, will just be infinite)
-    - This will apply for ALL players on the server
-    - The actual max value is now shown on the tooltip to the left of the bed icon
+[✔] Vanilla players can now drop off resources into stockpile chests (and chests for this purpose have been added to civilian portals)
+    - This was actually designed previously, just was only working for villager stockpiles until now
+
+[✔] New cheat code: thereisnospoon X - sets everyone's hard capped max population to X
+    - The current max value is now shown on the tooltip to the left of the bed icon
     - Like most other cheats, this won't save between server restarts
+    - foodforthought now allows you to only ignore the soft cap (ie. houses are no longer needed), but
+        cannot go higher than what has been set with thereisnospoon
+
+[❌] Radius indicator around monster capitol and stronghold to better indicate range of night
+    (can use this same code for ability range indicators too)
 
 [❌] Flatten terrain ability
     - Require that villagers work on it like a building
     - Will need a new flatten zone object (no need to save it)
 
-[❌] Pressing Stop on a spider should force it to stop climbing for a few seconds
-
-[❌] Middle mouse button to drag camera
-[❌] Radius indicator around monster capitol and stronghold to better indicate range of night
-    (can use this same code for ability range indicators too)
 [❌] More shift click queue commands
     - Build already-placed foundations
     - Repair damaged buildings
     - Move units
+
 [❌] Hovering buttons (or some other indicator) for idle farms
     - Clicking said button will assign the nearest idle villager to it
 

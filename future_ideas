@@ -36,15 +36,31 @@ VANILLA PLAYER INTEGRATION
 --------------------------
 Must first solve issue of lag in fog of war when in vanilla cam
 
+Changes required for any implementation:
+-----------------------------------------
+- Attacking any melee unit that's targeting a player should immediately deal its melee damage to them
+    - Otherwise, kiting melee units is too easy
+- Block placement is disabled
+- Block breaking only allowed for gathering resources and attacking buildings
+
+
+Vagabond
+--------
+Inspired by the Raccoon from the boardgame Root, where each survival player is on their own team
+
+
+
+RTS Commander
+-------------
+Inspired by the game Natural Selection, where each RTS player is a commander for their team of survival players and they can support each other
+
 - Balance player actions using food that must be provided by RTS player:
     - sprinting (very high usage)
     - attacking (medium usage)
     - gathering (low usage)
     - walking and jumping (low usage)
 
-- Attacking any melee unit that's targeting a player should immediately deal its melee damage to them
-    - Otherwise, kiting melee units is too easy
-- Punching disabled, combat and resource gathering can only be done if the player has tools/weapons
+
 - Turned into a ghost on death - must walk back to a capitol building to be resurrected for a resource cost
 - Tools/weapons provided by the RTS player using resources
 - Items/utilities for non-RTS players should be produced at existing buildings:
