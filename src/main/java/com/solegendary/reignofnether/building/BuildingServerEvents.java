@@ -28,6 +28,7 @@ import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
@@ -51,6 +52,8 @@ public class BuildingServerEvents {
     private static final int BUILDING_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
     private static int buildingSyncTicks = BUILDING_SYNC_TICKS_MAX;
 
+    private static int TNT_BUILDING_BASE_DAMAGE = 20;
+
     private static ServerLevel serverLevel = null;
 
     // buildings that currently exist serverside
@@ -59,6 +62,8 @@ public class BuildingServerEvents {
     public static final ArrayList<NetherZone> netherZones = new ArrayList<>();
 
     public static ArrayList<Building> getBuildings() { return buildings; }
+
+    public static final Random random = new Random();
 
     public static void saveBuildings() {
         if (serverLevel == null)
@@ -480,7 +485,7 @@ public class BuildingServerEvents {
 
         // apply creeper, ghast and mounted pillager attack damage as bonus damage to buildings
         // this is dealt in addition to the actual blocks destroyed by the explosion itself
-        if (creeperUnit != null || ghastUnit != null || pillagerUnit != null) {
+        if (creeperUnit != null || ghastUnit != null || pillagerUnit != null || exp.getExploder() instanceof PrimedTnt) {
             Set<Building> affectedBuildings = new HashSet<>();
             for (BlockPos bp : evt.getAffectedBlocks()) {
                 Building building = BuildingUtils.findBuilding(false, bp);
@@ -497,14 +502,26 @@ public class BuildingServerEvents {
                         atkDmg *= 2;
                 } else if (pillagerUnit != null) {
                     atkDmg = (int) pillagerUnit.getUnitAttackDamage() / 2;
+                } else if (exp.getExploder() instanceof PrimedTnt) {
+                    atkDmg = TNT_BUILDING_BASE_DAMAGE;
                 }
-                building.destroyRandomBlocks(atkDmg);
+
+                if (atkDmg > 0) {
+                    // all explosion damage will directly hit all occupants at an average of half rate
+                    if (building instanceof GarrisonableBuilding garr)
+                        for (LivingEntity le : garr.getOccupants())
+                            le.hurt(exp.getDamageSource(), random.nextInt(atkDmg + 1));
+
+                    building.destroyRandomBlocks(atkDmg);
+                }
+
             }
         }
-        // don't do any block damage apart from the scripted building damage above or damage to leaves
+        // don't do any block damage apart from the scripted building damage above or damage to leaves/tnt
         evt.getAffectedBlocks().removeIf(bp -> {
             BlockState bs = evt.getLevel().getBlockState(bp);
-            return !(bs.getBlock() instanceof LeavesBlock);
+            return !(bs.getBlock() instanceof LeavesBlock) &&
+                    !(bs.getBlock() instanceof TntBlock);
         });
     }
 

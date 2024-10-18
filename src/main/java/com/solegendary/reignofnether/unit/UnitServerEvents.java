@@ -463,8 +463,12 @@ public class UnitServerEvents {
         if (evt.getSource() == DamageSource.WITHER)
             evt.setAmount(evt.getAmount() * 2);
 
-        if (evt.getSource().getEntity() instanceof GhastUnit)
-            evt.setAmount(evt.getAmount() / 2);
+        // halve direct ghast damage since they get bonus damage from launching units into the air
+        if (evt.getSource().getEntity() instanceof GhastUnit) {
+            // (unless its to a garrisoned unit)
+            if (!(evt.getEntity() instanceof Unit unit && GarrisonableBuilding.getGarrison(unit) != null))
+                evt.setAmount(evt.getAmount() / 2);
+        }
 
         // ensure projectiles from units do the damage of the unit, not the item
         if (evt.getSource().isProjectile() && evt.getSource().getEntity() instanceof AttackerUnit attackerUnit)

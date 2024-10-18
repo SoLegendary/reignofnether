@@ -45,6 +45,7 @@ import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -740,6 +741,9 @@ public class BuildingClientEvents {
 
     @SubscribeEvent
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT_ALT) {
+            buildingToPlace = null;
+        }
         if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
             Building building = HudClientEvents.hudSelectedBuilding;
             if (building != null && building.isBuilt && getPlayerToBuildingRelationship(building) == Relationship.OWNED) {

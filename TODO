@@ -2,69 +2,91 @@
 1.19.2-1.0.2
 ------------
 
+[✔] Done and tested
+[🟡] Partially done, only has a workaround and/or needs testing
+[❌] Not done, top ones are roughly of higher priority
+
 Bugfixes
 --------
+[✔] Fixed Azalea leaves not being nether-converted
 
-[✔] /rts-reset now works from command blocks
+[✔] Regular TNT can now damage buildings with the same damage as regular creepers (20) and can set off other TNTs
 
-[✔] Spiders can no longer spawn out of lairs as vanilla jockeys and crash the game
+[❌] Water in farms no longer freeze up
 
-[✔] Liquid blocks that are part of a building can now be destroyed on damage.
-    This means Flame Sanctuaries are no longer indestructible and damaged wheat/pumpkin farms can dry up.
+[❌] Planks and plank-related blocks are no longer seen as resources by workers and will no longer chain-break when broken
 
-[✔] Fixed crash related to deselecting and reselecting control groups
+[❌] Queued units should pause at 99% with a warning if you are at the popcap
+    - eg. by destroying a house during production
 
-[✔] Fixed crash when selecting a nametagged unit
+[❌] Building on top of a unit causes crash
+    - probably because of moving out of the way logic
+    - need crash logs
 
-[✔] Enabling F12 cam now forces you out of 3rd person cam so that you don't get rendering issues
+[❌] Even non-ops can use /rts-reset
 
-[❌] Iron golems attack friendly units on attack move
+[❌] Iron golems attack your villagers sometimes
+    - Maybe because they're actually vindicators in a villager skin?
 
-
-[❌] On a server match, population appears to be incorrect a lot
-    - Server mismatches client
-    - Spectators see different to client
-    - Unupgraded portals are somehow worth 10 supply
-
-
-
+[❌] Joining a world causes a lot of lag if a match is already started
+    - Create an experimental branch where building syncing is toggleable
+    - Will need volunteer helpers to test
+    - Review code and see if direct optimisations can be made
+    - Maybe can buffer the syncing (eg. only allow 1 building sync per second, across all players) so it doesn't collapse the server
 
 [❌] [#29] Resources go negative after a match is done
     - make sure we're removing players' resources on each end condition, including:
         - defeat()
         - resetRTS()
 
-[❌] [performance] joining a loaded server causes huge lag
+[❌] On a server match, population appears to be incorrect a lot
+    - Server mismatches client
+    - Specatators see different to client
+    - Unupgraded portals are somehow worth 10 supply
 
-[❌] Logic for breaking trees also breaks all wooden buildings that aren't supported
-
-
-Balancing
----------
-[❌] Allow garrisoned units to be shot at, but at 1/2 damage
-    - have half of projectiles blocked by the battlements
-    - if STILL too powerful, cause all explosive damage to directly hit garrisoned units too at 1/4 damage
-
+[❌] On a server, unloaded workers stop gathering stuff
+    - Relook at forced chunks?
 
 
 
 Quality of Life Features
 ------------------------
-[❌] Banners and coloured minimap indicators for each player (each new player to join gets the next colour in order)\
-        - place banners after building completion
-        - use coloured
-        - reserve yellow for neutral
 
+[✔] Pressing alt now cancels your building placement so you don't accidentally place it while dragging the camera
+
+[❌] The foodforthought cheatcode now has an X value (if omitted, will just be infinite)
+    - This will apply for ALL players on the server
+    - The actual max value is now shown on the tooltip to the left of the bed icon
+    - Like most other cheats, this won't save between server restarts
+
+[❌] Flatten terrain ability
+    - Require that villagers work on it like a building
+    - Will need a new flatten zone object (no need to save it)
+
+[❌] Pressing Stop on a spider should force it to stop climbing for a few seconds
+
+[❌] Middle mouse button to drag camera
 [❌] Radius indicator around monster capitol and stronghold to better indicate range of night
     (can use this same code for ability range indicators too)
-
 [❌] More shift click queue commands
     - Build already-placed foundations
     - Repair damaged buildings
     - Move units
-
 [❌] Hovering buttons (or some other indicator) for idle farms
     - Clicking said button will assign the nearest idle villager to it
+
+
+Balancing
+---------
+[✔] Any explosive damage to a garrison now deals a random amount that damage directly to all garrisoned units
+    (This averages out to 1/2 of the explosion damage)
+
+[✔] Reduced ghast health from 60 to 50 to compensate for the above
+
+[🟡] Garrison units should be attackable by ground ranged units but only at 1/2 accuracy
+    - Implement the nophysics mixin for arrows and blaze fireballs but have it not work 1/2 of the time
+        - Turns out its kinda hard to do make arrows noclip the battlements but also collide with enemies
+
 
 
 

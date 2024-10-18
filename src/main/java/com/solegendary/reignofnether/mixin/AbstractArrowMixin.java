@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.mixin;
 import com.google.common.collect.Lists;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -37,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 @Mixin(AbstractArrow.class)
 public abstract class AbstractArrowMixin extends Projectile {
@@ -48,6 +50,18 @@ public abstract class AbstractArrowMixin extends Projectile {
     @Shadow public abstract boolean isNoPhysics();
     @Shadow private int life;
 
+    private boolean isInsideTopOfBuilding(Building building) {
+        BlockPos bp = this.blockPosition();
+        boolean isPosInsideBuildingExt =
+                bp.getX() <= building.maxCorner.getX() + 1 && bp.getX() >= building.minCorner.getX() - 1 &&
+                bp.getY() <= building.maxCorner.getY() + 1 && bp.getY() >= building.minCorner.getY() - 1 &&
+                bp.getZ() <= building.maxCorner.getZ() + 1 && bp.getZ() >= building.minCorner.getZ() - 1;
+
+        // only have nophysics at a high Y value so we can still attack enemies at the base of the building
+        return building.isPosInsideBuilding(this.blockPosition()) &&
+                this.blockPosition().getY() > building.originPos.getY() + 5;
+    }
+
     // prevent arrows from colliding with the building that a garrisoned unit is inside of
     @Inject(
             method = "isNoPhysics",
@@ -55,23 +69,27 @@ public abstract class AbstractArrowMixin extends Projectile {
             cancellable = true
     )
     public void isNoPhysics(CallbackInfoReturnable<Boolean> cir) {
-        if (this.getOwner() instanceof Unit unit) {
-            GarrisonableBuilding garr = GarrisonableBuilding.getGarrison(unit);
-
-            if (garr != null ) {
-                Building building = (Building) garr;
-
-                BlockPos bp = this.blockPosition();
-                boolean isPosInsideBuildingExt =
-                        bp.getX() <= building.maxCorner.getX() + 1 && bp.getX() >= building.minCorner.getX() - 1 &&
-                        bp.getY() <= building.maxCorner.getY() + 1 && bp.getY() >= building.minCorner.getY() - 1 &&
-                        bp.getZ() <= building.maxCorner.getZ() + 1 && bp.getZ() >= building.minCorner.getZ() - 1;
-
-                // only have nophysics at a high Y value so we can still attack enemies at the base of the building
-                if (building.isPosInsideBuilding(this.blockPosition()) &&
-                    this.blockPosition().getY() > building.originPos.getY() + 5)
-                    cir.setReturnValue(true);
+        if (this.getOwner() instanceof AttackerUnit aUnit) {
+            // garrisoned unit -> ground
+            if (GarrisonableBuilding.getGarrison((Unit) aUnit) instanceof Building building &&
+                isInsideTopOfBuilding(building)) {
+                cir.setReturnValue(true);
             }
+
+            // ground -> garrisoned unit - allow through at 1/2 accuracy
+            // can't use random() here or the nophysics status will change every tick
+            /*
+            if (this.getId() % 2 == 0 &&
+                ((Unit) aUnit).getTargetGoal().getTarget() instanceof Unit tUnit) {
+                if (GarrisonableBuilding.getGarrison(tUnit) instanceof Building building &&
+                    isInsideTopOfBuilding(building)) {
+
+                    // nophysics all the time means they wouldn't collide with the actual target
+                    if (this.distanceToSqr((Entity) tUnit) > Math.pow(1.0d, 2))
+                         cir.setReturnValue(true);
+                }
+            }
+             */
         }
     }
 
