@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -23,7 +24,7 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBl
 
 public class TownCentre extends ProductionBuilding {
 
-    public final static String buildingName = "Town Centre";
+    public final static String buildingName = Component.translatable("building.buildings.villagers.town_centre").getString();
     public final static String structureName = "town_centre";
     public final static ResourceCost cost = ResourceCosts.TOWN_CENTRE;
 
