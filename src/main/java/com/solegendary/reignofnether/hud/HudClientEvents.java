@@ -848,7 +848,7 @@ public class HudClientEvents {
         // ------------------------------
         // Start buttons (spectator only)
         // ------------------------------
-        if (!PlayerClientEvents.isRTSPlayer) {
+        if (!PlayerClientEvents.isRTSPlayer && !PlayerClientEvents.rtsLocked) {
             if (!StartButtons.villagerStartButton.isHidden.get()) {
                 StartButtons.villagerStartButton.render(evt.getPoseStack(),
                         screenWidth - (StartButtons.ICON_SIZE * 6),

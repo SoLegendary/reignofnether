@@ -51,6 +51,7 @@ public class PlayerServerEvents {
     public static final ArrayList<ServerPlayer> players = new ArrayList<>();
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
     public static final List<RTSPlayer> rtsPlayers = Collections.synchronizedList(new ArrayList<>()); // players that have run /startrts
+    public static boolean rtsLocked = false; // can players join as RTS players or not?
 
     public static final int ORTHOVIEW_PLAYER_BASE_Y = 85;
 
@@ -180,6 +181,10 @@ public class PlayerServerEvents {
                 serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
                 serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS camera and join the game"));
                 serverPlayer.sendSystemMessage(Component.literal("Use '/rts-help' to see the list of all commands"));
+                if (rtsLocked) {
+                    serverPlayer.sendSystemMessage(Component.literal(""));
+                    serverPlayer.sendSystemMessage(Component.literal("This RTS match has been locked. Please wait for a new game before joining."));
+                }
             } else {
                 serverPlayer.sendSystemMessage(Component.literal("Welcome back to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
             }
@@ -195,6 +200,11 @@ public class PlayerServerEvents {
             PlayerClientboundPacket.enableRTSStatus(playerName);
         else
             PlayerClientboundPacket.disableRTSStatus(playerName);
+
+        if (rtsLocked)
+            PlayerClientboundPacket.lockRTS(playerName);
+        else
+            PlayerClientboundPacket.unlockRTS(playerName);
     }
 
     @SubscribeEvent
@@ -213,6 +223,12 @@ public class PlayerServerEvents {
 
             if (serverPlayer == null)
                 return;
+            if (rtsLocked) {
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                serverPlayer.sendSystemMessage(Component.literal("This match has been locked from new RTS players joining."));
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                return;
+            }
             if (isRTSPlayer(serverPlayer.getId())) {
                 serverPlayer.sendSystemMessage(Component.literal(""));
                 serverPlayer.sendSystemMessage(Component.literal("You already started your RTS match!"));
@@ -530,5 +546,15 @@ public class PlayerServerEvents {
 
             BuildingServerEvents.netherZones.forEach(NetherZone::startRestoring);
         }
+    }
+
+    public static void setRTSLock(boolean lock) {
+        rtsLocked = lock;
+        serverLevel.players().forEach(p -> {
+            if (rtsLocked)
+                PlayerClientboundPacket.lockRTS(p.getName().getString());
+            else
+                PlayerClientboundPacket.unlockRTS(p.getName().getString());
+        });
     }
 }

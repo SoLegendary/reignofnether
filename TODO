@@ -23,12 +23,7 @@ Bugfixes
 
 [✔] Non-ops can no longer use /rts-reset
 
-
-
-[🟡] [#29] Resources go negative after a match is done
-    - make sure we're removing players' resources on each end condition, including:
-        - defeat()
-        - resetRTS()
+[✔] Resources no longer act strangely (go negative, have doubled costs, etc.) after a match is restarted or a player is defeated
 
 [❌] Let mapmakers set the default Y level of their world and have it sync to clients on login
     - This solves rendering issues on worlds where the default is far from Y=64
@@ -61,9 +56,9 @@ Bugfixes
 Quality of Life Features
 ------------------------
 
-[❌] /rts-lock/unlock to prevent new players joining the match
+[🟡] /rts-lock/unlock to prevent new players joining the match
 
-[❌] /rts-hard-lock/unlock to prevent new players from logging onto the server at all
+[❌] /server-lock/unlock to prevent new players from logging onto the server at all
 
 [✔] Pressing alt now cancels your building placement so you don't accidentally place it while dragging the camera
 

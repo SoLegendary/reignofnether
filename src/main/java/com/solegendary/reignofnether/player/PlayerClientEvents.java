@@ -34,6 +34,8 @@ public class PlayerClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
+    public static boolean rtsLocked = false;
+
     @SubscribeEvent
     public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
         evt.getDispatcher().register(Commands.literal("rts-surrender")
@@ -45,6 +47,22 @@ public class PlayerClientEvents {
                 .executes((command) -> {
                     if (MC.player != null && MC.player.hasPermissions(4)) {
                         PlayerServerboundPacket.resetRTS();
+                        return 1;
+                    }
+                    return 0;
+                }));
+        evt.getDispatcher().register(Commands.literal("rts-lock")
+                .executes((command) -> {
+                    if (MC.player != null && MC.player.hasPermissions(4)) {
+                        PlayerServerboundPacket.lockRTS();
+                        return 1;
+                    }
+                    return 0;
+                }));
+        evt.getDispatcher().register(Commands.literal("rts-unlock")
+                .executes((command) -> {
+                    if (MC.player != null && MC.player.hasPermissions(4)) {
+                        PlayerServerboundPacket.unlockRTS();
                         return 1;
                     }
                     return 0;
@@ -183,5 +201,9 @@ public class PlayerClientEvents {
         BuildingClientEvents.getSelectedBuildings().clear();
         BuildingClientEvents.getBuildings().clear();
         ResourcesClientEvents.resourcesList.clear();
+    }
+
+    public static void setRTSLock(boolean lock) {
+        rtsLocked = lock;
     }
 }
