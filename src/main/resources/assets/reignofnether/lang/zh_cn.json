@@ -1,4 +1,8 @@
 {
+    "hud.hudclientevents.food": "食物",
+    "hud.hudclientevents.wood": "木材",
+    "hud.hudclientevents.ore": "矿物",
+    "hud.hudclientevents.population": "人口",
     "item.reignofnether.zombie_unit_spawn_egg": "生成僵尸单位",
     "item.reignofnether.husk_unit_spawn_egg": "生成尸壳单位",
     "item.reignofnether.drowned_unit_spawn_egg": "生成溺尸单位",
