@@ -276,6 +276,7 @@
   "tutorial.hunt_animals.hold_warning": "TIP: If your worker can't hold all the food after hunting an animal, it will drop to the ground.",
   "tutorial.hunt_animals.dropped_items": "TIP: Dropped items like food and saplings can be picked by ANY unit and returned for resources.",
   "tutorial.hunt_animals.great_work": "Great work!",
+  "tutorial.hunt_animals.excellent": "Excellent!",
   "tutorial.hunt_animals.return_food": "Your villager should now return the food to your town centre, but if they aren't, simply select the villager and RIGHT-CLICK your Town Centre.",
   "tutorial.hunt_animals.return_help": "Select your villager that hunted the pig and RIGHT-CLICK your Town Centre.",
   "tutorial.hunt_animals.food_warning": "TIP: Units hold up to 100 total resources, but hunting allows you to go above this maximum.",

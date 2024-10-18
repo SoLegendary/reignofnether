@@ -31,7 +31,6 @@
     "item.reignofnether.ghast_unit_spawn_egg": "生成恶魂单位",
     "item.reignofnether.zombie_piglin_unit_spawn_egg": "生成僵尸猪灵单位",
     "item.reignofnether.zoglin_unit_spawn_egg": "生成僵尸疣猪兽单位",
-    
     "sounds.reignofnether.under_attack": "受到攻击！",
     "sounds.reignofnether.victory": "胜利！",
     "sounds.reignofnether.defeat": "失败",
@@ -39,7 +38,6 @@
     "sounds.reignofnether.ally": "盟友",
     "sounds.reignofnether.neutral": "中立",
     "sounds.reignofnether.enemy": "敌人",
-
     "ability.attack_ground": "攻击地面",
     "ability.call_lightning": "召唤闪电",
     "ability.call_lightning.description1": "在目标位置召唤一道闪电。",
@@ -98,7 +96,6 @@
     "ability.shield_stance.description.line1": "举起或放下盾牌，减少67%的远程攻击伤害，",
     "ability.shield_stance.description.line2": "并降低50%的移动速度。",
     "ability_cooldown": "此技能仍在冷却中。",
-
     "message.invalid_target": "无效目标！",
     "message.target_unit_or_building": "必须指定一个单位或建筑。",
     "message.capitol_placed": "%s 已放置他们的首都建筑！",
@@ -108,7 +105,6 @@
     "message.victorious": "你胜利了！",
     "message.invalid_starting_location": "无效的起始位置",
     "message.capitol_not_rebuilt": "%s 未能重建他们的首都，现已暴露！",
-
     "button.go_to_alert": "前往警报",
     "button.ignore_alert": "（右键忽略）",
     "button.return_resources": "归还资源",
@@ -134,7 +130,6 @@
     "button.piglins": "猪灵",
     "button.piglins.info1": "以猪灵派系加入游戏。",
     "button.piglins.info2": "在目标位置生成3个猪灵小兵。",
-
     "control.group": "控制组 %s（右键移除）",
     "controls.toggle_rts_camera": "F12 - 切换RTS相机",
     "controls.refresh_chunks": "F8 - 刷新区块",
@@ -151,14 +146,11 @@
     "controls.destroy_selected": "Delete - 销毁选定的单位/建筑",
     "controls.rotate_camera": "Alt + 右键 - 旋转相机",
     "controls.zoom_in_out": "Alt + 滚轮 - 缩放",
-
     "resources.player": "%s 的资源",
     "spectator.message": "你是观战者",
-
     "fog.leaves.hiding.around_units_and_cursor": "隐藏树叶：围绕单位和光标",
     "fog.leaves.hiding.all": "隐藏树叶：所有",
     "fog.leaves.hiding.disabled": "禁用隐藏树叶",
-
     "system.warning.animal_spawn_failed": "警告：放弃尝试找到合适的动物生成点！",
     "system.warning.non_origin_position": "警告：试图在非原点位置创建 FrozenChunk：%s",
     "system.info.froze_chunk_at": "冻结区块于：%s",
@@ -190,9 +182,7 @@
     "system.warning.fog_confirm": "使用 /rts-fog enable 再次确认。",
     "system.info.fog_status": "%s 所有玩家的战争迷雾",
     "system.info.explored_chunk_outside_frustum": "视锥体外的已探索区块位于：%s",
-
     "error.reported_exception": "捕获的异常：%s",
-
     "tutorial.help_button": "教程帮助",
     "tutorial.resuming_stage": "欢迎回来... 正在恢复到阶段：%s",
     "tutorial.welcome_message": "欢迎来到地狱王国教程！",
@@ -271,6 +261,7 @@
     "tutorial.hunt_animals.hold_warning": "提示：如果您的工人在狩猎动物后无法携带所有食物，它将掉落在地上。",
     "tutorial.hunt_animals.dropped_items": "提示：掉落的物品如食物和树苗可以被任何单位捡起并带回以获取资源。",
     "tutorial.hunt_animals.great_work": "做得好！",
+    "tutorial.hunt_animals.excellent": "完美！",
     "tutorial.hunt_animals.return_food": "您的村民现在应该将食物送回城镇中心，但如果没有，只需选择村民并右键点击您的城镇中心。",
     "tutorial.hunt_animals.return_help": "选择您狩猎猪的村民，并右键点击您的城镇中心。",
     "tutorial.hunt_animals.food_warning": "提示：单位最多可以携带 100 种资源，但狩猎可以让您超过此最大值。",
