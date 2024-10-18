@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.util.TextUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.MinecraftServer;
@@ -88,7 +89,7 @@ public class TutorialServerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         MinecraftServer server = evt.getEntity().getServer();
         if (server == null) {
-            PlayerServerEvents.sendMessageToAllPlayers("Failed to load tutorial, server couldn't be found.");
+            PlayerServerEvents.sendMessageToAllPlayers(TextUtil.translateText("tutorial.server_events.on_player_join.message"));
             return;
         }
         String levelName = server.getWorldData().getLevelSettings().levelName();

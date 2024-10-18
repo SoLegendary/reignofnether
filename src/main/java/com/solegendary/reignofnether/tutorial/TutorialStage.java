@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.tutorial;
 
 public enum TutorialStage {
-
+    // TODO: make stage names translatable
     INTRO { // just intro msgs, progresses on a delay
         @Override
         public TutorialStage prev() {
