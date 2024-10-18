@@ -17,6 +17,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -170,7 +173,7 @@ public class ControlGroup {
 
     public Button getButton() {
         return new Button(
-            "Control Group " + getKey(),
+            Component.translatable("control.group.label", getKey()).getString(),
             Button.itemIconSize,
             iconRl == null ? new ResourceLocation("") : iconRl,
             this.keybinding,
@@ -179,7 +182,12 @@ public class ControlGroup {
             () -> true,
             this::loadToSelected,
             this::clearAll,
-            List.of(FormattedCharSequence.forward("Control Group " + keybinding.buttonLabel + " (Right click to remove)", Style.EMPTY))
+            List.of(
+                FormattedCharSequence.forward(
+                    Component.translatable("control.group", keybinding.buttonLabel).getString(),
+                    Style.EMPTY
+                )
+            )
         );
     }
 }

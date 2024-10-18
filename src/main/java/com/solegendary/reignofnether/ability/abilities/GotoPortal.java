@@ -17,6 +17,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class GotoPortal extends Ability {
@@ -40,7 +43,7 @@ public class GotoPortal extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-                "Go to connected portal",
+                Component.translatable("ability.goto_connected_portal").getString(),
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
                 hotkey,
                 () -> false,
@@ -57,11 +60,11 @@ public class GotoPortal extends Ability {
                 () -> UnitClientEvents.sendUnitCommand(UnitAction.GOTO_PORTAL),
                 null,
                 List.of(
-                        FormattedCharSequence.forward("Go to connected portal", Style.EMPTY.withBold(true))
+                    FormattedCharSequence.forward(Component.translatable("ability.goto_connected_portal").getString(), Style.EMPTY.withBold(true))
                 ),
                 this
-        );
-    }
+            );
+        }
 
     @Override
     public void use(Level level, Building buildingUsing, BlockPos targetBp) {

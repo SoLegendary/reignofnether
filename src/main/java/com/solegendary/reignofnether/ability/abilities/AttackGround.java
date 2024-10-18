@@ -16,6 +16,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class AttackGround extends Ability {
@@ -38,7 +41,7 @@ public class AttackGround extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-                "Attack Ground",
+                Component.translatable("ability.attack_ground").getString(),
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/fireball.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK_GROUND,
@@ -47,10 +50,11 @@ public class AttackGround extends Ability {
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.ATTACK_GROUND),
                 null,
                 List.of(
-                        FormattedCharSequence.forward("Attack Ground", Style.EMPTY)
+                    FormattedCharSequence.forward(Component.translatable("ability.attack_ground").getString(), Style.EMPTY) // 本地化提示文本
                 ),
                 this
-        );
+            );
+
     }
 
     @Override

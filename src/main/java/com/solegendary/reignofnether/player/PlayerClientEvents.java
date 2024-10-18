@@ -24,6 +24,9 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
 
 public class PlayerClientEvents {
@@ -50,21 +53,21 @@ public class PlayerClientEvents {
                 .executes((command) -> {
                     if (MC.player != null) {
                         MC.player.sendSystemMessage(Component.literal(" "));
-                        MC.player.sendSystemMessage(Component.literal("F12 - Toggle RTS camera"));
-                        MC.player.sendSystemMessage(Component.literal("F8 - Refresh chunks"));
-                        MC.player.sendSystemMessage(Component.literal("F7 - Toggle FPS/TPS counters"));
-                        MC.player.sendSystemMessage(Component.literal("F6 - Toggle hide leaves (experimental)"));
-                        MC.player.sendSystemMessage(Component.literal("~ - Deselect all units and buildings"));
-                        MC.player.sendSystemMessage(Component.literal("/rts-fog enable/disable - Toggle fog of war for all players"));
-                        MC.player.sendSystemMessage(Component.literal("/rts-surrender - Concede the match"));
-                        MC.player.sendSystemMessage(Component.literal("/rts-reset - Delete all units/buildings, set all to spectator"));
-                        MC.player.sendSystemMessage(Component.literal("Right click - move, attack or set rallypoint"));
-                        MC.player.sendSystemMessage(Component.literal("Ctrl + number key - Create control group"));
-                        MC.player.sendSystemMessage(Component.literal("Shift + left-click on map - recenter map"));
-                        MC.player.sendSystemMessage(Component.literal("Double left-click on unit - select all same units"));
-                        MC.player.sendSystemMessage(Component.literal("Delete - destroy selected units/buildings"));
-                        MC.player.sendSystemMessage(Component.literal("Alt + right-click - rotate camera"));
-                        MC.player.sendSystemMessage(Component.literal("Alt + scroll - zoom in/out"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.toggle_rts_camera"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.refresh_chunks"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.toggle_fps_tps"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.toggle_hide_leaves"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.deselect_units_buildings"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.toggle_fog_of_war"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.concede_match"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.delete_units_buildings"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.move_attack_set_rallypoint"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.create_control_group"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.recenter_map"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.select_all_same_units"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.destroy_selected"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.rotate_camera"));
+                        MC.player.sendSystemMessage(Component.translatable("controls.zoom_in_out"));
                     }
                     return 1;
                 }));
@@ -83,7 +86,7 @@ public class PlayerClientEvents {
             return;
 
         disableRTS(playerName);
-        MC.gui.setTitle(Component.literal("You have been defeated"));
+        MC.gui.setTitle(Component.translatable("message.defeated"));
         MC.player.playSound(SoundRegistrar.DEFEAT.get(), 0.5f, 1.0f);
     }
 
@@ -91,7 +94,7 @@ public class PlayerClientEvents {
         if (MC.player == null || !MC.player.getName().getString().equals(playerName))
             return;
 
-        MC.gui.setTitle(Component.literal("You are victorious!"));
+        MC.gui.setTitle(Component.translatable("message.victorious"));
         MC.player.playSound(SoundRegistrar.VICTORY.get(), 0.5f, 1.0f);
     }
 

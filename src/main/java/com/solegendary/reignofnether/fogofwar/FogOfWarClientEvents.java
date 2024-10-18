@@ -32,6 +32,9 @@ import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -150,19 +153,14 @@ public class FogOfWarClientEvents {
                     //    return -1;
                     //}
                     if (!fogEnableWarningSent) {
-                        fogEnableWarningSent = true;
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.literal("[WARNING]").withStyle(Style.EMPTY.withBold(true)));
-                        MC.player.sendSystemMessage(Component.literal(
-                        "You are about to enable fog of war for all players. This is an experimental feature with several issues:"));
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.literal("- ALL PLAYERS WITH OPTIFINE WILL CRASH"));
-                        MC.player.sendSystemMessage(Component.literal("- May cause chunk rendering bugs"));
-                        MC.player.sendSystemMessage(Component.literal("- Ups CPU usage (lower chunk render distance to help)"));
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.literal("Use /rts-fog enable again to confirm."));
-                        MC.player.sendSystemMessage(Component.literal(""));
-                    } else {
+                    fogEnableWarningSent = true;
+                    String warningMessage = 
+                        Component.translatable("system.warning.fog_enable").withStyle(Style.EMPTY.withBold(true)).getString() + "\n" +
+                        Component.translatable("system.warning.fog_issues").getString() + "\n" +
+                        Component.translatable("system.warning.fog_confirm").getString();
+
+                    MC.player.sendSystemMessage(Component.literal(warningMessage));
+                } else {
                         setServerFog(true);
                     }
                     return 1;
@@ -173,7 +171,9 @@ public class FogOfWarClientEvents {
                         return -1;
                     if (!MC.player.hasPermissions(4))
                         return -1;
+
                     setServerFog(false);
+                    MC.player.sendSystemMessage(Component.translatable("system.info.fog_disabled"));
                     return 1;
                 })));
     }
@@ -377,7 +377,7 @@ public class FogOfWarClientEvents {
                 .collect(Collectors.toSet());
 
         if (!chunksInFrustum.contains(cpos)) {
-            System.out.println("explored chunk outside of frustum at: " + cpos);
+            System.out.println(Component.translatable("system.info.explored_chunk_outside_frustum", cpos).getString());
             chunksToRefresh.add(cpos);
         }
 

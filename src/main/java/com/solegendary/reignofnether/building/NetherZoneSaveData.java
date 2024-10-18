@@ -8,6 +8,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.SavedData;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 
@@ -29,7 +32,7 @@ public class NetherZoneSaveData extends SavedData {
     }
 
     public static NetherZoneSaveData load(CompoundTag tag) {
-        System.out.println("NetherZoneSaveData.load");
+        System.out.println(Component.translatable("system.info.nether_zone_save_data_load").getString());
 
         NetherZoneSaveData data = create();
         ListTag ltag = (ListTag) tag.get("netherzones");
@@ -50,7 +53,7 @@ public class NetherZoneSaveData extends SavedData {
 
                 data.netherZones.add(NetherZone.getFromSave(origin, maxRange, range, isRestoring, ticksLeft, converts));
 
-                System.out.println("NetherZoneSaveData.load: " + origin + "|" + range + "/" + maxRange + "|" + isRestoring);
+                System.out.println(Component.translatable("system.info.nether_zone_loaded", origin, range, maxRange, isRestoring).getString());
             }
         }
         return data;
@@ -58,7 +61,7 @@ public class NetherZoneSaveData extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        System.out.println("NetherZoneSaveData.save");
+        System.out.println(Component.translatable("system.info.nether_zone_save_data_save").getString());
 
         ListTag list = new ListTag();
         this.netherZones.forEach(nz -> {
@@ -73,7 +76,8 @@ public class NetherZoneSaveData extends SavedData {
             cTag.putInt("converts", nz.getConvertsAfterConstantRange());
             list.add(cTag);
 
-            System.out.println("NetherZoneSaveData.save: " + nz.getOrigin() + "|" + (int) nz.getRange() + "/" + (int) nz.getMaxRange() + "|" + nz.isRestoring());
+            System.out.println(Component.translatable("system.info.nether_zone_saved", 
+                nz.getOrigin(), (int) nz.getRange(), (int) nz.getMaxRange(), nz.isRestoring()).getString());
         });
         tag.put("netherzones", list);
         return tag;

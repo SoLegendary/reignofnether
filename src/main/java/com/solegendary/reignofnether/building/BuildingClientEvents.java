@@ -48,6 +48,9 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -256,21 +259,21 @@ public class BuildingClientEvents {
 
     public static void checkBuildingPlacementValidityWithMessages(BlockPos originPos) {
         if (!isBuildingPlacementWithinWorldBorder(originPos))
-            showTemporaryMessage("Outside or too close to map border");
+            showTemporaryMessage(Component.translatable("system.message.outside_map_border").getString());
         else if (isBuildingPlacementInAir(originPos))
-            showTemporaryMessage("Ground is not flat enough");
+            showTemporaryMessage(Component.translatable("system.message.ground_not_flat").getString());
         else if (isBuildingPlacementClipping(originPos))
-            showTemporaryMessage("Ground is not flat enough");
+            showTemporaryMessage(Component.translatable("system.message.ground_not_flat").getString());
         else if (isOverlappingAnyOtherBuilding())
-            showTemporaryMessage("Too close to another building");
+            showTemporaryMessage(Component.translatable("system.message.too_close_to_another_building").getString());
         else if (!isNonPiglinOrOnNetherBlocks(originPos))
-            showTemporaryMessage("Must be built on nether terrain");
+            showTemporaryMessage(Component.translatable("system.message.must_be_built_on_nether").getString());
         else if (!isNonBridgeOrValidBridge(originPos))
-            showTemporaryMessage("Must be placed in water or lava");
+            showTemporaryMessage(Component.translatable("system.message.must_be_placed_in_water_or_lava").getString());
         else if (!FogOfWarClientEvents.isInBrightChunk(originPos))
-            showTemporaryMessage("Area is unexplored");
+            showTemporaryMessage(Component.translatable("system.message.area_is_unexplored").getString());
         else if (!isNotTutorialOrNearValidCapitolPosition(originPos)) {
-            showTemporaryMessage("Build your town centre over here!");
+            showTemporaryMessage(Component.translatable("system.message.build_town_centre_here").getString());
             OrthoviewClientEvents.forceMoveCam(TutorialClientEvents.BUILD_CAM_POS, 50);
         }
 

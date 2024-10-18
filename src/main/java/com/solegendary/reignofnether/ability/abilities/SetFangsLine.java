@@ -16,6 +16,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class SetFangsLine extends Ability {
@@ -38,7 +41,7 @@ public class SetFangsLine extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Evoker Fangs (Line)",
+            Component.translatable("ability.evoker_fangs_line.name").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shears.png"),
             hotkey,
             () -> evokerUnit.isUsingLineFangs,
@@ -47,10 +50,13 @@ public class SetFangsLine extends Ability {
             () -> UnitClientEvents.sendUnitCommand(UnitAction.SET_FANGS_LINE),
             null,
             List.of(
-                FormattedCharSequence.forward("Evoker Fangs (Line)", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE006  " + EvokerUnit.FANGS_DAMAGE * 2 + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + EvokerUnit.FANGS_RANGE_LINE, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("Have this evoker summon a long line of snapping", Style.EMPTY),
-                FormattedCharSequence.forward("fangs around the caster when attacking.", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.evoker_fangs_line.name").getString(), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(
+                    "\uE006  " + EvokerUnit.FANGS_DAMAGE * 2 + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + EvokerUnit.FANGS_RANGE_LINE,
+                    MyRenderer.iconStyle
+                ),
+                FormattedCharSequence.forward(Component.translatable("ability.evoker_fangs_line.description.line1").getString(), Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("ability.evoker_fangs_line.description.line2").getString(), Style.EMPTY)
             ),
             this
         );

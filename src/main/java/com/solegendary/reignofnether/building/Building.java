@@ -47,6 +47,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.world.ForgeChunkManager;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -159,7 +162,9 @@ public abstract class Building {
         if (this.isCapitol && !this.level.isClientSide()) {
             if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 1 &&
                 !TutorialServerEvents.isEnabled()) {
-                sendMessageToAllPlayers(this.ownerName + " has placed their capitol building!");
+                sendMessageToAllPlayers(
+                    Component.translatable("message.capitol_placed", this.ownerName).getString()
+                );
             }
             FogOfWarClientboundPacket.revealOrHidePlayer(false, this.ownerName);
         }
@@ -457,11 +462,12 @@ public abstract class Building {
 
         if (!this.level.isClientSide() && isRTSPlayer(this.ownerName)) {
             if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 0) {
-                PlayerServerEvents.defeat(this.ownerName, "lost all their buildings");
-            }
-            else if (this.isCapitol) {
-                sendMessageToAllPlayers(this.ownerName + " has lost their capitol and will be revealed in " +
-                        PlayerServerEvents.TICKS_TO_REVEAL / ResourceCost.TICKS_PER_SECOND + " seconds unless they rebuild it!");
+                PlayerServerEvents.defeat(this.ownerName, Component.translatable("message.defeat.lost_all_buildings").getString());
+            } else if (this.isCapitol) {
+                sendMessageToAllPlayers(
+                    Component.translatable("message.capitol_lost", this.ownerName, 
+                    PlayerServerEvents.TICKS_TO_REVEAL / ResourceCost.TICKS_PER_SECOND).getString()
+                );
             }
         }
     }
@@ -689,7 +695,7 @@ public abstract class Building {
             spawnBs = level.getBlockState(spawnBp);
             spawnAttempts += 1;
             if (spawnAttempts > 20) {
-                System.out.println("WARNING: Gave up trying to find a suitable animal spawn!");
+                System.out.println(Component.translatable("system.warning.animal_spawn_failed").getString());
                 return;
             }
         }
@@ -772,11 +778,12 @@ public abstract class Building {
                     -bp.getZ() % 16
             );
             if (bp.getX() % 16 != 0 ||
-                    bp.getY() % 16 != 0 ||
-                    bp.getZ() % 16 != 0)
-                System.out.println("WARNING: attempted to create a FrozenChunk at non-origin pos: " + bp);
+                bp.getY() % 16 != 0 ||
+                bp.getZ() % 16 != 0) {
+                System.out.println(Component.translatable("system.warning.non_origin_position", bp).getString());
+            }
 
-            System.out.println("Froze chunk at: " + roundedOrigin);
+                System.out.println(Component.translatable("system.info.froze_chunk_at", roundedOrigin).getString());
 
             FrozenChunk newFrozenChunk = null;
             for (FrozenChunk frozenChunk : FogOfWarClientEvents.frozenChunks) {

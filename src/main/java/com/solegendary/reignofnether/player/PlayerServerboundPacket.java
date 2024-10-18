@@ -12,6 +12,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -44,7 +47,7 @@ public class PlayerServerboundPacket {
         if (MC.player != null && MC.level != null) {
             BlockState bs = MC.level.getBlockState(new BlockPos(x,y,z));
             if (bs.getMaterial().isLiquid()) {
-                HudClientEvents.showTemporaryMessage("Invalid starting location");
+                HudClientEvents.showTemporaryMessage(Component.translatable("message.invalid_starting_location").getString());
                 return;
             }
             PlayerAction playerAction = switch (faction) {

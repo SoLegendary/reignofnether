@@ -41,6 +41,9 @@ import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.text.WordUtils;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -355,11 +358,10 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         RenderSystem.runAsFancy(() -> {
             try {
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-                entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, poseStack, immediate,
-                        15728880);
+                entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, poseStack, immediate, 15728880);
                 immediate.endBatch();
             } catch (ReportedException e) {
-                System.out.println("Caught reportedException: " + e);
+                System.out.println(Component.translatable("error.reported_exception", e.getMessage()).getString());
             }
         });
         entityrenderdispatcher.setRenderShadow(true);

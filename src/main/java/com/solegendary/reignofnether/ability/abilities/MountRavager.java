@@ -24,6 +24,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class MountRavager extends Ability {
@@ -44,7 +47,7 @@ public class MountRavager extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Mount Ravager",
+            Component.translatable("ability.mount_ravager").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/ravager.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_RAVAGER,
@@ -53,8 +56,8 @@ public class MountRavager extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_RAVAGER),
             () -> UnitClientEvents.sendUnitCommand(UnitAction.MOUNT_RAVAGER),
             List.of(
-                    FormattedCharSequence.forward("Mount Ravager (Right click to auto-find)", Style.EMPTY),
-                    FormattedCharSequence.forward("Mounted pillagers gain explosive arrows", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.mount_ravager.tooltip1").getString(), Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("ability.mount_ravager.tooltip2").getString(), Style.EMPTY)
             ),
             this
         );
@@ -84,7 +87,8 @@ public class MountRavager extends Ability {
         if (targetEntity instanceof RavagerUnit) {
             getMountGoal().setTarget(targetEntity);
         }
-        else if (level.isClientSide())
-            HudClientEvents.showTemporaryMessage("Invalid target!");
+        else if (level.isClientSide()) {
+            HudClientEvents.showTemporaryMessage(Component.translatable("message.invalid_target").getString());
+        }
     }
 }

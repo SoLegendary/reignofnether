@@ -27,6 +27,9 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import com.mojang.math.Matrix4f;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -260,15 +263,13 @@ public class OrthoviewClientEvents {
                 UnitClientEvents.windowUpdateTicks = 0;
                 if (hideLeavesMethod == LeafHideMethod.NONE) {
                     hideLeavesMethod = LeafHideMethod.AROUND_UNITS_AND_CURSOR;
-                    HudClientEvents.showTemporaryMessage("Hiding leaves: around units and cursor");
-                }
-                else if (hideLeavesMethod == LeafHideMethod.AROUND_UNITS_AND_CURSOR) {
+                    HudClientEvents.showTemporaryMessage(Component.translatable("fog.leaves.hiding.around_units_and_cursor").getString());
+                } else if (hideLeavesMethod == LeafHideMethod.AROUND_UNITS_AND_CURSOR) {
                     hideLeavesMethod = LeafHideMethod.ALL;
-                    HudClientEvents.showTemporaryMessage("Hiding leaves: all");
-                }
-                else if (hideLeavesMethod == LeafHideMethod.ALL) {
+                    HudClientEvents.showTemporaryMessage(Component.translatable("fog.leaves.hiding.all").getString());
+                } else if (hideLeavesMethod == LeafHideMethod.ALL) {
                     hideLeavesMethod = LeafHideMethod.NONE;
-                    HudClientEvents.showTemporaryMessage("Disabled hiding leaves");
+                    HudClientEvents.showTemporaryMessage(Component.translatable("fog.leaves.hiding.disabled").getString());
                 }
             }
             if (evt.getKey() == Keybindings.reset.key)

@@ -20,6 +20,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class ThrowLingeringHealingPotion extends Ability {
@@ -42,7 +45,7 @@ public class ThrowLingeringHealingPotion extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Lingering Healing Potion",
+            Component.translatable("ability.lingering_healing_potion.name").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lingering_potion_healing.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_LINGERING_HEALING_POTION,
@@ -51,9 +54,12 @@ public class ThrowLingeringHealingPotion extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_LINGERING_HEALING_POTION),
             null,
             List.of(
-                FormattedCharSequence.forward("Lingering Healing Potion", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE007  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + witchUnit.getPotionThrowRange(), MyRenderer.iconStyle),
-                FormattedCharSequence.forward("Throw a potion that leaves a cloud of healing vapours.", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.lingering_healing_potion.name").getString(), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(
+                    "\uE007  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + witchUnit.getPotionThrowRange(),
+                    MyRenderer.iconStyle
+                ),
+                FormattedCharSequence.forward(Component.translatable("ability.lingering_healing_potion.description.line1").getString(), Style.EMPTY)
             ),
             this
         );

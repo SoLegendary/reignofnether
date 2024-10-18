@@ -34,6 +34,10 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.RegistryObject;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 
@@ -85,7 +89,7 @@ public class TutorialClientEvents {
     private static int helpButtonClicks = 0;
     private static String helpButtonText = "";
     public static final Button helpButton = new Button(
-            "Tutorial Help",
+            Component.translatable("tutorial.help_button").getString(),
             18,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/help.png"),
             (Keybinding) null,
@@ -100,14 +104,14 @@ public class TutorialClientEvents {
                     msg(helpButtonText, true, CHAT);
             },
             () -> { },
-            List.of(FormattedCharSequence.forward("Tutorial Help", Style.EMPTY))
-    );
+            List.of(FormattedCharSequence.forward(Component.translatable("tutorial.help_button").getString(), Style.EMPTY)) // 本地化按钮提示文本
+        );
 
     public static void loadStage(TutorialStage stage) {
         if (stage == null || stage == getStage() || stage == INTRO || stage == COMPLETED)
             return;
 
-        specialMsg("Welcome back... resuming at stage: " + stage.name().replace("_", " "));
+        specialMsg(Component.translatable("tutorial.resuming_stage", stage.name().replace("_", " ")).getString());
 
         tutorialStage = stage;
         ticksOnStage = 0;
@@ -118,6 +122,7 @@ public class TutorialClientEvents {
         updateStage();
         shouldPauseTicking = () -> false;
     }
+
 
     private static void setHelpButtonText(String text) {
         helpButtonClicks = 0;
@@ -139,11 +144,11 @@ public class TutorialClientEvents {
 
     public static void setEnabled(boolean value) {
         if (value && !enabled && MC.player != null) {
-            MC.player.sendSystemMessage(Component.literal(""));
-            MC.player.sendSystemMessage(Component.literal("Welcome to the Reign of Nether Tutorial!").withStyle(Style.EMPTY.withBold(true)));
-            MC.player.sendSystemMessage(Component.literal("Press F12 to get started."));
-            MC.player.sendSystemMessage(Component.literal(""));
-        }
+        MC.player.sendSystemMessage(Component.literal(""));
+        MC.player.sendSystemMessage(Component.translatable("tutorial.welcome_message").withStyle(Style.EMPTY.withBold(true)));
+        MC.player.sendSystemMessage(Component.translatable("tutorial.press_f12"));
+        MC.player.sendSystemMessage(Component.literal(""));
+    }
         enabled = value;
     }
 
@@ -201,7 +206,8 @@ public class TutorialClientEvents {
 
         if (Keybindings.ctrlMod.isDown() && Keybindings.altMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
             nextStage();
-            specialMsg("Skipping tutorial stage... you are now on: " + getStage().name());
+            MutableComponent messageComponent = Component.translatable("tutorial.skip_message", getStage().name());
+            specialMsg(messageComponent.getString());
         }
 
         if (pressSpaceToContinue && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
@@ -300,8 +306,10 @@ public class TutorialClientEvents {
 
     private static void nextStageAfterSpace() {
         blockUpdateStage = true;
-        msg("Press SPACE when you're ready to continue.", true, CHAT);
-        setHelpButtonText("Press SPACE when you're ready to continue.");
+        String localizedMsg = Component.translatable("tutorial.press_space_continue").getString();
+        msg(localizedMsg, true, CHAT);
+        
+        setHelpButtonText(localizedMsg);
         TutorialRendering.clearButtonName();
         pressSpaceToContinue = true;
     }
@@ -330,19 +338,17 @@ public class TutorialClientEvents {
             case INTRO -> {
                 if (stageProgress == 0 && OrthoviewClientEvents.isEnabled()) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    OrthoviewClientEvents.lockCam();
-                    msg("Welcome to RTS view. Instead of the usual first-person minecraft camera, " +
-                        "here we can view the world from a top-down perspective.");
+                    OrthoviewClientEvents.lockCam();                   
+                    msg(Component.translatable("tutorial.welcome_rts").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
-                    msg("TIP: If you want to see any of these messages again, open chat with ENTER or the button on the right.");
+                    msg(Component.translatable("tutorial.tip_chat").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 2) {
-                    msg("If at any point you're lost or need a reminder on what to do next, click the button at the " +
-                        "top right. Try doing that now to continue.");
-                    setHelpButtonText("You needed to click this button, which you just did. Great work!");
+                    msg(Component.translatable("tutorial.help_reminder").getString());
+                    setHelpButtonText(Component.translatable("tutorial.help_button_clicked").getString());
                     TutorialRendering.setButtonName(helpButton.name);
                     progressStage();
                 }
@@ -353,26 +359,24 @@ public class TutorialClientEvents {
             case PAN_CAMERA -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    OrthoviewClientEvents.unlockCam();
-                    msg("To move your camera, move your mouse to the edges of the screen. Try it now.");
-                    setHelpButtonText("Move your mouse to each edge of your screen until the camera starts moving, " +
-                                        "as shown by the arrows.");
+                    OrthoviewClientEvents.unlockCam();                    
+                    msg(Component.translatable("tutorial.camera_move").getString());
+                    setHelpButtonText(Component.translatable("tutorial.help_camera_move").getString());
                     progressStage();
                 }
                 else if (stageProgress == 1 && pannedUp && pannedDown && pannedLeft && pannedRight) {
-                    specialMsg("Nicely done.");
+                    specialMsg(Component.translatable("tutorial.nicely_done").getString());
                     nextStageAfterDelay(100);
                 }
             }
             case CAMERA_TIPS -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("TIP: You can also move the camera with arrow keys.");
+                    msg(Component.translatable("tutorial.camera_tips.move_with_arrows").getString());
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 1) {
-                    msg("TIP: You can zoom the camera with ALT+SCROLL and rotate it with " +
-                        "ALT+RIGHT-CLICK.");
+                    msg(Component.translatable("tutorial.camera_tips.zoom_rotate").getString());
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 2) {
@@ -382,31 +386,28 @@ public class TutorialClientEvents {
             case MINIMAP_CLICK -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("Since you could get lost with a top-down view like this, here's a minimap " +
-                        "for you to help navigate.");
+                    msg(Component.translatable("tutorial.minimap_click.introduction").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
                     clickedMinimap = false;
-                    msg("You can move around the world quickly by clicking on a spot on the map. " +
-                        "Try doing that now.");
-                    setHelpButtonText("Click a spot on the minimap at the bottom right to move the camera there");
+                    msg(Component.translatable("tutorial.minimap_click.move_camera").getString());
+                    setHelpButtonText(Component.translatable("tutorial.minimap_click.help_text").getString());
                     progressStage();
                 }
                 else if (stageProgress == 2 && clickedMinimap) {
-                    specialMsg("Good work!");
+                    specialMsg(Component.translatable("tutorial.minimap_click.good_work").getString());
                     nextStageAfterDelay(100);
                 }
             }
             case MINIMAP_TIPS -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("If you need to move really far away, you can also SHIFT+CLICK " +
-                        "to recentre the map on that location.");
+                    msg(Component.translatable("tutorial.minimap_tips.recentre").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
-                    msg("TIP: Press M or click the bottom right button to expand the map.");
+                    msg(Component.translatable("tutorial.minimap_tips.expand").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 2) {
@@ -416,10 +417,10 @@ public class TutorialClientEvents {
             case PLACE_WORKERS_A -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("It's time to start playing with some units.");
+                    msg(Component.translatable("tutorial.place_workers_a.start_units").getString());
                     progressStageAfterDelay(120);
                 } else if (stageProgress == 1) {
-                    msg("Let's get started by spawning in some villagers here.");
+                    msg(Component.translatable("tutorial.place_workers_a.spawn_villagers").getString());
                     OrthoviewClientEvents.forceMoveCam(SPAWN_POS, 50);
                     OrthoviewClientEvents.lockCam();
                     nextStageAfterDelay(100);
@@ -428,16 +429,14 @@ public class TutorialClientEvents {
             case PLACE_WORKERS_B -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("Click the button at the top right and then click on the ground where " +
-                        "you want to place them.");
-                    setHelpButtonText("Click the button at the top right and then click on the ground where " +
-                                        "you want to place your villagers.");
+                    msg(Component.translatable("tutorial.place_workers_b.place_villagers").getString());
+                    setHelpButtonText(Component.translatable("tutorial.place_workers_b.place_help").getString());
                     TutorialRendering.setButtonName("Villagers");
                     progressStage();
                 }
                 else if (stageProgress == 1 && PlayerClientEvents.isRTSPlayer) {
                     TutorialRendering.clearButtonName();
-                    specialMsg("Excellent.");
+                    specialMsg(Component.translatable("tutorial.place_workers_b.excellent").getString());
                     OrthoviewClientEvents.unlockCam();
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     nextStageAfterDelay(100);
@@ -446,13 +445,12 @@ public class TutorialClientEvents {
             case SELECT_UNIT -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("Villagers are your worker units who can build and gather resources " +
-                        "and are essential to starting and maintaining a good base.");
+                    msg(Component.translatable("tutorial.select_unit.introduction").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
-                    msg("Try selecting one with LEFT-CLICK.");
-                    setHelpButtonText("LEFT-CLICK a villager to select it.");
+                    msg(Component.translatable("tutorial.select_unit.select_hint").getString());
+                    setHelpButtonText(Component.translatable("tutorial.select_unit.select_help").getString());
                     UnitClientEvents.clearSelectedUnits();
                     progressStage();
                 }
@@ -463,15 +461,15 @@ public class TutorialClientEvents {
             case MOVE_UNIT -> {
                 if (stageProgress == 0 && hasUnitSelected("villager")) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("Now, RIGHT-CLICK where you want to move it.");
-                    setHelpButtonText("LEFT-CLICK a villager to select it, then RIGHT-CLICK on the ground to move it.");
+                    msg(Component.translatable("tutorial.move_unit.right_click").getString());
+                    setHelpButtonText(Component.translatable("tutorial.move_unit.help").getString());
                     progressStage();
                 }
                 else if (stageProgress == 1 && hasUnitSelected("villager")) {
                     Unit unit = (Unit) UnitClientEvents.getSelectedUnits().get(0);
                     MoveToTargetBlockGoal goal = unit.getMoveGoal();
                     if (goal != null && goal.getMoveTarget() != null) {
-                        specialMsg("Nice work.");
+                        specialMsg(Component.translatable("tutorial.move_unit.nice_work").getString());
                         nextStageAfterDelay(100);
                     }
                 }
@@ -479,13 +477,12 @@ public class TutorialClientEvents {
             case BOX_SELECT_UNITS -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("Now let's try selecting a group of villagers.");
+                    msg(Component.translatable("tutorial.box_select_units.introduction").getString());
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
-                    msg("To do this, hold LEFT-CLICK and DRAG your mouse across them, then release to select.");
-                    setHelpButtonText("Hold LEFT-CLICK and DRAG your mouse across a group of villagers, " +
-                                    "then release to select them.");
+                    msg(Component.translatable("tutorial.box_select_units.selection_hint").getString());
+                    setHelpButtonText(Component.translatable("tutorial.box_select_units.help").getString());
                     progressStage();
                 }
                 else if (stageProgress == 2 && UnitClientEvents.getSelectedUnits().size() > 1) {
@@ -495,15 +492,15 @@ public class TutorialClientEvents {
             case MOVE_UNITS -> {
                 if (stageProgress == 0 && UnitClientEvents.getSelectedUnits().size() > 1) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("Now, RIGHT-CLICK where you want to move the group.");
-                    setHelpButtonText("With a group of villagers selected, RIGHT-CLICK on the ground to move them.");
+                    msg(Component.translatable("tutorial.move_units.right_click").getString());
+                    setHelpButtonText(Component.translatable("tutorial.move_units.help").getString());
                     progressStage();
                 }
                 else if (stageProgress == 1 && UnitClientEvents.getSelectedUnits().size() > 1) {
                     Unit unit = (Unit) UnitClientEvents.getSelectedUnits().get(1);
                     MoveToTargetBlockGoal goal = unit.getMoveGoal();
                     if (goal != null && goal.getMoveTarget() != null) {
-                        specialMsg("Great job!");
+                        specialMsg(Component.translatable("tutorial.move_units.great_job").getString());
                         nextStageAfterDelay(100);
                     }
                 }
@@ -511,15 +508,15 @@ public class TutorialClientEvents {
             case UNIT_TIPS -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("TIP: You can also double click a unit to select all units of the same type.");
+                    msg(Component.translatable("tutorial.unit_tips.double_click").getString());
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 1) {
-                    msg("TIP: If you want to deselect your units, press the tilde (~) key");
+                    msg(Component.translatable("tutorial.unit_tips.deselect").getString());
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 2) {
-                    msg("TIP: For you RTS fans, control grouping with CTRL+NUM is also a feature.");
+                    msg(Component.translatable("tutorial.unit_tips.control_grouping").getString());
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 3) {
@@ -529,32 +526,28 @@ public class TutorialClientEvents {
             case BUILD_INTRO -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("It's time to start your base.");
+                    msg(Component.translatable("tutorial.build_intro.start_base").getString());
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 1) {
-                    msg("The first and most important building of any base is always the capitol.");
+                    msg(Component.translatable("tutorial.build_intro.first_building").getString());
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 2) {
-                    msg("This looks like a good spot for it, being flat ground, near lots of resources and with " +
-                        "plenty of space around it for other buildings.");
+                    msg(Component.translatable("tutorial.build_intro.good_spot").getString());
                     OrthoviewClientEvents.forceMoveCam(BUILD_CAM_POS, 50);
                     progressStageAfterDelay(180);
                 }
                 else if (stageProgress == 3) {
-                    msg("Note that building takes resources. Luckily, the TOP-LEFT shows we have more than enough " +
-                        "WOOD and ORE needed.");
+                    msg(Component.translatable("tutorial.build_intro.resources").getString());
                     nextStageAfterDelay(120);
                 }
             }
             case BUILD_TOWN_CENTRE -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("Select your workers, then click the bottom-left button and click on the " +
-                        "ground where you want to place your capitol.");
-                    setHelpButtonText("Select your workers, then click the bottom-left button and click on the " +
-                                      "ground to place a town centre.");
+                    msg(Component.translatable("tutorial.build_town_centre.select_workers").getString());
+                    setHelpButtonText(Component.translatable("tutorial.build_town_centre.help").getString());
                     TutorialRendering.setButtonName(TownCentre.buildingName);
                     progressStage();
                 }
@@ -566,65 +559,58 @@ public class TutorialClientEvents {
             case BUILDING_TIPS -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("If they aren't already, you can have all of your villagers help to build to speed up progress. " +
-                        "To do this, select your workers and RIGHT-CLICK the building.");
-                    setHelpButtonText("Just wait for your Town Centre to complete. If your workers stopped building " +
-                                      "for some reason, just select them and RIGHT-CLICK it to resume.");
+                    msg(Component.translatable("tutorial.building_tips.villagers_help").getString());
+                    setHelpButtonText(Component.translatable("tutorial.building_tips.help").getString());
                     progressStageAfterDelay(240);
                 }
                 else if (stageProgress == 1) {
-                    msg("You can also select the building itself like a unit to see how far along it is in building.");
+                    msg(Component.translatable("tutorial.building_tips.select_building").getString());
                     progressStage();
                 }
                 else if (stageProgress == 2 && BuildingClientEvents.getBuildings().size() > 0) {
                     if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre townCentre && townCentre.isBuilt) {
-                        specialMsg("Congratulations, you now have a base set up!");
+                        specialMsg(Component.translatable("tutorial.building_tips.congratulations").getString());
                         nextStageAfterDelay(100);
                     }
                 }
-            } //msg("You can also set a rally point for your building with RIGHT-CLICK.");
+            }
             case TRAIN_WORKER -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("Capitols like the Town Centre are the only building that can produce workers like villagers.");
+                    msg(Component.translatable("tutorial.train_worker.capitol_info").getString());
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
-                    msg("Note that producing workers takes 50 FOOD each. We should have enough resources for quite a lot");
+                    msg(Component.translatable("tutorial.train_worker.food_cost").getString());
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 2) {
-                    msg("LEFT-CLICK to select your Town Centre, RIGHT-CLICK to set a rally point - units will " +
-                        "automatically go to that spot when they appear.");
-                    setHelpButtonText("LEFT-CLICK to select your Town Centre, then RIGHT-CLICK on the ground to set a rally point.");
+                    msg(Component.translatable("tutorial.train_worker.rally_point").getString());
+                    setHelpButtonText(Component.translatable("tutorial.train_worker.rally_help").getString());
                     progressStage();
                 }
                 else if (stageProgress == 3 && BuildingClientEvents.getBuildings().size() > 0) {
-                    if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre townCentre &&
-                        townCentre.getRallyPoint() != null) {
-                        msg("Now let's try making a villager. With your Town Centre selected, click the " +
-                            "bottom-left button to start producing one.");
-                        setHelpButtonText("LEFT-CLICK to select your Town Centre, click the bottom-left button make a villager, " +
-                                          "then wait for it to be completed.");
+                    if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre townCentre && townCentre.getRallyPoint() != null) {
+                        msg(Component.translatable("tutorial.train_worker.villager_production").getString());
+                        setHelpButtonText(Component.translatable("tutorial.train_worker.villager_help").getString());
                         TutorialRendering.setButtonName(VillagerProd.itemName);
                         progressStage();
                     }
                 }
                 else if (stageProgress == 4 && BuildingClientEvents.getBuildings().size() > 0) {
-                    if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre townCentre &&
-                            townCentre.productionQueue.size() > 0) {
-                        msg("TIP: you can queue up as many units to build as you can afford.");
+                    if (BuildingClientEvents.getBuildings().get(0) instanceof TownCentre townCentre && townCentre.productionQueue.size() > 0) {
+                        msg(Component.translatable("tutorial.train_worker.queue_tip").getString());
                         progressStage();
                     }
                 }
                 else if (stageProgress == 5 && UnitClientEvents.getAllUnits().size() > 3) {
-                    specialMsg("Nice work. Workers are vital for a healthy base!");
+                    specialMsg(Component.translatable("tutorial.train_worker.worker_advice").getString());
                     clearHelpButtonText();
                     TutorialRendering.clearButtonName();
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 6) {
-                    msg("TIP: you can cancel any in-progress units for a full refund by clicking their icon at the bottom.");
+                    msg(Component.translatable("tutorial.train_worker.cancel_tip").getString());
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 7) {
@@ -634,25 +620,25 @@ public class TutorialClientEvents {
             case GATHER_WOOD -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("Now that we have a bunch of workers, we can start gathering some resources.");
+                    msg(Component.translatable("tutorial.gather_wood.introduction").getString());
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
-                    msg("There's a forest over here that we can get wood from.");
+                    msg(Component.translatable("tutorial.gather_wood.forest").getString());
                     OrthoviewClientEvents.forceMoveCam(WOOD_POS, 100);
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 2) {
-                    msg("To gather a resource, select a worker, then RIGHT-CLICK a tree.");
-                    setHelpButtonText("Select any villager, then RIGHT-CLICK any tree.");
+                    msg(Component.translatable("tutorial.gather_wood.gather_instruction").getString());
+                    setHelpButtonText(Component.translatable("tutorial.gather_wood.gather_instruction").getString());
                     progressStage();
                 }
                 else if (stageProgress == 3) {
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
                         if (entity instanceof VillagerUnit villager &&
-                                villager.getGatherResourceGoal().isGathering() &&
-                                villager.getGatherResourceGoal().getTargetResourceName() == ResourceName.WOOD) {
-                            specialMsg("Well done.");
+                            villager.getGatherResourceGoal().isGathering() &&
+                            villager.getGatherResourceGoal().getTargetResourceName() == ResourceName.WOOD) {
+                            specialMsg(Component.translatable("tutorial.gather_wood.success").getString());
                             clearHelpButtonText();
                             progressStageAfterDelay(100);
                             break;
@@ -660,25 +646,24 @@ public class TutorialClientEvents {
                     }
                 }
                 else if (stageProgress == 4) {
-                    msg("TIP: Workers keep gathering until told to do something else. " +
-                            "Once they have at least 50 total resources they return it to the town centre.");
+                    msg(Component.translatable("tutorial.gather_wood.tip").getString());
                     nextStageAfterDelay(160);
                 }
             }
             case GATHER_ORE -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("Now let's do the same thing for ore.");
+                    msg(Component.translatable("tutorial.gather_ore.introduction").getString());
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 1) {
-                    msg("Here's a beach with coal and copper we can get ore from.");
+                    msg(Component.translatable("tutorial.gather_ore.beach").getString());
                     OrthoviewClientEvents.forceMoveCam(ORE_POS, 50);
-                    progressStageAfterDelay(120);
+                    progressStage();
                 }
                 else if (stageProgress == 2) {
-                    msg("Select a worker, then RIGHT-CLICK an ore block.");
-                    setHelpButtonText("Select any villager, then RIGHT-CLICK any ore block.");
+                    msg(Component.translatable("tutorial.gather_ore.gather_instruction").getString());
+                    setHelpButtonText(Component.translatable("tutorial.gather_ore.gather_instruction").getString());
                     progressStage();
                 }
                 else if (stageProgress == 3) {
@@ -686,7 +671,7 @@ public class TutorialClientEvents {
                         if (entity instanceof VillagerUnit villager &&
                             villager.getGatherResourceGoal().isGathering() &&
                             villager.getGatherResourceGoal().getTargetResourceName() == ResourceName.ORE) {
-                            specialMsg("Well done.");
+                            specialMsg(Component.translatable("tutorial.gather_ore.success").getString());
                             clearHelpButtonText();
                             progressStageAfterDelay(100);
                             break;
@@ -694,39 +679,37 @@ public class TutorialClientEvents {
                     }
                 }
                 else if (stageProgress == 4) {
-                    msg("TIP: Sandy biomes like deserts and beaches have more and better ores.");
+                    msg(Component.translatable("tutorial.gather_ore.tip").getString());
                     nextStageAfterDelay(120);
                 }
             }
             case HUNT_ANIMALS -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("While your other workers are busy on wood and ore, let's find some food.");
+                    msg(Component.translatable("tutorial.hunt_animals.introduction").getString());
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
                     OrthoviewClientEvents.forceMoveCam(FOOD_POS, 50);
                     TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_ANIMALS);
-                    msg("Here are some pigs that you can hunt for food.");
+                    msg(Component.translatable("tutorial.hunt_animals.pigs").getString());
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 2) {
-                    msg("Just like wood and ore, select a worker and RIGHT-CLICK an animal to start hunting it.");
-                    setHelpButtonText("Select any villager, then RIGHT-CLICK an animal and wait for it to be killed." +
-                                        "Make sure that villager doesn't already have a full inventory.");
+                    msg(Component.translatable("tutorial.hunt_animals.gather_instruction").getString());
+                    setHelpButtonText(Component.translatable("tutorial.hunt_animals.help").getString());
                     progressStageAfterDelay(180);
                 }
                 else if (stageProgress == 3) {
-                    msg("Make sure your worker isn't holding any other resources!");
+                    msg(Component.translatable("tutorial.hunt_animals.worker_warning").getString());
                     progressStage();
                 }
                 else if (stageProgress == 4) {
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
                         if (entity instanceof VillagerUnit villager) {
                             LivingEntity targetEntity = villager.getTarget();
-                            if (ResourceSources.isHuntableAnimal(targetEntity) &&
-                                    targetEntity.getHealth() < targetEntity.getMaxHealth()) {
-                                msg("TIP: If your worker can't hold all the food after hunting an animal, it will drop to the ground.");
+                            if (ResourceSources.isHuntableAnimal(targetEntity) && targetEntity.getHealth() < targetEntity.getMaxHealth()) {
+                                msg(Component.translatable("tutorial.hunt_animals.hold_warning").getString());
                                 progressStage();
                                 break;
                             }
@@ -737,9 +720,8 @@ public class TutorialClientEvents {
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
                         if (entity instanceof VillagerUnit villager) {
                             LivingEntity targetEntity = villager.getTarget();
-                            if (ResourceSources.isHuntableAnimal(targetEntity) &&
-                                    targetEntity.getHealth() < targetEntity.getMaxHealth() / 2) {
-                                msg("TIP: Dropped items like food and saplings can be picked by ANY unit and returned for resources.");
+                            if (ResourceSources.isHuntableAnimal(targetEntity) && targetEntity.getHealth() < targetEntity.getMaxHealth() / 2) {
+                                msg(Component.translatable("tutorial.hunt_animals.dropped_items").getString());
                                 progressStage();
                                 break;
                             }
@@ -747,22 +729,24 @@ public class TutorialClientEvents {
                     }
                 }
                 else if (stageProgress == 6) {
-                    for (LivingEntity entity : UnitClientEvents.getAllUnits())
-                        if (entity instanceof VillagerUnit villager)
-                            for (ItemStack itemStack : villager.getItems())
-                                if (Resources.getTotalResourcesFromItems(List.of(itemStack)).food >= 100)
+                    for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
+                        if (entity instanceof VillagerUnit villager) {
+                            for (ItemStack itemStack : villager.getItems()) {
+                                if (Resources.getTotalResourcesFromItems(List.of(itemStack)).food >= 100) {
                                     villagersHoldingFood += 1;
-
+                                }
+                            }
+                        }
+                    }
                     if (villagersHoldingFood > 0) {
-                        specialMsg("Great work!");
+                        specialMsg(Component.translatable("tutorial.hunt_animals.great_work").getString());
                         clearHelpButtonText();
                         progressStageAfterDelay(100);
                     }
                 }
                 else if (stageProgress == 7) {
-                    msg("Your villager should now return the food to your town centre, but if they aren't, " +
-                        "simply select the villager and RIGHT-CLICK your Town Centre.");
-                    setHelpButtonText("Select your villager that hunted the pig and RIGHT-CLICK your Town Centre.");
+                    msg(Component.translatable("tutorial.hunt_animals.return_food").getString());
+                    setHelpButtonText(Component.translatable("tutorial.hunt_animals.return_help").getString());
                     progressStage();
                 }
                 else if (stageProgress == 8) {
@@ -771,52 +755,50 @@ public class TutorialClientEvents {
                         if (entity instanceof VillagerUnit villager) {
                             for (ItemStack itemStack : villager.getItems()) {
                                 Resources res = Resources.getTotalResourcesFromItems(List.of(itemStack));
-                                if (res.food > 0)
-                                    villagersHoldingFoodNow += 1;
+                                if (res.food > 0) villagersHoldingFoodNow += 1;
                             }
                         }
                     }
                     if (villagersHoldingFoodNow < villagersHoldingFood) {
-                        specialMsg("Excellent.");
+                        specialMsg(Component.translatable("tutorial.hunt_animals.excellent").getString());
                         clearHelpButtonText();
                         progressStageAfterDelay(100);
                     }
                 }
                 else if (stageProgress == 9) {
-                    msg("TIP: Units hold up to 100 total resources, but hunting allows you to go above this maximum.");
+                    msg(Component.translatable("tutorial.hunt_animals.food_warning").getString());
                     nextStageAfterSpace();
                 }
             }
             case EXPLAIN_BUILDINGS -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("Let's expand your base. Some new buildings have been unlocked for you. Select a worker if you " +
-                            "haven't already to check them out.");
-                    setHelpButtonText("Select any worker to check out your new building options.");
+                    msg(Component.translatable("tutorial.explain_buildings.introduction").getString());
+                    setHelpButtonText(Component.translatable("tutorial.explain_buildings.help").getString());
                     shouldPauseTicking = () -> UnitClientEvents.getSelectedUnits().isEmpty() ||
-                            !(UnitClientEvents.getSelectedUnits().get(0) instanceof VillagerUnit) ||
-                            BuildingClientEvents.getBuildingToPlace() != null;
+                                            !(UnitClientEvents.getSelectedUnits().get(0) instanceof VillagerUnit) ||
+                                            BuildingClientEvents.getBuildingToPlace() != null;
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 1 && hasUnitSelected("villager")) {
                     TutorialRendering.setButtonName(OakStockpile.buildingName);
-                    msg("Stockpiles can give your workers a place to drop off resources faster.");
+                    msg(Component.translatable("tutorial.explain_buildings.stockpile").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 2 && hasUnitSelected("villager")) {
                     TutorialRendering.setButtonName(VillagerHouse.buildingName);
-                    msg("Houses raise your max unit population. Check the top left for your current totals.");
+                    msg(Component.translatable("tutorial.explain_buildings.house").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 3 && hasUnitSelected("villager")) {
                     TutorialRendering.setButtonName(WheatFarm.buildingName);
-                    msg("Farms give you a slow but renewable source of food in exchange for wood.");
+                    msg(Component.translatable("tutorial.explain_buildings.farm").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 4 && hasUnitSelected("villager")) {
                     clearHelpButtonText();
                     TutorialRendering.setButtonName(Barracks.buildingName);
-                    msg("Finally, a barracks lets you start training soldiers to fight enemies.");
+                    msg(Component.translatable("tutorial.explain_buildings.barracks").getString());
                     progressStageAfterDelay(160);
                 }
                 else {
@@ -827,19 +809,18 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
                     TutorialRendering.clearButtonName();
-                    msg("Let's take some time to check out a few of these buildings.");
+                    msg(Component.translatable("tutorial.build_base.introduction").getString());
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 1) {
-                    msg("When you're ready, build a barracks and get prepare to train your first army.");
-                    setHelpButtonText("Select any villager and build a barracks building at the bottom left. Make sure " +
-                                      "you've gathered enough wood to afford it!");
+                    msg(Component.translatable("tutorial.build_base.barracks_info").getString());
+                    setHelpButtonText(Component.translatable("tutorial.build_base.barracks_help").getString());
                     progressStage();
                 }
                 else if (stageProgress == 2) {
                     for (Building building : BuildingClientEvents.getBuildings()) {
                         if (building instanceof Barracks barracks && barracks.isBuilt) {
-                            specialMsg("Great job.");
+                            specialMsg(Component.translatable("tutorial.build_base.great_job").getString());
                             nextStageAfterDelay(100);
                             break;
                         }
@@ -849,22 +830,21 @@ public class TutorialClientEvents {
             case EXPLAIN_BARRACKS -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    msg("The barracks is one of many buildings that can produce military units. " +
-                            "Select your barracks to check them out.");
-                    setHelpButtonText("Select your barracks to check out your military unit options");
+                    msg(Component.translatable("tutorial.explain_barracks.introduction").getString());
+                    setHelpButtonText(Component.translatable("tutorial.explain_barracks.help").getString());
                     shouldPauseTicking = () -> BuildingClientEvents.getSelectedBuildings().isEmpty() ||
-                            !(BuildingClientEvents.getSelectedBuildings().get(0) instanceof Barracks);
+                                            !(BuildingClientEvents.getSelectedBuildings().get(0) instanceof Barracks);
                     progressStageAfterDelay(140);
                 }
                 else if (stageProgress == 1 && hasBuildingSelected(Barracks.buildingName)) {
                     TutorialRendering.setButtonName(VindicatorProd.itemName);
-                    msg("Vindicators are melee units with high health and moderate damage.");
+                    msg(Component.translatable("tutorial.explain_barracks.vindicator").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 2 && hasBuildingSelected(Barracks.buildingName)) {
                     clearHelpButtonText();
                     TutorialRendering.setButtonName(PillagerProd.itemName);
-                    msg("Pillagers are ranged units which attack slowly but with high damage.");
+                    msg(Component.translatable("tutorial.explain_barracks.pillager").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 3) {
@@ -874,10 +854,9 @@ public class TutorialClientEvents {
             case BUILD_ARMY -> {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    setHelpButtonText("Select your barracks and produce a total of 3 Pillagers and/or Vindicators. If you need more food " +
-                                    "try building a farm or hunt more animals. If you need more population supply, try building a house.");
+                    setHelpButtonText(Component.translatable("tutorial.build_army.introduction").getString());
                     TutorialRendering.clearButtonName();
-                    msg("Try building 3 units from here to continue.");
+                    msg(Component.translatable("tutorial.build_army.try_build").getString());
                     progressStage();
                 }
                 else if (stageProgress == 1) {
@@ -886,31 +865,28 @@ public class TutorialClientEvents {
                         if (entity instanceof VindicatorUnit || entity instanceof PillagerUnit)
                             armyCount += 1;
                     if (armyCount >= 3) {
-                        specialMsg("Awesome!");
+                        specialMsg(Component.translatable("tutorial.build_army.awesome").getString());
                         progressStageAfterDelay(100);
                         TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTER_WORKERS);
                     }
                 }
                 else if (stageProgress == 2) {
-                    msg("TIP: If you lose track of your military units, you can press K or click the button " +
-                        "on the right to select all of them at once.");
+                    msg(Component.translatable("tutorial.build_army.tip").getString());
                     nextStageAfterDelay(200);
                     TutorialServerboundPacket.doServerAction(TutorialAction.START_MONSTER_BASE);
                 }
             }
             case DEFEND_BASE -> {
                 if (stageProgress == 0) {
-                    msg("Uh oh, looks like some monsters are about to attack!");
+                    msg(Component.translatable("tutorial.defend_base.introduction").getString());
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_NIGHT_TIME);
                     TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTERS_A);
                     OrthoviewClientEvents.forceMoveCam(MONSTER_CAMERA_POS, 50);
                     progressStageAfterDelay(120);
                 }
                 if (stageProgress == 1) {
-                    setHelpButtonText("With your units selected, RIGHT-CLICK an enemy to attack them. " +
-                            "Units will also automatically attack nearby enemies if they are idle.");
-                    msg("With your units selected, RIGHT-CLICK an enemy to attack them. " +
-                            "Units will also automatically attack nearby enemies if they are idle.");
+                    setHelpButtonText(Component.translatable("tutorial.defend_base.help").getString());
+                    msg(Component.translatable("tutorial.defend_base.help").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 2) {
@@ -926,7 +902,7 @@ public class TutorialClientEvents {
                     if (UnitClientEvents.getAllUnits().stream().filter(
                             u -> u instanceof ZombieUnit || u instanceof SkeletonUnit)
                             .toList().isEmpty()) {
-                        msg("Watch out! More monsters incoming!");
+                        msg(Component.translatable("tutorial.defend_base.monster_warning").getString());
                         TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTERS_B);
                         OrthoviewClientEvents.forceMoveCam(MONSTER_CAMERA_POS, 50);
                         progressStageAfterDelay(100);
@@ -939,21 +915,20 @@ public class TutorialClientEvents {
                 else if (stageProgress == 5) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.EXPAND_MONSTER_BASE_A);
                     TutorialServerboundPacket.doServerAction(TutorialAction.SET_DAY_TIME);
-                    specialMsg("Dawn breaks!");
+                    specialMsg(Component.translatable("tutorial.defend_base.night_time").getString());
                     progressStage();
                 }
                 else if (stageProgress == 6) {
                     if (UnitClientEvents.getAllUnits().stream().filter(
                                     u -> u instanceof ZombieUnit || u instanceof SkeletonUnit)
                             .toList().isEmpty()) {
-                        specialMsg("Nicely done, you successfully defended your base!");
+                        specialMsg(Component.translatable("tutorial.defend_base.success").getString());
                         clearHelpButtonText();
                         progressStageAfterDelay(100);
                     }
                 }
                 else if (stageProgress == 7) {
-                    msg("TIP: During an attack, be sure to protect your workers. If a worker dies while holding " +
-                        "resources, it is dropped and can be stolen by your enemies!");
+                    msg(Component.translatable("tutorial.defend_base.worker_tip").getString());
                     nextStageAfterDelay(200);
                 }
             }
@@ -966,21 +941,19 @@ public class TutorialClientEvents {
                     if (damagedBuildings.isEmpty()) {
                         nextStage();
                     } else {
-                        msg("Looks like some of your buildings were damaged in the attack.");
+                        msg(Component.translatable("tutorial.repair_building.introduction").getString());
                         progressStageAfterDelay(100);
                     }
                 }
                 else if (stageProgress == 1) {
-                    msg("Try repairing one of them by selecting a villager, then RIGHT-CLICKING the damaged building. " +
-                            "Repairs cost 1 wood for each block.");
-                    setHelpButtonText("Select a worker and RIGHT-CLICK a damaged building, then wait for it to be fully repaired. " +
-                            "Repairs cost 1 wood for each block.");
+                    msg(Component.translatable("tutorial.repair_building.repair_instruction").getString());
+                    setHelpButtonText(Component.translatable("tutorial.repair_building.help").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 2) {
                     for (Building building : damagedBuildings) {
                         if (building.getHealth() >= building.getMaxHealth()) {
-                            specialMsg("Good job!");
+                            specialMsg(Component.translatable("tutorial.repair_building.good_job").getString());
                             clearHelpButtonText();
                             progressStageAfterDelay(100);
                             break;
@@ -988,8 +961,7 @@ public class TutorialClientEvents {
                     }
                 }
                 else if (stageProgress == 3) {
-                    msg("TIP: Building health is determined by how many blocks it's made up of. If they have less than " +
-                            "half blocks remaining, they are destroyed completely.");
+                    msg(Component.translatable("tutorial.repair_building.health_tip").getString());
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 4) {
@@ -1001,29 +973,25 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     OrthoviewClientEvents.forceMoveCam(MONSTER_BASE_POS, 80);
                     if (FogOfWarClientEvents.isEnabled())
-                        msg("The monsters have a base across the river (but you can't see it yet because " +
-                            "fog of war is enabled). We should destroy it before they attack again.");
+                        msg(Component.translatable("tutorial.build_bridge.introduction").getString() + " (but you can't see it yet because fog of war is enabled).");
                     else
-                        msg("The monsters have a base across the river, we should destroy it before they attack again.");
+                        msg(Component.translatable("tutorial.build_bridge.introduction").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
-                    msg("To cross the river, we need to build a bridge.");
+                    msg(Component.translatable("tutorial.build_bridge.cross_instruction").getString());
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 2) {
                     OrthoviewClientEvents.forceMoveCam(BRIDGE_POS, 50);
-                    msg("This looks like a good spot for one. Select a worker and build a bridge here. " +
-                        "You can scroll to rotate the bridge before placement.");
-                    setHelpButtonText("Select a worker and build a bridge across the river. You can scroll to rotate the bridge. " +
-                            "before placement. If the bridge is too short, you can build more segments connecting to it.");
+                    msg(Component.translatable("tutorial.build_bridge.spot_instruction").getString());
+                    setHelpButtonText(Component.translatable("tutorial.build_bridge.help").getString());
                     progressStage();
                 }
                 else if (stageProgress == 3) {
                     for (Building building : BuildingClientEvents.getBuildings()) {
                         if (building instanceof OakBridge bridge) {
-                            msg("TIP: You may need more than one bridge segment to cross the river. After completing " +
-                                    "one you can connect new segments to it.");
+                            msg(Component.translatable("tutorial.build_bridge.bridge_tip").getString());
                             progressStage();
                             break;
                         }
@@ -1032,20 +1000,18 @@ public class TutorialClientEvents {
                 else if (stageProgress == 4) {
                     for (Building building : BuildingClientEvents.getBuildings()) {
                         if (building instanceof OakBridge bridge && bridge.isBuilt) {
-                            specialMsg("Nice job.");
+                            specialMsg(Component.translatable("tutorial.build_bridge.nice_job").getString());
                             progressStageAfterDelay(100);
                             break;
                         }
                     }
                 }
                 else if (stageProgress == 5) {
-                    msg("TIP: Bridges are always neutral regardless of who built them. This means anyone can attack, " +
-                            "repair and connect new segments to them.");
+                    msg(Component.translatable("tutorial.build_bridge.bridge_neutral_tip").getString());
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 6) {
-                    msg("TIP: Be very careful when crossing bridges. If it is destroyed while your units are crossing, " +
-                        "they will land in the water and be defenceless!");
+                    msg(Component.translatable("tutorial.build_bridge.crossing_caution").getString());
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 7) {
@@ -1054,25 +1020,24 @@ public class TutorialClientEvents {
             }
             case ATTACK_ENEMY_BASE -> {
                 if (stageProgress == 0) {
-                    msg("Reinforcements have arrived! Use them to crush the enemy base!");
+                    msg(Component.translatable("tutorial.attack_enemy_base.reinforcements").getString());
                     TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_FRIENDLY_ARMY);
                     OrthoviewClientEvents.forceMoveCam(ARMY_POS, 50);
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
-                    msg("Your army includes an iron golem and your workers can now build blacksmiths to produce more if needed.");
-                    setHelpButtonText("Prepare your army and destroy all buildings in the monsters' base");
+                    msg(Component.translatable("tutorial.attack_enemy_base.iron_golem").getString());
+                    setHelpButtonText(Component.translatable("tutorial.attack_enemy_base.help").getString());
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 2) {
-                    msg("TIP: Most ranged units can't attack buildings. Order them to attack units instead!");
+                    msg(Component.translatable("tutorial.attack_enemy_base.ranged_units_tip").getString());
                     progressStageAfterDelay(200);
                 }
                 else if (stageProgress == 3) {
                     for (Building building : BuildingClientEvents.getBuildings()) {
                         if (building.getFaction() == Faction.MONSTERS && building.getHealth() < building.getMaxHealth()) {
-                            msg("TIP: The monsters' capitol, the Mausoleum, produces an artificial night time around it. " +
-                                    "If you can destroy it during the day, undead units will burn under the sun.");
+                            msg(Component.translatable("tutorial.attack_enemy_base.mausoleum_tip").getString());
                             progressStage();
                             break;
                         }
@@ -1085,7 +1050,7 @@ public class TutorialClientEvents {
                             botAlive = true;
 
                     if (!botAlive) {
-                        // should show the standard victory screen
+                        specialMsg(Component.translatable("tutorial.attack_enemy_base.victory").getString());
                         progressStageAfterDelay(200);
                     }
                 }
@@ -1095,28 +1060,27 @@ public class TutorialClientEvents {
             }
             case OUTRO -> {
                 if (stageProgress == 0) {
-                    specialMsg("Congratulations! You have completed the tutorial!");
+                    specialMsg(Component.translatable("tutorial.outro.congratulations").getString());
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 1) {
-                    msg("You may now continue with all of the buildings and units unlocked.");
+                    msg(Component.translatable("tutorial.outro.unlocks").getString());
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 2) {
-                    msg("To reset the game and try a new faction, type /rts-reset");
+                    msg(Component.translatable("tutorial.outro.reset").getString());
                     progressStageAfterDelay(120);
                 }
                 else if (stageProgress == 3) {
-                    msg("If you would like to play against another player, check out the Reign of Nether CurseForge " +
-                        "page for a guide on server hosting.");
+                    msg(Component.translatable("tutorial.outro.server_guide").getString());
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 4) {
-                    msg("Until next time... Good luck and have fun!");
+                    msg(Component.translatable("tutorial.outro.good_luck").getString());
                     progressStageAfterDelay(100);
                 }
                 else if (stageProgress == 5) {
-                    specialMsg("Tutorial mode disabled");
+                    specialMsg(Component.translatable("tutorial.outro.mode_disabled").getString());
                     nextStage();
                 }
             }
