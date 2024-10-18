@@ -1,4 +1,8 @@
 {
+  "hud.hudclientevents.food": "Food",
+  "hud.hudclientevents.wood": "Wood",
+  "hud.hudclientevents.ore": "Ore",
+  "hud.hudclientevents.population": "Population",
   "item.reignofnether.zombie_unit_spawn_egg": "Spawn Zombie Unit",
   "item.reignofnether.husk_unit_spawn_egg": "Spawn Husk Unit",
   "item.reignofnether.drowned_unit_spawn_egg": "Spawn Drowned Unit",

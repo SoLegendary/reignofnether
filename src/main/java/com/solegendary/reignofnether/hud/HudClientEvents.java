@@ -700,6 +700,8 @@ public class HudClientEvents {
                         new ResourceLocation(ReignOfNether.MOD_ID, rlPath),
                         blitX+4, blitY+4, iconSize
                 );
+
+
                 GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, resValueStr,
                         blitX + (iconFrameSize) + 24 , blitY + (iconSize / 2) + 1, 0xFFFFFF);
 
@@ -751,7 +753,8 @@ public class HudClientEvents {
 
             blitY = resourceBlitYStart;
             for (String resourceName : new String[]{ "Food", "Wood", "Ore", "Population" }) {
-                List<FormattedCharSequence> tooltip = List.of(FormattedCharSequence.forward(resourceName, Style.EMPTY));
+                List<FormattedCharSequence> tooltip = List.of(FormattedCharSequence.forward(Component.translatable("hud.hudclientevents." + resourceName.toLowerCase()).getString(), Style.EMPTY));
+                //List<FormattedCharSequence> tooltip = List.of(FormattedCharSequence.forward(resourceName, Style.EMPTY));
                 if (mouseX >= blitX &&
                         mouseY >= blitY &&
                         mouseX < blitX + iconFrameSize &&
