@@ -64,12 +64,15 @@ public class BuildingClientEvents {
     static final Minecraft MC = Minecraft.getInstance();
 
     public static int getTotalPopulationSupply(String playerName) {
+        if (ResearchClient.hasResearch("foodforthought"))
+            return UnitClientEvents.maxPopulation;
+
         int totalPopulationSupply = 0;
         for (Building building : buildings)
             if (building.ownerName.equals(playerName) && building.isBuilt)
                 totalPopulationSupply += building.popSupply;
 
-        return Math.min(ResourceCosts.MAX_POPULATION, totalPopulationSupply);
+        return Math.min(UnitClientEvents.maxPopulation, totalPopulationSupply);
     }
     // clientside buildings used for tracking position (for cursor selection)
     private static final ArrayList<Building> buildings = new ArrayList<>();
