@@ -40,6 +40,9 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.*;
 
 import static com.solegendary.reignofnether.hud.buttons.HelperButtons.*;
@@ -427,8 +430,8 @@ public class HudClientEvents {
 
                     // return button
                     if (getPlayerToEntityRelationship(hudSelectedEntity) == Relationship.OWNED) {
-                        Button returnButton = new Button(
-                                "Return resources",
+                            Button returnButton = new Button(
+                                Component.translatable("button.return_resources").getString(),
                                 Button.itemIconSize,
                                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
                                 Keybindings.keyD,
@@ -437,11 +440,11 @@ public class HudClientEvents {
                                 () -> true,
                                 () -> sendUnitCommand(UnitAction.RETURN_RESOURCES_TO_CLOSEST),
                                 null,
-                                List.of(FormattedCharSequence.forward("Drop off resources", Style.EMPTY))
-                        );
-                        returnButton.render(evt.getPoseStack(), blitX + 10, blitY + 38, mouseX, mouseY);
-                        renderedButtons.add(returnButton);
-                    }
+                                List.of(FormattedCharSequence.forward(Component.translatable("button.drop_off_resources").getString(), Style.EMPTY))
+                            );
+                            returnButton.render(evt.getPoseStack(), blitX + 10, blitY + 38, mouseX, mouseY);
+                            renderedButtons.add(returnButton);
+                        }
                 }
             }
             if (hudSelectedEntity instanceof Unit unit &&
@@ -659,9 +662,13 @@ public class HudClientEvents {
 
         if (!PlayerClientEvents.isRTSPlayer) {
             if (resources != null) {
-                GuiComponent.drawString(evt.getPoseStack(), MC.font, selPlayerName + "'s resources", blitX + 5, blitY + 5, 0xFFFFFF);
+                GuiComponent.drawString(evt.getPoseStack(), MC.font, 
+                    Component.translatable("resources.player", selPlayerName).getString(), 
+                    blitX + 5, blitY + 5, 0xFFFFFF);
             } else if (!TutorialClientEvents.isEnabled()) {
-                GuiComponent.drawString(evt.getPoseStack(), MC.font, "You are a spectator", blitX + 5, blitY + 5, 0xFFFFFF);
+                GuiComponent.drawString(evt.getPoseStack(), MC.font, 
+                    Component.translatable("spectator.message").getString(), 
+                    blitX + 5, blitY + 5, 0xFFFFFF);
                 blitY += 10;
             }
             blitY += 20;
@@ -713,6 +720,8 @@ public class HudClientEvents {
                         new ResourceLocation(ReignOfNether.MOD_ID, rlPath),
                         blitX+4, blitY+4, iconSize
                 );
+
+
                 GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, resValueStr,
                         blitX + (iconFrameSize) + 24 , blitY + (iconSize / 2) + 1, 0xFFFFFF);
 

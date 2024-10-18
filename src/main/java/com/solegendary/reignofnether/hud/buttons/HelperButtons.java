@@ -17,6 +17,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedBuilding;
@@ -30,7 +33,7 @@ public class HelperButtons {
     public static final int ICON_SIZE = 14;
 
     public static final Button chatButton = new Button(
-            "Chat",
+            Component.translatable("button.chat").getString(),
             ICON_SIZE,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/book.png"),
             (Keybinding) null,
@@ -41,13 +44,13 @@ public class HelperButtons {
                 MC.setScreen(new ChatScreen(""));
             },
             null,
-            List.of(FormattedCharSequence.forward("Chat (enter)", Style.EMPTY))
+            List.of(FormattedCharSequence.forward(Component.translatable("button.chat").getString(),Style.EMPTY))
     );
 
     private static int idleWorkerIndex = 0;
 
     public static final Button idleWorkerButton = new Button(
-            "Idle workers",
+            Component.translatable("button.idle_workers").getString(),
             ICON_SIZE,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
             Keybindings.keyJ,
@@ -70,11 +73,11 @@ public class HelperButtons {
                     idleWorkerIndex = 0;
             },
             null,
-            List.of(FormattedCharSequence.forward("Idle workers", Style.EMPTY))
+            List.of(FormattedCharSequence.forward(Component.translatable("button.idle_workers").getString(),Style.EMPTY))
     );
 
     public static final Button buildingCancelButton = new Button(
-            "Cancel",
+            Component.translatable("button.cancel").getString(),
             ICON_SIZE,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
             Keybindings.cancelBuild,
@@ -86,11 +89,11 @@ public class HelperButtons {
                 hudSelectedBuilding = null;
             },
             null,
-            List.of(FormattedCharSequence.forward("Cancel", Style.EMPTY))
+            List.of(FormattedCharSequence.forward(Component.translatable("button.cancel").getString(), Style.EMPTY))
     );
 
     public static final Button armyButton = new Button(
-            "Select all military units",
+            Component.translatable("button.select_all_military_units").getString(),
             ICON_SIZE,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sword_and_bow.png"),
             Keybindings.keyK,
@@ -109,6 +112,6 @@ public class HelperButtons {
                     UnitClientEvents.addSelectedUnit(militaryUnit);
             },
             null,
-            List.of(FormattedCharSequence.forward("Select all military units", Style.EMPTY))
+            List.of(FormattedCharSequence.forward(Component.translatable("button.select_all_military_units").getString(), Style.EMPTY))
     );
 }

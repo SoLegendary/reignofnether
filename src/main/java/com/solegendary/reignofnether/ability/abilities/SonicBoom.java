@@ -23,6 +23,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 import static com.solegendary.reignofnether.hud.HudClientEvents.showTemporaryMessage;
@@ -47,7 +50,7 @@ public class SonicBoom extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-                "Sonic Boom",
+                Component.translatable("ability.sonic_boom.name").getString(),
                 new ResourceLocation("minecraft", "textures/block/note_block.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.CAST_SONIC_BOOM,
@@ -56,10 +59,13 @@ public class SonicBoom extends Ability {
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.CAST_SONIC_BOOM),
                 null,
                 List.of(
-                        FormattedCharSequence.forward("Sonic Boom", Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE006  " + WardenUnit.SONIC_BOOM_DAMAGE + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + WardenUnit.SONIC_BOOM_RANGE, MyRenderer.iconStyle),
-                        FormattedCharSequence.forward("After a short delay, fire a targeted wave of sound at the", Style.EMPTY),
-                        FormattedCharSequence.forward("target, dealing heavy damage and knocking it far away.", Style.EMPTY)
+                    FormattedCharSequence.forward(Component.translatable("ability.sonic_boom.name").getString(), Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(
+                        "\uE006  " + WardenUnit.SONIC_BOOM_DAMAGE + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + WardenUnit.SONIC_BOOM_RANGE,
+                        MyRenderer.iconStyle
+                    ),
+                    FormattedCharSequence.forward(Component.translatable("ability.sonic_boom.description.line1").getString(), Style.EMPTY),
+                    FormattedCharSequence.forward(Component.translatable("ability.sonic_boom.description.line2").getString(), Style.EMPTY)
                 ),
                 this
         );
@@ -79,8 +85,9 @@ public class SonicBoom extends Ability {
         if (targetBuilding != null) {
             ((WardenUnit) unitUsing).getSonicBoomGoal().setAbility(this);
             ((WardenUnit) unitUsing).getSonicBoomGoal().setTarget(targetBuilding);
-        } else if (level.isClientSide()) {
-            HudClientEvents.showTemporaryMessage("Must target a unit or building.");
+        } 
+        else if (level.isClientSide()) {
+            HudClientEvents.showTemporaryMessage(Component.translatable("message.target_unit_or_building").getString());
         }
     }
 }

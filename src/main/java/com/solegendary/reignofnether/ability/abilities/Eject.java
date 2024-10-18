@@ -15,6 +15,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class Eject extends Ability {
@@ -35,7 +38,7 @@ public class Eject extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Eject",
+            Component.translatable("ability.eject").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.EJECT,
@@ -44,7 +47,7 @@ public class Eject extends Ability {
             () -> UnitClientEvents.sendUnitCommand(UnitAction.EJECT),
             null,
             List.of(
-                FormattedCharSequence.forward("Eject", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.eject").getString(), Style.EMPTY)
             ),
             this
         );

@@ -22,6 +22,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class MountSpider extends Ability {
@@ -42,7 +45,7 @@ public class MountSpider extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Mount Spider",
+            Component.translatable("ability.mount_spider").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/spider.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_SPIDER,
@@ -51,7 +54,7 @@ public class MountSpider extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_SPIDER),
             () -> UnitClientEvents.sendUnitCommand(UnitAction.MOUNT_SPIDER),
             List.of(
-                FormattedCharSequence.forward("Mount Spider (Right click to auto-find)", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.mount_spider.tooltip").getString(), Style.EMPTY)
             ),
             this
         );
@@ -80,7 +83,8 @@ public class MountSpider extends Ability {
         if (targetEntity instanceof SpiderUnit || targetEntity instanceof PoisonSpiderUnit) {
             getMountGoal().setTarget(targetEntity);
         }
-        else if (level.isClientSide())
-            HudClientEvents.showTemporaryMessage("Invalid target!");
+        else if (level.isClientSide()) {
+            HudClientEvents.showTemporaryMessage(Component.translatable("message.invalid_target").getString());
+        }
     }
 }

@@ -16,6 +16,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class AttackWarningClientEvents {
@@ -32,7 +35,7 @@ public class AttackWarningClientEvents {
 
     public static Button getWarningButton() {
         return new Button(
-            "Go to alert",
+            Component.translatable("button.go_to_alert").getString(),
             20,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/warning.png"),
             null,
@@ -50,8 +53,8 @@ public class AttackWarningClientEvents {
                 lastAttackPos = null;
             },
             List.of(
-                FormattedCharSequence.forward("Go to alert", Style.EMPTY),
-                FormattedCharSequence.forward("(Right click to ignore)", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("button.go_to_alert").getString(), Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("button.ignore_alert").getString(), Style.EMPTY)
             )
         );
     }

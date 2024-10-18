@@ -10,6 +10,9 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -128,7 +131,7 @@ public class BuildingClientboundPacket {
                         // if the client was missing a building, replace it
                         if (this.action == BuildingAction.SYNC_BLOCKS) {
                             BuildingServerboundPacket.requestReplacement(this.buildingPos);
-                            System.out.println("Missing building");
+                            System.out.println(Component.translatable("system.warning.missing_building").getString());
                         }
                         return;
                     }

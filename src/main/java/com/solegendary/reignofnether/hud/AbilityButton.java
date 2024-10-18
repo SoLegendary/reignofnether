@@ -6,6 +6,9 @@ import com.solegendary.reignofnether.ability.Ability;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
@@ -28,7 +31,7 @@ public class AbilityButton extends Button {
         Runnable originalOnLeftClick = this.onLeftClick;
         this.onLeftClick = () -> {
             if (this.ability != null && (this.ability.getCooldown() > 0 && !this.ability.canBypassCooldown()))
-                HudClientEvents.showTemporaryMessage("This ability is still on cooldown");
+                HudClientEvents.showTemporaryMessage(Component.translatable("ability_cooldown").getString());
             else
                 originalOnLeftClick.run();
         };

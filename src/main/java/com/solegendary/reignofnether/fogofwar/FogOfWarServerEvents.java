@@ -11,6 +11,9 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -28,7 +31,8 @@ public class FogOfWarServerEvents {
 
     public static void setEnabled(boolean value) {
         enabled = value;
-        sendMessageToAllPlayers((enabled ? "Enabled" : "Disabled") + " fog of war for all players", true);
+        String statusMessage = Component.translatable("system.info.fog_status", enabled ? "Enabled" : "Disabled").getString();
+        sendMessageToAllPlayers(statusMessage, true);
         syncClientFog();
     }
 

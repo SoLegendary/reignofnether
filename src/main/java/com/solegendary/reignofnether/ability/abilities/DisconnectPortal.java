@@ -16,6 +16,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class DisconnectPortal extends Ability {
@@ -39,12 +42,12 @@ public class DisconnectPortal extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Sever Connection",
+            Component.translatable("ability.sever_connection").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
             hotkey,
             () -> false,
             () -> {
-                // hidden if the portal does not have a connection Or isn't a transport portal
+                // hidden if the portal does not have a connection or isn't a transport portal
                 if (building instanceof Portal portal) {
                     if (portal.portalType != Portal.PortalType.TRANSPORT)
                         return true;
@@ -56,7 +59,7 @@ public class DisconnectPortal extends Ability {
             () -> UnitClientEvents.sendUnitCommand(UnitAction.DISCONNECT_PORTAL),
             null,
             List.of(
-                    FormattedCharSequence.forward("Sever Connection", Style.EMPTY.withBold(true))
+                FormattedCharSequence.forward(Component.translatable("ability.sever_connection").getString(), Style.EMPTY.withBold(true))
             ),
             this
         );

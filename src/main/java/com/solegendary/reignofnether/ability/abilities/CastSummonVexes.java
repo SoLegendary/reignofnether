@@ -19,6 +19,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class CastSummonVexes extends Ability {
@@ -42,7 +45,7 @@ public class CastSummonVexes extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Summon Vexes",
+            Component.translatable("ability.summon_vexes").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/vex.png"),
             hotkey,
             () -> {
@@ -55,10 +58,10 @@ public class CastSummonVexes extends Ability {
             () -> UnitClientEvents.sendUnitCommand(UnitAction.CAST_SUMMON_VEXES),
             null,
             List.of(
-                FormattedCharSequence.forward("Summon Vexes", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(Component.translatable("ability.summon_vexes").getString(), Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("\uE004  " + CD_MAX_SECONDS + "s", MyRenderer.iconStyle),
-                FormattedCharSequence.forward("After a long delay, summon " + EvokerUnit.SUMMON_VEXES_AMOUNT + " flying vexes that attack", Style.EMPTY),
-                FormattedCharSequence.forward("the evoker's target. Vexes start to die off after " + VEX_DURATION_SECONDS + " seconds.", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.summon_vexes.description1", EvokerUnit.SUMMON_VEXES_AMOUNT).getString(), Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("ability.summon_vexes.description2", VEX_DURATION_SECONDS).getString(), Style.EMPTY)
             ),
             this
         );

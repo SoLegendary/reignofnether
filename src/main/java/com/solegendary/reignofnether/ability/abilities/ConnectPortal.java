@@ -16,6 +16,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class ConnectPortal extends Ability {
@@ -39,7 +42,7 @@ public class ConnectPortal extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Connect Portal",
+            Component.translatable("ability.connect_portal").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png"),
             hotkey,
             () -> false,
@@ -52,10 +55,10 @@ public class ConnectPortal extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.CONNECT_PORTAL),
             null,
             List.of(
-                    FormattedCharSequence.forward("Connect Portal", Style.EMPTY.withBold(true)),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Connect to a transport portal you own anywhere else.", Style.EMPTY),
-                    FormattedCharSequence.forward("Overrides any existing connections on both sides.", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.connect_portal").getString(), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("ability.connect_portal.description1").getString(), Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("ability.connect_portal.description2").getString(), Style.EMPTY)
             ),
             this
         );

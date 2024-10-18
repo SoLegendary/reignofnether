@@ -15,6 +15,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class Dismount extends Ability {
@@ -35,7 +38,7 @@ public class Dismount extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Dismount",
+            Component.translatable("ability.dismount").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.DISMOUNT,
@@ -44,7 +47,7 @@ public class Dismount extends Ability {
             () -> UnitClientEvents.sendUnitCommand(UnitAction.DISMOUNT),
             null,
             List.of(
-                FormattedCharSequence.forward("Dismount", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.dismount").getString(), Style.EMPTY)
             ),
             this
         );

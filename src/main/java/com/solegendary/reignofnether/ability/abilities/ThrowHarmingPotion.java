@@ -20,6 +20,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class ThrowHarmingPotion extends Ability {
@@ -42,18 +45,21 @@ public class ThrowHarmingPotion extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Harming Potion",
+            Component.translatable("ability.harming_potion.name").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/splash_potion_harming.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_HARMING_POTION,
-            () -> true, //ResearchClient.hasResearch(ResearchLingeringPotions.itemName),
+            () -> true, // ResearchClient.hasResearch(ResearchLingeringPotions.itemName),
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_HARMING_POTION),
             null,
             List.of(
-                FormattedCharSequence.forward("Harming Potion", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE006  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + witchUnit.getPotionThrowRange(), MyRenderer.iconStyle),
-                FormattedCharSequence.forward("Throw a potion that deals instant damage to units.", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.harming_potion.name").getString(), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(
+                    "\uE006  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + witchUnit.getPotionThrowRange(),
+                    MyRenderer.iconStyle
+                ),
+                FormattedCharSequence.forward(Component.translatable("ability.harming_potion.description.line1").getString(), Style.EMPTY)
             ),
             this
         );

@@ -11,6 +11,9 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class StartButtons {
@@ -18,7 +21,7 @@ public class StartButtons {
     public static final int ICON_SIZE = 14;
 
     public static Button villagerStartButton = new Button(
-        "Villagers",
+            Component.translatable("button.villagers").getString(),
             ICON_SIZE,
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
         (Keybinding) null,
@@ -28,13 +31,13 @@ public class StartButtons {
         () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_VILLAGERS),
         () -> { },
         List.of(
-            FormattedCharSequence.forward("Join the game as the Villager Faction.", Style.EMPTY),
-            FormattedCharSequence.forward("Spawns 3 villagers to the target location.", Style.EMPTY)
+                    FormattedCharSequence.forward(Component.translatable("button.villagers.info1").getString(),Style.EMPTY),
+                    FormattedCharSequence.forward(Component.translatable("button.villagers.info2").getString(),Style.EMPTY)
         )
     );
 
     public static Button monsterStartButton = new Button(
-        "Monsters",
+            Component.translatable("button.monsters").getString(),
             ICON_SIZE,
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
         (Keybinding) null,
@@ -43,14 +46,13 @@ public class StartButtons {
         () -> !TutorialClientEvents.isEnabled(),
         () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_MONSTERS),
         () -> { },
-        List.of(
-            FormattedCharSequence.forward("Join the game as the Monster Faction.", Style.EMPTY),
-            FormattedCharSequence.forward("Spawns 3 zombie villagers at the target location.", Style.EMPTY)
+        List.of(FormattedCharSequence.forward(Component.translatable("button.monsters.info1").getString(),Style.EMPTY),
+                    FormattedCharSequence.forward(Component.translatable("button.monsters.info2").getString(),Style.EMPTY)
         )
     );
 
     public static Button piglinStartButton = new Button(
-        "Piglins",
+            Component.translatable("button.piglins").getString(),
             ICON_SIZE,
         new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
         (Keybinding) null,
@@ -60,8 +62,8 @@ public class StartButtons {
         () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_PIGLINS),
         () -> { },
         List.of(
-            FormattedCharSequence.forward("Join the game as the Piglin Faction.", Style.EMPTY),
-            FormattedCharSequence.forward("Spawns in 3 piglin grunts to the target location.", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("button.piglins.info1").getString(),Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("button.piglins.info2").getString(),Style.EMPTY)
         )
     );
 }

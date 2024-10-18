@@ -20,6 +20,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class ToggleShield extends Ability {
@@ -42,7 +45,7 @@ public class ToggleShield extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-                "Shield Stance",
+                Component.translatable("ability.shield_stance.name").getString(),
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shield.png"),
                 hotkey,
                 () -> bruteUnit.isHoldingUpShield,
@@ -52,10 +55,10 @@ public class ToggleShield extends Ability {
                 () -> UnitClientEvents.sendUnitCommand(UnitAction.TOGGLE_SHIELD),
                 null,
                 List.of(
-                        FormattedCharSequence.forward("Shield Stance", Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Raise or lower a shield - reducing projectile ", Style.EMPTY),
-                        FormattedCharSequence.forward("damage taken by 67% and movement speed by 50%.", Style.EMPTY)
+                    FormattedCharSequence.forward(Component.translatable("ability.shield_stance.name").getString(), Style.EMPTY),
+                    FormattedCharSequence.forward("", Style.EMPTY),
+                    FormattedCharSequence.forward(Component.translatable("ability.shield_stance.description.line1").getString(), Style.EMPTY),
+                    FormattedCharSequence.forward(Component.translatable("ability.shield_stance.description.line2").getString(), Style.EMPTY)
                 ),
                 this
         );

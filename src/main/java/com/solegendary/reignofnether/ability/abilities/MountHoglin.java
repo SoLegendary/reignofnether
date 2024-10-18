@@ -24,6 +24,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class MountHoglin extends Ability {
@@ -44,7 +47,7 @@ public class MountHoglin extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Mount Hoglin",
+            Component.translatable("ability.mount_hoglin").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/hoglin.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_HOGLIN,
@@ -53,7 +56,7 @@ public class MountHoglin extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_HOGLIN),
             () -> UnitClientEvents.sendUnitCommand(UnitAction.MOUNT_HOGLIN),
             List.of(
-                FormattedCharSequence.forward("Mount Hoglin (Right click to auto-find)", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.mount_hoglin.tooltip").getString(), Style.EMPTY)
             ),
             this
         );
@@ -83,7 +86,8 @@ public class MountHoglin extends Ability {
         if (targetEntity instanceof HoglinUnit) {
             getMountGoal().setTarget(targetEntity);
         }
-        else if (level.isClientSide())
-            HudClientEvents.showTemporaryMessage("Invalid target!");
+        else if (level.isClientSide()) {
+            HudClientEvents.showTemporaryMessage(Component.translatable("message.invalid_target").getString());
+        }
     }
 }

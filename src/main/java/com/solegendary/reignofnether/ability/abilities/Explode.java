@@ -14,6 +14,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class Explode extends Ability {
@@ -34,7 +37,7 @@ public class Explode extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Explode",
+            Component.translatable("ability.explode").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
             hotkey,
             () -> false,//CursorClientEvents.getLeftClickAction() == UnitAction.EXPLODE,
@@ -43,7 +46,7 @@ public class Explode extends Ability {
             () -> UnitClientEvents.sendUnitCommand(UnitAction.EXPLODE),//CursorClientEvents.setLeftClickAction(UnitAction.EXPLODE),
             null,
             List.of(
-                FormattedCharSequence.forward("Explode", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.explode").getString(), Style.EMPTY)
             ),
             null
         );

@@ -18,6 +18,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class Teleport extends Ability {
@@ -41,7 +44,7 @@ public class Teleport extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-                "Teleport",
+                Component.translatable("ability.teleport.name").getString(),
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/enderpearl.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.TELEPORT,
@@ -50,9 +53,12 @@ public class Teleport extends Ability {
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.TELEPORT),
                 null,
                 List.of(
-                        FormattedCharSequence.forward("Teleport", Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
-                        FormattedCharSequence.forward("Immediately teleport towards a location", Style.EMPTY)
+                    FormattedCharSequence.forward(Component.translatable("ability.teleport.name").getString(), Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(
+                        "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + RANGE,
+                        MyRenderer.iconStyle
+                    ),
+                    FormattedCharSequence.forward(Component.translatable("ability.teleport.description.line1").getString(), Style.EMPTY)
                 ),
                 this
         );

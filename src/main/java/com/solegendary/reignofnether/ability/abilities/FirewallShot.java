@@ -23,6 +23,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class FirewallShot extends Ability {
@@ -46,7 +49,7 @@ public class FirewallShot extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-                "Fire Wall Shot",
+                Component.translatable("ability.fire_wall_shot").getString(),
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/fire.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.SHOOT_FIREWALL,
@@ -55,10 +58,10 @@ public class FirewallShot extends Ability {
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.SHOOT_FIREWALL),
                 null,
                 List.of(
-                        FormattedCharSequence.forward("Fire Wall Shot", Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
-                        FormattedCharSequence.forward("Fire an accurate shot that ignites all blocks in a line.", Style.EMPTY),
-                        FormattedCharSequence.forward("While this is on cooldown, the blaze cannot attack.", Style.EMPTY)
+                    FormattedCharSequence.forward(Component.translatable("ability.fire_wall_shot").getString(), Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward("\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
+                    FormattedCharSequence.forward(Component.translatable("ability.fire_wall_shot.description1").getString(), Style.EMPTY),
+                    FormattedCharSequence.forward(Component.translatable("ability.fire_wall_shot.description2").getString(), Style.EMPTY)
                 ),
                 this
         );

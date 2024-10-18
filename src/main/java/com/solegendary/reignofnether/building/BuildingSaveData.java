@@ -12,6 +12,9 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 
@@ -33,7 +36,7 @@ public class BuildingSaveData extends SavedData {
     }
 
     public static BuildingSaveData load(CompoundTag tag) {
-        System.out.println("BuildingSaveData.load");
+        System.out.println(Component.translatable("system.info.building_save_data_load").getString());
 
         BuildingSaveData data = create();
         ListTag ltag = (ListTag) tag.get("buildings");
@@ -53,7 +56,7 @@ public class BuildingSaveData extends SavedData {
                 Portal.PortalType portalType = Portal.PortalType.valueOf(btag.getString("portalType"));
                 data.buildings.add(new BuildingSave(pos, level, name, ownerName, rotation, rallyPoint,
                                                     isDiagonalBridge, isBuilt, isUpgraded, portalType));
-                System.out.println("BuildingSaveData.load: " + ownerName + "|" + name);
+                System.out.println(Component.translatable("system.info.building_load", ownerName, name).getString());
             }
         }
         return data;
@@ -61,7 +64,7 @@ public class BuildingSaveData extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        System.out.println("BuildingSaveData.save");
+        System.out.println(Component.translatable("system.info.building_save_data_save").getString());
 
         ListTag list = new ListTag();
         this.buildings.forEach(b -> {
@@ -81,7 +84,7 @@ public class BuildingSaveData extends SavedData {
             cTag.putString("portalType", b.portalType != null ? b.portalType.name() : Portal.PortalType.BASIC.name());
             list.add(cTag);
 
-            System.out.println("BuildingSaveData.save: " + b.ownerName + "|" + b.name);
+            System.out.println(Component.translatable("system.info.building_save_data", b.ownerName, b.name).getString());
         });
         tag.put("buildings", list);
         return tag;

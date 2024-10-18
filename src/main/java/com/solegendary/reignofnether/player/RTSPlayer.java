@@ -5,6 +5,9 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.server.level.ServerPlayer;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.Collections;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.TICKS_TO_REVEAL;
@@ -69,7 +72,7 @@ public class RTSPlayer {
             if (ticksWithoutCapitol < TICKS_TO_REVEAL) {
                 this.ticksWithoutCapitol += 1;
                 if (ticksWithoutCapitol == TICKS_TO_REVEAL) {
-                    PlayerServerEvents.sendMessageToAllPlayers(this.name + " has not rebuilt their capitol and is being revealed!");
+                    PlayerServerEvents.sendMessageToAllPlayers(Component.translatable("message.capitol_not_rebuilt", this.name).getString());
                     FogOfWarClientboundPacket.revealOrHidePlayer(true, this.name);
                 }
             }

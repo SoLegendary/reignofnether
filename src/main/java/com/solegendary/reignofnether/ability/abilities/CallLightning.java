@@ -20,6 +20,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class CallLightning extends Ability {
@@ -43,7 +46,7 @@ public class CallLightning extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Call Lightning",
+            Component.translatable("ability.call_lightning").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_on.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.CALL_LIGHTNING,
@@ -52,11 +55,11 @@ public class CallLightning extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.CALL_LIGHTNING),
             null,
             List.of(
-                    FormattedCharSequence.forward("Call Lightning", Style.EMPTY.withBold(true)),
-                    FormattedCharSequence.forward("\uE004  " + CD_MAX/20 + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Summon a bolt of lightning at the target location.", Style.EMPTY),
-                    FormattedCharSequence.forward("Can be used to charge creepers and damage enemies.", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.call_lightning").getString(), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("\uE004  " + CD_MAX / 20 + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("ability.call_lightning.description1").getString(), Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("ability.call_lightning.description2").getString(), Style.EMPTY)
             ),
             this
         );

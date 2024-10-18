@@ -18,6 +18,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class Roar extends Ability {
@@ -40,7 +43,7 @@ public class Roar extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Roar",
+            Component.translatable("ability.roar.name").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/ravager.png"),
             hotkey,
             () -> false,
@@ -49,11 +52,14 @@ public class Roar extends Ability {
             () -> UnitClientEvents.sendUnitCommand(UnitAction.ROAR),
             null,
             List.of(
-                FormattedCharSequence.forward("Roar", Style.EMPTY),
-                FormattedCharSequence.forward("\uE006  " + RavagerUnit.ROAR_DAMAGE + "   " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005   " + RavagerUnit.ROAR_RANGE, MyRenderer.iconStyle),
+                FormattedCharSequence.forward(Component.translatable("ability.roar.name").getString(), Style.EMPTY),
+                FormattedCharSequence.forward(
+                    "\uE006  " + RavagerUnit.ROAR_DAMAGE + "   " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005   " + RavagerUnit.ROAR_RANGE,
+                    MyRenderer.iconStyle
+                ),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Emit a deafening roar, knocking away, damaging", Style.EMPTY),
-                FormattedCharSequence.forward("and briefly slowing down all nearby enemies. ", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.roar.description.line1").getString(), Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("ability.roar.description.line2").getString(), Style.EMPTY)
             ),
             this
         );

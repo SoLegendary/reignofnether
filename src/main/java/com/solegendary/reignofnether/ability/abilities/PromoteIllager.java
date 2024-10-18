@@ -36,6 +36,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.List;
 
 public class PromoteIllager extends Ability {
@@ -77,7 +80,7 @@ public class PromoteIllager extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
         return new AbilityButton(
-            "Promote Illager",
+            Component.translatable("ability.promote_illager").getString(),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/ominous_banner.png"),
             hotkey,
             () -> false,
@@ -90,13 +93,13 @@ public class PromoteIllager extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.PROMOTE_ILLAGER),
             null,
             List.of(
-                    FormattedCharSequence.forward("Promote Illager", Style.EMPTY.withBold(true)),
-                    FormattedCharSequence.forward("\uE004  " + CD_MAX/20 + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Promote an illager to a captain, giving it a banner that gives", Style.EMPTY),
-                    FormattedCharSequence.forward("a speed buff to all friendly units in a " + BUFF_RANGE + " block radius.", Style.EMPTY),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("You may only have one captain at a time per upgraded castle.", Style.EMPTY)
+                FormattedCharSequence.forward(Component.translatable("ability.promote_illager").getString(), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward("\uE004  " + CD_MAX/20 + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("ability.promote_illager.description1").getString(), Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("ability.promote_illager.description2", BUFF_RANGE).getString(), Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(Component.translatable("ability.promote_illager.description3").getString(), Style.EMPTY)
             ),
             this
         );
@@ -107,7 +110,7 @@ public class PromoteIllager extends Ability {
         Vec3 pos = targetEntity.getEyePosition();
         if (buildingUsing.centrePos.distToCenterSqr(pos.x, pos.y, pos.z) > RANGE * RANGE) {
             if (level.isClientSide())
-                HudClientEvents.showTemporaryMessage("Unit is too far away!");
+                HudClientEvents.showTemporaryMessage(Component.translatable("ability.promote_illager.message.too_far").getString());
         }
         else if (targetEntity instanceof VindicatorUnit ||
             targetEntity instanceof PillagerUnit ||
@@ -117,15 +120,14 @@ public class PromoteIllager extends Ability {
 
             if (targetEntity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
                 if (level.isClientSide())
-                    HudClientEvents.showTemporaryMessage("That unit is already a captain!");
+                    HudClientEvents.showTemporaryMessage(Component.translatable("ability.promote_illager.message.already_captain").getString());
                 return;
             }
             if (!unit.getOwnerName().equals(this.building.ownerName)) {
                 if (level.isClientSide())
-                    HudClientEvents.showTemporaryMessage("You don't own that unit!");
+                    HudClientEvents.showTemporaryMessage(Component.translatable("ability.promote_illager.message.not_owner").getString());
                 return;
             }
-            // only once promotedIllager allowed at a time
             if (promotedIllager != null && promotedIllager.isAlive() &&
                 promotedIllager.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
                 promotedIllager.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.AIR));
@@ -133,7 +135,6 @@ public class PromoteIllager extends Ability {
             promotedIllager = targetEntity;
             promotedIllager.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance());
 
-            // spawn a firework
             if (!level.isClientSide()) {
                 MiscUtil.shootFirework(level, promotedIllager.getEyePosition());
             }
@@ -141,7 +142,7 @@ public class PromoteIllager extends Ability {
         }
         else {
             if (level.isClientSide())
-                HudClientEvents.showTemporaryMessage("Only Vindicators, Pillagers and Evokers may be promoted");
+                HudClientEvents.showTemporaryMessage(Component.translatable("ability.promote_illager.message.invalid_unit").getString());
         }
     }
 }

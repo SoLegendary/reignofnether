@@ -44,6 +44,9 @@ import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;// I18n
+
 import java.util.*;
 
 public class BuildingServerEvents {
@@ -89,7 +92,7 @@ public class BuildingServerEvents {
                     isUpgraded,
                     portalType
             ));
-            System.out.println("saved buildings/nether in serverevents: " + b.originPos);
+            System.out.println(Component.translatable("system.info.saved_buildings_nether", b.originPos.toString()).getString());
         });
         buildingData.save();
         serverLevel.getDataStorage().save();
@@ -105,7 +108,7 @@ public class BuildingServerEvents {
         netherData.save();
         serverLevel.getDataStorage().save();
 
-        System.out.println("saved " + netherZones.size() + " netherzones in serverevents");
+        System.out.println(Component.translatable("system.info.saved_nether_zones", netherZones.size()).getString());
     }
 
     @SubscribeEvent
@@ -136,21 +139,23 @@ public class BuildingServerEvents {
                             portal.changeStructure(b.portalType);
                     }
                     // setNetherZone can only be run once - this supercedes where it normally happens in tick() -> onBuilt()
-                    if (building instanceof NetherConvertingBuilding ncb)
-                        for (NetherZone nz : netherData.netherZones)
+                    if (building instanceof NetherConvertingBuilding ncb) {
+                        for (NetherZone nz : netherData.netherZones) {
                             if (building.isPosInsideBuilding(nz.getOrigin())) {
                                 ncb.setNetherZone(nz);
                                 placedNZs.add(nz.getOrigin());
-                                System.out.println("loaded netherzone for: " + b.name + "|" + b.originPos);
+                                System.out.println(Component.translatable("system.info.loaded_netherzone", b.name, b.originPos).getString());
                                 break;
                             }
-                    System.out.println("loaded building in serverevents: " + b.name + "|" + b.originPos);
+                        }
+                    }
+                    System.out.println(Component.translatable("system.info.loaded_building", b.name, b.originPos).getString());
                 }
             });
             netherData.netherZones.forEach(nz -> {
                 if (!placedNZs.contains(nz.getOrigin())) {
                     BuildingServerEvents.netherZones.add(nz);
-                    System.out.println("loaded orphaned netherzone: " + nz.getOrigin());
+                    System.out.println(Component.translatable("system.info.loaded_orphaned_netherzone", nz.getOrigin()).getString());
                 }
             });
         }
@@ -340,7 +345,7 @@ public class BuildingServerEvents {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
-        for (Building building : buildings)
+        for (Building building : buildings) {
             BuildingClientboundPacket.placeBuilding(
                 building.originPos,
                 building.name,
@@ -353,7 +358,8 @@ public class BuildingServerEvents {
                 building instanceof Portal p ? p.portalType : Portal.PortalType.BASIC,
                 true
             );
-        System.out.println("Synced " + buildings.size() + " buildings with player logged in");
+        }
+        System.out.println(Component.translatable("system.info.synced_buildings", buildings.size()).getString());
     }
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions
