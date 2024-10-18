@@ -700,6 +700,7 @@ public class HudClientEvents {
                         new ResourceLocation(ReignOfNether.MOD_ID, rlPath),
                         blitX+4, blitY+4, iconSize
                 );
+
                 GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, resValueStr,
                         blitX + (iconFrameSize) + 24 , blitY + (iconSize / 2) + 1, 0xFFFFFF);
 
