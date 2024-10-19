@@ -65,7 +65,7 @@ public class ResearchPoisonSpiders extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchPoisonSpiders.itemName) ||
+            () -> ProductionItem.itemIsBeingProduced(ResearchPoisonSpiders.itemName, prodBuilding.ownerName) ||
                     ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(SpiderLair.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

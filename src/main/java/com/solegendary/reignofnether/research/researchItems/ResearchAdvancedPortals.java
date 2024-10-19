@@ -48,7 +48,7 @@ public class ResearchAdvancedPortals extends ProductionItem {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchAdvancedPortals.itemName) ||
+                () -> ProductionItem.itemIsBeingProduced(ResearchAdvancedPortals.itemName, prodBuilding.ownerName) ||
                         ResearchClient.hasResearch(ResearchAdvancedPortals.itemName),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

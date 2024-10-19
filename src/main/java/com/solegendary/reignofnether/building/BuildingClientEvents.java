@@ -60,7 +60,7 @@ public class BuildingClientEvents {
     static final Minecraft MC = Minecraft.getInstance();
 
     public static int getTotalPopulationSupply(String playerName) {
-        if (ResearchClient.hasResearch("foodforthought"))
+        if (ResearchClient.hasCheat("foodforthought"))
             return UnitClientEvents.maxPopulation;
 
         int totalPopulationSupply = 0;
@@ -823,12 +823,11 @@ public class BuildingClientEvents {
                                      int numBlocksToPlace, boolean isDiagonalBridge, boolean isUpgraded,
                                      boolean isBuilt, Portal.PortalType portalType, boolean forPlayerLoggingIn) {
 
-        for (Building building : buildings)
-            if (!buildingName.toLowerCase().contains("bridge") &&
-                BuildingUtils.isPosPartOfAnyBuilding(true, pos, false, 0))
-                return; // building already exists clientside
-
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName, isDiagonalBridge);
+
+        for (Building building : buildings)
+            if (newBuilding.originPos.equals(building.originPos))
+                return; // skip, building already exists clientside
 
         // add a bunch of dummy blocks so clients know not to remove buildings before the first blocks get placed
         while (numBlocksToPlace > 0) {

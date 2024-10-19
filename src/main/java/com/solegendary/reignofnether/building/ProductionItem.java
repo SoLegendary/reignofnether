@@ -97,9 +97,9 @@ public abstract class ProductionItem {
     }
 
     // some items (eg. research) are enabled only if the item doesn't exist in any existing clientside queue
-    public static boolean itemIsBeingProduced(String itemName) {
+    public static boolean itemIsBeingProduced(String itemName, String ownerName) {
         for (Building building : BuildingClientEvents.getBuildings())
-            if (building instanceof ProductionBuilding prodBuilding)
+            if (building.ownerName.equals(ownerName) && building instanceof ProductionBuilding prodBuilding)
                 for (ProductionItem prodItem : prodBuilding.productionQueue)
                     if (prodItem.getItemName().equals(itemName))
                         return true;

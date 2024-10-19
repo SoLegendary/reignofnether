@@ -52,7 +52,7 @@ public class ResearchVindicatorAxes extends ProductionItem {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchVindicatorAxes.itemName) ||
+                () -> ProductionItem.itemIsBeingProduced(ResearchVindicatorAxes.itemName, prodBuilding.ownerName) ||
                         ResearchClient.hasResearch(ResearchVindicatorAxes.itemName),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

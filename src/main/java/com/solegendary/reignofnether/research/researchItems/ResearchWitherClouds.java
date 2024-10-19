@@ -48,7 +48,7 @@ public class ResearchWitherClouds extends ProductionItem {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchWitherClouds.itemName) ||
+                () -> ProductionItem.itemIsBeingProduced(ResearchWitherClouds.itemName, prodBuilding.ownerName) ||
                         ResearchClient.hasResearch(ResearchWitherClouds.itemName),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

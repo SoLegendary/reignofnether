@@ -52,7 +52,7 @@ public class ResearchSilverfish extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchSilverfish.itemName) ||
+            () -> ProductionItem.itemIsBeingProduced(ResearchSilverfish.itemName, prodBuilding.ownerName) ||
                     ResearchClient.hasResearch(ResearchSilverfish.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(Stronghold.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

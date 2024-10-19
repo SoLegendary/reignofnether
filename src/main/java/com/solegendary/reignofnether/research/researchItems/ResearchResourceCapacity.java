@@ -60,7 +60,7 @@ public class ResearchResourceCapacity extends ProductionItem {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchResourceCapacity.itemName) ||
+                () -> ProductionItem.itemIsBeingProduced(ResearchResourceCapacity.itemName, prodBuilding.ownerName) ||
                         ResearchClient.hasResearch(ResearchResourceCapacity.itemName),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

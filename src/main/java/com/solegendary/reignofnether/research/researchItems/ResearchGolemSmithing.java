@@ -48,7 +48,7 @@ public class ResearchGolemSmithing extends ProductionItem {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchGolemSmithing.itemName) ||
+                () -> ProductionItem.itemIsBeingProduced(ResearchGolemSmithing.itemName, prodBuilding.ownerName) ||
                         ResearchClient.hasResearch(ResearchGolemSmithing.itemName),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

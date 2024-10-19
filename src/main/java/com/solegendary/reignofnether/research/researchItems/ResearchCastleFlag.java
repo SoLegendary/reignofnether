@@ -47,7 +47,7 @@ public class ResearchCastleFlag extends ProductionItem {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchCastleFlag.itemName) ||
+                () -> ProductionItem.itemIsBeingProduced(ResearchCastleFlag.itemName, prodBuilding.ownerName) ||
                         (prodBuilding instanceof Castle castle && castle.isUpgraded()),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

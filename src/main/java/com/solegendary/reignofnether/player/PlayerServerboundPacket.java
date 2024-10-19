@@ -75,6 +75,14 @@ public class PlayerServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
                 PlayerAction.UNLOCK_RTS, 0,0d,0d,0d));
     }
+    public static void enableRTSSyncing() {
+        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+                PlayerAction.ENABLE_RTS_SYNCING, 0,0d,0d,0d));
+    }
+    public static void disableRTSSyncing() {
+        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+                PlayerAction.DISABLE_RTS_SYNCING, 0,0d,0d,0d));
+    }
 
     // packet-handler functions
     public PlayerServerboundPacket(PlayerAction action, int playerId, Double x, Double y, Double z) {
@@ -116,6 +124,8 @@ public class PlayerServerboundPacket {
                 case RESET_RTS -> PlayerServerEvents.resetRTS();
                 case LOCK_RTS -> PlayerServerEvents.setRTSLock(true);
                 case UNLOCK_RTS -> PlayerServerEvents.setRTSLock(false);
+                case ENABLE_RTS_SYNCING -> PlayerServerEvents.setRTSSyncingEnabled(true);
+                case DISABLE_RTS_SYNCING -> PlayerServerEvents.setRTSSyncingEnabled(false);
             }
             success.set(true);
         });

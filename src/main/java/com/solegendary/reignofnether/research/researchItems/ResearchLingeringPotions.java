@@ -47,7 +47,7 @@ public class ResearchLingeringPotions extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchLingeringPotions.itemName) ||
+            () -> ProductionItem.itemIsBeingProduced(ResearchLingeringPotions.itemName, prodBuilding.ownerName) ||
                     ResearchClient.hasResearch(ResearchLingeringPotions.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

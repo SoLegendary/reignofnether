@@ -155,13 +155,13 @@ public class ControlGroup {
             BuildingClientEvents.clearSelectedBuildings();
             for (BlockPos bp : buildingBps)
                 for (Building building : BuildingClientEvents.getBuildings())
-                    if (building.originPos == bp)
+                    if (building.originPos.equals(bp))
                         BuildingClientEvents.addSelectedBuilding(building);
 
             if (doubleClicked) {
                 BlockPos pos = buildingBps.get(0);
                 for (Building building : BuildingClientEvents.getBuildings())
-                    if (building.originPos == pos)
+                    if (building.originPos.equals(pos))
                         OrthoviewClientEvents.centreCameraOnPos(building.centrePos.getX(), building.centrePos.getZ());
             }
         }

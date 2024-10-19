@@ -25,13 +25,15 @@ Bugfixes
 
 [✔] Resources no longer act strangely (go negative, have doubled costs, etc.) after a match is restarted or a player is defeated
 
+[✔] Research buttons no longer disappear if someone else of the same faction is researching it at the time
+
+[✔] Joining a match no longer causes everyone's clientside buildings to be duplicated (this was causing population issues)
+
+
+
+
 [❌] Let mapmakers set the default Y level of their world and have it sync to clients on login
     - This solves rendering issues on worlds where the default is far from Y=64
-
-[❌] On a server match, population appears to be incorrect a lot
-    - Server mismatches client
-    - Specatators see different to client
-    - Unupgraded portals are somehow worth 10 supply
 
 [❌] Building on top of a unit causes crash
     - probably because of moving out of the way logic
@@ -56,9 +58,15 @@ Bugfixes
 Quality of Life Features
 ------------------------
 
-[🟡] /rts-lock/unlock to prevent new players joining the match
+[✔] New command: /rts-lock enable/disable to prevent new players joining the match
+    - /rts-reset will automatically unlock the match too
+    - change to enable/disable
 
-[❌] /server-lock/unlock to prevent new players from logging onto the server at all
+[✔] New experimental command: /rts-syncing enable/disable
+    - Prevents anyone logging in from syncing from server data, and from joining the RTS match, even if the game is unlocked
+    - New joiners will not be able to select buildings and units will appear neutral until the syncing is re-enabled and they relog
+    - This also affects existing RTS players who relog, so use at your discretion
+    - This is a temporary measure to (in theory) prevent login lag spikes until a permanent solution is found
 
 [✔] Pressing alt now cancels your building placement so you don't accidentally place it while dragging the camera
 
@@ -70,6 +78,7 @@ Quality of Life Features
     - Like most other cheats, this won't save between server restarts
     - foodforthought now allows you to only ignore the soft cap (ie. houses are no longer needed), but
         cannot go higher than what has been set with thereisnospoon
+
 
 [❌] Radius indicator around monster capitol and stronghold to better indicate range of night
     (can use this same code for ability range indicators too)

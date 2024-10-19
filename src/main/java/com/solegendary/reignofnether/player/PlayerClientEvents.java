@@ -36,6 +36,8 @@ public class PlayerClientEvents {
 
     public static boolean rtsLocked = false;
 
+    public static boolean canStartRTS = true;
+
     @SubscribeEvent
     public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
         evt.getDispatcher().register(Commands.literal("rts-surrender")
@@ -51,22 +53,38 @@ public class PlayerClientEvents {
                     }
                     return 0;
                 }));
-        evt.getDispatcher().register(Commands.literal("rts-lock")
+        evt.getDispatcher().register(Commands.literal("rts-lock").then(Commands.literal("enable")
                 .executes((command) -> {
                     if (MC.player != null && MC.player.hasPermissions(4)) {
                         PlayerServerboundPacket.lockRTS();
                         return 1;
                     }
                     return 0;
-                }));
-        evt.getDispatcher().register(Commands.literal("rts-unlock")
+                })));
+        evt.getDispatcher().register(Commands.literal("rts-lock").then(Commands.literal("disable")
                 .executes((command) -> {
                     if (MC.player != null && MC.player.hasPermissions(4)) {
                         PlayerServerboundPacket.unlockRTS();
                         return 1;
                     }
                     return 0;
-                }));
+                })));
+        evt.getDispatcher().register(Commands.literal("rts-syncing").then(Commands.literal("enable")
+                .executes((command) -> {
+                    if (MC.player != null && MC.player.hasPermissions(4)) {
+                        PlayerServerboundPacket.enableRTSSyncing();
+                        return 1;
+                    }
+                    return 0;
+                })));
+        evt.getDispatcher().register(Commands.literal("rts-syncing").then(Commands.literal("disable")
+                .executes((command) -> {
+                    if (MC.player != null && MC.player.hasPermissions(4)) {
+                        PlayerServerboundPacket.disableRTSSyncing();
+                        return 1;
+                    }
+                    return 0;
+                })));
         evt.getDispatcher().register(Commands.literal("rts-help")
                 .executes((command) -> {
                     if (MC.player != null) {
@@ -79,6 +97,7 @@ public class PlayerClientEvents {
                         MC.player.sendSystemMessage(Component.literal("/rts-fog enable/disable - Toggle fog of war for all players"));
                         MC.player.sendSystemMessage(Component.literal("/rts-surrender - Concede the match"));
                         MC.player.sendSystemMessage(Component.literal("/rts-reset - Delete all units/buildings, set all to spectator"));
+                        MC.player.sendSystemMessage(Component.literal("/rts-lock enable/disable - Prevent all players from joining the RTS match"));
                         MC.player.sendSystemMessage(Component.literal("Right click - move, attack or set rallypoint"));
                         MC.player.sendSystemMessage(Component.literal("Ctrl + number key - Create control group"));
                         MC.player.sendSystemMessage(Component.literal("Shift + left-click on map - recenter map"));
@@ -205,5 +224,9 @@ public class PlayerClientEvents {
 
     public static void setRTSLock(boolean lock) {
         rtsLocked = lock;
+    }
+
+    public static void setCanStartRTS(boolean canStart) {
+        canStartRTS = canStart;
     }
 }

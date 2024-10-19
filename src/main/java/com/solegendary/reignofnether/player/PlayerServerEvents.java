@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.player;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
@@ -52,6 +53,7 @@ public class PlayerServerEvents {
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
     public static final List<RTSPlayer> rtsPlayers = Collections.synchronizedList(new ArrayList<>()); // players that have run /startrts
     public static boolean rtsLocked = false; // can players join as RTS players or not?
+    public static boolean rtsSyncingEnabled = true; // will logging in players sync units and buildings?
 
     public static final int ORTHOVIEW_PLAYER_BASE_Y = 85;
 
@@ -158,7 +160,7 @@ public class PlayerServerEvents {
         // if a player is looking directly at a frozenchunk on login, they may load in the real blocks before
         // they are frozen so move them away then BuildingClientEvents.placeBuilding moves them to their base later
         // don't do this if they don't own any buildings
-        if (isRTSPlayer(playerName)) {
+        if (isRTSPlayer(playerName) && rtsSyncingEnabled) {
             for (Building building : BuildingServerEvents.getBuildings()) {
                 if (building.ownerName.equals(playerName)) {
                     movePlayer(serverPlayer.getId(), 0,ORTHOVIEW_PLAYER_BASE_Y,0);
@@ -166,12 +168,14 @@ public class PlayerServerEvents {
                 }
             }
         }
-        for (LivingEntity entity : UnitServerEvents.getAllUnits())
-            if (entity instanceof Unit unit)
-                UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
+        if (rtsSyncingEnabled) {
+            for (LivingEntity entity : UnitServerEvents.getAllUnits())
+                if (entity instanceof Unit unit)
+                    UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
 
-        ResearchServerEvents.syncResearch(playerName);
-        ResearchServerEvents.syncCheats(playerName);
+            ResearchServerEvents.syncResearch(playerName);
+            ResearchServerEvents.syncCheats(playerName);
+        }
 
         if (orthoviewPlayers.stream().map(Entity::getId).toList().contains(evt.getEntity().getId())) {
             orthoviewPlayers.add((ServerPlayer) evt.getEntity());
@@ -192,7 +196,15 @@ public class PlayerServerEvents {
                 serverPlayer.sendSystemMessage(Component.literal(""));
                 serverPlayer.sendSystemMessage(Component.literal("As a server op you may use:"));
                 serverPlayer.sendSystemMessage(Component.literal("/rts-fog enable | disable"));
+                serverPlayer.sendSystemMessage(Component.literal("/rts-lock enable | disable"));
+                serverPlayer.sendSystemMessage(Component.literal("/rts-syncing enable | disable"));
                 serverPlayer.sendSystemMessage(Component.literal("/rts-reset"));
+                serverPlayer.sendSystemMessage(Component.literal(""));
+            }
+            if (!rtsSyncingEnabled) {
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                serverPlayer.sendSystemMessage(Component.literal("RTS Syncing has been disabled, so you cannot select buildings or see unit owners, sorry!"));
+                serverPlayer.sendSystemMessage(Component.literal("To resolve this, please ask the host to re-enable it, then relog."));
                 serverPlayer.sendSystemMessage(Component.literal(""));
             }
         }
@@ -205,6 +217,11 @@ public class PlayerServerEvents {
             PlayerClientboundPacket.lockRTS(playerName);
         else
             PlayerClientboundPacket.unlockRTS(playerName);
+
+        if (rtsSyncingEnabled)
+            PlayerClientboundPacket.enableStartRTS(playerName);
+        else
+            PlayerClientboundPacket.disableStartRTS(playerName);
     }
 
     @SubscribeEvent
@@ -351,7 +368,9 @@ public class PlayerServerEvents {
                         int amount = Integer.parseInt(words[1]);
                         if (amount > 0) {
                             UnitServerEvents.hardCapPopulation = amount;
-                            ResearchClientboundPacket.addCheatWithValue(playerName, words[0], amount);
+                            for (ServerPlayer player : players) {
+                                ResearchClientboundPacket.addCheatWithValue(player.getName().getString(), words[0], amount);
+                            }
                             evt.setCanceled(true);
                             sendMessageToAllPlayers(playerName + " used cheat: " + words[0] + " " + amount);
                         }
@@ -545,6 +564,9 @@ public class PlayerServerEvents {
             saveRTSPlayers();
 
             BuildingServerEvents.netherZones.forEach(NetherZone::startRestoring);
+
+            if (rtsLocked)
+                setRTSLock(false);
         }
     }
 
@@ -556,5 +578,17 @@ public class PlayerServerEvents {
             else
                 PlayerClientboundPacket.unlockRTS(p.getName().getString());
         });
+        if (rtsLocked)
+            sendMessageToAllPlayers("The RTS match has been locked. No new players may join.");
+        else
+            sendMessageToAllPlayers("The RTS match has been unlocked. New players may now join.");
+    }
+
+    public static void setRTSSyncingEnabled(boolean enable) {
+        rtsSyncingEnabled = enable;
+        if (rtsSyncingEnabled)
+            sendMessageToAllPlayers("RTS login-syncing has been enabled.");
+        else
+            sendMessageToAllPlayers("RTS login-syncing has been disabled.");
     }
 }

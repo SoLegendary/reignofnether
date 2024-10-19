@@ -63,6 +63,16 @@ public class PlayerClientboundPacket {
                 new PlayerClientboundPacket(PlayerAction.UNLOCK_RTS, playerName, 0L));
     }
 
+    // prevent one particular player from joining the match
+    public static void disableStartRTS(String playerName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.DISABLE_START_RTS, playerName, 0L));
+    }
+    public static void enableStartRTS(String playerName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.ENABLE_START_RTS, playerName, 0L));
+    }
+
     public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long rtsGameTime) {
         this.playerAction = playerAction;
         this.playerName = playerName;
@@ -97,6 +107,8 @@ public class PlayerClientboundPacket {
                             case SYNC_RTS_GAME_TIME -> PlayerClientEvents.syncRtsGameTime(rtsGameTime);
                             case LOCK_RTS -> PlayerClientEvents.setRTSLock(true);
                             case UNLOCK_RTS -> PlayerClientEvents.setRTSLock(false);
+                            case ENABLE_START_RTS -> PlayerClientEvents.setCanStartRTS(true);
+                            case DISABLE_START_RTS -> PlayerClientEvents.setCanStartRTS(false);
                         }
                         success.set(true);
                     });

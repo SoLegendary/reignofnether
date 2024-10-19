@@ -66,7 +66,7 @@ public class ResearchHusks extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchHusks.itemName) ||
+            () -> ProductionItem.itemIsBeingProduced(ResearchHusks.itemName, prodBuilding.ownerName) ||
                     ResearchClient.hasResearch(ResearchHusks.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(Graveyard.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

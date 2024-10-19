@@ -167,7 +167,7 @@ public class BuildingServerEvents {
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName, isDiagonalBridge);
         boolean buildingExists = false;
         for (Building building : buildings)
-            if (building.originPos == pos) {
+            if (building.originPos.equals(pos)) {
                 buildingExists = true;
                 break;
             }
@@ -340,6 +340,9 @@ public class BuildingServerEvents {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
+        if (!PlayerServerEvents.rtsSyncingEnabled) {
+            return;
+        }
         for (Building building : buildings)
             BuildingClientboundPacket.placeBuilding(
                 building.originPos,
@@ -537,6 +540,8 @@ public class BuildingServerEvents {
     }
 
     public static void replaceClientBuilding(BlockPos buildingPos) {
+        if (!PlayerServerEvents.rtsSyncingEnabled)
+            return;
         for (Building building : buildings) {
             if (building.originPos.equals(buildingPos)) {
                 BuildingClientboundPacket.placeBuilding(

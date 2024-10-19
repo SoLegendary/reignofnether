@@ -48,7 +48,7 @@ public class ResearchEvokerVexes extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchEvokerVexes.itemName) ||
+            () -> ProductionItem.itemIsBeingProduced(ResearchEvokerVexes.itemName, prodBuilding.ownerName) ||
                     ResearchClient.hasResearch(ResearchEvokerVexes.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
