@@ -92,16 +92,17 @@ public class OrthoviewClientEvents {
     private static float mouseLeftDownY = 0;
 
     // by default orthoview players stay at BASE_Y, but can be raised to as high as MAX_Y if they are clipping terrain
-    public static double ORTHOVIEW_PLAYER_BASE_Y = 0;
-    public static double ORTHOVIEW_PLAYER_MAX_Y = 200;
+    public static double ORTHOVIEW_PLAYER_BASE_Y;
+    public static double ORTHOVIEW_PLAYER_MAX_Y;
 
-
-    public static void updateOrthoviewMaxY() {
+    public static void updateOrthoviewY() {
         if (MC.player != null) {
             BlockPos playerPos = MC.player.blockPosition();
             int highestBlockY = MC.level.getHeight(Heightmap.Types.MOTION_BLOCKING, playerPos.getX(), playerPos.getZ());
-            ORTHOVIEW_PLAYER_MAX_Y = highestBlockY + 60;
+
+            // Always update with the new values
             ORTHOVIEW_PLAYER_BASE_Y = highestBlockY;
+            ORTHOVIEW_PLAYER_MAX_Y = highestBlockY + 60;
         }
     }
     public static boolean isEnabled() {
@@ -206,7 +207,7 @@ public class OrthoviewClientEvents {
             forcePanTicksLeft -= 1;
         }
         if (evt.phase == TickEvent.Phase.END) {
-            updateOrthoviewMaxY();
+            updateOrthoviewY();
         }
     }
 
