@@ -76,8 +76,8 @@ Quality of Life Features
 [✔] New cheat code: thereisnospoon X - sets everyone's hard capped max population to X
     - The current max value is now shown on the tooltip to the left of the bed icon
     - Like most other cheats, this won't save between server restarts
-    - foodforthought now allows you to only ignore the soft cap (ie. houses are no longer needed), but
-        cannot go higher than what has been set with thereisnospoon
+    - foodforthought now allows you to only ignore the soft cap (ie. houses are no longer needed),
+       but cannot go higher than what has been set with thereisnospoon
 
 
 [❌] Radius indicator around monster capitol and stronghold to better indicate range of night
@@ -102,8 +102,6 @@ Balancing
     (This averages out to 1/2 of the explosion damage)
 
 [✔] Reduced ghast health from 60 to 50 to compensate for the above
-
-[✔] Default maximum population cap increased from 100 to 150
 
 [🟡] Garrison units should be attackable by ground ranged units but only at 1/2 accuracy
     - Implement the nophysics mixin for arrows and blaze fireballs but have it not work 1/2 of the time
