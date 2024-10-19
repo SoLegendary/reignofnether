@@ -19,8 +19,6 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
@@ -32,13 +30,13 @@ import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
+
+import java.util.concurrent.atomic.*;
 
 public class FogOfWarClientEvents {
     public static final float BRIGHT = 1.0f;
@@ -49,26 +47,26 @@ public class FogOfWarClientEvents {
     public static final int CHUNK_FAR_VIEW_DIST = 2;
     private static final Minecraft MC = Minecraft.getInstance();
     private static final int UPDATE_TICKS_MAX = 10;
-    private static int updateTicksLeft = UPDATE_TICKS_MAX;
+    private static final AtomicInteger updateTicksLeft = new AtomicInteger(UPDATE_TICKS_MAX);
 
-    public static final Set<ChunkPos> brightChunks = new HashSet<>();
+    public static final Set<ChunkPos> brightChunks = ConcurrentHashMap.newKeySet();
     public static final Set<ChunkPos> lastBrightChunks = ConcurrentHashMap.newKeySet();
     public static final Set<ChunkPos> rerenderChunks = ConcurrentHashMap.newKeySet();
     public static final Set<BlockPos> semiFrozenChunks = ConcurrentHashMap.newKeySet();
     public static final Set<FrozenChunk> frozenChunks = ConcurrentHashMap.newKeySet();
 
-    public static boolean fogEnableWarningSent = false;
-    private static boolean enabled = false;
+    public static final AtomicBoolean fogEnableWarningSent = new AtomicBoolean(false);
+    private static final AtomicBoolean enabled = new AtomicBoolean(false);
     private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
-    public static boolean movedToCapitol = false;
-    public static Set<ChunkPos> chunksToRefresh = new HashSet<>();
-    public static ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum = new ObjectArrayList<>();
+    public static final AtomicBoolean movedToCapitol = new AtomicBoolean(false);
+    public static final Set<ChunkPos> chunksToRefresh = ConcurrentHashMap.newKeySet();
+    public static final ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum = new ObjectArrayList<>();
 
     public static void revealOrHidePlayer(boolean reveal, String playerName) {
         if (reveal) {
             revealedPlayerNames.add(playerName);
         } else {
-            revealedPlayerNames.remove(playerName); // Direct remove instead of removeIf to avoid unnecessary iteration
+            revealedPlayerNames.remove(playerName);
         }
     }
 
@@ -89,31 +87,39 @@ public class FogOfWarClientEvents {
         MC.levelRenderer.allChanged();
         semiFrozenChunks.clear();
     }
+
     public static void unmuteChunks() {
         SoundClientEvents.mutedBps.clear();
     }
-    public static void setEnabled(boolean value) {
-        if (MC.player == null) return;
-        if (enabled == value) return; // Avoid resetting if the state doesn't change
 
-        enabled = value;
+    public static void setEnabled(boolean value) {
+        if (MC.player == null || enabled.get() == value) return;
+
+        enabled.set(value);
         resetFogChunks();
 
-        if (enabled) {
+        if (enabled.get()) {
             updateFogChunks();
-            for (Building building : BuildingClientEvents.getBuildings()) {
-                building.freezeChunks(MC.player.getName().getString(), false);
-            }
+            BuildingClientEvents.getBuildings().forEach(building ->
+                    building.freezeChunks(MC.player.getName().getString(), false)
+            );
         } else {
-            for (FrozenChunk frozenChunk : frozenChunks) {
-                frozenChunk.unloadBlocks();
-            }
+            frozenChunks.forEach(FrozenChunk::unloadBlocks);
             frozenChunks.clear();
         }
     }
 
     public static boolean isEnabled() {
-        return enabled;
+        return enabled.get();
+    }
+
+    public static void revealRangedUnit(String playerBeingAttacked, int unitId) {
+        if (MC.player != null && MC.player.getName().getString().equals(playerBeingAttacked)) {
+            UnitClientEvents.getAllUnits().stream()
+                    .filter(entity -> entity.getId() == unitId && entity instanceof RangedAttackerUnit)
+                    .map(entity -> (RangedAttackerUnit) entity)
+                    .forEach(unit -> unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX));
+        }
     }
 
     @SubscribeEvent
@@ -126,7 +132,7 @@ public class FogOfWarClientEvents {
 
     private static int handleFogCommand(boolean enable) {
         if (MC.player == null || !MC.player.hasPermissions(4)) return -1;
-        if (!enable && !fogEnableWarningSent) {
+        if (!enable && !fogEnableWarningSent.get()) {
             // Warning logic
             return 1;
         } else {
@@ -140,8 +146,7 @@ public class FogOfWarClientEvents {
         if (!MC.level.getWorldBorder().isWithinBounds(pPos)) return EXTRA_DARK;
 
         ChunkPos chunkPos = new ChunkPos(pPos);
-        if (brightChunks.contains(chunkPos)) return BRIGHT;
-        return isEnabled() ? DARK : BRIGHT;
+        return brightChunks.contains(chunkPos) ? BRIGHT : (isEnabled() ? DARK : BRIGHT);
     }
 
     public static boolean isBuildingInBrightChunk(Building building) {
@@ -156,7 +161,8 @@ public class FogOfWarClientEvents {
     public static boolean isInBrightChunk(Entity entity) {
         if (!isEnabled() || MC.level == null) return true;
         ChunkPos chunkPos = new ChunkPos(entity.getOnPos());
-        return brightChunks.contains(chunkPos) || (entity instanceof RangedAttackerUnit && ((RangedAttackerUnit) entity).getFogRevealDuration() > 0);
+        return brightChunks.contains(chunkPos) ||
+                (entity instanceof RangedAttackerUnit && ((RangedAttackerUnit) entity).getFogRevealDuration() > 0);
     }
 
     @SubscribeEvent
@@ -173,12 +179,13 @@ public class FogOfWarClientEvents {
 
         UnitClientEvents.getAllUnits().stream()
                 .filter(entity -> UnitClientEvents.getPlayerToEntityRelationship(entity) != Relationship.OWNED)
-                .forEach(entity -> enemyOccupiedChunks.add(new ChunkPos(entity.getOnPos())));
+                .map(entity -> new ChunkPos(entity.getOnPos()))
+                .forEach(enemyOccupiedChunks::add);
 
         BuildingClientEvents.getBuildings().stream()
                 .filter(building -> BuildingClientEvents.getPlayerToBuildingRelationship(building) != Relationship.OWNED && !isPlayerRevealed(building.ownerName))
-                .forEach(building -> building.getRenderChunkOrigins(true)
-                        .stream().map(bp -> MC.level.getChunk(bp).getPos()).forEach(enemyOccupiedChunks::add));
+                .flatMap(building -> building.getRenderChunkOrigins(true).stream().map(bp -> MC.level.getChunk(bp).getPos()))
+                .forEach(enemyOccupiedChunks::add);
 
         return enemyOccupiedChunks;
     }
@@ -189,61 +196,42 @@ public class FogOfWarClientEvents {
         Set<ChunkPos> viewerChunks = ConcurrentHashMap.newKeySet();
         Set<ChunkPos> farViewerChunks = ConcurrentHashMap.newKeySet();
 
-        // Process units and buildings in parallel to gather the chunks
-        CompletableFuture<Void> unitProcessing = CompletableFuture.runAsync(() -> {
-            UnitClientEvents.getAllUnits().stream()
-                    .parallel()
-                    .filter(entity -> UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
-                            (entity instanceof Unit unit && isPlayerRevealed(unit.getOwnerName())))
-                    .forEach(entity -> {
-                        ChunkPos chunkPos = new ChunkPos(entity.getOnPos());
-                        if (entity instanceof GhastUnit) {
-                            farViewerChunks.add(chunkPos);
-                        } else {
-                            viewerChunks.add(chunkPos);
-                        }
-                    });
-        });
+        // Processing units synchronously
+        UnitClientEvents.getAllUnits().stream()
+                .filter(entity -> UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
+                        (entity instanceof Unit unit && isPlayerRevealed(unit.getOwnerName())))
+                .forEach(entity -> {
+                    ChunkPos chunkPos = new ChunkPos(entity.getOnPos());
+                    if (entity instanceof GhastUnit) {
+                        farViewerChunks.add(chunkPos);
+                    } else {
+                        viewerChunks.add(chunkPos);
+                    }
+                });
 
-        CompletableFuture<Void> buildingProcessing = CompletableFuture.runAsync(() -> {
-            BuildingClientEvents.getBuildings().stream()
-                    .parallel()
-                    .filter(building -> BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED || isPlayerRevealed(building.ownerName))
-                    .forEach(building -> {
-                        ChunkPos chunkPos = new ChunkPos(building.centrePos);
-                        if ((building instanceof GarrisonableBuilding && GarrisonableBuilding.getNumOccupants(building) > 0 && building.isBuilt) || building.isCapitol) {
-                            farViewerChunks.add(chunkPos);
-                        } else {
-                            viewerChunks.add(chunkPos);
-                        }
-                    });
-        });
+        // Processing buildings synchronously
+        BuildingClientEvents.getBuildings().stream()
+                .filter(building -> BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED || isPlayerRevealed(building.ownerName))
+                .forEach(building -> {
+                    ChunkPos chunkPos = new ChunkPos(building.centrePos);
+                    if ((building instanceof GarrisonableBuilding && GarrisonableBuilding.getNumOccupants(building) > 0 && building.isBuilt) || building.isCapitol) {
+                        farViewerChunks.add(chunkPos);
+                    } else {
+                        viewerChunks.add(chunkPos);
+                    }
+                });
 
-        // Wait for both parallel tasks to complete before proceeding
-        CompletableFuture<Void> allProcessing = CompletableFuture.allOf(unitProcessing, buildingProcessing);
+        // Expand the chunk view after gathering the information
+        expandChunks(viewerChunks, CHUNK_VIEW_DIST);
+        expandChunks(farViewerChunks, CHUNK_FAR_VIEW_DIST);
 
-        allProcessing.thenRun(() -> {
-            // Now expand chunks for both viewer and farViewerChunks after gathering them
-            expandChunks(viewerChunks, CHUNK_VIEW_DIST);
-            expandChunks(farViewerChunks, CHUNK_FAR_VIEW_DIST);
-
-            handleNewlyDarkChunks();
-            handleNewlyBrightChunks();
-            updateSemiFrozenChunks();
-        }).join();  // Ensure that we wait for all processing to finish before proceeding
-    }
-    public static void revealRangedUnit(String playerBeingAttacked, int unitId) {
-        if (MC.player != null && MC.player.getName().getString().equals(playerBeingAttacked)) {
-            for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
-                if (entity.getId() == unitId && entity instanceof RangedAttackerUnit) {
-                    ((RangedAttackerUnit) entity).setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
-                }
-            }
-        }
+        handleNewlyDarkChunks();
+        handleNewlyBrightChunks();
+        updateSemiFrozenChunks();
     }
 
     private static void expandChunks(Set<ChunkPos> chunks, int distance) {
-        Set<ChunkPos> expandedChunks = new HashSet<>();
+        Set<ChunkPos> expandedChunks = ConcurrentHashMap.newKeySet();
         chunks.forEach(chunkPos -> {
             for (int x = -distance; x <= distance; x++) {
                 for (int z = -distance; z <= distance; z++) {
@@ -251,12 +239,8 @@ public class FogOfWarClientEvents {
                 }
             }
         });
-        synchronized (brightChunks) {
-            brightChunks.addAll(expandedChunks);
-        }
+        brightChunks.addAll(expandedChunks);
     }
-
-
 
     private static void handleNewlyDarkChunks() {
         Set<ChunkPos> newlyDarkChunks = ConcurrentHashMap.newKeySet();
@@ -265,8 +249,7 @@ public class FogOfWarClientEvents {
 
         newlyDarkChunks.forEach(cpos -> onChunkUnexplore(cpos));
 
-        // Add chunks for rerender in a batch.
-        Set<ChunkPos> rerenderBatch = new HashSet<>();
+        Set<ChunkPos> rerenderBatch = ConcurrentHashMap.newKeySet();
         newlyDarkChunks.forEach(cpos -> {
             for (int x = -1; x <= 1; x++) {
                 for (int z = -1; z <= 1; z++) {
@@ -274,9 +257,8 @@ public class FogOfWarClientEvents {
                 }
             }
         });
-        rerenderChunks.addAll(rerenderBatch); // Batch add rerender chunks
+        rerenderChunks.addAll(rerenderBatch);
     }
-
 
     private static void handleNewlyBrightChunks() {
         Set<ChunkPos> newlyBrightChunks = ConcurrentHashMap.newKeySet();
@@ -305,34 +287,32 @@ public class FogOfWarClientEvents {
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (isEnabled() && MC.level != null && MC.player != null && evt.phase == TickEvent.Phase.END) {
-            if (updateTicksLeft > 0) {
-                updateTicksLeft--;
+            if (updateTicksLeft.get() > 0) {
+                updateTicksLeft.decrementAndGet();
             } else {
-                updateTicksLeft = UPDATE_TICKS_MAX;
-                CompletableFuture.runAsync(FogOfWarClientEvents::updateFogChunks);
+                updateTicksLeft.set(UPDATE_TICKS_MAX);
+                updateFogChunks();
             }
         }
     }
-
 
     public static void updateChunkLighting(BlockPos originBp) {
         if (MC.level == null) return;
 
         for (int i = 0; i < 4; i++) {
             BlockPos updatePos = originBp.offset(4 * i, 0, 4 * i);
-            boolean foundBlock = false;  // Stop iterating once we find a non-air block
+            boolean foundBlock = false;
             for (int y = MC.level.getMaxBuildHeight(); y > MC.level.getMinBuildHeight() && !foundBlock; y--) {
                 BlockPos bp = new BlockPos(updatePos.getX(), y, updatePos.getZ());
                 BlockState bs = MC.level.getBlockState(bp);
                 if (!bs.isAir()) {
                     MC.level.setBlockAndUpdate(bp, Blocks.GLOWSTONE.defaultBlockState());
                     MC.level.setBlockAndUpdate(bp, bs);
-                    foundBlock = true;  // Exit the loop early
+                    foundBlock = true;
                 }
             }
         }
     }
-
 
     public static void onChunkExplore(ChunkPos cpos) {
         if (MC.level == null) return;
