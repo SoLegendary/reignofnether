@@ -2,6 +2,10 @@ package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.goat.Goat;
@@ -19,6 +23,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Material;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ResourceSources {
     public static final List<Material> CLEAR_MATERIALS = List.of(Material.WATER, Material.AIR, Material.PLANT, Material.LEAVES);
@@ -244,40 +249,35 @@ public class ResourceSources {
             ),
             new ResourceSource("Saplings", // item only
                     List.of(),
-                    List.of(Items.ACACIA_SAPLING, Items.SPRUCE_SAPLING, Items.BIRCH_SAPLING, Items.OAK_SAPLING, Items.OAK_SAPLING, Items.DARK_OAK_SAPLING, Items.JUNGLE_SAPLING),
+                    resolveItemsFromTag(ItemTags.SAPLINGS),
                     0,
                     5,
                     ResourceName.WOOD
             ),
-            /*
             new ResourceSource("Planks",
-                    List.of(Blocks.OAK_PLANKS, Blocks.BIRCH_PLANKS, Blocks.ACACIA_PLANKS, Blocks.DARK_OAK_PLANKS, Blocks.JUNGLE_PLANKS, Blocks.MANGROVE_PLANKS, Blocks.SPRUCE_PLANKS),
-                    List.of(Items.OAK_PLANKS, Items.BIRCH_PLANKS, Items.ACACIA_PLANKS, Items.DARK_OAK_PLANKS, Items.JUNGLE_PLANKS, Items.MANGROVE_PLANKS, Items.SPRUCE_PLANKS),
+                    resolveBlocksFromTag(BlockTags.PLANKS),
+                    resolveItemsFromTag(ItemTags.PLANKS),
                     TICKS_PER_SECOND * 2,
                     3,
                     ResourceName.WOOD
-            ), */
+            ),
             new ResourceSource("Logs",
-                    List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG,
-                            Blocks.OAK_WOOD, Blocks.BIRCH_WOOD, Blocks.ACACIA_WOOD, Blocks.DARK_OAK_WOOD, Blocks.JUNGLE_WOOD, Blocks.MANGROVE_WOOD, Blocks.SPRUCE_WOOD),
-                    List.of(Items.OAK_LOG, Items.BIRCH_LOG, Items.ACACIA_LOG, Items.DARK_OAK_LOG, Items.JUNGLE_LOG, Items.MANGROVE_LOG, Items.SPRUCE_LOG,
-                            Items.OAK_WOOD, Items.BIRCH_WOOD, Items.ACACIA_WOOD, Items.DARK_OAK_WOOD, Items.JUNGLE_WOOD, Items.MANGROVE_WOOD, Items.SPRUCE_WOOD),
+                    resolveBlocksFromTag(BlockTags.LOGS),
+                    resolveItemsFromTag(ItemTags.LOGS),
                     TICKS_PER_SECOND * 12,
                     15,
                     ResourceName.WOOD
             ),
             new ResourceSource("Nether Logs",
-                    List.of(Blocks.CRIMSON_STEM, Blocks.WARPED_STEM, Blocks.CRIMSON_HYPHAE, Blocks.WARPED_HYPHAE),
-                    List.of(Items.CRIMSON_STEM, Items.WARPED_STEM, Items.CRIMSON_HYPHAE, Items.WARPED_HYPHAE),
+                    resolveNetherLogsFromTag(BlockTags.LOGS),  // This will only return Nether-specific logs
+                    resolveNetherItemsFromTag(ItemTags.LOGS),
                     TICKS_PER_SECOND * 12,
                     17,
                     ResourceName.WOOD
             ),
             new ResourceSource("Leaves", // can't actually gather but can be targeted to begin wood gathering
-                    List.of(Blocks.ACACIA_LEAVES, Blocks.AZALEA_LEAVES, Blocks.BIRCH_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.DARK_OAK_LEAVES,
-                            Blocks.MANGROVE_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES, BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get(), BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get()),
-                    List.of(Items.ACACIA_LEAVES, Items.AZALEA_LEAVES, Items.BIRCH_LEAVES, Items.FLOWERING_AZALEA_LEAVES, Items.JUNGLE_LEAVES, Items.DARK_OAK_LEAVES,
-                            Items.MANGROVE_LEAVES, Items.OAK_LEAVES, Items.SPRUCE_LEAVES),
+                    resolveBlocksFromTag(BlockTags.LEAVES),
+                    resolveItemsFromTag(ItemTags.LEAVES),
                     8,
                     1,
                     ResourceName.WOOD
@@ -349,4 +349,72 @@ public class ResourceSources {
                     ResourceName.ORE
             )
     );
+
+
+    private static List<Block> resolveBlocksFromTag(TagKey<Block> tag) {
+        List<Block> allLogs = Registry.BLOCK.getTag(tag)
+                .map(named -> named.stream().map(entry -> entry.value()).collect(Collectors.toList()))
+                .orElse(List.of());
+        return allLogs.stream()
+                .filter(block -> !(block == Blocks.CRIMSON_STEM ||
+                        block == Blocks.WARPED_STEM ||
+                        block == Blocks.STRIPPED_CRIMSON_STEM ||
+                        block == Blocks.STRIPPED_WARPED_STEM))
+                .collect(Collectors.toList());
+    }
+
+    private static List<Item> resolveItemsFromTag(TagKey<Item> tag) {
+        List<Item> allLogs = Registry.ITEM.getTag(tag)
+                .map(named -> named.stream().map(entry -> entry.value()).collect(Collectors.toList()))
+                .orElse(List.of());
+
+        return allLogs.stream()
+                .filter(item -> !(item == Items.CRIMSON_STEM ||
+                        item == Items.WARPED_STEM ||
+                        item == Items.STRIPPED_CRIMSON_STEM ||
+                        item == Items.STRIPPED_WARPED_STEM))
+                .collect(Collectors.toList());
+    }
+
+
+
+
+    private static List<Block> resolveNetherLogsFromTag(TagKey<Block> tag) {
+        List<Block> allLogs = Registry.BLOCK.getTag(tag)
+                .map(named -> named.stream().map(entry -> entry.value()).collect(Collectors.toList()))
+                .orElse(List.of());
+
+        // List of Overworld logs to exclude
+        List<Block> overworldLogs = List.of(
+                Blocks.OAK_LOG, Blocks.SPRUCE_LOG, Blocks.BIRCH_LOG, Blocks.JUNGLE_LOG,
+                Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.STRIPPED_OAK_LOG, Blocks.STRIPPED_SPRUCE_LOG,
+                Blocks.STRIPPED_BIRCH_LOG, Blocks.STRIPPED_JUNGLE_LOG, Blocks.STRIPPED_ACACIA_LOG,
+                Blocks.STRIPPED_DARK_OAK_LOG
+        );
+
+        return allLogs.stream()
+                .filter(block -> !overworldLogs.contains(block)) // Remove Overworld logs
+                .collect(Collectors.toList());
+    }
+
+    private static List<Item> resolveNetherItemsFromTag(TagKey<Item> tag) {
+        List<Item> allLogs = Registry.ITEM.getTag(tag)
+                .map(named -> named.stream().map(entry -> entry.value()).collect(Collectors.toList()))
+                .orElse(List.of());
+
+        // List of Overworld log items to exclude
+        List<Item> overworldItems = List.of(
+                Items.OAK_LOG, Items.SPRUCE_LOG, Items.BIRCH_LOG, Items.JUNGLE_LOG,
+                Items.ACACIA_LOG, Items.DARK_OAK_LOG, Items.STRIPPED_OAK_LOG, Items.STRIPPED_SPRUCE_LOG,
+                Items.STRIPPED_BIRCH_LOG, Items.STRIPPED_JUNGLE_LOG, Items.STRIPPED_ACACIA_LOG,
+                Items.STRIPPED_DARK_OAK_LOG
+        );
+
+        // Return Nether log items by filtering out Overworld log items
+        return allLogs.stream()
+                .filter(item -> !overworldItems.contains(item)) // Remove Overworld log items
+                .collect(Collectors.toList());
+    }
+
+
 }
