@@ -128,6 +128,9 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    flatDir {
+        dirs 'libs' // Assuming the Baritone JAR is in the 'libs' folder in your project root
+    }
     mavenCentral()
 }
 
@@ -140,7 +143,6 @@ dependencies {
     implementation 'org.junit.jupiter:junit-jupiter:5.9.2'
 
     minecraft 'net.minecraftforge:forge:1.19.2-43.2.21'
-
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
