@@ -1,5 +1,5 @@
 
-1.19.2-1.0.2
+1.19.2-1.0.4
 ------------
 
 [✔] Done and tested
@@ -8,7 +8,7 @@
 
 Bugfixes
 --------
-[✔] Fixed Azalea leaves not being nether-converted
+[✔] Fixed Azalea and Flowering Azalea leaves not being nether-converted
 
 [✔] Regular TNT can now damage buildings with the same damage as regular creepers (20) and can set off other TNTs
 
@@ -30,7 +30,7 @@ Bugfixes
 [✔] Joining a match no longer causes everyone's clientside buildings to be duplicated (this was causing population issues)
 
 
-
+[❌] Ranged units in garrisons should deaggro targets out of range and aggro targets they can actually reach instead
 
 [❌] Let mapmakers set the default Y level of their world and have it sync to clients on login
     - This solves rendering issues on worlds where the default is far from Y=64
