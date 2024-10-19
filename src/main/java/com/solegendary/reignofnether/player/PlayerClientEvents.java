@@ -34,6 +34,10 @@ public class PlayerClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
+    public static boolean rtsLocked = false;
+
+    public static boolean canStartRTS = true;
+
     @SubscribeEvent
     public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
         evt.getDispatcher().register(Commands.literal("rts-surrender")
@@ -43,9 +47,44 @@ public class PlayerClientEvents {
                 }));
         evt.getDispatcher().register(Commands.literal("rts-reset")
                 .executes((command) -> {
-                    PlayerServerboundPacket.resetRTS();
-                    return 1;
+                    if (MC.player != null && MC.player.hasPermissions(4)) {
+                        PlayerServerboundPacket.resetRTS();
+                        return 1;
+                    }
+                    return 0;
                 }));
+        evt.getDispatcher().register(Commands.literal("rts-lock").then(Commands.literal("enable")
+                .executes((command) -> {
+                    if (MC.player != null && MC.player.hasPermissions(4)) {
+                        PlayerServerboundPacket.lockRTS();
+                        return 1;
+                    }
+                    return 0;
+                })));
+        evt.getDispatcher().register(Commands.literal("rts-lock").then(Commands.literal("disable")
+                .executes((command) -> {
+                    if (MC.player != null && MC.player.hasPermissions(4)) {
+                        PlayerServerboundPacket.unlockRTS();
+                        return 1;
+                    }
+                    return 0;
+                })));
+        evt.getDispatcher().register(Commands.literal("rts-syncing").then(Commands.literal("enable")
+                .executes((command) -> {
+                    if (MC.player != null && MC.player.hasPermissions(4)) {
+                        PlayerServerboundPacket.enableRTSSyncing();
+                        return 1;
+                    }
+                    return 0;
+                })));
+        evt.getDispatcher().register(Commands.literal("rts-syncing").then(Commands.literal("disable")
+                .executes((command) -> {
+                    if (MC.player != null && MC.player.hasPermissions(4)) {
+                        PlayerServerboundPacket.disableRTSSyncing();
+                        return 1;
+                    }
+                    return 0;
+                })));
         evt.getDispatcher().register(Commands.literal("rts-help")
                 .executes((command) -> {
                     if (MC.player != null) {
@@ -58,6 +97,7 @@ public class PlayerClientEvents {
                         MC.player.sendSystemMessage(Component.literal("/rts-fog enable/disable - Toggle fog of war for all players"));
                         MC.player.sendSystemMessage(Component.literal("/rts-surrender - Concede the match"));
                         MC.player.sendSystemMessage(Component.literal("/rts-reset - Delete all units/buildings, set all to spectator"));
+                        MC.player.sendSystemMessage(Component.literal("/rts-lock enable/disable - Prevent all players from joining the RTS match"));
                         MC.player.sendSystemMessage(Component.literal("Right click - move, attack or set rallypoint"));
                         MC.player.sendSystemMessage(Component.literal("Ctrl + number key - Create control group"));
                         MC.player.sendSystemMessage(Component.literal("Shift + left-click on map - recenter map"));
@@ -85,6 +125,8 @@ public class PlayerClientEvents {
         disableRTS(playerName);
         MC.gui.setTitle(Component.literal("You have been defeated"));
         MC.player.playSound(SoundRegistrar.DEFEAT.get(), 0.5f, 1.0f);
+
+        ResourcesClientEvents.resourcesList.removeIf(r -> r.ownerName.equals(MC.player.getName().getString()));
     }
 
     public static void victory(String playerName) {
@@ -178,5 +220,13 @@ public class PlayerClientEvents {
         BuildingClientEvents.getSelectedBuildings().clear();
         BuildingClientEvents.getBuildings().clear();
         ResourcesClientEvents.resourcesList.clear();
+    }
+
+    public static void setRTSLock(boolean lock) {
+        rtsLocked = lock;
+    }
+
+    public static void setCanStartRTS(boolean canStart) {
+        canStartRTS = canStart;
     }
 }

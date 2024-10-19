@@ -54,7 +54,7 @@ public class ResearchPillagerCrossbows extends ProductionItem {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchPillagerCrossbows.itemName) ||
+                () -> ProductionItem.itemIsBeingProduced(ResearchPillagerCrossbows.itemName, prodBuilding.ownerName) ||
                         ResearchClient.hasResearch(ResearchPillagerCrossbows.itemName),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

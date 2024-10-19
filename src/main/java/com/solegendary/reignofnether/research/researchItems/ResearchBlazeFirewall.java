@@ -48,7 +48,7 @@ public class ResearchBlazeFirewall extends ProductionItem {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchBlazeFirewall.itemName) ||
+                () -> ProductionItem.itemIsBeingProduced(ResearchBlazeFirewall.itemName, prodBuilding.ownerName) ||
                         ResearchClient.hasResearch(ResearchBlazeFirewall.itemName),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

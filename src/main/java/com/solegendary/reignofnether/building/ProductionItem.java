@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
-import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -39,48 +39,67 @@ public abstract class ProductionItem {
     }
 
     public boolean canAfford(String ownerName) {
-        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), ownerName);
-        int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
-
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName))
                 return (resources.food >= foodCost &&
                         resources.wood >= woodCost &&
                         resources.ore >= oreCost &&
-                        ((currentPop + popCost) <= popSupply || popCost == 0));
+                        canAffordPopulation());
         return false;
     }
 
-    public boolean canAffordPopulation(String ownerName) {
+    public boolean canAffordPopulation() {
         if (popCost == 0)
             return true;
 
-        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), ownerName);
-        int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
+        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), building.ownerName);
+        int popSupply = BuildingServerEvents.getTotalPopulationSupply(building.ownerName);
 
         for (Resources resources : ResourcesServerEvents.resourcesList)
-            if (resources.ownerName.equals(ownerName))
+            if (resources.ownerName.equals(building.ownerName))
                 return (currentPop + popCost) <= popSupply;
         return false;
     }
 
-    public boolean isBelowMaxPopulation(String ownerName) {
+    // check we didn't dip below pop supply after starting production
+    public boolean isBelowPopulationSupply() {
         if (popCost == 0)
             return true;
 
-        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), ownerName);
-        int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
+        int currentPop;
+        int popSupply;
+        if (building.getLevel().isClientSide()) {
+            currentPop = UnitClientEvents.getCurrentPopulation(building.ownerName);
+            popSupply = BuildingClientEvents.getTotalPopulationSupply(building.ownerName);
+        } else {
+            currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), building.ownerName);
+            popSupply = BuildingServerEvents.getTotalPopulationSupply(building.ownerName);
+        }
+        return currentPop <= popSupply;
+    }
 
-        for (Resources resources : ResourcesServerEvents.resourcesList)
-            if (resources.ownerName.equals(ownerName))
-                return (currentPop + popCost) <= ResourceCosts.MAX_POPULATION;
+    public boolean isBelowMaxPopulation() {
+        if (popCost == 0)
+            return true;
+
+        int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) building.getLevel(), building.ownerName);
+        int popSupply = BuildingServerEvents.getTotalPopulationSupply(building.ownerName);
+
+        for (Resources resources : ResourcesServerEvents.resourcesList) {
+            if (resources.ownerName.equals(building.ownerName)) {
+                if (this.building.level.isClientSide())
+                    return (currentPop + popCost) <= UnitClientEvents.maxPopulation;
+                else
+                    return (currentPop + popCost) <= UnitServerEvents.hardCapPopulation;
+            }
+        }
         return false;
     }
 
     // some items (eg. research) are enabled only if the item doesn't exist in any existing clientside queue
-    public static boolean itemIsBeingProduced(String itemName) {
+    public static boolean itemIsBeingProduced(String itemName, String ownerName) {
         for (Building building : BuildingClientEvents.getBuildings())
-            if (building instanceof ProductionBuilding prodBuilding)
+            if (building.ownerName.equals(ownerName) && building instanceof ProductionBuilding prodBuilding)
                 for (ProductionItem prodItem : prodBuilding.productionQueue)
                     if (prodItem.getItemName().equals(itemName))
                         return true;
@@ -99,13 +118,14 @@ public abstract class ProductionItem {
 
     // return true if the tick finished
     public boolean tick(Level level) {
-        if ((level.isClientSide() && ResearchClient.hasCheat("warpten")) ||
-            (!level.isClientSide() && ResearchServerEvents.playerHasCheat(this.building.ownerName, "warpten")))
-            this.ticksLeft -= 10;
-        else
-            this.ticksLeft -= 1;
-
-        if (this.ticksLeft <= 0) {
+        if (this.ticksLeft > 0) {
+            if ((level.isClientSide() && ResearchClient.hasCheat("warpten")) ||
+                    (!level.isClientSide() && ResearchServerEvents.playerHasCheat(this.building.ownerName, "warpten")))
+                this.ticksLeft -= 10;
+            else
+                this.ticksLeft -= 1;
+        }
+        if (this.ticksLeft <= 0 && isBelowPopulationSupply()) {
             onComplete.accept(level);
             return true;
         }

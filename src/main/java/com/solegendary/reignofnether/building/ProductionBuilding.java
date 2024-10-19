@@ -237,9 +237,9 @@ public abstract class ProductionBuilding extends Building {
                         success = true;
                     }
                     else {
-                        if (!prodItem.isBelowMaxPopulation(building.ownerName))
+                        if (!prodItem.isBelowMaxPopulation())
                             ResourcesClientboundPacket.warnMaxPopulation(building.ownerName);
-                        else if (!prodItem.canAffordPopulation(building.ownerName))
+                        else if (!prodItem.canAffordPopulation())
                             ResourcesClientboundPacket.warnInsufficientPopulation(building.ownerName);
                         else
                             ResourcesClientboundPacket.warnInsufficientResources(building.ownerName,

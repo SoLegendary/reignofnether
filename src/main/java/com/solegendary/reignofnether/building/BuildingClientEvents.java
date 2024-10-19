@@ -41,7 +41,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -61,12 +60,15 @@ public class BuildingClientEvents {
     static final Minecraft MC = Minecraft.getInstance();
 
     public static int getTotalPopulationSupply(String playerName) {
+        if (ResearchClient.hasCheat("foodforthought"))
+            return UnitClientEvents.maxPopulation;
+
         int totalPopulationSupply = 0;
         for (Building building : buildings)
             if (building.ownerName.equals(playerName) && building.isBuilt)
                 totalPopulationSupply += building.popSupply;
 
-        return Math.min(ResourceCosts.MAX_POPULATION, totalPopulationSupply);
+        return Math.min(UnitClientEvents.maxPopulation, totalPopulationSupply);
     }
     // clientside buildings used for tracking position (for cursor selection)
     private static final ArrayList<Building> buildings = new ArrayList<>();
@@ -740,6 +742,9 @@ public class BuildingClientEvents {
 
     @SubscribeEvent
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT_ALT) {
+            buildingToPlace = null;
+        }
         if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
             Building building = HudClientEvents.hudSelectedBuilding;
             if (building != null && building.isBuilt && getPlayerToBuildingRelationship(building) == Relationship.OWNED) {
@@ -818,12 +823,11 @@ public class BuildingClientEvents {
                                      int numBlocksToPlace, boolean isDiagonalBridge, boolean isUpgraded,
                                      boolean isBuilt, Portal.PortalType portalType, boolean forPlayerLoggingIn) {
 
-        for (Building building : buildings)
-            if (!buildingName.toLowerCase().contains("bridge") &&
-                BuildingUtils.isPosPartOfAnyBuilding(true, pos, false, 0))
-                return; // building already exists clientside
-
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, MC.level, pos, rotation, ownerName, isDiagonalBridge);
+
+        for (Building building : buildings)
+            if (newBuilding.originPos.equals(building.originPos))
+                return; // skip, building already exists clientside
 
         // add a bunch of dummy blocks so clients know not to remove buildings before the first blocks get placed
         while (numBlocksToPlace > 0) {

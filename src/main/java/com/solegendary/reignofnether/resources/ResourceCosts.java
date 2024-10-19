@@ -31,7 +31,8 @@ public class ResourceCosts {
 
     public static final int REPLANT_WOOD_COST = 1;
     public static final int REDUCED_REPLANT_WOOD_COST = 0;
-    public static final int MAX_POPULATION = 100; // max possible pop you can have regardless of buildings
+    public static final int DEFAULT_HARD_CAP_POPULATION = 100;
+
 
     // ******************* UNITS ******************* //
     // Monsters

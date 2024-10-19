@@ -54,7 +54,7 @@ public class ResearchBruteShields extends ProductionItem {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchBruteShields.itemName) ||
+                () -> ProductionItem.itemIsBeingProduced(ResearchBruteShields.itemName, prodBuilding.ownerName) ||
                         ResearchClient.hasResearch(ResearchBruteShields.itemName),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),

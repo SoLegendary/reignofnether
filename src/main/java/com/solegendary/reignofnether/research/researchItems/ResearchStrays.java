@@ -65,7 +65,7 @@ public class ResearchStrays extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchStrays.itemName) ||
+            () -> ProductionItem.itemIsBeingProduced(ResearchStrays.itemName, prodBuilding.ownerName) ||
                     ResearchClient.hasResearch(ResearchStrays.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(Graveyard.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
