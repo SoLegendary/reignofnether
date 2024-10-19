@@ -101,7 +101,7 @@ public class OrthoviewClientEvents {
             int highestBlockY = MC.level.getHeight(Heightmap.Types.MOTION_BLOCKING, playerPos.getX(), playerPos.getZ());
 
             // Always update with the new values
-            ORTHOVIEW_PLAYER_BASE_Y = highestBlockY+20;
+            ORTHOVIEW_PLAYER_BASE_Y = highestBlockY+30;
             ORTHOVIEW_PLAYER_MAX_Y = highestBlockY + 100;
         }
     }
