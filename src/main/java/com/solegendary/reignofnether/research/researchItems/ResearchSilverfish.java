@@ -62,7 +62,7 @@ public class ResearchSilverfish extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Gives your buildings a " + (int) (SILVERFISH_SPAWN_CHANCE * 100) + " chance to spawn", Style.EMPTY),
+                FormattedCharSequence.forward("Gives your buildings a " + (int) (SILVERFISH_SPAWN_CHANCE * 100) + "% chance to spawn", Style.EMPTY),
                 FormattedCharSequence.forward("a silverfish whenever a block is destroyed. ", Style.EMPTY),
                 FormattedCharSequence.forward("Silverfish have limited lifespans.", Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),

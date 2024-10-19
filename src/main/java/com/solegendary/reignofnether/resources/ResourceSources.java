@@ -202,7 +202,13 @@ public class ResourceSources {
                     10,
                     ResourceName.FOOD
             ),
-
+            new ResourceSource("Bee nest",
+                    List.of(Blocks.BEE_NEST),
+                    List.of(Items.BEE_NEST),
+                    TICKS_PER_SECOND * 10,
+                    100,
+                    ResourceName.FOOD
+            ),
             new ResourceSource("Extra large food item",
                     List.of(),
                     List.of(Items.COOKED_BEEF,  Items.COOKED_CHICKEN, Items.COOKED_PORKCHOP, Items.COOKED_RABBIT,
