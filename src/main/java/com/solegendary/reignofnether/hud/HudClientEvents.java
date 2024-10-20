@@ -717,29 +717,34 @@ public class HudClientEvents {
                         blitX + (iconFrameSize) + 24 , blitY + (iconSize / 2) + 1, 0xFFFFFF);
 
                 // worker count assigned to each resource
-                if (resName != ResourceName.NONE) {
-                    String finalSelPlayerName = selPlayerName;
+                String finalSelPlayerName = selPlayerName;
 
-                    int numWorkersHunting = UnitClientEvents.getAllUnits().stream().filter(
-                            le -> le instanceof WorkerUnit wu && le instanceof Unit u &&
-                                    u.getOwnerName().equals(finalSelPlayerName) &&
-                                    ResourceSources.isHuntableAnimal(u.getTargetGoal().getTarget())
-                    ).toList().size();
+                int numWorkersHunting = UnitClientEvents.getAllUnits().stream().filter(
+                        le -> le instanceof WorkerUnit wu && le instanceof Unit u &&
+                                u.getOwnerName().equals(finalSelPlayerName) &&
+                                ResourceSources.isHuntableAnimal(u.getTargetGoal().getTarget())
+                ).toList().size();
 
-                    // we can only see ReturnResourcesGoal data on server, so we can't use that here
-                    int numWorkersAssigned = 0;
+                int numWorkersAssigned = 0;
+                // we can only see ReturnResourcesGoal data on server, so we can't use that here
+                if (resName == ResourceName.NONE) {
+                    numWorkersAssigned = UnitClientEvents.getAllUnits().stream()
+                            .filter(u -> u instanceof WorkerUnit &&
+                                    UnitClientEvents.getPlayerToEntityRelationship(u) == Relationship.OWNED)
+                            .toList().size();
+                } else {
                     for (LivingEntity le : UnitClientEvents.getAllUnits()) {
                         if (le instanceof Unit u && le instanceof WorkerUnit wu &&
-                            u.getOwnerName().equals(finalSelPlayerName) &&
-                            !UnitClientEvents.idleWorkerIds.contains(le.getId())) {
+                                u.getOwnerName().equals(finalSelPlayerName) &&
+                                !UnitClientEvents.idleWorkerIds.contains(le.getId())) {
 
                             boolean alreadyAssigned = false;
 
                             if (u.getReturnResourcesGoal() != null) {
                                 Resources res = Resources.getTotalResourcesFromItems(u.getItems());
                                 if (resName == ResourceName.FOOD && res.food > 0 ||
-                                    resName == ResourceName.WOOD && res.wood > 0 ||
-                                    resName == ResourceName.ORE && res.ore > 0) {
+                                        resName == ResourceName.WOOD && res.wood > 0 ||
+                                        resName == ResourceName.ORE && res.ore > 0) {
                                     numWorkersAssigned += 1;
                                     alreadyAssigned = true;
                                 }
@@ -751,14 +756,15 @@ public class HudClientEvents {
 
                     if (resName == ResourceName.FOOD)
                         numWorkersAssigned += numWorkersHunting;
-
-                    hudZones.add(MyRenderer.renderIconFrameWithBg(evt.getPoseStack(),
-                            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
-                            blitX + 69, blitY, iconFrameSize, iconBgColour));
-
-                    GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, String.valueOf(numWorkersAssigned),
-                            blitX + 69 + (iconFrameSize / 2) , blitY + (iconSize / 2) + 1, 0xFFFFFF);
                 }
+
+                hudZones.add(MyRenderer.renderIconFrameWithBg(evt.getPoseStack(),
+                        new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                        blitX + 69, blitY, iconFrameSize, iconBgColour));
+
+                GuiComponent.drawCenteredString(evt.getPoseStack(), MC.font, String.valueOf(numWorkersAssigned),
+                        blitX + 69 + (iconFrameSize / 2) , blitY + (iconSize / 2) + 1, 0xFFFFFF);
+
                 blitY += iconFrameSize - 1;
             }
 
@@ -776,15 +782,23 @@ public class HudClientEvents {
                 ) {
                     MyRenderer.renderTooltip(evt.getPoseStack(), tooltip, mouseX + 5, mouseY);
                 }
-                List<FormattedCharSequence> tooltipWorkersAssigned =
-                        List.of(FormattedCharSequence.forward("Workers on " + resourceName.toLowerCase(), Style.EMPTY));
-                if (!resourceName.equals("pop") &&
-                        mouseX >= blitX + 69 &&
-                        mouseY >= blitY &&
-                        mouseX < blitX + 69 + iconFrameSize &&
-                        mouseY < blitY + iconFrameSize
+                if (mouseX >= blitX + 69 &&
+                    mouseY >= blitY &&
+                    mouseX < blitX + 69 + iconFrameSize &&
+                    mouseY < blitY + iconFrameSize
                 ) {
+                    List<FormattedCharSequence> tooltipWorkersAssigned;
+                    if (resourceName.equals("Population")) {
+                        int numWorkers = UnitClientEvents.getAllUnits().stream()
+                                .filter(u -> u instanceof WorkerUnit &&
+                                        UnitClientEvents.getPlayerToEntityRelationship(u) == Relationship.OWNED)
+                                .toList().size();
+                        tooltipWorkersAssigned = List.of(FormattedCharSequence.forward("Total workers: " + numWorkers, Style.EMPTY));
+                    } else {
+                        tooltipWorkersAssigned = List.of(FormattedCharSequence.forward("Workers on " + resourceName.toLowerCase(), Style.EMPTY));
+                    }
                     MyRenderer.renderTooltip(evt.getPoseStack(), tooltipWorkersAssigned, mouseX + 5, mouseY);
+
                 }
                 blitY += iconFrameSize - 1;
             }

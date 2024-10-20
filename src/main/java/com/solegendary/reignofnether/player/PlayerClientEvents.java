@@ -83,11 +83,6 @@ public class PlayerClientEvents {
                 .executes((command) -> {
                     if (MC.player != null) {
                         MC.player.sendSystemMessage(Component.literal(" "));
-                        MC.player.sendSystemMessage(Component.literal("F12 - Toggle RTS camera"));
-                        MC.player.sendSystemMessage(Component.literal("F8 - Refresh chunks"));
-                        MC.player.sendSystemMessage(Component.literal("F7 - Toggle FPS/TPS counters"));
-                        MC.player.sendSystemMessage(Component.literal("F6 - Toggle hide leaves (experimental)"));
-                        MC.player.sendSystemMessage(Component.literal("~ - Deselect all units and buildings"));
                         MC.player.sendSystemMessage(Component.literal("/rts-fog enable/disable - Toggle fog of war for all players"));
                         MC.player.sendSystemMessage(Component.literal("/rts-surrender - Concede the match"));
                         MC.player.sendSystemMessage(Component.literal("/rts-reset - Delete all units/buildings, set all to spectator"));
@@ -98,6 +93,11 @@ public class PlayerClientEvents {
         evt.getDispatcher().register(Commands.literal("rts-controls")
                 .executes((command) -> {
                     if (MC.player != null) {
+                        MC.player.sendSystemMessage(Component.literal("F12 - Toggle RTS camera"));
+                        MC.player.sendSystemMessage(Component.literal("F8 - Refresh chunks"));
+                        MC.player.sendSystemMessage(Component.literal("F7 - Toggle FPS/TPS counters"));
+                        MC.player.sendSystemMessage(Component.literal("F6 - Toggle hide leaves (experimental)"));
+                        MC.player.sendSystemMessage(Component.literal("~ - Deselect all units and buildings"));
                         MC.player.sendSystemMessage(Component.literal("Right click - move, attack or set rallypoint"));
                         MC.player.sendSystemMessage(Component.literal("Ctrl + number key - Create control group"));
                         MC.player.sendSystemMessage(Component.literal("Shift + left-click on map - recenter map"));

@@ -1,6 +1,9 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -46,6 +49,7 @@ public class SelectedTargetGoal<T extends LivingEntity> extends TargetGoal {
     public void setTarget(@Nullable LivingEntity target) {
         if (target != null && target.getId() == this.mob.getId())
             return;
+
         this.target = target;
         this.start();
     }
