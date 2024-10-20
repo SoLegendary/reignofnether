@@ -19,7 +19,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 
-version = '1.0'
+version = '1.0.5'
 group = 'com.solegendary.reignofnether' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'reignofnether'
 

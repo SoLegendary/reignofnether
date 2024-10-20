@@ -1,5 +1,5 @@
 
-1.19.2-1.0.4
+1.19.2-1.0.5
 ------------
 
 [✔] Done and tested
@@ -12,21 +12,20 @@
 
 Bugfixes
 --------
-
-[🟡] The witch icon is actually a witch now, not a villager
-[🟡] Tutorial players may now cancel and delete buildings
-[🟡] Workers may now gather bee nests (worth 100 food)
-[🟡] Farm water that freezes now melts after a few seconds
-[🟡] Can no longer place buildings on top of leaf blocks
-[🟡] Ghast fireballs no longer bounce off of each other
-[🟡] Fixed another resources desync bug
-[🟡] Ghasts high up in the air are now a bit easier to target with ranged units
-[🟡] Evokers can no longer send vexes to attack enemies at unlimited range (now has a range of 20, or 30 in a garrison)
-
-[❌] Ghasts crash when you select to move them into a sky block with no floor
-
-[❌] Stopped iron golems from randomly attacking your own troops
-    In a large group of iron golems and pillagers, the golems attack your own troops randomly when you A-attack anything
+[🟡] Reign of Nether's version now correctly shows in the mods menu
+[✔] The witch icon is actually a witch now, not a villager
+[✔] Tutorial players may now cancel and delete buildings
+[✔] Workers may now gather bee nests (worth 100 food)
+[✔] Farm water that freezes now melts after a few seconds
+[✔] Can no longer place buildings on top of leaf blocks
+[✔] Ghast fireballs no longer bounce off of each other
+[✔] Fixed another resources desync bug
+[✔] Ghasts high up in the air are now a bit easier to target with ranged units
+[✔] Evokers can no longer send vexes to attack enemies at unlimited range (now has a range of 20, or 30 in a garrison)
+[✔] Stopped iron golems from randomly attacking your own troops
+[✔] Ravagers no longer gain bonus movement speed when targeting an enemy (this was unintended vanilla logic)
+[✔] Ghasts no longer crash when you command them to move them into a sky block with no floor
+    - However, they will now simply ignore movement commands into open air
 
 [❌] Camera issues in worlds where the ground is far from Y=64 have been solved, thanks @Boobcat!
     - Review ColinVaugn PR and take out only this change
@@ -73,29 +72,37 @@ Quality of Life Features
 Balancing
 ---------
 
-[🟡] All mounted unit upgrades have been upped in cost and time    - Spider Jockeys: (150 food, 150 wood, 60s) -> (250 food, 250 wood, 100s)
-    - Hoglin Cavalry: (150 food, 150 wood, 60s) -> (250 food, 250 wood, 100s)
-    - Ravager Artillery: (250 food, 250 wood, 90s) -> (350 food, 350 ORE, 140s)
+[✔] All mounted unit upgrades have been upped in cost and time
+    - Spider Jockeys: (150 food, 150 wood, 60s) -> (300 food, 250 wood, 100s)
+    - Hoglin Cavalry: (150 food, 150 wood, 60s) -> (300 food, 250 wood, 100s)
+    - Ravager Artillery: (250 food, 250 wood, 90s) -> (400 food, 350 ORE, 140s)
 
-[🟡] Skeletons, zombies and all their variants have had food costs and build times reduced:
+[✔] Skeletons, zombies and all their variants have had food costs and build times reduced:
     - Zombie: (90 food, 20s) -> (75 food, 18s)
     - Skeleton: (70 food, 20s) -> (60 food, 18s)
 
-[🟡] Warden health increased from 90 to 120
+[✔] Spiders and poison spiders have had their costs increased
+    - (80 food) -> (90 food)
 
-[🟡] Warden damage increased from 6 to 8
+[✔] Warden health increased from 90 to 120
 
-[🟡] Ravager health decreased from 300 to 250 and movement speed from 28 to 22
+[✔] Warden damage increased from 6 to 8
 
-[🟡] Castles now additionally require a Blacksmith to be built (they already require a Barracks and Arcane Tower)
+[✔] Ravager health decreased from 300 to 250 and movement speed from 30 to 25
 
-rework time of day when a monster player starts?
-    - have it be so it's night when its mostly likely someone attacks
+[✔] Castles now additionally require a Blacksmith to be built (they already require a Barracks and Arcane Tower)
+
+[✔] When a monster faction joins the game, time of day is now set to noon (5 mins before sunset) instead of sunset.
+    (Zombie villagers are immune to sunburn anyway)
+
+
+
+[❌] Multishot Pillagers now only fire 2 arrows instead of 3
 
 [❌] Mausoleums provide a speed I aura to all friendly units in their night range, similar to villager captains
     - or some other inherent base defense
 
-[❌] Multishot Pillagers now only fire 2 arrows instead of 3
+
 
 
 

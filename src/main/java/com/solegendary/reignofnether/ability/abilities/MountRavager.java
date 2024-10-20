@@ -54,7 +54,8 @@ public class MountRavager extends Ability {
             () -> UnitClientEvents.sendUnitCommand(UnitAction.MOUNT_RAVAGER),
             List.of(
                     FormattedCharSequence.forward("Mount Ravager (Right click to auto-find)", Style.EMPTY),
-                    FormattedCharSequence.forward("Mounted pillagers gain explosive arrows", Style.EMPTY)
+                    FormattedCharSequence.forward("Mounted pillagers gain explosive arrows", Style.EMPTY),
+                    FormattedCharSequence.forward("but fire 30% slower.", Style.EMPTY)
             ),
             this
         );

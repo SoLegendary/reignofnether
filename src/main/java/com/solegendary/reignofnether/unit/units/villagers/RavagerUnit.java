@@ -23,6 +23,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -36,14 +37,16 @@ import net.minecraft.world.entity.monster.Ravager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.ForgeEventFactory;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
@@ -129,7 +132,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     final static public float attacksPerSecond = 0.6f;
     final static public float maxHealth = 250.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.22f;
+    final static public float movementSpeed = 0.25f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -227,6 +230,14 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public void startToRoar() {
         this.playSound(SoundEvents.RAVAGER_ROAR, 3.0F, 1.0F);
         this.roarTick = 40;
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (this.isAlive()) {
+            this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed);
+        }
     }
 
     @Override
