@@ -142,7 +142,7 @@ public class MinimapClientEvents {
             largeMap ? "Close" : "Open large map",
             14,
             largeMap ? new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png") :
-                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
+                        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
             Keybindings.keyM,
             () -> false,
@@ -592,9 +592,9 @@ public class MinimapClientEvents {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
             if (UnitClientEvents.getSelectedUnits().size() > 0 && moveTo != null) {
                 UnitClientEvents.sendUnitCommandManual(
-                        UnitAction.MOVE, -1,
-                        UnitClientEvents.getSelectedUnits().stream().mapToInt(Entity::getId).toArray(),
-                        moveTo
+                    UnitAction.MOVE, -1,
+                    UnitClientEvents.getSelectedUnits().stream().mapToInt(Entity::getId).toArray(),
+                    moveTo
                 );
             }
         }
@@ -603,7 +603,7 @@ public class MinimapClientEvents {
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiOverlayEvent.Post evt) {
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() ||
-                !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
+            !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
             return;
 
         // toggle here to ensure it doesn't happen in the middle of the updates
