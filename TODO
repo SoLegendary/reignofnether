@@ -12,6 +12,9 @@
 
 Bugfixes
 --------
+
+[❌] Camera issues in worlds where the ground is far from Y=64 have been solved, thanks @Boobcat!
+
 [🟡] Reign of Nether's version now correctly shows in the mods menu
 [✔] The witch icon is actually a witch now, not a villager
 [✔] Tutorial players may now cancel and delete buildings
@@ -27,8 +30,7 @@ Bugfixes
 [✔] Ghasts no longer crash when you command them to move them into a sky block with no floor
     - However, they will now simply ignore movement commands into open air
 
-[❌] Camera issues in worlds where the ground is far from Y=64 have been solved, thanks @Boobcat!
-    - Review ColinVaugn PR and take out only this change
+
 
 
 
