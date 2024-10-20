@@ -59,7 +59,7 @@ public class ResearchRavagerCavalry extends ProductionItem {
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward("Unlocks the ability for pillagers to mount ravagers,", Style.EMPTY),
-                FormattedCharSequence.forward("gaining explosive arrows that shoot upwards like mortar,", Style.EMPTY)
+                FormattedCharSequence.forward("gaining explosive arrows that shoot upwards like mortar.", Style.EMPTY)
             )
         );
     }

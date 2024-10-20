@@ -1,12 +1,8 @@
 package com.solegendary.reignofnether.attackwarnings;
 
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
-import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class AttackWarningServerEvents {

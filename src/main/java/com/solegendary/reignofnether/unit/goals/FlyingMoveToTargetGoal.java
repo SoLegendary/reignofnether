@@ -62,8 +62,8 @@ public class FlyingMoveToTargetGoal extends MoveToTargetBlockGoal {
             MiscUtil.addUnitCheckpoint((Unit) mob, bp);
             ((Unit) mob).setIsCheckpointGreen(true);
 
-            //if (this.mob.level.getBlockState(bp).isAir())
-            //    return;
+            if (this.mob.level.getBlockState(bp).isAir())
+                return;
 
             BlockPos bpGround = bp;
             int y = 1;
