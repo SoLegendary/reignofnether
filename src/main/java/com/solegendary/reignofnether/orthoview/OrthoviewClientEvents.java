@@ -192,10 +192,10 @@ public class OrthoviewClientEvents {
         }
 
         if (MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-5,0)) &&
-                MC.player.getOnPos().getY() <= ORTHOVIEW_PLAYER_MAX_Y)
+            MC.player.getOnPos().getY() <= ORTHOVIEW_PLAYER_MAX_Y)
             panCam(0,1f,0);
         if (!MiscUtil.isGroundBlock(MC.level, MC.player.getOnPos().offset(0,-6,0)) &&
-                MC.player.getOnPos().getY() >= ORTHOVIEW_PLAYER_BASE_Y)
+            MC.player.getOnPos().getY() >= ORTHOVIEW_PLAYER_BASE_Y)
             panCam(0,-1f,0);
 
         if (forcePanTicksLeft > 0) {
@@ -267,7 +267,7 @@ public class OrthoviewClientEvents {
     public static void onInput(InputEvent.Key evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
             if (evt.getKey() == Keybindings.getFnum(12).key &&
-                    !OrthoviewClientEvents.isCameraLocked())
+                !OrthoviewClientEvents.isCameraLocked())
                 toggleEnable();
 
             if (evt.getKey() == Keybindings.getFnum(6).key) {
