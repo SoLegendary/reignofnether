@@ -185,6 +185,7 @@ public class PlayerServerEvents {
                 serverPlayer.sendSystemMessage(Component.literal("Welcome to Reign of Nether").withStyle(Style.EMPTY.withBold(true)));
                 serverPlayer.sendSystemMessage(Component.literal("Press F12 to toggle RTS camera and join the game"));
                 serverPlayer.sendSystemMessage(Component.literal("Use '/rts-help' to see the list of all commands"));
+                serverPlayer.sendSystemMessage(Component.literal("Use '/rts-controls' to see the list of controls"));
                 if (rtsLocked) {
                     serverPlayer.sendSystemMessage(Component.literal(""));
                     serverPlayer.sendSystemMessage(Component.literal("This RTS match has been locked. Please wait for a new game before joining."));

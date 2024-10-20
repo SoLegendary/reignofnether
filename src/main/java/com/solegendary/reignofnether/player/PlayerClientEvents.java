@@ -9,22 +9,16 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.world.scores.Objective;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.glfw.GLFW;
-
-import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
 
 public class PlayerClientEvents {
 
@@ -98,6 +92,12 @@ public class PlayerClientEvents {
                         MC.player.sendSystemMessage(Component.literal("/rts-surrender - Concede the match"));
                         MC.player.sendSystemMessage(Component.literal("/rts-reset - Delete all units/buildings, set all to spectator"));
                         MC.player.sendSystemMessage(Component.literal("/rts-lock enable/disable - Prevent all players from joining the RTS match"));
+                    }
+                    return 1;
+                }));
+        evt.getDispatcher().register(Commands.literal("rts-controls")
+                .executes((command) -> {
+                    if (MC.player != null) {
                         MC.player.sendSystemMessage(Component.literal("Right click - move, attack or set rallypoint"));
                         MC.player.sendSystemMessage(Component.literal("Ctrl + number key - Create control group"));
                         MC.player.sendSystemMessage(Component.literal("Shift + left-click on map - recenter map"));
@@ -105,6 +105,7 @@ public class PlayerClientEvents {
                         MC.player.sendSystemMessage(Component.literal("Delete - destroy selected units/buildings"));
                         MC.player.sendSystemMessage(Component.literal("Alt + right-click - rotate camera"));
                         MC.player.sendSystemMessage(Component.literal("Alt + scroll - zoom in/out"));
+                        MC.player.sendSystemMessage(Component.literal("Scroll - Rotate a building to place"));
                     }
                     return 1;
                 }));
@@ -193,7 +194,7 @@ public class PlayerClientEvents {
     // allow tab player list menu on the orthoview screen
     @SubscribeEvent
     public static void onScreenRender(ScreenEvent.Render evt) {
-        if (OrthoviewClientEvents.isEnabled() && Keybindings.showPlayers.isDown() && MC.level != null) {
+        if (OrthoviewClientEvents.isEnabled() && Keybindings.tab.isDown() && MC.level != null) {
             if (!MC.isLocalServer()) {
                 MC.gui.getTabList().setVisible(true);
                 MC.gui.getTabList().render(evt.getPoseStack(), MC.getWindow().getGuiScaledWidth(), MC.level.getScoreboard(), null);

@@ -302,7 +302,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         if (!this.isSilent()) {
             this.level.levelEvent(null, 1016, this.blockPosition(), 0);
         }
-        LargeFireball fireball = new LargeFireball(this.level, this, tx, ty, tz, EXPLOSION_POWER);
+        LargeFireball fireball = new GhastUnitFireball(this.level, this, tx, ty, tz, EXPLOSION_POWER);
         fireball.setInvulnerable(true);
         fireball.setPos(this.getX() + viewVec.x * 4.0, this.getY(0.5) + 0.5, fireball.getZ() + viewVec.z * 4.0);
         this.playSound(SoundEvents.GHAST_WARN, 3.0F, 1.0F);
@@ -318,10 +318,10 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         double vertiDist = Math.max(0, this.getY() - attacker.getY());
 
         // if we're directly under the ghast, just allow anything to attack it
-        if (horizDist < 2)
+        if (horizDist < 4)
             return (int) vertiDist;
         else
-            return (int) (vertiDist * 0.4f);
+            return (int) (vertiDist * 0.5f);
     }
 
     @Override

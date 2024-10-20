@@ -169,19 +169,7 @@ public class ResourcesServerEvents {
     }
 
     public static void assignResources(String playerName) {
-        for (Resources res : resourcesList) {
-            if (res.ownerName.equals(playerName)) {
-                if (TutorialServerEvents.isEnabled()) {
-                    res.food = STARTING_FOOD_TUTORIAL;
-                    res.wood = STARTING_WOOD_TUTORIAL;
-                    res.ore = STARTING_ORE_TUTORIAL;
-                } else {
-                    res.food = STARTING_FOOD;
-                    res.wood = STARTING_WOOD;
-                    res.ore = STARTING_ORE;
-                }
-            }
-        }
+        resourcesList.removeIf(r -> r.ownerName.equals(playerName));
         Resources resources;
         if (TutorialServerEvents.isEnabled()) {
             resources = new Resources(playerName,

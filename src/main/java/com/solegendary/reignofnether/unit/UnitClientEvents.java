@@ -494,6 +494,11 @@ public class UnitClientEvents {
             lastLeftClickTime = System.currentTimeMillis();
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            if (BuildingClientEvents.getBuildingToPlace() != null) {
+                BuildingClientEvents.setBuildingToPlace(null);
+                return;
+            }
+
             if (selectedUnits.size() > 0) {
                 Building preSelBuilding = BuildingClientEvents.getPreselectedBuilding();
 

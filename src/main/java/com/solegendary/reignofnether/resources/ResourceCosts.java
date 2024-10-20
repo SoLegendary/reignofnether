@@ -114,7 +114,7 @@ public class ResourceCosts {
     public static ResourceCost RESEARCH_GOLEM_SMITHING = ResourceCost.Research(0, 150, 150, 60);
     public static ResourceCost RESEARCH_LAB_LIGHTNING_ROD = ResourceCost.Research(0,0,400, 120);
     public static ResourceCost RESEARCH_RESOURCE_CAPACITY = ResourceCost.Research(200,200,0, 90);
-    public static ResourceCost RESEARCH_SPIDER_JOCKEYS = ResourceCost.Research(150,150,0, 60);
+    public static ResourceCost RESEARCH_SPIDER_JOCKEYS = ResourceCost.Research(250,250,0, 100);
     public static ResourceCost RESEARCH_POISON_SPIDERS = ResourceCost.Research(400,0,250, 150);
     public static ResourceCost RESEARCH_HUSKS = ResourceCost.Research(500,0,500, 200);
     public static ResourceCost RESEARCH_DROWNED = ResourceCost.Research(500,0,500, 200);
@@ -123,9 +123,9 @@ public class ResourceCosts {
     public static ResourceCost RESEARCH_EVOKER_VEXES = ResourceCost.Research(500,0,300, 120);
     public static ResourceCost RESEARCH_CASTLE_FLAG = ResourceCost.Research(200,0,100, 60);
     public static ResourceCost RESEARCH_SILVERFISH = ResourceCost.Research(0,300,300, 120);
-    public static ResourceCost RESEARCH_RAVAGER_ARTILLERY = ResourceCost.Research(250,250,0, 90);
+    public static ResourceCost RESEARCH_RAVAGER_ARTILLERY = ResourceCost.Research(350,0,350, 140);
     public static ResourceCost RESEARCH_BRUTE_SHIELDS = ResourceCost.Research(0,300,300, 150);
-    public static ResourceCost RESEARCH_HOGLIN_CAVALRY = ResourceCost.Research(150,150,0, 60);
+    public static ResourceCost RESEARCH_HOGLIN_CAVALRY = ResourceCost.Research(250,250,0, 100);
     public static ResourceCost RESEARCH_HEAVY_TRIDENTS = ResourceCost.Research(0, 250, 250, 140);
     public static ResourceCost RESEARCH_BLAZE_FIRE_WALL = ResourceCost.Research(400, 0, 200, 150);
     public static ResourceCost RESEARCH_FIRE_RESISTANCE = ResourceCost.Research(0, 200, 200, 100);

@@ -738,7 +738,6 @@ public class BuildingClientEvents {
                     }
                 }
             }
-            setBuildingToPlace(null);
         }
     }
 

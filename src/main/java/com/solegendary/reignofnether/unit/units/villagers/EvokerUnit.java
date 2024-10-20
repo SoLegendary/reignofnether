@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ability.abilities.SetFangsCircle;
 import com.solegendary.reignofnether.ability.abilities.SetFangsLine;
 import com.solegendary.reignofnether.ability.abilities.CastSummonVexes;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
+import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -142,6 +143,8 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     public static final float FANGS_DAMAGE = 6f; // can sometimes be doubled or tripled due to overlapping fang hitboxes
     public static final int FANGS_CHANNEL_SECONDS = 2;
     public static final int SUMMON_VEXES_AMOUNT = 3;
+    public static final int VEX_TARGET_RANGE = 20;
+    public static final int VEX_TARGET_RANGE_GARRISON = 30;
 
     final static public float attackDamage = FANGS_DAMAGE * 2;
     final static public float attacksPerSecond = 1f / (SetFangsLine.CD_MAX_SECONDS + FANGS_CHANNEL_SECONDS);
@@ -329,6 +332,12 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
 
         if (flag)
             this.level.addFreshEntity(new EvokerFangs(this.level, pX, (double)blockpos.getY() + d0, pZ, pYRot, pWarmupDelay, this));
+    }
+
+    public int getVexTargetRange() {
+        if (GarrisonableBuilding.getGarrison(this) != null)
+            return VEX_TARGET_RANGE_GARRISON;
+        return VEX_TARGET_RANGE;
     }
 
     public void summonVexes() {

@@ -14,33 +14,28 @@ Bugfixes
 --------
 
 [🟡] The witch icon is actually a witch now, not a villager
-
 [🟡] The pillager icon has been given a headband to distinguish them from vindicators
-
 [🟡] Tutorial players may now cancel and delete buildings
-
 [🟡] Workers may now gather bee nests (worth 100 food)
-
-[🟡] Farm water will now re-melt automatically after a few seconds
-
+[🟡] Farm water that freezes now melts after a few seconds
 [🟡] Can no longer place buildings on top of leaf blocks
+[🟡] Ghast fireballs no longer bounce off of each other
+[🟡] Fixed another resources desync bug
+[🟡] Ghasts high up in the air are now a bit easier to target with ranged units
+[🟡] Evokers can no longer send vexes to attack enemies at unlimited range (now has a range of 20, or 30 in a garrison)
+
+[❌] Ghasts crash when you select to move them into a sky block with no floor
+
+[❌] In a large group of iron golems and pillagers, the golems attack your own troops randomly when you A-attack anything
+
+[❌] Camera issues in worlds where the ground is far from Y=64 have been solved, thanks @Boobcat!
+    - Review ColinVaugn PR and take out only this change
 
 
-[❌] Ghast fireballs sometimes bounce off of each other
-    - Fix by extending LargeFireball and overriding ignoreExplosion() to always return true
-
-[❌] In a large group of iron golems and pillagers, the golems attack your own troops randomly when you a-attack anything
 
 [❌] World stuck at 100%
     - Maybe try running a clientside /rts-reset on logout?
     - Happens only if you are on a world with buildings, then try to reenter that or any other world (with or without buildings)
-
-[❌] Building on top of a unit causes crash
-    - probably because of moving out of the way logic
-    - need crash logs
-
-[❌] Iron golems attack your villagers sometimes
-    - Maybe because they're actually vindicators in a villager skin?
 
 [❌] Joining a world causes a lot of lag if a match is already started
     - Create an experimental branch where building syncing is toggleable
@@ -56,7 +51,13 @@ Bugfixes
 Quality of Life Features
 ------------------------
 
+[✔] You can now CTRL+click the idle workers button (or hotkey) to select all idle workers
 
+[✔] Tab and shift+tab now cycle between both units and building groups (this was previously done via control groups hotkeys)
+
+[✔] Right clicking with a building about to be placed now only cancels the building and does not issue a move command
+
+[✔] Moved controls from /rts-help into /rts-controls
 
 [❌] Radius indicator around monster capitol and stronghold to better indicate range of night
     (can use this same code for ability range indicators too)
@@ -72,9 +73,20 @@ Quality of Life Features
 Balancing
 ---------
 
-[🟡] Garrison units should be attackable by ground ranged units but only at 1/2 accuracy
-    - Implement the nophysics mixin for arrows and blaze fireballs but have it not work 1/2 of the time
-        - Turns out its kinda hard to do make arrows noclip the battlements but also collide with enemies
+[🟡] All mounted unit upgrades have been upped in cost and time
+    - Spider Jockeys: (150 food, 150 wood, 60s) -> (250 food, 250 wood, 100s)
+    - Hoglin Cavalry: (150 food, 150 wood, 60s) -> (250 food, 250 wood, 100s)
+    - Ravager Artillery: (250 food, 250 wood, 90s) -> (350 food, 350 ORE, 140s)
+
+[🟡] Warden health increased from 90 to 120
+
+[🟡] Warden damage increased from 6 to 8
+
+[🟡] Ravager health decreased from 300 to 250 and movement speed from 28 to 25
+
+[🟡] Castles now additionally require a Blacksmith to be built (they already require a Barracks and Arcane Tower)
+
+[❌] Multishot Pillagers now only fire 2 arrows instead of 3
 
 
 

@@ -64,7 +64,8 @@ public class ResearchPillagerCrossbows extends ProductionItem {
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Enchants the crossbows of all pillagers with multishot", Style.EMPTY)
+                        FormattedCharSequence.forward("Enchants the crossbows of all pillagers with multishot", Style.EMPTY),
+                        FormattedCharSequence.forward("allowing to fire 2 arrows at once", Style.EMPTY)
                 )
         );
     }

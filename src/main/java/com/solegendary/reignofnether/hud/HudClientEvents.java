@@ -1055,6 +1055,36 @@ public class HudClientEvents {
         if (OrthoviewClientEvents.isEnabled() && evt.getKeyCode() == Keybindings.chat.key) {
             MC.setScreen(new ChatScreen(""));
         }
+
+
+
+        // press again to cycle between selected unit type in the group
+        if (evt.getKeyCode() == Keybindings.tab.key) {
+            List<LivingEntity> entities = new ArrayList<>(getSelectedUnits().stream()
+                    .filter(e -> e instanceof Unit)
+                    .sorted(Comparator.comparing(HudClientEvents::getSimpleEntityName))
+                    .toList());
+
+            if (Keybindings.shiftMod.isDown())
+                Collections.reverse(entities);
+
+            if (hudSelectedEntity != null) {
+                String hudSelectedEntityName = HudClientEvents.getSimpleEntityName(hudSelectedEntity);
+                String lastEntityName = "";
+                boolean cycled = false;
+                for (LivingEntity entity : entities) {
+                    String currentEntityName = HudClientEvents.getSimpleEntityName(entity);
+                    if (lastEntityName.equals(hudSelectedEntityName) && !currentEntityName.equals(lastEntityName)) {
+                        hudSelectedEntity = entity;
+                        cycled = true;
+                        break;
+                    }
+                    lastEntityName = currentEntityName;
+                }
+                if (!cycled)
+                    hudSelectedEntity = entities.get(0);
+            }
+        }
     }
 
     // newUnitIds are replacing oldUnitIds - replace them in every control group while retaining their index
