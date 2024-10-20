@@ -139,18 +139,18 @@ public class MinimapClientEvents {
 
     public static Button getToggleSizeButton() {
         return new Button(
-                largeMap ? "Close" : "Open large map",
-                14,
-                largeMap ? new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png") :
-                        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
-                Keybindings.keyM,
-                () -> false,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK),
-                () -> true,
-                () -> shouldToggleSize = true,
-                () -> { },
-                List.of(FormattedCharSequence.forward(largeMap ? "Close" : "Open large map", Style.EMPTY))
+            largeMap ? "Close" : "Open large map",
+            14,
+            largeMap ? new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png") :
+                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+            Keybindings.keyM,
+            () -> false,
+            () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK),
+            () -> true,
+            () -> shouldToggleSize = true,
+            () -> { },
+            List.of(FormattedCharSequence.forward(largeMap ? "Close" : "Open large map", Style.EMPTY))
         );
     }
 
@@ -277,7 +277,6 @@ public class MinimapClientEvents {
                     else
                         break;
                 } while (true);
-
 
                 Material mat = MC.level.getBlockState(new BlockPos(x,yNorth,z-1)).getMaterial();
                 int rgb = mat.getColor().col;
@@ -478,7 +477,7 @@ public class MinimapClientEvents {
     // checks whether a given X Z in the world is part of our map
     public static boolean isWorldXZinsideMap(int x, int z) {
         return x >= xc_world - worldRadius && x < xc_world + worldRadius &&
-                z >= zc_world - worldRadius && z < zc_world + worldRadius;
+               z >= zc_world - worldRadius && z < zc_world + worldRadius;
     }
 
     private static void renderMap(PoseStack stack)
@@ -559,9 +558,9 @@ public class MinimapClientEvents {
     public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
         // when clicking on map move player there
         if (OrthoviewClientEvents.isEnabled() &&
-                evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 &&
-                !Keybindings.shiftMod.isDown() &&
-                !OrthoviewClientEvents.isCameraLocked()) {
+            evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 &&
+            !Keybindings.shiftMod.isDown() &&
+            !OrthoviewClientEvents.isCameraLocked()) {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
             if (MC.player != null && moveTo != null) {
                 PlayerServerboundPacket.teleportPlayer((double) moveTo.getX(), MC.player.getY(), (double) moveTo.getZ());
