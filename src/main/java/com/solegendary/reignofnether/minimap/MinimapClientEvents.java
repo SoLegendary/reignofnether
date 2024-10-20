@@ -252,7 +252,6 @@ public class MinimapClientEvents {
                     if (bs.getBlock() instanceof SnowLayerBlock) {
                         int layers = bs.getValue(SnowLayerBlock.LAYERS);
                         y += (int) (layers * (1.0F / 8.0F));
-
                         break;
                     }
                     if (!bs.getMaterial().isSolid() && !bs.getMaterial().isLiquid() && y > 0)
@@ -267,9 +266,7 @@ public class MinimapClientEvents {
                     bsNorth = MC.level.getBlockState(new BlockPos(x, yNorth, z-1));
                     if (bsNorth.getBlock() instanceof SnowLayerBlock) {
                         int layersNorth = bsNorth.getValue(SnowLayerBlock.LAYERS);
-
                         yNorth += (int) (layersNorth * (1.0F / 8.0F));
-
                         break;
                     }
                     if (!bsNorth.getMaterial().isSolid() && !bsNorth.getMaterial().isLiquid() && yNorth > 0)
