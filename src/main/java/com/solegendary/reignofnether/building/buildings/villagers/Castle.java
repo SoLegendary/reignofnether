@@ -94,6 +94,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
                 () -> BuildingClientEvents.getBuildingToPlace() == Castle.class,
                 TutorialClientEvents::isEnabled,
                 () -> (BuildingClientEvents.hasFinishedBuilding(Barracks.buildingName) &&
+                        BuildingClientEvents.hasFinishedBuilding(Blacksmith.buildingName) &&
                         BuildingClientEvents.hasFinishedBuilding(ArcaneTower.buildingName)) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 () -> BuildingClientEvents.setBuildingToPlace(Castle.class),
@@ -105,7 +106,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
                         FormattedCharSequence.forward("A grand castle that can produce ravagers ", Style.EMPTY),
                         FormattedCharSequence.forward("and garrison up to " + MAX_OCCUPANTS + " units.", Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Requires an arcane tower and a barracks.", Style.EMPTY)
+                        FormattedCharSequence.forward("Requires a Blacksmith, Arcane Tower and a Barracks.", Style.EMPTY)
                 ),
                 null
         );

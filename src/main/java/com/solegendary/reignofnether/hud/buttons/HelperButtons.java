@@ -47,7 +47,7 @@ public class HelperButtons {
     private static int idleWorkerIndex = 0;
 
     public static final Button idleWorkerButton = new Button(
-            "Idle workers",
+            "Idle workers (CTRL-click to select all)",
             ICON_SIZE,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
             Keybindings.keyJ,
@@ -57,17 +57,27 @@ public class HelperButtons {
             () -> {
                 if (MC.level == null)
                     return;
-                if (idleWorkerIndex >= idleWorkerIds.size())
-                    idleWorkerIndex = 0;
-                Entity entity = MC.level.getEntity(idleWorkerIds.get(idleWorkerIndex));
-                if (entity instanceof WorkerUnit) {
-                    OrthoviewClientEvents.centreCameraOnPos(entity.getX(), entity.getZ());
+
+                if (Keybindings.ctrlMod.isDown()) {
                     UnitClientEvents.clearSelectedUnits();
-                    UnitClientEvents.addSelectedUnit((LivingEntity) entity);
+                    for (int id : idleWorkerIds) {
+                        Entity entity = MC.level.getEntity(idleWorkerIds.get(idleWorkerIndex));
+                        if (entity instanceof WorkerUnit)
+                            UnitClientEvents.addSelectedUnit((LivingEntity) entity);
+                    }
+                } else {
+                    if (idleWorkerIndex >= idleWorkerIds.size())
+                        idleWorkerIndex = 0;
+                    Entity entity = MC.level.getEntity(idleWorkerIds.get(idleWorkerIndex));
+                    if (entity instanceof WorkerUnit) {
+                        OrthoviewClientEvents.centreCameraOnPos(entity.getX(), entity.getZ());
+                        UnitClientEvents.clearSelectedUnits();
+                        UnitClientEvents.addSelectedUnit((LivingEntity) entity);
+                    }
+                    idleWorkerIndex += 1;
+                    if (idleWorkerIndex >= idleWorkerIds.size())
+                        idleWorkerIndex = 0;
                 }
-                idleWorkerIndex += 1;
-                if (idleWorkerIndex >= idleWorkerIds.size())
-                    idleWorkerIndex = 0;
             },
             null,
             List.of(FormattedCharSequence.forward("Idle workers", Style.EMPTY))

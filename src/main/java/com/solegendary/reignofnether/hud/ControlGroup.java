@@ -52,8 +52,6 @@ public class ControlGroup {
     public void clearAll() {
         this.entityIds.clear();
         this.buildingBps.clear();
-        if (HudClientEvents.lastSelCtrlGroupKey == this.getKey())
-            HudClientEvents.lastSelCtrlGroupKey = -1;
     }
 
     public boolean isEmpty() {
@@ -124,30 +122,6 @@ public class ControlGroup {
                         OrthoviewClientEvents.centreCameraOnPos(entities.get(0).getX(), entities.get(0).getZ());
                 }
             }
-            // press again to cycle between selected unit type in the group
-            if (HudClientEvents.lastSelCtrlGroupKey == this.getKey()) {
-                List<LivingEntity> entities = getAllUnits().stream()
-                        .filter(e -> entityIds.contains(e.getId()) && e instanceof Unit)
-                        .sorted(Comparator.comparing(HudClientEvents::getSimpleEntityName))
-                        .toList();
-
-                if (hudSelectedEntity != null) {
-                    String hudSelectedEntityName = HudClientEvents.getSimpleEntityName(hudSelectedEntity);
-                    String lastEntityName = "";
-                    boolean cycled = false;
-                    for (LivingEntity entity : entities) {
-                        String currentEntityName = HudClientEvents.getSimpleEntityName(entity);
-                        if (lastEntityName.equals(hudSelectedEntityName) && !currentEntityName.equals(lastEntityName)) {
-                            hudSelectedEntity = entity;
-                            cycled = true;
-                            break;
-                        }
-                        lastEntityName = currentEntityName;
-                    }
-                    if (!cycled)
-                        hudSelectedEntity = entities.get(0);
-                }
-            }
         }
         else if (buildingBps.size() > 0) {
             UnitClientEvents.clearSelectedUnits();
@@ -167,7 +141,6 @@ public class ControlGroup {
         }
 
         lastClickTime = System.currentTimeMillis();
-        HudClientEvents.lastSelCtrlGroupKey = this.getKey();
     }
 
     public Button getButton() {

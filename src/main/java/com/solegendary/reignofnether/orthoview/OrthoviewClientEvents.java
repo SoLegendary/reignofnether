@@ -19,6 +19,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
@@ -91,9 +92,19 @@ public class OrthoviewClientEvents {
     private static float mouseLeftDownY = 0;
 
     // by default orthoview players stay at BASE_Y, but can be raised to as high as MAX_Y if they are clipping terrain
-    private static final double ORTHOVIEW_PLAYER_BASE_Y = 85;
-    private static final double ORTHOVIEW_PLAYER_MAX_Y = 105;
+    public static double ORTHOVIEW_PLAYER_BASE_Y;
+    public static double ORTHOVIEW_PLAYER_MAX_Y;
 
+    public static void updateOrthoviewY() {
+        if (MC.player != null && MC.level != null) {
+            BlockPos playerPos = MC.player.blockPosition();
+            int highestBlockY = MC.level.getHeight(Heightmap.Types.MOTION_BLOCKING, playerPos.getX(), playerPos.getZ());
+
+            // Always update with the new values
+            ORTHOVIEW_PLAYER_BASE_Y = highestBlockY + 30;
+            ORTHOVIEW_PLAYER_MAX_Y = highestBlockY + 100;
+        }
+    }
     public static boolean isEnabled() {
         return enabled;
     }
@@ -194,6 +205,9 @@ public class OrthoviewClientEvents {
             zoom += zoomDiff;
             MC.player.move(MoverType.SELF, new Vec3(xDiff , 0, zDiff));
             forcePanTicksLeft -= 1;
+        }
+        if (evt.phase == TickEvent.Phase.END) {
+            updateOrthoviewY();
         }
     }
 
@@ -369,7 +383,7 @@ public class OrthoviewClientEvents {
         if (enabled)
             evt.setCanceled(true);
     }
-    
+
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         if (!enabled || isCameraLocked())

@@ -1,48 +1,42 @@
 
-1.19.2-1.0.4
+1.19.2-1.0.5
 ------------
 
 [✔] Done and tested
 [🟡] Partially done, only has a workaround and/or needs testing
 [❌] Not done, top ones are roughly of higher priority
 
+
+
+
+
 Bugfixes
 --------
-[✔] Fixed Azalea and Flowering Azalea leaves not being nether-converted
 
-[✔] Regular TNT can now damage buildings with the same damage as regular creepers (20) and can set off other TNTs
+[❌] Camera issues in worlds where the ground is far from Y=64 have been solved, thanks @Boobcat!
 
-[✔] Having many buildings selected no longer has messed up HUD rendering
-
-[✔] Crimson and Warped Hyphae are now gatherable by workers
-
-[✔] Planks and stripped logs are no longer gatherable by workers and will no longer chain-break when broken in the air
-    The only gatherable and chain-breakable blocks are now logs, wood blocks and mushroom/wart stems
-
-[✔] Units in production queues now pause at 99% in red text if you dropped below max population while it was building
-
-[✔] Non-ops can no longer use /rts-reset
-
-[✔] Resources no longer act strangely (go negative, have doubled costs, etc.) after a match is restarted or a player is defeated
-
-[✔] Research buttons no longer disappear if someone else of the same faction is researching it at the time
-
-[✔] Joining a match no longer causes everyone's clientside buildings to be duplicated (this was causing population issues)
+[🟡] Reign of Nether's version now correctly shows in the mods menu
+[✔] The witch icon is actually a witch now, not a villager
+[✔] Tutorial players may now cancel and delete buildings
+[✔] Workers may now gather bee nests (worth 100 food)
+[✔] Farm water that freezes now melts after a few seconds
+[✔] Can no longer place buildings on top of leaf blocks
+[✔] Ghast fireballs no longer bounce off of each other
+[✔] Fixed another resources desync bug
+[✔] Ghasts high up in the air are now a bit easier to target with ranged units
+[✔] Evokers can no longer send vexes to attack enemies at unlimited range (now has a range of 20, or 30 in a garrison)
+[✔] Stopped iron golems from randomly attacking your own troops
+[✔] Ravagers no longer gain bonus movement speed when targeting an enemy (this was unintended vanilla logic)
+[✔] Ghasts no longer crash when you command them to move them into a sky block with no floor
+    - However, they will now simply ignore movement commands into open air
 
 
-[❌] Ranged units in garrisons should deaggro targets out of range and aggro targets they can actually reach instead
 
-[❌] Let mapmakers set the default Y level of their world and have it sync to clients on login
-    - This solves rendering issues on worlds where the default is far from Y=64
 
-[❌] Building on top of a unit causes crash
-    - probably because of moving out of the way logic
-    - need crash logs
 
-[❌] Water in farms no longer freeze up
-
-[❌] Iron golems attack your villagers sometimes
-    - Maybe because they're actually vindicators in a villager skin?
+[❌] World stuck at 100%
+    - Maybe try running a clientside /rts-reset on logout?
+    - Happens only if you are on a world with buildings, then try to reenter that or any other world (with or without buildings)
 
 [❌] Joining a world causes a lot of lag if a match is already started
     - Create an experimental branch where building syncing is toggleable
@@ -58,26 +52,12 @@ Bugfixes
 Quality of Life Features
 ------------------------
 
-[✔] New command: /rts-lock enable/disable to prevent new players joining the match
-    - /rts-reset will automatically unlock the match too
-    - change to enable/disable
-
-[✔] New experimental command: /rts-syncing enable/disable
-    - Prevents anyone logging in from syncing from server data, and from joining the RTS match, even if the game is unlocked
-    - New joiners will not be able to select buildings and units will appear neutral until the syncing is re-enabled and they relog
-    - This also affects existing RTS players who relog, so use at your discretion
-    - This is a temporary measure to (in theory) prevent login lag spikes until a permanent solution is found
-
-[✔] Pressing alt now cancels your building placement so you don't accidentally place it while dragging the camera
-
-[✔] Vanilla players can now drop off resources into stockpile chests (and chests for this purpose have been added to civilian portals)
-    - This was actually designed previously, just was only working for villager stockpiles until now
-
-[✔] New cheat code: thereisnospoon X - sets everyone's hard capped max population to X
-    - The current max value is now shown on the tooltip to the left of the bed icon
-    - Like most other cheats, this won't save between server restarts
-    - foodforthought now allows you to only ignore the soft cap (ie. houses are no longer needed),
-       but cannot go higher than what has been set with thereisnospoon
+[✔] You can now CTRL+click the idle workers button (or hotkey) to select all idle workers
+[✔] Tab and shift+tab now cycle between both units and building groups (this was previously done via control groups hotkeys)
+[✔] Right clicking with a building about to be placed now only cancels the building and does not issue a move command
+[✔] Moved controls from /rts-help into /rts-controls
+[✔] Added total workers count next to population
+[✔] The pillager icon has been given a headband to distinguish them from vindicators
 
 
 [❌] Radius indicator around monster capitol and stronghold to better indicate range of night
@@ -87,25 +67,44 @@ Quality of Life Features
     - Require that villagers work on it like a building
     - Will need a new flatten zone object (no need to save it)
 
-[❌] More shift click queue commands
-    - Build already-placed foundations
-    - Repair damaged buildings
-    - Move units
-
 [❌] Hovering buttons (or some other indicator) for idle farms
     - Clicking said button will assign the nearest idle villager to it
 
 
 Balancing
 ---------
-[✔] Any explosive damage to a garrison now deals a random amount that damage directly to all garrisoned units
-    (This averages out to 1/2 of the explosion damage)
 
-[✔] Reduced ghast health from 60 to 50 to compensate for the above
+[✔] All mounted unit upgrades have been upped in cost and time
+    - Spider Jockeys: (150 food, 150 wood, 60s) -> (300 food, 250 wood, 100s)
+    - Hoglin Cavalry: (150 food, 150 wood, 60s) -> (300 food, 250 wood, 100s)
+    - Ravager Artillery: (250 food, 250 wood, 90s) -> (400 food, 350 ORE, 140s)
 
-[🟡] Garrison units should be attackable by ground ranged units but only at 1/2 accuracy
-    - Implement the nophysics mixin for arrows and blaze fireballs but have it not work 1/2 of the time
-        - Turns out its kinda hard to do make arrows noclip the battlements but also collide with enemies
+[✔] Skeletons, zombies and all their variants have had food costs and build times reduced:
+    - Zombie: (90 food, 20s) -> (75 food, 18s)
+    - Skeleton: (70 food, 20s) -> (60 food, 18s)
+
+[✔] Spiders and poison spiders have had their costs increased
+    - (80 food) -> (90 food)
+
+[✔] Warden health increased from 90 to 120
+
+[✔] Warden damage increased from 6 to 8
+
+[✔] Ravager health decreased from 300 to 250 and movement speed from 30 to 25
+
+[✔] Castles now additionally require a Blacksmith to be built (they already require a Barracks and Arcane Tower)
+
+[✔] When a monster faction joins the game, time of day is now set to noon (5 mins before sunset) instead of sunset.
+    (Zombie villagers are immune to sunburn anyway)
+
+
+
+[❌] Multishot Pillagers now only fire 2 arrows instead of 3
+
+[❌] Mausoleums provide a speed I aura to all friendly units in their night range, similar to villager captains
+    - or some other inherent base defense
+
+
 
 
 

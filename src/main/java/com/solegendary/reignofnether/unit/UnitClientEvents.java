@@ -494,6 +494,11 @@ public class UnitClientEvents {
             lastLeftClickTime = System.currentTimeMillis();
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            if (BuildingClientEvents.getBuildingToPlace() != null) {
+                BuildingClientEvents.setBuildingToPlace(null);
+                return;
+            }
+
             if (selectedUnits.size() > 0) {
                 Building preSelBuilding = BuildingClientEvents.getPreselectedBuilding();
 
@@ -661,7 +666,7 @@ public class UnitClientEvents {
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
             LivingEntity entity = hudSelectedEntity;
-            if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED && !TutorialClientEvents.isEnabled())
+            if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                 sendUnitCommand(UnitAction.DELETE);
         }
     }

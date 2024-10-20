@@ -406,7 +406,8 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 1) {
-                    msg("TIP: Press M or click the bottom right button to expand the map.");
+                    msg("TIP: Press M or click the bottom right button to expand the map. " +
+                        "The very dark areas are outside the world border.");
                     progressStageAfterDelay(160);
                 }
                 else if (stageProgress == 2) {

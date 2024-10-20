@@ -35,6 +35,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
@@ -247,7 +248,12 @@ public class MinimapClientEvents {
                 int y = MC.level.getChunkAt(new BlockPos(x,0,z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                 BlockState bs;
                 do {
-                    bs = MC.level.getBlockState(new BlockPos(x,y,z));
+                    bs = MC.level.getBlockState(new BlockPos(x, y, z));
+                    if (bs.getBlock() instanceof SnowLayerBlock) {
+                        int layers = bs.getValue(SnowLayerBlock.LAYERS);
+                        y += (int) (layers * (1.0F / 8.0F));
+                        break;
+                    }
                     if (!bs.getMaterial().isSolid() && !bs.getMaterial().isLiquid() && y > 0)
                         y -= 1;
                     else
@@ -257,7 +263,12 @@ public class MinimapClientEvents {
                 int yNorth = MC.level.getChunkAt(new BlockPos(x,0,z-1)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z-1);
                 BlockState bsNorth;
                 do {
-                    bsNorth = MC.level.getBlockState(new BlockPos(x,yNorth,z-1));
+                    bsNorth = MC.level.getBlockState(new BlockPos(x, yNorth, z-1));
+                    if (bsNorth.getBlock() instanceof SnowLayerBlock) {
+                        int layersNorth = bsNorth.getValue(SnowLayerBlock.LAYERS);
+                        yNorth += (int) (layersNorth * (1.0F / 8.0F));
+                        break;
+                    }
                     if (!bsNorth.getMaterial().isSolid() && !bsNorth.getMaterial().isLiquid() && yNorth > 0)
                         yNorth -= 1;
                     else
@@ -266,6 +277,9 @@ public class MinimapClientEvents {
 
                 Material mat = MC.level.getBlockState(new BlockPos(x,yNorth,z-1)).getMaterial();
                 int rgb = mat.getColor().col;
+                if (bs.getBlock() instanceof SnowLayerBlock) {
+                    rgb = 0xFFFFFF;
+                }
 
                 // shade blocks to give elevation effects, excluding liquids and nonblocking blocks (eg. grass, flowers)
                 if (!mat.isLiquid()) {
