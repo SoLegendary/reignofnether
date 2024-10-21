@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -74,15 +75,15 @@ public class Mausoleum extends ProductionBuilding {
             () -> BuildingClientEvents.setBuildingToPlace(Mausoleum.class),
             null,
             List.of(
-                FormattedCharSequence.forward(Mausoleum.buildingName + " (Capitol)", Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.mausoleum"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPop(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A tomb of the dead that produces zombie villagers.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.mausoleum.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Distorts time to midnight within a " + nightRange + " block radius.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.mausoleum.tooltip2", nightRange), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("You may only have one capitol building at any time.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.mausoleum.tooltip3"), Style.EMPTY)
             ),
             null
         );

@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -66,11 +67,11 @@ public class NetherwartFarm extends Building {
                 () -> BuildingClientEvents.setBuildingToPlace(NetherwartFarm.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(NetherwartFarm.buildingName, Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.netherwart_farm"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE001  " + cost.wood + "  +  " + ResourceCosts.REPLANT_WOOD_COST + "  per  crop  planted", MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A field of netherwart that can be farmed collect food.", Style.EMPTY),
-                        FormattedCharSequence.forward("Workers automatically use wood to replant while working.", Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.netherwart_farm.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.netherwart_farm.tooltip2"), Style.EMPTY)
                 ),
                 null
         );

@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -52,11 +53,11 @@ public class CallLightning extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.CALL_LIGHTNING),
             null,
             List.of(
-                    FormattedCharSequence.forward("Call Lightning", Style.EMPTY.withBold(true)),
-                    FormattedCharSequence.forward("\uE004  " + CD_MAX/20 + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning"), Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip1", CD_MAX / 20, RANGE), MyRenderer.iconStyle),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Summon a bolt of lightning at the target location.", Style.EMPTY),
-                    FormattedCharSequence.forward("Can be used to charge creepers and damage enemies.", Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip2"), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip3"), Style.EMPTY)
             ),
             this
         );

@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -75,13 +76,13 @@ public class DarkWatchtower extends Building implements GarrisonableBuilding {
             () -> BuildingClientEvents.setBuildingToPlace(DarkWatchtower.class),
             null,
             List.of(
-                    FormattedCharSequence.forward(DarkWatchtower.buildingName, Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dark_watchtower"), Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("An ominous tower that can garrison units.", Style.EMPTY),
-                    FormattedCharSequence.forward("Garrisoned ranged units have increased range.", Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dark_watchtower.tooltip1"), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dark_watchtower.tooltip2"), Style.EMPTY),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Can hold a maximum of " + MAX_OCCUPANTS + " units", Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dark_watchtower.tooltip3", MAX_OCCUPANTS), Style.EMPTY)
             ),
             null
         );

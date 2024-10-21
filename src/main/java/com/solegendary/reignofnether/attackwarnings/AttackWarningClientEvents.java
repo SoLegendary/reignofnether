@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -50,8 +51,8 @@ public class AttackWarningClientEvents {
                 lastAttackPos = null;
             },
             List.of(
-                FormattedCharSequence.forward("Go to alert", Style.EMPTY),
-                FormattedCharSequence.forward("(Right click to ignore)", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("attack_warning.reignofnether.go_to"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("attack_warning.reignofnether.ignore"), Style.EMPTY)
             )
         );
     }
@@ -71,7 +72,7 @@ public class AttackWarningClientEvents {
             lastAttackPos = attackPos;
 
         if (dist2dSqr > Math.pow(OrthoviewClientEvents.getZoom() * 2, 2) && attackWarningCd <= 0) {
-            HudClientEvents.showTemporaryMessage("Your units are in danger!", 200);
+            HudClientEvents.showTemporaryMessage(I18n.get("attack_warning.reignofnether.danger"), 200);
             lastAttackPos = attackPos;
             if (MC.player != null)
                 MC.player.playSound(SoundRegistrar.UNDER_ATTACK.get(), 0.5f, 1.0f);

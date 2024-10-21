@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerProd;
 import com.solegendary.reignofnether.unit.units.villagers.WitchProd;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -77,12 +78,12 @@ public class ArcaneTower extends ProductionBuilding {
             () -> BuildingClientEvents.setBuildingToPlace(ArcaneTower.class),
             null,
             List.of(
-                FormattedCharSequence.forward(ArcaneTower.buildingName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.arcane_tower"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A magical tower that is home to Witches and Evokers.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.arcane_tower.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Barracks.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.arcane_tower.tooltip2"), Style.EMPTY)
             ),
             null
         );

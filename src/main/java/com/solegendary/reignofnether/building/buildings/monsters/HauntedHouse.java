@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -61,11 +62,11 @@ public class HauntedHouse extends Building {
             () -> BuildingClientEvents.setBuildingToPlace(HauntedHouse.class),
             null,
             List.of(
-                    FormattedCharSequence.forward(HauntedHouse.buildingName, Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.haunted_house"), Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
                     ResourceCosts.getFormattedPop(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("A spooky house that provides population supply. ", Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.haunted_house.tooltip1"), Style.EMPTY)
             ),
             null
         );

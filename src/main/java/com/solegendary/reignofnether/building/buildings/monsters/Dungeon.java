@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperProd;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -75,12 +76,12 @@ public class Dungeon extends ProductionBuilding {
             () -> BuildingClientEvents.setBuildingToPlace(Dungeon.class),
             null,
             List.of(
-                FormattedCharSequence.forward(Dungeon.buildingName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dungeon"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A fiery cage containing the power to create creepers.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dungeon.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Laboratory.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dungeon.tooltip2"), Style.EMPTY)
             ),
             null
         );

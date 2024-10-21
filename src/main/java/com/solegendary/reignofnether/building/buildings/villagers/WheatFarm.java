@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -65,11 +66,11 @@ public class WheatFarm extends Building {
                 () -> BuildingClientEvents.setBuildingToPlace(WheatFarm.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(WheatFarm.buildingName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + cost.wood + "  +  " + ResourceCosts.REPLANT_WOOD_COST + "  per  crop  planted", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.wheat_farm"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.wheat_farm.tooltip1", cost.wood, ResourceCosts.REPLANT_WOOD_COST), MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A wheat field that be can tilled to collect food.", Style.EMPTY),
-                        FormattedCharSequence.forward("Workers automatically use wood to replant seeds while working.", Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.wheat_farm.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.wheat_farm.tooltip3"), Style.EMPTY)
                 ),
                 null
         );

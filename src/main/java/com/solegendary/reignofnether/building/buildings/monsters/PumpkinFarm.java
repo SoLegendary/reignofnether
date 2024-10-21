@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -63,11 +64,11 @@ public class PumpkinFarm extends Building {
                 () -> BuildingClientEvents.setBuildingToPlace(PumpkinFarm.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(PumpkinFarm.buildingName, Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE001  " + cost.wood + "  +  " + ResourceCosts.REPLANT_WOOD_COST + "  per  crop  planted", MyRenderer.iconStyle),
+                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.pumpkin_farm"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.pumpkin_farm.tooltip1", cost.wood, ResourceCosts.REPLANT_WOOD_COST), MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A pumpkin field that be can harvested to collect food.", Style.EMPTY),
-                        FormattedCharSequence.forward("Pumpkins don't need to replanted but farms cost more up front.", Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.pumpkin_farm.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.pumpkin_farm.tooltip3"), Style.EMPTY)
                 ),
                 null
         );

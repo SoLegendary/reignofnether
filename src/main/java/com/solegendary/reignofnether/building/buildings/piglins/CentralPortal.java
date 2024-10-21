@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.piglins.GruntProd;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -117,13 +118,13 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
                 () -> BuildingClientEvents.setBuildingToPlace(CentralPortal.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(CentralPortal.buildingName + " (Capitol)", Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.central_portal"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPop(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("The primary portal to transport piglin grunts from the nether.", Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.central_portal.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("You may only have one capitol building at any time.", Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.central_portal.tooltip2"), Style.EMPTY)
                 ),
                 null
         );

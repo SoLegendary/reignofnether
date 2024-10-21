@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -75,13 +76,13 @@ public class Watchtower extends Building implements GarrisonableBuilding {
             () -> BuildingClientEvents.setBuildingToPlace(Watchtower.class),
             null,
             List.of(
-                    FormattedCharSequence.forward(Watchtower.buildingName, Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.watchtower"), Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("A fortified tower that can garrison units.", Style.EMPTY),
-                    FormattedCharSequence.forward("Garrisoned ranged units have increased range.", Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.watchtower.tooltip1"), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.watchtower.tooltip2"), Style.EMPTY),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Can hold a maximum of " + MAX_OCCUPANTS + " units", Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.watchtower.tooltip3", MAX_OCCUPANTS), Style.EMPTY)
             ),
             null
         );

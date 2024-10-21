@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchFireResistan
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -82,13 +83,13 @@ public class FlameSanctuary extends ProductionBuilding {
             () -> BuildingClientEvents.setBuildingToPlace(FlameSanctuary.class),
             null,
             List.of(
-                FormattedCharSequence.forward(FlameSanctuary.buildingName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.flame_sanctuary"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Scorching pillars of lava and brick to keep blazes,", Style.EMPTY),
-                FormattedCharSequence.forward("enabling their production at military portals.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.flame_sanctuary.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.flame_sanctuary.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires Hoglin Stables.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.flame_sanctuary.tooltip3"), Style.EMPTY)
             ),
             null
         );

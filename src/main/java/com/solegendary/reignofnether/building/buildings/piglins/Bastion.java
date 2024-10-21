@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTrident
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -91,15 +92,15 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuilding 
                 () -> BuildingClientEvents.setBuildingToPlace(Bastion.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(Bastion.buildingName, Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.bastion"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A fortified barracks to house military piglins,", Style.EMPTY),
-                        FormattedCharSequence.forward("enabling them to be produced at military portals.", Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.bastion.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.bastion.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Also garrisons up to 5 units.", Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.bastion.tooltip3", MAX_OCCUPANTS), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Requires a Basic Portal", Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.bastion.tooltip4"), Style.EMPTY)
                 ),
                 null
         );

@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -70,14 +71,14 @@ public class SpruceBridge extends AbstractBridge {
                 () -> BuildingClientEvents.setBuildingToPlace(SpruceBridge.class),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(SpruceBridge.buildingName, Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spruce_bridge"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("A bridge built to traverse water.", Style.EMPTY),
-                        FormattedCharSequence.forward("Must be connected to land or another bridge.", Style.EMPTY),
-                        FormattedCharSequence.forward("Can be built over lava (but isn't fireproof!)", Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spruce_bridge.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spruce_bridge.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spruce_bridge.tooltip3"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Bridges can be repaired or attacked by anyone.", Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spruce_bridge.tooltip4"), Style.EMPTY)
                 ),
                 null
         );

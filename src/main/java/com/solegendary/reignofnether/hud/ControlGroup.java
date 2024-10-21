@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -179,7 +180,10 @@ public class ControlGroup {
             () -> true,
             this::loadToSelected,
             this::clearAll,
-            List.of(FormattedCharSequence.forward("Control Group " + keybinding.buttonLabel + " (Right click to remove)", Style.EMPTY))
+            List.of(FormattedCharSequence.forward(
+                I18n.get("hud.control_group.reignofnether.control_group", keybinding.buttonLabel),
+                Style.EMPTY
+            ))
         );
     }
 }

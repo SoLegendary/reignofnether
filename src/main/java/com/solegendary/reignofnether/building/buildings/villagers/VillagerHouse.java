@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -64,11 +65,11 @@ public class VillagerHouse extends Building {
             () -> BuildingClientEvents.setBuildingToPlace(VillagerHouse.class),
             null,
             List.of(
-                FormattedCharSequence.forward(VillagerHouse.buildingName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.villager_house"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPop(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A simple house that provides population supply.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.villager_house.tooltip1"), Style.EMPTY)
             ),
             null
         );

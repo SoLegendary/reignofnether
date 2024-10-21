@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -78,13 +79,13 @@ public class WitherShrine extends ProductionBuilding {
             () -> BuildingClientEvents.setBuildingToPlace(WitherShrine.class),
             null,
             List.of(
-                FormattedCharSequence.forward(WitherShrine.buildingName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.wither_shrine"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A dark shrine dedicated to the power of Withers.", Style.EMPTY),
-                FormattedCharSequence.forward("Enables wither skeletons production at military portals. ", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.wither_shrine.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.wither_shrine.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Bastion.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.wither_shrine.tooltip3"), Style.EMPTY)
             ),
             null
         );
