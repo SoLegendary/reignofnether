@@ -1,0 +1,105 @@
+
+1.19.2-1.0.5
+------------
+
+[✔] Done and tested
+[🟡] Partially done, only has a workaround and/or needs testing
+[❌] Not done, top ones are roughly of higher priority
+
+
+
+
+
+Bugfixes
+--------
+
+
+
+[❌] Exploit where rapidly pressing F12 can land you back in regular creative mode
+
+[❌] Talls trees dont break properly (just reduce the max height of it)
+
+[❌] Can't build properly on tall grass
+
+[❌] World stuck at 100%
+    - Maybe try running a clientside /rts-reset on logout?
+    - Happens only if you are on a world with buildings, then try to reenter that or any other world (with or without buildings)
+
+[❌] Joining a world causes a lot of lag if a match is already started
+    - Create an experimental branch where building syncing is toggleable
+    - Will need volunteer helpers to test
+    - Review code and see if direct optimisations can be made
+    - Maybe can buffer the syncing (eg. only allow 1 building sync per second, across all players) so it doesn't collapse the server
+
+[❌] On a server, unloaded workers stop gathering stuff
+    - Relook at forced chunks?
+
+
+
+Quality of Life Features
+------------------------
+
+[❌] Move cheats to serverside for command block compatibility:  execute as @[selector] run [command]
+
+[❌] Right click the bridge icon to remove fences
+
+[❌] Spellcasters should only cast spells one at time when in a group
+    - Have to reorder who the hudSelectedEntity is
+    - And change sendUnitCommand to only do 1 ability at a time (if it has a cooldown)
+
+[❌] Radius indicator around monster capitol and stronghold to better indicate range of night
+    - and give night vision to monster players
+    (can use this same code for ability range indicators too)
+
+[❌] Flatten terrain ability
+    - Require that villagers work on it like a building
+    - Will need a new flatten zone object (no need to save it)
+
+[❌] Hovering buttons (or some other indicator) for idle farms
+    - Clicking said button will assign the nearest idle villager to it
+
+
+Balancing
+---------
+
+- Monsters still underpowered, need some way to escape night issues, esp. on big maps
+
+- Check later if multishot is still OP
+    - Maybe make it 40% slower but toggleable?
+
+
+
+
+
+
+
+
+
+TODO BACKLOG
+------------
+
+Limitations of save data
+------------------------
+Goals reset - all units stop what they're doing
+Production items and held resources are all deposited/refunded automatically
+Buildings revealed in fog on minimaps are removed
+Control groups are lost
+Transport portal links are lost
+Entity rally points are lost (and client rallyPos is lost)
+
+
+Bugs backlog
+------------
+- time set causes desyncs when done with /gamerule dodaynightcycle false
+- workers are not marked as idle until 15s after stopping gathering
+- your portal blocks crack when explored by an opponent (muting function only applies for the opponent)
+- minimap still shows nether blocks in fog until the camera moves (and replaces them with fake frozen blocks)
+- beehives are not gatherable
+- recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
+    - most prevalent in 1v1 melee combat
+
+(MacOS) minecraft title screen is messed up and doesn't retrieve the assets
+(MacOS) GUI scaling does not work
+(MacOS) macbooks dont have alt and ctrl (it's option and command)
+
+
