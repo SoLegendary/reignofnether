@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.units.monsters.WardenProd;
 import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +26,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Stronghold extends ProductionBuilding implements GarrisonableBuilding {
+public class Stronghold extends ProductionBuilding implements GarrisonableBuilding, NightSource {
 
     public final static String buildingName = "Stronghold";
     public final static String structureName = "stronghold";
@@ -33,6 +34,8 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
     public final static int nightRange = 60;
 
     private final static int MAX_OCCUPANTS = 7;
+
+    private final ArrayList<BlockPos> nightBorderBps = new ArrayList<>();
 
     public Stronghold(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -56,6 +59,22 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
             this.productionButtons = Arrays.asList(
                 WardenProd.getStartButton(this, Keybindings.keyQ)
             );
+        updateNightBorderBps();
+    }
+
+    public int getNightRange() { return (isBuilt || isBuiltServerside) ? nightRange : 0; }
+
+    public BlockPos getNightCentre() { return centrePos; }
+
+    @Override
+    public void updateNightBorderBps() {
+        this.nightBorderBps.clear();
+        this.nightBorderBps.addAll(MiscUtil.getGroundCircleBlocks(centrePos, getNightRange(), level));
+    }
+
+    @Override
+    public List<BlockPos> getNightBorderBps() {
+        return nightBorderBps;
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}

@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static com.solegendary.reignofnether.resources.BlockUtils.isLogBlock;
+
 // Move towards the nearest open resource blocks and start gathering them
 // Can be toggled between food, wood and ore, and disabled by clicking
 
@@ -254,7 +256,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
                         ResourceName resourceName = ResourceSources.getBlockResourceName(this.gatherTarget, mob.level);
 
-                        if (ResourcesServerEvents.isLogBlock(this.mob.level.getBlockState(gatherTarget)))
+                        if (isLogBlock(this.mob.level.getBlockState(gatherTarget)))
                             ResourcesServerEvents.breakAdjacentLogs(gatherTarget, new ArrayList<>(), this.mob.level);
 
                         if (mob.level.destroyBlock(gatherTarget, false)) {

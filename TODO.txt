@@ -13,13 +13,15 @@
 Bugfixes
 --------
 
-
+[ ] Optimised code for minimaps so opening the large map should drop less frames
 
 [❌] Exploit where rapidly pressing F12 can land you back in regular creative mode
 
 [❌] Talls trees dont break properly (just reduce the max height of it)
 
 [❌] Can't build properly on tall grass
+
+
 
 [❌] World stuck at 100%
     - Maybe try running a clientside /rts-reset on logout?
@@ -39,6 +41,18 @@ Bugfixes
 Quality of Life Features
 ------------------------
 
+[🟡] Radius indicator around monster capitol and stronghold to better indicate range of night
+
+    - click the clock to toggle it
+    - show on minimap
+    - and give night vision to monster players
+        - don't wipe effects on F12, just hide particles instead
+
+    (can use this same code for ability range indicators too)
+
+
+
+
 [❌] Move cheats to serverside for command block compatibility:  execute as @[selector] run [command]
 
 [❌] Right click the bridge icon to remove fences
@@ -46,10 +60,6 @@ Quality of Life Features
 [❌] Spellcasters should only cast spells one at time when in a group
     - Have to reorder who the hudSelectedEntity is
     - And change sendUnitCommand to only do 1 ability at a time (if it has a cooldown)
-
-[❌] Radius indicator around monster capitol and stronghold to better indicate range of night
-    - and give night vision to monster players
-    (can use this same code for ability range indicators too)
 
 [❌] Flatten terrain ability
     - Require that villagers work on it like a building

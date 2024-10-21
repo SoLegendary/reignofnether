@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerProd;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -24,12 +25,14 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Mausoleum extends ProductionBuilding {
+public class Mausoleum extends ProductionBuilding implements NightSource {
 
     public final static String buildingName = "Mausoleum";
     public final static String structureName = "mausoleum";
     public final static ResourceCost cost = ResourceCosts.MAUSOLEUM;
     public final static int nightRange = 80;
+
+    private final ArrayList<BlockPos> nightBorderBps = new ArrayList<>();
 
     public Mausoleum(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), true);
@@ -55,6 +58,22 @@ public class Mausoleum extends ProductionBuilding {
             this.productionButtons = List.of(
                 ZombieVillagerProd.getStartButton(this, Keybindings.keyQ)
             );
+        updateNightBorderBps();
+    }
+
+    public int getNightRange() { return nightRange; }
+
+    public BlockPos getNightCentre() { return centrePos; }
+
+    @Override
+    public void updateNightBorderBps() {
+        this.nightBorderBps.clear();
+        this.nightBorderBps.addAll(MiscUtil.getGroundCircleBlocks(centrePos, getNightRange(), level));
+    }
+
+    @Override
+    public List<BlockPos> getNightBorderBps() {
+        return nightBorderBps;
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}

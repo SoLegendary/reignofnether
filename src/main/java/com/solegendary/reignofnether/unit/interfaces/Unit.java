@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchFireResistance;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
@@ -27,8 +28,6 @@ import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.isInRangeOfNightSource;
 
 // Defines method bodies for Units
 // workaround for trying to have units inherit from both their base vanilla Mob class and a Unit class
@@ -171,7 +170,7 @@ public interface Unit {
         if (!le.level.isClientSide()) {
             if (unit.getFaction() == Faction.MONSTERS &&
                     le.tickCount % MONSTER_HEALING_TICKS == 0 &&
-                    (!le.level.isDay() || isInRangeOfNightSource(le.position(), le.level.isClientSide()))) {
+                    (!le.level.isDay() || TimeUtils.isInRangeOfNightSource(le.position(), le.level.isClientSide()))) {
                 le.heal(1);
             } else if (unit.getFaction() == Faction.PIGLINS &&
                     le.tickCount % PIGLIN_HEALING_TICKS == 0 &&

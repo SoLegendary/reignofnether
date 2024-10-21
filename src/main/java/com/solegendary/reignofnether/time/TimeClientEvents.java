@@ -1,5 +1,10 @@
 package com.solegendary.reignofnether.time;
 
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.NightSource;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -9,14 +14,19 @@ import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TimeClientEvents {
@@ -30,7 +40,6 @@ public class TimeClientEvents {
     public static long targetClientTime = 0;
     // actual time on the server
     public static long serverTime = 0;
-
 
 
     // ensures a time value is between 0 and 24000
@@ -88,7 +97,7 @@ public class TimeClientEvents {
     @SubscribeEvent
     public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() ||
-            !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
+                !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
             return;
 
         xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) + 2;
@@ -133,10 +142,10 @@ public class TimeClientEvents {
             );
             if (targetClientTime != serverTime)
                 tooltip = List.of(
-                    FormattedCharSequence.forward("Time is distorted to midnight", Style.EMPTY.withBold(true)),
-                    FormattedCharSequence.forward("Real time: " + timeStr, Style.EMPTY),
-                    timeUntilStr,
-                    gameLengthStr
+                        FormattedCharSequence.forward("Time is distorted to midnight", Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward("Real time: " + timeStr, Style.EMPTY),
+                        timeUntilStr,
+                        gameLengthStr
                 );
 
             MyRenderer.renderTooltip(
@@ -146,5 +155,23 @@ public class TimeClientEvents {
                     evt.getMouseY()
             );
         }
+    }
+    // show corners of all frozenChunks
+    @SubscribeEvent
+    public static void onRenderLevel(RenderLevelStageEvent evt) {
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+            return;
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
+
+        // draw night-ranges for monsters
+        for (Building building : BuildingClientEvents.getBuildings())
+            if (building instanceof NightSource ns)
+                for (BlockPos bp : ns.getNightBorderBps()) {
+                    if (targetClientTime % 100 == 0) {
+                        ns.updateNightBorderBps();
+                    }
+                    MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, 0f, 0f, 0f, 0.25f);
+                }
     }
 }

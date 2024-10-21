@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.mixin.firedamage;
 
+import com.solegendary.reignofnether.resources.BlockUtils;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
@@ -41,7 +42,7 @@ public abstract class WalkNodeEvaluatorMixin extends NodeEvaluator {
         if (block == Blocks.FIRE || blockBelow == Blocks.FIRE ||
             block == Blocks.MAGMA_BLOCK || blockBelow == Blocks.MAGMA_BLOCK)
             cir.setReturnValue(BlockPathTypes.WALKABLE);
-        else if (ResourcesServerEvents.isLeafBlock(blockStateBelow))
+        else if (BlockUtils.isLeafBlock(blockStateBelow))
             cir.setReturnValue(BlockPathTypes.DAMAGE_FIRE);
         else {
             BlockPathTypes bpt = getBlockPathTypeStatic(pLevel, new BlockPos.MutableBlockPos(pX, pY, pZ));
