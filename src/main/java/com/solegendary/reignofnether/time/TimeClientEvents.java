@@ -156,6 +156,7 @@ public class TimeClientEvents {
             );
         }
     }
+
     // show corners of all frozenChunks
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
@@ -168,10 +169,7 @@ public class TimeClientEvents {
         for (Building building : BuildingClientEvents.getBuildings())
             if (building instanceof NightSource ns)
                 for (BlockPos bp : ns.getNightBorderBps()) {
-                    if (targetClientTime % 100 == 0) {
-                        ns.updateNightBorderBps();
-                    }
-                    MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, 0f, 0f, 0f, 0.25f);
+                    MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, 0f, 0f, 0f, 0.5f);
                 }
     }
 }

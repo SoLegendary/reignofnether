@@ -34,6 +34,9 @@ public class Mausoleum extends ProductionBuilding implements NightSource {
 
     private final ArrayList<BlockPos> nightBorderBps = new ArrayList<>();
 
+    private static final int NIGHT_RANGE_TICKS_MAX = 100;
+    private static int nightRangeTicks = NIGHT_RANGE_TICKS_MAX;
+
     public Mausoleum(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), true);
         this.name = buildingName;
@@ -59,6 +62,8 @@ public class Mausoleum extends ProductionBuilding implements NightSource {
                 ZombieVillagerProd.getStartButton(this, Keybindings.keyQ)
             );
         updateNightBorderBps();
+
+
     }
 
     public int getNightRange() { return nightRange; }
@@ -74,6 +79,17 @@ public class Mausoleum extends ProductionBuilding implements NightSource {
     @Override
     public List<BlockPos> getNightBorderBps() {
         return nightBorderBps;
+    }
+
+    @Override
+    public void tick(Level tickLevel) {
+        super.tick(tickLevel);
+        if (nightRangeTicks <= 0) {
+            updateNightBorderBps();
+            nightRangeTicks = NIGHT_RANGE_TICKS_MAX;
+        } else {
+            nightRangeTicks -= 1;
+        }
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}
