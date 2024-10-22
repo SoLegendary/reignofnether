@@ -223,6 +223,12 @@ public class ResourcesServerEvents {
 
     @SubscribeEvent
     public static void onPlayerBlockBreak(BlockEvent.BreakEvent evt) {
+        if (BuildingUtils.isPosInsideAnyBuilding(false, evt.getPos())) {
+            evt.setCanceled(true);
+            if (evt.getLevel() instanceof ServerLevel serverLevel)
+                serverLevel.setBlockAndUpdate(evt.getPos(), Blocks.AIR.defaultBlockState());
+        }
+
         if (isLogBlock(evt.getState()) && !BuildingUtils.isPosInsideAnyBuilding(false, evt.getPos()))
             fellAdjacentLogs(evt.getPos(), new ArrayList<>(), (Level) evt.getLevel());
     }

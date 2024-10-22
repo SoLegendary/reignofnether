@@ -170,7 +170,8 @@ public class NetherBlocks {
                 Blocks.COARSE_DIRT,
                 Blocks.DIRT_PATH,
                 Blocks.ROOTED_DIRT,
-                Blocks.FARMLAND
+                Blocks.FARMLAND,
+                Blocks.PODZOL
             ));
         MAPPINGS.put(Blocks.NETHERRACK,
             List.of(

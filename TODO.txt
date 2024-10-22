@@ -12,18 +12,25 @@
 
 Bugfixes
 --------
-
+[✔] Fixed a crash when using the idle workers button. Thanks @Boobcat
 [✔] Fixed survival players being able to deposit into stockpiles on non-English languages
-
 [✔] Iron golem spawn egg texture is fixed
+[✔] Survival players can no longer use F12 cam
 
 [❌] Exploit where rapidly pressing F12 can land you back in regular creative mode
 
-[❌] Talls trees dont break properly
-
 [❌] Can't build properly on tall grass
 
+[❌] Farm water boils on soulsand and magma
+    - Just replace them with soulsoil and cobble underneath
 
+[🟡] Nether doesn't spread to podzol
+
+[❌] Prevent berry bush and cacti damage
+
+[🟡] Build is the same hotkey as bridge build
+
+[🟡] Building blocks no longer drop items for survival players when mined
 
 
 [❌] World stuck at 100%
@@ -61,14 +68,14 @@ Quality of Life Features
 
 [❌] Move cheats to serverside for command block compatibility:  execute as @[selector] run [command]
 
-[❌] Right click the bridge icon to remove fences
-
 [❌] Spellcasters should only cast spells one at time when in a group
     - Have to reorder who the hudSelectedEntity is
     - And change sendUnitCommand to only do 1 ability at a time (if it has a cooldown)
 
 
 
+
+[❌] Right click the bridge icon to remove fences
 
 [❌] Flatten terrain ability
     - Require that villagers work on it like a building
@@ -81,13 +88,18 @@ Quality of Life Features
 Balancing Features
 ------------------
 
-[❌] Building blocks no longer drop items for survival players when mined
+[❌] The Silverfish upgrade is now given by default to monster players
+[❌] An upgrade at the lab now upgrades silverfish to endermites for +1 attack and +5 movespeed
 
-- Monsters still underpowered, need some way to escape night issues, esp. on big maps
+[❌] Sculk catalyst, cheap building you can sacrifice units to spread a night zone
+    - Starts off at 10 radius, goes up to 40 (~200 max sculk blocks, +1 radius per 4 sculk blocks or veins)
+        - Need to give more sculk per unit than vanilla
+    - The more sculk blocks around, the wider the night radius, up to a limit of 20 blocks
+    - Sonic boom them to split the boom into two random nearby enemies within the night radius
+    - range equal to night radius
+    - Sculk blocks are unconvertible by portals
 
-- Check later if multishot is still OP
-    - Maybe make it 40% slower but toggleable?
-
+    - Incorporate sculk into monster buildings to show they spread night
 
 
 

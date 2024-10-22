@@ -66,30 +66,25 @@ public class HelperButtons {
                             if (entity instanceof WorkerUnit) {
                                 UnitClientEvents.addSelectedUnit((LivingEntity) entity);
                             }
-                            idleWorkerIndex++;
-                        } else {
+                            idleWorkerIndex += 1;
+                        } else
                             idleWorkerIndex = 0; // Reset to zero if out of bounds
-                        }
                     }
                 } else {
-                    if (idleWorkerIndex >= idleWorkerIds.size() || idleWorkerIndex < 0) {
+                    if (idleWorkerIndex >= idleWorkerIds.size())
                         idleWorkerIndex = 0; // Reset to zero if out of bounds
-                    }
 
-                    if (idleWorkerIndex < idleWorkerIds.size()) {
-                        Entity entity = MC.level.getEntity(idleWorkerIds.get(idleWorkerIndex));
-                        if (entity instanceof WorkerUnit) {
-                            OrthoviewClientEvents.centreCameraOnPos(entity.getX(), entity.getZ());
-                            UnitClientEvents.clearSelectedUnits();
-                            UnitClientEvents.addSelectedUnit((LivingEntity) entity);
-                        }
-                        idleWorkerIndex++;
+                    Entity entity = MC.level.getEntity(idleWorkerIds.get(idleWorkerIndex));
+                    if (entity instanceof WorkerUnit) {
+                        OrthoviewClientEvents.centreCameraOnPos(entity.getX(), entity.getZ());
+                        UnitClientEvents.clearSelectedUnits();
+                        UnitClientEvents.addSelectedUnit((LivingEntity) entity);
                     }
+                    idleWorkerIndex += 1;
 
                     // Reset idleWorkerIndex if it exceeds the size after increment
-                    if (idleWorkerIndex >= idleWorkerIds.size()) {
+                    if (idleWorkerIndex >= idleWorkerIds.size())
                         idleWorkerIndex = 0;
-                    }
                 }
             },
             null,

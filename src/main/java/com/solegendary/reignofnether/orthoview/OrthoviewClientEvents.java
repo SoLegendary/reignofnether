@@ -15,10 +15,12 @@ import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -267,7 +269,9 @@ public class OrthoviewClientEvents {
     public static void onInput(InputEvent.Key evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
             if (evt.getKey() == Keybindings.getFnum(12).key &&
-                !OrthoviewClientEvents.isCameraLocked())
+                !OrthoviewClientEvents.isCameraLocked() &&
+                MC.gameMode != null &&
+                MC.gameMode.getPlayerMode() != GameType.SURVIVAL)
                 toggleEnable();
 
             if (evt.getKey() == Keybindings.getFnum(6).key) {
