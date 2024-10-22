@@ -1,11 +1,14 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.blocks.FallingRotatedPillarBlock;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
@@ -22,6 +25,12 @@ public class BlockRegistrar {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(ForgeRegistries.BLOCKS, ReignOfNether.MOD_ID);
 
+    private static FallingRotatedPillarBlock fallingLog(MaterialColor pTopColor, MaterialColor pBarkColor) {
+        return new FallingRotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, (p_152624_) -> {
+            return p_152624_.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y ? pTopColor : pBarkColor;
+        }).strength(2.0F).sound(SoundType.WOOD));
+    }
+
     public static final RegistryObject<Block> DECAYABLE_NETHER_WART_BLOCK = registerBlock("decayable_nether_wart_block",
             () -> new LeavesBlock(BlockBehaviour.Properties.of(Material.LEAVES, MaterialColor.COLOR_RED)
                     .strength(1.0F)
@@ -37,6 +46,11 @@ public class BlockRegistrar {
                     .randomTicks()
                     .color(MaterialColor.WARPED_WART_BLOCK)
                     .sound(SoundType.WART_BLOCK)),
+            CreativeModeTab.TAB_BUILDING_BLOCKS
+    );
+
+    public static final RegistryObject<Block> FALLING_OAK_LOG = registerBlock("falling_oak_log",
+            () -> fallingLog(MaterialColor.WOOD, MaterialColor.PODZOL),
             CreativeModeTab.TAB_BUILDING_BLOCKS
     );
 

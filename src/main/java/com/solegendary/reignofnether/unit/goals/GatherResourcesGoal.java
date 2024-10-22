@@ -257,7 +257,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         ResourceName resourceName = ResourceSources.getBlockResourceName(this.gatherTarget, mob.level);
 
                         if (isLogBlock(this.mob.level.getBlockState(gatherTarget)))
-                            ResourcesServerEvents.breakAdjacentLogs(gatherTarget, new ArrayList<>(), this.mob.level);
+                            ResourcesServerEvents.fellAdjacentLogs(gatherTarget, new ArrayList<>(), this.mob.level);
 
                         if (mob.level.destroyBlock(gatherTarget, false)) {
                             // replace workers' mine ores with cobble to prevent creating potholes

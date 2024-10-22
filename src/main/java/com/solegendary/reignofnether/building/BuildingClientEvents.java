@@ -24,6 +24,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
@@ -799,8 +800,7 @@ public class BuildingClientEvents {
     // on closing a chest screen check that it could be a stockpile chest so they can be consumed for resources
     @SubscribeEvent
     public static void onScreenClose(ScreenEvent.Closing evt) {
-        String screenName = evt.getScreen().getTitle().getString();
-        if ((screenName.equals("Chest") || screenName.equals("Large Chest")) && MC.level != null && MC.player != null) {
+        if (evt.getScreen() instanceof ContainerScreen && MC.level != null && MC.player != null) {
             BlockPos bp = Item.getPlayerPOVHitResult(MC.level, MC.player, ClipContext.Fluid.NONE).getBlockPos();
             BuildingServerboundPacket.checkStockpileChests(bp);
         }

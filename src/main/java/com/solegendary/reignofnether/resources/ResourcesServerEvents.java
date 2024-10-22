@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -223,11 +224,11 @@ public class ResourcesServerEvents {
     @SubscribeEvent
     public static void onPlayerBlockBreak(BlockEvent.BreakEvent evt) {
         if (isLogBlock(evt.getState()) && !BuildingUtils.isPosInsideAnyBuilding(false, evt.getPos()))
-            breakAdjacentLogs(evt.getPos(), new ArrayList<>(), (Level) evt.getLevel());
+            fellAdjacentLogs(evt.getPos(), new ArrayList<>(), (Level) evt.getLevel());
     }
 
     // if a tree is touched, destroy any adjacent logs that are above the ground after some time to avoid leaving tall trees behind
-    public static void breakAdjacentLogs(BlockPos bp, ArrayList<BlockPos> bpsExcluded, Level level) {
+    public static void fellAdjacentLogs(BlockPos bp, ArrayList<BlockPos> bpsExcluded, Level level) {
         BlockState bs = level.getBlockState(bp);
 
         List<BlockPos> bpsAdj = List.of(
@@ -239,10 +240,9 @@ public class ResourcesServerEvents {
         for (BlockPos bpAdj : bpsAdj) {
             BlockState bsAdj = level.getBlockState(bpAdj);
             if (isLogBlock(bsAdj) && !bpsExcluded.contains(bpAdj)) {
-                if (numAirOrLeafBlocksBelow(bpAdj, level) >= 5)
-                    level.destroyBlock(bpAdj, true);
+                level.setBlockAndUpdate(bpAdj, BlockRegistrar.FALLING_OAK_LOG.get().defaultBlockState());
                 bpsExcluded.add(bpAdj);
-                breakAdjacentLogs(bpAdj, bpsExcluded, level);
+                fellAdjacentLogs(bpAdj, bpsExcluded, level);
             }
         }
     }

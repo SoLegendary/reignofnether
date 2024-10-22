@@ -34,5 +34,9 @@
   "sounds.reignofnether.chat": "Chat",
   "sounds.reignofnether.ally": "Ally",
   "sounds.reignofnether.neutral": "Neutral",
-  "sounds.reignofnether.enemy": "Enemy"
+  "sounds.reignofnether.enemy": "Enemy",
+
+  "block.reignofnether.decayable_nether_wart_block": "Decayable Nether Wart Block",
+  "block.reignofnether.decayable_warped_wart_block": "Decayable Warped Wart Block",
+  "block.reignofnether.falling_oak_log": "Falling Oak Log"
 }

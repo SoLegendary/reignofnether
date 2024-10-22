@@ -1,5 +1,5 @@
 
-1.19.2-1.0.5
+1.19.2-1.0.6
 ------------
 
 [✔] Done and tested
@@ -13,13 +13,16 @@
 Bugfixes
 --------
 
-[ ] Optimised code for minimaps so opening the large map should drop less frames
+[✔] Fixed survival players being able to deposit into stockpiles on non-English languages
+
+[✔] Iron golem spawn egg texture is fixed
 
 [❌] Exploit where rapidly pressing F12 can land you back in regular creative mode
 
-[❌] Talls trees dont break properly (just reduce the max height of it)
+[❌] Talls trees dont break properly
 
 [❌] Can't build properly on tall grass
+
 
 
 
@@ -41,6 +44,12 @@ Bugfixes
 Quality of Life Features
 ------------------------
 
+[🟡] Tree logs now become affected by gravity whenever any log is broken
+    - 🟡 this can be toggled using /gamerule dologfalling
+    - This only occurs for worker units breaking blocks, survival players break
+    - Pull boobcat's wood tag change too
+    - apply to all logs, stems, wood and hyphae too
+
 [🟡] Radius indicator around monster capitol and stronghold to better indicate range of night
 
     - click the clock to toggle it
@@ -50,9 +59,6 @@ Quality of Life Features
 
     (can use this same code for ability range indicators too)
 
-
-
-
 [❌] Move cheats to serverside for command block compatibility:  execute as @[selector] run [command]
 
 [❌] Right click the bridge icon to remove fences
@@ -60,6 +66,9 @@ Quality of Life Features
 [❌] Spellcasters should only cast spells one at time when in a group
     - Have to reorder who the hudSelectedEntity is
     - And change sendUnitCommand to only do 1 ability at a time (if it has a cooldown)
+
+
+
 
 [❌] Flatten terrain ability
     - Require that villagers work on it like a building
@@ -69,8 +78,10 @@ Quality of Life Features
     - Clicking said button will assign the nearest idle villager to it
 
 
-Balancing
----------
+Balancing Features
+------------------
+
+[❌] Building blocks no longer drop items for survival players when mined
 
 - Monsters still underpowered, need some way to escape night issues, esp. on big maps
 
