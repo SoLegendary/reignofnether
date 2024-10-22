@@ -229,15 +229,11 @@ public class OrthoviewClientEvents {
             MC.options.setCameraType(CameraType.FIRST_PERSON);
         }
         else {
+            int highestBlockY = MC.level.getHeight(Heightmap.Types.MOTION_BLOCKING,(int)MC.player.getX(), (int) MC.player.getZ());
+
             PlayerServerboundPacket.disableOrthoview();
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
-            if (!MC.level.getBlockState(MC.player.getOnPos()).isAir()) {
-                BlockPos tp = MiscUtil.getHighestNonAirBlock(MC.level, MC.player.getOnPos());
-                PlayerServerboundPacket.teleportPlayer((double) tp.getX(), (double) tp.getY() + 2, (double) tp.getZ());
-            }
-            else {
-                PlayerServerboundPacket.teleportPlayer(MC.player.getX(), MC.player.getY(), MC.player.getZ());
-            }
+            PlayerServerboundPacket.teleportPlayer(MC.player.getX(), (double) highestBlockY, MC.player.getZ());
         }
         TutorialClientEvents.updateStage();
     }
