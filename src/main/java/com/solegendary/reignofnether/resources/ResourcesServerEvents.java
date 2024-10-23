@@ -246,7 +246,12 @@ public class ResourcesServerEvents {
         for (BlockPos bpAdj : bpsAdj) {
             BlockState bsAdj = level.getBlockState(bpAdj);
             if (isLogBlock(bsAdj) && !bpsExcluded.contains(bpAdj)) {
-                level.setBlockAndUpdate(bpAdj, BlockRegistrar.FALLING_OAK_LOG.get().defaultBlockState());
+                if (bsAdj.hasProperty(BlockStateProperties.AXIS)) {
+                    level.setBlockAndUpdate(bpAdj, BlockRegistrar.FALLING_OAK_LOG.get().defaultBlockState()
+                            .setValue(BlockStateProperties.AXIS, bsAdj.getValue(BlockStateProperties.AXIS)));
+                } else {
+                    level.setBlockAndUpdate(bpAdj, BlockRegistrar.FALLING_OAK_LOG.get().defaultBlockState());
+                }
                 bpsExcluded.add(bpAdj);
                 fellAdjacentLogs(bpAdj, bpsExcluded, level);
             }

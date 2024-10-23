@@ -8,10 +8,7 @@ import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
 import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile;
-import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
-import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
-import com.solegendary.reignofnether.fogofwar.FrozenChunk;
-import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
+import com.solegendary.reignofnether.fogofwar.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -50,7 +47,6 @@ import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.world.ForgeChunkManager;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.*;
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
@@ -465,7 +461,7 @@ public abstract class Building {
             if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 0) {
                 PlayerServerEvents.defeat(this.ownerName, "lost all their buildings");
             }
-            else if (this.isCapitol) {
+            else if (this.isCapitol && FogOfWarServerEvents.isEnabled()) {
                 sendMessageToAllPlayers(this.ownerName + " has lost their capitol and will be revealed in " +
                         PlayerServerEvents.TICKS_TO_REVEAL / ResourceCost.TICKS_PER_SECOND + " seconds unless they rebuild it!");
             }
@@ -644,6 +640,14 @@ public abstract class Building {
                 BlockState bs = nextBlock.getBlockState();
                 if (level.isLoaded(bp)) {
                     level.setBlockAndUpdate(bp, bs);
+
+                    // avoid creating a bubble column block
+                    if (bs.getMaterial() == Material.WATER) {
+                        if (level.getBlockState(bp.below()).getBlock() == Blocks.SOUL_SAND)
+                            level.setBlockAndUpdate(bp.below(), Blocks.SOUL_SOIL.defaultBlockState());
+                        else if (level.getBlockState(bp.below()).getBlock() == Blocks.MAGMA_BLOCK)
+                            level.setBlockAndUpdate(bp.below(), Blocks.COBBLESTONE.defaultBlockState());
+                    }
                     level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, bp, Block.getId(bs));
                     level.levelEvent(bs.getSoundType().getPlaceSound().hashCode(), bp, Block.getId(bs));
                     blockPlaceQueue.removeIf(i -> i.equals(nextBlock));

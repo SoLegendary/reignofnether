@@ -32,6 +32,10 @@ public class FogOfWarServerEvents {
         syncClientFog();
     }
 
+    public static boolean isEnabled() {
+        return enabled;
+    }
+
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)

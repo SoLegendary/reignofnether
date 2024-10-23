@@ -456,6 +456,15 @@ public class UnitServerEvents {
             knockbackIgnoreIds.add(evt.getEntity().getId());
 
         // wither skeletons deal up to double damage to enemies with less health left
+        if (evt.getEntity() instanceof Unit && (
+            evt.getSource() == DamageSource.SWEET_BERRY_BUSH ||
+            evt.getSource() == DamageSource.CACTUS
+        )) {
+            evt.setCanceled(true);
+            return;
+        }
+
+        // wither skeletons deal up to double damage to enemies with less health left
         if (evt.getSource().getEntity() instanceof WitherSkeletonUnit) {
             float maxHp = evt.getEntity().getMaxHealth();
             float hp = evt.getEntity().getHealth();
