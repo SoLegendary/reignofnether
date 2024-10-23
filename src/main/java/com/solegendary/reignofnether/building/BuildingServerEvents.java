@@ -166,27 +166,18 @@ public class BuildingServerEvents {
     public static void placeBuilding(String buildingName, BlockPos pos, Rotation rotation, String ownerName,
                                      int[] builderUnitIds, boolean queue, boolean isDiagonalBridge) {
         Building newBuilding = BuildingUtils.getNewBuilding(buildingName, serverLevel, pos, rotation, ownerName, isDiagonalBridge);
-        boolean buildingExists = false;
-        for (Building building : buildings)
-            if (building.originPos.equals(pos)) {
-                buildingExists = true;
-                break;
-            }
+        boolean buildingExists = buildings.stream().anyMatch(b -> b.originPos.equals(pos));
 
         if (newBuilding != null && !buildingExists) {
-
-            // special check for iron golem buildings
+            // Handle special building (Iron Golem)
             if (newBuilding instanceof IronGolemBuilding) {
                 int currentPop = UnitServerEvents.getCurrentPopulation(serverLevel, ownerName);
                 int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
 
-                boolean canAffordPop = false;
-                for (Resources resources : ResourcesServerEvents.resourcesList) {
-                    if (resources.ownerName.equals(ownerName)) {
-                        canAffordPop = (currentPop + ResourceCosts.IRON_GOLEM.population) <= popSupply;
-                        break;
-                    }
-                }
+                boolean canAffordPop = ResourcesServerEvents.resourcesList.stream()
+                        .anyMatch(r -> r.ownerName.equals(ownerName) &&
+                                (currentPop + ResourceCosts.IRON_GOLEM.population) <= popSupply);
+
                 if (!canAffordPop) {
                     ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
                     return;
@@ -195,96 +186,116 @@ public class BuildingServerEvents {
 
             if (newBuilding.canAfford(ownerName)) {
                 buildings.add(newBuilding);
-
                 newBuilding.forceChunk(true);
-
                 int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
 
                 if (!(newBuilding instanceof AbstractBridge)) {
                     for (BuildingBlock block : newBuilding.blocks) {
-                        // place scaffolding underneath all solid blocks that don't have support
                         if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir()) {
-                            int yBelow = 0;
-                            boolean tooDeep = false;
-                            BlockState bsBelow;
-                            do {
-                                yBelow -= 1;
-                                bsBelow = serverLevel.getBlockState(block.getBlockPos().offset(0, yBelow, 0));
-                                if (yBelow < -5)
-                                    tooDeep = true;
-                            }
-                            while (!bsBelow.getMaterial().isSolidBlocking());
-                            yBelow += 1;
-
-                            if (!tooDeep) {
-                                while (yBelow < 0) {
-                                    BlockPos bp = block.getBlockPos().offset(0, yBelow, 0);
-                                    BuildingBlock scaffold = new BuildingBlock(bp, Blocks.SCAFFOLDING.defaultBlockState());
-                                    newBuilding.getScaffoldBlocks().add(scaffold);
-                                    newBuilding.addToBlockPlaceQueue(scaffold);
-                                    yBelow += 1;
-                                }
+                            if (!placeScaffoldingUnder(block, newBuilding)) {
+                                // Abort if the scaffolding placement failed
+                                return;
                             }
                         }
                     }
                 }
 
-                for (BuildingBlock block : newBuilding.blocks) {
-                    // place all blocks on the lowest y level
-                    if (block.getBlockPos().getY() == minY &&
-                            newBuilding.startingBlockTypes.contains(block.getBlockState().getBlock()))
-                        newBuilding.addToBlockPlaceQueue(block);
-                }
-                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName, newBuilding.blockPlaceQueue.size(),
-                        isDiagonalBridge, false, false, Portal.PortalType.BASIC, false);
+                newBuilding.blocks.stream()
+                        .filter(block -> block.getBlockPos().getY() == minY &&
+                                newBuilding.startingBlockTypes.contains(block.getBlockState().getBlock()))
+                        .forEach(newBuilding::addToBlockPlaceQueue);
+
+                BuildingClientboundPacket.placeBuilding(pos, buildingName, rotation, ownerName,
+                        newBuilding.blockPlaceQueue.size(), isDiagonalBridge, false, false, Portal.PortalType.BASIC, false);
 
                 ResourcesServerEvents.addSubtractResources(new Resources(
-                    newBuilding.ownerName,
-                    -newBuilding.foodCost,
-                    -newBuilding.woodCost,
-                    -newBuilding.oreCost
-                ));
-                // assign the builder unit that placed this building
-                for (int id : builderUnitIds) {
-                    Entity entity = serverLevel.getEntity(id);
-                    if (entity instanceof WorkerUnit workerUnit) {
-                        if (queue) {
-                            if (workerUnit.getBuildRepairGoal().queuedBuildings.size() == 0) {
-                                ((Unit) entity).resetBehaviours();
-                                WorkerUnit.resetBehaviours(workerUnit);
-                            }
-                            workerUnit.getBuildRepairGoal().queuedBuildings.add(newBuilding);
-                            if (workerUnit.getBuildRepairGoal().getBuildingTarget() == null)
-                                workerUnit.getBuildRepairGoal().startNextQueuedBuilding();
-                        } else {
-                            ((Unit) entity).resetBehaviours();
-                            WorkerUnit.resetBehaviours(workerUnit);
-                            workerUnit.getBuildRepairGoal().setBuildingTarget(newBuilding);
-                        }
-                    }
-                }
-            }
-            else if (!PlayerServerEvents.isBot(ownerName))
-                ResourcesClientboundPacket.warnInsufficientResources(newBuilding.ownerName,
-                    ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.FOOD, newBuilding.foodCost),
-                    ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.WOOD, newBuilding.woodCost),
-                    ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.ORE, newBuilding.oreCost)
-                );
+                        newBuilding.ownerName, -newBuilding.foodCost, -newBuilding.woodCost, -newBuilding.oreCost));
 
-            for (LivingEntity entity : UnitServerEvents.getAllUnits())
-                if (entity instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
-                    newBuilding.isPosInsideBuilding(entity.getOnPos().above().above())) {
-                    if (Arrays.stream(builderUnitIds).noneMatch(id -> id == entity.getId()))
-                        UnitServerEvents.addActionItem(
-                                unit.getOwnerName(),
-                                UnitAction.MOVE, -1,
-                                new int[]{entity.getId()},
-                                newBuilding.getClosestGroundPos(entity.getOnPos(), 2),
-                                new BlockPos(0,0,0)
-                        );
-                }
+                assignBuilderUnits(builderUnitIds, queue, newBuilding);
+            } else if (!PlayerServerEvents.isBot(ownerName)) {
+                warnInsufficientResources(newBuilding);
+            }
+
+            UnitServerEvents.getAllUnits().stream()
+                    .filter(entity -> entity instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
+                            newBuilding.isPosInsideBuilding(entity.getOnPos().above().above()))
+                    .forEach(entity -> assignActionIfNotBuilder(entity, builderUnitIds, newBuilding));
         }
     }
+
+    private static boolean placeScaffoldingUnder(BuildingBlock block, Building newBuilding) {
+        BlockPos basePos = block.getBlockPos();
+        int yBelow = 0;
+        BlockState bsBelow;
+        boolean tooDeep = false;
+
+        // Search downward for a solid block up to -5 levels below.
+        while (yBelow > -5) {
+            yBelow--;
+            bsBelow = serverLevel.getBlockState(basePos.offset(0, yBelow, 0));
+            if (bsBelow.getMaterial().isSolidBlocking()) {
+                break; // Found a solid block, exit loop.
+            }
+        }
+
+        if (yBelow <= -5) {
+            return false; // Abort if no solid block found within limit (possibly void).
+        }
+
+        // Place scaffolding from the lowest point back to the original block's level.
+        for (int y = yBelow + 1; y < 0; y++) {
+            BlockPos scaffoldPos = basePos.offset(0, y, 0);
+            BuildingBlock scaffold = new BuildingBlock(scaffoldPos, Blocks.SCAFFOLDING.defaultBlockState());
+            newBuilding.getScaffoldBlocks().add(scaffold);
+            newBuilding.addToBlockPlaceQueue(scaffold);
+        }
+        return true;
+    }
+
+
+    private static void assignBuilderUnits(int[] builderUnitIds, boolean queue, Building newBuilding) {
+        for (int id : builderUnitIds) {
+            Entity entity = serverLevel.getEntity(id);
+            if (entity instanceof WorkerUnit workerUnit) {
+                if (queue) {
+                    if (workerUnit.getBuildRepairGoal().queuedBuildings.isEmpty()) {
+                        ((Unit) entity).resetBehaviours();
+                        WorkerUnit.resetBehaviours(workerUnit);
+                    }
+                    workerUnit.getBuildRepairGoal().queuedBuildings.add(newBuilding);
+                    if (workerUnit.getBuildRepairGoal().getBuildingTarget() == null) {
+                        workerUnit.getBuildRepairGoal().startNextQueuedBuilding();
+                    }
+                } else {
+                    ((Unit) entity).resetBehaviours();
+                    WorkerUnit.resetBehaviours(workerUnit);
+                    workerUnit.getBuildRepairGoal().setBuildingTarget(newBuilding);
+                }
+            }
+        }
+    }
+
+    private static void warnInsufficientResources(Building newBuilding) {
+        ResourcesClientboundPacket.warnInsufficientResources(
+                newBuilding.ownerName,
+                ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.FOOD, newBuilding.foodCost),
+                ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.WOOD, newBuilding.woodCost),
+                ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.ORE, newBuilding.oreCost)
+        );
+    }
+
+    private static void assignActionIfNotBuilder(LivingEntity entity, int[] builderUnitIds, Building newBuilding) {
+        if (Arrays.stream(builderUnitIds).noneMatch(id -> id == entity.getId())) {
+            UnitServerEvents.addActionItem(
+                    ((Unit) entity).getOwnerName(),
+                    UnitAction.MOVE, -1,
+                    new int[]{entity.getId()},
+                    newBuilding.getClosestGroundPos(entity.getOnPos(), 2),
+                    new BlockPos(0, 0, 0)
+            );
+        }
+    }
+
 
     public static void cancelBuilding(Building building) {
         if (building == null || building.isCapitol)
