@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
@@ -45,7 +46,7 @@ public class VindicatorProd extends ProductionItem {
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
 
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-                FormattedCharSequence.forward(VindicatorProd.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.vindicator"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),

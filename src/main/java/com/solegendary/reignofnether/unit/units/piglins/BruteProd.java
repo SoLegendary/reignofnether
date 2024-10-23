@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
@@ -44,7 +45,7 @@ public class BruteProd extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-                FormattedCharSequence.forward(BruteProd.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.brute"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),

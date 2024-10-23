@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
@@ -42,7 +43,7 @@ public class GruntProd extends ProductionItem {
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-            FormattedCharSequence.forward(GruntProd.itemName, Style.EMPTY.withBold(true)),
+            FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.grunt"), Style.EMPTY.withBold(true)),
             ResourceCosts.getFormattedCost(cost),
             ResourceCosts.getFormattedPopAndTime(cost),
             FormattedCharSequence.forward("", Style.EMPTY),
