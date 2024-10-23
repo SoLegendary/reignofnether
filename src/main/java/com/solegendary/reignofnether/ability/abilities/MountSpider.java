@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -51,7 +52,7 @@ public class MountSpider extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_SPIDER),
             () -> UnitClientEvents.sendUnitCommand(UnitAction.MOUNT_SPIDER),
             List.of(
-                FormattedCharSequence.forward("Mount Spider (Right click to auto-find)", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.mount_spider"), Style.EMPTY)
             ),
             this
         );

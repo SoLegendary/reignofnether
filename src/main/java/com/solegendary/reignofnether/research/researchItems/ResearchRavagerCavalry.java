@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -25,9 +26,9 @@ public class ResearchRavagerCavalry extends ProductionItem {
     public ResearchRavagerCavalry(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (level.isClientSide())
+            if (level.isClientSide()) {
                 ResearchClient.addResearch(this.building.ownerName, ResearchRavagerCavalry.itemName);
-            else {
+            } else {
                 ResearchServerEvents.addResearch(this.building.ownerName, ResearchRavagerCavalry.itemName);
             }
         };
@@ -41,32 +42,32 @@ public class ResearchRavagerCavalry extends ProductionItem {
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-        return new Button(
-            ResearchRavagerCavalry.itemName,
+        return new Button(ResearchRavagerCavalry.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/ravager.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchRavagerCavalry.itemName) ||
-                    ResearchClient.hasResearch(ResearchRavagerCavalry.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchRavagerCavalry.itemName) || ResearchClient.hasResearch(
+                ResearchRavagerCavalry.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(
-                FormattedCharSequence.forward(ResearchRavagerCavalry.itemName, Style.EMPTY.withBold(true)),
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.ravager_cavalry"),
+                    Style.EMPTY.withBold(true)
+                ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Unlocks the ability for pillagers to mount ravagers,", Style.EMPTY),
-                FormattedCharSequence.forward("gaining explosive arrows that shoot upwards like mortar.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.ravager_cavalry.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.ravager_cavalry.tooltip2"), Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
-        return new Button(
-            ResearchRavagerCavalry.itemName,
+        return new Button(ResearchRavagerCavalry.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/ravager.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),

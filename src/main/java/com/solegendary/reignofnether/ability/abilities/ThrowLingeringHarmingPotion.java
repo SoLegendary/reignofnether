@@ -5,13 +5,12 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPotions;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.WitchUnit;
 import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -29,8 +28,7 @@ public class ThrowLingeringHarmingPotion extends Ability {
     private final WitchUnit witchUnit;
 
     public ThrowLingeringHarmingPotion(WitchUnit witchUnit) {
-        super(
-            UnitAction.THROW_LINGERING_HARMING_POTION,
+        super(UnitAction.THROW_LINGERING_HARMING_POTION,
             CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,
             witchUnit.getPotionThrowRange(),
             0,
@@ -41,19 +39,28 @@ public class ThrowLingeringHarmingPotion extends Ability {
 
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
-        return new AbilityButton(
-            "Lingering Harming Potion",
+        return new AbilityButton("Lingering Harming Potion",
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lingering_potion_harming.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_LINGERING_HARMING_POTION,
-            () -> false, //!ResearchClient.hasResearch(ResearchLingeringPotions.itemName),
+            () -> false,
+            //!ResearchClient.hasResearch(ResearchLingeringPotions.itemName),
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_LINGERING_HARMING_POTION),
             null,
-            List.of(
-                FormattedCharSequence.forward("Lingering Harming Potion", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE006  3  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + witchUnit.getPotionThrowRange(), MyRenderer.iconStyle),
-                FormattedCharSequence.forward("Throw a potion that leaves a cloud of deadly gas.", Style.EMPTY)
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("abilities.reignofnether.lingering_harming_potion"),
+                    Style.EMPTY.withBold(true)
+                ),
+                FormattedCharSequence.forward(
+                    I18n.get("abilities.reignofnether.lingering_harming_potion.tooltip1", CD_MAX_SECONDS)
+                        + witchUnit.getPotionThrowRange(),
+                    MyRenderer.iconStyle
+                ),
+                FormattedCharSequence.forward(
+                    I18n.get("abilities.reignofnether.lingering_harming_potion.tooltip2"),
+                    Style.EMPTY
+                )
             ),
             this
         );

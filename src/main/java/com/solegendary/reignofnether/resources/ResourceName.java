@@ -5,5 +5,9 @@ public enum ResourceName {
     FOOD,
     WOOD,
     ORE,
-    NONE
+    NONE;
+
+    public String langKey() {
+        return "resources.reignofnether." + this.toString().toLowerCase();
+    }
 }

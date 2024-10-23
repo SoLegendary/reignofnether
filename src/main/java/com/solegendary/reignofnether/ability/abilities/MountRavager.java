@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
@@ -53,8 +54,8 @@ public class MountRavager extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_RAVAGER),
             () -> UnitClientEvents.sendUnitCommand(UnitAction.MOUNT_RAVAGER),
             List.of(
-                    FormattedCharSequence.forward("Mount Ravager (Right click to auto-find)", Style.EMPTY),
-                    FormattedCharSequence.forward("Mounted pillagers gain explosive arrows", Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.mount_ravager"), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.mount_ravager.tooltip1"), Style.EMPTY)
             ),
             this
         );

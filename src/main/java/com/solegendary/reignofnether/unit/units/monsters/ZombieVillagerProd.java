@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
@@ -54,10 +55,10 @@ public class ZombieVillagerProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An undead worker that can construct and", Style.EMPTY),
-                FormattedCharSequence.forward("repair buildings and gather resources.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie_villager.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie_villager.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Zombie villagers DO NOT burn under sunlight.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie_villager.tooltip3"), Style.EMPTY)
             )
         );
     }

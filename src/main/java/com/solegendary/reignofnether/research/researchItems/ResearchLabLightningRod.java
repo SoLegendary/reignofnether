@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -26,8 +27,9 @@ public class ResearchLabLightningRod extends ProductionItem {
     public ResearchLabLightningRod(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (this.building instanceof Laboratory lab)
+            if (this.building instanceof Laboratory lab) {
                 lab.changeStructure(Laboratory.upgradedStructureName);
+            }
         };
         this.foodCost = cost.food;
         this.woodCost = cost.wood;
@@ -39,34 +41,35 @@ public class ResearchLabLightningRod extends ProductionItem {
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-        return new Button(
-            ResearchLabLightningRod.itemName,
+        return new Button(ResearchLabLightningRod.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_off.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchLabLightningRod.itemName) ||
-                    (prodBuilding instanceof Laboratory lab && lab.isUpgraded()),
+            () -> ProductionItem.itemIsBeingProduced(ResearchLabLightningRod.itemName) || (
+                prodBuilding instanceof Laboratory lab && lab.isUpgraded()
+            ),
             () -> BuildingClientEvents.hasFinishedBuilding(Dungeon.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(
-                FormattedCharSequence.forward(ResearchLabLightningRod.itemName, Style.EMPTY.withBold(true)),
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.lightning_rod"),
+                    Style.EMPTY.withBold(true)
+                ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Adds a lightning rod to this lab that can be activated ", Style.EMPTY),
-                FormattedCharSequence.forward("to call lightning to charge creepers and damage enemies.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.lightning_rod.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.lightning_rod.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Dungeon.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.lightning_rod.tooltip3"), Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
-        return new Button(
-            ResearchLabLightningRod.itemName,
+        return new Button(ResearchLabLightningRod.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_off.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),

@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -42,42 +43,43 @@ public class ResearchPortalForCivilian extends ProductionItem {
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-        return new Button(
-                ResearchPortalForCivilian.itemName,
-                14,
-                new ResourceLocation("minecraft", "textures/block/cyan_glazed_terracotta.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                hotkey,
-                () -> false,
-                () -> prodBuilding.productionQueue.size() > 0 ||
-                        (prodBuilding instanceof Portal portal && portal.isUpgraded()),
-                () -> true,
-                () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(ResearchPortalForCivilian.itemName, Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedTime(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Convert into a civilian portal, supplying 15 population", Style.EMPTY),
-                        FormattedCharSequence.forward("and allowing workers to drop resources off here.", Style.EMPTY)
-                )
+        return new Button(ResearchPortalForCivilian.itemName,
+            14,
+            new ResourceLocation("minecraft", "textures/block/cyan_glazed_terracotta.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            hotkey,
+            () -> false,
+            () -> prodBuilding.productionQueue.size() > 0 || (
+                prodBuilding instanceof Portal portal && portal.isUpgraded()
+            ),
+            () -> true,
+            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
+            null,
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.civilian_portal"),
+                    Style.EMPTY.withBold(true)
+                ),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedTime(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.civilian_portal.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.civilian_portal.tooltip2"), Style.EMPTY)
+            )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
-        return new Button(
-                ResearchPortalForCivilian.itemName,
-                14,
-                new ResourceLocation("minecraft", "textures/block/cyan_glazed_terracotta.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
-                null,
-                null
+        return new Button(ResearchPortalForCivilian.itemName,
+            14,
+            new ResourceLocation("minecraft", "textures/block/cyan_glazed_terracotta.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            null,
+            () -> false,
+            () -> false,
+            () -> true,
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
+            null,
+            null
         );
     }
 }

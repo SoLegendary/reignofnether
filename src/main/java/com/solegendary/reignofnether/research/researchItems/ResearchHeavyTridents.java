@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -25,9 +26,9 @@ public class ResearchHeavyTridents extends ProductionItem {
     public ResearchHeavyTridents(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (level.isClientSide())
+            if (level.isClientSide()) {
                 ResearchClient.addResearch(this.building.ownerName, ResearchHeavyTridents.itemName);
-            else {
+            } else {
                 ResearchServerEvents.addResearch(this.building.ownerName, ResearchHeavyTridents.itemName);
             }
         };
@@ -41,31 +42,31 @@ public class ResearchHeavyTridents extends ProductionItem {
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-        return new Button(
-            ResearchHeavyTridents.itemName,
+        return new Button(ResearchHeavyTridents.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/trident.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchHeavyTridents.itemName) ||
-                    ResearchClient.hasResearch(ResearchHeavyTridents.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchHeavyTridents.itemName) || ResearchClient.hasResearch(
+                ResearchHeavyTridents.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(
-                FormattedCharSequence.forward(ResearchHeavyTridents.itemName, Style.EMPTY.withBold(true)),
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.heavy_tridents"),
+                    Style.EMPTY.withBold(true)
+                ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Headhunters' tridents knock enemies back on hit.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.heavy_tridents.tooltip1"), Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
-        return new Button(
-            ResearchHeavyTridents.itemName,
+        return new Button(ResearchHeavyTridents.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/trident.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),

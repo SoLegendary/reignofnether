@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
@@ -47,11 +48,11 @@ public class GhastProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A massive flying creature that fires explosive fireballs", Style.EMPTY),
-                FormattedCharSequence.forward("from a great distance to siege units and buildings.", Style.EMPTY),
-                FormattedCharSequence.forward("Slow and fragile, but can only be targeted by ranged units.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast.tooltip3"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Fortress.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast.tooltip4"), Style.EMPTY)
         ));
 
         return new Button(

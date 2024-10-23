@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -43,44 +44,51 @@ public class ResearchPortalForTransport extends ProductionItem {
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-        return new Button(
-                ResearchPortalForTransport.itemName,
-                14,
-                new ResourceLocation("minecraft", "textures/block/blue_glazed_terracotta.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                hotkey,
-                () -> false,
-                () -> prodBuilding.productionQueue.size() > 0 ||
-                        (prodBuilding instanceof Portal portal && portal.isUpgraded()),
-                () -> ResearchClient.hasResearch(ResearchAdvancedPortals.itemName),
-                () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(ResearchPortalForTransport.itemName, Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedTime(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Convert into a transport portal, allowing for instant", Style.EMPTY),
-                        FormattedCharSequence.forward("teleportation of units to another linked transport portal.", Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Requires research at a Fortress.", Style.EMPTY)
-                )
+        return new Button(ResearchPortalForTransport.itemName,
+            14,
+            new ResourceLocation("minecraft", "textures/block/blue_glazed_terracotta.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            hotkey,
+            () -> false,
+            () -> prodBuilding.productionQueue.size() > 0 || (
+                prodBuilding instanceof Portal portal && portal.isUpgraded()
+            ),
+            () -> ResearchClient.hasResearch(ResearchAdvancedPortals.itemName),
+            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
+            null,
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.transport_portal"),
+                    Style.EMPTY.withBold(true)
+                ),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedTime(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.transport_portal.tooltip1"),
+                    Style.EMPTY
+                ),
+                FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.transport_portal.tooltip2"),
+                    Style.EMPTY
+                ),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.transport_portal.tooltip3"), Style.EMPTY)
+            )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
-        return new Button(
-                ResearchPortalForTransport.itemName,
-                14,
-                new ResourceLocation("minecraft", "textures/block/blue_glazed_terracotta.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
-                null,
-                null
+        return new Button(ResearchPortalForTransport.itemName,
+            14,
+            new ResourceLocation("minecraft", "textures/block/blue_glazed_terracotta.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            null,
+            () -> false,
+            () -> false,
+            () -> true,
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
+            null,
+            null
         );
     }
 }

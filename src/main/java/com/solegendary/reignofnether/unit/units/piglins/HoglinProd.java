@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
@@ -47,10 +48,10 @@ public class HoglinProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A beast trained for war. Deals 50% more damage to buildings.", Style.EMPTY),
-                FormattedCharSequence.forward("Can be upgraded to be mountable by Headhunters.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.hoglin.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.hoglin.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires Hoglin Stables.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.hoglin.tooltip3"), Style.EMPTY)
         ));
 
         return new Button(

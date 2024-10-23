@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.monsters.HuskUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -33,18 +34,16 @@ public class ResearchHusks extends ProductionItem {
     public ResearchHusks(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (level.isClientSide())
+            if (level.isClientSide()) {
                 ResearchClient.addResearch(this.building.ownerName, ResearchHusks.itemName);
-            else {
+            } else {
                 ResearchServerEvents.addResearch(this.building.ownerName, ResearchHusks.itemName);
 
                 // convert all zombies into husks with the same stats/inventory/etc.
-                UnitServerEvents.convertAllToUnit(
-                    this.building.ownerName,
+                UnitServerEvents.convertAllToUnit(this.building.ownerName,
                     (ServerLevel) level,
-                    (LivingEntity entity) ->
-                        entity instanceof ZombieUnit zUnit &&
-                        zUnit.getOwnerName().equals(building.ownerName),
+                    (LivingEntity entity) -> entity instanceof ZombieUnit zUnit && zUnit.getOwnerName()
+                        .equals(building.ownerName),
                     EntityRegistrar.HUSK_UNIT.get()
                 );
             }
@@ -59,34 +58,37 @@ public class ResearchHusks extends ProductionItem {
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-        return new Button(
-            ResearchHusks.itemName,
+        return new Button(ResearchHusks.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchHusks.itemName) ||
-                    ResearchClient.hasResearch(ResearchHusks.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchHusks.itemName)
+                || ResearchClient.hasResearch(ResearchHusks.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(Graveyard.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(ResearchHusks.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.husks"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Transforms all of your zombies into husks,", Style.EMPTY),
-                FormattedCharSequence.forward("granting them +" + (int) (HuskUnit.maxHealth - ZombieUnit.maxHealth) + " health and immunity to sunlight.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.husks.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.husks.tooltip2",
+                        (int) (HuskUnit.maxHealth - ZombieUnit.maxHealth)
+                    ),
+                    Style.EMPTY
+                ),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Graveyard.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.husks.tooltip3"), Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
-        return new Button(
-            ResearchHusks.itemName,
+        return new Button(ResearchHusks.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),

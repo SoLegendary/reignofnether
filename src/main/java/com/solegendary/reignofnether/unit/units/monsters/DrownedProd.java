@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
@@ -56,12 +57,12 @@ public class DrownedProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An infectious variant of the zombie which zombifies", Style.EMPTY),
-                FormattedCharSequence.forward("villagers and piglins after killing them.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.drowned.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.drowned.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Drowned will burn under sunlight.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.drowned.tooltip3"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires an upgrade at the Laboratory.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.drowned.tooltip4"), Style.EMPTY)
             )
         );
     }

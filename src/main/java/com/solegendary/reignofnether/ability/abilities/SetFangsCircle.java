@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -25,8 +26,7 @@ public class SetFangsCircle extends Ability {
     private final EvokerUnit evokerUnit;
 
     public SetFangsCircle(EvokerUnit evokerUnit) {
-        super(
-            UnitAction.SET_FANGS_CIRCLE,
+        super(UnitAction.SET_FANGS_CIRCLE,
             CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,
             EvokerUnit.FANGS_RANGE_CIRCLE,
             0,
@@ -37,8 +37,7 @@ public class SetFangsCircle extends Ability {
 
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
-        return new AbilityButton(
-            "Evoker Fangs (Circular)",
+        return new AbilityButton("Evoker Fangs (Circular)",
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shears.png"),
             hotkey,
             () -> !evokerUnit.isUsingLineFangs,
@@ -46,11 +45,22 @@ public class SetFangsCircle extends Ability {
             () -> true,
             () -> UnitClientEvents.sendUnitCommand(UnitAction.SET_FANGS_CIRCLE),
             null,
-            List.of(
-                FormattedCharSequence.forward("Evoker Fangs (Circular)", Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward("\uE006  " + EvokerUnit.FANGS_DAMAGE * 2 + "  " + "\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + EvokerUnit.FANGS_RANGE_CIRCLE, MyRenderer.iconStyle),
-                FormattedCharSequence.forward("Have this evoker summon a circle of snapping", Style.EMPTY),
-                FormattedCharSequence.forward("fangs around itself when attacking.", Style.EMPTY)
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("abilities.reignofnether.evoker_fangs_circular"),
+                    Style.EMPTY.withBold(true)
+                ),
+                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.evoker_fangs_circular.tooltip1",
+                    EvokerUnit.FANGS_DAMAGE * 2,
+                    CD_MAX_SECONDS
+                ) + EvokerUnit.FANGS_RANGE_CIRCLE, MyRenderer.iconStyle),
+                FormattedCharSequence.forward(
+                    I18n.get("abilities.reignofnether.evoker_fangs_circular.tooltip2"),
+                    Style.EMPTY
+                ),
+                FormattedCharSequence.forward(
+                    I18n.get("abilities.reignofnether.evoker_fangs_circular.tooltip3"),
+                    Style.EMPTY
+                )
             ),
             this
         );
@@ -64,8 +74,9 @@ public class SetFangsCircle extends Ability {
     public void setCooldown(int cooldown) {
         super.setCooldown(cooldown);
         for (Ability ability : this.evokerUnit.getAbilities())
-            if (ability instanceof SetFangsLine ab)
+            if (ability instanceof SetFangsLine ab) {
                 ab.setCooldownSingle(cooldown);
+            }
     }
 
     @Override
@@ -74,8 +85,12 @@ public class SetFangsCircle extends Ability {
     }
 
     @Override
-    public boolean canBypassCooldown() { return true; }
+    public boolean canBypassCooldown() {
+        return true;
+    }
 
     @Override
-    public boolean shouldResetBehaviours() { return false; }
+    public boolean shouldResetBehaviours() {
+        return false;
+    }
 }

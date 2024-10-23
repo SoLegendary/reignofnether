@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -25,9 +26,9 @@ public class ResearchHoglinCavalry extends ProductionItem {
     public ResearchHoglinCavalry(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (level.isClientSide())
+            if (level.isClientSide()) {
                 ResearchClient.addResearch(this.building.ownerName, ResearchHoglinCavalry.itemName);
-            else {
+            } else {
                 ResearchServerEvents.addResearch(this.building.ownerName, ResearchHoglinCavalry.itemName);
             }
         };
@@ -41,31 +42,31 @@ public class ResearchHoglinCavalry extends ProductionItem {
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-        return new Button(
-            ResearchHoglinCavalry.itemName,
+        return new Button(ResearchHoglinCavalry.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/hoglin.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchHoglinCavalry.itemName) ||
-                    ResearchClient.hasResearch(ResearchHoglinCavalry.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchHoglinCavalry.itemName) || ResearchClient.hasResearch(
+                ResearchHoglinCavalry.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(
-                FormattedCharSequence.forward(ResearchHoglinCavalry.itemName, Style.EMPTY.withBold(true)),
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.hoglin_cavalry"),
+                    Style.EMPTY.withBold(true)
+                ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Unlocks the ability for headhunters to mount hoglins.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.hoglin_cavalry.tooltip1"), Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
-        return new Button(
-            ResearchHoglinCavalry.itemName,
+        return new Button(ResearchHoglinCavalry.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/hoglin.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),

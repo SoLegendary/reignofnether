@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.time;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -123,18 +124,18 @@ public class TimeClientEvents {
             FormattedCharSequence gameLengthStr = FormattedCharSequence.forward("", Style.EMPTY);
 
             if (PlayerClientEvents.isRTSPlayer)
-                gameLengthStr = FormattedCharSequence.forward("Game time: " + getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks), Style.EMPTY);
+                gameLengthStr = FormattedCharSequence.forward(I18n.get("time.reignofnether.game_time") + getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks), Style.EMPTY);
 
             List<FormattedCharSequence> tooltip = List.of(
-                    FormattedCharSequence.forward("Time: " + timeStr, Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("time.reignofnether.time") + timeStr, Style.EMPTY),
                     timeUntilStr,
                     FormattedCharSequence.forward("" + timeStr, Style.EMPTY),
                     gameLengthStr
             );
             if (targetClientTime != serverTime)
                 tooltip = List.of(
-                    FormattedCharSequence.forward("Time is distorted to midnight", Style.EMPTY.withBold(true)),
-                    FormattedCharSequence.forward("Real time: " + timeStr, Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("time.reignofnether.time_is_distorted"), Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("time.reignofnether.real_time") + timeStr, Style.EMPTY),
                     timeUntilStr,
                     gameLengthStr
                 );

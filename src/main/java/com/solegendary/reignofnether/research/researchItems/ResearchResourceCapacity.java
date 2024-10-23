@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -33,14 +34,15 @@ public class ResearchResourceCapacity extends ProductionItem {
             if (level.isClientSide()) {
                 ResearchClient.addResearch(this.building.ownerName, ResearchResourceCapacity.itemName);
                 for (LivingEntity unit : UnitClientEvents.getAllUnits())
-                    if (unit instanceof WorkerUnit)
+                    if (unit instanceof WorkerUnit) {
                         ((Unit) unit).setupEquipmentAndUpgradesClient();
-            }
-            else {
+                    }
+            } else {
                 ResearchServerEvents.addResearch(this.building.ownerName, ResearchResourceCapacity.itemName);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())
-                    if (unit instanceof WorkerUnit)
+                    if (unit instanceof WorkerUnit) {
                         ((Unit) unit).setupEquipmentAndUpgradesServer();
+                    }
             }
         };
         this.foodCost = cost.food;
@@ -53,42 +55,48 @@ public class ResearchResourceCapacity extends ProductionItem {
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-        return new Button(
-                ResearchResourceCapacity.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                hotkey,
-                () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchResourceCapacity.itemName) ||
-                        ResearchClient.hasResearch(ResearchResourceCapacity.itemName),
-                () -> true,
-                () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(ResearchResourceCapacity.itemName, Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedTime(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Raises the resource capacity of workers from 100 to 200", Style.EMPTY),
-                        FormattedCharSequence.forward("Workers still auto-return resources when holding above 50", Style.EMPTY)
+        return new Button(ResearchResourceCapacity.itemName,
+            14,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            hotkey,
+            () -> false,
+            () -> ProductionItem.itemIsBeingProduced(ResearchResourceCapacity.itemName) || ResearchClient.hasResearch(
+                ResearchResourceCapacity.itemName),
+            () -> true,
+            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
+            null,
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.resource_capacity"),
+                    Style.EMPTY.withBold(true)
+                ),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedTime(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.resource_capacity.tooltip1"),
+                    Style.EMPTY
+                ),
+                FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.resource_capacity.tooltip2"),
+                    Style.EMPTY
                 )
+            )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
-        return new Button(
-                ResearchResourceCapacity.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
-                null,
-                null
+        return new Button(ResearchResourceCapacity.itemName,
+            14,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            null,
+            () -> false,
+            () -> false,
+            () -> true,
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
+            null,
+            null
         );
     }
 }

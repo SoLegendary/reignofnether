@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.Button;
@@ -52,10 +53,10 @@ public class CreeperProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("An explosive monster that can blow up units and buildings.", Style.EMPTY),
-                FormattedCharSequence.forward("Deals less damage to capitol buildings.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.creeper.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.creeper.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Creepers move much more slowly under sunlight.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.creeper.tooltip3"), Style.EMPTY)
             )
         );
     }

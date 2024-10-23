@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -32,18 +33,17 @@ public class ResearchStrays extends ProductionItem {
     public ResearchStrays(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (level.isClientSide())
+            if (level.isClientSide()) {
                 ResearchClient.addResearch(this.building.ownerName, ResearchStrays.itemName);
-            else {
+            } else {
                 ResearchServerEvents.addResearch(this.building.ownerName, ResearchStrays.itemName);
 
                 // convert all skeletons into strays with the same stats/inventory/etc.
                 UnitServerEvents.convertAllToUnit(
                     this.building.ownerName,
                     (ServerLevel) level,
-                    (LivingEntity entity) ->
-                        entity instanceof SkeletonUnit sUnit &&
-                        sUnit.getOwnerName().equals(building.ownerName),
+                    (LivingEntity entity) -> entity instanceof SkeletonUnit sUnit && sUnit.getOwnerName()
+                        .equals(building.ownerName),
                     EntityRegistrar.STRAY_UNIT.get()
                 );
             }
@@ -65,37 +65,37 @@ public class ResearchStrays extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchStrays.itemName) ||
-                    ResearchClient.hasResearch(ResearchStrays.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchStrays.itemName) || ResearchClient.hasResearch(
+                ResearchStrays.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(Graveyard.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(ResearchStrays.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.strays"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Transforms all of your skeletons into", Style.EMPTY),
-                FormattedCharSequence.forward("strays which fire slowing arrows.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.strays.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.strays.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Graveyard.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.strays.tooltip3"), Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
         return new Button(
-                ResearchStrays.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
-                null,
-                null
+            ResearchStrays.itemName,
+            14,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            null,
+            () -> false,
+            () -> false,
+            () -> true,
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
+            null,
+            null
         );
     }
 }

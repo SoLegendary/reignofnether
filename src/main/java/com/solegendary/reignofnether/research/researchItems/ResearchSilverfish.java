@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -29,9 +30,9 @@ public class ResearchSilverfish extends ProductionItem {
     public ResearchSilverfish(ProductionBuilding building) {
         super(building, ResourceCosts.RESEARCH_SILVERFISH.ticks);
         this.onComplete = (Level level) -> {
-            if (level.isClientSide())
+            if (level.isClientSide()) {
                 ResearchClient.addResearch(this.building.ownerName, ResearchSilverfish.itemName);
-            else {
+            } else {
                 ResearchServerEvents.addResearch(this.building.ownerName, ResearchSilverfish.itemName);
             }
         };
@@ -45,45 +46,47 @@ public class ResearchSilverfish extends ProductionItem {
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-        return new Button(
-            ResearchSilverfish.itemName,
+        return new Button(ResearchSilverfish.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/silverfish.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchSilverfish.itemName) ||
-                    ResearchClient.hasResearch(ResearchSilverfish.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchSilverfish.itemName) || ResearchClient.hasResearch(
+                ResearchSilverfish.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(Stronghold.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(
-                FormattedCharSequence.forward(ResearchSilverfish.itemName, Style.EMPTY.withBold(true)),
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.silverfish"),
+                    Style.EMPTY.withBold(true)
+                ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Gives your buildings a " + (int) (SILVERFISH_SPAWN_CHANCE * 100) + " chance to spawn", Style.EMPTY),
-                FormattedCharSequence.forward("a silverfish whenever a block is destroyed. ", Style.EMPTY),
-                FormattedCharSequence.forward("Silverfish have limited lifespans.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.silverfish.tooltip1",
+                    (int) (SILVERFISH_SPAWN_CHANCE * 100)
+                ), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.silverfish.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.silverfish.tooltip3"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Stronghold.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.silverfish.tooltip4"), Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
-        return new Button(
-                ResearchSilverfish.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/silverfish.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
-                null,
-                null
+        return new Button(ResearchSilverfish.itemName,
+            14,
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/silverfish.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            null,
+            () -> false,
+            () -> false,
+            () -> true,
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
+            null,
+            null
         );
     }
 }

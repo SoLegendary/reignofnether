@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -25,9 +26,9 @@ public class ResearchGolemSmithing extends ProductionItem {
     public ResearchGolemSmithing(ProductionBuilding building) {
         super(building, ResourceCosts.RESEARCH_GOLEM_SMITHING.ticks);
         this.onComplete = (Level level) -> {
-            if (level.isClientSide())
+            if (level.isClientSide()) {
                 ResearchClient.addResearch(this.building.ownerName, ResearchGolemSmithing.itemName);
-            else {
+            } else {
                 ResearchServerEvents.addResearch(this.building.ownerName, ResearchGolemSmithing.itemName);
             }
         };
@@ -41,41 +42,41 @@ public class ResearchGolemSmithing extends ProductionItem {
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-        return new Button(
-                ResearchGolemSmithing.itemName,
-                14,
-                new ResourceLocation("minecraft", "textures/block/iron_block.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                hotkey,
-                () -> false,
-                () -> ProductionItem.itemIsBeingProduced(ResearchGolemSmithing.itemName) ||
-                        ResearchClient.hasResearch(ResearchGolemSmithing.itemName),
-                () -> true,
-                () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(ResearchGolemSmithing.itemName, Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedTime(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward("Allows villagers to construct iron golems.", Style.EMPTY)
-                )
+        return new Button(ResearchGolemSmithing.itemName,
+            14,
+            new ResourceLocation("minecraft", "textures/block/iron_block.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            hotkey,
+            () -> false,
+            () -> ProductionItem.itemIsBeingProduced(ResearchGolemSmithing.itemName) || ResearchClient.hasResearch(
+                ResearchGolemSmithing.itemName),
+            () -> true,
+            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
+            null,
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.golem_smithing"),
+                    Style.EMPTY.withBold(true)
+                ),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedTime(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.golem_smithing.tooltip1"), Style.EMPTY)
+            )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
-        return new Button(
-                ResearchGolemSmithing.itemName,
-                14,
-                new ResourceLocation("minecraft", "textures/block/iron_block.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-                null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
-                null,
-                null
+        return new Button(ResearchGolemSmithing.itemName,
+            14,
+            new ResourceLocation("minecraft", "textures/block/iron_block.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            null,
+            () -> false,
+            () -> false,
+            () -> true,
+            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, itemName, first),
+            null,
+            null
         );
     }
 }

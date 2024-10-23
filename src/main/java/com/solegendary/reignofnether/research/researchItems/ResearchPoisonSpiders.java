@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -32,18 +33,17 @@ public class ResearchPoisonSpiders extends ProductionItem {
     public ResearchPoisonSpiders(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (level.isClientSide())
+            if (level.isClientSide()) {
                 ResearchClient.addResearch(this.building.ownerName, ResearchPoisonSpiders.itemName);
-            else {
+            } else {
                 ResearchServerEvents.addResearch(this.building.ownerName, ResearchPoisonSpiders.itemName);
 
                 // convert all spiders into poison spiders with the same stats/inventory/etc.
                 UnitServerEvents.convertAllToUnit(
                     this.building.ownerName,
                     (ServerLevel) level,
-                    (LivingEntity entity) ->
-                        entity instanceof SpiderUnit zUnit &&
-                        zUnit.getOwnerName().equals(building.ownerName),
+                    (LivingEntity entity) -> entity instanceof SpiderUnit zUnit && zUnit.getOwnerName()
+                        .equals(building.ownerName),
                     EntityRegistrar.POISON_SPIDER_UNIT.get()
                 );
             }
@@ -58,34 +58,34 @@ public class ResearchPoisonSpiders extends ProductionItem {
     }
 
     public static Button getStartButton(ProductionBuilding prodBuilding, Keybinding hotkey) {
-        return new Button(
-            ResearchPoisonSpiders.itemName,
+        return new Button(ResearchPoisonSpiders.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchPoisonSpiders.itemName) ||
-                    ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchPoisonSpiders.itemName) || ResearchClient.hasResearch(
+                ResearchPoisonSpiders.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(SpiderLair.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(
-                FormattedCharSequence.forward(ResearchPoisonSpiders.itemName, Style.EMPTY.withBold(true)),
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("research.reignofnether.poison_spiders"),
+                    Style.EMPTY.withBold(true)
+                ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Transforms your Spiders into Cave Spiders, ", Style.EMPTY),
-                FormattedCharSequence.forward("granting them poisonous attacks.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.poison_spiders.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.poison_spiders.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Spider Lair.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.poison_spiders.tooltip3"), Style.EMPTY)
             )
         );
     }
 
     public Button getCancelButton(ProductionBuilding prodBuilding, boolean first) {
-        return new Button(
-            ResearchPoisonSpiders.itemName,
+        return new Button(ResearchPoisonSpiders.itemName,
             14,
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/cave_spider.png"),
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.tutorial;
 
+import net.minecraft.client.resources.language.I18n;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
@@ -100,7 +101,7 @@ public class TutorialClientEvents {
                     msg(helpButtonText, true, CHAT);
             },
             () -> { },
-            List.of(FormattedCharSequence.forward("Tutorial Help", Style.EMPTY))
+            List.of(FormattedCharSequence.forward(I18n.get("tutorial.reignofnether.tutorial_help"), Style.EMPTY))
     );
 
     public static void loadStage(TutorialStage stage) {

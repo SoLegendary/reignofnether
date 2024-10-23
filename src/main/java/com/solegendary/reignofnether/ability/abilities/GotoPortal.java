@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.Building;
@@ -57,7 +58,7 @@ public class GotoPortal extends Ability {
                 () -> UnitClientEvents.sendUnitCommand(UnitAction.GOTO_PORTAL),
                 null,
                 List.of(
-                        FormattedCharSequence.forward("Go to connected portal", Style.EMPTY.withBold(true))
+                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.go_to_portal"), Style.EMPTY.withBold(true))
                 ),
                 this
         );

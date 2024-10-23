@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -44,7 +45,7 @@ public class Dismount extends Ability {
             () -> UnitClientEvents.sendUnitCommand(UnitAction.DISMOUNT),
             null,
             List.of(
-                FormattedCharSequence.forward("Dismount", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.dismount"), Style.EMPTY)
             ),
             this
         );

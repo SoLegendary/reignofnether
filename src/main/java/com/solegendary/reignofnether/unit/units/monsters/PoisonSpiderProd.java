@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.Button;
@@ -55,11 +56,11 @@ public class PoisonSpiderProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A spider fanged with deadly poison.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.poison_spider.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Spiders move much more slowly under sunlight.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.poison_spider.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires an upgrade at the Laboratory.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.poison_spider.tooltip3"), Style.EMPTY)
             )
         );
     }

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
@@ -47,11 +48,11 @@ public class PillagerProd extends ProductionItem {
             ResourceCosts.getFormattedCost(cost),
             ResourceCosts.getFormattedPopAndTime(cost),
             FormattedCharSequence.forward("", Style.EMPTY),
-            FormattedCharSequence.forward("A villager armed with a crossbow for ranged combat.", Style.EMPTY)
+            FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.pillager.tooltip1"), Style.EMPTY)
         ));
         if (ResearchClient.hasResearch(ResearchVindicatorAxes.itemName)) {
             tooltipLines.add(FormattedCharSequence.forward("", Style.EMPTY));
-            tooltipLines.add(FormattedCharSequence.forward("Upgraded with multishot crossbows that fire triple arrows", Style.EMPTY.withBold(true)));
+            tooltipLines.add(FormattedCharSequence.forward(I18n.get("units.reignofnether.pillager.tooltip2"), Style.EMPTY.withBold(true)));
         }
 
         return new Button(

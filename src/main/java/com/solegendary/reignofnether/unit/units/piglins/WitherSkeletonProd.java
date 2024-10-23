@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
@@ -47,11 +48,11 @@ public class WitherSkeletonProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("A charcoal black skeleton that afflicts", Style.EMPTY),
-                FormattedCharSequence.forward("wither on enemies and deals bonus damage", Style.EMPTY),
-                FormattedCharSequence.forward("(up to double) to enemies near death.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.wither_skeleton.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.wither_skeleton.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.wither_skeleton.tooltip3"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Wither Shrine.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.wither_skeleton.tooltip4"), Style.EMPTY)
         ));
 
         return new Button(

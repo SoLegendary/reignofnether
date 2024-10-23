@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -32,18 +33,17 @@ public class ResearchDrowned extends ProductionItem {
     public ResearchDrowned(ProductionBuilding building) {
         super(building, cost.ticks);
         this.onComplete = (Level level) -> {
-            if (level.isClientSide())
+            if (level.isClientSide()) {
                 ResearchClient.addResearch(this.building.ownerName, ResearchDrowned.itemName);
-            else {
+            } else {
                 ResearchServerEvents.addResearch(this.building.ownerName, ResearchDrowned.itemName);
 
                 // convert all zombies into drowned with the same stats/inventory/etc.
                 UnitServerEvents.convertAllToUnit(
                     this.building.ownerName,
                     (ServerLevel) level,
-                    (LivingEntity entity) ->
-                        entity instanceof ZombieUnit zUnit &&
-                        zUnit.getOwnerName().equals(building.ownerName),
+                    (LivingEntity entity) -> entity instanceof ZombieUnit zUnit && zUnit.getOwnerName()
+                        .equals(building.ownerName),
                     EntityRegistrar.DROWNED_UNIT.get()
                 );
             }
@@ -65,20 +65,20 @@ public class ResearchDrowned extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchDrowned.itemName) ||
-                    ResearchClient.hasResearch(ResearchDrowned.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchDrowned.itemName) || ResearchClient.hasResearch(
+                ResearchDrowned.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(Graveyard.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
             List.of(
-                FormattedCharSequence.forward(ResearchDrowned.itemName, Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.drowned"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Transforms all of your zombies into drowned, which", Style.EMPTY),
-                FormattedCharSequence.forward("zombify Villager and Piglin units after killing them.", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.drowned.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.drowned.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward("Requires a Graveyard.", Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.drowned.tooltip3"), Style.EMPTY)
             )
         );
     }

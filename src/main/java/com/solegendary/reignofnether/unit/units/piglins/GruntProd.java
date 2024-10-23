@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.ProductionBuilding;
@@ -45,8 +46,8 @@ public class GruntProd extends ProductionItem {
             ResourceCosts.getFormattedCost(cost),
             ResourceCosts.getFormattedPopAndTime(cost),
             FormattedCharSequence.forward("", Style.EMPTY),
-            FormattedCharSequence.forward("A piglin worker that can construct and ", Style.EMPTY),
-            FormattedCharSequence.forward("repair buildings and gather resources.", Style.EMPTY)
+            FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.grunt.tooltip1"), Style.EMPTY),
+            FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.grunt.tooltip2"), Style.EMPTY)
         ));
 
         return new Button(

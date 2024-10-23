@@ -17,9 +17,7 @@ import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntArrayTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -28,7 +26,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
@@ -48,55 +45,65 @@ public class PromoteIllager extends Ability {
     Building building;
 
     public PromoteIllager(Building building) {
-        super(
-            UnitAction.PROMOTE_ILLAGER,
-            CD_MAX,
-            RANGE,
-            0,
-            true
-        );
+        super(UnitAction.PROMOTE_ILLAGER, CD_MAX, RANGE, 0, true);
         this.building = building;
     }
 
     // checks that the unit has a banner and applies the speed buff to nearby friendly units if it is
     public static void checkAndApplyBuff(LivingEntity entity) {
-        if (!entity.level.isClientSide() && entity instanceof Unit captainUnit &&
-                entity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
-            List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
-                    new Vector3d(entity.position().x, entity.position().y, entity.position().z),
-                    BUFF_RANGE,
-                    Mob.class,
-                    entity.level);
+        if (!entity.level.isClientSide() && entity instanceof Unit captainUnit
+            && entity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
+            List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(new Vector3d(
+                    entity.position().x,
+                    entity.position().y,
+                    entity.position().z
+                ),
+                BUFF_RANGE,
+                Mob.class,
+                entity.level
+            );
 
             for (Mob mob : nearbyMobs)
-                if (mob instanceof Unit unit && unit.getOwnerName().equals(captainUnit.getOwnerName()))
+                if (mob instanceof Unit unit && unit.getOwnerName().equals(captainUnit.getOwnerName())) {
                     mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 2, 0));
+                }
         }
     }
 
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
-        return new AbilityButton(
-            "Promote Illager",
+        return new AbilityButton("Promote Illager",
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/ominous_banner.png"),
             hotkey,
             () -> false,
             () -> {
-                if (building instanceof Castle castle)
+                if (building instanceof Castle castle) {
                     return !castle.isUpgraded();
+                }
                 return true;
             },
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.PROMOTE_ILLAGER),
             null,
-            List.of(
-                    FormattedCharSequence.forward("Promote Illager", Style.EMPTY.withBold(true)),
-                    FormattedCharSequence.forward("\uE004  " + CD_MAX/20 + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Promote an illager to a captain, giving it a banner that gives", Style.EMPTY),
-                    FormattedCharSequence.forward("a speed buff to all friendly units in a " + BUFF_RANGE + " block radius.", Style.EMPTY),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("You may only have one captain at a time per upgraded castle.", Style.EMPTY)
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("abilities.reignofnether.promote_illager"),
+                    Style.EMPTY.withBold(true)
+                ),
+                FormattedCharSequence.forward(
+                    I18n.get("abilities.reignofnether.promote_illager.tooltip1", CD_MAX / 20) + RANGE,
+                    MyRenderer.iconStyle
+                ),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(
+                    I18n.get("abilities.reignofnether.promote_illager.tooltip2"),
+                    Style.EMPTY
+                ),
+                FormattedCharSequence.forward(
+                    I18n.get("abilities.reignofnether.promote_illager.tooltip3", BUFF_RANGE),
+                    Style.EMPTY
+                ),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.promote_illager.tooltip4"), Style.EMPTY)
             ),
             this
         );
@@ -106,28 +113,29 @@ public class PromoteIllager extends Ability {
     public void use(Level level, Building buildingUsing, LivingEntity targetEntity) {
         Vec3 pos = targetEntity.getEyePosition();
         if (buildingUsing.centrePos.distToCenterSqr(pos.x, pos.y, pos.z) > RANGE * RANGE) {
-            if (level.isClientSide())
+            if (level.isClientSide()) {
                 HudClientEvents.showTemporaryMessage("Unit is too far away!");
-        }
-        else if (targetEntity instanceof VindicatorUnit ||
-            targetEntity instanceof PillagerUnit ||
-            targetEntity instanceof EvokerUnit) {
+            }
+        } else if (targetEntity instanceof VindicatorUnit || targetEntity instanceof PillagerUnit
+            || targetEntity instanceof EvokerUnit) {
 
             Unit unit = (Unit) targetEntity;
 
             if (targetEntity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
-                if (level.isClientSide())
+                if (level.isClientSide()) {
                     HudClientEvents.showTemporaryMessage("That unit is already a captain!");
+                }
                 return;
             }
             if (!unit.getOwnerName().equals(this.building.ownerName)) {
-                if (level.isClientSide())
+                if (level.isClientSide()) {
                     HudClientEvents.showTemporaryMessage("You don't own that unit!");
+                }
                 return;
             }
             // only once promotedIllager allowed at a time
-            if (promotedIllager != null && promotedIllager.isAlive() &&
-                promotedIllager.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
+            if (promotedIllager != null && promotedIllager.isAlive()
+                && promotedIllager.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
                 promotedIllager.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.AIR));
             }
             promotedIllager = targetEntity;
@@ -138,10 +146,10 @@ public class PromoteIllager extends Ability {
                 MiscUtil.shootFirework(level, promotedIllager.getEyePosition());
             }
             this.setToMaxCooldown();
-        }
-        else {
-            if (level.isClientSide())
+        } else {
+            if (level.isClientSide()) {
                 HudClientEvents.showTemporaryMessage("Only Vindicators, Pillagers and Evokers may be promoted");
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.Building;
@@ -56,7 +57,7 @@ public class DisconnectPortal extends Ability {
             () -> UnitClientEvents.sendUnitCommand(UnitAction.DISCONNECT_PORTAL),
             null,
             List.of(
-                    FormattedCharSequence.forward("Sever Connection", Style.EMPTY.withBold(true))
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.disconnect_portal"), Style.EMPTY.withBold(true))
             ),
             this
         );

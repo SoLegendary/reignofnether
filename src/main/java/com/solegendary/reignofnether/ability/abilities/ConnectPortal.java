@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.Building;
@@ -52,10 +53,10 @@ public class ConnectPortal extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.CONNECT_PORTAL),
             null,
             List.of(
-                    FormattedCharSequence.forward("Connect Portal", Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.connect_portal"), Style.EMPTY.withBold(true)),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward("Connect to a transport portal you own anywhere else.", Style.EMPTY),
-                    FormattedCharSequence.forward("Overrides any existing connections on both sides.", Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.connect_portal.tooltip1"), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.connect_portal.tooltip2"), Style.EMPTY)
             ),
             this
         );
