@@ -1,0 +1,72 @@
+
+1.19.2-1.0.6
+------------
+
+[✔] Done and tested
+[🟡] Partially done, only has a workaround and/or needs testing
+[❌] Not done, top ones are roughly of higher priority
+
+Features
+--------
+[❌] Wave Survival
+    - Start anywhere, set time to morning
+    - Whenever night begins, spawn wave of enemies to attack move your base
+    - Give enemies all frostwalker to allow islands
+        - But won't work on sky maps
+    - play a random cave ambience sound at the start of each night and title function
+    - start off doing only monster enemies
+    - roguelike features?
+
+
+
+Bugfixes
+--------
+
+[❌] World stuck at 100%
+    - Maybe try running a clientside /rts-reset on logout?
+    - Happens only if you are on a world with buildings, then try to reenter that or any other world (with or without buildings)
+
+[❌] Joining a world causes a lot of lag if a match is already started
+    - Create an experimental branch where building syncing is toggleable
+    - Will need volunteer helpers to test
+    - Review code and see if direct optimisations can be made
+    - Maybe can buffer the syncing (eg. only allow 1 building sync per second, across all players) so it doesn't collapse the server
+
+[❌] On a server, unloaded workers stop gathering stuff
+    - Relook at forced chunks?
+
+
+
+Quality of Life Features
+------------------------
+
+[❌] Right click the bridge icon to remove fences
+
+[❌] Flatten terrain ability
+    - Require that villagers work on it like a building
+    - Will need a new flatten zone object (no need to save it)
+
+[❌] Amethyst is now mineable, and regenerates automatically after 1min
+
+
+
+Balancing
+---------
+
+[❌] Sculk catalyst, cheap building you can sacrifice units to spread a night zone
+    - Starts off at 10 radius, goes up to 40 (~200 max sculk blocks, +1 radius per 4 sculk blocks or veins)
+        - Need to give more sculk per unit than vanilla
+    - The more sculk blocks around, the wider the night radius, up to a limit of 20 blocks
+    - Sonic boom them to split the boom into two random nearby enemies within the night radius
+    - range equal to night radius
+    - Sculk blocks are unconvertible by portals
+
+    - Incorporate sculk into monster buildings to show they spread night
+
+[❌] The Silverfish upgrade is now given by default to monster players
+
+[❌] An upgrade at the lab now upgrades silverfish to endermites for +1 attack and +5 movespeed
+
+[❌] Move diamond axes and multishot to enchantments at the library which cost extra to use and have a cooldown
+    - and only upgrade one unit per use
+

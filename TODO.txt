@@ -16,10 +16,15 @@ Bugfixes
 [✔] Fixed survival players being able to deposit into stockpiles on non-English languages
 [✔] Iron golem spawn egg texture is fixed
 [✔] Survival players can no longer use F12 cam
+[✔] The hotkey for bridges has been changed to G to avoid an overlap with Build/Repair
 
-[❌] Exploit where rapidly pressing F12 can land you back in regular creative mode
+[🟡] Fixed a crash when you build over a ledge with no floor
+
+[❌] Fixed an exploit where rapidly pressing F12 can land you back in regular creative mode
 
 [❌] Can't build properly on tall grass
+
+[❌] Removed "being revealed" messages related to not having a capitol if fog of war is disabled
 
 [❌] Farm water boils on soulsand and magma
     - Just replace them with soulsoil and cobble underneath
@@ -28,23 +33,7 @@ Bugfixes
 
 [❌] Prevent berry bush and cacti damage
 
-[🟡] Build is the same hotkey as bridge build
-
 [🟡] Building blocks no longer drop items for survival players when mined
-
-
-[❌] World stuck at 100%
-    - Maybe try running a clientside /rts-reset on logout?
-    - Happens only if you are on a world with buildings, then try to reenter that or any other world (with or without buildings)
-
-[❌] Joining a world causes a lot of lag if a match is already started
-    - Create an experimental branch where building syncing is toggleable
-    - Will need volunteer helpers to test
-    - Review code and see if direct optimisations can be made
-    - Maybe can buffer the syncing (eg. only allow 1 building sync per second, across all players) so it doesn't collapse the server
-
-[❌] On a server, unloaded workers stop gathering stuff
-    - Relook at forced chunks?
 
 
 
@@ -56,6 +45,8 @@ Quality of Life Features
     - This only occurs for worker units breaking blocks, survival players break
     - Pull boobcat's wood tag change too
     - apply to all logs, stems, wood and hyphae too
+    - should break leaves underneath
+    - should retain alignment
 
 [🟡] Radius indicator around monster capitol and stronghold to better indicate range of night
 
@@ -66,73 +57,15 @@ Quality of Life Features
 
     (can use this same code for ability range indicators too)
 
-[❌] Move cheats to serverside for command block compatibility:  execute as @[selector] run [command]
-
-[❌] Spellcasters should only cast spells one at time when in a group
-    - Have to reorder who the hudSelectedEntity is
-    - And change sendUnitCommand to only do 1 ability at a time (if it has a cooldown)
 
 
-
-
-[❌] Right click the bridge icon to remove fences
-
-[❌] Flatten terrain ability
-    - Require that villagers work on it like a building
-    - Will need a new flatten zone object (no need to save it)
-
-[❌] Hovering buttons (or some other indicator) for idle farms
-    - Clicking said button will assign the nearest idle villager to it
 
 
 Balancing Features
 ------------------
 
-[❌] The Silverfish upgrade is now given by default to monster players
-[❌] An upgrade at the lab now upgrades silverfish to endermites for +1 attack and +5 movespeed
+[✔] Capitols now spawn animals closer and immediately spawn some nearby upon being built (within a 40 block radius)
 
-[❌] Sculk catalyst, cheap building you can sacrifice units to spread a night zone
-    - Starts off at 10 radius, goes up to 40 (~200 max sculk blocks, +1 radius per 4 sculk blocks or veins)
-        - Need to give more sculk per unit than vanilla
-    - The more sculk blocks around, the wider the night radius, up to a limit of 20 blocks
-    - Sonic boom them to split the boom into two random nearby enemies within the night radius
-    - range equal to night radius
-    - Sculk blocks are unconvertible by portals
-
-    - Incorporate sculk into monster buildings to show they spread night
-
-
-
-
-
-
-
-
-TODO BACKLOG
-------------
-
-Limitations of save data
-------------------------
-Goals reset - all units stop what they're doing
-Production items and held resources are all deposited/refunded automatically
-Buildings revealed in fog on minimaps are removed
-Control groups are lost
-Transport portal links are lost
-Entity rally points are lost (and client rallyPos is lost)
-
-
-Bugs backlog
-------------
-- time set causes desyncs when done with /gamerule dodaynightcycle false
-- workers are not marked as idle until 15s after stopping gathering
-- your portal blocks crack when explored by an opponent (muting function only applies for the opponent)
-- minimap still shows nether blocks in fog until the camera moves (and replaces them with fake frozen blocks)
-- beehives are not gatherable
-- recalculate unit pathing as soon as they are damaged, or else melee units attacking each other run past each other a lot
-    - most prevalent in 1v1 melee combat
-
-(MacOS) minecraft title screen is messed up and doesn't retrieve the assets
-(MacOS) GUI scaling does not work
-(MacOS) macbooks dont have alt and ctrl (it's option and command)
-
+[✔] Piglins may now build basic portals on overworld terrain, but doing so takes twice as long
+    - Advanced portals makes this regular speed
 

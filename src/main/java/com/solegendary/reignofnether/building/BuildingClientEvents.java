@@ -353,12 +353,16 @@ public class BuildingClientEvents {
             return true;
         if (!buildingName.contains("buildings.piglins.") || buildingName.contains("centralportal"))
             return true;
-        if (buildingName.contains("portal") && ResearchClient.hasResearch(ResearchAdvancedPortals.itemName))
+        if (buildingName.contains("portal"))
             return true;
 
+        return isOnNetherBlocks(blocksToDraw, originPos);
+    }
+
+    public static boolean isOnNetherBlocks(List<BuildingBlock> blocks, BlockPos originPos) {
         int netherBlocksBelow = 0;
         int blocksBelow = 0;
-        for (BuildingBlock block : blocksToDraw) {
+        for (BuildingBlock block : blocks) {
             if (block.getBlockPos().getY() == 0 && MC.level != null) {
                 BlockPos bp = block.getBlockPos().offset(originPos).offset(0,1,0);
                 BlockState bs = block.getBlockState(); // building block

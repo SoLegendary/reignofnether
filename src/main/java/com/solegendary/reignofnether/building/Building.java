@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
+import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
@@ -16,6 +17,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.research.researchItems.ResearchAdvancedPortals;
 import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
@@ -99,9 +101,9 @@ public abstract class Building {
     private final long TICKS_TO_EXTINGUISH = 100;
 
     private final long TICKS_TO_SPAWN_ANIMALS_MAX = 1800; // how often we attempt to spawn animals around each
-    private long ticksToSpawnAnimals = TICKS_TO_SPAWN_ANIMALS_MAX - 100; // spawn once soon after placement
+    private long ticksToSpawnAnimals = 0; // spawn once soon after placement
     private final int MAX_ANIMALS = 8;
-    private final int ANIMAL_SPAWN_RANGE = 100; // block range to check and spawn animals in
+    private final int ANIMAL_SPAWN_RANGE = 80; // block range to check and spawn animals in
 
     public int foodCost;
     public int woodCost;
@@ -547,8 +549,11 @@ public abstract class Building {
 
     public void onBuilt() {
         isBuilt = true;
-        if (!this.level.isClientSide())
+        if (!this.level.isClientSide()) {
             FrozenChunkClientboundPacket.setBuildingBuiltServerside(this.originPos);
+            for (int i = 0; i < 3; i++)
+                spawnHuntableAnimalsNearby(ANIMAL_SPAWN_RANGE / 2);
+        }
         else
             TutorialClientEvents.updateStage();
 
@@ -611,6 +616,10 @@ public abstract class Building {
                 else
                     msPerBuild *= repairTimeModifier;
 
+                if (this instanceof Portal && !BuildingClientEvents.isOnNetherBlocks(blocks, originPos) &&
+                    !ResearchServerEvents.playerHasResearch(ownerName, ResearchAdvancedPortals.itemName))
+                    msPerBuild *= Portal.NON_NETHER_BUILD_TIME_MODIFIER;
+
                 if (msToNextBuild > msPerBuild)
                     msToNextBuild = msPerBuild;
 
@@ -654,19 +663,19 @@ public abstract class Building {
             ticksToSpawnAnimals += 1;
             if (ticksToSpawnAnimals >= TICKS_TO_SPAWN_ANIMALS_MAX) {
                 ticksToSpawnAnimals = 0;
-                spawnHuntableAnimalsNearby();
+                spawnHuntableAnimalsNearby(ANIMAL_SPAWN_RANGE);
             }
         }
     }
 
     // if there aren't already too many animals nearby, spawn some random huntable animals
-    private void spawnHuntableAnimalsNearby() {
+    private void spawnHuntableAnimalsNearby(int range) {
         if (level.isClientSide())
             return;
 
         int numNearbyAnimals = MiscUtil.getEntitiesWithinRange(
                 new Vector3d(centrePos.getX(), centrePos.getY(), centrePos.getZ()),
-                ANIMAL_SPAWN_RANGE,
+                range,
                 Animal.class,
                 level
         ).stream().filter(ResourceSources::isHuntableAnimal).toList().size();
@@ -678,8 +687,8 @@ public abstract class Building {
         BlockPos spawnBp;
         Random random = new Random();
         do {
-            int x = centrePos.getX() + random.nextInt(-ANIMAL_SPAWN_RANGE/2, ANIMAL_SPAWN_RANGE/2);
-            int z = centrePos.getZ() + random.nextInt(-ANIMAL_SPAWN_RANGE/2, ANIMAL_SPAWN_RANGE/2);
+            int x = centrePos.getX() + random.nextInt(-range/2, range/2);
+            int z = centrePos.getZ() + random.nextInt(-range/2, range/2);
             int y = level.getChunkAt(new BlockPos(x,0,z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
             BlockState bs;
             do {

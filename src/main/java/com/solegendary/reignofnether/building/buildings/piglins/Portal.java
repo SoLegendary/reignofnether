@@ -38,6 +38,8 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
 
     public final static int CIVILIIAN_PORTAL_POPULATION_SUPPLY = 15;
 
+    public final static float NON_NETHER_BUILD_TIME_MODIFIER = 2.0f;
+
     public enum PortalType {
         BASIC,
         CIVILIAN,
@@ -235,7 +237,9 @@ public class Portal extends ProductionBuilding implements NetherConvertingBuildi
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward("An obsidian portal used to spread nether blocks.", Style.EMPTY),
-                        FormattedCharSequence.forward("Can be upgraded for various different functions.", Style.EMPTY)
+                        FormattedCharSequence.forward("Can be upgraded for various different functions.", Style.EMPTY),
+                        FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.forward("Can be built on overworld terrain, but at half speed.", Style.EMPTY)
                 ),
                 null
         );
