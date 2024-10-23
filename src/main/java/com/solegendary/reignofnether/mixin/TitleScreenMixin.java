@@ -30,10 +30,8 @@ import javax.annotation.Nullable;
 @Mixin(TitleScreen.class)
 public class TitleScreenMixin extends Screen {
 
-    private static final ResourceLocation MINECRAFT_LOGO =
-            new ResourceLocation("textures/gui/title/minecraft.png");
-    private static final ResourceLocation MINECRAFT_EDITION =
-            new ResourceLocation("textures/gui/title/edition.png");
+    private static final ResourceLocation MINECRAFT_LOGO = new ResourceLocation("textures/gui/title/minecraft.png");
+    private static final ResourceLocation MINECRAFT_EDITION = new ResourceLocation("textures/gui/title/edition.png");
 
     @Shadow @Final private PanoramaRenderer panorama;
     @Shadow @Final private boolean fading;
@@ -44,7 +42,11 @@ public class TitleScreenMixin extends Screen {
         super(pTitle);
     }
 
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    @Inject(
+            method = "render",
+            at = @At("HEAD"),
+            cancellable = true
+    )
     private void render(PoseStack pPoseStack, int pMouseX, int pMouseY,
                         float pPartialTick, CallbackInfo ci) {
         ci.cancel();

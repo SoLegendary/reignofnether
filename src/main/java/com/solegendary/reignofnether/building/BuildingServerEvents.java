@@ -191,8 +191,7 @@ public class BuildingServerEvents {
                 if (!(newBuilding instanceof AbstractBridge))
                     for (BuildingBlock block : newBuilding.blocks)
                         if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir())
-                            if (!placeScaffoldingUnder(block, newBuilding)) // Abort if the scaffolding placement failedx
-                                return;
+                            placeScaffoldingUnder(block, newBuilding);
 
                 newBuilding.blocks.stream()
                         .filter(block -> block.getBlockPos().getY() == minY &&
@@ -217,7 +216,7 @@ public class BuildingServerEvents {
         }
     }
 
-    private static boolean placeScaffoldingUnder(BuildingBlock block, Building newBuilding) {
+    private static void placeScaffoldingUnder(BuildingBlock block, Building newBuilding) {
         BlockPos basePos = block.getBlockPos();
         int yBelow = 0;
         BlockState bsBelow;
@@ -230,7 +229,7 @@ public class BuildingServerEvents {
                 break; // Found a solid block, exit loop
         }
         if (yBelow <= -MAX_SCAFFOLD_DEPTH)
-            return false; // Abort if no solid block found within limit (possibly void)
+            return;
 
         // Place scaffolding from the lowest point back to the original block's level
         for (int y = yBelow + 1; y < 0; y++) {
@@ -239,7 +238,6 @@ public class BuildingServerEvents {
             newBuilding.getScaffoldBlocks().add(scaffold);
             newBuilding.addToBlockPlaceQueue(scaffold);
         }
-        return true;
     }
 
 
