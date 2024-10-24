@@ -229,11 +229,8 @@ public class OrthoviewClientEvents {
             MC.options.setCameraType(CameraType.FIRST_PERSON);
         }
         else {
-            int highestBlockY = MC.level.getHeight(Heightmap.Types.MOTION_BLOCKING,(int)MC.player.getX(), (int) MC.player.getZ());
-
             PlayerServerboundPacket.disableOrthoview();
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
-            PlayerServerboundPacket.teleportPlayer(MC.player.getX(), (double) highestBlockY, MC.player.getZ());
         }
         TutorialClientEvents.updateStage();
     }
