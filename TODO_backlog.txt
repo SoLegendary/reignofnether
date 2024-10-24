@@ -17,7 +17,19 @@ Features
     - start off doing only monster enemies
     - roguelike features?
 
-
+[❌] King of the Beacon
+    - simple pyramid made of 4 layers + beacon block (9x9 minimum)
+    - need to be neutral placeable at the start of a match
+    - logic to change ownership to whoever has the most units nearby, with some slight inertia
+    - timer to determine who wins (win via total time accumulated)
+    - must ignore all attack commands and be indestructible
+    - starts out entirely made of stone brick, but deposit ore to be upgraded into ore blocks from the top down
+        - level 1: regen
+        - level 2: strength
+        - level 3: resistance
+        - level 4: speed
+    - instead of scaffolding underneath, place some other brick blocks
+    - add a UI later to show the effects, for now just have a number next to name showing how much ore to next tier)
 
 Bugfixes
 --------

@@ -197,7 +197,7 @@ public class PlayerClientEvents {
     // disallow opening the creative menu while orthoview is enabled
     @SubscribeEvent
     public static void onScreenOpen(ScreenEvent.Opening evt) {
-        if (OrthoviewClientEvents.isEnabled())
+        if (OrthoviewClientEvents.isEnabled() && evt.getScreen() instanceof CreativeModeInventoryScreen)
             evt.setCanceled(true);
     }
 

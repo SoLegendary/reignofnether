@@ -38,5 +38,13 @@
 
   "block.reignofnether.decayable_nether_wart_block": "Decayable Nether Wart Block",
   "block.reignofnether.decayable_warped_wart_block": "Decayable Warped Wart Block",
-  "block.reignofnether.falling_oak_log": "Falling Oak Log"
+  "block.reignofnether.falling_oak_log": "Falling Oak Log",
+  "block.reignofnether.falling_dark_oak_log": "Falling Dark Oak Log",
+  "block.reignofnether.falling_birch_log": "Falling Birch Log",
+  "block.reignofnether.falling_spruce_log": "Falling Spruce Log",
+  "block.reignofnether.falling_jungle_log": "Falling Jungle Log",
+  "block.reignofnether.falling_mangrove_log": "Falling Mangrove Log",
+  "block.reignofnether.falling_acacia_log": "Falling Acacia Log",
+  "block.reignofnether.falling_warped_stem": "Falling Warped Stem",
+  "block.reignofnether.falling_crimson_stem": "Falling Crimson Stem"
 }

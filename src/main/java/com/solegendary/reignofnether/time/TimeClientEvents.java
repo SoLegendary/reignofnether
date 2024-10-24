@@ -1,14 +1,15 @@
 package com.solegendary.reignofnether.time;
 
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.NightSource;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
+import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.research.researchItems.ResearchLingeringPotions;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -17,6 +18,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -40,6 +42,22 @@ public class TimeClientEvents {
     public static long targetClientTime = 0;
     // actual time on the server
     public static long serverTime = 0;
+
+    public static boolean showNightRadius = true;
+
+    private static final Button CLOCK_BUTTON = new Button(
+        "Clock",
+        14,
+        null,
+        null,
+        null,
+        () -> false,
+        () -> false,
+        () -> true,
+        () -> showNightRadius = !showNightRadius,
+        null,
+        null
+    );
 
 
     // ensures a time value is between 0 and 24000
@@ -97,14 +115,35 @@ public class TimeClientEvents {
     @SubscribeEvent
     public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() ||
-                !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
+            !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
             return;
 
         xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) + 2;
-        yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 4;
+        yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 6;
 
         ItemRenderer itemrenderer = MC.getItemRenderer();
+
         itemrenderer.renderAndDecorateItem(new ItemStack(Items.CLOCK), xPos, yPos);
+    }
+
+    @SubscribeEvent
+    public static void onDrawScreen(ScreenEvent.Render.Post evt) {
+        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() ||
+            !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
+            return;
+
+        xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) + 2;
+        yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 6;
+
+        CLOCK_BUTTON.render(evt.getPoseStack(), xPos-3, yPos-3, evt.getMouseX(), evt.getMouseY());
+    }
+
+    @SubscribeEvent
+    public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1)
+            CLOCK_BUTTON.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
+        //else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2)
+        //    CLOCK_BUTTON.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
     }
 
     @SubscribeEvent
@@ -115,7 +154,7 @@ public class TimeClientEvents {
         final int GUI_LENGTH = 16;
 
         if (evt.getMouseX() > xPos && evt.getMouseX() <= xPos + GUI_LENGTH &&
-                evt.getMouseY() > yPos && evt.getMouseY() <= yPos + GUI_LENGTH) {
+            evt.getMouseY() > yPos && evt.getMouseY() <= yPos + GUI_LENGTH) {
 
             final long DAWN = 500;
             final long DUSK = 12500;
@@ -138,14 +177,16 @@ public class TimeClientEvents {
                     FormattedCharSequence.forward("Time: " + timeStr, Style.EMPTY),
                     timeUntilStr,
                     FormattedCharSequence.forward("" + timeStr, Style.EMPTY),
-                    gameLengthStr
+                    gameLengthStr,
+                    FormattedCharSequence.forward("Night radius: " + (showNightRadius ? "ON" : "OFF"), Style.EMPTY)
             );
             if (targetClientTime != serverTime)
                 tooltip = List.of(
                         FormattedCharSequence.forward("Time is distorted to midnight", Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("Real time: " + timeStr, Style.EMPTY),
                         timeUntilStr,
-                        gameLengthStr
+                        gameLengthStr,
+                        FormattedCharSequence.forward("Night radius: " + (showNightRadius ? "ON" : "OFF"), Style.EMPTY)
                 );
 
             MyRenderer.renderTooltip(
@@ -162,14 +203,13 @@ public class TimeClientEvents {
     public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
             return;
-        if (!OrthoviewClientEvents.isEnabled())
+        if (!OrthoviewClientEvents.isEnabled() || !showNightRadius)
             return;
 
         // draw night-ranges for monsters
         for (Building building : BuildingClientEvents.getBuildings())
             if (building instanceof NightSource ns)
-                for (BlockPos bp : ns.getNightBorderBps()) {
+                for (BlockPos bp : ns.getNightBorderBps())
                     MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, 0f, 0f, 0f, 0.5f);
-                }
     }
 }

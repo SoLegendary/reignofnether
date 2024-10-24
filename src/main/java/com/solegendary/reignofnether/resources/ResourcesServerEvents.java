@@ -2,12 +2,14 @@ package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,9 +21,7 @@ import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static com.solegendary.reignofnether.resources.BlockUtils.isLogBlock;
 import static com.solegendary.reignofnether.resources.BlockUtils.numAirOrLeafBlocksBelow;
@@ -235,6 +235,10 @@ public class ResourcesServerEvents {
 
     // if a tree is touched, destroy any adjacent logs that are above the ground after some time to avoid leaving tall trees behind
     public static void fellAdjacentLogs(BlockPos bp, ArrayList<BlockPos> bpsExcluded, Level level) {
+
+        if (!level.getGameRules().getRule(GameRuleRegistrar.LOG_FALLING).get())
+            return;
+
         BlockState bs = level.getBlockState(bp);
 
         List<BlockPos> bpsAdj = List.of(
@@ -247,15 +251,37 @@ public class ResourcesServerEvents {
             BlockState bsAdj = level.getBlockState(bpAdj);
             if (isLogBlock(bsAdj) && !bpsExcluded.contains(bpAdj)) {
                 if (bsAdj.hasProperty(BlockStateProperties.AXIS)) {
-                    level.setBlockAndUpdate(bpAdj, BlockRegistrar.FALLING_OAK_LOG.get().defaultBlockState()
+                    level.setBlockAndUpdate(bpAdj, FALLING_LOGS.get(bsAdj.getBlock()).defaultBlockState()
                             .setValue(BlockStateProperties.AXIS, bsAdj.getValue(BlockStateProperties.AXIS)));
                 } else {
-                    level.setBlockAndUpdate(bpAdj, BlockRegistrar.FALLING_OAK_LOG.get().defaultBlockState());
+                    level.setBlockAndUpdate(bpAdj, FALLING_LOGS.get(bsAdj.getBlock()).defaultBlockState());
                 }
                 bpsExcluded.add(bpAdj);
                 fellAdjacentLogs(bpAdj, bpsExcluded, level);
             }
         }
+    }
+
+    private static final Map<Block, Block> FALLING_LOGS = new HashMap<>();
+    static {
+        FALLING_LOGS.put(Blocks.OAK_LOG, BlockRegistrar.FALLING_OAK_LOG.get());
+        FALLING_LOGS.put(Blocks.SPRUCE_LOG, BlockRegistrar.FALLING_SPRUCE_LOG.get());
+        FALLING_LOGS.put(Blocks.BIRCH_LOG, BlockRegistrar.FALLING_BIRCH_LOG.get());
+        FALLING_LOGS.put(Blocks.JUNGLE_LOG, BlockRegistrar.FALLING_JUNGLE_LOG.get());
+        FALLING_LOGS.put(Blocks.ACACIA_LOG, BlockRegistrar.FALLING_ACACIA_LOG.get());
+        FALLING_LOGS.put(Blocks.DARK_OAK_LOG, BlockRegistrar.FALLING_DARK_OAK_LOG.get());
+        FALLING_LOGS.put(Blocks.MANGROVE_LOG, BlockRegistrar.FALLING_MANGROVE_LOG.get());
+        FALLING_LOGS.put(Blocks.OAK_WOOD, BlockRegistrar.FALLING_OAK_LOG.get());
+        FALLING_LOGS.put(Blocks.SPRUCE_WOOD, BlockRegistrar.FALLING_SPRUCE_LOG.get());
+        FALLING_LOGS.put(Blocks.BIRCH_WOOD, BlockRegistrar.FALLING_BIRCH_LOG.get());
+        FALLING_LOGS.put(Blocks.JUNGLE_WOOD, BlockRegistrar.FALLING_JUNGLE_LOG.get());
+        FALLING_LOGS.put(Blocks.ACACIA_WOOD, BlockRegistrar.FALLING_ACACIA_LOG.get());
+        FALLING_LOGS.put(Blocks.DARK_OAK_WOOD, BlockRegistrar.FALLING_DARK_OAK_LOG.get());
+        FALLING_LOGS.put(Blocks.MANGROVE_WOOD, BlockRegistrar.FALLING_MANGROVE_LOG.get());
+        FALLING_LOGS.put(Blocks.WARPED_STEM, BlockRegistrar.FALLING_WARPED_STEM.get());
+        FALLING_LOGS.put(Blocks.WARPED_HYPHAE, BlockRegistrar.FALLING_WARPED_STEM.get());
+        FALLING_LOGS.put(Blocks.CRIMSON_STEM, BlockRegistrar.FALLING_CRIMSON_STEM.get());
+        FALLING_LOGS.put(Blocks.CRIMSON_HYPHAE, BlockRegistrar.FALLING_CRIMSON_STEM.get());
     }
 }
 

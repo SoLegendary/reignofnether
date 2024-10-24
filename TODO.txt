@@ -20,17 +20,15 @@ Bugfixes
 
 [✔] Fixed a crash when you build over a ledge with no floor
 
-[🟡] Fixed an exploit where rapidly pressing F12 can land you back in regular creative mode
-    - needs testing, done via onScreenOpen(ScreenEvent.Opening evt)
+[🟡] Added a hard stop on opening the creative menu while in F12 cam
 
-[🟡] Disabled "being revealed" messages related to not having a capitol if fog of war is disabled
+[🟡] Disabled "being revealed" messages when your capitol is destroyed if fog of war is disabled
 
-[✔] Farm water boils on soulsand and magma
-    - Just replace them with soulsoil and cobble underneath
+[✔] Farm water now turns magma below it into cobblestone and soulsand into soulsoil to prevent becoming a bubble column
 
-[🟡] Nether doesn't spread to podzol
+[🟡] Podzol can now be converted into nether terrain (as nylium)
 
-[🟡] Prevent berry bush and cacti damage
+[🟡] Workers no longer take damage from berry bushes and cacti
 
 [🟡] Building blocks no longer drop items for survival players when mined
 
@@ -40,13 +38,10 @@ Quality of Life Features
 ------------------------
 
 [🟡] Tree logs now become affected by gravity whenever any log is broken
-    - 🟡 this can be toggled using /gamerule dologfalling
-    - This only occurs for worker units breaking blocks, survival players break
-    - Pull boobcat's wood tag change too
-    - apply to all logs, stems, wood and hyphae too
-    - should retain alignment
-    - should have correct axe breaking speeds
-    - check property AXIS exists to avoid erroring on wood/hyphae blocks
+    - This applies to all log blocks, wood blocks and nether stems
+    - this is enabled by default but can be toggled using /gamerule doLogFalling
+
+[🟡] make /rts-fog serverside (no warnings)
 
 [🟡] Radius indicator around monster capitol and stronghold to better indicate range of night
 
@@ -57,7 +52,7 @@ Quality of Life Features
 
     (can use this same code for ability range indicators too)
 
-[❌] make /rts-fog serverside
+
 
 
 

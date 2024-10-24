@@ -31,6 +31,12 @@ public class BlockRegistrar {
         }).strength(2.0F).sound(SoundType.WOOD));
     }
 
+    private static FallingRotatedPillarBlock fallingNetherStem(MaterialColor pMaterialColor) {
+        return new FallingRotatedPillarBlock(BlockBehaviour.Properties.of(Material.NETHER_WOOD, (p_152620_) -> {
+            return pMaterialColor;
+        }).strength(2.0F).sound(SoundType.STEM));
+    }
+
     public static final RegistryObject<Block> DECAYABLE_NETHER_WART_BLOCK = registerBlock("decayable_nether_wart_block",
             () -> new LeavesBlock(BlockBehaviour.Properties.of(Material.LEAVES, MaterialColor.COLOR_RED)
                     .strength(1.0F)
@@ -51,6 +57,38 @@ public class BlockRegistrar {
 
     public static final RegistryObject<Block> FALLING_OAK_LOG = registerBlock("falling_oak_log",
             () -> fallingLog(MaterialColor.WOOD, MaterialColor.PODZOL),
+            CreativeModeTab.TAB_BUILDING_BLOCKS
+    );
+    public static final RegistryObject<Block> FALLING_SPRUCE_LOG = registerBlock("falling_spruce_log",
+            () -> fallingLog(MaterialColor.PODZOL, MaterialColor.COLOR_BROWN),
+            CreativeModeTab.TAB_BUILDING_BLOCKS
+    );
+    public static final RegistryObject<Block> FALLING_BIRCH_LOG = registerBlock("falling_birch_log",
+            () -> fallingLog(MaterialColor.SAND, MaterialColor.QUARTZ),
+            CreativeModeTab.TAB_BUILDING_BLOCKS
+    );
+    public static final RegistryObject<Block> FALLING_JUNGLE_LOG = registerBlock("falling_jungle_log",
+            () -> fallingLog(MaterialColor.DIRT, MaterialColor.PODZOL),
+            CreativeModeTab.TAB_BUILDING_BLOCKS
+    );
+    public static final RegistryObject<Block> FALLING_ACACIA_LOG = registerBlock("falling_acacia_log",
+            () -> fallingLog(MaterialColor.COLOR_ORANGE, MaterialColor.STONE),
+            CreativeModeTab.TAB_BUILDING_BLOCKS
+    );
+    public static final RegistryObject<Block> FALLING_DARK_OAK_LOG = registerBlock("falling_dark_oak_log",
+            () -> fallingLog(MaterialColor.COLOR_BROWN, MaterialColor.COLOR_BROWN),
+            CreativeModeTab.TAB_BUILDING_BLOCKS
+    );
+    public static final RegistryObject<Block> FALLING_MANGROVE_LOG = registerBlock("falling_mangrove_log",
+            () -> fallingLog(MaterialColor.COLOR_RED, MaterialColor.PODZOL),
+            CreativeModeTab.TAB_BUILDING_BLOCKS
+    );
+    public static final RegistryObject<Block> FALLING_WARPED_STEM = registerBlock("falling_warped_stem",
+            () -> fallingNetherStem(MaterialColor.WARPED_STEM),
+            CreativeModeTab.TAB_BUILDING_BLOCKS
+    );
+    public static final RegistryObject<Block> FALLING_CRIMSON_STEM = registerBlock("falling_crimson_stem",
+            () -> fallingNetherStem(MaterialColor.CRIMSON_STEM),
             CreativeModeTab.TAB_BUILDING_BLOCKS
     );
 

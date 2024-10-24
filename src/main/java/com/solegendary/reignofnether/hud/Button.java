@@ -157,12 +157,14 @@ public class Button {
             );
         }
         // item/unit icon
-        MyRenderer.renderIcon(
-                poseStack,
-                iconResource,
-                x+4 + (7 - iconSize/2), y+4 + (7 - iconSize/2),
-                iconSize
-        );
+        if (iconResource != null) {
+            MyRenderer.renderIcon(
+                    poseStack,
+                    iconResource,
+                    x+4 + (7 - iconSize/2), y+4 + (7 - iconSize/2),
+                    iconSize
+            );
+        }
         // hotkey letter
         if (this.hotkey != null) {
             String hotkeyStr = hotkey.buttonLabel;
