@@ -17,6 +17,7 @@ import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -92,8 +93,8 @@ public class OrthoviewClientEvents {
     private static float mouseLeftDownY = 0;
 
     // by default orthoview players stay at BASE_Y, but can be raised to as high as MAX_Y if they are clipping terrain
-    public static double ORTHOVIEW_PLAYER_BASE_Y;
-    public static double ORTHOVIEW_PLAYER_MAX_Y;
+    public static double ORTHOVIEW_PLAYER_BASE_Y=100;
+    public static double ORTHOVIEW_PLAYER_MAX_Y=200;
 
     public static void updateOrthoviewY() {
         if (MC.player != null && MC.level != null) {
@@ -230,13 +231,6 @@ public class OrthoviewClientEvents {
         else {
             PlayerServerboundPacket.disableOrthoview();
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
-            if (!MC.level.getBlockState(MC.player.getOnPos()).isAir()) {
-                BlockPos tp = MiscUtil.getHighestNonAirBlock(MC.level, MC.player.getOnPos());
-                PlayerServerboundPacket.teleportPlayer((double) tp.getX(), (double) tp.getY() + 2, (double) tp.getZ());
-            }
-            else {
-                PlayerServerboundPacket.teleportPlayer(MC.player.getX(), MC.player.getY(), MC.player.getZ());
-            }
         }
         TutorialClientEvents.updateStage();
     }
@@ -265,30 +259,51 @@ public class OrthoviewClientEvents {
     @SubscribeEvent
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.Key evt) {
-        if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
+        // Prevent repeated key actions
+        if (evt.getAction() == GLFW.GLFW_PRESS) {
+
             if (evt.getKey() == Keybindings.getFnum(12).key &&
-                !OrthoviewClientEvents.isCameraLocked())
+                    !OrthoviewClientEvents.isCameraLocked()) {
+
                 toggleEnable();
+                switchToEasyIfPeaceful();
+            }
 
             if (evt.getKey() == Keybindings.getFnum(6).key) {
                 FogOfWarClientEvents.resetFogChunks();
-
                 UnitClientEvents.windowUpdateTicks = 0;
+
                 if (hideLeavesMethod == LeafHideMethod.NONE) {
                     hideLeavesMethod = LeafHideMethod.AROUND_UNITS_AND_CURSOR;
                     HudClientEvents.showTemporaryMessage("Hiding leaves: around units and cursor");
-                }
-                else if (hideLeavesMethod == LeafHideMethod.AROUND_UNITS_AND_CURSOR) {
+                } else if (hideLeavesMethod == LeafHideMethod.AROUND_UNITS_AND_CURSOR) {
                     hideLeavesMethod = LeafHideMethod.ALL;
                     HudClientEvents.showTemporaryMessage("Hiding leaves: all");
-                }
-                else if (hideLeavesMethod == LeafHideMethod.ALL) {
+                } else if (hideLeavesMethod == LeafHideMethod.ALL) {
                     hideLeavesMethod = LeafHideMethod.NONE;
                     HudClientEvents.showTemporaryMessage("Disabled hiding leaves");
                 }
             }
-            if (evt.getKey() == Keybindings.reset.key)
+
+            if (evt.getKey() == Keybindings.reset.key) {
                 reset();
+            }
+        }
+    }
+
+    // Method to switch difficulty to Easy if it is currently set to Peaceful
+    private static void switchToEasyIfPeaceful() {
+        Minecraft minecraft = Minecraft.getInstance();
+
+        // Ensure this only runs in single-player mode
+        if (minecraft.getSingleplayerServer() != null) {
+            Difficulty currentDifficulty = minecraft.level.getDifficulty();
+
+            // If the current difficulty is Peaceful, switch to Easy
+            if (currentDifficulty == Difficulty.PEACEFUL) {
+                minecraft.getSingleplayerServer().setDifficulty(Difficulty.EASY, true);
+                HudClientEvents.showTemporaryMessage("RTS units cannot spawn in Peaceful. Your difficulty has been set to Easy.");
+            }
         }
     }
 
