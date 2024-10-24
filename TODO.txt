@@ -1,0 +1,71 @@
+
+1.19.2-1.0.6
+------------
+
+[✔] Done and tested
+[🟡] Partially done, only has a workaround and/or needs testing
+[❌] Not done, top ones are roughly of higher priority
+
+
+
+
+
+Bugfixes
+--------
+[✔] Fixed a crash when using the idle workers button. Thanks @Boobcat
+[✔] Fixed survival players being able to deposit into stockpiles on non-English languages
+[✔] Iron golem spawn egg texture is fixed
+[✔] Survival players can no longer use F12 cam
+[✔] The hotkey for bridges has been changed to G to avoid an overlap with Build/Repair
+
+[✔] Fixed a crash when you build over a ledge with no floor
+
+[🟡] Fixed an exploit where rapidly pressing F12 can land you back in regular creative mode
+    - needs testing, done via onScreenOpen(ScreenEvent.Opening evt)
+
+[🟡] Disabled "being revealed" messages related to not having a capitol if fog of war is disabled
+
+[✔] Farm water boils on soulsand and magma
+    - Just replace them with soulsoil and cobble underneath
+
+[🟡] Nether doesn't spread to podzol
+
+[🟡] Prevent berry bush and cacti damage
+
+[🟡] Building blocks no longer drop items for survival players when mined
+
+
+
+Quality of Life Features
+------------------------
+
+[🟡] Tree logs now become affected by gravity whenever any log is broken
+    - 🟡 this can be toggled using /gamerule dologfalling
+    - This only occurs for worker units breaking blocks, survival players break
+    - Pull boobcat's wood tag change too
+    - apply to all logs, stems, wood and hyphae too
+    - should retain alignment
+    - should have correct axe breaking speeds
+    - check property AXIS exists to avoid erroring on wood/hyphae blocks
+
+[🟡] Radius indicator around monster capitol and stronghold to better indicate range of night
+
+    - click the clock to toggle it
+    - show on minimap
+    - and give night vision to monster players
+        - don't wipe effects on F12, just hide particles instead
+
+    (can use this same code for ability range indicators too)
+
+[❌] make /rts-fog serverside
+
+
+
+Balancing Features
+------------------
+
+[✔] Capitols now spawn animals closer and immediately spawn some nearby upon being built (within a 40 block radius)
+
+[✔] Piglins may now build basic portals on overworld terrain, but doing so takes twice as long
+    - Advanced portals makes this regular speed
+

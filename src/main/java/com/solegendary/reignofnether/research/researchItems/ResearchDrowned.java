@@ -65,8 +65,8 @@ public class ResearchDrowned extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchDrowned.itemName) || ResearchClient.hasResearch(
-                ResearchDrowned.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchDrowned.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchDrowned.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(Graveyard.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,

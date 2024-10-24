@@ -25,6 +25,7 @@
         "ForgeGuiMixin",
         "FrustumMixin",
         "ItemInHandLayerMixin",
+        "MobMixin",
         "MobRendererMixin",
         "OrthoViewMixin",
         "RenderChunkRegionMixin",

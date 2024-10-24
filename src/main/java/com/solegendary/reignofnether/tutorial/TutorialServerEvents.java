@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.tutorial;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.buildings.monsters.*;
@@ -56,11 +57,14 @@ public class TutorialServerEvents {
     private static final Vec3i SPIDER_POS = new Vec3i(-3082, 73, -1297);
     private static final Vec3i GRAVEYARD_ZOMBIE_POS = new Vec3i(-3074, 73, -1273);
 
-    public static boolean isEnabled() { return enabled; }
+    public static boolean isEnabled() {
+        return enabled;
+    }
 
     private static ServerLevel getServerLevel() {
-        if (!PlayerServerEvents.players.isEmpty())
+        if (!PlayerServerEvents.players.isEmpty()) {
             return PlayerServerEvents.players.get(0).getLevel();
+        }
         return null;
     }
 
@@ -71,14 +75,14 @@ public class TutorialServerEvents {
             tutorialData.stage = stage;
             tutorialData.save();
             serverLevel.getDataStorage().save();
-            System.out.println("saved tutorialStage in serverevents");
+            ReignOfNether.LOGGER.info("saved tutorialStage in serverevents");
         }
     }
 
     public static TutorialStage loadStage(ServerLevel level) {
         if (level != null) {
             TutorialStage stage = TutorialSaveData.getInstance(level).stage;
-            System.out.println("loaded tutorialStage in serverevents: " + stage);
+            ReignOfNether.LOGGER.info("loaded tutorialStage in serverevents: " + stage);
             return stage;
         }
         return null;
@@ -88,20 +92,20 @@ public class TutorialServerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         MinecraftServer server = evt.getEntity().getServer();
         if (server == null) {
-            PlayerServerEvents.sendMessageToAllPlayers("Failed to load tutorial, server couldn't be found.");
+            PlayerServerEvents.sendMessageToAllPlayers("tutorial.reignofnether.server_not_found");
             return;
         }
         String levelName = server.getWorldData().getLevelSettings().levelName();
-        if (evt.getEntity().getLevel() instanceof ServerLevel serverLevel &&
-                serverLevel.getSeed() == TUTORIAL_MAP_SEED &&
-                levelName.equals(TUTORIAL_MAP_NAME)) {
+        if (evt.getEntity().getLevel() instanceof ServerLevel serverLevel && serverLevel.getSeed() == TUTORIAL_MAP_SEED
+            && levelName.equals(TUTORIAL_MAP_NAME)) {
 
             TutorialStage stage = loadStage(server.getLevel(Level.OVERWORLD));
 
-            if (stage == TutorialStage.COMPLETED)
+            if (stage == TutorialStage.COMPLETED) {
                 return;
-            else if (stage != null)
+            } else if (stage != null) {
                 TutorialClientboundPacket.loadTutorialStage(stage);
+            }
 
             TutorialClientboundPacket.enableTutorial();
             enabled = true;
@@ -138,101 +142,169 @@ public class TutorialServerEvents {
     }
 
     public static void spawnMonstersA() {
-        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), getServerLevel(), MONSTER_ATTACK_SPAWN_POS, 1, TUTORIAL_ENEMY_NAME);
-        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), getServerLevel(), MONSTER_ATTACK_SPAWN_POS.north(), 1, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(),
+            getServerLevel(),
+            MONSTER_ATTACK_SPAWN_POS,
+            1,
+            TUTORIAL_ENEMY_NAME
+        );
+        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(),
+            getServerLevel(),
+            MONSTER_ATTACK_SPAWN_POS.north(),
+            1,
+            TUTORIAL_ENEMY_NAME
+        );
     }
 
     public static void spawnMonstersB() {
-        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), getServerLevel(), MONSTER_ATTACK_SPAWN_POS, 4, TUTORIAL_ENEMY_NAME);
-        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), getServerLevel(), MONSTER_ATTACK_SPAWN_POS.north(), 2, TUTORIAL_ENEMY_NAME);
+        spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(),
+            getServerLevel(),
+            MONSTER_ATTACK_SPAWN_POS,
+            4,
+            TUTORIAL_ENEMY_NAME
+        );
+        spawnMobs(EntityRegistrar.SKELETON_UNIT.get(),
+            getServerLevel(),
+            MONSTER_ATTACK_SPAWN_POS.north(),
+            2,
+            TUTORIAL_ENEMY_NAME
+        );
     }
 
     public static void attackWithMonstersA() { // order all monster units to attack move towards the enemy base
         BlockPos attackPos = null;
         for (Building building : BuildingServerEvents.getBuildings())
-            if (building instanceof TownCentre)
+            if (building instanceof TownCentre) {
                 attackPos = building.originPos;
+            }
 
-        if (attackPos == null)
+        if (attackPos == null) {
             for (Building building : BuildingServerEvents.getBuildings())
-                if (building instanceof Barracks)
+                if (building instanceof Barracks) {
                     attackPos = building.originPos;
+                }
+        }
 
-        if (attackPos != null)
+        if (attackPos != null) {
             for (LivingEntity entity : UnitServerEvents.getAllUnits())
-                if (entity instanceof ZombieUnit || entity instanceof SkeletonUnit)
+                if (entity instanceof ZombieUnit || entity instanceof SkeletonUnit) {
                     ((AttackerUnit) entity).setAttackMoveTarget(attackPos);
+                }
+        }
     }
 
     public static void attackWithMonstersB() {
         BlockPos townCentrePos = null;
         BlockPos barracksPos = null;
         for (Building building : BuildingServerEvents.getBuildings()) {
-            if (building instanceof TownCentre)
+            if (building instanceof TownCentre) {
                 townCentrePos = building.originPos;
-            else if (building instanceof Barracks)
+            } else if (building instanceof Barracks) {
                 barracksPos = building.originPos;
+            }
         }
 
         int zombiesCommanded = 0;
         int skeletonsCommanded = 0;
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
             if (entity instanceof ZombieUnit zUnit) {
-                if (zombiesCommanded == 0 && barracksPos != null)
+                if (zombiesCommanded == 0 && barracksPos != null) {
                     zUnit.setAttackBuildingTarget(barracksPos);
-                else if (townCentrePos != null)
+                } else if (townCentrePos != null) {
                     zUnit.setAttackBuildingTarget(townCentrePos);
+                }
                 zombiesCommanded += 1;
-            }
-            else if (entity instanceof SkeletonUnit sUnit) {
-                if (skeletonsCommanded == 0 && barracksPos != null)
+            } else if (entity instanceof SkeletonUnit sUnit) {
+                if (skeletonsCommanded == 0 && barracksPos != null) {
                     sUnit.setAttackMoveTarget(barracksPos);
-                else if (townCentrePos != null)
+                } else if (townCentrePos != null) {
                     sUnit.setAttackMoveTarget(townCentrePos);
+                }
                 skeletonsCommanded += 1;
             }
         }
     }
 
     public static void startBuildingMonsterBase() {
-        int[] builderUnitIds = UnitServerEvents.getAllUnits().stream()
-                .filter(u -> u instanceof ZombieVillagerUnit)
-                .mapToInt(Entity::getId).toArray();
+        int[] builderUnitIds = UnitServerEvents.getAllUnits()
+            .stream()
+            .filter(u -> u instanceof ZombieVillagerUnit)
+            .mapToInt(Entity::getId)
+            .toArray();
         if (builderUnitIds.length > 0) {
             BuildingServerEvents.placeBuilding(Mausoleum.buildingName,
-                    new BlockPos(MAUSOLEUM_POS.getX(), MAUSOLEUM_POS.getY(), MAUSOLEUM_POS.getZ()),
-                    Rotation.NONE, TUTORIAL_ENEMY_NAME, builderUnitIds, false, false);
+                new BlockPos(MAUSOLEUM_POS.getX(), MAUSOLEUM_POS.getY(), MAUSOLEUM_POS.getZ()),
+                Rotation.NONE,
+                TUTORIAL_ENEMY_NAME,
+                builderUnitIds,
+                false,
+                false
+            );
         }
     }
 
     public static void expandMonsterBaseA() {
-        int[] builderUnitIds = UnitServerEvents.getAllUnits().stream()
-                .filter(u -> u instanceof ZombieVillagerUnit)
-                .mapToInt(Entity::getId).toArray();
+        int[] builderUnitIds = UnitServerEvents.getAllUnits()
+            .stream()
+            .filter(u -> u instanceof ZombieVillagerUnit)
+            .mapToInt(Entity::getId)
+            .toArray();
 
         for (int i = 0; i < builderUnitIds.length; i++) {
             switch (i) {
-                case 0 -> BuildingServerEvents.placeBuilding(PumpkinFarm.buildingName, new BlockPos(FARM_POS_1),
-                        Rotation.NONE, TUTORIAL_ENEMY_NAME, new int[] {builderUnitIds[0]}, false, false);
-                case 1 -> BuildingServerEvents.placeBuilding(PumpkinFarm.buildingName, new BlockPos(FARM_POS_2),
-                        Rotation.CLOCKWISE_90, TUTORIAL_ENEMY_NAME, new int[] {builderUnitIds[1]}, false, false);
+                case 0 -> BuildingServerEvents.placeBuilding(PumpkinFarm.buildingName,
+                    new BlockPos(FARM_POS_1),
+                    Rotation.NONE,
+                    TUTORIAL_ENEMY_NAME,
+                    new int[] { builderUnitIds[0] },
+                    false,
+                    false
+                );
+                case 1 -> BuildingServerEvents.placeBuilding(PumpkinFarm.buildingName,
+                    new BlockPos(FARM_POS_2),
+                    Rotation.CLOCKWISE_90,
+                    TUTORIAL_ENEMY_NAME,
+                    new int[] { builderUnitIds[1] },
+                    false,
+                    false
+                );
             }
         }
     }
 
     public static void expandMonsterBaseB() {
-        int[] builderUnitIds = UnitServerEvents.getAllUnits().stream()
-                .filter(u -> u instanceof ZombieVillagerUnit)
-                .mapToInt(Entity::getId).toArray();
+        int[] builderUnitIds = UnitServerEvents.getAllUnits()
+            .stream()
+            .filter(u -> u instanceof ZombieVillagerUnit)
+            .mapToInt(Entity::getId)
+            .toArray();
 
         for (int i = 0; i < builderUnitIds.length; i++) {
             switch (i) {
-                case 0 -> BuildingServerEvents.placeBuilding(Graveyard.buildingName, new BlockPos(GRAVEYARD_POS),
-                        Rotation.NONE, TUTORIAL_ENEMY_NAME, new int[] {builderUnitIds[0]}, false, false);
-                case 1 -> BuildingServerEvents.placeBuilding(DarkWatchtower.buildingName, new BlockPos(TOWER_POS),
-                        Rotation.NONE, TUTORIAL_ENEMY_NAME, new int[] {builderUnitIds[1]}, false, false);
-                case 2 -> BuildingServerEvents.placeBuilding(SpiderLair.buildingName, new BlockPos(SPIDER_LAIR_POS),
-                        Rotation.NONE, TUTORIAL_ENEMY_NAME, new int[] {builderUnitIds[2]}, false, false);
+                case 0 -> BuildingServerEvents.placeBuilding(Graveyard.buildingName,
+                    new BlockPos(GRAVEYARD_POS),
+                    Rotation.NONE,
+                    TUTORIAL_ENEMY_NAME,
+                    new int[] { builderUnitIds[0] },
+                    false,
+                    false
+                );
+                case 1 -> BuildingServerEvents.placeBuilding(DarkWatchtower.buildingName,
+                    new BlockPos(TOWER_POS),
+                    Rotation.NONE,
+                    TUTORIAL_ENEMY_NAME,
+                    new int[] { builderUnitIds[1] },
+                    false,
+                    false
+                );
+                case 2 -> BuildingServerEvents.placeBuilding(SpiderLair.buildingName,
+                    new BlockPos(SPIDER_LAIR_POS),
+                    Rotation.NONE,
+                    TUTORIAL_ENEMY_NAME,
+                    new int[] { builderUnitIds[2] },
+                    false,
+                    false
+                );
             }
         }
     }
@@ -246,11 +318,17 @@ public class TutorialServerEvents {
     }
 
     public static void spawnFriendlyArmy() {
-        if (PlayerServerEvents.players.isEmpty())
+        if (PlayerServerEvents.players.isEmpty()) {
             return;
+        }
         String ownerName = PlayerServerEvents.players.get(0).getName().getString();
         spawnMobs(EntityRegistrar.VINDICATOR_UNIT.get(), getServerLevel(), ARMY_SPAWN_POS, 5, ownerName);
         spawnMobs(EntityRegistrar.PILLAGER_UNIT.get(), getServerLevel(), ARMY_SPAWN_POS.south(), 3, ownerName);
-        spawnMobs(EntityRegistrar.IRON_GOLEM_UNIT.get(), getServerLevel(), ARMY_SPAWN_POS.south().south(), 1, ownerName);
+        spawnMobs(EntityRegistrar.IRON_GOLEM_UNIT.get(),
+            getServerLevel(),
+            ARMY_SPAWN_POS.south().south(),
+            1,
+            ownerName
+        );
     }
 }

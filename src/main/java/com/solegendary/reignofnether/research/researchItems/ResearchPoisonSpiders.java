@@ -39,8 +39,7 @@ public class ResearchPoisonSpiders extends ProductionItem {
                 ResearchServerEvents.addResearch(this.building.ownerName, ResearchPoisonSpiders.itemName);
 
                 // convert all spiders into poison spiders with the same stats/inventory/etc.
-                UnitServerEvents.convertAllToUnit(
-                    this.building.ownerName,
+                UnitServerEvents.convertAllToUnit(this.building.ownerName,
                     (ServerLevel) level,
                     (LivingEntity entity) -> entity instanceof SpiderUnit zUnit && zUnit.getOwnerName()
                         .equals(building.ownerName),
@@ -64,13 +63,12 @@ public class ResearchPoisonSpiders extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchPoisonSpiders.itemName) || ResearchClient.hasResearch(
-                ResearchPoisonSpiders.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchPoisonSpiders.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchPoisonSpiders.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(SpiderLair.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.poison_spiders"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.poison_spiders"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),

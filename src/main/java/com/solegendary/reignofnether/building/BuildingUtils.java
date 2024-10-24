@@ -43,21 +43,6 @@ public class BuildingUtils {
                     building.getBlocksPlaced() < building.getBlocksTotal();
     }
 
-    public static boolean isInRangeOfNightSource(Vec3 pos, boolean clientSide) {
-        List<Building> buildings = clientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
-        for (Building building : buildings) {
-            if (building.isDestroyedServerside)
-                continue;
-            if (building instanceof Mausoleum mausoleum)
-                if (BuildingUtils.getCentrePos(mausoleum.getBlocks()).distToCenterSqr(pos.x, pos.y, pos.z) < Math.pow(Mausoleum.nightRange, 2))
-                    return true;
-            if (building instanceof Stronghold stronghold && (stronghold.isBuilt || stronghold.isBuiltServerside))
-                if (BuildingUtils.getCentrePos(stronghold.getBlocks()).distToCenterSqr(pos.x, pos.y, pos.z) < Math.pow(Stronghold.nightRange, 2))
-                    return true;
-        }
-        return false;
-    }
-
     public static boolean doesPlayerOwnCapitol(boolean isClientSide, String playerName) {
         List<Building> buildings = isClientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
         for (Building building : buildings)

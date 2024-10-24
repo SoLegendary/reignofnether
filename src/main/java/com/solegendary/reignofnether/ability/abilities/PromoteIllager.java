@@ -53,8 +53,7 @@ public class PromoteIllager extends Ability {
     public static void checkAndApplyBuff(LivingEntity entity) {
         if (!entity.level.isClientSide() && entity instanceof Unit captainUnit
             && entity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
-            List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(new Vector3d(
-                    entity.position().x,
+            List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(new Vector3d(entity.position().x,
                     entity.position().y,
                     entity.position().z
                 ),
@@ -85,8 +84,8 @@ public class PromoteIllager extends Ability {
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.PROMOTE_ILLAGER),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("abilities.reignofnether.promote_illager"),
+            List.of(
+                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.promote_illager"),
                     Style.EMPTY.withBold(true)
                 ),
                 FormattedCharSequence.forward(
@@ -94,12 +93,10 @@ public class PromoteIllager extends Ability {
                     MyRenderer.iconStyle
                 ),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("abilities.reignofnether.promote_illager.tooltip2"),
+                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.promote_illager.tooltip2"),
                     Style.EMPTY
                 ),
-                FormattedCharSequence.forward(
-                    I18n.get("abilities.reignofnether.promote_illager.tooltip3", BUFF_RANGE),
+                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.promote_illager.tooltip3", BUFF_RANGE),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward("", Style.EMPTY),
@@ -114,7 +111,7 @@ public class PromoteIllager extends Ability {
         Vec3 pos = targetEntity.getEyePosition();
         if (buildingUsing.centrePos.distToCenterSqr(pos.x, pos.y, pos.z) > RANGE * RANGE) {
             if (level.isClientSide()) {
-                HudClientEvents.showTemporaryMessage("Unit is too far away!");
+                HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.promote_illager.error1"));
             }
         } else if (targetEntity instanceof VindicatorUnit || targetEntity instanceof PillagerUnit
             || targetEntity instanceof EvokerUnit) {
@@ -123,13 +120,13 @@ public class PromoteIllager extends Ability {
 
             if (targetEntity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
                 if (level.isClientSide()) {
-                    HudClientEvents.showTemporaryMessage("That unit is already a captain!");
+                    HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.promote_illager.error2"));
                 }
                 return;
             }
             if (!unit.getOwnerName().equals(this.building.ownerName)) {
                 if (level.isClientSide()) {
-                    HudClientEvents.showTemporaryMessage("You don't own that unit!");
+                    HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.promote_illager.error3"));
                 }
                 return;
             }
@@ -148,7 +145,7 @@ public class PromoteIllager extends Ability {
             this.setToMaxCooldown();
         } else {
             if (level.isClientSide()) {
-                HudClientEvents.showTemporaryMessage("Only Vindicators, Pillagers and Evokers may be promoted");
+                HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.promote_illager.error4"));
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.ability.abilities;
 
-import net.minecraft.client.resources.language.I18n;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
@@ -18,6 +17,7 @@ import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -32,20 +32,13 @@ public class MountHoglin extends Ability {
     private final LivingEntity entity;
 
     public MountHoglin(LivingEntity entity) {
-        super(
-            UnitAction.MOUNT_HOGLIN,
-            0,
-            0,
-            0,
-            true
-        );
+        super(UnitAction.MOUNT_HOGLIN, 0, 0, 0, true);
         this.entity = entity;
     }
 
     @Override
     public AbilityButton getButton(Keybinding hotkey) {
-        return new AbilityButton(
-            "Mount Hoglin",
+        return new AbilityButton("Mount Hoglin",
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/hoglin.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_HOGLIN,
@@ -53,22 +46,24 @@ public class MountHoglin extends Ability {
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_HOGLIN),
             () -> UnitClientEvents.sendUnitCommand(UnitAction.MOUNT_HOGLIN),
-            List.of(
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.mount_hoglin"), Style.EMPTY)
-            ),
+            List.of(FormattedCharSequence.forward(I18n.get("abilities.reignofnether.mount_hoglin"), Style.EMPTY)),
             this
         );
     }
 
     private MountGoal getMountGoal() {
-        if (entity instanceof PillagerUnit pillagerUnit)
+        if (entity instanceof PillagerUnit pillagerUnit) {
             return pillagerUnit.getMountGoal();
-        if (entity instanceof StrayUnit strayUnit)
+        }
+        if (entity instanceof StrayUnit strayUnit) {
             return strayUnit.getMountGoal();
-        if (entity instanceof SkeletonUnit skeletonUnit)
+        }
+        if (entity instanceof SkeletonUnit skeletonUnit) {
             return skeletonUnit.getMountGoal();
-        if (entity instanceof HeadhunterUnit headhunterUnit)
+        }
+        if (entity instanceof HeadhunterUnit headhunterUnit) {
             return headhunterUnit.getMountGoal();
+        }
         return null;
     }
 
@@ -83,8 +78,8 @@ public class MountHoglin extends Ability {
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
         if (targetEntity instanceof HoglinUnit) {
             getMountGoal().setTarget(targetEntity);
+        } else if (level.isClientSide()) {
+            HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.mount_hoglin.error1"));
         }
-        else if (level.isClientSide())
-            HudClientEvents.showTemporaryMessage("Invalid target!");
     }
 }

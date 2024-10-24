@@ -1,20 +1,25 @@
 package com.solegendary.reignofnether.time;
 
-import net.minecraft.client.resources.language.I18n;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.NightSource;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
-import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -31,7 +36,6 @@ public class TimeClientEvents {
     public static long targetClientTime = 0;
     // actual time on the server
     public static long serverTime = 0;
-
 
 
     // ensures a time value is between 0 and 24000
@@ -52,7 +56,9 @@ public class TimeClientEvents {
             hours -= 12;
             ampm = "pm";
         }
-        if (hours == 0) hours = 12;
+        if (hours == 0) {
+            hours = 12;
+        }
         String mm = "0" + minutes;
         mm = mm.substring(mm.length() - 2);
         return hours + ":" + mm + ampm;
@@ -60,8 +66,9 @@ public class TimeClientEvents {
 
     // get a string representing real time in min/sec until the given time
     private static String getTimeUntilStr(long currentTime, long targetTime) {
-        if (currentTime > targetTime)
+        if (currentTime > targetTime) {
             currentTime -= 24000;
+        }
         long timeDiff = targetTime - currentTime;
 
         // there's 1200 real time seconds per MC day (24000 units)
@@ -69,8 +76,9 @@ public class TimeClientEvents {
         int min = sec / 60;
         sec -= (min * 60);
 
-        if (min == 0)
+        if (min == 0) {
             return sec + "s";
+        }
         return min + "m" + sec + "s";
     }
 
@@ -80,20 +88,26 @@ public class TimeClientEvents {
         int min = sec / 60;
         sec -= (min * 60);
 
-        if (min == 0)
+        if (min == 0) {
             return sec + "s";
+        }
         return min + "m" + sec + "s";
     }
 
     // render directly above the minimap
     @SubscribeEvent
     public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() ||
-            !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
+        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused()
+            || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK)) {
             return;
+        }
 
-        xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) + 2;
-        yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2) - 4;
+        xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.getMapGuiRadius() - (
+            MinimapClientEvents.CORNER_OFFSET * 2
+        ) + 2;
+        yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.getMapGuiRadius() * 2) - (
+            MinimapClientEvents.CORNER_OFFSET * 2
+        ) - 4;
 
         ItemRenderer itemrenderer = MC.getItemRenderer();
         itemrenderer.renderAndDecorateItem(new ItemStack(Items.CLOCK), xPos, yPos);
@@ -101,13 +115,14 @@ public class TimeClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
-        if (!TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
+        if (!TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK)) {
             return;
+        }
 
         final int GUI_LENGTH = 16;
 
-        if (evt.getMouseX() > xPos && evt.getMouseX() <= xPos + GUI_LENGTH &&
-                evt.getMouseY() > yPos && evt.getMouseY() <= yPos + GUI_LENGTH) {
+        if (evt.getMouseX() > xPos && evt.getMouseX() <= xPos + GUI_LENGTH && evt.getMouseY() > yPos
+            && evt.getMouseY() <= yPos + GUI_LENGTH) {
 
             final long DAWN = 500;
             final long DUSK = 12500;
@@ -115,37 +130,62 @@ public class TimeClientEvents {
             // 'day' is when undead start burning, ~500
             // 'night' is when undead stop burning, ~12500
             boolean isDay = serverTime > DAWN && serverTime <= DUSK;
-            String dayStr = isDay ? " (day)" : " (night)";
+            String dayStr = " (%s)".formatted(I18n.get(isDay ? "time.reignofnether.day" : "time.reignofnether.night"));
             String timeStr = get12HourTimeStr(serverTime) + dayStr;
 
-            FormattedCharSequence timeUntilStr = FormattedCharSequence.forward(
-                    getTimeUntilStr(serverTime, isDay ? DUSK : DAWN) + " until " + (isDay ? "night" : "day"), Style.EMPTY);
+            FormattedCharSequence timeUntilStr = FormattedCharSequence.forward(I18n.get("time.reignofnether.time_until",
+                getTimeUntilStr(serverTime, isDay ? DUSK : DAWN),
+                isDay ? I18n.get("time.reignofnether.day") : I18n.get("time.reignofnether.night")
+            ), Style.EMPTY);
 
             FormattedCharSequence gameLengthStr = FormattedCharSequence.forward("", Style.EMPTY);
 
-            if (PlayerClientEvents.isRTSPlayer)
-                gameLengthStr = FormattedCharSequence.forward(I18n.get("time.reignofnether.game_time") + getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks), Style.EMPTY);
+            if (PlayerClientEvents.isRTSPlayer) {
+                gameLengthStr = FormattedCharSequence.forward(
+                    I18n.get("time.reignofnether.game_time") + getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks),
+                    Style.EMPTY
+                );
+            }
 
-            List<FormattedCharSequence> tooltip = List.of(
-                    FormattedCharSequence.forward(I18n.get("time.reignofnether.time") + timeStr, Style.EMPTY),
-                    timeUntilStr,
-                    FormattedCharSequence.forward("" + timeStr, Style.EMPTY),
-                    gameLengthStr
+            List<FormattedCharSequence> tooltip = List.of(FormattedCharSequence.forward(
+                    I18n.get("time.reignofnether.time") + timeStr,
+                    Style.EMPTY
+                ),
+                timeUntilStr,
+                FormattedCharSequence.forward(timeStr, Style.EMPTY),
+                gameLengthStr
             );
-            if (targetClientTime != serverTime)
+            if (targetClientTime != serverTime) {
                 tooltip = List.of(
-                    FormattedCharSequence.forward(I18n.get("time.reignofnether.time_is_distorted"), Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("time.reignofnether.time_is_distorted"),
+                        Style.EMPTY.withBold(true)
+                    ),
                     FormattedCharSequence.forward(I18n.get("time.reignofnether.real_time") + timeStr, Style.EMPTY),
                     timeUntilStr,
                     gameLengthStr
                 );
+            }
 
-            MyRenderer.renderTooltip(
-                    evt.getPoseStack(),
-                    tooltip,
-                    evt.getMouseX(),
-                    evt.getMouseY()
-            );
+            MyRenderer.renderTooltip(evt.getPoseStack(), tooltip, evt.getMouseX(), evt.getMouseY());
         }
+    }
+
+    // show corners of all frozenChunks
+    @SubscribeEvent
+    public static void onRenderLevel(RenderLevelStageEvent evt) {
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+            return;
+        }
+        if (!OrthoviewClientEvents.isEnabled()) {
+            return;
+        }
+
+        // draw night-ranges for monsters
+        for (Building building : BuildingClientEvents.getBuildings())
+            if (building instanceof NightSource ns) {
+                for (BlockPos bp : ns.getNightBorderBps()) {
+                    MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, 0f, 0f, 0f, 0.5f);
+                }
+            }
     }
 }

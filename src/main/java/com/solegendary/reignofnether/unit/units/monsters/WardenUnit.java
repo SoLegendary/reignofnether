@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -120,9 +121,9 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 6.0f;
+    final static public float attackDamage = 8.0f;
     final static public float attacksPerSecond = 0.6f;
-    final static public float maxHealth = 90.0f;
+    final static public float maxHealth = 120.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.28f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
@@ -189,7 +190,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
         this.sonicBoomGoal.tick();
 
         // apply slowness level 2 during daytime for a short time repeatedly
-        if (!this.level.isClientSide() && this.level.isDay() && !BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false))
+        if (!this.level.isClientSide() && this.level.isDay() && !TimeUtils.isInRangeOfNightSource(this.getEyePosition(), false))
             this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 2, 1));
     }
 

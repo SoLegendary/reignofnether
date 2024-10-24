@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -24,11 +25,13 @@ public class ResourcesSaveData extends SavedData {
         if (server == null) {
             return create();
         }
-        return server.overworld().getDataStorage().computeIfAbsent(ResourcesSaveData::load, ResourcesSaveData::create, "saved-resources-data");
+        return server.overworld()
+            .getDataStorage()
+            .computeIfAbsent(ResourcesSaveData::load, ResourcesSaveData::create, "saved-resources-data");
     }
 
     public static ResourcesSaveData load(CompoundTag tag) {
-        System.out.println("ResourcesSaveData.load");
+        ReignOfNether.LOGGER.info("ResourcesSaveData.load");
 
         ResourcesSaveData data = create();
         ListTag ltag = (ListTag) tag.get("resources");
@@ -44,7 +47,7 @@ public class ResourcesSaveData extends SavedData {
 
                 data.resources.add(new Resources(ownerName, food, wood, ore));
 
-                System.out.println("ResourcesSaveData.load: " + ownerName + "|" + food + "|" + wood + "|" + ore);
+                ReignOfNether.LOGGER.info("ResourcesSaveData.load: " + ownerName + "|" + food + "|" + wood + "|" + ore);
             }
         }
         return data;
@@ -52,7 +55,7 @@ public class ResourcesSaveData extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        System.out.println("ResourcesSaveData.save");
+        ReignOfNether.LOGGER.info("ResourcesSaveData.save");
 
         ListTag list = new ListTag();
         this.resources.forEach(r -> {
@@ -63,7 +66,8 @@ public class ResourcesSaveData extends SavedData {
             cTag.putInt("ore", r.ore);
             list.add(cTag);
 
-            System.out.println("ResourcesSaveData.save: " + r.ownerName + "|" + r.food + "|" + r.wood + "|" + r.ore);
+            ReignOfNether.LOGGER.info(
+                "ResourcesSaveData.save: " + r.ownerName + "|" + r.food + "|" + r.wood + "|" + r.ore);
         });
         tag.put("resources", list);
         return tag;

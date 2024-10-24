@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.tutorial;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.LevelAccessor;
@@ -21,19 +22,21 @@ public class TutorialSaveData extends SavedData {
         if (server == null) {
             return create();
         }
-        return server.overworld().getDataStorage().computeIfAbsent(TutorialSaveData::load, TutorialSaveData::create, "saved-tutorial-data");
+        return server.overworld()
+            .getDataStorage()
+            .computeIfAbsent(TutorialSaveData::load, TutorialSaveData::create, "saved-tutorial-data");
     }
 
     public static TutorialSaveData load(CompoundTag tag) {
         TutorialSaveData data = create();
         data.stage = TutorialStage.valueOf(tag.getString("stage"));
-        System.out.println("TutorialSaveData.load: " + data.stage);
+        ReignOfNether.LOGGER.info("TutorialSaveData.load: " + data.stage);
         return data;
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        System.out.println("TutorialSaveData.save: " + stage);
+        ReignOfNether.LOGGER.info("TutorialSaveData.save: " + stage);
         tag.putString("stage", this.stage.name());
         return tag;
     }

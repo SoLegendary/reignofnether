@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.ability.abilities.Explode;
+import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -175,7 +176,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
             this.setSwellDir(-1);
 
         // apply slowness level 2 during daytime for a short time repeatedly
-        if (!this.level.isClientSide() && this.level.isDay() && !BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false))
+        if (!this.level.isClientSide() && this.level.isDay() && !TimeUtils.isInRangeOfNightSource(this.getEyePosition(), false))
             this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 2, 1));
     }
 

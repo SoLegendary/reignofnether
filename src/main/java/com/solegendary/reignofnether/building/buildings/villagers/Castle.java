@@ -7,7 +7,8 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.researchItems.*;
+import com.solegendary.reignofnether.research.researchItems.ResearchCastleFlag;
+import com.solegendary.reignofnether.research.researchItems.ResearchRavagerCavalry;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
@@ -40,7 +41,14 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
     private final static int MAX_OCCUPANTS = 7;
 
     public Castle(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
-        super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
+        super(
+            level,
+            originPos,
+            rotation,
+            ownerName,
+            getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation),
+            false
+        );
         this.name = buildingName;
         this.ownerName = ownerName;
         this.portraitBlock = Blocks.COBBLESTONE;
@@ -62,8 +70,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
         this.abilities.add(promoteIllager);
 
         if (level.isClientSide()) {
-            this.productionButtons = Arrays.asList(
-                RavagerProd.getStartButton(this, Keybindings.keyQ),
+            this.productionButtons = Arrays.asList(RavagerProd.getStartButton(this, Keybindings.keyQ),
                 ResearchRavagerCavalry.getStartButton(this, Keybindings.keyW),
                 ResearchCastleFlag.getStartButton(this, Keybindings.keyE)
             );
@@ -71,44 +78,62 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
         }
     }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
+    public Faction getFaction() {
+        return Faction.VILLAGERS;
+    }
 
     // don't use this for abilities as it may not be balanced
-    public int getAttackRange() { return 30; }
+    public int getAttackRange() {
+        return 30;
+    }
+
     // bonus for units attacking garrisoned units
-    public int getExternalAttackRangeBonus() { return 15; }
+    public int getExternalAttackRangeBonus() {
+        return 15;
+    }
 
     public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
         return BuildingBlockData.getBuildingBlocks(structureName, level);
     }
 
     public boolean canDestroyBlock(BlockPos relativeBp) {
-        return relativeBp.getY() != 15 &&
-                relativeBp.getY() != 17;
+        return relativeBp.getY() != 15 && relativeBp.getY() != 17;
     }
 
     public static AbilityButton getBuildButton(Keybinding hotkey) {
-        return new AbilityButton(
-                Castle.buildingName,
-                new ResourceLocation("minecraft", "textures/block/cobblestone.png"),
-                hotkey,
-                () -> BuildingClientEvents.getBuildingToPlace() == Castle.class,
-                TutorialClientEvents::isEnabled,
-                () -> (BuildingClientEvents.hasFinishedBuilding(Barracks.buildingName) &&
-                        BuildingClientEvents.hasFinishedBuilding(ArcaneTower.buildingName)) ||
-                        ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Castle.class),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.castle"), Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.castle.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.castle.tooltip2", MAX_OCCUPANTS), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.castle.tooltip3"), Style.EMPTY)
+        return new AbilityButton(Castle.buildingName,
+            new ResourceLocation("minecraft", "textures/block/cobblestone.png"),
+            hotkey,
+            () -> BuildingClientEvents.getBuildingToPlace() == Castle.class,
+            TutorialClientEvents::isEnabled,
+            () -> (
+                BuildingClientEvents.hasFinishedBuilding(Barracks.buildingName)
+                    && BuildingClientEvents.hasFinishedBuilding(Blacksmith.buildingName)
+                    && BuildingClientEvents.hasFinishedBuilding(ArcaneTower.buildingName)
+            ) || ResearchClient.hasCheat("modifythephasevariance"),
+            () -> BuildingClientEvents.setBuildingToPlace(Castle.class),
+            null,
+            List.of(FormattedCharSequence.forward(
+                    I18n.get("buildings.villagers.reignofnether.castle"),
+                    Style.EMPTY.withBold(true)
                 ),
-                null
+                ResourceCosts.getFormattedCost(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(
+                    I18n.get("buildings.villagers.reignofnether.castle.tooltip1"),
+                    Style.EMPTY
+                ),
+                FormattedCharSequence.forward(I18n.get(
+                    "buildings.villagers.reignofnether.castle.tooltip2",
+                    MAX_OCCUPANTS
+                ), Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(
+                    I18n.get("buildings.villagers.reignofnether.castle.tooltip3"),
+                    Style.EMPTY
+                )
+            ),
+            null
         );
     }
 
@@ -122,10 +147,11 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
     @Override
     public boolean isUpgraded() {
         for (BuildingBlock block : blocks)
-            if (block.getBlockState().getBlock() == Blocks.WHITE_WOOL ||
-                    block.getBlockState().getBlock() == Blocks.RED_WOOL ||
-                    block.getBlockState().getBlock() == Blocks.LIGHT_GRAY_WOOL)
+            if (block.getBlockState().getBlock() == Blocks.WHITE_WOOL
+                || block.getBlockState().getBlock() == Blocks.RED_WOOL
+                || block.getBlockState().getBlock() == Blocks.LIGHT_GRAY_WOOL) {
                 return true;
+            }
         return false;
     }
 
@@ -137,29 +163,31 @@ public class Castle extends ProductionBuilding implements GarrisonableBuilding {
     @Override
     public BlockPos getEntryPosition() {
         if (this.rotation == Rotation.NONE) {
-            return new BlockPos(5,16,5);
+            return new BlockPos(5, 16, 5);
         } else if (this.rotation == Rotation.CLOCKWISE_90) {
-            return new BlockPos(-5,16,5);
+            return new BlockPos(-5, 16, 5);
         } else if (this.rotation == Rotation.CLOCKWISE_180) {
-            return new BlockPos(-5,16,-5);
+            return new BlockPos(-5, 16, -5);
         } else {
-            return new BlockPos(5,16,-5);
+            return new BlockPos(5, 16, -5);
         }
     }
 
     @Override
     public BlockPos getExitPosition() {
         if (this.rotation == Rotation.NONE) {
-            return new BlockPos(5,2,5);
+            return new BlockPos(5, 2, 5);
         } else if (this.rotation == Rotation.CLOCKWISE_90) {
-            return new BlockPos(-5,2,5);
+            return new BlockPos(-5, 2, 5);
         } else if (this.rotation == Rotation.CLOCKWISE_180) {
-            return new BlockPos(-5,2,-5);
+            return new BlockPos(-5, 2, -5);
         } else {
-            return new BlockPos(5,2,-5);
+            return new BlockPos(5, 2, -5);
         }
     }
 
     @Override
-    public boolean isFull() { return GarrisonableBuilding.getNumOccupants(this) >= MAX_OCCUPANTS; }
+    public boolean isFull() {
+        return GarrisonableBuilding.getNumOccupants(this) >= MAX_OCCUPANTS;
+    }
 }

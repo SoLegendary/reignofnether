@@ -4,13 +4,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -33,8 +32,9 @@ public class ResourcesClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
+        if (evt.phase != TickEvent.Phase.END) {
             return;
+        }
 
         for (Resources resources : resourcesList)
             resources.tick();
@@ -48,48 +48,47 @@ public class ResourcesClientEvents {
     // should never be run from clientside except via packet
     public static void addSubtractResources(Resources serverResources) {
         for (Resources resources : resourcesList)
-            if (resources.ownerName.equals(serverResources.ownerName))
-                resources.changeOverTime(
-                    serverResources.food,
-                    serverResources.wood,
-                    serverResources.ore
-                );
+            if (resources.ownerName.equals(serverResources.ownerName)) {
+                resources.changeOverTime(serverResources.food, serverResources.wood, serverResources.ore);
+            }
     }
 
     public static void addSubtractResourcesInstantly(Resources serverResources) {
         for (Resources resources : resourcesList)
-            if (resources.ownerName.equals(serverResources.ownerName))
-                resources.changeInstantly(
-                    serverResources.food,
-                    serverResources.wood,
-                    serverResources.ore
-                );
+            if (resources.ownerName.equals(serverResources.ownerName)) {
+                resources.changeInstantly(serverResources.food, serverResources.wood, serverResources.ore);
+            }
     }
 
     public static Resources getOwnResources() {
         Minecraft MC = Minecraft.getInstance();
-        if (MC.player != null)
+        if (MC.player != null) {
             return getResources(MC.player.getName().getString());
+        }
         return null;
     }
 
     public static Resources getResources(String playerName) {
         for (Resources resources : resourcesList)
-            if (resources.ownerName.equals(playerName))
+            if (resources.ownerName.equals(playerName)) {
                 return resources;
+            }
         return null;
     }
 
     public static void showWarning(String ownerName, String msg) {
         Player player = Minecraft.getInstance().player;
         if (player != null && player.getName().getString().equals(ownerName)) {
-            HudClientEvents.showTemporaryMessage(msg);
+            String loc = I18n.get(msg);
+            HudClientEvents.showTemporaryMessage(loc);
 
             // remove checkpoints from a failed building placement since the client has no knowledge of resource costs
-            if (msg.contains("You don't have enough"))
+            if (loc.contains("You don't have enough")) {
                 for (LivingEntity entity : getSelectedUnits())
-                    if (entity instanceof Unit unit)
+                    if (entity instanceof Unit unit) {
                         unit.getCheckpoints().clear();
+                    }
+            }
         }
     }
 
@@ -110,10 +109,12 @@ public class ResourcesClientEvents {
     }
 
     public static void addFloatingTextsFromResources(Resources res, BlockPos pos) {
-        if (!OrthoviewClientEvents.isEnabled())
+        if (!OrthoviewClientEvents.isEnabled()) {
             return;
-        if (!Minecraft.getInstance().player.getName().getString().equals(res.ownerName))
+        }
+        if (!Minecraft.getInstance().player.getName().getString().equals(res.ownerName)) {
             return;
+        }
 
         int tickAge = 0;
         if (res.food > 0) {
@@ -124,15 +125,17 @@ public class ResourcesClientEvents {
             floatingTexts.add(new FloatingText("+" + res.wood + "  \uE001", pos, tickAge));
             tickAge -= 25;
         }
-        if (res.ore > 0)
+        if (res.ore > 0) {
             floatingTexts.add(new FloatingText("+" + res.ore + "  \uE002", pos, tickAge));
+        }
     }
 
     // Render floating text for dropped-off resources
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
-        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             return;
+        }
 
         for (FloatingText floatingText : floatingTexts) {
 
@@ -145,30 +148,42 @@ public class ResourcesClientEvents {
                 Vec3 camPos = camera.getPosition();
 
                 poseStack.pushPose();
-                poseStack.translate(
-                        floatingText.pos.getX() - camPos.x(),
-                        floatingText.pos.getY() - camPos.y() + 2.5 + (floatingText.tickAge / 20f),
-                        floatingText.pos.getZ() - camPos.z()
+                poseStack.translate(floatingText.pos.getX() - camPos.x(),
+                    floatingText.pos.getY() - camPos.y() + 2.5 + (floatingText.tickAge / 20f),
+                    floatingText.pos.getZ() - camPos.z()
                 );
                 poseStack.mulPose(Vector3f.YP.rotationDegrees(-camera.getYRot()));
                 poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
-                if (OrthoviewClientEvents.isEnabled())
+                if (OrthoviewClientEvents.isEnabled()) {
                     poseStack.scale(-0.075F, -0.075F, 0.075F);
-                else
+                } else {
                     poseStack.scale(-0.05F, -0.05F, 0.05F);
+                }
                 Font font = MC.font;
-                float f2 = (float)(-font.width(component) / 2);
+                float f2 = (float) (-font.width(component) / 2);
                 float f1 = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
-                float alphaPercent = ((FLOATING_TEXT_MAX_AGE - floatingText.tickAge) * 1.5f) / (float) FLOATING_TEXT_MAX_AGE;
-                if (alphaPercent < 0.05)
+                float alphaPercent =
+                    ((FLOATING_TEXT_MAX_AGE - floatingText.tickAge) * 1.5f) / (float) FLOATING_TEXT_MAX_AGE;
+                if (alphaPercent < 0.05) {
                     alphaPercent = 0.05f;
-                if (alphaPercent > 1)
+                }
+                if (alphaPercent > 1) {
                     alphaPercent = 1f;
+                }
                 int textCol = 0x00FFFFFF + ((int) (0xFF * alphaPercent) << 24);
-                int bgCol = (int)(f1 * 255.0F * alphaPercent) << 24;
+                int bgCol = (int) (f1 * 255.0F * alphaPercent) << 24;
 
-                font.drawInBatch(component, f2, 0, textCol, false, poseStack.last().pose(),
-                        MC.renderBuffers().bufferSource(), false, bgCol, 255);
+                font.drawInBatch(component,
+                    f2,
+                    0,
+                    textCol,
+                    false,
+                    poseStack.last().pose(),
+                    MC.renderBuffers().bufferSource(),
+                    false,
+                    bgCol,
+                    255
+                );
 
                 poseStack.popPose();
             }

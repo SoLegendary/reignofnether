@@ -31,6 +31,9 @@ public class WheatFarm extends Building {
     public final static String structureName = "wheat_farm";
     public final static ResourceCost cost = ResourceCosts.WHEAT_FARM;
 
+    private static final int ICE_CHECK_TICKS_MAX = 100;
+    private int ticksToNextIceCheck = ICE_CHECK_TICKS_MAX;
+
     public WheatFarm(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
         this.name = buildingName;
@@ -74,5 +77,19 @@ public class WheatFarm extends Building {
                 ),
                 null
         );
+    }
+
+    @Override
+    public void tick(Level tickLevel) {
+        super.tick(tickLevel);
+        if (!tickLevel.isClientSide()) {
+            ticksToNextIceCheck -= 1;
+            if (ticksToNextIceCheck <= 0) {
+                for (BuildingBlock bb : blocks)
+                    if (tickLevel.getBlockState(bb.getBlockPos()).getBlock() == Blocks.ICE)
+                        tickLevel.setBlockAndUpdate(bb.getBlockPos(), Blocks.WATER.defaultBlockState());
+                ticksToNextIceCheck = ICE_CHECK_TICKS_MAX;
+            }
+        }
     }
 }

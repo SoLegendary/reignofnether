@@ -48,13 +48,12 @@ public class ResearchHoglinCavalry extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchHoglinCavalry.itemName) || ResearchClient.hasResearch(
-                ResearchHoglinCavalry.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchHoglinCavalry.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchHoglinCavalry.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.hoglin_cavalry"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.hoglin_cavalry"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),

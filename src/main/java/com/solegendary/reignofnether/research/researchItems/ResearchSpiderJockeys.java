@@ -50,13 +50,12 @@ public class ResearchSpiderJockeys extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchSpiderJockeys.itemName) || ResearchClient.hasResearch(
-                ResearchSpiderJockeys.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchSpiderJockeys.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchSpiderJockeys.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(SpiderLair.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.spider_jockeys"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.spider_jockeys"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
@@ -31,44 +32,121 @@ public class BuildingClientboundPacket {
     public Portal.PortalType portalType;
     public boolean forPlayerLoggingIn; // is this placement for someone logging in currently joined?
 
-    public static void placeBuilding(BlockPos buildingPos, String itemName, Rotation rotation, String ownerName, int numQueuedBlocks,
-                                     boolean isDiagonalBridge, boolean isUpgraded, boolean isBuilt, Portal.PortalType portalType, boolean forPlayerLoggingIn) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new BuildingClientboundPacket(BuildingAction.PLACE,
-                    itemName, buildingPos, rotation, ownerName, 0, numQueuedBlocks,
-                    isDiagonalBridge, isUpgraded, isBuilt, portalType, forPlayerLoggingIn));
-    }
-    public static void syncBuilding(BlockPos buildingPos, int blocksPlaced) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new BuildingClientboundPacket(BuildingAction.SYNC_BLOCKS,
-                        "", buildingPos, Rotation.NONE, "", blocksPlaced, 0,
-                        false, false, false, Portal.PortalType.BASIC, false));
-    }
-    public static void startProduction(BlockPos buildingPos, String itemName) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new BuildingClientboundPacket(
-            BuildingAction.START_PRODUCTION,
-            itemName, buildingPos, Rotation.NONE, "", 0, 0, false,
-                    false, false, Portal.PortalType.BASIC, false));
-    }
-    public static void cancelProduction(BlockPos buildingPos, String itemName, boolean frontItem) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new BuildingClientboundPacket(
-                        frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
-                        itemName, buildingPos, Rotation.NONE, "", 0, 0,
-                        false, false, false, Portal.PortalType.BASIC, false));
-    }
-    public static void changePortal(BlockPos buildingPos, String portalType) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new BuildingClientboundPacket(
-                        BuildingAction.CHANGE_PORTAL, portalType, buildingPos,
-                        Rotation.NONE, "", 0, 0, false, false,
-                        false, Portal.PortalType.BASIC, false));
+    public static void placeBuilding(
+        BlockPos buildingPos,
+        String itemName,
+        Rotation rotation,
+        String ownerName,
+        int numQueuedBlocks,
+        boolean isDiagonalBridge,
+        boolean isUpgraded,
+        boolean isBuilt,
+        Portal.PortalType portalType,
+        boolean forPlayerLoggingIn
+    ) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new BuildingClientboundPacket(BuildingAction.PLACE,
+            itemName,
+            buildingPos,
+            rotation,
+            ownerName,
+            0,
+            numQueuedBlocks,
+            isDiagonalBridge,
+            isUpgraded,
+            isBuilt,
+            portalType,
+            forPlayerLoggingIn
+        ));
     }
 
-    public BuildingClientboundPacket(BuildingAction action, String itemName, BlockPos buildingPos, Rotation rotation, String ownerName,
-                                     int blocksPlaced, int numQueuedBlocks, boolean isDiagonalBridge, boolean isUpgraded,
-                                     boolean isBuilt, Portal.PortalType portalType, boolean forPlayerLoggingIn) {
+    public static void syncBuilding(BlockPos buildingPos, int blocksPlaced) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+            new BuildingClientboundPacket(BuildingAction.SYNC_BLOCKS,
+                "",
+                buildingPos,
+                Rotation.NONE,
+                "",
+                blocksPlaced,
+                0,
+                false,
+                false,
+                false,
+                Portal.PortalType.BASIC,
+                false
+            )
+        );
+    }
+
+    public static void startProduction(BlockPos buildingPos, String itemName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+            new BuildingClientboundPacket(BuildingAction.START_PRODUCTION,
+                itemName,
+                buildingPos,
+                Rotation.NONE,
+                "",
+                0,
+                0,
+                false,
+                false,
+                false,
+                Portal.PortalType.BASIC,
+                false
+            )
+        );
+    }
+
+    public static void cancelProduction(BlockPos buildingPos, String itemName, boolean frontItem) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+            new BuildingClientboundPacket(frontItem
+                                          ? BuildingAction.CANCEL_PRODUCTION
+                                          : BuildingAction.CANCEL_BACK_PRODUCTION,
+                itemName,
+                buildingPos,
+                Rotation.NONE,
+                "",
+                0,
+                0,
+                false,
+                false,
+                false,
+                Portal.PortalType.BASIC,
+                false
+            )
+        );
+    }
+
+    public static void changePortal(BlockPos buildingPos, String portalType) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+            new BuildingClientboundPacket(BuildingAction.CHANGE_PORTAL,
+                portalType,
+                buildingPos,
+                Rotation.NONE,
+                "",
+                0,
+                0,
+                false,
+                false,
+                false,
+                Portal.PortalType.BASIC,
+                false
+            )
+        );
+    }
+
+    public BuildingClientboundPacket(
+        BuildingAction action,
+        String itemName,
+        BlockPos buildingPos,
+        Rotation rotation,
+        String ownerName,
+        int blocksPlaced,
+        int numQueuedBlocks,
+        boolean isDiagonalBridge,
+        boolean isUpgraded,
+        boolean isBuilt,
+        Portal.PortalType portalType,
+        boolean forPlayerLoggingIn
+    ) {
         this.action = action;
         this.itemName = itemName;
         this.buildingPos = buildingPos;
@@ -118,8 +196,7 @@ public class BuildingClientboundPacket {
         final var success = new AtomicBoolean(false);
 
         ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
-            () -> () -> {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 Building building = null;
                 if (this.action != BuildingAction.PLACE) {
                     building = findBuilding(true, this.buildingPos);
@@ -128,27 +205,51 @@ public class BuildingClientboundPacket {
                         // if the client was missing a building, replace it
                         if (this.action == BuildingAction.SYNC_BLOCKS) {
                             BuildingServerboundPacket.requestReplacement(this.buildingPos);
-                            System.out.println("Missing building");
+                            ReignOfNether.LOGGER.warn("Missing building");
                         }
                         return;
                     }
                 }
                 switch (action) {
-                    case PLACE -> BuildingClientEvents.placeBuilding(this.itemName, this.buildingPos, this.rotation, this.ownerName,
-                            this.numQueuedBlocks, this.isDiagonalBridge, this.isBuilt, this.isUpgraded, this.portalType, this.forPlayerLoggingIn);
+                    case PLACE -> BuildingClientEvents.placeBuilding(this.itemName,
+                        this.buildingPos,
+                        this.rotation,
+                        this.ownerName,
+                        this.numQueuedBlocks,
+                        this.isDiagonalBridge,
+                        this.isBuilt,
+                        this.isUpgraded,
+                        this.portalType,
+                        this.forPlayerLoggingIn
+                    );
                     case SYNC_BLOCKS -> BuildingClientEvents.syncBuildingBlocks(building, this.blocksPlaced);
                     case START_PRODUCTION -> {
-                        ProductionBuilding.startProductionItem((ProductionBuilding) building, this.itemName, this.buildingPos);
+                        ProductionBuilding.startProductionItem(
+                            (ProductionBuilding) building,
+                            this.itemName,
+                            this.buildingPos
+                        );
                     }
                     case CANCEL_PRODUCTION -> {
-                        ProductionBuilding.cancelProductionItem((ProductionBuilding) building, this.itemName, this.buildingPos, true);
+                        ProductionBuilding.cancelProductionItem(
+                            (ProductionBuilding) building,
+                            this.itemName,
+                            this.buildingPos,
+                            true
+                        );
                     }
                     case CANCEL_BACK_PRODUCTION -> {
-                        ProductionBuilding.cancelProductionItem((ProductionBuilding) building, this.itemName, this.buildingPos, false);
+                        ProductionBuilding.cancelProductionItem(
+                            (ProductionBuilding) building,
+                            this.itemName,
+                            this.buildingPos,
+                            false
+                        );
                     }
                     case CHANGE_PORTAL -> {
-                        if (building instanceof Portal portal)
+                        if (building instanceof Portal portal) {
                             portal.changeStructure(Portal.PortalType.valueOf(itemName));
+                        }
                     }
                 }
                 success.set(true);

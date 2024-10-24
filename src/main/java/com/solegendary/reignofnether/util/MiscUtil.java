@@ -3,10 +3,9 @@ package com.solegendary.reignofnether.util;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3d;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.resources.BlockUtils;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -19,6 +18,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
@@ -32,16 +32,17 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
+import static com.solegendary.reignofnether.resources.BlockUtils.isLeafBlock;
+import static com.solegendary.reignofnether.resources.BlockUtils.isLogBlock;
 import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
 
@@ -70,7 +71,7 @@ public class MiscUtil {
     public static boolean isGroundBlock(Level level, BlockPos bp) {
         BlockState bs = level.getBlockState(bp);
         Block block = bs.getBlock();
-        if (ResourcesServerEvents.isLogBlock(bs) || ResourcesServerEvents.isLeafBlock(bs) || bs.isAir() ||
+        if (isLogBlock(bs) || isLeafBlock(bs) || bs.isAir() ||
                 BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), bp))
             return false;
         return true;
@@ -99,8 +100,7 @@ public class MiscUtil {
         do {
             bs = level.getBlockState(new BlockPos(blockPos.getX(), y, blockPos.getZ()));
             y -= 1;
-        } while(bs.isAir() && y > 0);
-
+        } while(bs.isAir() && y > -63);
         return new BlockPos(blockPos.getX(), y, blockPos.getZ());
     }
 
@@ -336,5 +336,89 @@ public class MiscUtil {
         Vector3d cursorWorldPosNear = MyMath.addVector3d(centrePosd, lookVector, -200);
         Vector3d cursorWorldPosFar = MyMath.addVector3d(centrePosd, lookVector, 200);
         return CursorClientEvents.getRefinedCursorWorldPos(cursorWorldPosNear, cursorWorldPosFar);
+    }
+
+
+    // highlight the tops of all blocks which are of at a certain horizontal distance away from the centrePos
+    public static List<BlockPos> getGroundCircleBlocks(BlockPos centrePos, int radius, Level level) {
+        if (radius <= 0)
+            return List.of();
+
+        ArrayList<BlockPos> bps = new ArrayList<>();
+
+        for (BlockPos bp : CircleUtil.getCircle(centrePos, radius)) {
+            int groundY = level.getHeight(Heightmap.Types.MOTION_BLOCKING, bp.getX(), bp.getZ()) - 1;
+            BlockPos groundBp = new BlockPos(bp.getX(), groundY, bp.getZ());
+
+            int y = 1;
+            while (y < 10 && (level.getBlockState(groundBp).isAir() ||
+                    BlockUtils.isLeafBlock(level.getBlockState(groundBp)) ||
+                    BuildingUtils.isPosInsideAnyBuilding(true, groundBp))) {
+                groundBp = groundBp.offset(0,-y,0);
+                y += 1;
+            }
+            bps.add(groundBp);
+        }
+        return bps;
+    }
+
+    public static class CircleUtil {
+
+        private static final Map<Integer, List<BlockPos>> circleCache = new HashMap<>();
+
+        public static List<BlockPos> getCircle(BlockPos center, int radius) {
+            if (!circleCache.containsKey(radius)) {
+                // If not cached, compute and store it
+                circleCache.put(radius, computeCircleEdge(radius));
+            }
+            // Retrieve precomputed circle edge points
+            List<BlockPos> cachedCircle = circleCache.get(radius);
+
+            // Translate the circle to the given center position
+            List<BlockPos> translatedCircle = new ArrayList<>(cachedCircle.size());
+            int cx = center.getX();
+            int cy = center.getY();
+            int cz = center.getZ();
+
+            for (BlockPos pos : cachedCircle) {
+                translatedCircle.add(new BlockPos(cx + pos.getX(), cy, cz + pos.getZ()));
+            }
+            return translatedCircle;
+        }
+        private static List<BlockPos> computeCircleEdge(int radius) {
+            List<BlockPos> circleBlocks = new ArrayList<>(8 * radius);
+
+            int x = radius;
+            int z = 0;
+            int decisionOver2 = 1 - x;
+
+            // Bresenham's circle algorithm to compute the edge points
+            while (x >= z) {
+                addSymmetricPoints(circleBlocks, x, z);
+                z++;
+                if (decisionOver2 <= 0) {
+                    decisionOver2 += 2 * z + 1;
+                } else {
+                    x--;
+                    decisionOver2 += 2 * (z - x) + 1;
+                }
+            }
+
+            return circleBlocks;
+        }
+        private static void addSymmetricPoints(List<BlockPos> circleBlocks, int x, int z) {
+            // Adding symmetric points in 8 octants
+            circleBlocks.add(new BlockPos(x, 0, z));
+            circleBlocks.add(new BlockPos(-x, 0, z));
+            circleBlocks.add(new BlockPos(x, 0, -z));
+            circleBlocks.add(new BlockPos(-x, 0, -z));
+
+            if (x != z) {
+                circleBlocks.add(new BlockPos(z, 0, x));
+                circleBlocks.add(new BlockPos(-z, 0, x));
+                circleBlocks.add(new BlockPos(z, 0, -x));
+                circleBlocks.add(new BlockPos(-z, 0, -x));
+            }
+        }
     }
 }

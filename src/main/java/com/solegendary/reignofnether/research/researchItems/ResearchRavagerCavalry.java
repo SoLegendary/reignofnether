@@ -48,13 +48,12 @@ public class ResearchRavagerCavalry extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchRavagerCavalry.itemName) || ResearchClient.hasResearch(
-                ResearchRavagerCavalry.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchRavagerCavalry.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchRavagerCavalry.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.ravager_cavalry"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.ravager_cavalry"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),

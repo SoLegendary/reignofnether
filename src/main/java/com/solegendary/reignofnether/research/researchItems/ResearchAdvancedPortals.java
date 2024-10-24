@@ -48,24 +48,21 @@ public class ResearchAdvancedPortals extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchAdvancedPortals.itemName) || ResearchClient.hasResearch(
-                ResearchAdvancedPortals.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchAdvancedPortals.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchAdvancedPortals.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.advanced_portals"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.advanced_portals"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.advanced_portals.tooltip1"),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.advanced_portals.tooltip1"),
                     Style.EMPTY
                 ),
-                FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.advanced_portals.tooltip2"),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.advanced_portals.tooltip2"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.advanced_portals.tooltip3"), Style.EMPTY)

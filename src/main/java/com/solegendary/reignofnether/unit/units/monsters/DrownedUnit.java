@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -166,7 +167,7 @@ public class DrownedUnit extends Drowned implements Unit, AttackerUnit {
     @Override
     protected boolean isSunBurnTick() {
         return super.isSunBurnTick() &&
-                !BuildingUtils.isInRangeOfNightSource(this.getEyePosition(), false);
+                !TimeUtils.isInRangeOfNightSource(this.getEyePosition(), false);
     }
 
     @Override

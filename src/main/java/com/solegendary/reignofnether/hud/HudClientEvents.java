@@ -45,6 +45,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -96,12 +97,22 @@ public class HudClientEvents {
     // eg. entity.reignofnether.zombie_unit -> zombie
     public static String getSimpleEntityName(Entity entity) {
         if (entity instanceof Unit) {
-            return entity.getName()
-                .getString()
-                .replace(" ", "")
-                .replace("entity.reignofnether.", "")
-                .replace("_unit", "")
-                .replace(".none", "");
+            if (entity.hasCustomName()) {
+                return entity.getType()
+                    .getDescription()
+                    .getString()
+                    .replace(" ", "")
+                    .replace("entity.reignofnether.", "")
+                    .replace("_unit", "")
+                    .replace(".none", "");
+            } else {
+                return entity.getName()
+                    .getString()
+                    .replace(" ", "")
+                    .replace("entity.reignofnether.", "")
+                    .replace("_unit", "")
+                    .replace(".none", "");
+            }
         } else {
             return entity.getName().getString();
         }
@@ -188,6 +199,8 @@ public class HudClientEvents {
             hudZones.add(buildingPortraitZone);
 
             blitX += portraitRendererBuilding.frameWidth + 10;
+
+            blitXStart = blitX + 20;
 
 
             // ---------------------------
@@ -314,21 +327,28 @@ public class HudClientEvents {
 
                     // name and progress %
                     ProductionItem firstProdItem = selProdBuilding.productionQueue.get(0);
-                    float percentageDone = (float) firstProdItem.ticksLeft / (float) firstProdItem.ticksToProduce;
+                    float percentageDoneInv = (float) firstProdItem.ticksLeft / (float) firstProdItem.ticksToProduce;
 
+                    int colour = 0xFFFFFF;
+                    if (!firstProdItem.isBelowPopulationSupply()) {
+                        colour = 0xFF0000;
+                        if (percentageDoneInv <= 0) {
+                            percentageDoneInv = 0.01f;
+                        }
+                    }
                     GuiComponent.drawString(evt.getPoseStack(),
                         MC.font,
-                        Math.round(100 - (percentageDone * 100f)) + "% " + productionButtons.get(0).name,
+                        Math.round(100 - (percentageDoneInv * 100f)) + "% " + productionButtons.get(0).name,
                         blitX + iconFrameSize + 5,
                         blitY + 2,
-                        0xFFFFFF
+                        colour
                     );
 
                     int buttonsRendered = 0;
                     for (Button prodButton : productionButtons) {
                         // top row for currently-in-progress item
                         if (buttonsRendered == 0) {
-                            prodButton.greyPercent = 1 - percentageDone;
+                            prodButton.greyPercent = 1 - percentageDoneInv;
                             prodButton.render(evt.getPoseStack(), blitX, blitY - 5, mouseX, mouseY);
                             renderedButtons.add(prodButton);
                         }
@@ -432,6 +452,10 @@ public class HudClientEvents {
 
             // write capitalised unit name
             String name = getSimpleEntityName(hudSelectedEntity).replace("_", " ");
+            if (hudSelectedEntity.hasCustomName()) {
+                name = hudSelectedEntity.getCustomName().getString();
+            }
+
             String nameCap = name.substring(0, 1).toUpperCase() + name.substring(1);
 
             unitPortraitZone = portraitRendererUnit.render(evt.getPoseStack(),
@@ -728,7 +752,7 @@ public class HudClientEvents {
             if (resources != null) {
                 GuiComponent.drawString(evt.getPoseStack(),
                     MC.font,
-                    selPlayerName + "'s resources",
+                    I18n.get("hud.reignofnether.players_resources", selPlayerName),
                     blitX + 5,
                     blitY + 5,
                     0xFFFFFF
@@ -736,7 +760,7 @@ public class HudClientEvents {
             } else if (!TutorialClientEvents.isEnabled()) {
                 GuiComponent.drawString(evt.getPoseStack(),
                     MC.font,
-                    "You are a spectator",
+                    I18n.get("hud.reignofnether.you_are_spectator"),
                     blitX + 5,
                     blitY + 5,
                     0xFFFFFF
@@ -749,7 +773,6 @@ public class HudClientEvents {
         int resourceBlitYStart = blitY;
 
         if (resources != null) {
-
             for (String resourceName : new String[] { "food", "wood", "ore", "pop" }) {
                 String rlPath = "";
                 String resValueStr = "";
@@ -811,19 +834,25 @@ public class HudClientEvents {
                 );
 
                 // worker count assigned to each resource
-                if (resName != ResourceName.NONE) {
-                    String finalSelPlayerName = selPlayerName;
+                String finalSelPlayerName = selPlayerName;
 
-                    int numWorkersHunting = UnitClientEvents.getAllUnits()
+                int numWorkersHunting = UnitClientEvents.getAllUnits()
+                    .stream()
+                    .filter(le -> le instanceof WorkerUnit wu && le instanceof Unit u && u.getOwnerName()
+                        .equals(finalSelPlayerName) && ResourceSources.isHuntableAnimal(u.getTargetGoal().getTarget()))
+                    .toList()
+                    .size();
+
+                int numWorkersAssigned = 0;
+                // we can only see ReturnResourcesGoal data on server, so we can't use that here
+                if (resName == ResourceName.NONE) {
+                    numWorkersAssigned = UnitClientEvents.getAllUnits()
                         .stream()
-                        .filter(le -> le instanceof WorkerUnit wu && le instanceof Unit u && u.getOwnerName()
-                            .equals(finalSelPlayerName) && ResourceSources.isHuntableAnimal(u.getTargetGoal()
-                            .getTarget()))
+                        .filter(u -> u instanceof WorkerUnit
+                            && UnitClientEvents.getPlayerToEntityRelationship(u) == Relationship.OWNED)
                         .toList()
                         .size();
-
-                    // we can only see ReturnResourcesGoal data on server, so we can't use that here
-                    int numWorkersAssigned = 0;
+                } else {
                     for (LivingEntity le : UnitClientEvents.getAllUnits()) {
                         if (le instanceof Unit u && le instanceof WorkerUnit wu && u.getOwnerName()
                             .equals(finalSelPlayerName) && !UnitClientEvents.idleWorkerIds.contains(le.getId())) {
@@ -866,25 +895,48 @@ public class HudClientEvents {
                         blitY + (iconSize / 2) + 1,
                         0xFFFFFF
                     );
+
+                    blitY += iconFrameSize - 1;
                 }
-                blitY += iconFrameSize - 1;
             }
 
             blitY = resourceBlitYStart;
             for (String resourceName : new String[] { "food", "wood", "ore", "population" }) {
                 String locName = I18n.get("resources.reignofnether." + resourceName);
-                List<FormattedCharSequence> tooltip = List.of(FormattedCharSequence.forward(locName, Style.EMPTY));
+                List<FormattedCharSequence> tooltip;
+                if (resourceName.equals("population")) {
+                    tooltip = List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.max_resources",
+                        maxPopulation
+                    ), Style.EMPTY));
+                } else {
+                    tooltip = List.of(FormattedCharSequence.forward(resourceName, Style.EMPTY));
+                }
                 if (mouseX >= blitX && mouseY >= blitY && mouseX < blitX + iconFrameSize
                     && mouseY < blitY + iconFrameSize) {
                     MyRenderer.renderTooltip(evt.getPoseStack(), tooltip, mouseX + 5, mouseY);
                 }
-                List<FormattedCharSequence> tooltipWorkersAssigned = List.of(FormattedCharSequence.forward(I18n.get(
-                    "hud.reignofnether.workers_on") + locName,
-                    Style.EMPTY
-                ));
                 if (mouseX >= blitX + 69 && mouseY >= blitY && mouseX < blitX + 69 + iconFrameSize
                     && mouseY < blitY + iconFrameSize) {
+                    List<FormattedCharSequence> tooltipWorkersAssigned;
+                    if (resourceName.equals("population")) {
+                        int numWorkers = UnitClientEvents.getAllUnits()
+                            .stream()
+                            .filter(u -> u instanceof WorkerUnit
+                                && UnitClientEvents.getPlayerToEntityRelationship(u) == Relationship.OWNED)
+                            .toList()
+                            .size();
+                        tooltipWorkersAssigned =
+                            List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.total_workers",
+                            numWorkers
+                        ), Style.EMPTY));
+                    } else {
+                        tooltipWorkersAssigned =
+                            List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.workers_on",
+                            locName
+                        ), Style.EMPTY));
+                    }
                     MyRenderer.renderTooltip(evt.getPoseStack(), tooltipWorkersAssigned, mouseX + 5, mouseY);
+
                 }
                 blitY += iconFrameSize - 1;
             }
@@ -957,7 +1009,7 @@ public class HudClientEvents {
         // ------------------------------
         // Start buttons (spectator only)
         // ------------------------------
-        if (!PlayerClientEvents.isRTSPlayer) {
+        if (!PlayerClientEvents.isRTSPlayer && !PlayerClientEvents.rtsLocked) {
             if (!StartButtons.villagerStartButton.isHidden.get()) {
                 StartButtons.villagerStartButton.render(evt.getPoseStack(),
                     screenWidth - (StartButtons.ICON_SIZE * 6),
@@ -1181,6 +1233,37 @@ public class HudClientEvents {
         // open chat while orthoview is enabled
         if (OrthoviewClientEvents.isEnabled() && evt.getKeyCode() == Keybindings.chat.key) {
             MC.setScreen(new ChatScreen(""));
+        }
+
+
+        // press again to cycle between selected unit type in the group
+        if (evt.getKeyCode() == Keybindings.tab.key) {
+            List<LivingEntity> entities = new ArrayList<>(getSelectedUnits().stream()
+                .filter(e -> e instanceof Unit)
+                .sorted(Comparator.comparing(HudClientEvents::getSimpleEntityName))
+                .toList());
+
+            if (Keybindings.shiftMod.isDown()) {
+                Collections.reverse(entities);
+            }
+
+            if (hudSelectedEntity != null) {
+                String hudSelectedEntityName = HudClientEvents.getSimpleEntityName(hudSelectedEntity);
+                String lastEntityName = "";
+                boolean cycled = false;
+                for (LivingEntity entity : entities) {
+                    String currentEntityName = HudClientEvents.getSimpleEntityName(entity);
+                    if (lastEntityName.equals(hudSelectedEntityName) && !currentEntityName.equals(lastEntityName)) {
+                        hudSelectedEntity = entity;
+                        cycled = true;
+                        break;
+                    }
+                    lastEntityName = currentEntityName;
+                }
+                if (!cycled) {
+                    hudSelectedEntity = entities.get(0);
+                }
+            }
         }
     }
 

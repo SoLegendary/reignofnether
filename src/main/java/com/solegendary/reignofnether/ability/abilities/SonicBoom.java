@@ -48,14 +48,16 @@ public class SonicBoom extends Ability {
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.CAST_SONIC_BOOM),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("abilities.reignofnether.sonic_boom"),
+            List.of(FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sonic_boom"),
                     Style.EMPTY.withBold(true)
                 ),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sonic_boom.tooltip1",
-                    WardenUnit.SONIC_BOOM_DAMAGE,
-                    CD_MAX_SECONDS
-                ) + WardenUnit.SONIC_BOOM_RANGE, MyRenderer.iconStyle),
+                FormattedCharSequence.forward(
+                    I18n.get("abilities.reignofnether.sonic_boom.tooltip1",
+                        WardenUnit.SONIC_BOOM_DAMAGE,
+                        CD_MAX_SECONDS
+                    ) + WardenUnit.SONIC_BOOM_RANGE,
+                    MyRenderer.iconStyle
+                ),
                 FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sonic_boom.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sonic_boom.tooltip3"), Style.EMPTY)
             ),
@@ -79,7 +81,7 @@ public class SonicBoom extends Ability {
             ((WardenUnit) unitUsing).getSonicBoomGoal().setAbility(this);
             ((WardenUnit) unitUsing).getSonicBoomGoal().setTarget(targetBuilding);
         } else if (level.isClientSide()) {
-            HudClientEvents.showTemporaryMessage("Must target a unit or building.");
+            HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.sonic_boom.error1"));
         }
     }
 }

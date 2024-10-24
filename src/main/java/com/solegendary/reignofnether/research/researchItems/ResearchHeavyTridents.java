@@ -48,13 +48,12 @@ public class ResearchHeavyTridents extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchHeavyTridents.itemName) || ResearchClient.hasResearch(
-                ResearchHeavyTridents.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchHeavyTridents.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchHeavyTridents.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.heavy_tridents"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.heavy_tridents"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),

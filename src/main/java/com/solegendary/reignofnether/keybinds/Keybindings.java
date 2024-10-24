@@ -28,11 +28,11 @@ public class Keybindings {
     public static final Keybinding keyV = new Keybinding(GLFW.GLFW_KEY_V, "V", "V");
     public static final Keybinding keyL = new Keybinding(GLFW.GLFW_KEY_L, "L", "L");
     public static final Keybinding keyM = new Keybinding(GLFW.GLFW_KEY_M, "M", "M");
-    public static final Keybinding keyB = new Keybinding(GLFW.GLFW_KEY_B, "B", "B");
     public static final Keybinding keyF = new Keybinding(GLFW.GLFW_KEY_F, "F", "F");
     public static final Keybinding keyD = new Keybinding(GLFW.GLFW_KEY_D, "D", "D");
     public static final Keybinding keyJ = new Keybinding(GLFW.GLFW_KEY_J, "J", "J");
     public static final Keybinding keyK = new Keybinding(GLFW.GLFW_KEY_K, "K", "K");
+    public static final Keybinding keyG = new Keybinding(GLFW.GLFW_KEY_G, "G", "G");
     public static final Keybinding attack = new Keybinding(GLFW.GLFW_KEY_A, "A", "Attack");
     public static final Keybinding stop = new Keybinding(GLFW.GLFW_KEY_S, "S", "Stop");
     public static final Keybinding hold = new Keybinding(GLFW.GLFW_KEY_H, "H", "Hold");
@@ -42,7 +42,7 @@ public class Keybindings {
     public static final Keybinding garrison = new Keybinding(GLFW.GLFW_KEY_N, "N", "Garrison");
     public static final Keybinding chat = new Keybinding(GLFW.GLFW_KEY_ENTER, "ENTR", "Chat");
     public static final Keybinding deselect = new Keybinding(GLFW.GLFW_KEY_GRAVE_ACCENT, "TILDE", "Deselect");
-    public static final Keybinding showPlayers = new Keybinding(GLFW.GLFW_KEY_TAB, "TAB", "Show Players");
+    public static final Keybinding tab = new Keybinding(GLFW.GLFW_KEY_TAB, "TAB", "tab");
 
     public static final Keybinding[] nums = {
         new Keybinding(GLFW.GLFW_KEY_0, "0", "0"),

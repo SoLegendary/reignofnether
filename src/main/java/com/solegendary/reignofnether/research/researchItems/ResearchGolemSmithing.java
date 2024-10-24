@@ -48,13 +48,12 @@ public class ResearchGolemSmithing extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchGolemSmithing.itemName) || ResearchClient.hasResearch(
-                ResearchGolemSmithing.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchGolemSmithing.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchGolemSmithing.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.golem_smithing"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.golem_smithing"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),

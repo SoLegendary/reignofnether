@@ -48,13 +48,12 @@ public class ResearchFireResistance extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchFireResistance.itemName) || ResearchClient.hasResearch(
-                ResearchFireResistance.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchFireResistance.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchFireResistance.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.fire_resistance"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.fire_resistance"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),

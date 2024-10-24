@@ -61,24 +61,21 @@ public class ResearchResourceCapacity extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchResourceCapacity.itemName) || ResearchClient.hasResearch(
-                ResearchResourceCapacity.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchResourceCapacity.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchResourceCapacity.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.resource_capacity"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.resource_capacity"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.resource_capacity.tooltip1"),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.resource_capacity.tooltip1"),
                     Style.EMPTY
                 ),
-                FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.resource_capacity.tooltip2"),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.resource_capacity.tooltip2"),
                     Style.EMPTY
                 )
             )

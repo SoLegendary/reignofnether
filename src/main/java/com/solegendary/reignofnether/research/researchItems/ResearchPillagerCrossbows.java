@@ -55,20 +55,18 @@ public class ResearchPillagerCrossbows extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchPillagerCrossbows.itemName) || ResearchClient.hasResearch(
-                ResearchPillagerCrossbows.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchPillagerCrossbows.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchPillagerCrossbows.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.pillager_crossbows"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.pillager_crossbows"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.pillager_crossbows.tooltip1"),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.pillager_crossbows.tooltip1"),
                     Style.EMPTY
                 )
             )

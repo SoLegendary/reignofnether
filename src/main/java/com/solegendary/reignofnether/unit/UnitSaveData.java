@@ -1,16 +1,12 @@
 package com.solegendary.reignofnether.unit;
 
-import com.solegendary.reignofnether.resources.Resources;
-import net.minecraft.core.BlockPos;
+import com.solegendary.reignofnether.ReignOfNether;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -29,11 +25,13 @@ public class UnitSaveData extends SavedData {
         if (server == null) {
             return create();
         }
-        return server.overworld().getDataStorage().computeIfAbsent(UnitSaveData::load, UnitSaveData::create, "saved-unit-data");
+        return server.overworld()
+            .getDataStorage()
+            .computeIfAbsent(UnitSaveData::load, UnitSaveData::create, "saved-unit-data");
     }
 
     public static UnitSaveData load(CompoundTag tag) {
-        System.out.println("UnitSaveData.load");
+        ReignOfNether.LOGGER.info("UnitSaveData.load");
 
         UnitSaveData data = create();
         ListTag ltag = (ListTag) tag.get("units");
@@ -47,7 +45,7 @@ public class UnitSaveData extends SavedData {
                 String uuid = utag.getString("uuid");
 
                 data.units.add(new UnitSave(name, ownerName, uuid));
-                System.out.println("UnitSaveData.load: " + ownerName + "|" + name + "|" + uuid);
+                ReignOfNether.LOGGER.info("UnitSaveData.load: " + ownerName + "|" + name + "|" + uuid);
             }
         }
         return data;
@@ -55,7 +53,7 @@ public class UnitSaveData extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        System.out.println("UnitSaveData.save");
+        ReignOfNether.LOGGER.info("UnitSaveData.save");
 
         ListTag list = new ListTag();
         this.units.forEach(u -> {
@@ -66,7 +64,7 @@ public class UnitSaveData extends SavedData {
             cTag.putString("uuid", u.uuid);
             list.add(cTag);
 
-            System.out.println("UnitSaveData.save: " + u.ownerName + "|" + u.name + "|" + u.uuid);
+            ReignOfNether.LOGGER.info("UnitSaveData.save: " + u.ownerName + "|" + u.name + "|" + u.uuid);
         });
         tag.put("units", list);
         return tag;

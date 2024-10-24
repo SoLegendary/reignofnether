@@ -48,20 +48,18 @@ public class ResearchLingeringPotions extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchLingeringPotions.itemName) || ResearchClient.hasResearch(
-                ResearchLingeringPotions.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchLingeringPotions.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchLingeringPotions.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.lingering_potions"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.lingering_potions"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.lingering_potions.tooltip1"),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.lingering_potions.tooltip1"),
                     Style.EMPTY
                 )
             )

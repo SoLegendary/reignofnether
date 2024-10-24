@@ -29,6 +29,7 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -49,7 +50,8 @@ import static com.solegendary.reignofnether.hud.HudClientEvents.getSimpleEntityN
 
 // Renders a Unit's portrait including its animated head, name, healthbar, list of stats and UI frames for these
 
-public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R extends LivingEntityRenderer<T, M>> {
+public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R extends LivingEntityRenderer<T,
+    M>> {
     public R renderer;
     public Model model;
 
@@ -99,25 +101,32 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
     public void tickAnimation() {
         ticksLeft -= 1;
-        if (ticksLeft <= 0)
+        if (ticksLeft <= 0) {
             this.randomiseAnimation(false);
+        }
 
         int lookSpeedX = Math.abs(lastLookTargetX - lookX) / 20;
         int lookSpeedY = Math.abs(lastLookTargetY - lookY) / 20;
 
-        if (lookX < lookTargetX)
+        if (lookX < lookTargetX) {
             lookX += lookSpeedX;
-        if (lookX > lookTargetX)
+        }
+        if (lookX > lookTargetX) {
             lookX -= lookSpeedX;
-        if (lookY < lookTargetY)
+        }
+        if (lookY < lookTargetY) {
             lookY += lookSpeedY;
-        if (lookY > lookTargetY)
+        }
+        if (lookY > lookTargetY) {
             lookY -= lookSpeedY;
+        }
 
-        if (Math.abs(lookTargetX - lookX) < lookSpeedX)
+        if (Math.abs(lookTargetX - lookX) < lookSpeedX) {
             lookX = lookTargetX;
-        if (Math.abs(lookTargetY - lookY) < lookSpeedY)
+        }
+        if (Math.abs(lookTargetY - lookY) < lookSpeedY) {
             lookY = lookTargetY;
+        }
     }
 
     // Render the portrait including:
@@ -132,15 +141,12 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
         int bgCol = 0x0;
         switch (rs) {
-            case OWNED    -> bgCol = 0x90000000;
+            case OWNED -> bgCol = 0x90000000;
             case FRIENDLY -> bgCol = 0x90009000;
-            case NEUTRAL  -> bgCol = 0x90909000;
-            case HOSTILE  -> bgCol = 0x90900000;
+            case NEUTRAL -> bgCol = 0x90909000;
+            case HOSTILE -> bgCol = 0x90900000;
         }
-        MyRenderer.renderFrameWithBg(poseStack, x, y,
-                frameWidth,
-                frameHeight,
-                bgCol);
+        MyRenderer.renderFrameWithBg(poseStack, x, y, frameWidth, frameHeight, bgCol);
 
         // remember 0,0 is top left
         int drawX = x + offsetX;
@@ -154,61 +160,72 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         sizeFinal += yAndScaleOffsets.getSecond();
 
         ItemStack itemStack = entity.getItemBySlot(EquipmentSlot.HEAD);
-        if (itemStack.getItem() instanceof BannerItem)
+        if (itemStack.getItem() instanceof BannerItem) {
             entity.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+        }
 
         drawEntityOnScreen(poseStack, entity, drawX, drawY, sizeFinal);
 
         if (itemStack.getItem() instanceof BannerItem) {
             entity.setItemSlot(EquipmentSlot.HEAD, itemStack);
-            name += " Captain";
+            name = I18n.get("units.reignofnether.captain", name);
         }
         if (entity.getPassengers().size() == 1) {
-            String pName = getSimpleEntityName(entity.getPassengers().get(0)).replace("_"," ");
+            String pName = getSimpleEntityName(entity.getPassengers().get(0)).replace("_", " ");
             String nameCap = pName.substring(0, 1).toUpperCase() + pName.substring(1);
             name += " & " + nameCap;
         }
         name = WordUtils.capitalize(name);
 
-        if (rs != Relationship.OWNED && entity instanceof Unit unit && unit.getOwnerName().length() > 0)
+        if (rs != Relationship.OWNED && entity instanceof Unit unit && unit.getOwnerName().length() > 0) {
             name += " (" + unit.getOwnerName() + ")";
+        }
 
         // draw name (unless a player, since their nametag will be rendered anyway)
         if (!(entity instanceof Player)) {
-            GuiComponent.drawString(
-                    poseStack, Minecraft.getInstance().font,
-                    name,
-                    x+4,y-9,
-                    0xFFFFFFFF
-            );
+            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, name, x + 4, y - 9, 0xFFFFFFFF);
         }
 
         RectZone rectZone = RectZone.getZoneByLW(x, y, frameWidth, frameHeight);
 
         // draw health bar and write min/max hp
-        HealthBarClientEvents.renderForEntity(poseStack, entity,
-                x+(frameWidth/2f), y+frameHeight-15,
-                frameWidth-9, HealthBarClientEvents.RenderMode.GUI_PORTRAIT);
+        HealthBarClientEvents.renderForEntity(poseStack,
+            entity,
+            x + (frameWidth / 2f),
+            y + frameHeight - 15,
+            frameWidth - 9,
+            HealthBarClientEvents.RenderMode.GUI_PORTRAIT
+        );
 
         String healthText = "";
         float health = entity.getHealth();
-        if (health >= 1)
+        if (health >= 1) {
             healthText = String.valueOf((int) health);
-        else
-            healthText = String.valueOf(health).substring(0,3);
+        } else {
+            healthText = String.valueOf(health).substring(0, 3);
+        }
 
-        // need to render like this instead of GuiComponent.drawCenteredString, so it's layered above the portrait entity
+        // need to render like this instead of GuiComponent.drawCenteredString, so it's layered above the portrait
+        // entity
         Minecraft MC = Minecraft.getInstance();
         Window window = MC.getWindow();
         poseStack.pushPose();
-        MultiBufferSource.BufferSource multibuffersource$buffersource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource multibuffersource$buffersource =
+            MultiBufferSource.immediate(Tesselator.getInstance()
+            .getBuilder());
         String text = healthText + "/" + (int) entity.getMaxHealth();
         FormattedCharSequence pTooltips = FormattedCharSequence.forward(text, Style.EMPTY);
         ClientTooltipComponent clientTooltip = ClientTooltipComponent.create(pTooltips);
         poseStack.translate(0.0, 0.0, 400.0);
-        int x0 = x+(frameWidth/2);
+        int x0 = x + (frameWidth / 2);
         int xC = (x0 - MC.font.width(text) / 2);
-        clientTooltip.renderText(MC.font, xC, y+frameHeight-13, poseStack.last().pose(), multibuffersource$buffersource);
+        clientTooltip.renderText(
+            MC.font,
+            xC,
+            y + frameHeight - 13,
+            poseStack.last().pose(),
+            multibuffersource$buffersource
+        );
         multibuffersource$buffersource.endBatch();
         poseStack.popPose();
 
@@ -216,10 +233,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     }
 
     public RectZone renderStats(PoseStack poseStack, String name, int x, int y, Unit unit) {
-        MyRenderer.renderFrameWithBg(poseStack, x, y,
-                statsWidth,
-                statsHeight,
-                0xA0000000);
+        MyRenderer.renderFrameWithBg(poseStack, x, y, statsWidth, statsHeight, 0xA0000000);
 
         int blitXIcon = x + 6;
         int blitYIcon = y + 7;
@@ -230,23 +244,30 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
         if (unit instanceof AttackerUnit attackerUnit) {
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sword.png")); // DAMAGE
-            textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sparkler.png")); // ATTACK SPEED
+            textureStatIcons.add(new ResourceLocation(
+                "reignofnether",
+                "textures/icons/items/sparkler.png"
+            )); // ATTACK SPEED
             textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/bow.png")); // RANGE
-            int atkDmg = (int) attackerUnit.getUnitAttackDamage() + (int) AttackerUnit.getWeaponDamageModifier(attackerUnit);
-            if (unit instanceof CreeperUnit cUnit && cUnit.isPowered())
+            int atkDmg =
+                (int) attackerUnit.getUnitAttackDamage() + (int) AttackerUnit.getWeaponDamageModifier(attackerUnit);
+            if (unit instanceof CreeperUnit cUnit && cUnit.isPowered()) {
                 atkDmg *= 2;
-            if (unit instanceof WorkerUnit wUnit)
+            }
+            if (unit instanceof WorkerUnit wUnit) {
                 atkDmg = (int) attackerUnit.getUnitAttackDamage();
+            }
 
             statStrings.add(String.valueOf(atkDmg));
             DecimalFormat df = new DecimalFormat("###.##");
             statStrings.add(String.valueOf(df.format(attackerUnit.getAttacksPerSecond()))); // attacks per second
 
             GarrisonableBuilding garr = GarrisonableBuilding.getGarrison(unit);
-            if (garr != null)
+            if (garr != null) {
                 statStrings.add(String.valueOf(garr.getAttackRange()));
-            else
+            } else {
                 statStrings.add(String.valueOf((int) (attackerUnit.getAttackRange())));
+            }
         }
         textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"));
         textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/boots.png"));
@@ -255,18 +276,22 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
 
         int msInt = ms != null ? (int) (ms.getValue() * 101) : 0;
-        if (unit instanceof BruteUnit pbUnit && pbUnit.isHoldingUpShield)
+        if (unit instanceof BruteUnit pbUnit && pbUnit.isHoldingUpShield) {
             msInt *= 0.5f;
+        }
         statStrings.add(String.valueOf(msInt)); // prevent rounding errors
 
         // render based on prepped strings/icons
         for (int i = 0; i < statStrings.size(); i++) {
-            MyRenderer.renderIcon(
-                    poseStack,
-                    textureStatIcons.get(i),
-                    blitXIcon, blitYIcon, 8
+            MyRenderer.renderIcon(poseStack, textureStatIcons.get(i), blitXIcon, blitYIcon, 8);
+            GuiComponent.drawString(
+                poseStack,
+                Minecraft.getInstance().font,
+                statStrings.get(i),
+                blitXIcon + 13,
+                blitYIcon,
+                0xFFFFFF
             );
-            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, statStrings.get(i), blitXIcon + 13, blitYIcon, 0xFFFFFF);
             blitYIcon += 10;
         }
         return RectZone.getZoneByLW(x, y, statsWidth, statsHeight);
@@ -276,24 +301,22 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
         int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
 
-        MyRenderer.renderFrameWithBg(poseStack, x, y,
-                statsWidth,
-                statsHeight,
-                0xA0000000);
+        MyRenderer.renderFrameWithBg(poseStack, x, y, statsWidth, statsHeight, 0xA0000000);
 
         int blitXIcon = x + 6;
         int blitYIcon = y + 7;
 
         // prep strings/icons to render
-        List<ResourceLocation> textureStatIcons = List.of(
-            new ResourceLocation("reignofnether", "textures/icons/items/wheat.png"),
+        List<ResourceLocation> textureStatIcons = List.of(new ResourceLocation(
+                "reignofnether",
+                "textures/icons/items/wheat.png"
+            ),
             new ResourceLocation("reignofnether", "textures/icons/items/wood.png"),
             new ResourceLocation("reignofnether", "textures/icons/items/iron_ore.png")
         );
         Resources resources = Resources.getTotalResourcesFromItems(unit.getItems());
 
-        List<String> statStrings = List.of(
-            String.valueOf(resources.food),
+        List<String> statStrings = List.of(String.valueOf(resources.food),
             String.valueOf(resources.wood),
             String.valueOf(resources.ore)
         );
@@ -302,13 +325,14 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         for (int i = 0; i < statStrings.size(); i++) {
 
             if (!statStrings.get(i).equals("0")) {
-                MyRenderer.renderIcon(
-                        poseStack,
-                        textureStatIcons.get(i),
-                        blitXIcon, blitYIcon, 8
+                MyRenderer.renderIcon(poseStack, textureStatIcons.get(i), blitXIcon, blitYIcon, 8);
+                GuiComponent.drawString(poseStack,
+                    Minecraft.getInstance().font,
+                    statStrings.get(i),
+                    blitXIcon + 12,
+                    blitYIcon,
+                    Unit.atMaxResources(unit) ? 0xFF2525 : 0xFFFFFF
                 );
-                GuiComponent.drawString(poseStack, Minecraft.getInstance().font, statStrings.get(i), blitXIcon + 12, blitYIcon,
-                        Unit.atMaxResources(unit) ? 0xFF2525 : 0xFFFFFF);
                 blitYIcon += 10;
             }
         }
@@ -319,11 +343,11 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
     private void drawEntityOnScreen(PoseStack poseStack, LivingEntity entity, int x, int y, int size) {
 
-        float f = (float) Math.atan((double) (-lookX / 40F));
-        float g = (float) Math.atan((double) (-lookY / 40F));
+        float f = (float) Math.atan(-lookX / 40F);
+        float g = (float) Math.atan(-lookY / 40F);
         PoseStack poseStackModel = RenderSystem.getModelViewStack();
         poseStackModel.pushPose();
-        poseStackModel.translate((double) x, (double) y, 1050.0D);
+        poseStackModel.translate(x, y, 1050.0D);
         poseStackModel.scale(1.0F, 1.0F, -1.0F);
         RenderSystem.applyModelViewMatrix();
         poseStack.pushPose();
@@ -345,18 +369,17 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         entity.yHeadRotO = entity.getYRot();
 
         Lighting.setupForEntityInInventory();
-        EntityRenderDispatcher entityrenderdispatcher =
-                Minecraft.getInstance().getEntityRenderDispatcher();
+        EntityRenderDispatcher entityrenderdispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         quaternion2.conj();
         entityrenderdispatcher.setRenderShadow(false);
         entityrenderdispatcher.overrideCameraOrientation(quaternion2);
 
-        // for some reason this snippet causes drawLineBox to draw lines in completely wrong locations while in spectator mode
+        // for some reason this snippet causes drawLineBox to draw lines in completely wrong locations while in
+        // spectator mode
         RenderSystem.runAsFancy(() -> {
             try {
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-                entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, poseStack, immediate,
-                        15728880);
+                entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, poseStack, immediate, 15728880);
                 immediate.endBatch();
             } catch (ReportedException e) {
                 System.out.println("Caught reportedException: " + e);

@@ -52,13 +52,12 @@ public class ResearchSilverfish extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchSilverfish.itemName) || ResearchClient.hasResearch(
-                ResearchSilverfish.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchSilverfish.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchSilverfish.itemName),
             () -> BuildingClientEvents.hasFinishedBuilding(Stronghold.buildingName),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.silverfish"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.silverfish"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),

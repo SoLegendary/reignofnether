@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.event.TickEvent;
@@ -28,14 +28,23 @@ public class FogOfWarServerEvents {
 
     public static void setEnabled(boolean value) {
         enabled = value;
-        sendMessageToAllPlayers((enabled ? "Enabled" : "Disabled") + " fog of war for all players", true);
+        sendMessageToAllPlayers((
+            enabled
+            ? "server.reignofnether.enabled_fog_of_war"
+            : "server.reignofnether.disabled_fog_of_war"
+        ), true);
         syncClientFog();
+    }
+
+    public static boolean isEnabled() {
+        return enabled;
     }
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
+        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD) {
             return;
+        }
 
         serverLevel = (ServerLevel) evt.level;
     }
@@ -47,20 +56,20 @@ public class FogOfWarServerEvents {
 
     // updates all blocks in the renderchunk to force all clients to match the server
     public static void syncClientBlocks(BlockPos renderChunkOrigin) {
-        if (serverLevel == null)
+        if (serverLevel == null) {
             return;
+        }
 
         ArrayList<Pair<BlockPos, BlockState>> plants = new ArrayList<>();
 
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 16; y++) {
                 for (int z = 0; z < 16; z++) {
-                    BlockPos bp = renderChunkOrigin.offset(x,y,z);
+                    BlockPos bp = renderChunkOrigin.offset(x, y, z);
                     BlockState bs = serverLevel.getBlockState(bp);
-                    if (bs.getMaterial() == Material.PLANT ||
-                        bs.getMaterial() == Material.REPLACEABLE_PLANT ||
-                        bs.getMaterial() == Material.REPLACEABLE_WATER_PLANT ||
-                        bs.getMaterial() == Material.REPLACEABLE_FIREPROOF_PLANT) {
+                    if (bs.getMaterial() == Material.PLANT || bs.getMaterial() == Material.REPLACEABLE_PLANT
+                        || bs.getMaterial() == Material.REPLACEABLE_WATER_PLANT
+                        || bs.getMaterial() == Material.REPLACEABLE_FIREPROOF_PLANT) {
                         plants.add(new Pair<>(bp, bs));
                     }
                 }
@@ -72,7 +81,7 @@ public class FogOfWarServerEvents {
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 16; y++) {
                 for (int z = 0; z < 16; z++) {
-                    BlockPos bp = renderChunkOrigin.offset(x,y,z);
+                    BlockPos bp = renderChunkOrigin.offset(x, y, z);
                     BlockState bs = serverLevel.getBlockState(bp);
                     serverLevel.setBlockAndUpdate(bp, Blocks.BEDROCK.defaultBlockState());
                     serverLevel.setBlockAndUpdate(bp, bs);

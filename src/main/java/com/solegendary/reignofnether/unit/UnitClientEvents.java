@@ -12,7 +12,6 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
@@ -22,8 +21,6 @@ import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
-import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
-import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
@@ -38,12 +35,10 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -61,7 +56,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
-import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -74,6 +68,9 @@ import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.*;
 public class UnitClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
+
+    // max possible pop you can have regardless of buildings, adjustable via thereisnospoon cheat
+    public static int maxPopulation = ResourceCosts.DEFAULT_HARD_CAP_POPULATION;
 
     // list of vecs used in RenderChunkRegionMixin to replace leaf rendering
     private static final int WINDOW_RADIUS = 5; // size of area to hide leaves
@@ -497,6 +494,11 @@ public class UnitClientEvents {
             lastLeftClickTime = System.currentTimeMillis();
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            if (BuildingClientEvents.getBuildingToPlace() != null) {
+                BuildingClientEvents.setBuildingToPlace(null);
+                return;
+            }
+
             if (selectedUnits.size() > 0) {
                 Building preSelBuilding = BuildingClientEvents.getPreselectedBuilding();
 
@@ -664,7 +666,7 @@ public class UnitClientEvents {
     public static void onButtonPress(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
             LivingEntity entity = hudSelectedEntity;
-            if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED && !TutorialClientEvents.isEnabled())
+            if (entity != null && getPlayerToEntityRelationship(entity) == Relationship.OWNED)
                 sendUnitCommand(UnitAction.DELETE);
         }
     }

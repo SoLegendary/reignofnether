@@ -53,8 +53,6 @@ public class ControlGroup {
     public void clearAll() {
         this.entityIds.clear();
         this.buildingBps.clear();
-        if (HudClientEvents.lastSelCtrlGroupKey == this.getKey())
-            HudClientEvents.lastSelCtrlGroupKey = -1;
     }
 
     public boolean isEmpty() {
@@ -125,28 +123,6 @@ public class ControlGroup {
                         OrthoviewClientEvents.centreCameraOnPos(entities.get(0).getX(), entities.get(0).getZ());
                 }
             }
-            // press again to cycle between selected unit type in the group
-            if (HudClientEvents.lastSelCtrlGroupKey == this.getKey()) {
-                List<LivingEntity> entities = getAllUnits().stream()
-                        .filter(e -> entityIds.contains(e.getId()) && e instanceof Unit)
-                        .sorted(Comparator.comparing(HudClientEvents::getSimpleEntityName))
-                        .toList();
-
-                String hudSelectedEntityName = HudClientEvents.getSimpleEntityName(hudSelectedEntity);
-                String lastEntityName = "";
-                boolean cycled = false;
-                for (LivingEntity entity : entities) {
-                    String currentEntityName = HudClientEvents.getSimpleEntityName(entity);
-                    if (lastEntityName.equals(hudSelectedEntityName) && !currentEntityName.equals(lastEntityName)) {
-                        hudSelectedEntity = entity;
-                        cycled = true;
-                        break;
-                    }
-                    lastEntityName = currentEntityName;
-                }
-                if (!cycled)
-                    hudSelectedEntity = entities.get(0);
-            }
         }
         else if (buildingBps.size() > 0) {
             UnitClientEvents.clearSelectedUnits();
@@ -154,19 +130,18 @@ public class ControlGroup {
             BuildingClientEvents.clearSelectedBuildings();
             for (BlockPos bp : buildingBps)
                 for (Building building : BuildingClientEvents.getBuildings())
-                    if (building.originPos == bp)
+                    if (building.originPos.equals(bp))
                         BuildingClientEvents.addSelectedBuilding(building);
 
             if (doubleClicked) {
                 BlockPos pos = buildingBps.get(0);
                 for (Building building : BuildingClientEvents.getBuildings())
-                    if (building.originPos == pos)
+                    if (building.originPos.equals(pos))
                         OrthoviewClientEvents.centreCameraOnPos(building.centrePos.getX(), building.centrePos.getZ());
             }
         }
 
         lastClickTime = System.currentTimeMillis();
-        HudClientEvents.lastSelCtrlGroupKey = this.getKey();
     }
 
     public Button getButton() {

@@ -48,13 +48,12 @@ public class ResearchWitherClouds extends ProductionItem {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> false,
-            () -> ProductionItem.itemIsBeingProduced(ResearchWitherClouds.itemName) || ResearchClient.hasResearch(
-                ResearchWitherClouds.itemName),
+            () -> ProductionItem.itemIsBeingProduced(ResearchWitherClouds.itemName, prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ResearchWitherClouds.itemName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, itemName),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("research.reignofnether.wither_clouds"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.wither_clouds"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
