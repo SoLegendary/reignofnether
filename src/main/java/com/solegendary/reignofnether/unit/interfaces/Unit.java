@@ -170,7 +170,11 @@ public interface Unit {
         if (!le.level.isClientSide()) {
             if (unit.getFaction() == Faction.MONSTERS &&
                     le.tickCount % MONSTER_HEALING_TICKS == 0 &&
-                    (!le.level.isDay() || TimeUtils.isInRangeOfNightSource(le.position(), le.level.isClientSide()))) {
+                    (!le.level.isDay())) {
+                le.heal(1);
+            } else if (unit.getFaction() == Faction.MONSTERS &&
+                    (le.tickCount + MONSTER_HEALING_TICKS / 2) % MONSTER_HEALING_TICKS == 0 &&
+                    (TimeUtils.isInRangeOfNightSource(le.position(), le.level.isClientSide()))) {
                 le.heal(1);
             } else if (unit.getFaction() == Faction.PIGLINS &&
                     le.tickCount % PIGLIN_HEALING_TICKS == 0 &&

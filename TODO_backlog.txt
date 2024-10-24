@@ -69,7 +69,7 @@ Balancing
     - Starts off at 10 radius, goes up to 40 (~200 max sculk blocks, +1 radius per 4 sculk blocks or veins)
         - Need to give more sculk per unit than vanilla
     - The more sculk blocks around, the wider the night radius, up to a limit of 20 blocks
-    - Sonic boom them to split the boom into two random nearby enemies within the night radius
+    - Sculk Amplifiers: Upgrade at stronghold to allow a to split the boom into 3 random nearby enemies within the night radius
     - range equal to night radius
     - Sculk blocks are unconvertible by portals
 

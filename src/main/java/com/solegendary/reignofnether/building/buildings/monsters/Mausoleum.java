@@ -21,7 +21,9 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
@@ -32,10 +34,7 @@ public class Mausoleum extends ProductionBuilding implements NightSource {
     public final static ResourceCost cost = ResourceCosts.MAUSOLEUM;
     public final static int nightRange = 80;
 
-    private final ArrayList<BlockPos> nightBorderBps = new ArrayList<>();
-
-    private static final int NIGHT_RANGE_TICKS_MAX = 100;
-    private static int nightRangeTicks = NIGHT_RANGE_TICKS_MAX;
+    private final Set<BlockPos> nightBorderBps = new HashSet<>();
 
     public Mausoleum(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), true);
@@ -62,8 +61,6 @@ public class Mausoleum extends ProductionBuilding implements NightSource {
                 ZombieVillagerProd.getStartButton(this, Keybindings.keyQ)
             );
         updateNightBorderBps();
-
-
     }
 
     public int getNightRange() { return nightRange; }
@@ -74,22 +71,13 @@ public class Mausoleum extends ProductionBuilding implements NightSource {
     public void updateNightBorderBps() {
         this.nightBorderBps.clear();
         this.nightBorderBps.addAll(MiscUtil.getGroundCircleBlocks(centrePos, getNightRange(), level));
+        this.nightBorderBps.addAll(MiscUtil.getGroundCircleBlocks(centrePos.offset(1,0,0), getNightRange(), level));
+        this.nightBorderBps.addAll(MiscUtil.getGroundCircleBlocks(centrePos.offset(0,0,1), getNightRange(), level));
     }
 
     @Override
-    public List<BlockPos> getNightBorderBps() {
+    public Set<BlockPos> getNightBorderBps() {
         return nightBorderBps;
-    }
-
-    @Override
-    public void tick(Level tickLevel) {
-        super.tick(tickLevel);
-        if (nightRangeTicks <= 0) {
-            updateNightBorderBps();
-            nightRangeTicks = NIGHT_RANGE_TICKS_MAX;
-        } else {
-            nightRangeTicks -= 1;
-        }
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}

@@ -123,7 +123,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
 
     final static public float attackDamage = 8.0f;
     final static public float attacksPerSecond = 0.6f;
-    final static public float maxHealth = 120.0f;
+    final static public float maxHealth = 150.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.28f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers

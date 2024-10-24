@@ -30,8 +30,10 @@ Bugfixes
 
 [🟡] Workers no longer take damage from berry bushes and cacti
 
-[🟡] Building blocks no longer drop items for survival players when mined
+[✔] Building blocks no longer drop items for survival players when mined
 
+[❌] Fixed undead burning too early (change isSunBurnTick to check exact time of day to be between 500 and 12500)
+    - Apparently undead actually burn for about 55% of the day in vanilla code
 
 
 Quality of Life Features
@@ -41,18 +43,11 @@ Quality of Life Features
     - This applies to all log blocks, wood blocks and nether stems
     - this is enabled by default but can be toggled using /gamerule doLogFalling
 
-[🟡] make /rts-fog serverside (no warnings)
+[✔] make /rts-fog serverside (no warnings)
 
 [🟡] Radius indicator around monster capitol and stronghold to better indicate range of night
-
-    - click the clock to toggle it
-    - show on minimap
-    - and give night vision to monster players
-        - don't wipe effects on F12, just hide particles instead
-
     (can use this same code for ability range indicators too)
-
-
+    - night warping areas are now cylinders instead of a sphere (this means it has unlimited vertical range)
 
 
 
@@ -62,5 +57,13 @@ Balancing Features
 [✔] Capitols now spawn animals closer and immediately spawn some nearby upon being built (within a 40 block radius)
 
 [✔] Piglins may now build basic portals on overworld terrain, but doing so takes twice as long
-    - Advanced portals makes this regular speed
+    - The Advanced Portals upgrade removes this penalty
 
+[✔] Default max population has been raised from 100 to 120
+[🟡] Natural monster unit regen is doubled to 1hp per 6s if you are near a night source AND it is true night
+
+[✔] Warden Health has been increased from 120 to 150
+[🟡] Iron golem ore cost ↓ 50, wood cost ↑ 50
+[🟡] Ravager food cost ↑ 50, build time ↑ 10s
+[🟡] Hoglin ore cost ↑ 25, build time ↑ 5s, population ↑ 1
+[🟡] Ghast ore cost ↓ 50

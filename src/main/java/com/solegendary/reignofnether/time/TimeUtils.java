@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.time;
 
 import com.solegendary.reignofnether.building.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -13,8 +15,12 @@ public class TimeUtils {
             if (building.isDestroyedServerside)
                 continue;
             if (building instanceof NightSource ns) {
-                return BuildingUtils.getCentrePos(building.getBlocks())
-                        .distToCenterSqr(pos.x, pos.y, pos.z) < Math.pow(ns.getNightRange(), 2);
+
+                BlockPos centrePos = BuildingUtils.getCentrePos(building.getBlocks());
+                Vec2 centrePos2d = new Vec2(centrePos.getX(), centrePos.getZ());
+                Vec2 pos2d = new Vec2((float) pos.x, (float) pos.z);
+
+                return centrePos2d.distanceToSqr(pos2d) < Math.pow(ns.getNightRange(), 2);
             }
         }
         return false;

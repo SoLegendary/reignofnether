@@ -40,6 +40,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.resources.BlockUtils.isLeafBlock;
 import static com.solegendary.reignofnether.resources.BlockUtils.isLogBlock;
@@ -339,10 +340,10 @@ public class MiscUtil {
     }
 
 
-    // highlight the tops of all blocks which are of at a certain horizontal distance away from the centrePos
-    public static List<BlockPos> getGroundCircleBlocks(BlockPos centrePos, int radius, Level level) {
+    // get the tops of all blocks which are of at a certain horizontal distance away from the centrePos
+    public static Set<BlockPos> getGroundCircleBlocks(BlockPos centrePos, int radius, Level level) {
         if (radius <= 0)
-            return List.of();
+            return Set.of();
 
         ArrayList<BlockPos> bps = new ArrayList<>();
 
@@ -359,7 +360,7 @@ public class MiscUtil {
             }
             bps.add(groundBp);
         }
-        return bps;
+        return new HashSet<>(bps);
     }
 
     public static class CircleUtil {

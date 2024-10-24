@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -51,7 +52,7 @@ public class FogOfWarServerEvents {
 
     // register here too for command blocks
     @SubscribeEvent
-    public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
+    public static void onRegisterCommand(RegisterCommandsEvent evt) {
         evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("enable")
                 .executes((command) -> {
                     setEnabled(true);

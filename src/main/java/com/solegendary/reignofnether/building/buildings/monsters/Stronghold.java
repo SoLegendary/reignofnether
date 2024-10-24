@@ -20,9 +20,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
@@ -35,7 +33,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
 
     private final static int MAX_OCCUPANTS = 7;
 
-    private final ArrayList<BlockPos> nightBorderBps = new ArrayList<>();
+    private final Set<BlockPos> nightBorderBps = new HashSet<>();
 
     public Stronghold(Level level, BlockPos originPos, Rotation rotation, String ownerName) {
         super(level, originPos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation), false);
@@ -67,13 +65,21 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
     public BlockPos getNightCentre() { return centrePos; }
 
     @Override
-    public void updateNightBorderBps() {
-        this.nightBorderBps.clear();
-        this.nightBorderBps.addAll(MiscUtil.getGroundCircleBlocks(centrePos, getNightRange(), level));
+    public void onBuilt() {
+        super.onBuilt();
+        updateNightBorderBps();
     }
 
     @Override
-    public List<BlockPos> getNightBorderBps() {
+    public void updateNightBorderBps() {
+        this.nightBorderBps.clear();
+        this.nightBorderBps.addAll(MiscUtil.getGroundCircleBlocks(centrePos, getNightRange(), level));
+        this.nightBorderBps.addAll(MiscUtil.getGroundCircleBlocks(centrePos.offset(1,0,0), getNightRange(), level));
+        this.nightBorderBps.addAll(MiscUtil.getGroundCircleBlocks(centrePos.offset(0,0,1), getNightRange(), level));
+    }
+
+    @Override
+    public Set<BlockPos> getNightBorderBps() {
         return nightBorderBps;
     }
 

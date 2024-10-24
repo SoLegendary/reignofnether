@@ -31,7 +31,7 @@ public class ResourceCosts {
 
     public static final int REPLANT_WOOD_COST = 1;
     public static final int REDUCED_REPLANT_WOOD_COST = 0;
-    public static final int DEFAULT_HARD_CAP_POPULATION = 100;
+    public static final int DEFAULT_HARD_CAP_POPULATION = 120;
 
 
     // ******************* UNITS ******************* //
@@ -53,18 +53,18 @@ public class ResourceCosts {
 
     // Villagers
     public static ResourceCost VILLAGER = ResourceCost.Unit(50,0,0,15,1);
-    public static ResourceCost IRON_GOLEM = ResourceCost.Unit(0,0,250,40,4);
+    public static ResourceCost IRON_GOLEM = ResourceCost.Unit(0,50,200,40,4);
     public static ResourceCost PILLAGER = ResourceCost.Unit(100,80,0,30,2);
     public static ResourceCost VINDICATOR = ResourceCost.Unit(150,0,0,30,2);
     public static ResourceCost WITCH = ResourceCost.Unit(100,100,100,35,3);
     public static ResourceCost EVOKER = ResourceCost.Unit(150,0,150,35,3);
-    public static ResourceCost RAVAGER = ResourceCost.Unit(350,50,150,50,6);
+    public static ResourceCost RAVAGER = ResourceCost.Unit(400,50,150,60,7);
 
     // Piglins
     public static ResourceCost GRUNT = ResourceCost.Unit(50,0,0,15,1);
     public static ResourceCost BRUTE = ResourceCost.Unit(125,0,0,25,2);
     public static ResourceCost HEADHUNTER = ResourceCost.Unit(90,70,0,25,2);
-    public static ResourceCost HOGLIN = ResourceCost.Unit(150,0,50,30,2);
+    public static ResourceCost HOGLIN = ResourceCost.Unit(150,0,75,35,3);
     public static ResourceCost BLAZE = ResourceCost.Unit(50,50,100,30,2);
     public static ResourceCost WITHER_SKELETON = ResourceCost.Unit(200,0,100,35,3);
     public static ResourceCost GHAST = ResourceCost.Unit(100,150,250,50,5);

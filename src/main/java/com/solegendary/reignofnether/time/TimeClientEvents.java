@@ -178,7 +178,7 @@ public class TimeClientEvents {
                     timeUntilStr,
                     FormattedCharSequence.forward("" + timeStr, Style.EMPTY),
                     gameLengthStr,
-                    FormattedCharSequence.forward("Night radius: " + (showNightRadius ? "ON" : "OFF"), Style.EMPTY)
+                    FormattedCharSequence.forward("Night circles: " + (showNightRadius ? "ON" : "OFF"), Style.EMPTY)
             );
             if (targetClientTime != serverTime)
                 tooltip = List.of(
@@ -186,7 +186,7 @@ public class TimeClientEvents {
                         FormattedCharSequence.forward("Real time: " + timeStr, Style.EMPTY),
                         timeUntilStr,
                         gameLengthStr,
-                        FormattedCharSequence.forward("Night radius: " + (showNightRadius ? "ON" : "OFF"), Style.EMPTY)
+                        FormattedCharSequence.forward("Night circles: " + (showNightRadius ? "ON" : "OFF"), Style.EMPTY)
                 );
 
             MyRenderer.renderTooltip(
