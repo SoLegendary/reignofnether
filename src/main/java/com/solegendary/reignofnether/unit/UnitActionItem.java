@@ -334,7 +334,6 @@ public class UnitActionItem {
                 }
                 // any other Ability not explicitly defined here
                 default -> {
-                    boolean enabledAutocast = false;
                     for (Ability ability : unit.getAbilities()) {
                         if (ability.action == action && (ability.isOffCooldown(unit) || ability.canBypassCooldown())) {
                             if (ability.canTargetEntities && this.unitId > 0) {
@@ -352,16 +351,10 @@ public class UnitActionItem {
                             }
                         } else if (ability.autocastEnableAction == action) {
                             ability.setAutocast(true, unit);
-                            enabledAutocast = true;
                         } else if (ability.autocastDisableAction == action) {
                             ability.setAutocast(false, unit);
                         }
                     }
-                    // turn off all other autocasts
-                    if (enabledAutocast)
-                        for (Ability ability : unit.getAbilities())
-                            if (ability.autocastEnableAction != null && ability.autocastEnableAction != action)
-                                ability.setAutocast(false, unit);
                 }
             }
         }

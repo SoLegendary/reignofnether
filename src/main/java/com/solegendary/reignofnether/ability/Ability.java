@@ -26,10 +26,9 @@ public class Ability {
     public int maxCharges = 1;
     public int charges = 1;
 
-    private boolean autocast = false;
     private boolean defaultAutocast = false;
-    public void setAutocast(boolean value, Unit unit) { autocast = value; }
-    public boolean getAutocast(Unit unit) { return autocast; }
+    public void setAutocast(boolean value, Unit unit) { unit.setAutocast(value ? this : null); }
+    public boolean getAutocast(Unit unit) { return unit.hasAutocast(this); }
 
     public Ability(UnitAction action, int cooldownMax, float range, float radius, boolean canTargetEntities) {
         this.action = action;
@@ -53,14 +52,13 @@ public class Ability {
         return maxCharges > 1;
     }
 
-    protected void toggleAutocast(/*boolean serverSide*/) {
-        //TODO
-        //if (!level.isClientSide())  // Why? currently its only called by button
-        //    return;
+    protected void toggleAutocast(Unit unit) {
+        if (!unit.level().isClientSide())
+            return;
 
-        if (autocast && autocastDisableAction != null) {
+        if (getAutocast(unit) && autocastDisableAction != null) {
             sendUnitCommand(autocastDisableAction);
-        } else if (!autocast && autocastEnableAction != null) {
+        } else if (!getAutocast(unit) && autocastEnableAction != null) {
             sendUnitCommand(autocastEnableAction);
         }
     }
@@ -136,5 +134,9 @@ public class Ability {
 
     protected void setDefaultAutocast(boolean b) {
         defaultAutocast = b;
+    }
+
+    public boolean isDefaultAutocast() {
+        return defaultAutocast;
     }
 }

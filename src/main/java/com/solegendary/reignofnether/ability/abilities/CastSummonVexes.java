@@ -55,7 +55,7 @@ public class CastSummonVexes extends Ability {
                 () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_EVOKER_VEXES),
                 () -> true,
                 () -> UnitClientEvents.sendUnitCommand(UnitAction.CAST_SUMMON_VEXES),
-                this::toggleAutocast,
+                () -> toggleAutocast(unit),
                 List.of(
                         FormattedCharSequence.forward(I18n.get("abilities.reignofnether.summon_vexes"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward(I18n.get("abilities.reignofnether.summon_vexes.tooltip1", CD_MAX_SECONDS), MyRenderer.iconStyle),

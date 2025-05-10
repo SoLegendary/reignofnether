@@ -61,7 +61,7 @@ public class GreedIsGoodPassive extends HeroAbility {
                 () -> getAutocast(hero),
                 () -> rank == 0,
                 () -> true,
-                this::toggleAutocast,
+                () -> toggleAutocast(hero),
                 null,
                 getTooltipLines(hero),
                 this,
@@ -107,7 +107,7 @@ public class GreedIsGoodPassive extends HeroAbility {
 
     public int checkAndSpendResources(ResourceName resName, HeroUnit hero) {
         int totalSpent = 0;
-        String ownerName = ((Unit) hero).getOwnerName();
+        String ownerName = hero.getOwnerName();
         if (getAutocast(hero) && !((LivingEntity) hero).level().isClientSide()) {
             for (Resources resources : ResourcesServerEvents.resourcesList) {
                 if (resources.ownerName.equals(ownerName)) {

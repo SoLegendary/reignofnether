@@ -62,4 +62,12 @@ public class Abilities {
     public List<Ability> get() {
         return new ArrayList<>(Arrays.asList(abilities.stream().map(Pair::getA).toArray(Ability[]::new)));
     }
+
+    public Ability getDefaultAutocast() {
+        for (Pair<Ability, Keybinding> ability:abilities) {
+            if (ability.getA().isDefaultAutocast())
+                return ability.getA();
+        }
+        return null;
+    }
 }

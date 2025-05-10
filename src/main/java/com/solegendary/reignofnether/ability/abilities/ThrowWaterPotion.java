@@ -56,7 +56,7 @@ public class ThrowWaterPotion extends Ability {
             () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_WATER_POTIONS),
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_WATER_POTION),
-            this::toggleAutocast,
+            () -> toggleAutocast(unit),
             List.of(
                 fcs(I18n.get("abilities.reignofnether.water_potion"), true),
                 fcsIcons(I18n.get("abilities.reignofnether.water_potion.tooltip1", CD_MAX_SECONDS, witchUnit.getPotionThrowRange())),

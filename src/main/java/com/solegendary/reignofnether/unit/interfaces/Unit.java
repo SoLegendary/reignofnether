@@ -368,4 +368,7 @@ public interface Unit {
     }
 
     Object2ObjectArrayMap<Class<? extends Ability>,Float> getCooldowns();
+
+    boolean hasAutocast(Ability ability);
+    void setAutocast(Ability ability);
 }

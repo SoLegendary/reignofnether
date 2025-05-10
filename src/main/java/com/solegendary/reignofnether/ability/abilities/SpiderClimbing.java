@@ -42,7 +42,7 @@ public class SpiderClimbing extends Ability {
                 () -> false,
                 () -> false,
                 () -> true,
-                this::toggleAutocast,
+                () -> toggleAutocast(unit),
                 null,
                 List.of(
                         spiderUnit.isWallClimbing() ?

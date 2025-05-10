@@ -60,7 +60,7 @@ public class SoulSiphonPassive extends HeroAbility {
             () -> this.getAutocast(hero),
             () -> rank == 0,
             () -> true,
-            this::toggleAutocast,
+            () -> toggleAutocast(hero),
             null,
             getTooltipLines(hero),
             this,

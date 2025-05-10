@@ -42,7 +42,7 @@ public class ConsumeSlime extends Ability {
             () -> slime.getSize() <= 1,
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.CONSUME_SLIME),
-            this::toggleAutocast,
+            () -> toggleAutocast(unit),
             List.of(FormattedCharSequence.forward(I18n.get("abilities.reignofnether.consume"),
                     Style.EMPTY.withBold(true)
                 ),

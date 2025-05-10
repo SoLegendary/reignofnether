@@ -53,7 +53,7 @@ public class ThrowLingeringRegenPotion extends Ability {
             () -> false, //!ResearchClient.hasResearch(ResearchLingeringPotions.itemName),
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_LINGERING_REGEN_POTION),
-            this::toggleAutocast,
+            () -> toggleAutocast(unit),
             List.of(
                 fcs(I18n.get("abilities.reignofnether.lingering_regen_potion"), true),
                 fcsIcons(I18n.get("abilities.reignofnether.lingering_regen_potion.tooltip1", CD_MAX_SECONDS, witchUnit.getPotionThrowRange())),

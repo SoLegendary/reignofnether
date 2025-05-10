@@ -50,6 +50,8 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
 
     Object2ObjectArrayMap<Class<? extends Ability>, Float> cooldowns = Unit.createCooldownMap();
 
+    Ability autocast;
+
     // region
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
@@ -252,10 +254,21 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     public void updateAbilityButtons() {
         abilities = ABILITIES.get();
         abilityButtons = ABILITIES.getButtons(this);
+        autocast = ABILITIES.getDefaultAutocast();
     }
 
     @Override
     public Object2ObjectArrayMap<Class<? extends Ability>, Float> getCooldowns() {
         return cooldowns;
+    }
+
+    @Override
+    public boolean hasAutocast(Ability ability) {
+        return autocast == ability;
+    }
+
+    @Override
+    public void setAutocast(Ability autocast) {
+        this.autocast = autocast;
     }
 }

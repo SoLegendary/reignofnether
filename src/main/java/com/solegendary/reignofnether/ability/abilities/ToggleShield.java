@@ -52,7 +52,7 @@ public class ToggleShield extends Ability {
                 () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_BRUTE_SHIELDS) ||
                         bruteUnit.getItemBySlot(EquipmentSlot.OFFHAND).getItem() != Items.SHIELD,
                 () -> true,
-                this::toggleAutocast,
+                () -> toggleAutocast(unit),
                 null,
                 List.of(
                         fcs(I18n.get("abilities.reignofnether.shield_stance"), true),

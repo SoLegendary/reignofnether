@@ -51,7 +51,7 @@ public class SpinWebs extends Ability {
                 () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_SPIDER_WEBS),
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.SPIN_WEBS),
-                this::toggleAutocast,
+                () -> toggleAutocast(unit),
                 List.of(
                         FormattedCharSequence.forward(I18n.get("abilities.reignofnether.spin_webs"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + RANGE, MyRenderer.iconStyle),

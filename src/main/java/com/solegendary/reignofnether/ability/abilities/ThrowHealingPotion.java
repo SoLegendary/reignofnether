@@ -54,7 +54,7 @@ public class ThrowHealingPotion extends Ability {
             () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_HEALING_POTIONS),
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_HEALING_POTION),
-            this::toggleAutocast,
+            () -> toggleAutocast(unit),
             List.of(
                 fcs(I18n.get("abilities.reignofnether.healing_potion"), true),
                 fcsIcons(I18n.get("abilities.reignofnether.healing_potion.tooltip1", CD_MAX_SECONDS, witchUnit.getPotionThrowRange())),

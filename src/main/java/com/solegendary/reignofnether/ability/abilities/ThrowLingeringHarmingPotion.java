@@ -52,7 +52,7 @@ public class ThrowLingeringHarmingPotion extends Ability {
             //!ResearchClient.hasResearch(ResearchLingeringPotions.itemName),
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_LINGERING_HARMING_POTION),
-            this::toggleAutocast,
+            () -> toggleAutocast(unit),
             List.of(
                 fcs(I18n.get("abilities.reignofnether.lingering_harming_potion"), true),
                 fcsIcons(I18n.get("abilities.reignofnether.lingering_harming_potion.tooltip1", CD_MAX_SECONDS, witchUnit.getPotionThrowRange())),
