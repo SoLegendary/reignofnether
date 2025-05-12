@@ -73,7 +73,7 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
     // only count as building if in range of the target - building is actioned in Building.tick()
     public boolean canDropOff() {
         if (buildingTarget != null && this.moveTarget != null)
-            if (buildingTarget.isBuilt && buildingTarget.canAcceptResources &&
+            if (buildingTarget.isBuilt && buildingTarget.getBuilding().canAcceptResources &&
                 BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED &&
                 BuildingServerEvents.getBuildings().contains(buildingTarget))
                 return buildingTarget.isPosInsideBuilding(mob.getOnPos()) || MiscUtil.isMobInRangeOfPos(moveTarget, mob, 1.5f);
@@ -88,7 +88,7 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
         BuildingPlacement closestBuilding = null;
         double closestDist = 99999;
         for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
-            if (building.ownerName.equals(((Unit) mob).getOwnerName()) && building.canAcceptResources && building.isBuilt) {
+            if (building.ownerName.equals(((Unit) mob).getOwnerName()) && building.getBuilding().canAcceptResources && building.isBuilt) {
                 BlockPos bp = building.getClosestGroundPos(pos, 1);
                 double dist = bp.distSqr(pos);
                 if (dist < closestDist) {

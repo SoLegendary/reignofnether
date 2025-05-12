@@ -109,7 +109,7 @@ public class PlayerServerboundPacket {
                 });
             } else if (ClientGameModeHelper.gameMode == GameMode.CLASSIC) {
                 BeaconPlacement beacon = BuildingUtils.getBeacon(true);
-                boolean isKotB = beacon != null && beacon.capturable;
+                boolean isKotB = beacon != null && beacon.getBuilding().capturable;
                 if (isKotB) {
                     CompletableFuture.delayedExecutor(2000, TimeUnit.MILLISECONDS).execute(() -> {
                         MC.player.sendSystemMessage(Component.literal(""));

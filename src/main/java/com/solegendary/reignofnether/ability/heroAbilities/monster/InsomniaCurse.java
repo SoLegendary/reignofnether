@@ -66,7 +66,7 @@ public class InsomniaCurse extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, HeroUnit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Curse of Insomnia",
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/phantom.png"),
             hotkey,
@@ -75,7 +75,7 @@ public class InsomniaCurse extends HeroAbility {
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.INSOMNIA_CURSE),
             null,
-            getTooltipLines(hero),
+            getTooltipLines((HeroUnit) hero),
             this,
             hero
         );

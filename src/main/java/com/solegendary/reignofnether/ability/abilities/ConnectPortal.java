@@ -37,7 +37,7 @@ public class ConnectPortal extends Ability {
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png"),
             hotkey,
             () -> false,
-            () -> portal.portalType != PortalPlacement.PortalType.TRANSPORT,
+            () -> portal.getPortalType() != PortalPlacement.PortalType.TRANSPORT,
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.CONNECT_PORTAL),
             null,
@@ -57,11 +57,11 @@ public class ConnectPortal extends Ability {
     @Override
     public void use(Level level, BuildingPlacement building, BlockPos targetBp) {
 
-        if (building instanceof PortalPlacement portal && portal.portalType == PortalPlacement.PortalType.TRANSPORT) {
+        if (building instanceof PortalPlacement portal && portal.getPortalType() == PortalPlacement.PortalType.TRANSPORT) {
             portal.disconnectPortal();
 
             BuildingPlacement targetBuilding = BuildingUtils.findBuilding(level.isClientSide(), targetBp);
-            if (targetBuilding instanceof PortalPlacement targetPortal && targetPortal.portalType == PortalPlacement.PortalType.TRANSPORT &&
+            if (targetBuilding instanceof PortalPlacement targetPortal && targetPortal.getPortalType() == PortalPlacement.PortalType.TRANSPORT &&
                 targetBuilding != building && targetBuilding.isBuilt &&
                 (targetBuilding.ownerName.equals(building.ownerName) ||
                 (targetBuilding.getBuilding() instanceof NeutralTransportPortal &&

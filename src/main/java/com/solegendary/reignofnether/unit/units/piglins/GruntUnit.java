@@ -180,8 +180,11 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
 
         for (Building building : ReignOfNetherRegistries.BUILDING) {
             if (building.getFaction() == Faction.PIGLINS || building.getFaction() == null) {
-                buildingButtons.add(building.getBuildButton(index >= keybindings.size() ? null : keybindings.get(index)));
-                index++;
+                AbilityButton button = building.getBuildButton(index >= keybindings.size() ? null : keybindings.get(index));
+                if (button != null) {
+                    buildingButtons.add(button);
+                    index++;
+                }
             }
         }
         return buildingButtons;

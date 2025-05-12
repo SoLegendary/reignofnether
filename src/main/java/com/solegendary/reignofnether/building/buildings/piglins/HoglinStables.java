@@ -54,7 +54,7 @@ public class HoglinStables extends ProductionBuilding {
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.HOGLIN_STABLES,
             () -> false,
-            () -> BuildingClientEvents.hasFinishedBuilding(Buildings.PORTAL) ||
+            () -> BuildingClientEvents.hasFinishedBuilding(Buildings.PORTAL_BASIC) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             () -> BuildingClientEvents.setBuildingToPlace(Buildings.HOGLIN_STABLES),
             null,

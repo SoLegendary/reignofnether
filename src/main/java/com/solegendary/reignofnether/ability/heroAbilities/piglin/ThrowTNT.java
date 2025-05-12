@@ -57,7 +57,7 @@ public class ThrowTNT extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, HeroUnit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Throw TNT",
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
                 hotkey,
@@ -66,7 +66,7 @@ public class ThrowTNT extends HeroAbility {
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_TNT),
                 null,
-                getTooltipLines(hero),
+                getTooltipLines((HeroUnit) hero),
                 this,
                 hero
         );

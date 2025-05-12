@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.time;
 
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.heroAbilities.monster.BloodMoon;
-import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -67,7 +66,7 @@ public class TimeServerEvents {
                 .toList();
 
         ArrayList<BuildingPlacement> enemyBuildings = new ArrayList<>(BuildingServerEvents.getBuildings().stream()
-                .filter(b -> !b.ownerName.equals(((Unit) bloodMoonOwner).getOwnerName()) && !b.invulnerable)
+                .filter(b -> !b.ownerName.equals(((Unit) bloodMoonOwner).getOwnerName()) && !b.getBuilding().invulnerable)
                 .toList());
         Collections.shuffle(enemyBuildings);
 

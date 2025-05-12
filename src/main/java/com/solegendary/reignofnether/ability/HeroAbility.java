@@ -65,7 +65,7 @@ public abstract class HeroAbility extends Ability {
         return List.of();
     }
 
-    public AbilityButton getButton(Keybinding hotkey, HeroUnit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return null;
     }
 

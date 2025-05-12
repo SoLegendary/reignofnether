@@ -85,6 +85,7 @@ public class ResourceCosts {
     //Piglins
     public static final ResourceCost CENTRAL_PORTAL = new ResourceCost(ID, "CENTRAL_PORTAL");
     public static final ResourceCost BASIC_PORTAL = new ResourceCost(ID, "BASIC_PORTAL");
+    public static final ResourceCost CIVILIAN_PORTAL = new ResourceCost(ID, "CIVILIAN_PORTAL");
     public static final ResourceCost NETHERWART_FARM = new ResourceCost(ID, "NETHERWART_FARM");
     public static final ResourceCost BASTION = new ResourceCost(ID, "BASTION");
     public static final ResourceCost HOGLIN_STABLES = new ResourceCost(ID, "HOGLIN_STABLES");
@@ -253,6 +254,7 @@ public class ResourceCosts {
         // Piglins
         CENTRAL_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.CENTRAL_PORTAL);
         BASIC_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BASIC_PORTAL);
+        CIVILIAN_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.CIVILIAN_PORTAL);
         NETHERWART_FARM.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.NETHERWART_FARM);
         BASTION.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BASTION);
         HOGLIN_STABLES.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.HOGLIN_STABLES);

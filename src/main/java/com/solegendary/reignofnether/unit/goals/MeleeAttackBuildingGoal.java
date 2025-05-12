@@ -119,7 +119,7 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
         if (blockPos != null) {
             if (this.mob.level().isClientSide()) {
                 BuildingPlacement b = BuildingUtils.findBuilding(this.mob.level().isClientSide(), blockPos);
-                if (b != null && !b.invulnerable) {
+                if (b != null && !b.getBuilding().invulnerable) {
                     this.buildingTarget = b;
                     MiscUtil.addUnitCheckpoint(((Unit) mob), new BlockPos(
                             buildingTarget.centrePos.getX(),
@@ -131,7 +131,7 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
             }
             else {
                 BuildingPlacement b = BuildingUtils.findBuilding(this.mob.level().isClientSide(), blockPos);
-                if (b != null && !b.invulnerable) {
+                if (b != null && !b.getBuilding().invulnerable) {
                     this.buildingTarget = b;
                     if (this.mob.isVehicle() && this.mob.getFirstPassenger() instanceof AttackerUnit aUnit &&
                             aUnit.getAttackBuildingGoal() instanceof RangedAttackBuildingGoal<?> rabg)

@@ -64,7 +64,7 @@ public class FancyFeast extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, HeroUnit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Fancy Feast",
                 getIcon(0),
                 hotkey,
@@ -73,7 +73,7 @@ public class FancyFeast extends HeroAbility {
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.FANCY_FEAST),
                 null,
-                getTooltipLines(hero),
+                getTooltipLines((HeroUnit) hero),
                 this,
                 hero
         );

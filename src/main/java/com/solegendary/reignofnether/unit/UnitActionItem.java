@@ -212,7 +212,7 @@ public class UnitActionItem {
                             goal.saveAndReturnResources();
                         }
                     } else if (buildingAtPos instanceof PortalPlacement portal
-                        && portal.portalType == PortalPlacement.PortalType.TRANSPORT && unit.canUsePortal()) {
+                        && portal.getPortalType() == PortalPlacement.PortalType.TRANSPORT && unit.canUsePortal()) {
                         if (unit.getUsePortalGoal() instanceof FlyingUsePortalGoal flyingUsePortalGoal)
                             flyingUsePortalGoal.setBuildingTarget(preselectedBlockPos);
                         if (unit.getUsePortalGoal() instanceof UsePortalGoal usePortalGoal)

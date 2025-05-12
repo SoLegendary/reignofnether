@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransportPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
-import com.solegendary.reignofnether.building.buildings.piglins.Portal;
+import com.solegendary.reignofnether.building.buildings.piglins.PortalBasic;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
@@ -79,7 +79,7 @@ public class BuildingClientEvents {
         int totalPopulationSupply = 0;
         for (BuildingPlacement building : buildings)
             if (building.ownerName.equals(playerName) && building.isBuilt) {
-                totalPopulationSupply += building.popSupply;
+                totalPopulationSupply += building.building.cost.population;
             }
 
         return Math.min(GameruleClient.maxPopulation, totalPopulationSupply);
@@ -303,7 +303,7 @@ public class BuildingClientEvents {
         float g = valid ? 1.0f : 0;
         // highlight yellow if we are placing a portal on overworld terrain
         if (valid) {
-            if (buildingToPlace instanceof Portal &&
+            if (buildingToPlace instanceof PortalBasic &&
                     !isOnNetherBlocks(blocksToDraw, originPos)) {
                 r = 0.5f;
                 g = 0.5f;
@@ -434,7 +434,7 @@ public class BuildingClientEvents {
         if (buildingToPlace.getFaction() != Faction.PIGLINS || buildingToPlace instanceof CentralPortal) {
             return true;
         }
-        if (buildingToPlace instanceof Portal) {
+        if (buildingToPlace instanceof PortalBasic) {
             return true;
         }
 

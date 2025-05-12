@@ -43,7 +43,7 @@ public class DisconnectPortal extends Ability {
             () -> false,
             () -> {
                 // hidden if the portal does not have a connection Or isn't a transport portal
-                if (portal.portalType != PortalPlacement.PortalType.TRANSPORT)
+                if (portal.getPortalType() != PortalPlacement.PortalType.TRANSPORT)
                     return true;
                 return !portal.hasDestination();
             },

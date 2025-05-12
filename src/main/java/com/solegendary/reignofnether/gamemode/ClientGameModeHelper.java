@@ -55,7 +55,7 @@ public class ClientGameModeHelper {
 
     private static boolean isKotB() {
         BeaconPlacement beacon = BuildingUtils.getBeacon(true);
-        return (beacon != null && beacon.capturable);
+        return (beacon != null && beacon.getBuilding().capturable);
     }
 
     private static Button getClassicButton() {

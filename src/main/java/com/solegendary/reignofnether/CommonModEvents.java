@@ -43,7 +43,7 @@ public class CommonModEvents {
             if (bp != null) {
                 BuildingPlacement building = BuildingUtils.findBuilding(true, bp);
                 if (building instanceof PortalPlacement portal) {
-                    switch (portal.portalType) {
+                    switch (portal.getPortalType()) {
                         case CIVILIAN -> tint = 0x00FF00;
                         case MILITARY -> tint = 0xFF0000;
                         case TRANSPORT -> tint = 0x0000FF;

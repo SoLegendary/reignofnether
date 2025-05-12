@@ -59,7 +59,7 @@ public class MaceSlam extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, HeroUnit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Mace Slam",
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/mace.png"),
                 hotkey,
@@ -68,7 +68,7 @@ public class MaceSlam extends HeroAbility {
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.MACE_SLAM),
                 null,
-                getTooltipLines(hero),
+                getTooltipLines((HeroUnit) hero),
                 this,
                 hero
         );

@@ -22,13 +22,6 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.researchItems.ResearchHoglinCavalry;
-import com.solegendary.reignofnether.research.researchItems.ResearchRavagerCavalry;
-import com.solegendary.reignofnether.research.researchItems.ResearchSpiderJockeys;
-import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.resources.ResourceName;
-import com.solegendary.reignofnether.resources.ResourceSources;
-import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -667,7 +660,7 @@ public class UnitClientEvents {
                 // right click -> attack unfriendly building
                 else if (hudSelectedEntity instanceof AttackerUnit &&
                         (preSelBuilding != null) &&
-                        !preSelBuilding.invulnerable &&
+                        !preSelBuilding.getBuilding().invulnerable &&
                         !(preSelBuilding instanceof BridgePlacement) &&
                         ((GameruleClient.neutralAggro && getPlayerToBuildingRelationship(preSelBuilding) == Relationship.NEUTRAL) ||
                         getPlayerToBuildingRelationship(preSelBuilding) == Relationship.HOSTILE)) {
@@ -677,7 +670,7 @@ public class UnitClientEvents {
                 else if (hudSelectedEntity instanceof Unit unit &&
                         unit.getReturnResourcesGoal() != null &&
                         Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0 &&
-                        preSelBuilding != null && preSelBuilding.canAcceptResources && preSelBuilding.isBuilt &&
+                        preSelBuilding != null && preSelBuilding.getBuilding().canAcceptResources && preSelBuilding.isBuilt &&
                         getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED) {
                     sendUnitCommand(UnitAction.RETURN_RESOURCES);
                 }

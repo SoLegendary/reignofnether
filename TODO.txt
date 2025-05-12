@@ -7,6 +7,12 @@
 
 
 
+Building rework
+---------------
+ProductionPlacement
+
+
+
 
 Features
 --------
@@ -67,9 +73,15 @@ Bugfixes
 [❌] Armour on units doesn't do anything against other mob projectiles?
     - Check on latest forge version?
 
+[❌] gatherTarget save data doesn't work
+
+[❌] Bastion and Flame Sanctuary stuck building?
+
 Quality of Life
 ---------------
 [❌] Shift-clicking the "Select all Military units" button now only selects the units on screen
+
+[❌] Skirmish mode command
 
 Languages
 ---------

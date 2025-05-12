@@ -54,7 +54,7 @@ public class GreedIsGoodPassive extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, HeroUnit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Greed is Good",
                 new ResourceLocation("minecraft", "textures/block/gold_block.png"),
                 hotkey,
@@ -63,7 +63,7 @@ public class GreedIsGoodPassive extends HeroAbility {
                 () -> true,
                 () -> toggleAutocast(hero),
                 null,
-                getTooltipLines(hero),
+                getTooltipLines((HeroUnit) hero),
                 this,
                 hero
         );

@@ -40,7 +40,6 @@ public class Mausoleum extends ProductionBuilding {
     public Mausoleum() {
         super(structureName, cost, true);
         this.name = buildingName;
-//        this.blocks = getAbsoluteBlockData(getRelativeBlockData(level), level, originPos, rotation);
         this.portraitBlock = Blocks.DEEPSLATE_TILES;
         this.icon = new ResourceLocation("minecraft", "textures/block/deepslate_tiles.png");
 

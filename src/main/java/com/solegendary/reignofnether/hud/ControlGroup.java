@@ -96,7 +96,7 @@ public class ControlGroup {
             String unitName = HudClientEvents.getSimpleEntityName(hudSelectedEntity);
             iconRl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png");
         } else if (hudSelectedPlacement != null) {
-            iconRl = hudSelectedPlacement.icon;
+            iconRl = hudSelectedPlacement.getBuilding().icon;
         }
     }
 

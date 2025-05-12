@@ -96,6 +96,7 @@ public class ReignOfNetherCommonConfigs {
         BUILDER.comment("Piglins");
         BuildingCosts.CENTRAL_PORTAL.define(BUILDER);
         BuildingCosts.BASIC_PORTAL.define(BUILDER);
+        BuildingCosts.CIVILIAN_PORTAL.define(BUILDER);
         BuildingCosts.NETHERWART_FARM.define(BUILDER);
         BuildingCosts.BASTION.define(BUILDER);
         BuildingCosts.HOGLIN_STABLES.define(BUILDER);
@@ -237,6 +238,7 @@ public class ReignOfNetherCommonConfigs {
         // Piglins
         public static final ResourceCostConfigEntry CENTRAL_PORTAL = ResourceCostConfigEntry.Building(0,350,250, 10, ResourceCosts.CENTRAL_PORTAL, "Central Portal Config");
         public static final ResourceCostConfigEntry BASIC_PORTAL = ResourceCostConfigEntry.Building(0, 75, 0, 0, ResourceCosts.BASIC_PORTAL, "Basic Portal Config");
+        public static final ResourceCostConfigEntry CIVILIAN_PORTAL = ResourceCostConfigEntry.Building(0, 75, 0, 15, ResourceCosts.CIVILIAN_PORTAL, "Civilian Portal Config");
         public static final ResourceCostConfigEntry NETHERWART_FARM = ResourceCostConfigEntry.Building(0, 150, 0, 0, ResourceCosts.NETHERWART_FARM, "Netherwart Farm Config");
         public static final ResourceCostConfigEntry BASTION = ResourceCostConfigEntry.Building(0, 150, 100, 0, ResourceCosts.BASTION, "Bastion Config");
         public static final ResourceCostConfigEntry HOGLIN_STABLES = ResourceCostConfigEntry.Building(0, 250, 0, 0, ResourceCosts.HOGLIN_STABLES, "Hoglin Stables Config");

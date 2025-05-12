@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.building.buildings.piglins.PortalCivilian;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.StockpilePlacement;
@@ -207,7 +208,7 @@ public class BuildingServerboundPacket {
                 case CHECK_STOCKPILE_CHEST -> {
                     if (building instanceof StockpilePlacement stockpile)
                         stockpile.checkAndConsumeChestItems();
-                    else if (building instanceof PortalPlacement portal && portal.portalType == PortalPlacement.PortalType.CIVILIAN)
+                    else if (building instanceof PortalPlacement portal && portal.getBuilding() instanceof PortalCivilian)
                         portal.checkAndConsumeChestItems();
                 }
                 case REQUEST_REPLACEMENT -> {

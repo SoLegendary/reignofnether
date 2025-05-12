@@ -1,78 +1,37 @@
 package com.solegendary.reignofnether.building;
 
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Abilities;
-import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
-import com.solegendary.reignofnether.building.buildings.monsters.DarkWatchtower;
-import com.solegendary.reignofnether.building.buildings.neutral.Beacon;
-import com.solegendary.reignofnether.building.buildings.piglins.Bastion;
-import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
-import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
-import com.solegendary.reignofnether.building.buildings.piglins.Portal;
-import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
-import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile;
-import com.solegendary.reignofnether.building.buildings.villagers.Watchtower;
-import com.solegendary.reignofnether.fogofwar.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Chicken;
-import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.world.ForgeChunkManager;
-import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
 
+// Registered object in Buildings
+// is a member of BuildingPlacement and is generally not instantiated directly
 public abstract class Building {
-    private static final int BASE_MS_PER_BUILD = 500;
-    public final float MELEE_DAMAGE_MULTIPLIER = 0.2F;
     public String name;
     public String structureName;
     public ResourceLocation icon;
     public final boolean isCapitol;
-    public int msToNextBuild = 500;
-    public final float MIN_BLOCKS_PERCENT = 0.5F;
-    protected float explodeChance = 0.3F;
-    protected float explodeRadius = 2.0F;
-    protected float fireThreshold = 0.75F;
-    protected float buildTimeModifier = 1.0F;
-    protected float repairTimeModifier = 1.25F;
-    protected int highestBlockCountReached = 2;
-    public Block portraitBlock;
-    public boolean canAcceptResources = false;
-    public int serverBlocksPlaced = 1;
-    private int totalBlocksEverBroken = 0;
-    private long ticksToExtinguish = 0L;
-    private final long TICKS_TO_EXTINGUISH = 100L;
-    private final long TICKS_TO_SPAWN_ANIMALS_MAX = 1800L;
-    private long ticksToSpawnAnimals = 0L;
-    private final int MAX_ANIMALS = 8;
-    private final int ANIMAL_SPAWN_BLOCK_RANGE = 70;
-    private final int ANIMAL_SPAWN_RANGE_MIN = 15;
-    private final int ANIMAL_SPAWN_RANGE_MAX = 80;
+    public Block portraitBlock; // block rendered in the portrait GUI to represent this building
+    public boolean canAcceptResources = false; // can workers drop off resources here?
+
+    // chance for a mini explosion to destroy extra blocks if a player is breaking it
+    // should be higher for large fragile buildings so players don't take ages to destroy it
+    protected float explodeChance = 0.3f;
+    protected float explodeRadius = 2.0f;
+    protected float fireThreshold = 0.75f; // if building has less %hp than this, explosions caused can make fires
+    protected float buildTimeModifier = 1.0f; // only affects non-built buildings, not repair times
+    protected float repairTimeModifier = 1.25f; // only affects built buildings
 
     public int captureRange = 20;
     public boolean capturable = false;
@@ -81,7 +40,11 @@ public abstract class Building {
 
     public ResourceCost cost;
     public boolean selfBuilding = false;
+
+    // blocks types that are placed automatically when the building is placed
+    // used to control size of initial foundations while keeping it symmetrical
     public final ArrayList<Block> startingBlockTypes = new ArrayList();
+
     protected final Abilities abilities = new Abilities();
 
     public Abilities getAbilities() {

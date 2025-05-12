@@ -190,8 +190,11 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
 
         for (Building building : ReignOfNetherRegistries.BUILDING) {
             if (building.getFaction() == Faction.MONSTERS || building.getFaction() == null) {
-                buildingButtons.add(building.getBuildButton(index >= keybindings.size() ? null : keybindings.get(index)));
-                index++;
+                AbilityButton button = building.getBuildButton(index >= keybindings.size() ? null : keybindings.get(index));
+                if (button != null) {
+                    buildingButtons.add(button);
+                    index++;
+                }
             }
         }
         return buildingButtons;

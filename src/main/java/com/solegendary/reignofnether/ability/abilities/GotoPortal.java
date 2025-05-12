@@ -46,7 +46,7 @@ public class GotoPortal extends Ability {
                 () -> false,
                 () -> {
                     // hidden if the portal does not have a connection Or isn't a transport portal
-                    if (portal.portalType != PortalPlacement.PortalType.TRANSPORT)
+                    if (portal.getPortalType() != PortalPlacement.PortalType.TRANSPORT)
                         return true;
                     return !portal.hasDestination();
                 },
@@ -66,7 +66,7 @@ public class GotoPortal extends Ability {
         if (level.isClientSide() && building instanceof PortalPlacement portal &&
             portal.hasDestination()) {
             BuildingPlacement targetBuilding = BuildingUtils.findBuilding(level.isClientSide(), portal.destination);
-            if (targetBuilding instanceof PortalPlacement targetPortal && portal.portalType == PortalPlacement.PortalType.TRANSPORT)
+            if (targetBuilding instanceof PortalPlacement targetPortal && portal.getPortalType() == PortalPlacement.PortalType.TRANSPORT)
                 OrthoviewClientEvents.centreCameraOnPos(targetPortal.centrePos);
         }
     }

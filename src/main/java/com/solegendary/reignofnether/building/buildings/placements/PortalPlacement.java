@@ -1,12 +1,13 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.piglins.Portal;
+import com.solegendary.reignofnether.building.buildings.piglins.PortalCivilian;
+import com.solegendary.reignofnether.building.buildings.piglins.PortalMilitary;
+import com.solegendary.reignofnether.building.buildings.piglins.PortalTransport;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -25,17 +26,25 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
     public enum PortalType {
         BASIC, CIVILIAN, MILITARY, TRANSPORT
     }
-    public final static int CIVILIIAN_PORTAL_POPULATION_SUPPLY = 15;
 
-    public PortalType portalType = PortalType.BASIC;
+    public final static float NON_NETHER_BUILD_TIME_MODIFIER = 2.0f;
 
     public BlockPos destination; // for transport portals
 
     public NetherZone netherConversionZone = null;
 
-
     public PortalPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
+    }
+
+    public PortalType getPortalType() {
+        if (building instanceof PortalCivilian)
+            return PortalType.CIVILIAN;
+        else if (building instanceof PortalMilitary)
+            return PortalType.MILITARY;
+        else if (building instanceof PortalTransport)
+            return PortalType.TRANSPORT;
+        return PortalType.BASIC;
     }
 
     @Override
@@ -84,7 +93,7 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
     public void disconnectPortal() {
         if (destination != null) {
             BuildingPlacement targetBuilding = BuildingUtils.findBuilding(getLevel().isClientSide(), destination);
-            if (targetBuilding instanceof PortalPlacement targetPortal && portalType == PortalType.TRANSPORT) {
+            if (targetBuilding instanceof PortalPlacement targetPortal && getBuilding() instanceof PortalTransport) {
                 targetPortal.destination = null;
             }
         }
@@ -102,19 +111,15 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
         String newStructureName = "";
         switch (portalType) {
             case CIVILIAN -> {
-                this.portraitBlock = Blocks.CYAN_GLAZED_TERRACOTTA;
-                this.icon = new ResourceLocation("minecraft", "textures/block/cyan_glazed_terracotta.png");
-                newStructureName = Portal.structureNameCivilian;
-                this.canAcceptResources = true;
-                popSupply = CIVILIIAN_PORTAL_POPULATION_SUPPLY;
+                this.building = Buildings.PORTAL_CIVILIAN;
+                newStructureName = PortalCivilian.structureName;
                 if (this.getLevel().isClientSide()) {
                     this.productionButtons = List.of(ProductionItems.RESEARCH_RESOURCE_CAPACITY.getStartButton(this, Keybindings.keyQ));
                 }
             }
             case MILITARY -> {
-                this.portraitBlock = Blocks.RED_GLAZED_TERRACOTTA;
-                this.icon = new ResourceLocation("minecraft", "textures/block/red_glazed_terracotta.png");
-                newStructureName = Portal.structureNameMilitary;
+                this.building = Buildings.PORTAL_MILITARY;
+                newStructureName = PortalMilitary.structureName;
                 if (this.getLevel().isClientSide()) {
                     this.productionButtons = Arrays.asList(ProductionItems.BRUTE.getStartButton(this, Keybindings.keyQ),
                             ProductionItems.HEADHUNTER.getStartButton(this, Keybindings.keyW),
@@ -127,37 +132,26 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
                 }
             }
             case TRANSPORT -> {
-                this.portraitBlock = Blocks.BLUE_GLAZED_TERRACOTTA;
-                this.icon = new ResourceLocation("minecraft", "textures/block/blue_glazed_terracotta.png");
-                newStructureName = Portal.structureNameTransport;
+                this.building = Buildings.PORTAL_TRANSPORT;
+                newStructureName = PortalTransport.structureName;
             }
         }
         if (!newStructureName.isEmpty()) {
             ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocks(newStructureName, this.getLevel());
             this.blocks = getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation);
             super.refreshBlocks();
-            this.portalType = portalType;
         }
     }
 
-    @Override
-    public double getMaxRange() {
-        return ((Portal)getBuilding()).getMaxRange();
-    }
+    public double getMaxRange() { return 20; }
 
-    @Override
     public double getStartingRange() {
-        return ((Portal)getBuilding()).getStartingRange();
+        return 3;
     }
 
     @Override
     public NetherZone getZone() {
         return netherConversionZone;
-    }
-
-    @Override
-    public boolean canSetRallyPoint() {
-        return portalType == PortalType.MILITARY;
     }
 
     public void checkAndConsumeChestItems() {
@@ -196,7 +190,7 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
 
     public boolean hasDestination() {
         return isBuilt &&
-                portalType == PortalType.TRANSPORT &&
+                getBuilding() instanceof PortalTransport &&
                 destination != null &&
                 !destination.equals(new BlockPos(0,0,0));
     }

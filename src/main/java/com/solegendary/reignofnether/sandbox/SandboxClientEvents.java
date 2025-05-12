@@ -67,8 +67,11 @@ public class SandboxClientEvents {
 
         for (Building building : ReignOfNetherRegistries.BUILDING) {
             if (building.getFaction() == Faction.NONE) {
-                buildingButtons.add(building.getBuildButton(index >= keybindings.size() ? null : keybindings.get(index)));
-                index++;
+                AbilityButton button = building.getBuildButton(index >= keybindings.size() ? null : keybindings.get(index));
+                if (button != null) {
+                    buildingButtons.add(button);
+                    index++;
+                }
             }
         }
         return buildingButtons;

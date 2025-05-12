@@ -53,7 +53,7 @@ public class SoulSiphonPassive extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, HeroUnit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         AbilityButton button = new AbilityButton("Soul Siphon",
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png"),
             hotkey,
@@ -62,7 +62,7 @@ public class SoulSiphonPassive extends HeroAbility {
             () -> true,
             () -> toggleAutocast(hero),
             null,
-            getTooltipLines(hero),
+            getTooltipLines((HeroUnit) hero),
             this,
             hero
         );

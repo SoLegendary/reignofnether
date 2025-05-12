@@ -5,14 +5,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.world.item.ItemDisplayContext;
-import org.joml.Quaternionf;
-import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
+import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.util.Faction;
@@ -100,7 +96,7 @@ class PortraitRendererBuilding {
     }
 
     private void drawBlockOnScreen(int x, int y, BuildingPlacement building) {
-        ItemStack item = new ItemStack(building.portraitBlock);
+        ItemStack item = new ItemStack(building.getBuilding().portraitBlock);
 
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);

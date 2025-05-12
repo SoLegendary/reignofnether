@@ -181,7 +181,7 @@ public class WaveEnemy {
 
     private BuildingPlacement getNearestAttackableBuilding() {
         List<BuildingPlacement> buildings = BuildingServerEvents.getBuildings().stream()
-                .filter(b -> !SurvivalServerEvents.ENEMY_OWNER_NAME.equals(b.ownerName) && !b.ownerName.isBlank() && !b.invulnerable)
+                .filter(b -> !SurvivalServerEvents.ENEMY_OWNER_NAME.equals(b.ownerName) && !b.ownerName.isBlank() && !b.getBuilding().invulnerable)
                 .sorted(Comparator.comparing(b -> b.centrePos.distToCenterSqr(((Entity) unit).position())))
                 .toList();
 

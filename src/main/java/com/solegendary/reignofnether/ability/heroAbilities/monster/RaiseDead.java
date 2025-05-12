@@ -37,7 +37,7 @@ public class RaiseDead extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, HeroUnit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Raise Dead",
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
                 hotkey,
@@ -46,7 +46,7 @@ public class RaiseDead extends HeroAbility {
                 () -> true,
                 () -> sendUnitCommand(UnitAction.RAISE_DEAD),
                 null,
-                getTooltipLines(hero),
+                getTooltipLines((HeroUnit) hero),
                 this,
                 hero
         );
@@ -70,8 +70,7 @@ public class RaiseDead extends HeroAbility {
                 fcsIcons(I18n.get("abilities.reignofnether.raise_dead.stats", CD_MAX_SECONDS / 20)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.raise_dead.tooltip1")),
-                fcs(I18n.get("abilities.reignofnether.raise_dead.tooltip2", BONUS_HEALTH_PER_SOUL, BONUS_DAMAGE_PER_SOUL)),
-                fcs(I18n.get("abilities.reignofnether.raise_dead.tooltip3"))
+                fcs(I18n.get("abilities.reignofnether.raise_dead.tooltip2"))
         );
     }
 

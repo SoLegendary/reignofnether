@@ -4,15 +4,10 @@ import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.Buildings;
-import com.solegendary.reignofnether.building.buildings.piglins.Portal;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
-import com.solegendary.reignofnether.research.researchItems.ResearchBruteShields;
-import com.solegendary.reignofnether.research.researchItems.ResearchCubeMagma;
-import com.solegendary.reignofnether.research.researchItems.ResearchHeavyTridents;
-import com.solegendary.reignofnether.research.researchItems.ResearchSoulFireballs;
 import com.solegendary.reignofnether.survival.Wave;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
@@ -156,7 +151,7 @@ public class PiglinWaveSpawner {
 
             if (spawnBp != null) {
                 portalBps.add(spawnBp);
-                BuildingPlacement building = BuildingServerEvents.placeBuilding(Buildings.PORTAL,
+                BuildingPlacement building = BuildingServerEvents.placeBuilding(Buildings.PORTAL_MILITARY,
                         new BlockPos(spawnBp).above(),
                         Rotation.NONE,
                         ENEMY_OWNER_NAME,

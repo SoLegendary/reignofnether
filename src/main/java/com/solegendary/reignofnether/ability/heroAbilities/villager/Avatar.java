@@ -40,7 +40,7 @@ public class Avatar extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, HeroUnit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Avatar",
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
                 hotkey,
@@ -49,7 +49,7 @@ public class Avatar extends HeroAbility {
                 () -> true,
                 () -> sendUnitCommand(UnitAction.AVATAR),
                 null,
-                getTooltipLines(hero),
+                getTooltipLines((HeroUnit) hero),
                 this,
                 hero
         );

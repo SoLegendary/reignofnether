@@ -37,7 +37,7 @@ public class LootExplosion extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, HeroUnit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Loot Explosion",
                 new ResourceLocation("minecraft", "textures/item/iron_chestplate.png"),
                 hotkey,
@@ -46,7 +46,7 @@ public class LootExplosion extends HeroAbility {
                 () -> true,
                 () -> sendUnitCommand(UnitAction.LOOT_EXPLOSION),
                 null,
-                getTooltipLines(hero),
+                getTooltipLines((HeroUnit) hero),
                 this,
                 hero
         );

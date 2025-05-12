@@ -8,9 +8,10 @@ import com.solegendary.reignofnether.building.buildings.monsters.DarkWatchtower;
 import com.solegendary.reignofnether.building.buildings.piglins.Bastion;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
-import com.solegendary.reignofnether.building.buildings.piglins.Portal;
+import com.solegendary.reignofnether.building.buildings.piglins.PortalBasic;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
+import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.Watchtower;
@@ -79,7 +80,7 @@ import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessag
 import static com.solegendary.reignofnether.survival.SurvivalServerEvents.ENEMY_OWNER_NAME;
 
 public class BuildingPlacement {
-    Building building;
+    protected Building building;
     public Level level; // directly return MC.level if it's clientside to avoid stale references
     public BlockPos originPos;
     public Rotation rotation;
@@ -88,34 +89,24 @@ public class BuildingPlacement {
     public boolean isDestroyedServerside = false;
     public boolean isBuiltServerside = false;
 
-    private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned;
-    // normally 500ms in real games
-
     public static String structureName;
-    public ResourceLocation icon;
 
     public final boolean isCapitol;
 
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time; the building can then be used
+
+    private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned;
     public int msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
 
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
     public final float MIN_BLOCKS_PERCENT = 0.5f;
-    // chance for a mini explosion to destroy extra blocks if a player is breaking it
-    // should be higher for large fragile buildings so players don't take ages to destroy it
-    protected float explodeChance = 0.3f;
-    protected float explodeRadius = 2.0f;
-    protected float fireThreshold = 0.75f; // if building has less %hp than this, explosions caused can make fires
-    protected float buildTimeModifier = 1.0f; // only affects non-built buildings, not repair times
-    protected float repairTimeModifier = 1.25f; // only affects built buildings
+
     protected int highestBlockCountReached = 2; // effective max health of the building
 
     protected ArrayList<BuildingBlock> scaffoldBlocks = new ArrayList<>();
-    protected ArrayList<BuildingBlock> blocks = new ArrayList<>(); // positions are absolute
+    protected ArrayList<BuildingBlock> blocks; // positions are absolute
     protected ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
     public String ownerName;
-    public Block portraitBlock; // block rendered in the portrait GUI to represent this building
-    public boolean canAcceptResources = false; // can workers drop off resources here?
     public int serverBlocksPlaced = 1;
     private int totalBlocksEverBroken = 0;
 
@@ -126,15 +117,10 @@ public class BuildingPlacement {
     private long ticksToSpawnAnimals = 0; // spawn once soon after placement
     private final int MAX_ANIMALS = 8;
     private final int ANIMAL_SPAWN_BLOCK_RANGE = 70; // block range to check and spawn animals in
-    private final int ANIMAL_SPAWN_RANGE_MIN = 15; // block range to check and spawn animals in
-    private final int ANIMAL_SPAWN_RANGE_MAX = 80; // block range to check and spawn animals in
+    private final int ANIMAL_SPAWN_RANGE_MIN = 15;
+
     protected long tickAgeAfterBuilt = 0; // not saved
     protected long tickAge = 0; // not saved
-
-    public int foodCost;
-    public int woodCost;
-    public int oreCost;
-    public int popSupply; // max population this building provides
 
     public final BlockPos minCorner;
     public final BlockPos maxCorner;
@@ -144,17 +130,8 @@ public class BuildingPlacement {
 
     public boolean selfBuilding = false; // if set to true, will build itself quickly without workers (but not repair)
 
-    // blocks types that are placed automatically when the building is placed
-    // used to control size of initial foundations while keeping it symmetrical
-    public final ArrayList<Block> startingBlockTypes;
-
     protected List<AbilityButton> abilityButtons;
     protected List<Ability> abilities;
-
-    public int captureRange;
-    public boolean capturable;
-    public boolean invulnerable;
-    public boolean shouldDestroyOnReset;
 
     Object2ObjectArrayMap<Class<? extends Ability>, Float> cooldowns = new Object2ObjectArrayMap<>();
 
@@ -230,20 +207,6 @@ public class BuildingPlacement {
         }
 
         updateButtons();
-
-        startingBlockTypes = building.startingBlockTypes;
-
-        foodCost = building.cost.food;
-        woodCost = building.cost.wood;
-        oreCost = building.cost.ore;
-        popSupply = building.cost.population;
-        canAcceptResources = building.canAcceptResources;
-        captureRange = building.captureRange;
-        capturable = building.capturable;
-        invulnerable = building.invulnerable;
-        shouldDestroyOnReset = building.shouldDestroyOnReset;
-
-        portraitBlock = building.portraitBlock;
     }
 
     public float getMeleeDamageMult() {
@@ -312,7 +275,9 @@ public class BuildingPlacement {
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName)) {
                 return (
-                        resources.food >= foodCost && resources.wood >= woodCost && resources.ore >= oreCost
+                        resources.food >= building.cost.food &&
+                        resources.wood >= building.cost.wood &&
+                        resources.ore >= building.cost.ore
                 );
             }
         return false;
@@ -487,7 +452,7 @@ public class BuildingPlacement {
     public void destroyRandomBlocks(int amount) {
         if (getLevel().isClientSide())
             return;
-        if (invulnerable)
+        if (building.invulnerable)
             return;
         ArrayList<BuildingBlock> placedBlocks = new ArrayList<>(blocks.stream()
                 .filter(b -> { // avoid destroying blocks adjacent to liquids unless its a bridge or is itself a liquid
@@ -622,15 +587,15 @@ public class BuildingPlacement {
         // when a player breaks a block that's part of the building:
         // - roll explodeChance to cause explosion effects and destroy more blocks
         // - cause fire if < fireThreshold% blocksPercent
-        if (rand.nextFloat(1.0f) < this.explodeChance) {
+        if (rand.nextFloat(1.0f) < this.building.explodeChance) {
             level.explode(null,
                     level.damageSources().generic(),
                     null,
                     pos.getX(),
                     pos.getY(),
                     pos.getZ(),
-                    breakBlocks ? this.explodeRadius : 2.0f,
-                    this.getBlocksPlacedPercent() < this.fireThreshold,
+                    breakBlocks ? this.building.explodeRadius : 2.0f,
+                    this.getBlocksPlacedPercent() < this.building.fireThreshold,
                     // fire
                     breakBlocks ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE
             );
@@ -840,16 +805,16 @@ public class BuildingPlacement {
                 // 5 builders - 3/7 (43%)
                 int msPerBuild = (3 * BASE_MS_PER_BUILD) / (builderCount + 2);
                 if (!isBuilt) {
-                    msPerBuild *= buildTimeModifier;
+                    msPerBuild *= building.buildTimeModifier;
                     if (isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) > 0)
                         msPerBuild *= 2;
                 } else {
-                    msPerBuild *= repairTimeModifier;
+                    msPerBuild *= building.repairTimeModifier;
                 }
 
-                if (getBuilding() instanceof Portal && !BuildingServerEvents.isOnNetherBlocks(blocks, originPos, serverLevel)
+                if (getBuilding() instanceof PortalBasic && !BuildingServerEvents.isOnNetherBlocks(blocks, originPos, serverLevel)
                         && !ResearchServerEvents.playerHasResearch(ownerName, ProductionItems.RESEARCH_ADVANCED_PORTALS)) {
-                    msPerBuild *= Portal.NON_NETHER_BUILD_TIME_MODIFIER;
+                    msPerBuild *= PortalPlacement.NON_NETHER_BUILD_TIME_MODIFIER;
                 }
 
                 if (msToNextBuild > msPerBuild) {
@@ -909,13 +874,11 @@ public class BuildingPlacement {
                 }
             }
         }
-        if (isBuilt && tickAgeAfterBuilt % 10 == 0 && capturable) {
+        if (isBuilt && tickAgeAfterBuilt % 10 == 0 && getBuilding().capturable) {
             checkIfCaptured(serverLevel);
         }
     }
-
-
-
+    
     // if there aren't already too many animals nearby, spawn some random huntable animals
     private void spawnHuntableAnimalsNearby(int range) {
         if (level.isClientSide()) {
@@ -1095,7 +1058,7 @@ public class BuildingPlacement {
 
         List<Mob> nearbyUnits = MiscUtil.getEntitiesWithinRange(
                         new Vector3d(centrePos.getX(), minCorner.getY(), centrePos.getZ()),
-                        captureRange, Mob.class, serverLevel)
+                        getBuilding().captureRange, Mob.class, serverLevel)
                 .stream()
                 .toList();
 

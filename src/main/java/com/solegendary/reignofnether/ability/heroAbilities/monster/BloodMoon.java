@@ -41,7 +41,7 @@ public class BloodMoon extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, HeroUnit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Blood Moon",
             new ResourceLocation("minecraft", "textures/block/redstone_block.png"),
             hotkey,
@@ -50,7 +50,7 @@ public class BloodMoon extends HeroAbility {
             () -> true,
             () -> sendUnitCommand(UnitAction.BLOOD_MOON),
             null,
-            getTooltipLines(hero),
+            getTooltipLines((HeroUnit) hero),
             this,
             hero
         );

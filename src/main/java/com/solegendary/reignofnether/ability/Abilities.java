@@ -23,9 +23,7 @@ public class Abilities {
     List<Pair<Ability, Keybinding>> abilities = new ArrayList<>();
     //Map<Ability, Keybinding> abilities = new HashMap<>();
 
-    public Abilities() {
-
-    }
+    public Abilities() { }
 
     public void add(Ability ability) {
         abilities.add(new Pair<>(ability, null));

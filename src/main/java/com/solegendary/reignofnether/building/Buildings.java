@@ -24,7 +24,10 @@ public class Buildings {
     public static final SpruceBridge SPRUCE_BRIDGE = register(new ResourceLocation(ReignOfNether.MOD_ID, "spruce_bridge"), new SpruceBridge());
     public static final SculkCatalyst SCULK_CATALYST = register(new ResourceLocation(ReignOfNether.MOD_ID, "sculk_catalyst"), new SculkCatalyst());
     public static final CentralPortal CENTRAL_PORTAL = register(new ResourceLocation(ReignOfNether.MOD_ID, "central_portal"), new CentralPortal());
-    public static final Portal PORTAL = register(new ResourceLocation(ReignOfNether.MOD_ID, "portal"), new Portal());
+    public static final PortalBasic PORTAL_BASIC = register(new ResourceLocation(ReignOfNether.MOD_ID, "portal_basic"), new PortalBasic());
+    public static final PortalCivilian PORTAL_CIVILIAN = register(new ResourceLocation(ReignOfNether.MOD_ID, "portal_civilian"), new PortalCivilian());
+    public static final PortalMilitary PORTAL_MILITARY = register(new ResourceLocation(ReignOfNether.MOD_ID, "portal_military"), new PortalMilitary());
+    public static final PortalTransport PORTAL_TRANSPORT = register(new ResourceLocation(ReignOfNether.MOD_ID, "portal_transport"), new PortalTransport());
     public static final NetherwartFarm NETHERWART_FARM = register(new ResourceLocation(ReignOfNether.MOD_ID, "netherwart_farm"), new NetherwartFarm());
     public static final Bastion BASTION = register(new ResourceLocation(ReignOfNether.MOD_ID, "bastion"), new Bastion());
     public static final HoglinStables HOGLIN_STABLES = register(new ResourceLocation(ReignOfNether.MOD_ID, "hoglin_stables"), new HoglinStables());

@@ -58,6 +58,7 @@ public class BuildingSaveData extends SavedData {
                 }else {
                     building = getOldBuilding(btag.getString("buildingName"));
                 }
+
                 String ownerName = btag.getString("ownerName");
                 Rotation rotation = Rotation.valueOf(btag.getString("rotation"));
                 BlockPos rallyPoint = new BlockPos(btag.getInt("rallyX"), btag.getInt("rallyY"), btag.getInt("rallyZ"));
@@ -122,6 +123,7 @@ public class BuildingSaveData extends SavedData {
         this.setDirty();
     }
 
+    // backwards compatibility for old saves
     private static Building getOldBuilding(String name) {
         Building building = null;
         switch(name) {
@@ -152,10 +154,10 @@ public class BuildingSaveData extends SavedData {
             case Castle.buildingName -> building = Buildings.CASTLE;
             case Stronghold.buildingName -> building = Buildings.STRONGHOLD;
             case CentralPortal.buildingName -> building = Buildings.CENTRAL_PORTAL;
-            case Portal.buildingName,
-                 Portal.buildingNameMilitary,
-                 Portal.buildingNameCivilian,
-                 Portal.buildingNameTransport -> building = Buildings.PORTAL;
+            case PortalBasic.buildingName -> building = Buildings.PORTAL_BASIC;
+            case PortalCivilian.buildingName -> building = Buildings.PORTAL_CIVILIAN;
+            case PortalMilitary.buildingName -> building = Buildings.PORTAL_MILITARY;
+            case PortalTransport.buildingName -> building = Buildings.PORTAL_TRANSPORT;
             case NetherwartFarm.buildingName -> building = Buildings.NETHERWART_FARM;
             case Bastion.buildingName -> building = Buildings.BASTION;
             case HoglinStables.buildingName -> building = Buildings.HOGLIN_STABLES;

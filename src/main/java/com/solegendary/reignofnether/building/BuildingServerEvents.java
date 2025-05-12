@@ -99,8 +99,8 @@ public class BuildingServerEvents {
 
         getBuildings().forEach(b -> {
             PortalPlacement.PortalType portalType = null;
-            if (b instanceof PortalPlacement portal && portal.portalType != PortalPlacement.PortalType.BASIC) {
-                portalType = portal.portalType;
+            if (b instanceof PortalPlacement portal) {
+                portalType = portal.getPortalType();
             }
             buildingData.buildings.add(new BuildingSave(b.originPos,
                 level,
@@ -256,7 +256,7 @@ public class BuildingServerEvents {
 
                 newBuilding.blocks.stream()
                     .filter(block -> block.getBlockPos().getY() == minY
-                        && newBuilding.startingBlockTypes.contains(block.getBlockState().getBlock()))
+                        && newBuilding.getBuilding().startingBlockTypes.contains(block.getBlockState().getBlock()))
                     .forEach(newBuilding::addToBlockPlaceQueue);
 
                 BuildingClientboundPacket.placeBuilding(pos,
@@ -272,9 +272,9 @@ public class BuildingServerEvents {
                     false
                 );
                 ResourcesServerEvents.addSubtractResources(new Resources(ownerName,
-                    -newBuilding.foodCost,
-                    -newBuilding.woodCost,
-                    -newBuilding.oreCost
+                    -newBuilding.building.cost.food,
+                    -newBuilding.building.cost.wood,
+                    -newBuilding.building.cost.ore
                 ));
 
                 if (ownerName.isEmpty() || ownerName.equals("Enemy"))
@@ -292,7 +292,7 @@ public class BuildingServerEvents {
                 warnInsufficientResources(newBuilding);
             }
             if (SandboxServer.isAnyoneASandboxPlayer() && builderUnitIds.length == 0) {
-                newBuilding.shouldDestroyOnReset = false;
+                newBuilding.getBuilding().shouldDestroyOnReset = false;
             }
             return newBuilding;
         }
@@ -350,9 +350,9 @@ public class BuildingServerEvents {
 
     private static void warnInsufficientResources(BuildingPlacement newBuilding) {
         ResourcesClientboundPacket.warnInsufficientResources(newBuilding.ownerName,
-            ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.FOOD, newBuilding.foodCost),
-            ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.WOOD, newBuilding.woodCost),
-            ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.ORE, newBuilding.oreCost)
+            ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.FOOD, newBuilding.building.cost.food),
+            ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.WOOD, newBuilding.building.cost.wood),
+            ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.ORE, newBuilding.building.cost.ore)
         );
     }
 
@@ -391,14 +391,14 @@ public class BuildingServerEvents {
         if (!building.isBuilt || SurvivalServerEvents.isEnabled()) {
 
             float buildPercent = building.getBlocksPlacedPercent();
-            int food = Math.round(building.foodCost * (1 - buildPercent));
-            int wood = Math.round(building.woodCost * (1 - buildPercent));
-            int ore = Math.round(building.oreCost * (1 - buildPercent));
+            int food = Math.round(building.building.cost.food * (1 - buildPercent));
+            int wood = Math.round(building.building.cost.wood * (1 - buildPercent));
+            int ore = Math.round(building.building.cost.ore * (1 - buildPercent));
 
             if (building.isBuilt && SurvivalServerEvents.isEnabled()) {
-                food = Math.round(building.foodCost * 0.5f * buildPercent);
-                wood = Math.round(building.woodCost * 0.5f * buildPercent);
-                ore = Math.round(building.oreCost * 0.5f * buildPercent);
+                food = Math.round(building.building.cost.food * 0.5f * buildPercent);
+                wood = Math.round(building.building.cost.wood * 0.5f * buildPercent);
+                ore = Math.round(building.building.cost.ore * 0.5f * buildPercent);
             }
             if (food > 0 || wood > 0 || ore > 0) {
                 ResourcesServerEvents.addSubtractResources(new Resources(building.ownerName, food, wood, ore));
@@ -419,7 +419,7 @@ public class BuildingServerEvents {
         int totalPopulationSupply = 0;
         for (BuildingPlacement building : buildings)
             if (building.ownerName.equals(ownerName) && building.isBuilt) {
-                totalPopulationSupply += building.popSupply;
+                totalPopulationSupply += building.getBuilding().cost.population;
             }
         return Math.min(UnitServerEvents.maxPopulation, totalPopulationSupply);
     }
@@ -453,7 +453,7 @@ public class BuildingServerEvents {
                     building instanceof BridgePlacement bridge && bridge.isDiagonalBridge,
                     building.getUpgradeLevel(),
                     building.isBuilt,
-                    building instanceof PortalPlacement p ? p.portalType : PortalPlacement.PortalType.BASIC,
+                    building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
                     building instanceof PortalPlacement p && p.hasDestination() ? p.destination : new BlockPos(0, 0, 0),
                     true
             );
@@ -678,8 +678,8 @@ public class BuildingServerEvents {
                     building instanceof BridgePlacement bridge && bridge.isDiagonalBridge,
                     building.getUpgradeLevel(),
                     building.isBuilt,
-                    building instanceof PortalPlacement p ? p.portalType : PortalPlacement.PortalType.BASIC,
-                    building instanceof PortalPlacement p && p.portalType == PortalPlacement.PortalType.TRANSPORT ? p.destination : new BlockPos(0,0,0),
+                    building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
+                    building instanceof PortalPlacement p && p.getPortalType() == PortalPlacement.PortalType.TRANSPORT ? p.destination : new BlockPos(0,0,0),
                     false
                 );
                 return;

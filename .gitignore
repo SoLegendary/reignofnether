@@ -2,6 +2,17 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+*.ipr
+*.iws
+*.iml
+.idea
+run
+run/
+
+# gradle
+build
+.gradle
+build.gradle
 
 ### Eclipse ###
 .apt_generated

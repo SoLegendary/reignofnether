@@ -895,11 +895,11 @@ public class PlayerServerEvents {
             for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                 if (building instanceof ProductionPlacement productionBuilding)
                     productionBuilding.productionQueue.clear();
-                if ((building.shouldDestroyOnReset || hardReset) && !isSandbox)
+                if ((building.getBuilding().shouldDestroyOnReset || hardReset) && !isSandbox)
                     building.destroy((ServerLevel) building.getLevel());
             }
             if (!isSandbox)
-                BuildingServerEvents.getBuildings().removeIf(b -> b.shouldDestroyOnReset || hardReset);
+                BuildingServerEvents.getBuildings().removeIf(b -> b.getBuilding().shouldDestroyOnReset || hardReset);
             for (BuildingPlacement building : BuildingServerEvents.getBuildings())
                 building.ownerName = "";
             ResearchServerEvents.removeAllResearch();
