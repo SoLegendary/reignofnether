@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.ibm.icu.impl.Assert;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
@@ -80,7 +81,7 @@ import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessag
 import static com.solegendary.reignofnether.survival.SurvivalServerEvents.ENEMY_OWNER_NAME;
 
 public class BuildingPlacement {
-    protected Building building;
+    private Building building;
     public Level level; // directly return MC.level if it's clientside to avoid stale references
     public BlockPos originPos;
     public Rotation rotation;
@@ -171,6 +172,7 @@ public class BuildingPlacement {
             ArrayList<BuildingBlock> blocks,
             boolean isCapitol
     ) {
+        Objects.requireNonNull(building, "Building can't be null");
         this.building = building;
         this.level = level;
         this.originPos = originPos;
@@ -1143,5 +1145,10 @@ public class BuildingPlacement {
                 this.targetStand = stand;
             }
         }
+    }
+
+    public void setBuilding(Building building) {
+        Objects.requireNonNull(building, "Building can't be null");
+        this.building = building;
     }
 }

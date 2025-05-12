@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -46,5 +48,10 @@ public abstract class AbstractPortal extends ProductionBuilding {
     @Override @Nullable
     public AbilityButton getBuildButton(Keybinding hotkey) {
         return null;
+    }
+
+    @Override
+    public boolean isTypeOf(Building building) {
+        return super.isTypeOf(building) || building == Buildings.PORTAL_BASIC;
     }
 }

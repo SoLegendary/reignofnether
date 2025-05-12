@@ -79,7 +79,7 @@ public class BuildingClientEvents {
         int totalPopulationSupply = 0;
         for (BuildingPlacement building : buildings)
             if (building.ownerName.equals(playerName) && building.isBuilt) {
-                totalPopulationSupply += building.building.cost.population;
+                totalPopulationSupply += building.getBuilding().cost.population;
             }
 
         return Math.min(GameruleClient.maxPopulation, totalPopulationSupply);
@@ -1104,7 +1104,7 @@ public class BuildingClientEvents {
     // does the player own one of these buildings?
     public static boolean hasFinishedBuilding(Building building2) {
         for (BuildingPlacement building : buildings)
-            if (building.getBuilding().equals(building2) && building.isBuilt && MC.player != null
+            if (building.getBuilding().isTypeOf(building2) && building.isBuilt && MC.player != null
                     && building.ownerName.equals(MC.player.getName().getString())) {
                 return true;
             }

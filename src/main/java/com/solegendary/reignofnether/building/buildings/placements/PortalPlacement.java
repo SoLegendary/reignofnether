@@ -38,11 +38,11 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
     }
 
     public PortalType getPortalType() {
-        if (building instanceof PortalCivilian)
+        if (getBuilding() instanceof PortalCivilian)
             return PortalType.CIVILIAN;
-        else if (building instanceof PortalMilitary)
+        else if (getBuilding() instanceof PortalMilitary)
             return PortalType.MILITARY;
-        else if (building instanceof PortalTransport)
+        else if (getBuilding() instanceof PortalTransport)
             return PortalType.TRANSPORT;
         return PortalType.BASIC;
     }
@@ -111,14 +111,14 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
         String newStructureName = "";
         switch (portalType) {
             case CIVILIAN -> {
-                this.building = Buildings.PORTAL_CIVILIAN;
+                setBuilding(Buildings.PORTAL_CIVILIAN);
                 newStructureName = PortalCivilian.structureName;
                 if (this.getLevel().isClientSide()) {
                     this.productionButtons = List.of(ProductionItems.RESEARCH_RESOURCE_CAPACITY.getStartButton(this, Keybindings.keyQ));
                 }
             }
             case MILITARY -> {
-                this.building = Buildings.PORTAL_MILITARY;
+                setBuilding(Buildings.PORTAL_MILITARY);
                 newStructureName = PortalMilitary.structureName;
                 if (this.getLevel().isClientSide()) {
                     this.productionButtons = Arrays.asList(ProductionItems.BRUTE.getStartButton(this, Keybindings.keyQ),
@@ -132,7 +132,7 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
                 }
             }
             case TRANSPORT -> {
-                this.building = Buildings.PORTAL_TRANSPORT;
+                setBuilding(Buildings.PORTAL_TRANSPORT);
                 newStructureName = PortalTransport.structureName;
             }
         }

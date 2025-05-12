@@ -111,4 +111,8 @@ public abstract class Building {
     }
 
     public abstract AbilityButton getBuildButton(Keybinding var1);
+
+    public boolean isTypeOf(Building building) {
+        return this == building;
+    }
 }
