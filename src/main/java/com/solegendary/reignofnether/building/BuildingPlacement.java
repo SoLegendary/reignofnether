@@ -723,14 +723,14 @@ public class BuildingPlacement {
             float cooldown = cooldownEntry.getValue();
             if (cooldown > 0 || getCharges(ability) < ability.maxCharges) {
                 if (level.isClientSide())
-                    cooldownEntry.setValue((float) (cooldown - (TPSClientEvents.getCappedTPS() / 20D)));
+                    cooldowns.put(ability, (float) (cooldown - (TPSClientEvents.getCappedTPS() / 20D)));
                 else
-                    cooldownEntry.setValue(cooldown - 1);
+                    cooldowns.put(ability, cooldown - 1);
 
                 if (cooldown <= 0 && ability.usesCharges() && getCharges(ability) < ability.maxCharges) {
                     setCharges(ability, getCharges(ability) + 1);
                     if (getCharges(ability) < ability.maxCharges)
-                        cooldownEntry.setValue(ability.cooldownMax);
+                        cooldowns.put(ability, ability.cooldownMax);
                     if (getCharges(ability) > ability.maxCharges)
                         setCharges(ability, ability.maxCharges);
                 }
@@ -1168,7 +1168,7 @@ public class BuildingPlacement {
     }
 
     public int getCharges(Ability ability) {
-        if (charges.containsKey(ability))
+        if (!charges.containsKey(ability))
             charges.put(ability, ability.maxCharges);
         return charges.get(ability);
     }

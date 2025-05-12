@@ -133,14 +133,14 @@ public interface Unit {
             float cooldown = cooldownEntry.getValue();
             if (cooldown > 0 || unit.getCharges(ability) < ability.maxCharges) {
                 if (unit.level().isClientSide())
-                    cooldownEntry.setValue((float) (cooldown - (TPSClientEvents.getCappedTPS() / 20D)));
+                    unit.getCooldowns().put(ability, (float) (cooldown - (TPSClientEvents.getCappedTPS() / 20D)));
                 else
-                    cooldownEntry.setValue(cooldown - 1);
+                    unit.getCooldowns().put(ability, cooldown - 1);
 
                 if (cooldown <= 0 && ability.usesCharges() && unit.getCharges(ability) < ability.maxCharges) {
                     unit.setCharges(ability, unit.getCharges(ability) + 1);
                     if (unit.getCharges(ability) < ability.maxCharges)
-                        cooldownEntry.setValue(ability.cooldownMax);
+                        unit.getCooldowns().put(ability, ability.cooldownMax);
                     if (unit.getCharges(ability) > ability.maxCharges)
                         unit.setCharges(ability, ability.maxCharges);
                 }
@@ -386,7 +386,7 @@ public interface Unit {
     }
 
     default int getCharges(Ability ability) {
-        if (getCharges().containsKey(ability))
+        if (!getCharges().containsKey(ability))
             getCharges().put(ability, ability.maxCharges);
         return getCharges().get(ability);
     }
