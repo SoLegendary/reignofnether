@@ -53,7 +53,8 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
         ABILITIES.add(new Bloodlust(), Keybindings.keyW);
     }
 
-    Object2ObjectArrayMap<Class<? extends Ability>, Float> cooldowns = Unit.createCooldownMap();
+    Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
+    Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
 
     Ability autocast;
 
@@ -283,7 +284,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     }
 
     @Override
-    public Object2ObjectArrayMap<Class<? extends Ability>, Float> getCooldowns() {
+    public Object2ObjectArrayMap<Ability, Float> getCooldowns() {
         return cooldowns;
     }
 
@@ -295,5 +296,10 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     @Override
     public void setAutocast(Ability autocast) {
         this.autocast = autocast;
+    }
+
+    @Override
+    public Object2ObjectArrayMap<Ability, Integer> getCharges() {
+        return charges;
     }
 }

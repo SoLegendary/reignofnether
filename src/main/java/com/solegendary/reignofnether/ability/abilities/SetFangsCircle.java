@@ -89,7 +89,7 @@ public class SetFangsCircle extends Ability {
     }
 
     @Override
-    public boolean canBypassCooldown() {
+    public boolean canBypassCooldown(Unit unit) {
         return true;
     }
 

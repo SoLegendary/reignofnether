@@ -335,7 +335,7 @@ public class UnitActionItem {
                 // any other Ability not explicitly defined here
                 default -> {
                     for (Ability ability : unit.getAbilities()) {
-                        if (ability.action == action && (ability.isOffCooldown(unit) || ability.canBypassCooldown())) {
+                        if (ability.action == action && (ability.isOffCooldown(unit) || ability.canBypassCooldown(unit))) {
                             if (ability.canTargetEntities && this.unitId > 0) {
                                 ability.use(level, unit, (LivingEntity) level.getEntity(unitId));
                                 usedAbility = ability;
@@ -383,7 +383,7 @@ public class UnitActionItem {
 
         if (actionableBuilding != null) {
             for (Ability ability : actionableBuilding.getAbilities()) {
-                if (ability.action == action && (ability.isOffCooldown(actionableBuilding) || ability.canBypassCooldown())) {
+                if (ability.action == action && (ability.isOffCooldown(actionableBuilding) || ability.canBypassCooldown(actionableBuilding))) {
                     if (ability.canTargetEntities && this.unitId > 0) {
                         ability.use(level, actionableBuilding, (LivingEntity) level.getEntity(unitId));
                     } else {

@@ -40,7 +40,6 @@ public class InsomniaCurse extends HeroAbility {
     public InsomniaCurse() {
         super(3, UnitAction.INSOMNIA_CURSE, 20 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
         maxCharges = 3;
-        charges = maxCharges;
     }
 
     @Override

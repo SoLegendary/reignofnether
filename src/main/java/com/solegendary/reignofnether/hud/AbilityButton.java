@@ -34,7 +34,7 @@ public class AbilityButton extends Button {
 
         Runnable originalOnLeftClick = this.onLeftClick;
         this.onLeftClick = () -> {
-            if (this.ability != null && (this.ability.getCooldown(unit) > 0 && !this.ability.canBypassCooldown()))
+            if (this.ability != null && (this.ability.getCooldown(unit) > 0 && !this.ability.canBypassCooldown(unit)))
                 HudClientEvents.showTemporaryMessage(I18n.get("hud.buttons.reignofnether.on_cooldown"));
             else if (originalOnLeftClick != null)
                 originalOnLeftClick.run();
@@ -53,7 +53,7 @@ public class AbilityButton extends Button {
 
         Runnable originalOnLeftClick = this.onLeftClick;
         this.onLeftClick = () -> {
-            if (this.ability != null && (this.ability.getCooldown(placement) > 0 && !this.ability.canBypassCooldown()))
+            if (this.ability != null && (this.ability.getCooldown(placement) > 0 && !this.ability.canBypassCooldown(building)))
                 HudClientEvents.showTemporaryMessage(I18n.get("hud.buttons.reignofnether.on_cooldown"));
             else if (originalOnLeftClick != null)
                 originalOnLeftClick.run();
@@ -84,15 +84,15 @@ public class AbilityButton extends Button {
 
         // charges remaining number
         if (this.ability != null && this.ability.usesCharges()) {
-            String chargeStr = String.valueOf(this.ability.charges);
+            String chargeStr = String.valueOf(unit != null ? unit.getCharges(ability) : building.getCharges(ability));
             guiGraphics.pose().translate(0,0,2);
 
             int colour = 0xFFFFFF;
-            if (this.ability.charges >= this.ability.maxCharges)
+            if ((unit != null ? unit.getCharges(ability) : building.getCharges(ability)) >= this.ability.maxCharges)
                 colour = 0x00FF00;
-            else if (this.ability.charges <= 0)
+            else if ((unit != null ? unit.getCharges(ability) : building.getCharges(ability)) <= 0)
                 colour = 0xFF0000;
-            else if (this.ability.charges == 1)
+            else if ((unit != null ? unit.getCharges(ability) : building.getCharges(ability)) == 1)
                 colour = 0xFFFF00;
 
             guiGraphics.drawCenteredString(MC.font,

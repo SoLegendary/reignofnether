@@ -46,7 +46,8 @@ public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
         ABILITIES.add(new Eject(), Keybindings.keyQ);
     }
 
-    Object2ObjectArrayMap<Class<? extends Ability>, Float> cooldowns = Unit.createCooldownMap();
+    Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
+    Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
 
     Ability autocast;
 
@@ -247,7 +248,7 @@ public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
     }
 
     @Override
-    public Object2ObjectArrayMap<Class<? extends Ability>, Float> getCooldowns() {
+    public Object2ObjectArrayMap<Ability, Float> getCooldowns() {
         return cooldowns;
     }
 
@@ -259,5 +260,10 @@ public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
     @Override
     public void setAutocast(Ability autocast) {
         this.autocast = autocast;
+    }
+
+    @Override
+    public Object2ObjectArrayMap<Ability, Integer> getCharges() {
+        return charges;
     }
 }

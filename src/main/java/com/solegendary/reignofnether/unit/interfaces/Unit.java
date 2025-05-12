@@ -57,8 +57,8 @@ public interface Unit {
     int FOLLOW_RANGE_IMPROVED = 64;
     int FOLLOW_RANGE = 16;
 
-    static Object2ObjectArrayMap<Class<? extends Ability>, Float> createCooldownMap() {
-        Object2ObjectArrayMap<Class<? extends Ability>, Float> map = new Object2ObjectArrayMap<>();
+    static Object2ObjectArrayMap<Ability, Float> createCooldownMap() {
+        Object2ObjectArrayMap<Ability, Float> map = new Object2ObjectArrayMap<>();
         map.defaultReturnValue(0F);
         return map;
     }
@@ -128,12 +128,22 @@ public interface Unit {
                 }
             }
         }
-        for (Map.Entry<Class<? extends Ability>, Float> cooldownEntry : unit.getCooldowns().entrySet()) {
-            if (cooldownEntry.getValue() > 0) {
-                if (unitMob.level().isClientSide())
-                    unit.getCooldowns().put(cooldownEntry.getKey(), cooldownEntry.getValue() - (float)(TPSClientEvents.getCappedTPS() / 20D));
+        for (Map.Entry<Ability, Float> cooldownEntry : unit.getCooldowns().entrySet()) {
+            Ability ability = cooldownEntry.getKey();
+            float cooldown = cooldownEntry.getValue();
+            if (cooldown > 0 || unit.getCharges(ability) < ability.maxCharges) {
+                if (unit.level().isClientSide())
+                    cooldownEntry.setValue((float) (cooldown - (TPSClientEvents.getCappedTPS() / 20D)));
                 else
-                    unit.getCooldowns().put(cooldownEntry.getKey(), cooldownEntry.getValue() - 1);
+                    cooldownEntry.setValue(cooldown - 1);
+
+                if (cooldown <= 0 && ability.usesCharges() && unit.getCharges(ability) < ability.maxCharges) {
+                    unit.setCharges(ability, unit.getCharges(ability) + 1);
+                    if (unit.getCharges(ability) < ability.maxCharges)
+                        cooldownEntry.setValue(ability.cooldownMax);
+                    if (unit.getCharges(ability) > ability.maxCharges)
+                        unit.setCharges(ability, ability.maxCharges);
+                }
             }
         }
 
@@ -359,16 +369,26 @@ public interface Unit {
     void updateAbilityButtons();
     Level level();
 
-    default void setCooldown(Class<? extends Ability> abilityClass, float cooldown) {
+    default void setCooldown(Ability abilityClass, float cooldown) {
         getCooldowns().put(abilityClass, cooldown);
     }
 
-    default float getCooldown(Class<? extends Ability> abilityClass) {
+    default float getCooldown(Ability abilityClass) {
         return getCooldowns().get(abilityClass);
     }
 
-    Object2ObjectArrayMap<Class<? extends Ability>,Float> getCooldowns();
+    Object2ObjectArrayMap<Ability,Float> getCooldowns();
 
     boolean hasAutocast(Ability ability);
     void setAutocast(Ability ability);
+    default void setCharges(Ability abilityClass, int cooldown) {
+        getCharges().put(abilityClass, cooldown);
+    }
+
+    default int getCharges(Ability ability) {
+        if (getCharges().containsKey(ability))
+            getCharges().put(ability, ability.maxCharges);
+        return getCharges().get(ability);
+    }
+    Object2ObjectArrayMap<Ability,Integer> getCharges();
 }

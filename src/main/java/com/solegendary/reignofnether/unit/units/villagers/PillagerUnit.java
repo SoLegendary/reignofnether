@@ -55,7 +55,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         ABILITIES.add(new MountRavager(), Keybindings.keyQ);
     }
 
-    Object2ObjectArrayMap<Class<? extends Ability>, Float> cooldowns = Unit.createCooldownMap();
+    Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
+    Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
 
     Ability autocast;
 
@@ -327,7 +328,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     }
 
     @Override
-    public Object2ObjectArrayMap<Class<? extends Ability>, Float> getCooldowns() {
+    public Object2ObjectArrayMap<Ability, Float> getCooldowns() {
         return cooldowns;
     }
 
@@ -339,5 +340,10 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     @Override
     public void setAutocast(Ability autocast) {
         this.autocast = autocast;
+    }
+
+    @Override
+    public Object2ObjectArrayMap<Ability, Integer> getCharges() {
+        return charges;
     }
 }

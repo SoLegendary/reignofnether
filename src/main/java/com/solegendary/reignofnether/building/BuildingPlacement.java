@@ -134,7 +134,8 @@ public class BuildingPlacement {
     protected List<AbilityButton> abilityButtons;
     protected List<Ability> abilities;
 
-    Object2ObjectArrayMap<Class<? extends Ability>, Float> cooldowns = new Object2ObjectArrayMap<>();
+    Object2ObjectArrayMap<Ability, Float> cooldowns = new Object2ObjectArrayMap<>();
+    Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
 
     public List<AbilityButton> getAbilityButtons() {
         return abilityButtons;
@@ -717,12 +718,22 @@ public class BuildingPlacement {
     }
 
     public void tick(Level tickLevel) {
-        for (Map.Entry<Class<? extends Ability>, Float> cooldownEntry : cooldowns.entrySet()) {
-            if (cooldownEntry.getValue() > 0) {
+        for (Map.Entry<Ability, Float> cooldownEntry : cooldowns.entrySet()) {
+            Ability ability = cooldownEntry.getKey();
+            float cooldown = cooldownEntry.getValue();
+            if (cooldown > 0 || getCharges(ability) < ability.maxCharges) {
                 if (level.isClientSide())
-                    cooldowns.put(cooldownEntry.getKey(), cooldownEntry.getValue() - (float)(TPSClientEvents.getCappedTPS() / 20D));
+                    cooldownEntry.setValue((float) (cooldown - (TPSClientEvents.getCappedTPS() / 20D)));
                 else
-                    cooldowns.put(cooldownEntry.getKey(), cooldownEntry.getValue() - 1);
+                    cooldownEntry.setValue(cooldown - 1);
+
+                if (cooldown <= 0 && ability.usesCharges() && getCharges(ability) < ability.maxCharges) {
+                    setCharges(ability, getCharges(ability) + 1);
+                    if (getCharges(ability) < ability.maxCharges)
+                        cooldownEntry.setValue(ability.cooldownMax);
+                    if (getCharges(ability) > ability.maxCharges)
+                        setCharges(ability, ability.maxCharges);
+                }
             }
         }
 
@@ -1114,11 +1125,11 @@ public class BuildingPlacement {
         abilityButtons = building.getAbilities().getButtons(this);
     }
 
-    public void setCooldown(Class<? extends Ability> abilityClass, float cooldown) {
+    public void setCooldown(Ability abilityClass, float cooldown) {
         cooldowns.put(abilityClass, cooldown);
     }
 
-    public float getCooldown(Class<? extends Ability> abilityClass) {
+    public float getCooldown(Ability abilityClass) {
         return cooldowns.get(abilityClass);
     }
 
@@ -1150,5 +1161,15 @@ public class BuildingPlacement {
     public void setBuilding(Building building) {
         Objects.requireNonNull(building, "Building can't be null");
         this.building = building;
+    }
+
+    public void setCharges(Ability ability, int cooldown) {
+        charges.put(ability, cooldown);
+    }
+
+    public int getCharges(Ability ability) {
+        if (charges.containsKey(ability))
+            charges.put(ability, ability.maxCharges);
+        return charges.get(ability);
     }
 }
