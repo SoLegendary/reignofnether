@@ -684,6 +684,8 @@ public class BuildingClientEvents {
                 MyRenderer.drawLine(evt.getPoseStack(), selBuilding.centrePos, portal.destination, 0, 1, 0, a);
             }
         }
+
+
     }
 
     // on scroll rotate the building placement by 90deg by resorting the blocks list
@@ -762,7 +764,7 @@ public class BuildingClientEvents {
                     BuildingServerboundPacket.placeAndQueueBuilding(building,
                         isBuildingToPlaceABridge() && bridgePlaceState == 2 ? pos.offset(-5, 0, -5) : pos,
                         buildingRotation,
-                        MC.player.getName().getString(),
+                        hudSelectedEntity instanceof Unit unit ? unit.getOwnerName() : MC.player.getName().getString(),
                         builderIds.stream().mapToInt(i -> i).toArray(),
                         isBridgeDiagonal()
                     );
@@ -798,7 +800,7 @@ public class BuildingClientEvents {
                     BuildingServerboundPacket.placeBuilding(buildingToPlace,
                         isBuildingToPlaceABridge() && bridgePlaceState == 2 ? pos.offset(-5, 0, -5) : pos,
                         buildingRotation,
-                        ownerName,
+                        hudSelectedEntity instanceof Unit unit ? unit.getOwnerName() : ownerName,
                         builderIds.stream().mapToInt(i -> i).toArray(),
                         isBridgeDiagonal()
                     );
@@ -1102,12 +1104,32 @@ public class BuildingClientEvents {
     }
 
     // does the player own one of these buildings?
-    public static boolean hasFinishedBuilding(Building building2) {
-        for (BuildingPlacement building : buildings)
-            if (building.getBuilding().isTypeOf(building2) && building.isBuilt && MC.player != null
-                    && building.ownerName.equals(MC.player.getName().getString())) {
+    public static boolean hasFinishedBuilding(Building building) {
+        for (BuildingPlacement bpl : buildings) {
+            if (bpl.getBuilding().isTypeOf(building) && bpl.isBuilt &&
+                    ((MC.player != null && bpl.ownerName.equals(MC.player.getName().getString())) ||
+                    allyHasFinishedBuilding(building))) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    // does the selected ally's unit own one of these buildings?
+    public static boolean allyHasFinishedBuilding(Building building) {
+        if (!AlliancesClient.canControlAlly(hudSelectedEntity))
+            return false;
+
+        String allyName = "";
+        if (hudSelectedEntity instanceof Unit unit)
+            allyName = unit.getOwnerName();
+
+        for (BuildingPlacement bpl : buildings) {
+            if (bpl.getBuilding().isTypeOf(building) && bpl.isBuilt &&
+                    MC.player != null && bpl.ownerName.equals(allyName)) {
+                return true;
+            }
+        }
         return false;
     }
 

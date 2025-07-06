@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.monsters.*;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -13,7 +14,6 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
@@ -25,14 +25,13 @@ import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
@@ -47,6 +46,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
@@ -63,6 +63,9 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -121,7 +124,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     // combat stats
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
-    public float getUnitArmorValue() {return armorValue;}
+
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.ZOMBIE_VILLAGER;}
     public boolean getWillRetaliate() {return willRetaliate;}
@@ -180,7 +183,8 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     }
 
     public boolean isSwingingArmRepeatedly() {
-        return (this.getGatherResourceGoal().isGathering() || this.getBuildRepairGoal().isBuilding());
+        return ((this.getGatherResourceGoal() != null && this.getGatherResourceGoal().isGathering()) ||
+                (this.getBuildRepairGoal() != null && this.getBuildRepairGoal().isBuilding()));
     }
 
     public static List<AbilityButton> getBuildingButtons() {
@@ -261,12 +265,23 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
         Unit.tick(this);
         AttackerUnit.tick(this);
         WorkerUnit.tick(this);
+    }
 
-        // apply slowness level 2 during daytime for a short time repeatedly
-        if (tickCount % 10 == 0 && !this.level().isClientSide() && this.level().isDay() &&
-                !NightUtils.isInRangeOfNightSource(this.getEyePosition(), false) &&
-                !ResearchServerEvents.playerHasCheat(getOwnerName(), "slipslopslap"))
-            this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15, 1));
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
+    }
+
+    @Override
+    public SunlightEffect getSunlightEffect() {
+        return SunlightEffect.MOVEMENT_SLOWDOWN;
     }
 
     public void initialiseGoals() {

@@ -25,12 +25,12 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -45,6 +45,9 @@ public class WolfUnit extends Wolf implements Unit, AttackerUnit {
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -99,7 +102,7 @@ public class WolfUnit extends Wolf implements Unit, AttackerUnit {
     // combat stats
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
-    public float getUnitArmorValue() {return armorValue;}
+
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.WOLF;}
     public boolean getWillRetaliate() {return willRetaliate;}
@@ -144,7 +147,7 @@ public class WolfUnit extends Wolf implements Unit, AttackerUnit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Mob.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE, WolfUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, WolfUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WolfUnit.maxHealth)
@@ -166,6 +169,18 @@ public class WolfUnit extends Wolf implements Unit, AttackerUnit {
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
     }
 
     @Override

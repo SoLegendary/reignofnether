@@ -37,7 +37,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -77,7 +80,7 @@ public class BuildingServerEvents {
 
     public static final Random random = new Random();
 
-    private static final int SAVE_TICKS_MAX = 1200;
+    private static final int SAVE_TICKS_MAX = 600;
     private static int saveTicks = 0;
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
@@ -492,9 +495,8 @@ public class BuildingServerEvents {
             if (evt.getSpawner() != null && evt.getSpawner().getSpawnerBlockEntity() != null) {
                 BlockEntity be = evt.getSpawner().getSpawnerBlockEntity();
                 BlockPos bp = evt.getSpawner().getSpawnerBlockEntity().getBlockPos();
-                if (BuildingUtils.findBuilding(false, bp) instanceof DungeonPlacement || BuildingUtils.findBuilding(false,
-                    bp
-                ) instanceof FlameSanctuaryPlacement) {
+                if (BuildingUtils.findBuilding(false, bp) instanceof DungeonPlacement ||
+                    BuildingUtils.findBuilding(false, bp) instanceof FlameSanctuaryPlacement) {
                     evt.getEntity().discard();
                 }
             }
@@ -598,13 +600,16 @@ public class BuildingServerEvents {
                 int atkDmg = 0;
                 if (ghastUnit != null) {
                     atkDmg = (int) ghastUnit.getUnitAttackDamage();
+                    building.lastAttacker = ghastUnit;
                 } else if (creeperUnit != null) {
                     atkDmg = (int) creeperUnit.getUnitAttackDamage();
                     if (creeperUnit.isPowered()) {
                         atkDmg *= CreeperUnit.CHARGED_DAMAGE_MULT;
                     }
+                    building.lastAttacker = creeperUnit;
                 } else if (pillagerUnit != null) {
                     atkDmg = (int) pillagerUnit.getUnitAttackDamage() / 2;
+                    building.lastAttacker = pillagerUnit;
                 } else if (exp.getExploder() instanceof PrimedTnt) {
                     atkDmg = TNT_BUILDING_BASE_DAMAGE;
                 }
@@ -710,4 +715,5 @@ public class BuildingServerEvents {
         }
         return ((float) netherBlocksBelow / (float) blocksBelow) > MIN_NETHER_BLOCKS_PERCENT;
     }
+
 }

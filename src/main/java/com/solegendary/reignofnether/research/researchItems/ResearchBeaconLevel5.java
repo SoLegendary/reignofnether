@@ -46,7 +46,7 @@ public class ResearchBeaconLevel5 extends ProductionItem {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
                 hotkey,
                 () -> false,
-                () -> itemIsBeingProduced(prodBuilding.ownerName) ||
+                () -> itemIsBeingProducedAt(prodBuilding) ||
                         (prodBuilding instanceof BeaconPlacement beacon && beacon.getUpgradeLevel() != 4),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, this),

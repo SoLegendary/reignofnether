@@ -1,6 +1,9 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
+import com.solegendary.reignofnether.entities.ThrownMaceProjectile;
+import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
 import com.solegendary.reignofnether.hero.HeroExperienceOrb;
 import com.solegendary.reignofnether.unit.modelling.renderers.GhastUnitRenderer;
 import com.solegendary.reignofnether.unit.modelling.renderers.NecromancerRenderer;
@@ -182,6 +185,12 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "hoglin_unit").toString()));
 
+    public static final RegistryObject<EntityType<HoglinUnit>> ARMOURED_HOGLIN_UNIT = ENTITIES.register("armoured_hoglin_unit",
+            () -> EntityType.Builder.of(HoglinUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.HOGLIN.getWidth(), EntityType.HOGLIN.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "armoured_hoglin_unit").toString()));
+
     public static final RegistryObject<EntityType<BlazeUnit>> BLAZE_UNIT = ENTITIES.register("blaze_unit",
             () -> EntityType.Builder.of(BlazeUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.BLAZE.getWidth(), EntityType.BLAZE.getHeight())
@@ -281,6 +290,29 @@ public class EntityRegistrar {
                     .sized(EntityType.RABBIT.getWidth(), EntityType.RABBIT.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(new ResourceLocation(ReignOfNether.MOD_ID, "killer_rabbit_unit").toString()));
+
+    public static final RegistryObject<EntityType<ThrowableTntProjectile>> THROWABLE_TNT_PROJECTILE = ENTITIES.register("tnt_throwable_projectile",
+            () -> EntityType.Builder.<ThrowableTntProjectile>of(ThrowableTntProjectile::new, MobCategory.MISC)
+                    .sized(0.98F, 0.98F)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "tnt_throwable_projectile").toString()));
+
+    public static final RegistryObject<EntityType<AdjustablePrimedTnt>> ADJUSTABLE_PRIMED_TNT = ENTITIES.register("adjustable_primed_tnt",
+            () -> EntityType.Builder.<AdjustablePrimedTnt>of(AdjustablePrimedTnt::new, MobCategory.MISC)
+                    .fireImmune()
+                    .sized(0.98F, 0.98F)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .updateInterval(10)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "adjustable_primed_tnt").toString()));
+
+    public static final RegistryObject<EntityType<ThrownMaceProjectile>> THROWN_MACE_PROJECTILE = ENTITIES.register("thrown_mace_projectile",
+            () -> EntityType.Builder.<ThrownMaceProjectile>of(ThrownMaceProjectile::new, MobCategory.MISC)
+                    .fireImmune()
+                    .sized(0.5f, 0.5f)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .updateInterval(10)
+                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "thrown_mace_projectile").toString()));
+
 
     public static void init() {
         ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());

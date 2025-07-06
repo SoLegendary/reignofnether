@@ -13,7 +13,6 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -31,8 +30,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -68,6 +65,9 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -130,7 +130,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitAttackDamage() {return attackDamage;}
     public float getUnitMaxHealth() {return maxHealth;}
-    public float getUnitArmorValue() {return armorValue;}
+
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.SPIDER;}
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
@@ -233,15 +233,26 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
             Unit.tick(this);
             AttackerUnit.tick(this);
 
-            // apply slowness level 2 during daytime for a short time repeatedly
-            if (tickCount % 10 == 0 && !this.level().isClientSide() && this.level().isDay() &&
-                    !NightUtils.isInRangeOfNightSource(this.getEyePosition(), false) &&
-                    !ResearchServerEvents.playerHasCheat(getOwnerName(), "slipslopslap"))
-                this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15, 1));
-
             if (getWebGoal() != null)
                 getWebGoal().tick();
         }
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
+    }
+
+    @Override
+    public SunlightEffect getSunlightEffect() {
+        return SunlightEffect.MOVEMENT_SLOWDOWN;
     }
 
     @Override
@@ -283,7 +294,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     @Override
     public boolean doHurtTarget(@NotNull Entity pEntity) {
         if (super.doHurtTarget(pEntity)) {
-            if (getWebAbility() != null)
+            if (getWebAbility() != null && getWebAbility().isAutocasting())
                 getWebAbility().use(this.level(), this, pEntity.getOnPos());
             return true;
         } else {

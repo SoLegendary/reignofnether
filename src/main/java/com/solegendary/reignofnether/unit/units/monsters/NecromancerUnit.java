@@ -11,9 +11,10 @@ import com.solegendary.reignofnether.ability.heroAbilities.villager.Avatar;
 import com.solegendary.reignofnether.ability.heroAbilities.villager.BattleRagePassive;
 import com.solegendary.reignofnether.ability.heroAbilities.villager.MaceSlam;
 import com.solegendary.reignofnether.ability.heroAbilities.villager.TauntingCry;
-import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -30,6 +31,7 @@ import com.solegendary.reignofnether.util.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -52,6 +54,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -72,6 +75,9 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -150,7 +156,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitAttackDamage() {return attackDamage + (attackBonusPerLevel * getHeroLevel());}
     public float getUnitMaxHealth() {return maxHealth + (maxHealthBonusPerLevel * getHeroLevel());}
-    public float getUnitArmorValue() {return armorValue;}
+
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.NECROMANCER;}
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
@@ -172,6 +178,26 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
         experience = amount;
         setStatsForLevel();
     }
+    private float baseMaxMana = 150;
+    private float maxMana = baseMaxMana;
+    private float mana = maxMana;
+    private float manaRegenPerSecond = 1;
+    private float manaBonusPerLevel = 10;
+    @Override public float getBaseMaxMana() { return baseMaxMana; }
+    @Override public float getMaxMana() { return maxMana; }
+    @Override public void setMaxMana(float amount) {
+        this.maxMana = amount;
+        if (!level().isClientSide())
+            HeroClientboundPacket.setMaxMana(getId(), amount);
+    }
+    @Override public float getMana() { return mana; }
+    @Override public void setMana(float amount) {
+        this.mana = Math.min(maxMana, amount);
+        if (!level().isClientSide())
+            HeroClientboundPacket.setMana(getId(), this.mana);
+    }
+    @Override public float getManaRegenPerSecond() { return manaRegenPerSecond; }
+    @Override public float getManaBonusPerLevel() { return manaBonusPerLevel; }
 
     final static public float attackDamage = 4.0f;
     final static public float attackBonusPerLevel = 0.4f;
@@ -187,7 +213,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     public int maxResources = 100;
 
     @Override public float getHealthBonusPerLevel() { return maxHealthBonusPerLevel; };
-    @Override public float getAttackBonusPerLevel() { return maxHealth; };
+    @Override public float getAttackBonusPerLevel() { return attackBonusPerLevel; };
     @Override public float getBaseHealth() { return maxHealth; };
     @Override public float getBaseAttack() { return attackDamage; };
 
@@ -287,6 +313,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+        HeroUnit.tick(this);
 
         if (level().isClientSide() && animateTicks > 0) {
             animateTicks -= 1;
@@ -294,6 +321,18 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
         this.castRaiseDeadGoal.tick();
         this.castPhantomGoal.tick();
         this.castBloodMoonGoal.tick();
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
     }
 
     public RaiseDead getRaiseDead() {
@@ -313,6 +352,11 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     @Override
     protected boolean isSunBurnTick() {
         return NightUtils.isSunBurnTick(this);
+    }
+
+    @Override
+    public SunlightEffect getSunlightEffect() {
+        return SunlightEffect.MOVEMENT_SLOWDOWN;
     }
 
     public void initialiseGoals() {
@@ -364,6 +408,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     @Override
     public void setupEquipmentAndUpgradesServer() {
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+        this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.PAPER)); // prevent burning in sunlight
     }
 
     // override to make inaccuracy 0
@@ -420,28 +465,37 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 zombieUnit.setOwnerName(this.getOwnerName());
                 this.level().addFreshEntity(zombieUnit);
 
+                ItemStack helmet = new ItemStack(Items.LEATHER_HELMET);
                 ItemStack chestPlate = new ItemStack(Items.LEATHER_CHESTPLATE);
                 ItemStack leggings = new ItemStack(Items.LEATHER_LEGGINGS);
                 ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
+                ItemStack sword = new ItemStack(Items.WOODEN_SWORD);
                 if (raiseDeadRank == 2) {
+                    helmet = new ItemStack(Items.CHAINMAIL_HELMET);
                     chestPlate = new ItemStack(Items.CHAINMAIL_CHESTPLATE);
                     leggings = new ItemStack(Items.CHAINMAIL_LEGGINGS);
                     boots = new ItemStack(Items.CHAINMAIL_BOOTS);
+                    sword = new ItemStack(Items.STONE_SWORD);
                 } else if (raiseDeadRank >= 3) {
+                    helmet = new ItemStack(Items.IRON_HELMET);
                     chestPlate = new ItemStack(Items.IRON_CHESTPLATE);
                     leggings = new ItemStack(Items.IRON_LEGGINGS);
                     boots = new ItemStack(Items.IRON_BOOTS);
+                    sword = new ItemStack(Items.IRON_SWORD);
                 }
                 if (soulRank >= 1)
                     chestPlate.enchant(Enchantments.THORNS, 3);
                 if (soulRank >= 2)
                     leggings.enchant(Enchantments.THORNS, 3);
-                if (soulRank >= 3)
-                    boots.enchant(Enchantments.THORNS, 3);
-
+                if (soulRank >= 3) {
+                    boots.enchant(Enchantments.THORNS, 2);
+                    helmet.enchant(Enchantments.THORNS, 2);
+                }
+                zombieUnit.setItemSlot(EquipmentSlot.HEAD, helmet);
                 zombieUnit.setItemSlot(EquipmentSlot.CHEST, chestPlate);
                 zombieUnit.setItemSlot(EquipmentSlot.LEGS, leggings);
                 zombieUnit.setItemSlot(EquipmentSlot.FEET, boots);
+                zombieUnit.setItemSlot(EquipmentSlot.MAINHAND, sword);
             }
         }
     }
@@ -484,6 +538,8 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
     public void doBloodMoon() {
         if (level().isClientSide())
+            return;
+        if (TimeServerEvents.isBloodMoonActive())
             return;
 
         int soulRank = consumeSoulsAndGetSoulRank();

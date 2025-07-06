@@ -1,26 +1,40 @@
 package com.solegendary.reignofnether.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderStateShard;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 import java.util.List;
 import java.util.OptionalDouble;
@@ -407,4 +421,55 @@ public class MyRenderer {
             guiGraphics.pose().translate(0,0,-3000);
         }
     }
+
+    public static void renderItemInFrontOfEntityFace(PoseStack poseStack, LivingEntity entity, float partialTicks, ItemStack itemStack) {
+        ItemRenderer itemRenderer = MC.getItemRenderer();
+        poseStack.pushPose();
+
+        // Get current rendering position
+        Camera camera = MC.gameRenderer.getMainCamera();
+        Vec3 camPos = camera.getPosition();
+        Vec3 eyePos = entity.getEyePosition();
+
+        float f = entity.getXRot() * 0.017453292F;
+        float f1 = -entity.getYHeadRot() * 0.017453292F;
+        float f2 = Mth.cos(f1);
+        float f3 = Mth.sin(f1);
+        float f4 = Mth.cos(f);
+        float f5 = Mth.sin(f);
+        Vec3 look = new Vec3(f3 * f4, -f5, f2 * f4).normalize();
+
+        Vec3 itemPos = eyePos.add(look.scale(0.5f));
+
+        poseStack.translate(itemPos.x - camPos.x, itemPos.y - camPos.y - 0.25f, itemPos.z - camPos.z);
+
+        float yaw = Mth.lerp(partialTicks, entity.yHeadRotO, entity.getYHeadRot());
+        float pitch = Mth.lerp(partialTicks, entity.xRotO, entity.getXRot());
+
+        poseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
+        poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
+
+        itemRenderer.renderStatic(
+                itemStack,
+                ItemDisplayContext.FIXED,
+                LightTexture.FULL_BRIGHT,
+                OverlayTexture.NO_OVERLAY,
+                poseStack,
+                MC.renderBuffers().bufferSource(),
+                MC.level,
+                0 // random seed
+        );
+        poseStack.popPose();
+
+        RandomSource random = MC.level.getRandom();
+        double dx = (random.nextDouble() - 0.5) * 0.1;
+        double dy = random.nextDouble() * 0.1 + 0.05;
+        double dz = (random.nextDouble() - 0.5) * 0.1;
+
+        MC.particleEngine.createParticle(
+                new ItemParticleOption(ParticleTypes.ITEM, itemStack),
+                itemPos.x, itemPos.y - 0.1f, itemPos.z, dx, dy, dz
+        );
+    }
+
 }

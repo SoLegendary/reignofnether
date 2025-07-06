@@ -20,7 +20,7 @@ public class HeroClientboundPacket {
 
     HeroAction action;
     int unitId;
-    int value;
+    float value;
     int abilityIndex;
 
     public static void setExperience(int unitId, int value) {
@@ -43,7 +43,27 @@ public class HeroClientboundPacket {
                 new HeroClientboundPacket(HeroAction.SET_ABILITY_RANK, unitId, rank, abilityIndex));
     }
 
-    public HeroClientboundPacket(HeroAction action, int unitId, int value, int abilityIndex) {
+    public static void setMana(int unitId, float value) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new HeroClientboundPacket(HeroAction.SET_MANA, unitId, value, 0));
+    }
+
+    public static void setMaxMana(int unitId, float value) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new HeroClientboundPacket(HeroAction.SET_MAX_MANA, unitId, value, 0));
+    }
+
+    public static void activateAbilityClientside(int unitId, int abilityIndex) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new HeroClientboundPacket(HeroAction.ACTIVATE_ABILITY_CLIENTSIDE, unitId, 0, abilityIndex));
+    }
+
+    public static void deactivateAbilityClientside(int unitId, int abilityIndex) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new HeroClientboundPacket(HeroAction.DEACTIVATE_ABILITY_CLIENTSIDE, unitId, 0, abilityIndex));
+    }
+
+    public HeroClientboundPacket(HeroAction action, int unitId, float value, int abilityIndex) {
         this.action = action;
         this.unitId = unitId;
         this.value = value;
@@ -53,14 +73,14 @@ public class HeroClientboundPacket {
     public HeroClientboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(HeroAction.class);
         this.unitId = buffer.readInt();
-        this.value = buffer.readInt();
+        this.value = buffer.readFloat();
         this.abilityIndex = buffer.readInt();
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeInt(this.unitId);
-        buffer.writeInt(this.value);
+        buffer.writeFloat(this.value);
         buffer.writeInt(this.abilityIndex);
     }
 
@@ -78,16 +98,20 @@ public class HeroClientboundPacket {
 
                     if (hero != null) {
                         switch (action) {
-                            case SET_EXPERIENCE -> hero.setExperience(value);
-                            case SET_SKILL_POINTS -> hero.setSkillPoints(value);
-                            case SET_CHARGES -> hero.setChargesFromSaveData(value);
+                            case SET_EXPERIENCE -> hero.setExperience((int) value);
+                            case SET_SKILL_POINTS -> hero.setSkillPoints((int) value);
+                            case SET_CHARGES -> hero.setChargesFromSaveData((int) value);
                             case SET_ABILITY_RANK -> {
                                 List<HeroAbility> abls = hero.getHeroAbilities();
-                                if (abls.size() > abilityIndex) abls.get(abilityIndex).rank = value;
+                                if (abls.size() > abilityIndex) abls.get(abilityIndex).rank = (int) value;
                                 for (HeroAbility abl : abls)
                                     abl.updateStatsForRank();
                                 ((Unit) hero).updateAbilityButtons();
                             }
+                            case SET_MANA -> hero.setMana(value);
+                            case SET_MAX_MANA -> hero.setMaxMana(value);
+                            case ACTIVATE_ABILITY_CLIENTSIDE -> hero.activateAbilityClientside(abilityIndex);
+                            case DEACTIVATE_ABILITY_CLIENTSIDE -> hero.deactivateAbilityClientside(abilityIndex);
                         }
                     }
                     success.set(true);

@@ -26,10 +26,19 @@ public abstract class HeroAbility extends Ability {
 
     public int rank = 0; // 0 == not learnt
     public final int maxRank;
+    public int manaCost = 0;
 
     public HeroAbility(int maxRank, UnitAction action, int cooldownMax, float range, float radius, boolean canTargetEntities) {
         super(action, cooldownMax, range, radius, canTargetEntities);
         this.maxRank = maxRank;
+        this.manaCost = 0;
+    }
+
+    public HeroAbility(HeroUnit hero, int maxRank, int manaCost, UnitAction action, int cooldownMax, float range, float radius, boolean canTargetEntities) {
+        super(action, ((Entity) hero).level(), cooldownMax, range, radius, canTargetEntities);
+        this.hero = hero;
+        this.maxRank = maxRank;
+        this.manaCost = manaCost;
     }
 
     public int getLevelRequirement() {
@@ -97,6 +106,16 @@ public abstract class HeroAbility extends Ability {
         return button;
     }
 
+    public static boolean allSkillsLearnt(HeroUnit hero) {
+        if (hero.getHeroLevel() >= HeroUnit.MAX_HERO_LEVEL && hero.getSkillPoints() <= 0)
+            return true;
+        int totalSkillRanks = 0;
+        for (HeroAbility ability : hero.getHeroAbilities()) {
+            totalSkillRanks += ability.rank;
+        }
+        return totalSkillRanks >= 10;
+    }
+
     // button that all heroes have to show ability level up options
     public static Button getRankUpMenuButton(HeroUnit hero) {
         Button menuButton = new Button("Rank up abilities",
@@ -106,7 +125,7 @@ public abstract class HeroAbility extends Ability {
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
             Keybindings.keyU,
             () -> false,
-            () -> hero.getHeroLevel() >= HeroUnit.MAX_HERO_LEVEL && hero.getSkillPoints() <= 0,
+            () -> allSkillsLearnt(hero),
             () -> true,
             () -> hero.showRankUpMenu(!hero.isRankUpMenuOpen()),
             null,

@@ -1,11 +1,17 @@
 package com.solegendary.reignofnether.mixin;
 
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.CombatTracker;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,10 +19,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -88,6 +97,60 @@ public abstract class LivingEntityMixin extends Entity {
 
                     pLevel.setBlockAndUpdate(blockpos, magmaState);
                     pLevel.scheduleTick(blockpos, Blocks.NETHERRACK, Mth.nextInt(pLiving.getRandom(), 60, 120));
+                }
+            }
+        }
+    }
+
+    @Shadow protected float getDamageAfterArmorAbsorb(DamageSource pDamageSource, float pDamageAmount) { return 0f; }
+    @Shadow protected float getDamageAfterMagicAbsorb(DamageSource pDamageSource, float pDamageAmount) { return 0f; }
+    @Shadow public float getAbsorptionAmount() { return 0f; }
+    @Shadow public void setAbsorptionAmount(float pAbsorptionAmount) { }
+    @Shadow public CombatTracker getCombatTracker() { return null; }
+    @Shadow public float getHealth() { return 0f; }
+    @Shadow public void setHealth(float pHealth) { }
+
+    @Inject(
+            method = "actuallyHurt",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount, CallbackInfo ci) {
+        // ensure projectiles from units do the damage of the unit, not the item
+        if (pDamageSource.is(DamageTypeTags.IS_PROJECTILE) &&
+            pDamageSource.getEntity() instanceof AttackerUnit attackerUnit &&
+            this.getAbsorptionAmount() > 0) {
+
+            float dmg = attackerUnit.getUnitAttackDamage();
+            if (this instanceof Unit unit)
+                dmg *= (1 - unit.getUnitArmorPercentage());
+            ci.cancel();
+
+            if (!this.isInvulnerableTo(pDamageSource)) {
+                dmg = ForgeHooks.onLivingHurt((LivingEntity) (Object) this, pDamageSource, dmg);
+                if (dmg <= 0.0F) {
+                    return;
+                }
+
+                dmg = this.getDamageAfterArmorAbsorb(pDamageSource, dmg);
+                dmg = this.getDamageAfterMagicAbsorb(pDamageSource, dmg);
+                float f1 = Math.max(dmg - this.getAbsorptionAmount(), 0.0F);
+                this.setAbsorptionAmount(this.getAbsorptionAmount() - (dmg - f1));
+                float f = dmg - f1;
+                if (f > 0.0F && f < 3.4028235E37F) {
+                    Entity entity = pDamageSource.getEntity();
+                    if (entity instanceof ServerPlayer) {
+                        ServerPlayer serverplayer = (ServerPlayer)entity;
+                        serverplayer.awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(f * 10.0F));
+                    }
+                }
+
+                f1 = ForgeHooks.onLivingDamage((LivingEntity) (Object) this, pDamageSource, f1);
+                if (f1 != 0.0F) {
+                    this.getCombatTracker().recordDamage(pDamageSource, f1);
+                    this.setHealth(this.getHealth() - f1);
+                    this.setAbsorptionAmount(this.getAbsorptionAmount() - f1);
+                    this.gameEvent(GameEvent.ENTITY_DAMAGE);
                 }
             }
         }

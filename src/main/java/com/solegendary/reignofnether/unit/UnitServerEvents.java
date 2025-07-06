@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.unit;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
-import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.heroAbilities.monster.SoulSiphonPassive;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -14,11 +13,14 @@ import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
-import com.solegendary.reignofnether.hero.HeroClientboundPacket;
+import com.solegendary.reignofnether.building.production.ActiveProduction;
+import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
@@ -44,6 +46,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Fireball;
@@ -102,11 +105,9 @@ public class UnitServerEvents {
         return allUnits;
     }
 
-    public static final ArrayList<UnitSave> savedUnits = new ArrayList<>();
-    public static final ArrayList<HeroUnitSave> savedHeroUnits = new ArrayList<>();
     public static final ArrayList<TargetResourcesSave> savedTargetResources = new ArrayList<>();
 
-    private static final int SAVE_TICKS_MAX = 1200;
+    private static final int SAVE_TICKS_MAX = 600;
     private static int saveTicks = 0;
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
@@ -116,8 +117,7 @@ public class UnitServerEvents {
         if (saveTicks >= SAVE_TICKS_MAX) {
             ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
             if (level != null) {
-                saveUnits(level);
-                saveHeroUnits(level);
+                saveGatherTargets(level);
                 saveTicks = 0;
             }
         }
@@ -127,48 +127,18 @@ public class UnitServerEvents {
     public static void onServerStopping(ServerStoppingEvent evt) {
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
         if (level != null) {
-            saveUnits(level);
-            saveHeroUnits(level);
+            saveFallenHeroUnits(level);
             saveGatherTargets(level);
         }
     }
 
-    public static void saveUnits(ServerLevel level) {
-        UnitSaveData data = UnitSaveData.getInstance(level);
-        data.units.clear();
-        getAllUnits().forEach(e -> {
-            if (e instanceof Unit unit) {
-                // Save unit data as usual
-                data.units.add(new UnitSave(e.getName().getString(), unit.getOwnerName(), e.getStringUUID(), unit.getAnchor()));
-            }
-        });
-        data.save();
-        level.getDataStorage().save();
-        //ReignOfNether.LOGGER.info("Saved " + getAllUnits().size() + " units");
-    }
-
-    public static void saveHeroUnits(ServerLevel level) {
+    public static void saveFallenHeroUnits(ServerLevel level) {
         HeroUnitSaveData data = HeroUnitSaveData.getInstance(level);
         data.heroUnits.clear();
-        getAllUnits().forEach(e -> {
-            if (e instanceof HeroUnit hero) {
-                int charges = 0;
-                List<HeroAbility> abls = hero.getHeroAbilities();
-                data.heroUnits.add(new HeroUnitSave(
-                    e.getStringUUID(),
-                    hero.getExperience(),
-                    hero.getSkillPoints(),
-                    hero.getChargesForSaveData(),
-                    abls.size() > 0 ? abls.get(0).rank : 0,
-                    abls.size() > 1 ? abls.get(1).rank : 0,
-                    abls.size() > 2 ? abls.get(2).rank : 0,
-                    abls.size() > 3 ? abls.get(3).rank : 0
-                ));
-            }
-        });
+        data.heroUnits.addAll(HeroServerEvents.fallenHeroes);
         data.save();
         level.getDataStorage().save();
-        //ReignOfNether.LOGGER.info("Saved " + getAllUnits().size() + " units");
+        ReignOfNether.LOGGER.info("Saved " + getAllUnits().size() + " fallen hero units");
     }
 
     public static void saveGatherTargets(ServerLevel level) {
@@ -198,16 +168,10 @@ public class UnitServerEvents {
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
 
         if (level != null) {
-            synchronized (savedUnits) {
-                UnitSaveData data = UnitSaveData.getInstance(level);
-                savedUnits.addAll(data.units); // actually assign the data in TickEvent as entities don't exist here yet
-                ReignOfNether.LOGGER.info("Loaded " + data.units.size() + " units in serverevents");
-            }
-            synchronized (savedHeroUnits) {
-                HeroUnitSaveData data = HeroUnitSaveData.getInstance(level);
-                savedHeroUnits.addAll(data.heroUnits);
-                ReignOfNether.LOGGER.info("Loaded " + data.heroUnits.size() + " hero units in serverevents");
-            }
+            HeroUnitSaveData heroData = HeroUnitSaveData.getInstance(level);
+            HeroServerEvents.fallenHeroes.addAll(heroData.heroUnits);
+            ReignOfNether.LOGGER.info("Loaded " + heroData.heroUnits.size() + " hero units in serverevents");
+
             synchronized (savedTargetResources) {
                 TargetResourcesSaveData data = TargetResourcesSaveData.getInstance(level);
                 savedTargetResources.addAll(data.targetData); // actually assign the data in TickEvent as entities don't exist here yet
@@ -257,7 +221,7 @@ public class UnitServerEvents {
             if (building.ownerName.equals(ownerName)) {
                 if (building instanceof ProductionPlacement prodPlacement) {
                     for (ActiveProduction prodItem : prodPlacement.productionQueue)
-                        currentPopulation += prodItem.item.cost.population;
+                        currentPopulation += prodItem.item.getCost(false, ownerName).population;
                 } else if (building.getBuilding() instanceof IronGolemBuilding) {
                     currentPopulation += ResourceCosts.IRON_GOLEM.population;
                 }
@@ -323,7 +287,9 @@ public class UnitServerEvents {
         String ownerName1 = unit.getOwnerName();
         String ownerName2 = "";
 
-        if (entity instanceof Player player) {
+        if (entity instanceof ItemEntity item && item.getOwner() instanceof Unit unitItemOwner) {
+            ownerName2 = unitItemOwner.getOwnerName();
+        } else if (entity instanceof Player player) {
             ownerName2 = player.getName().getString();
         } else if (entity instanceof Unit) {
             ownerName2 = ((Unit) entity).getOwnerName();
@@ -338,6 +304,8 @@ public class UnitServerEvents {
         // If not allied, check if the owners are the same
         if (ownerName1.equals(ownerName2)) {
             return Relationship.FRIENDLY;
+        } else if (ownerName1.isBlank() || ownerName2.isBlank()) {
+            return Relationship.NEUTRAL;
         } else {
             return Relationship.HOSTILE;
         }
@@ -347,11 +315,10 @@ public class UnitServerEvents {
         String unitOwnerName = unit.getOwnerName();
         String buildingOwnerName = building.ownerName;
 
-        if (buildingOwnerName.isEmpty()) {
-            return Relationship.NEUTRAL;
-        }
         if (unitOwnerName.equals(buildingOwnerName)) {
             return Relationship.OWNED;
+        } else if (buildingOwnerName.isBlank() || unitOwnerName.isBlank()) {
+            return Relationship.NEUTRAL;
         } else if (AlliancesServerEvents.isAllied(unitOwnerName, buildingOwnerName)) {
             return Relationship.FRIENDLY;
         } else {
@@ -377,56 +344,6 @@ public class UnitServerEvents {
             && !evt.getLevel().isClientSide) {
             allUnits.add(entity);
 
-            synchronized (savedUnits) {
-                savedUnits.removeIf(su -> {
-                    if (su.uuid.equals(entity.getStringUUID())) {
-                        unit.setOwnerName(su.ownerName);
-                        unit.setAnchor(su.anchorPos);
-                        UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
-                        UnitSyncClientboundPacket.sendSyncOwnerNamePacket(unit);
-                        UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
-                        ReignOfNether.LOGGER.info("loaded unit in serverevents: " + su.ownerName + "|" + su.name + "|" + su.uuid);
-                        return true;
-                    }
-                    return false;
-                });
-            }
-            synchronized (savedHeroUnits) {
-                savedHeroUnits.removeIf(shu -> {
-                    if (shu.uuid.equals(entity.getStringUUID()) && unit instanceof HeroUnit hero) {
-                        hero.setExperience(shu.experience);
-                        hero.setSkillPoints(shu.skillPoints);
-                        hero.setChargesFromSaveData(shu.charges);
-
-                        HeroClientboundPacket.setExperience(entity.getId(), hero.getExperience());
-                        HeroClientboundPacket.setSkillPoints(entity.getId(), hero.getSkillPoints());
-                        HeroClientboundPacket.setCharges(entity.getId(), hero.getChargesForSaveData());
-
-                        List<HeroAbility> abls = hero.getHeroAbilities();
-                        if (abls.size() > 0) {
-                            abls.get(0).rank = shu.ability1Rank;
-                            HeroClientboundPacket.setAbilityRank(entity.getId(), shu.ability1Rank, 0);
-                        }
-                        if (abls.size() > 1) {
-                            abls.get(1).rank = shu.ability2Rank;
-                            HeroClientboundPacket.setAbilityRank(entity.getId(), shu.ability2Rank, 1);
-                        }
-                        if (abls.size() > 2) {
-                            abls.get(2).rank = shu.ability3Rank;
-                            HeroClientboundPacket.setAbilityRank(entity.getId(), shu.ability3Rank, 2);
-                        }
-                        if (abls.size() > 3) {
-                            abls.get(3).rank = shu.ability4Rank;
-                            HeroClientboundPacket.setAbilityRank(entity.getId(), shu.ability4Rank, 3);
-                        }
-                        for (HeroAbility abl : abls)
-                            abl.updateStatsForRank();
-                        ReignOfNether.LOGGER.info("loaded hero unit in serverevents: " + shu.uuid + "|" + shu.experience + "|" + shu.skillPoints);
-                        return true;
-                    }
-                    return false;
-                });
-            }
             if (unit instanceof WorkerUnit wUnit) {
                 synchronized (savedTargetResources) {
                     savedTargetResources.removeIf(sr -> {
@@ -440,7 +357,6 @@ public class UnitServerEvents {
                     });
                 }
             }
-
             ((Unit) entity).setupEquipmentAndUpgradesServer();
 
             ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
@@ -534,7 +450,7 @@ public class UnitServerEvents {
             creeperUnit.explodeCreeper();
         }
 
-        boolean drownedInfected = evt.getEntity().getActiveEffectsMap().containsKey(MobEffects.HUNGER);
+        boolean drownedInfected = evt.getEntity().getActiveEffectsMap().containsKey(MobEffectRegistrar.ZOMBIE_INFECTED.get());
         boolean slimeInfected = evt.getEntity().getActiveEffectsMap().containsKey(MobEffects.CONFUSION);
 
         if (evt.getEntity().getLastHurtByMob() instanceof Unit unit && (drownedInfected || slimeInfected)) {
@@ -873,8 +789,14 @@ public class UnitServerEvents {
         }
 
         // ensure projectiles from units do the damage of the unit, not the item
-        if (evt.getSource().is(DamageTypeTags.IS_PROJECTILE) && evt.getSource().getEntity() instanceof AttackerUnit attackerUnit) {
-            evt.setAmount(attackerUnit.getUnitAttackDamage());
+        if (evt.getSource().is(DamageTypeTags.IS_PROJECTILE) &&
+            evt.getSource().getEntity() instanceof AttackerUnit attackerUnit) {
+            float dmg = attackerUnit.getUnitAttackDamage();
+            if (evt.getAmount() > dmg) {
+                if (evt.getEntity() instanceof Unit unit)
+                    dmg *= (1 - unit.getUnitArmorPercentage());
+                evt.setAmount(dmg);
+            }
         }
 
         // ignore added weapon damage for workers
@@ -924,6 +846,14 @@ public class UnitServerEvents {
                 evt.setCanceled(true);
             }
         }
+
+        if (evt.getEntity().getAbsorptionAmount() > 0)
+            UnitSyncClientboundPacket.sendSyncStatsPacket(evt.getEntity());
+
+        if (evt.getSource().getEntity() instanceof HeadhunterUnit headhunterUnit &&
+                headhunterUnit.hasFireAspectTrident() &&
+                evt.getAmount() > 0)
+            evt.getEntity().setSecondsOnFire(4);
     }
 
     @SubscribeEvent

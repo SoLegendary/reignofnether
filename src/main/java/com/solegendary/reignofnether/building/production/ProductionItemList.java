@@ -6,13 +6,10 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ProductionItemList {
-    Map<ProductionItem, Keybinding> productions = new HashMap<>();
+    Map<ProductionItem, Keybinding> productions = new LinkedHashMap<>();
 
     public ProductionItemList() {
 

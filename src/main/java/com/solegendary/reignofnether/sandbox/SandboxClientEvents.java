@@ -145,7 +145,7 @@ public class SandboxClientEvents {
         };
     }
 
-    private static String getRelationshipName() {
+    public static String getRelationshipName(Relationship relationship) {
         return switch (relationship) {
             case OWNED -> I18n.get("hud.relationship.reignofnether.owned");
             case FRIENDLY -> I18n.get("hud.relationship.reignofnether.allied");
@@ -223,7 +223,7 @@ public class SandboxClientEvents {
                     }
                 },
                 List.of(
-                        fcs(I18n.get("sandbox.reignofnether.relationship_button1", getRelationshipName())),
+                        fcs(I18n.get("sandbox.reignofnether.relationship_button1", getRelationshipName(relationship))),
                         fcs(I18n.get("sandbox.reignofnether.relationship_button2"))
                 )
         );
@@ -266,7 +266,7 @@ public class SandboxClientEvents {
         if (MC.player == null)
             return null;
         boolean hasCheats = ResearchClient.hasCheat("warpten") &&
-                            ResearchClient.hasCheat("modifythephasevariance");
+                ResearchClient.hasCheat("modifythephasevariance");
         String playerName = Minecraft.getInstance().player.getName().getString();
         return new Button(
                 "Toggle Building Cheats",
@@ -289,9 +289,9 @@ public class SandboxClientEvents {
                 },
                 null,
                 List.of(hasCheats ? fcs(I18n.get("sandbox.reignofnether.building_cheats_on")) :
-                                    fcs(I18n.get("sandbox.reignofnether.building_cheats_off")),
-                                    fcs(I18n.get("sandbox.reignofnether.building_cheats1")),
-                                    fcs(I18n.get("sandbox.reignofnether.building_cheats2"))
+                                fcs(I18n.get("sandbox.reignofnether.building_cheats_off")),
+                        fcs(I18n.get("sandbox.reignofnether.building_cheats1")),
+                        fcs(I18n.get("sandbox.reignofnether.building_cheats2"))
                 )
         );
     }
@@ -334,6 +334,38 @@ public class SandboxClientEvents {
                                     fcs(I18n.get("sandbox.reignofnether.unit_cheats1")),
                                     fcs(I18n.get("sandbox.reignofnether.unit_cheats2")),
                                     fcs(I18n.get("sandbox.reignofnether.unit_cheats3"))
+                )
+        );
+    }
+
+    public static Button getToggleNonUnitControlButton() {
+        Minecraft MC = Minecraft.getInstance();
+        if (MC.player == null)
+            return null;
+        boolean hasCheat = ResearchClient.hasCheat("wouldyoukindly");
+        String playerName = Minecraft.getInstance().player.getName().getString();
+        return new Button(
+                "Toggle Full Unit Control",
+                Button.itemIconSize,
+                hasCheat ?
+                        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/repeating_command_block_side.png") :
+                        new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/repeating_command_block_side_dark.png"),
+                (Keybinding) null,
+                () -> false,
+                () -> false,
+                () -> true,
+                () -> {
+                    if (hasCheat) {
+                        ResearchServerboundPacket.removeCheat(playerName, "wouldyoukindly");
+                    } else {
+                        ResearchServerboundPacket.addCheat(playerName, "wouldyoukindly");
+                    }
+                },
+                null,
+                List.of(hasCheat ? fcs(I18n.get("sandbox.reignofnether.nonunit_control_cheat_on")) :
+                                    fcs(I18n.get("sandbox.reignofnether.nonunit_control_cheat_off")),
+                                    fcs(I18n.get("sandbox.reignofnether.nonunit_control_cheat1")),
+                                    fcs(I18n.get("sandbox.reignofnether.nonunit_control_cheat2"))
                 )
         );
     }

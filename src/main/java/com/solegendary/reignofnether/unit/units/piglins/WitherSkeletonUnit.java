@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -32,8 +33,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -57,6 +58,9 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -111,7 +115,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     // combat stats
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
-    public float getUnitArmorValue() {return armorValue;}
+
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.WITHER_SKELETON;}
     public boolean getWillRetaliate() {return willRetaliate;}
@@ -165,7 +169,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Mob.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE, WitherSkeletonUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, WitherSkeletonUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WitherSkeletonUnit.maxHealth)
@@ -209,6 +213,18 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
             deathCloudTicks -= 1;
     }
 
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
+    }
+
     public void initialiseGoals() {
         this.usePortalGoal = new UsePortalGoal(this);
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
@@ -249,6 +265,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
 
     public static final int WITHER_SECONDS = 6;
     public static final int WITHER_MAX_AMPLIFIER = 5; // amplifier starts at 0
+    public static final int WITHER_MAX_AMPLIFIER_HERO = 2;
 
     public static void applyStackingWither(LivingEntity le) {
         int amplifier = 0;
@@ -258,7 +275,10 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
                 witherEffect = effect;
 
         if (witherEffect != null) {
-            amplifier = Math.min(WITHER_MAX_AMPLIFIER, witherEffect.getAmplifier() + 1);
+            int maxAmp = WITHER_MAX_AMPLIFIER;
+            if (le instanceof HeroUnit heroUnit)
+                maxAmp = WITHER_MAX_AMPLIFIER_HERO;
+            amplifier = Math.min(maxAmp, witherEffect.getAmplifier() + 1);
             le.removeEffect(MobEffects.WITHER);
         }
         le.addEffect(new MobEffectInstance(MobEffects.WITHER, WITHER_SECONDS * 20, amplifier), null);
@@ -277,8 +297,27 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
 
     @Override
     public boolean fireImmune() {
-        BuildingPlacement building = BuildingUtils.findBuilding(level().isClientSide(), getOnPos());
-        return super.fireImmune() || (building != null &&(building.getBuilding() instanceof FlameSanctuary || building.getBuilding() instanceof BasaltSprings));
+        BuildingPlacement bpl = BuildingUtils.findBuilding(level().isClientSide(), getOnPos());
+        return super.fireImmune() || (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary || bpl.getBuilding() instanceof BasaltSprings));
+    }
+
+    @Override
+    public boolean canPickUpEquipment(ItemStack itemStack) {
+        Item item = itemStack.getItem();
+        return (item == Items.GOLDEN_CHESTPLATE ||
+                item == Items.GOLDEN_LEGGINGS ||
+                item == Items.GOLDEN_BOOTS ||
+                item == Items.GOLDEN_HELMET ||
+                item == Items.NETHERITE_CHESTPLATE ||
+                item == Items.NETHERITE_LEGGINGS ||
+                item == Items.NETHERITE_BOOTS ||
+                item == Items.NETHERITE_HELMET) &&
+                getItemBySlot(getEquipmentSlotForItem(itemStack)).getItem() != item;
+    }
+
+    @Override
+    public void onPickupEquipment(ItemStack itemStack) {
+        setItemSlot(getEquipmentSlotForItem(itemStack), itemStack);
     }
 
     @Override

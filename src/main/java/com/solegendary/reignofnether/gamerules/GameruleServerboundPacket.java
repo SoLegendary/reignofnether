@@ -71,6 +71,10 @@ public class GameruleServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_SLANTED_BUILDING, "", slantedBuilding ? 1L : 0L));
     }
+    public static void setAllowHeroes(boolean allowHeroes) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_ALLOW_HEROES, "", allowHeroes ? 1L : 0L));
+    }
 
     public GameruleServerboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
@@ -165,6 +169,10 @@ public class GameruleServerboundPacket {
                 case SET_SLANTED_BUILDING -> {
                     gameRules.getRule(GameRuleRegistrar.SLANTED_BUILDING).set(booleanValue, server);
                     GameruleClientboundPacket.setSlantedBuilding(booleanValue);
+                }
+                case SET_ALLOW_HEROES -> {
+                    gameRules.getRule(GameRuleRegistrar.ALLOW_HEROES).set(booleanValue, server);
+                    GameruleClientboundPacket.setAllowHeroes(booleanValue);
                 }
             }
             success.set(true);

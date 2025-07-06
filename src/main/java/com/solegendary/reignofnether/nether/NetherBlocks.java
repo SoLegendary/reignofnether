@@ -7,7 +7,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.NetherWartBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,8 +37,12 @@ public class NetherBlocks {
         if (!overworldBs.isAir())
             for (Map.Entry<Block, List<Block>> entrySet : PLANT_MAPPINGS.entrySet())
                 for (Block block : entrySet.getValue())
-                    if (overworldBs.getBlock().equals(block))
-                        return entrySet.getKey().defaultBlockState();
+                    if (overworldBs.getBlock().equals(block)) {
+                        BlockState bs = entrySet.getKey().defaultBlockState();
+                        if (bs.getBlock() instanceof NetherWartBlock)
+                            return bs.setValue(BlockStateProperties.AGE_3, 3);
+                        return bs;
+                    }
         return null;
     }
 
@@ -65,16 +71,20 @@ public class NetherBlocks {
 
     // returns the first block in the list of overworld blocks for a nether block mapping
     public static BlockState getOverworldBlock(Level level, BlockPos overworldBp) {
-        BlockState netherBs = level.getBlockState(overworldBp);
-        if (!netherBs.isAir()) {
-            for (Map.Entry<Block, List<Block>> entrySet : MAPPINGS.entrySet()) {
-                if (netherBs.getBlock() == Blocks.OBSIDIAN)
-                    return Blocks.WATER.defaultBlockState();
-                else if (netherBs.getBlock() == Blocks.NETHERRACK)
-                    return Blocks.DIRT.defaultBlockState();
-                else if (entrySet.getKey().getName().getString().equals(netherBs.getBlock().getName().getString()))
-                    return entrySet.getValue().get(0).defaultBlockState();
+        try {
+            BlockState netherBs = level.getBlockState(overworldBp);
+            if (!netherBs.isAir()) {
+                for (Map.Entry<Block, List<Block>> entrySet : MAPPINGS.entrySet()) {
+                    if (netherBs.getBlock() == Blocks.OBSIDIAN)
+                        return Blocks.WATER.defaultBlockState();
+                    else if (netherBs.getBlock() == Blocks.NETHERRACK)
+                        return Blocks.DIRT.defaultBlockState();
+                    else if (entrySet.getKey().getName().getString().equals(netherBs.getBlock().getName().getString()))
+                        return entrySet.getValue().get(0).defaultBlockState();
+                }
             }
+        } catch (NullPointerException e) {
+            return null;
         }
         return null;
     }

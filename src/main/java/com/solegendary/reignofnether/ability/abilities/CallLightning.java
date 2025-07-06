@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.buildings.placements.RangeIndicato
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -38,25 +39,21 @@ public class CallLightning extends Ability {
             false,
             true
         );
+        this.defaultHotkey = Keybindings.keyL;
     }
 
     @Override
     public AbilityButton getButton(Keybinding hotkey, BuildingPlacement placement) {
         if (!(placement instanceof RangeIndicatorProductionPlacement)) return null;
-        RangeIndicatorProductionPlacement lab = (RangeIndicatorProductionPlacement) placement;
+        RangeIndicatorProductionPlacement bpl = (RangeIndicatorProductionPlacement) placement;
 
         return new AbilityButton(
             "Call Lightning",
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_on.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.CALL_LIGHTNING,
-            () -> lab.getUpgradeLevel() == 0,
-            () -> {
-                if (lab.getBuilding() instanceof Laboratory laboratory)
-                    return laboratory.getLightningRodPos(lab) != null;
-                else
-                    return false;
-            },
+            () -> bpl.getUpgradeLevel() == 0,
+            () -> bpl.getBuilding() instanceof Laboratory lab && lab.getLightningRodPos(bpl) != null,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.CALL_LIGHTNING),
             null,
             List.of(

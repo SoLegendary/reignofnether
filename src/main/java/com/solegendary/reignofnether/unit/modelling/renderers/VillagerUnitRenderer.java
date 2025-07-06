@@ -24,12 +24,12 @@ public class VillagerUnitRenderer extends AbstractVillagerUnitRenderer<AbstractI
         this.addLayer(new ItemInHandLayer<AbstractIllager, VillagerUnitModel<AbstractIllager>>(this, context.getItemInHandRenderer()) {
             public void render(PoseStack pose, MultiBufferSource mbs, int p_116354_, AbstractIllager unit, float p_116356_, float p_116357_, float p_116358_, float p_116359_, float p_116360_, float p_116361_) {
                 if (unit instanceof VillagerUnit vUnit &&
-                        (vUnit.getBuildRepairGoal().isBuilding() ||
-                        vUnit.getGatherResourceGoal().isGathering() ||
-                        vUnit.getTargetGoal().getTarget() != null)) {
+                        ((vUnit.getBuildRepairGoal() != null && vUnit.getBuildRepairGoal().isBuilding()) ||
+                        (vUnit.getGatherResourceGoal() != null && vUnit.getGatherResourceGoal().isGathering()) ||
+                        (vUnit.getTargetGoal() != null && vUnit.getTargetGoal().getTarget() != null))) {
                     super.render(pose, mbs, p_116354_, unit, p_116356_, p_116357_, p_116358_, p_116359_, p_116360_, p_116361_);
                 } else if (unit instanceof MilitiaUnit mUnit &&
-                        (mUnit.getTargetGoal().getTarget() != null ||
+                        ((mUnit.getTargetGoal() != null && mUnit.getTargetGoal().getTarget() != null) ||
                         (mUnit.getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg &&
                         mabg.getBuildingTarget() != null))) {
                     super.render(pose, mbs, p_116354_, unit, p_116356_, p_116357_, p_116358_, p_116359_, p_116360_, p_116361_);

@@ -27,7 +27,6 @@ public abstract class MobMixin extends LivingEntity {
         synchronized (NonUnitServerEvents.attackSuppressedNonUnits) {
             if (pTarget != null && NonUnitServerEvents.attackSuppressedNonUnits.stream().map(Entity::getId).toList().contains(getId())) {
                 ci.cancel();
-                System.out.println("cancelled!");
             }
         }
     }

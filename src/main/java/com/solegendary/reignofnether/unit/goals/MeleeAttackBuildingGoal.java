@@ -28,9 +28,8 @@ import java.util.Random;
 
 public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
 
-    private int ticksToNextBlockBreak = ((AttackerUnit) mob).getAttackCooldown();
-
-    private BuildingPlacement buildingTarget;
+    protected int ticksToNextBlockBreak = ((AttackerUnit) mob).getAttackCooldown();
+    protected BuildingPlacement buildingTarget;
 
     protected final int RECALC_COOLDOWN_MAX = 10;
     protected int recalcCooldown = 0; // limit start() used by canContinueToUse
@@ -67,40 +66,43 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
                 // if the damage multiplier leaves a fraction remainder, treat that as a chance to destroy an additional block
                 // eg. if a unit with 3 damage attacks a building with 0.5 multiplier, always destroy 1 block + 50% chance to destroy 2 blocks
                 ticksToNextBlockBreak -= 1;
-                if (ticksToNextBlockBreak <= 0) {
-
-                    if (mob instanceof IronGolemUnit ||
-                        mob instanceof HoglinUnit ||
-                        mob instanceof ZoglinUnit ||
-                        mob instanceof RavagerUnit ||
-                        mob instanceof WardenUnit) {
-                        mob.handleEntityEvent((byte) 4);
-                        UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.NON_KEYFRAME_ATTACK, mob);
-                    }
-                    else
-                        this.mob.swing(InteractionHand.MAIN_HAND);
-
-                    AttackerUnit unit = (AttackerUnit) mob;
-                    ticksToNextBlockBreak = unit.getAttackCooldown();
-                    double damageFloat = unit.getUnitAttackDamage() * buildingTarget.getMeleeDamageMult();
-                    if (unit instanceof IronGolemUnit)
-                        damageFloat *= IronGolemUnit.BUILDING_DAMAGE_MULTIPLIER;
-                    else if (unit instanceof HoglinUnit || unit instanceof ZoglinUnit)
-                        damageFloat *= HoglinUnit.BUILDING_DAMAGE_MULTIPLIER;
-
-                    double damageFloor = Math.floor(damageFloat);
-                    int damageInt = (int) damageFloor;
-                    if (new Random().nextDouble(1.0f) < damageFloat - damageFloor)
-                        damageInt += 1;
-                    buildingTarget.destroyRandomBlocks(damageInt);
-
-                    if (mob instanceof Slime slime && slime.onGround())
-                        slime.jumpFromGround();
-                }
+                if (ticksToNextBlockBreak <= 0)
+                    doBuildingAttack();
             }
         }
         else
             this.moveTarget = null;
+    }
+
+    protected void doBuildingAttack() {
+        if (mob instanceof IronGolemUnit ||
+                mob instanceof HoglinUnit ||
+                mob instanceof ZoglinUnit ||
+                mob instanceof RavagerUnit ||
+                mob instanceof WardenUnit) {
+            mob.handleEntityEvent((byte) 4);
+            UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.NON_KEYFRAME_ATTACK, mob);
+        }
+        else
+            this.mob.swing(InteractionHand.MAIN_HAND);
+
+        AttackerUnit unit = (AttackerUnit) mob;
+        ticksToNextBlockBreak = unit.getAttackCooldown();
+        double damageFloat = unit.getUnitAttackDamage() * buildingTarget.getMeleeDamageMult();
+        if (unit instanceof IronGolemUnit)
+            damageFloat *= IronGolemUnit.BUILDING_DAMAGE_MULTIPLIER;
+        else if (unit instanceof HoglinUnit || unit instanceof ZoglinUnit)
+            damageFloat *= HoglinUnit.BUILDING_DAMAGE_MULTIPLIER;
+
+        double damageFloor = Math.floor(damageFloat);
+        int damageInt = (int) damageFloor;
+        if (new Random().nextDouble(1.0f) < damageFloat - damageFloor)
+            damageInt += 1;
+        buildingTarget.destroyRandomBlocks(damageInt);
+        buildingTarget.lastAttacker = this.mob;
+
+        if (mob instanceof Slime slime && slime.onGround())
+            slime.jumpFromGround();
     }
 
     private void calcMoveTarget() {

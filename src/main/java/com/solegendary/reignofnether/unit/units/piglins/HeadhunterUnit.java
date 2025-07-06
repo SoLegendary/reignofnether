@@ -23,6 +23,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -30,19 +31,21 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -62,6 +65,9 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -117,7 +123,7 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     // combat stats
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
-    public float getUnitArmorValue() {return armorValue;}
+
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.HEADHUNTER;}
     public boolean getWillRetaliate() {return willRetaliate;}
@@ -186,7 +192,7 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Mob.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE, HeadhunterUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, HeadhunterUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, HeadhunterUnit.maxHealth)
@@ -216,6 +222,18 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
 
         if (bloodlustTicks > 0)
             bloodlustTicks -= 1;
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
     }
 
     public void initialiseGoals() {
@@ -281,8 +299,8 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
 
     @Override
     public boolean fireImmune() {
-        BuildingPlacement building = BuildingUtils.findBuilding(level().isClientSide(), getOnPos());
-        return super.fireImmune() || (building != null &&(building.getBuilding() instanceof FlameSanctuary || building.getBuilding() instanceof BasaltSprings));
+        BuildingPlacement bpl = BuildingUtils.findBuilding(level().isClientSide(), getOnPos());
+        return super.fireImmune() || (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary || bpl.getBuilding() instanceof BasaltSprings));
     }
 
     @Override
@@ -310,5 +328,34 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     @Override
     public Object2ObjectArrayMap<Ability, Integer> getCharges() {
         return charges;
+    }
+
+    public boolean hasFireAspectTrident() {
+        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+        return itemStack.getAllEnchantments().containsKey(Enchantments.FIRE_ASPECT);
+    }
+
+    @Override
+    public boolean canPickUpEquipment(ItemStack itemStack) {
+        Item item = itemStack.getItem();
+        ItemStack currentItemStack = getItemBySlot(getEquipmentSlotForItem(itemStack));
+        return ((item == Items.GOLDEN_CHESTPLATE ||
+                item == Items.GOLDEN_LEGGINGS ||
+                item == Items.GOLDEN_BOOTS ||
+                item == Items.GOLDEN_HELMET ||
+                item == Items.NETHERITE_CHESTPLATE ||
+                item == Items.NETHERITE_LEGGINGS ||
+                item == Items.NETHERITE_BOOTS ||
+                item == Items.NETHERITE_HELMET ||
+                item == Items.TRIDENT) &&
+                (currentItemStack.getItem() != item ||
+                        (!hasFireAspectTrident() && itemStack.isEnchanted())));
+    }
+
+    @Override
+    public void onPickupEquipment(ItemStack itemStack) {
+        AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
+        itemStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+        setItemSlot(getEquipmentSlotForItem(itemStack), itemStack);
     }
 }

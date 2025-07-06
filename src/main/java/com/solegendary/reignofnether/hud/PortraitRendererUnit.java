@@ -8,14 +8,6 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.resources.ResourceSource;
-import com.solegendary.reignofnether.resources.ResourceSources;
-import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.world.entity.animal.Animal;
-import org.joml.Quaternionf;
 import com.solegendary.reignofnether.ability.abilities.EnchantMaiming;
 import com.solegendary.reignofnether.ability.abilities.EnchantVigor;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
@@ -30,10 +22,13 @@ import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
+import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.ReportedException;
@@ -66,6 +61,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+
 // Renders a Unit's portrait including its animated head, name, healthbar, list of stats and UI frames for these
 
 public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<T>, R extends LivingEntityRenderer<T, M>> {
@@ -96,6 +93,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     private final int lookRangeX = 100;
     private final int lookRangeY = 40;
 
+    public final int HERO_Y_OFFSET = 10;
 
     public PortraitRendererUnit() {
     }
@@ -153,6 +151,8 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     // - unit name
     // Must be called from DrawScreenEvent
     public RectZone render(GuiGraphics guiGraphics, String name, int x, int y, LivingEntity entity) {
+        if (entity instanceof HeroUnit)
+            y -= HERO_Y_OFFSET;
 
         Relationship rs = UnitClientEvents.getPlayerToEntityRelationship(entity);
 
@@ -163,11 +163,18 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             case NEUTRAL -> bgCol = 0x90909000;
             case HOSTILE -> bgCol = 0x90900000;
         }
-        MyRenderer.renderFrameWithBg(guiGraphics, x, y, frameWidth, frameHeight, bgCol);
+        int frameHeightPlus = 0;
+        if (entity instanceof HeroUnit) {
+            frameHeightPlus = HERO_Y_OFFSET;
+        }
+        MyRenderer.renderFrameWithBg(guiGraphics, x, y, frameWidth, frameHeight + frameHeightPlus, bgCol);
 
         // remember 0,0 is top left
         int drawX = x + offsetX;
         int drawY = y + (int) (entity.getEyeHeight() / standardEyeHeight * offsetY);
+
+        //if (entity instanceof HeroUnit)
+        //    drawY += HERO_Y_OFFSET;
 
         int sizeFinal = size;
 
@@ -187,6 +194,10 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         guiGraphics.pose().translate(0,0,2000);
         name = WordUtils.capitalize(name);
 
+        if ((entity instanceof BruteUnit bUnit && bUnit.hasEnchantedNetheriteSword()) ||
+            (entity instanceof HeadhunterUnit hUnit && hUnit.hasFireAspectTrident())) {
+            name += " (FA)";
+        }
         if (entity instanceof VindicatorUnit pUnit && pUnit.getEnchant() == Enchantments.SHARPNESS) {
             name += " (S)";
         }
@@ -217,58 +228,88 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         }
 
         // draw name (unless a player, since their nametag will be rendered anyway)
-        // draw name (unless a player, since their nametag will be rendered anyway)
         if (entity instanceof HeroUnit heroUnit) {
             y -= 6;
-            name += I18n.get("hud.hero.reignofnether.level", heroUnit.getHeroLevel());
+            //name += I18n.get("hud.hero.reignofnether.level", heroUnit.getHeroLevel());
         }
         if (!(entity instanceof Player)) {
             guiGraphics.drawString(Minecraft.getInstance().font, name, x + 4, y - 9, 0xFFFFFFFF);
         }
         if (entity instanceof HeroUnit heroUnit) {
-            y += 6;
+            y += 14;
         }
 
         RectZone rectZone = RectZone.getZoneByLW(x, y, frameWidth, frameHeight);
 
-        // draw health bar and write min/max hp
-        HealthBarClientEvents.renderForEntity(guiGraphics.pose(),
-            entity,
-            x + (frameWidth / 2f),
-            y + frameHeight - 15,
-            frameWidth - 9,
-            HealthBarClientEvents.RenderMode.GUI_PORTRAIT
-        );
+        if (entity instanceof HeroUnit heroUnit) {
+            // draw health bar and write min/max hp
+            HealthBarClientEvents.renderForEntity(guiGraphics.pose(),
+                    entity,
+                    x + (frameWidth / 2f),
+                    y + frameHeight - 22,
+                    frameWidth - 9,
+                    HealthBarClientEvents.RenderMode.GUI_PORTRAIT
+            );
+            HealthBarClientEvents.renderAbsorbForEntity(guiGraphics.pose(),
+                    entity,
+                    x + (frameWidth / 2f),
+                    y + frameHeight - 22,
+                    frameWidth - 9,
+                    HealthBarClientEvents.RenderMode.GUI_PORTRAIT
+            );
+            HealthBarClientEvents.renderManaForEntity(guiGraphics.pose(),
+                    heroUnit,
+                    x + (frameWidth / 2f),
+                    y + frameHeight - 12,
+                    frameWidth - 9,
+                    HealthBarClientEvents.RenderMode.GUI_PORTRAIT
+            );
+        } else {
+            HealthBarClientEvents.renderForEntity(guiGraphics.pose(),
+                    entity,
+                    x + (frameWidth / 2f),
+                    y + frameHeight - 14,
+                    frameWidth - 9,
+                    HealthBarClientEvents.RenderMode.GUI_PORTRAIT
+            );
+            HealthBarClientEvents.renderAbsorbForEntity(guiGraphics.pose(),
+                    entity,
+                    x + (frameWidth / 2f),
+                    y + frameHeight - 14,
+                    frameWidth - 9,
+                    HealthBarClientEvents.RenderMode.GUI_PORTRAIT
+            );
+        }
 
+        ArrayList<String> texts = new ArrayList<>();
         String healthText = "";
         float health = entity.getHealth();
+        health += entity.getAbsorptionAmount();
         if (health >= 1) {
             healthText = String.valueOf((int) health);
         } else {
             healthText = String.valueOf(health).substring(0, 3);
         }
+        float maxHealth = entity.getMaxHealth();
+        if (entity.getAbsorptionAmount() > 0)
+            maxHealth += MiscUtil.getMaxAbsorptionAmount(entity);
 
-        // need to render like this instead of GuiComponent.drawCenteredString, so it's layered above the portrait
-        // entity
-        Minecraft MC = Minecraft.getInstance();
-        Window window = MC.getWindow();
-        MultiBufferSource.BufferSource multibuffersource$buffersource =
-            MultiBufferSource.immediate(Tesselator.getInstance()
-            .getBuilder());
-        String text = healthText + "/" + (int) entity.getMaxHealth();
-        FormattedCharSequence pTooltips = FormattedCharSequence.forward(text, Style.EMPTY);
-        ClientTooltipComponent clientTooltip = ClientTooltipComponent.create(pTooltips);
-        guiGraphics.pose().translate(0.0, 0.0, 400.0);
-        int x0 = x + (frameWidth / 2);
-        int xC = (x0 - MC.font.width(text) / 2);
-        clientTooltip.renderText(MC.font,
-            xC,
-            y + frameHeight - 13,
-                guiGraphics.pose().last().pose(),
-            multibuffersource$buffersource
-        );
-        multibuffersource$buffersource.endBatch();
-        guiGraphics.pose().popPose();
+        healthText += "/" + ((int) maxHealth);
+        texts.add(healthText);
+
+        if (entity instanceof HeroUnit heroUnit) {
+            String manaText = "";
+            float mana = heroUnit.getMana();
+            if (mana >= 1) {
+                manaText = String.valueOf((int) mana);
+            } else {
+                manaText = String.valueOf(mana).substring(0, 3);
+            }
+            manaText += "/" + (int) heroUnit.getMaxMana();
+            texts.add(manaText);
+        }
+
+        renderStatText(texts, entity, x, (entity instanceof HeroUnit ? y - HERO_Y_OFFSET + 2 : y), guiGraphics);
 
         if (hasBanner)
             entity.setItemSlot(EquipmentSlot.HEAD, bannerStack);
@@ -276,8 +317,39 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         return rectZone;
     }
 
+    private void renderStatText(List<String> texts, LivingEntity entity, int x, int y, GuiGraphics guiGraphics) {
+        // need to render like this instead of GuiComponent.drawCenteredString, so it's layered above the portrait
+        // entity
+        Minecraft MC = Minecraft.getInstance();
+        Window window = MC.getWindow();
+        MultiBufferSource.BufferSource multibuffersource$buffersource =
+                MultiBufferSource.immediate(Tesselator.getInstance()
+                        .getBuilder());
+
+        for (int i = 0; i < texts.size(); i++) {
+            FormattedCharSequence pTooltips = FormattedCharSequence.forward(texts.get(i), Style.EMPTY);
+            ClientTooltipComponent clientTooltip = ClientTooltipComponent.create(pTooltips);
+            guiGraphics.pose().translate(0.0, 0.0, 400.0);
+            int x0 = x + (frameWidth / 2);
+            int xC = (x0 - MC.font.width(texts.get(i)) / 2);
+            clientTooltip.renderText(MC.font,
+                    xC,
+                    y + frameHeight - 2 + ((i-1) * 10),
+                    guiGraphics.pose().last().pose(),
+                    multibuffersource$buffersource
+            );
+        }
+        multibuffersource$buffersource.endBatch();
+        guiGraphics.pose().popPose();
+    }
+
     public RectZone renderStats(GuiGraphics guiGraphics, String name, int x, int y, Unit unit) {
-        MyRenderer.renderFrameWithBg(guiGraphics, x, y, statsWidth, statsHeight, 0xA0000000);
+        int statsHeightPlus = 0;
+        if (unit instanceof HeroUnit) {
+            y -= HERO_Y_OFFSET;
+            statsHeightPlus = HERO_Y_OFFSET;
+        }
+        MyRenderer.renderFrameWithBg(guiGraphics, x, y, statsWidth, statsHeight + statsHeightPlus, 0xA0000000);
 
         int blitXIcon = x + 6;
         int blitYIcon = y + 7;
@@ -319,7 +391,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"));
         textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/boots.png"));
 
-        statStrings.add(String.valueOf((int) (unit.getUnitArmorValue())));
+        statStrings.add((int) (unit.getUnitArmorPercentage() * 100) + "%");
         AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
 
         int msInt = ms != null ? (int) (ms.getValue() * 101) : 0;
@@ -328,6 +400,18 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             msInt *= 0.45f;
         }
         statStrings.add(String.valueOf(msInt)); // prevent rounding errors
+
+        if (unit instanceof HeroUnit heroUnit) {
+            int heroLvl = heroUnit.getHeroLevel();
+            guiGraphics.drawString(
+                    Minecraft.getInstance().font,
+                    fcs((heroLvl >= 10 ? "Lv " : "Lvl ") + heroLvl, true),
+                    blitXIcon + 1,
+                    blitYIcon - 1,
+                    0xFFFFFF
+            );
+            blitYIcon += HERO_Y_OFFSET + 1;
+        }
 
         // render based on prepped strings/icons
         for (int i = 0; i < statStrings.size(); i++) {
@@ -347,6 +431,9 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     public RectZone renderHeroLevelAndExp(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, HeroUnit heroUnit) {
         int width = 101;
         int height = 5;
+
+        y -= HERO_Y_OFFSET;
+
         ResourceLocation expBarEmptyRl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/experience_bar_empty.png");
         RenderSystem.setShaderTexture(0, expBarEmptyRl);
         guiGraphics.blit(expBarEmptyRl,

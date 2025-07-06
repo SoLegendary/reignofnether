@@ -27,12 +27,12 @@ import static com.solegendary.reignofnether.ability.heroAbilities.monster.Insomn
 
 public class PhantomSummon extends Phantom {
 
-    final static public float maxHealth = 60.0f;
+    final static public float maxHealth = 50.0f;
     public int attacksLeft = PHANTOM_MAX_ATTACKS; // at 0, dies after a few seconds
     public int ticksToDie = 60; // starts counting down after attacksLeft <= 0
     public int tickCountUntilDeath = 1200; // hard cap on lifespan
     public int attackCooldown = 0;
-    public final int ATTACK_COOLDOWN_MAX = 200;
+    public final int ATTACK_COOLDOWN_MAX = 120;
 
     public LivingEntity entityTarget = null;
 

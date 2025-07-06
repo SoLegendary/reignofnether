@@ -27,7 +27,7 @@ public class SonicBoomGoal extends GenericTargetedSpellGoal {
     public void stop() {
         // hack fix to stop a weird bug where it gets stopped unexpectedly (serverside)
         // happens when needing to move towards the target first
-        if (this.ticksCasting <= 5 && isInRange())
+        if (this.channelTicks <= 5 && isInRange())
             return;
         super.stop();
     }

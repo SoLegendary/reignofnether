@@ -35,7 +35,6 @@ public abstract class BeaconAbility extends Ability {
     public void use(Level level, BuildingPlacement buildingUsing, BlockPos bp) {
         if (!(buildingUsing instanceof BeaconPlacement)) return;
         BeaconPlacement beacon = (BeaconPlacement) buildingUsing;
-
         beacon.setAuraEffect(effect);
         setToMaxCooldownAllAbiltities(beacon);
     }

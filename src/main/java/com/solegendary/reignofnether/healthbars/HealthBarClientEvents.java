@@ -4,11 +4,12 @@ package com.solegendary.reignofnether.healthbars;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
-import org.joml.Matrix4f;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
@@ -56,7 +57,7 @@ public class HealthBarClientEvents {
             return;
 
         Camera camera = MC.gameRenderer.getMainCamera();
-        renderInWorld(evt.getPartialTick(), evt.getPoseStack(), camera);
+        renderBarsInWorld(evt.getPartialTick(), evt.getPoseStack(), camera);
     }
     @SubscribeEvent
     public static void playerTick(PlayerTickEvent evt) {
@@ -80,15 +81,16 @@ public class HealthBarClientEvents {
         if (!shouldShowHealthBar(entity, MC))
             return;
 
-        BarStates.getState(entity);
-
-        if (entity.getHealth() >= entity.getMaxHealth())
+        BarStates.getState(entity, BarState.BarStateType.HEALTH);
+        if (entity.getHealth() >= entity.getMaxHealth() && entity.getAbsorptionAmount() <= 0)
             return;
+        if (entity.getAbsorptionAmount() > 0)
+            BarStates.getState(entity, BarState.BarStateType.ABSORB);
 
         renderedEntities.add(entity);
     }
 
-    private static void renderInWorld(float partialTick, PoseStack matrix, Camera camera) {
+    private static void renderBarsInWorld(float partialTick, PoseStack matrix, Camera camera) {
         Minecraft MC = Minecraft.getInstance();
 
         if (camera == null)
@@ -141,6 +143,9 @@ public class HealthBarClientEvents {
             renderForEntity(matrix, entity, 0, 0, barWidth,
                     OrthoviewClientEvents.isEnabled() ? RenderMode.IN_WORLD_ORTHOVIEW : RenderMode.IN_WORLD_FIRST_PERSON);
 
+            renderAbsorbForEntity(matrix, entity, 0, 0, barWidth,
+                    OrthoviewClientEvents.isEnabled() ? RenderMode.IN_WORLD_ORTHOVIEW : RenderMode.IN_WORLD_FIRST_PERSON);
+
             matrix.popPose();
         }
 
@@ -151,12 +156,40 @@ public class HealthBarClientEvents {
 
     public static void renderForEntity(PoseStack matrix, LivingEntity entity, double x, double y,
                                        float width, RenderMode renderMode) {
-        BarState state = BarStates.getState(entity);
+        BarState state = BarStates.getState(entity, BarState.BarStateType.HEALTH);
 
-        float percent = Math.min(1, Math.min(state.health, entity.getMaxHealth()) / entity.getMaxHealth());
-        float percent2 = Math.min(state.previousHealthDisplay, entity.getMaxHealth()) / entity.getMaxHealth();
+        float percent = Math.min(1, Math.min(state.amount, entity.getMaxHealth()) / entity.getMaxHealth());
+        float percent2 = Math.min(state.previousAmountDisplay, entity.getMaxHealth()) / entity.getMaxHealth();
 
-        render(matrix, percent, percent2, x, y, width, renderMode);
+        render(matrix, percent, percent2, x, y, width, renderMode, BarState.BarStateType.HEALTH);
+    }
+
+    public static void renderAbsorbForEntity(PoseStack matrix, LivingEntity entity, double x, double y,
+                                       float width, RenderMode renderMode) {
+        if (entity.getAbsorptionAmount() > 0) {
+            BarState state = BarStates.getState(entity, BarState.BarStateType.ABSORB);
+
+            float percent = Math.min(1, Math.min(state.amount, MiscUtil.getMaxAbsorptionAmount(entity)) / MiscUtil.getMaxAbsorptionAmount(entity));
+            float percent2 = Math.min(state.previousAmountDisplay, MiscUtil.getMaxAbsorptionAmount(entity)) / MiscUtil.getMaxAbsorptionAmount(entity);
+
+            render(matrix, percent, percent2, x, y, width, renderMode, BarState.BarStateType.ABSORB,
+                    0, 1f, 1f,
+                    0, 0.5f, 0.5f
+            );
+        }
+    }
+
+    public static void renderManaForEntity(PoseStack matrix, HeroUnit heroUnit, double x, double y,
+                                           float width, RenderMode renderMode) {
+        BarState state = BarStates.getState((LivingEntity) heroUnit, BarState.BarStateType.MANA);
+
+        float percent = Math.min(1, Math.min(state.amount, heroUnit.getMaxMana()) / heroUnit.getMaxMana());
+        float percent2 = Math.min(state.previousAmountDisplay, heroUnit.getMaxMana()) / heroUnit.getMaxMana();
+
+        render(matrix, percent, percent2, x, y, width, renderMode, BarState.BarStateType.MANA,
+                0.3f, 0.3f, 1f,
+                0.15f, 0.15f, 0.5f
+        );
     }
 
     public static void renderForBuilding(PoseStack matrix, BuildingPlacement building, double x, double y,
@@ -165,13 +198,11 @@ public class HealthBarClientEvents {
         if (health > building.getMaxHealth())
             health = building.getMaxHealth();
         float percent = health / (float) building.getMaxHealth();
-        render(matrix, percent, percent, x, y, width, renderMode);
+        render(matrix, percent, percent, x, y, width, renderMode, BarState.BarStateType.HEALTH);
     }
 
     private static void render(PoseStack matrix, float percent, float percent2, double x, double y,
-                               float width, RenderMode renderMode) {
-        int zOffset = 0;
-
+                               float width, RenderMode renderMode, BarState.BarStateType barStateType) {
         // base colour on percentage health remaining (green @ 100%, yellow @ 50%, red @ 0%)
         float r = Math.max(0, Math.min(1, 2-percent*2));
         float g = Math.max(0, Math.min(1, percent*2));
@@ -179,9 +210,15 @@ public class HealthBarClientEvents {
         float r2 = r * 0.5f;
         float g2 = g * 0.5f;
         float b2 = b * 0.5f;
+        render(matrix, percent, percent2, x, y, width, renderMode, barStateType, r, g, b, r2, g2, b2);
+    }
 
+    private static void render(PoseStack matrix, float percent, float percent2, double x, double y,
+                               float width, RenderMode renderMode, BarState.BarStateType barStateType, float r, float g, float b, float r2, float g2, float b2) {
+        int zOffset = 0;
         Matrix4f m4f = matrix.last().pose();
-        drawBar(m4f, x, y, width, 1, 0.35f,0.35f,0.35f, zOffset++, renderMode);
+        if (!(barStateType == BarState.BarStateType.ABSORB && (renderMode == RenderMode.IN_WORLD_ORTHOVIEW || renderMode == RenderMode.IN_WORLD_FIRST_PERSON)))
+            drawBar(m4f, x, y, width, 1, 0.35f,0.35f,0.35f, zOffset++, renderMode);
         drawBar(m4f, x, y, width, percent2, r2,g2,b2, zOffset++, renderMode);
         drawBar(m4f, x, y, width, percent, r,g,b, zOffset, renderMode);
     }

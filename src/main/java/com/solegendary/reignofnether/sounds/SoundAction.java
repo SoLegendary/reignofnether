@@ -9,5 +9,7 @@ public enum SoundAction {
     BELL,
     BEACON_ACTIVATE,
     BEACON_DEACTIVATE,
-    LEVEL_UP
+    LEVEL_UP,
+    BLOODLUST,
+    HEROISM
 }

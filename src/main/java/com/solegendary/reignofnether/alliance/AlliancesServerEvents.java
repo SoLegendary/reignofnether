@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.alliance;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
@@ -9,6 +11,19 @@ import java.util.*;
 
 public class AlliancesServerEvents {
     private static final Map<String, Set<String>> alliances = new HashMap<>();
+
+    public static final HashSet<String> playersWithAlliedControl = new HashSet<>();
+
+    public static boolean canControlAlly(String player, LivingEntity entity) {
+        return entity instanceof Unit unit && canControlAlly(player, unit.getOwnerName());
+    }
+    public static boolean canControlAlly(String player, Unit unit) {
+        return canControlAlly(player, unit.getOwnerName());
+    }
+    public static boolean canControlAlly(String player, String ownerName) {
+        return (AlliancesServerEvents.isAllied(player, ownerName) &&
+                AlliancesServerEvents.playersWithAlliedControl.contains(ownerName));
+    }
 
     public static void addAlliance(String owner1, String owner2) {
         if (!owner1.equals(owner2)) {
@@ -77,7 +92,9 @@ public class AlliancesServerEvents {
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         syncAlliances();
+        for (String playerName : playersWithAlliedControl) {
+            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                    new AllianceClientboundControlPacket(playerName, true));
+        }
     }
-
-
 }

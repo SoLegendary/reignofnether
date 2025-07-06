@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
+import com.solegendary.reignofnether.building.production.HeroProductionItem;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
@@ -13,37 +14,38 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxAction;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.EntityType;
 
 import java.util.List;
 
-public class NecromancerProd extends ProductionItem {
+public class NecromancerProd extends HeroProductionItem {
 
     public final static String itemName = "Necromancer";
     public final static ResourceCost cost = ResourceCosts.NECROMANCER;
 
     public NecromancerProd() {
-        super(cost);
+        super(cost, itemName, new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/necromancer.png"));
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide())
                 placement.produceUnit((ServerLevel) level, EntityRegistrar.NECROMANCER_UNIT.get(), placement.ownerName, true);
         };
     }
 
-    public String getItemName() {
-        return NecromancerProd.itemName;
+    @Override
+    protected EntityType<? extends HeroUnit> getHeroEntityType() {
+        return EntityRegistrar.NECROMANCER_UNIT.get();
     }
 
     public AbilityButton getPlaceButton() {
         return new AbilityButton(
                 itemName,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/necromancer.png"),
+                iconRl,
                 null,
                 () -> SandboxClientEvents.spawnUnitName.equals(itemName),
                 () -> false,
@@ -71,12 +73,12 @@ public class NecromancerProd extends ProductionItem {
 
     public Button getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new Button(
-            NecromancerProd.itemName,
+            itemName,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/necromancer.png"),
+            iconRl,
             hotkey,
             () -> false,
-            () -> false,
+            () -> itemIsBeingProduced(prodBuilding.ownerName) || heroOwned(prodBuilding.level.isClientSide(), prodBuilding.ownerName),
             () -> true,
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, this),
             null,
@@ -96,18 +98,5 @@ public class NecromancerProd extends ProductionItem {
         );
     }
 
-    public Button getCancelButton(ProductionPlacement prodBuilding, boolean first) {
-        return new Button(
-            NecromancerProd.itemName,
-            14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/necromancer.png"),
-            (Keybinding) null,
-            () -> false,
-            () -> false,
-            () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, this, first),
-            null,
-            null
-        );
-    }
+
 }

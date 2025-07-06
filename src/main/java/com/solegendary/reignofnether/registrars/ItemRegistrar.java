@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.items.ThrowableTnt;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -148,6 +149,28 @@ public class ItemRegistrar {
             ITEMS.register("piglin_merchant_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.PIGLIN_MERCHANT_UNIT,
                     0x3d1f12, 0x91da2a, new Item.Properties()));
 
+    public static final RegistryObject<ForgeSpawnEggItem> POLAR_BEAR_UNIT_SPAWN_EGG =
+            ITEMS.register("polar_bear_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.POLAR_BEAR_UNIT,
+                    0xe3e3e3, 0x6f6f6f, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> GRIZZLY_BEAR_UNIT_SPAWN_EGG =
+            ITEMS.register("grizzly_bear_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.GRIZZLY_BEAR_UNIT,
+                    0x665442, 0x543423, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> PANDA_UNIT_SPAWN_EGG =
+            ITEMS.register("panda_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.PANDA_UNIT,
+                    0xd9d9d9, 0x121218, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> WOLF_UNIT_SPAWN_EGG =
+            ITEMS.register("wolf_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WOLF_UNIT,
+                    0xc3bfbf, 0x947e6c, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> LLAMA_UNIT_SPAWN_EGG =
+            ITEMS.register("llama_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.LLAMA_UNIT,
+                    0xa6896c, 0x6e442e, new Item.Properties()));
+
+    public static final RegistryObject<Item> THROWABLE_TNT =
+            ITEMS.register("throwable_tnt", () -> new ThrowableTnt(new Item.Properties()));
 
     public static void init() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());

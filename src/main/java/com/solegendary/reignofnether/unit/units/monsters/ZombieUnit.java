@@ -1,11 +1,13 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.Abilities;
+import com.solegendary.reignofnether.ability.heroAbilities.monster.BloodMoon;
+import com.solegendary.reignofnether.ability.heroAbilities.monster.RaiseDead;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.time.NightUtils;
+import com.solegendary.reignofnether.time.TimeServerEvents;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -31,6 +33,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -45,6 +48,9 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -108,7 +114,6 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitAttackDamage() {return attackDamage;}
     public float getUnitMaxHealth() {return maxHealth;}
-    public float getUnitArmorValue() {return armorValue;}
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.ZOMBIE;}
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
@@ -169,12 +174,50 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
             super.tick();
             Unit.tick(this);
             AttackerUnit.tick(this);
+
+            if (tickCount % 20 == 0 && !level().isClientSide()) {
+                if (getOwnerName().equals(BloodMoon.ENEMY_NAME) && !TimeServerEvents.isBloodMoonActive()) {
+                    hurt(this.damageSources().starve(), 1.33f);
+                }
+                else if (tickCount > RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY && isSummonedByNecromancer()) {
+                    hurt(this.damageSources().starve(), 1.33f);
+                }
+            }
         }
+    }
+
+    private boolean isSummonedByNecromancer() {
+        return hasItemInSlot(EquipmentSlot.HEAD) &&
+                hasItemInSlot(EquipmentSlot.CHEST) &&
+                hasItemInSlot(EquipmentSlot.LEGS) &&
+                hasItemInSlot(EquipmentSlot.FEET) &&
+                hasItemInSlot(EquipmentSlot.MAINHAND);
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
     }
 
     @Override
     protected boolean isSunBurnTick() {
         return NightUtils.isSunBurnTick(this);
+    }
+
+    @Override
+    public SunlightEffect getSunlightEffect() {
+        if (hasItemInSlot(EquipmentSlot.HEAD)) {
+            return SunlightEffect.MOVEMENT_SLOWDOWN;
+        } else {
+            return SunlightEffect.FIRE;
+        }
     }
 
     public void initialiseGoals() {

@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.researchItems.ResearchSpiderWebs;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -47,7 +46,7 @@ public class SpinWebs extends Ability {
                 "Spin Webs",
                 new ResourceLocation("minecraft", "textures/block/cobweb.png"),
                 hotkey,
-                () -> CursorClientEvents.getLeftClickAction() == UnitAction.SPIN_WEBS || getAutocast(unit),
+                () -> CursorClientEvents.getLeftClickAction() == UnitAction.SPIN_WEBS || isAutocasting(unit),
                 () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_SPIDER_WEBS),
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.SPIN_WEBS),

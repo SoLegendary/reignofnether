@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
+import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
@@ -16,6 +18,8 @@ public class CastlePlacement extends ProductionPlacement implements Garrisonable
 
     public CastlePlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
+        Ability promoteIllager = new PromoteIllager(this);
+        abilities.add(promoteIllager);
     }
 
     public int getAttackRange() {

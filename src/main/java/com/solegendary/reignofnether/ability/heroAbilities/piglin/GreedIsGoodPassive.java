@@ -10,12 +10,9 @@ import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.resources.ResourceName;
-import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -30,9 +27,10 @@ public class GreedIsGoodPassive extends HeroAbility {
     public int maxResourcesPerCast = 100;
 
     public GreedIsGoodPassive() {
-        super(3, UnitAction.NONE, 0, 0, 0, false);
+        super(3, 0, UnitAction.NONE, 0, 0, 0, false);
         this.autocastEnableAction = UnitAction.ENABLE_GREED_IS_GOOD_PASSIVE;
         this.autocastDisableAction = UnitAction.DISABLE_GREED_IS_GOOD_PASSIVE;
+        this.setAutocast(true);
     }
 
     public boolean rankUp(HeroUnit hero) {
@@ -58,7 +56,7 @@ public class GreedIsGoodPassive extends HeroAbility {
         return new AbilityButton("Greed is Good",
                 new ResourceLocation("minecraft", "textures/block/gold_block.png"),
                 hotkey,
-                () -> getAutocast(hero),
+                () -> isAutocasting(hero),
                 () -> rank == 0,
                 () -> true,
                 () -> toggleAutocast(hero),
@@ -105,29 +103,34 @@ public class GreedIsGoodPassive extends HeroAbility {
         );
     }
 
-    public int checkAndSpendResources(ResourceName resName, HeroUnit hero) {
+    // return the amount of 100s of resources spent
+    public int spendResourcesAndGet100sSpent(ResourceName resName, HeroUnit hero) {
         int totalSpent = 0;
         String ownerName = hero.getOwnerName();
-        if (getAutocast(hero) && !((LivingEntity) hero).level().isClientSide()) {
-            for (Resources resources : ResourcesServerEvents.resourcesList) {
+        boolean isClientSide = ((LivingEntity) hero).level().isClientSide();
+        List<Resources> resourcesList = isClientSide ? ResourcesClientEvents.resourcesList : ResourcesServerEvents.resourcesList;
+        if (isAutocasting(hero)) {
+            for (Resources resources : resourcesList) {
                 if (resources.ownerName.equals(ownerName)) {
                     for (int i = 0; i < rank; i++) {
-                        Resources resToSpend = new Resources(((Unit) hero).getOwnerName(), 0, 0, 0);
+                        Resources resToSpend = new Resources(hero.getOwnerName(), 0, 0, 0);
                         if (resName == ResourceName.FOOD && resources.food >= 100) {
-                            resToSpend.food += 100;
+                            resToSpend.food -= 100;
                             totalSpent += 100;
                         } else if (resName == ResourceName.WOOD && resources.wood >= 100) {
-                            resToSpend.wood += 100;
+                            resToSpend.wood -= 100;
                             totalSpent += 100;
                         } else if (resName == ResourceName.ORE && resources.ore >= 100) {
-                            resToSpend.ore += 100;
+                            resToSpend.ore -= 100;
                             totalSpent += 100;
                         }
-                        ResourcesServerEvents.addSubtractResources(resToSpend);
+                        if (!isClientSide) {
+                            ResourcesServerEvents.addSubtractResources(resToSpend);
+                        }
                     }
                 }
             }
         }
-        return totalSpent;
+        return totalSpent / 100;
     }
 }

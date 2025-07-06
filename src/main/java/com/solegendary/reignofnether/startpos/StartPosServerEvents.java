@@ -32,6 +32,9 @@ public class StartPosServerEvents {
     private static int ticksToStart = TICKS_TO_START_MAX;
     private static boolean startingGame = false;
 
+    private static int cullTicksMax = 100;
+    private static int cullTicks = 0;
+
     public static void reset(ServerLevel serverLevel) {
         for (StartPos startPos : startPoses) {
             startPos.reset();
@@ -74,6 +77,18 @@ public class StartPosServerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         for (StartPos startPos : startPoses)
             StartPosClientboundPacket.addPos(startPos);
+    }
+
+    private static void cullInvalidPoses(ServerLevel serverLevel) {
+        if (startPoses.removeIf(sp -> {
+            if (!(serverLevel.getBlockState(sp.pos).getBlock() instanceof RTSStartBlock)) {
+                StartPosClientboundPacket.removePos(sp.pos);
+                return true;
+            }
+            return false;
+        })) {
+            savePositions(serverLevel);
+        }
     }
 
     public static void startGameCountdown() {
@@ -129,6 +144,13 @@ public class StartPosServerEvents {
             }
             if (ticksToStart >= 0)
                 ticksToStart -= 1;
+        }
+        else if (!(PlayerServerEvents.isGameActive())) {
+            cullTicks += 1;
+            if (cullTicks >= cullTicksMax) {
+                cullTicks = 0;
+                cullInvalidPoses(evt.getServer().getLevel(Level.OVERWORLD));
+            }
         }
     }
 

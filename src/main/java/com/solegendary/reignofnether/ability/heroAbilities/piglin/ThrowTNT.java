@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.goals.GenericTargetedSpellGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinMerchantUnit;
@@ -30,11 +31,22 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 public class ThrowTNT extends HeroAbility {
 
     public static final int RANGE = 12;
-    private static float explosionPower = 2;
-    private static int LESS_COOLDOWN_PER_100_RESOURCES = 5 * ResourceCost.TICKS_PER_SECOND;
+    public float explosionPower = 2;
+    public static int LESS_COOLDOWN_PER_100_RESOURCES = 5 * ResourceCost.TICKS_PER_SECOND;
+    public static int LESS_MANA_PER_100_RESOURCES = 5;
 
     public ThrowTNT() {
-        super(3, UnitAction.THROW_TNT, 25 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
+        super(3, 40, UnitAction.THROW_TNT, 20 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
+    }
+
+    @Override
+    public boolean isCasting() {
+        if (this.hero instanceof PiglinMerchantUnit piglinMerchantUnit) {
+            GenericTargetedSpellGoal goal = piglinMerchantUnit.getCastTNTGoal();
+            if (goal != null)
+                return goal.isCasting();
+        }
+        return false;
     }
 
     @Override
@@ -84,10 +96,10 @@ public class ThrowTNT extends HeroAbility {
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.throw_tnt") + " " + rankString(), true),
-                fcsIcons(I18n.get("abilities.reignofnether.throw_tnt.stats", Math.round(explosionPower * 6.67f), cooldownMax / 20, RANGE)),
+                fcsIcons(I18n.get("abilities.reignofnether.throw_tnt.stats", Math.round(explosionPower * 6.67f), cooldownMax / 20, RANGE, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip1")),
-                fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2", LESS_COOLDOWN_PER_100_RESOURCES / 20))
+                fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2", LESS_COOLDOWN_PER_100_RESOURCES / 20, LESS_MANA_PER_100_RESOURCES))
         );
     }
 
@@ -97,7 +109,7 @@ public class ThrowTNT extends HeroAbility {
                 fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement()), getLevelReqStyle(hero)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip1")),
-                fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2", LESS_COOLDOWN_PER_100_RESOURCES / 20)),
+                fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2", LESS_COOLDOWN_PER_100_RESOURCES / 20, LESS_MANA_PER_100_RESOURCES)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.rank1"), rank == 0),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.rank2"), rank == 1),

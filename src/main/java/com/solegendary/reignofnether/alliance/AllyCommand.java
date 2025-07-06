@@ -2,9 +2,11 @@ package com.solegendary.reignofnether.alliance;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import net.minecraft.commands.CommandSourceStack;
@@ -12,6 +14,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -36,6 +39,13 @@ public class AllyCommand {
         dispatcher.register(Commands.literal("disband")
                 .then(Commands.argument("player", EntityArgument.player())
                         .executes(AllyCommand::disband)));
+
+        dispatcher.register(Commands.literal("allycontrol")
+                .executes(AllyCommand::getAlliedControl));
+
+        dispatcher.register(Commands.literal("allycontrol")
+                .then(Commands.argument("value", BoolArgumentType.bool())
+                        .executes(AllyCommand::setAlliedControl)));
     }
 
     private static int ally(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -126,6 +136,37 @@ public class AllyCommand {
         allyPlayer.sendSystemMessage(Component.translatable("alliance.reignofnether.disbanding", playerName));
         SoundClientboundPacket.playSoundForPlayer(SoundAction.ENEMY, allyPlayerName);
 
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int getAlliedControl(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        String playerName = player.getName().getString();
+        boolean value = AlliancesServerEvents.playersWithAlliedControl.contains(playerName);
+        String msgKey = value ? "alliance.reignofnether.ally_control_enabled" : "alliance.reignofnether.ally_control_disabled";
+        context.getSource().sendSuccess(()->Component.translatable(msgKey, playerName), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int setAlliedControl(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        String playerName = player.getName().getString();
+        boolean value = BoolArgumentType.getBool(context, "value");
+        String msgKey = value ? "alliance.reignofnether.ally_control_enable" : "alliance.reignofnether.ally_control_disable";
+
+        if (value)
+            AlliancesServerEvents.playersWithAlliedControl.add(playerName);
+        else
+            AlliancesServerEvents.playersWithAlliedControl.remove(playerName);
+
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new AllianceClientboundControlPacket(playerName, value));
+        context.getSource().sendSuccess(()->Component.translatable(msgKey, playerName), false);
+        SoundClientboundPacket.playSoundForPlayer(SoundAction.CHAT, playerName);
+
+        for (String allyPlayerName : AlliancesServerEvents.getAllAllies(playerName)) {
+            PlayerServerEvents.sendMessageToPlayerNoNewLines(allyPlayerName, msgKey, false, playerName);
+            SoundClientboundPacket.playSoundForPlayer(SoundAction.CHAT, allyPlayerName);
+        }
         return Command.SINGLE_SUCCESS;
     }
 }

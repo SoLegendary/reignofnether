@@ -9,52 +9,73 @@ import java.util.Map;
 
 public class BarStates {
 
-  private static final Map<Integer, BarState> STATES = new HashMap<>();
+  private static final Map<Integer, BarState> HEALTH_STATES = new HashMap<>();
+  private static final Map<Integer, BarState> ABSORB_STATES = new HashMap<>();
+  private static final Map<Integer, BarState> MANA_STATES = new HashMap<>();
   private static int tickCount = 0;
 
-  public static BarState getState(LivingEntity entity) {
+  public static BarState getState(LivingEntity entity, BarState.BarStateType barStateType) {
     int id = entity.getId();
-    BarState state = STATES.get(id);
-    if (state == null) {
-      state = new BarState(id);
-      STATES.put(id, state);
+
+    BarState state;
+    if (barStateType == BarState.BarStateType.HEALTH) {
+      state = HEALTH_STATES.get(id);
+      if (state == null) {
+        state = new BarState(id, barStateType);
+        HEALTH_STATES.put(id, state);
+      }
+    } else if (barStateType == BarState.BarStateType.ABSORB) {
+      state = ABSORB_STATES.get(id);
+      if (state == null) {
+        state = new BarState(id, barStateType);
+        ABSORB_STATES.put(id, state);
+      }
+    } else {
+      state = MANA_STATES.get(id);
+      if (state == null) {
+        state = new BarState(id, barStateType);
+        MANA_STATES.put(id, state);
+      }
     }
     return state;
   }
 
   public static void tick() {
-    for (BarState state : STATES.values()) {
+    for (BarState state : HEALTH_STATES.values()) {
+      state.tick();
+    }
+    for (BarState state : ABSORB_STATES.values()) {
+      state.tick();
+    }
+    for (BarState state : MANA_STATES.values()) {
       state.tick();
     }
 
     if (tickCount % 200 == 0) {
-      //cleanCache();
+      cleanCache();
     }
-
     tickCount++;
   }
 
   private static void cleanCache() {
-    STATES.entrySet().removeIf(BarStates::stateExpired);
+    HEALTH_STATES.entrySet().removeIf(BarStates::stateExpired);
+    ABSORB_STATES.entrySet().removeIf(BarStates::stateExpired);
+    MANA_STATES.entrySet().removeIf(BarStates::stateExpired);
   }
 
   private static boolean stateExpired(Map.Entry<Integer, BarState> entry) {
     if (entry.getValue() == null) {
       return true;
     }
+    Minecraft MC = Minecraft.getInstance();
 
-    Minecraft minecraft = Minecraft.getInstance();
-    Entity entity = minecraft.level.getEntity(entry.getKey());
-
-    if (!(entity instanceof LivingEntity)) {
-      return true;
+    if (MC.level != null) {
+      Entity entity = MC.level.getEntity(entry.getKey());
+      if (entity == null)
+        return true;
+      return !entity.isAlive();
     }
-
-    if (!minecraft.level.hasChunkAt(entity.blockPosition())) {
-      return true;
-    }
-
-    return !entity.isAlive();
+    return false;
   }
 
 }

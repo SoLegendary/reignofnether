@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.goals.GenericUntargetedSpellGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
@@ -30,10 +31,21 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 public class RaiseDead extends HeroAbility {
 
     public static final int CHANNEL_TICKS = 40;
-    private static final int CD_MAX_SECONDS = 60 * ResourceCost.TICKS_PER_SECOND;
+    private static final int CD_MAX_SECONDS = 75 * ResourceCost.TICKS_PER_SECOND;
+    public static final int ZOMBIE_TICKS_BEFORE_DECAY = 60 * ResourceCost.TICKS_PER_SECOND;
 
     public RaiseDead() {
-        super(3, UnitAction.RAISE_DEAD, CD_MAX_SECONDS, 0, 0, false);
+        super(3, 75, UnitAction.RAISE_DEAD, CD_MAX_SECONDS, 0, 0, false);
+    }
+
+    @Override
+    public boolean isCasting() {
+        if (this.hero instanceof NecromancerUnit necromancerUnit) {
+            GenericUntargetedSpellGoal goal = necromancerUnit.getCastRaiseDeadGoal();
+            if (goal != null)
+                return goal.isCasting();
+        }
+        return false;
     }
 
     @Override
@@ -61,16 +73,14 @@ public class RaiseDead extends HeroAbility {
         );
     }
 
-    private static final float BONUS_HEALTH_PER_SOUL = 2;
-    private static final float BONUS_DAMAGE_PER_SOUL = 0.3f;
-
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.raise_dead") + " " + rankString(), true),
-                fcsIcons(I18n.get("abilities.reignofnether.raise_dead.stats", CD_MAX_SECONDS / 20)),
+                fcsIcons(I18n.get("abilities.reignofnether.raise_dead.stats", CD_MAX_SECONDS / 20, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.raise_dead.tooltip1")),
-                fcs(I18n.get("abilities.reignofnether.raise_dead.tooltip2"))
+                fcs(I18n.get("abilities.reignofnether.raise_dead.tooltip2")),
+                fcs(I18n.get("abilities.reignofnether.raise_dead.tooltip3", ZOMBIE_TICKS_BEFORE_DECAY / 20))
         );
     }
 

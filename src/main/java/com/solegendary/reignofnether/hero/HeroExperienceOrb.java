@@ -16,6 +16,7 @@ import java.util.Random;
 
 public class HeroExperienceOrb extends ExperienceOrb {
 
+    private int age = 0;
     public static final float RANGE = 20;
 
     private static final Random RANDOM = new Random();
@@ -79,6 +80,11 @@ public class HeroExperienceOrb extends ExperienceOrb {
         }
         this.move(MoverType.SELF, this.getDeltaMovement());
         checkTouchedHero();
+
+        ++this.age;
+        if (this.age >= 1200 || followingHero == null || followingHero.isDeadOrDying()) {
+            this.discard();
+        }
     }
 
     private void checkTouchedHero() {

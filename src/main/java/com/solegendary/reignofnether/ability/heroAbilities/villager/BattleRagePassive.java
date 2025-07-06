@@ -25,10 +25,10 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class BattleRagePassive extends HeroAbility {
 
     public float maxHpRegen = 1.2f;
-    public float maxBonusDamage = 4;
+    public float manaPerDmgTaken = 0.4f;
 
     public BattleRagePassive() {
-        super(3, UnitAction.NONE, 0, 0, 0, false);
+        super(3, 0, UnitAction.NONE, 0, 0, 0, false);
     }
 
     public boolean rankUp(HeroUnit hero) {
@@ -42,24 +42,19 @@ public class BattleRagePassive extends HeroAbility {
     public void updateStatsForRank() {
         if (rank == 1) {
             maxHpRegen = 1.2f;
-            maxBonusDamage = 4;
+            manaPerDmgTaken = 0.4f;
         } else if (rank == 2) {
             maxHpRegen = 1.8f;
-            maxBonusDamage = 6;
+            manaPerDmgTaken = 0.6f;
         } else if (rank == 3) {
             maxHpRegen = 2.4f;
-            maxBonusDamage = 8;
+            manaPerDmgTaken = 0.8f;
         }
     }
 
     public double getHpRegen(HeroUnit hero) {
         float healthRatio = 1f - (((LivingEntity) hero).getHealth() / ((LivingEntity) hero).getMaxHealth());
         return MyMath.round(healthRatio * maxHpRegen, 1);
-    }
-
-    public double getBonusDamage(HeroUnit hero) {
-        float healthRatio = 1f - (((LivingEntity) hero).getHealth() / ((LivingEntity) hero).getMaxHealth());
-        return MyMath.round(healthRatio * maxBonusDamage, 1);
     }
 
     @Override
@@ -91,9 +86,9 @@ public class BattleRagePassive extends HeroAbility {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.battle_rage") + " " + rankString(), true),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip1", maxBonusDamage, maxHpRegen)),
-                fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip2")),
-                fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip3", getBonusDamage(hero), getHpRegen(hero)))
+                fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip1", maxHpRegen)),
+                fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip2", manaPerDmgTaken)),
+                fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip3", getHpRegen(hero)))
         );
     }
 
@@ -102,8 +97,8 @@ public class BattleRagePassive extends HeroAbility {
                 fcs(I18n.get("abilities.reignofnether.battle_rage"), true),
                 fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement()), getLevelReqStyle(hero)),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip1", maxBonusDamage, maxHpRegen)),
-                fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip2")),
+                fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip1", maxHpRegen)),
+                fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip2", manaPerDmgTaken)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.battle_rage.rank1"), rank == 0),
                 fcs(I18n.get("abilities.reignofnether.battle_rage.rank2"), rank == 1),

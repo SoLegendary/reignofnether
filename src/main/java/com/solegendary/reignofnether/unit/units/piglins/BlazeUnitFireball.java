@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.level.Level;
@@ -74,6 +75,18 @@ public class BlazeUnitFireball extends SmallFireball {
 
             if (!this.level().isClientSide)
                 this.discard();
+        }
+    }
+
+    @Override
+    protected void onHitEntity(EntityHitResult pResult) {
+        if (!this.level().isClientSide) {
+            Entity entity = pResult.getEntity();
+            int i = entity.getRemainingFireTicks();
+            if (i > 0) // if we just set to 100 every time, we reset the damage delay back to 20 ticks
+                entity.setRemainingFireTicks((i % 20) + 80);
+            else
+                entity.setRemainingFireTicks(100);
         }
     }
 

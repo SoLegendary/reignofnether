@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
-import com.solegendary.reignofnether.building.production.ProductionItem;
+import com.solegendary.reignofnether.building.production.HeroProductionItem;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
@@ -14,40 +14,41 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxAction;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.EntityType;
 
 import java.util.List;
 
-public class RoyalGuardProd extends ProductionItem {
+public class RoyalGuardProd extends HeroProductionItem {
 
-    public final static String itemName = "royal_guard";
+    public final static String itemName = "Royal Guard";
     public final static ResourceCost cost = ResourceCosts.ROYAL_GUARD;
 
     public RoyalGuardProd() {
-        super(cost);
+        super(cost, itemName, new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/royal_guard.png"));
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide())
                 placement.produceUnit((ServerLevel) level, EntityRegistrar.ROYAL_GUARD_UNIT.get(), placement.ownerName, true);
         };
     }
 
-    public String getItemName() {
-        return RoyalGuardProd.itemName;
+    @Override
+    protected EntityType<? extends HeroUnit> getHeroEntityType() {
+        return EntityRegistrar.ROYAL_GUARD_UNIT.get();
     }
 
     public AbilityButton getPlaceButton() {
         return new AbilityButton(
                 itemName,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/royal_guard.png"),
+                iconRl,
                 null,
                 () -> SandboxClientEvents.spawnUnitName.equals(itemName),
                 () -> false,
-                () -> false,
+                () -> true,
                 () -> {
                     CursorClientEvents.setLeftClickSandboxAction(SandboxAction.SPAWN_UNIT);
                     SandboxClientEvents.spawnUnitName = itemName;
@@ -69,12 +70,12 @@ public class RoyalGuardProd extends ProductionItem {
 
     public Button getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new Button(
-                RoyalGuardProd.itemName,
+                itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/royal_guard.png"),
+                iconRl,
                 hotkey,
                 () -> false,
-                () -> false,
+                () -> itemIsBeingProduced(prodBuilding.ownerName) || heroOwned(prodBuilding.level.isClientSide(), prodBuilding.ownerName),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, this),
                 null,
@@ -89,21 +90,6 @@ public class RoyalGuardProd extends ProductionItem {
                         FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.royal_guard.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.royal_guard.tooltip2"), Style.EMPTY)
                 )
-        );
-    }
-
-    public Button getCancelButton(ProductionPlacement prodBuilding, boolean first) {
-        return new Button(
-                RoyalGuardProd.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/royal_guard.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, this, first),
-                null,
-                null
         );
     }
 }

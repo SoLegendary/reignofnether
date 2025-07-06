@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.unit;
 
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -28,10 +27,9 @@ public class NonUnitClientEvents {
 
     public static boolean isMoveCheckpointGreen = true;
 
-    public static boolean canControlNonUnits() {
+    public static boolean canControlAllMobs() {
         return MC.player != null &&
-            (ResearchClient.hasCheat("wouldyoukindly") ||
-            SandboxClientEvents.isSandboxPlayer(MC.player.getName().getString()));
+                (ResearchClient.hasCheat("wouldyoukindly"));
     }
 
     public static boolean canAttack(LivingEntity le) {

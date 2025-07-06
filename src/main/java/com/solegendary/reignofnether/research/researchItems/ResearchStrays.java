@@ -69,14 +69,14 @@ public class ResearchStrays extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, ProductionItems.RESEARCH_STRAYS),
             null,
             List.of(
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.strays"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_strays"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.strays.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.strays.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_strays.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_strays.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.strays.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_strays.tooltip3"), Style.EMPTY)
             )
         );
     }

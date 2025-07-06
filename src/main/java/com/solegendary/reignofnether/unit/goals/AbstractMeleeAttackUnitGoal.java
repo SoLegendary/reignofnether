@@ -35,8 +35,9 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
     public void tickAttackCooldown() {
         if (this.ticksUntilNextAttack > ((AttackerUnit) this.mob).getAttackCooldown())
             this.ticksUntilNextAttack = getAttackInterval();
-        if (ticksUntilNextAttack > 0) // tick down even when not targeting anything
+        if (ticksUntilNextAttack > 0) { // tick down even when not targeting anything
             this.ticksUntilNextAttack -= 1;
+        }
     }
 
     public boolean canUse() {

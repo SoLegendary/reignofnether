@@ -1,0 +1,69 @@
+package com.solegendary.reignofnether.building.buildings.monsters;
+
+import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.production.ProductionBuilding;
+import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.gamerules.GameruleClient;
+import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.resources.ResourceCost;
+import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Blocks;
+
+import java.util.List;
+
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+
+public class AltarOfDarkness extends ProductionBuilding {
+
+    public final static String buildingName = "Altar of Darkness";
+    public final static String structureName = "altar_of_darkness";
+    public final static ResourceCost cost = ResourceCosts.ALTAR_OF_DARKNESS;
+
+    public AltarOfDarkness() {
+        super(structureName, cost, false);
+        this.name = buildingName;
+        this.portraitBlock = Blocks.DARK_PRISMARINE;
+        this.icon = new ResourceLocation("minecraft", "textures/block/dark_prismarine.png");
+
+        this.startingBlockTypes.add(Blocks.DARK_PRISMARINE);
+        this.startingBlockTypes.add(Blocks.TINTED_GLASS);
+
+        this.productions.add(ProductionItems.NECROMANCER, Keybindings.keyQ);
+        this.productions.add(ProductionItems.NECROMANCER_REVIVE, Keybindings.keyQ);
+    }
+
+    public Faction getFaction() {return Faction.MONSTERS;}
+
+    public AbilityButton getBuildButton(Keybinding hotkey) {
+        ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
+        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        return new AbilityButton(
+                name,
+                new ResourceLocation("minecraft", "textures/block/dark_prismarine.png"),
+                hotkey,
+                () -> BuildingClientEvents.getBuildingToPlace() == Buildings.ALTAR_OF_DARKNESS,
+                () -> !SandboxClientEvents.isSandboxPlayer() && !GameruleClient.allowHeroes,
+                () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
+                        ResearchClient.hasCheat("modifythephasevariance"),
+                () -> BuildingClientEvents.setBuildingToPlace(Buildings.ALTAR_OF_DARKNESS),
+                null,
+                List.of(
+                        fcs(I18n.get("buildings.monsters.reignofnether.altar_of_darkness"), true),
+                        ResourceCosts.getFormattedCost(cost),
+                        fcs(""),
+                        fcs(I18n.get("buildings.monsters.reignofnether.altar_of_darkness.tooltip1")),
+                        fcs(I18n.get("buildings.monsters.reignofnether.altar_of_darkness.tooltip2"))
+                ),
+                null
+        );
+    }
+}

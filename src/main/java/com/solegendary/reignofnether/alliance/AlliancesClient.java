@@ -1,9 +1,29 @@
 package com.solegendary.reignofnether.alliance;
 
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.LivingEntity;
+
 import java.util.*;
 
 public class AlliancesClient {
+    private static final Minecraft MC = Minecraft.getInstance();
+
     private static final Map<String, Set<String>> alliances = new HashMap<>();
+
+    public static final ArrayList<String> playersWithAlliedControl = new ArrayList<>();
+
+    public static boolean canControlAlly(LivingEntity entity) {
+        return entity instanceof Unit unit && canControlAlly(unit.getOwnerName());
+    }
+    public static boolean canControlAlly(Unit unit) {
+        return canControlAlly(unit.getOwnerName());
+    }
+    public static boolean canControlAlly(String ownerName) {
+        return MC.player != null &&
+                (AlliancesClient.isAllied(MC.player.getName().getString(), ownerName) &&
+                        AlliancesClient.playersWithAlliedControl.contains(ownerName));
+    }
 
     public static void addAlliance(String owner1, String owner2) {
         alliances.computeIfAbsent(owner1, k -> new HashSet<>()).add(owner2);

@@ -75,7 +75,7 @@ public class Laboratory extends ProductionBuilding {
     // return the lightning rod is built based on existing placed blocks
     // returns null if it is not build or is damaged
     // also will return null if outside of render range, but shouldn't matter since it'd be out of ability range anyway
-    public BlockPos getLightningRodPos(RangeIndicatorProductionPlacement placement) {
+    public BlockPos getLightningRodPos(BuildingPlacement placement) {
         for (BuildingBlock block : placement.getBlocks()) {
             if (placement.getLevel().getBlockState(block.getBlockPos()).getBlock() == Blocks.LIGHTNING_ROD &&
                 placement.getLevel().getBlockState(block.getBlockPos().below()).getBlock() == Blocks.WAXED_COPPER_BLOCK)

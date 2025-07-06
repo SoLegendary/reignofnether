@@ -1,5 +1,5 @@
 
-1.19.2-1.1.6
+1.19.2-1.2.0b
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -7,102 +7,50 @@
 
 
 
-Building rework
----------------
-ProductionPlacement
-
-
-
-
-Features
---------
-HEROES (in order of priority)
-    - spells
-    - spell animations
-    - spell particles
-    - levelling and exp
-        - exp bar/level number above portrait, below name
-    - spell levelling and requirements
-    - mana?
-    - equipment
-
-
 Necromancer
     [❌] Purple particles on soul usage and soul gain
     [❌] Magical projectile model and sound
+    [❌] Allow consumption of souls for healing/mana
 
 Piglin Merchant
-    - TNT Toss
-        [❌] Throws TNT item entity
-            - Parent to hero
-            - When contacting the ground, place primed TNT at the blockPosition()
-            - New TNTBlock required to scale explosion power?
+    [❌] Building attack animation not sycned
 
     - Fancy Feast
-        [❌] Throw food entities
-        [❌] All piglin units need an EatFoodItemGoal
-            - If damaged, will stop to pick up food and show an eating animation to heal
-
-    - Loot Explosion
-        [❌] Untargeted, create randomised loot
-        [❌] All piglin units should be able to pick up and equip weapons and armor
-        [❌] Include resistance potions for non-infantry
-            - Pick up instead of splashed?
-
+        [❌] Prioritise giving food items to more hurt units
 
 Royal Guard
     - Mace Slam
-        [❌] AOE damage and knockback in a circle in front of the guard
+        [❌] Add hammer throw alternate
         [❌] Raise ground blocks with block displays?
-        [❌] Add 'stun' effect to all units
-            - While active, repeats stop commands and ignores all other commands
-            - Show potion swirling particles, but don't make them move upwards
 
-    - Taunting Cry
-        [❌] Add 'taunt' effect to all units
-            - While active, repeats attack commands on the taunting unit and ignores all other commands
-            - Show angry villager particle effects
+    [❌] Proper sound effects for taunt and avatar
 
-    - Avatar of War
-        [❌] Enlarge size smoothly
-
+Features
+--------
+Ron Structure block to register custom neutral buildings
+    1. Create custom block extending StructureBlock
+    2. Mixin StructureTemplate.save to check whether its from a Structure block
+    3. Create a generic Building CustomBuilding with no special abilities
+    4. Create a BuildingPlacement for CustomBuilding
+    5. Add menu options in sandbox that can change the CustomBuilding:
+        - Give it features like production, nether spread, garrisoning, etc.
+        - Toggle indestructible/capturable flags
 
 
 Bugfixes
 --------
-[❌] Armour on units doesn't do anything against other mob projectiles?
-    - Check on latest forge version?
+[❌] keyframe animations are cancelled upon being hit
 
-[❌] gatherTarget save data doesn't work
+[❌] on a fresh world (easy) survival wave starts way too early (within 1-2 mins of starting)
 
-[❌] Bastion and Flame Sanctuary stuck building?
-
-Quality of Life
----------------
-[❌] Shift-clicking the "Select all Military units" button now only selects the units on screen
-
-[❌] Skirmish mode command
-
-Languages
----------
-
+[❌] Avatar state is reset when unloaded
 
 
 Quality of Life
 ---------------
 
-
+[❌] Convert stairs, slabs, stone bricks and polished blocks to nether/blackstone counterparts
 
 Balancing
 ---------
 
-[❌] Day cycle times adjusted from: (20, 15, 12, 9, 6) to (14, 12, 10, 8, 6) minutes
-
-[❌] At higher wave survival difficulties, enemy wave populations and beacon build/upgrade costs are increased
-    - Beginner: no change
-    - Easy: +25% beacon costs, +20% wave populations
-    - Medium: +50% beacon costs, +30% wave populations
-    - Hard: +75% beacon costs, +40% wave populations
-    - Extreme: +100% beacon costs, +50% wave populations
-
-[❌] Every third wave now includes an enemy hero unit with level equal to 2/3rds the wave number

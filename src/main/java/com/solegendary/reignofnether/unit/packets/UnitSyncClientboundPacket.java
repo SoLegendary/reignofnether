@@ -24,6 +24,7 @@ public class UnitSyncClientboundPacket {
     private final int entityId;
     private final int targetId;
     private final float health;
+    private final float absorb;
     private final double posX;
     private final double posY;
     private final double posZ;
@@ -35,14 +36,14 @@ public class UnitSyncClientboundPacket {
     public static void sendLeavePacket(LivingEntity entity) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitSyncClientboundPacket(UnitSyncAction.LEAVE_LEVEL,
-                        entity.getId(),0,0,0,0,0,0,0,0, "")
+                        entity.getId(),0,0,0,0,0,0,0,0,0, "")
         );
     }
 
     public static void sendSyncOwnerNamePacket(Unit unit) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitSyncClientboundPacket(UnitSyncAction.SYNC_OWNERNAME,
-                        ((LivingEntity) unit).getId(),0,0,0,0,0,0,0,0, unit.getOwnerName())
+                        ((LivingEntity) unit).getId(),0,0,0,0,0,0,0,0,0, unit.getOwnerName())
         );
     }
 
@@ -58,6 +59,7 @@ public class UnitSyncClientboundPacket {
             new UnitSyncClientboundPacket(UnitSyncAction.SYNC_STATS,
                 entity.getId(), 0,
                 entity.getHealth(),
+                entity.getAbsorptionAmount(),
                 entity.getX(), entity.getY(), entity.getZ(),
                 0,0,0, owner)
         );
@@ -67,7 +69,7 @@ public class UnitSyncClientboundPacket {
         Resources res = Resources.getTotalResourcesFromItems(unit.getItems());
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitSyncClientboundPacket(UnitSyncAction.SYNC_RESOURCES,
-                ((LivingEntity) unit).getId(), 0,0,0,0,0,
+                ((LivingEntity) unit).getId(), 0,0,0,0,0,0,
                 res.food, res.wood, res.ore, "")
         );
     }
@@ -77,7 +79,7 @@ public class UnitSyncClientboundPacket {
                 new UnitSyncClientboundPacket(
                         UnitSyncAction.MAKE_VILLAGER_VETERAN,
                         entity.getId(), 0,
-                        0, 0,0,0,0,0,0, "")
+                        0, 0,0,0,0,0,0,0, "")
         );
     }
 
@@ -85,7 +87,7 @@ public class UnitSyncClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitSyncClientboundPacket(
                         UnitSyncAction.SYNC_ANCHOR_POS,
-                        entity.getId(), 0,
+                        entity.getId(), 0,0,
                         0, bp.getX(), bp.getY(), bp.getZ(),0,0,0, "")
         );
     }
@@ -94,7 +96,7 @@ public class UnitSyncClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitSyncClientboundPacket(
                         UnitSyncAction.SYNC_ANCHOR_POS,
-                        entity.getId(), 0,
+                        entity.getId(), 0,0,
                         0,0,0,0,0,0,0, "")
         );
     }
@@ -105,6 +107,7 @@ public class UnitSyncClientboundPacket {
         int unitId,
         int targetId,
         float health,
+        float absorb,
         double posX,
         double posY,
         double posZ,
@@ -118,6 +121,7 @@ public class UnitSyncClientboundPacket {
         this.entityId = unitId;
         this.targetId = targetId;
         this.health = health;
+        this.absorb = absorb;
         this.posX = posX;
         this.posY = posY;
         this.posZ = posZ;
@@ -132,6 +136,7 @@ public class UnitSyncClientboundPacket {
         this.entityId = buffer.readInt();
         this.targetId = buffer.readInt();
         this.health = buffer.readFloat();
+        this.absorb = buffer.readFloat();
         this.posX = buffer.readDouble();
         this.posY = buffer.readDouble();
         this.posZ = buffer.readDouble();
@@ -146,6 +151,7 @@ public class UnitSyncClientboundPacket {
         buffer.writeInt(this.entityId);
         buffer.writeInt(this.targetId);
         buffer.writeFloat(this.health);
+        buffer.writeFloat(this.absorb);
         buffer.writeDouble(this.posX);
         buffer.writeDouble(this.posY);
         buffer.writeDouble(this.posZ);
@@ -168,6 +174,7 @@ public class UnitSyncClientboundPacket {
                         case SYNC_STATS -> UnitClientEvents.syncUnitStats(
                                 this.entityId,
                                 this.health,
+                                this.absorb,
                                 new Vec3(this.posX, this.posY, this.posZ),
                                 this.ownerName
                         );

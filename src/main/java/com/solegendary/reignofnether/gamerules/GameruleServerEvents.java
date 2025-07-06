@@ -37,7 +37,13 @@ public class GameruleServerEvents {
             Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
             if (args.containsKey("value")) {
                 double groundYLevel = ((Integer) args.get("value").getResult()).doubleValue();
-                GameruleClientboundPacket.setFlyingMaxYLevel((long) groundYLevel + 30);
+                GameruleClientboundPacket.setGroundYLevel((long) groundYLevel);
+            }
+        }  else if (nodes.get(1).getNode().getName().equals("flyingMaxYLevel")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                double flyingMaxYLevel = ((Integer) args.get("value").getResult()).doubleValue();
+                GameruleClientboundPacket.setFlyingMaxYLevel((long) flyingMaxYLevel);
             }
         } else if (nodes.get(1).getNode().getName().equals("improvedPathfinding")) {
             Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
@@ -81,6 +87,12 @@ public class GameruleServerEvents {
                 boolean value = (boolean) args.get("value").getResult();
                 GameruleClientboundPacket.setSlantedBuilding(value);
             }
+        } else if (nodes.get(1).getNode().getName().equals("allowHeroes")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                GameruleClientboundPacket.setAllowHeroes(value);
+            }
         }
     }
 
@@ -101,7 +113,7 @@ public class GameruleServerEvents {
             boolean improvedPathfinding = server.getGameRules().getRule(GameRuleRegistrar.IMPROVED_PATHFINDING).get();
             GameruleClientboundPacket.setImprovedPathfinding(improvedPathfinding);
             int groundYLevel = server.getGameRules().getRule(GameRuleRegistrar.GROUND_Y_LEVEL).get();
-            GameruleClientboundPacket.setFlyingMaxYLevel(groundYLevel + 30);
+            GameruleClientboundPacket.setGroundYLevel(groundYLevel);
             int flyingMaxYLevel = server.getGameRules().getRule(GameRuleRegistrar.FLYING_MAX_Y_LEVEL).get();
             GameruleClientboundPacket.setFlyingMaxYLevel(flyingMaxYLevel);
             boolean allowBeacons = server.getGameRules().getRule(GameRuleRegistrar.ALLOW_BEACONS).get();
@@ -112,6 +124,8 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setBeaconWinMinutes(beaconWinMinutes);
             boolean slantedBuilding = server.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get();
             GameruleClientboundPacket.setSlantedBuilding(slantedBuilding);
+            boolean allowHeroes = server.getGameRules().getRule(GameRuleRegistrar.ALLOW_HEROES).get();
+            GameruleClientboundPacket.setAllowHeroes(allowHeroes);
         }
     }
 }

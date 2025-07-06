@@ -9,7 +9,6 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.controls.SlimeUnitMoveControl;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -66,6 +65,9 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -127,7 +129,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() { return ((getSize() + 1) * 0.5f); }
     public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitArmorValue() {return armorValue;}
+
     public ResourceCost getCost() {
         int popCost = getSize();
         if (getSize() == 1)
@@ -246,7 +248,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public boolean autocastingConsume() {
         for (Ability ability : abilities)
             if (ability instanceof ConsumeSlime consume)
-                return consume.getAutocast(this);
+                return consume.isAutocasting(this);
         return false;
     }
 
@@ -377,12 +379,23 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
                 setUnitAttackTarget(closestTarget);
             }
         }
-        // apply slowness level 2 during daytime for a short time repeatedly
-        if (!(this instanceof MagmaCubeUnit) &&
-                tickCount % 10 == 0 && !this.level().isClientSide() && this.level().isDay() &&
-                !NightUtils.isInRangeOfNightSource(this.getEyePosition(), false) &&
-                !ResearchServerEvents.playerHasCheat(getOwnerName(), "slipslopslap"))
-            this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15, 1));
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
+    }
+
+    @Override
+    public SunlightEffect getSunlightEffect() {
+        return SunlightEffect.MOVEMENT_SLOWDOWN;
     }
 
     // break leaves that are touched

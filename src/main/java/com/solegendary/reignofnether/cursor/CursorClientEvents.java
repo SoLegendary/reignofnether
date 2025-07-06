@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.cursor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -72,6 +73,7 @@ public class CursorClientEvents {
     // action that is performed on the next left click
     private static UnitAction leftClickAction = null;
     private static SandboxAction leftClickSandboxAction = null;
+
 
     public static Vector3d getCursorWorldPos() {
         return cursorWorldPos;
@@ -256,12 +258,14 @@ public class CursorClientEvents {
             // instead, improvise our own quad
             // https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
 
+            List<LivingEntity> entitiesInRange = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, LivingEntity.class, MC.level);
+
             ArrayList<Vec3> uvwp = MyMath.prepIsPointInsideRect3d(MC,
                     (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDownPos.y, // top left
                     (int) cursorLeftClickDownPos.x, (int) cursorLeftClickDragPos.y, // bottom left
                     (int) cursorLeftClickDragPos.x, (int) cursorLeftClickDragPos.y // bottom right
             );
-            for (LivingEntity entity : MiscUtil.getEntitiesWithinRange(cursorWorldPos, 100, LivingEntity.class, MC.level)) {
+            for (LivingEntity entity : entitiesInRange) {
                 if (MyMath.isPointInsideRect3d(uvwp, entity.getBoundingBox().getCenter()) &&
                         entity.getId() != MC.player.getId() &&
                         !UnitClientEvents.getPreselectedUnits().contains(entity))
@@ -270,7 +274,6 @@ public class CursorClientEvents {
         }
     }
 
-    public static ArrayList<LivingEntity> militaryUnitsOnScreen = new ArrayList<>();
 
     public static boolean isBoxSelecting() {
         return cursorLeftClickDownPos.x >= 0 &&
@@ -338,13 +341,17 @@ public class CursorClientEvents {
                 // only act if there is at least 1 owned entity so we don't deselect things by box selecting only non-owned entities
                 int ownedEntities = 0;
                 for (LivingEntity unit : preselectedUnit)
-                    if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED || NonUnitClientEvents.canControlNonUnits())
+                    if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED ||
+                            NonUnitClientEvents.canControlAllMobs() ||
+                            AlliancesClient.canControlAlly(unit))
                         ownedEntities += 1;
 
                 if (ownedEntities > 0) {
                     ArrayList<LivingEntity> unitsToAdd = new ArrayList<>();
                     for (LivingEntity unit : preselectedUnit)
-                        if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED || NonUnitClientEvents.canControlNonUnits())
+                        if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED ||
+                                NonUnitClientEvents.canControlAllMobs() ||
+                                AlliancesClient.canControlAlly(unit))
                             unitsToAdd.add(unit);
 
                     if (Keybindings.shiftMod.isDown()) {

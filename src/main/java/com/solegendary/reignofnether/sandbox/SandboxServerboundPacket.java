@@ -31,6 +31,9 @@ public class SandboxServerboundPacket {
     public static void removeAnchor(int entityId) {
         PacketHandler.INSTANCE.sendToServer(new SandboxServerboundPacket(SandboxAction.REMOVE_ANCHOR, "", "", new BlockPos(0,0,0), entityId));
     }
+    public static void setOwner(int entityId, String ownerName) {
+        PacketHandler.INSTANCE.sendToServer(new SandboxServerboundPacket(SandboxAction.SET_OWNER, ownerName, "", new BlockPos(0,0,0), entityId));
+    }
 
     public SandboxServerboundPacket(SandboxAction sandboxAction, String playerName, String unitName, BlockPos blockPos, int entityId) {
         this.sandboxAction = sandboxAction;
@@ -78,6 +81,7 @@ public class SandboxServerboundPacket {
                 case SET_ANCHOR -> SandboxServer.setAnchor(this.entityId, this.blockPos);
                 case RESET_TO_ANCHOR -> SandboxServer.resetToAnchor(this.entityId);
                 case REMOVE_ANCHOR -> SandboxServer.removeAnchor(this.entityId);
+                case SET_OWNER -> SandboxServer.setOwner(this.entityId, this.playerName);
             }
             success.set(true);
         });

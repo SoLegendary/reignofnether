@@ -58,6 +58,13 @@
         },
         {
             "type": "bitmap",
+            "file": "reignofnether:icons/items/lapis.png",
+            "ascent": 9,
+            "height": 9,
+            "chars": ["\uE008"]
+        },
+        {
+            "type": "bitmap",
             "file": "minecraft:font/ascii.png",
             "ascent": 7,
             "chars": [

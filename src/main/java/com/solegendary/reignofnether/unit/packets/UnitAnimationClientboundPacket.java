@@ -52,6 +52,15 @@ public class UnitAnimationClientboundPacket {
         );
     }
 
+    public static void sendEatFoodPacket(LivingEntity entity, int itemId) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new UnitAnimationClientboundPacket(
+                        UnitAnimationAction.EAT_FOOD_ITEM,
+                        entity.getId(), itemId,
+                        0,0,0)
+        );
+    }
+
     // packet-handler functions
     public UnitAnimationClientboundPacket(
         UnitAnimationAction animAction,
@@ -77,6 +86,7 @@ public class UnitAnimationClientboundPacket {
         this.posX = buffer.readDouble();
         this.posY = buffer.readDouble();
         this.posZ = buffer.readDouble();
+
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -96,6 +106,7 @@ public class UnitAnimationClientboundPacket {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> {
                     switch (this.animAction) {
+                        case EAT_FOOD_ITEM -> UnitClientEvents.syncUnitEatingFood(this.entityId, this.targetId);
                         case NON_KEYFRAME_START -> UnitClientEvents.syncUnitAnimation(this.animAction, true,
                                 this.entityId, this.targetId, new BlockPos((int) this.posX, (int) this.posY, (int) this.posZ));
                         case NON_KEYFRAME_STOP -> UnitClientEvents.syncUnitAnimation(this.animAction, false,

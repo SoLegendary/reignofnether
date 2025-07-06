@@ -6,35 +6,52 @@
 Features
 --------
 
+[❌] Villager upgrade
+    - For stats and at blacksmith?
+
+[❌] Custom structure block to register new buildings
+    - That are also saved to the level
+
+[❌] Walls
+    - Connect to garrisonable towers
+    - 3 layers that are broken starting from where the unit attacking it is positioned
+    - Able to be walked along as battlements
+    - Variable height across terrain
+
+[❌] Nydus worm-style ability for transport portals
+    - Because without Fog of war, transport portals are too weak
+    - Includes minimap and sound warning
+
+
+
 [❌] Import the Bedrock Minecraft Movie addon piglins
 
 [❌] Config to allow changing resource block values, including modded blocks
 
 [❌] AoE2-style markets
-
-[❌] Workers can repair iron golems
-    - Also contributes to mason exp and masons can repair faster
+    - Start as neutral building
 
 [❌] let modded/vanilla mobs attack buildings by making them attack an indestructible invisible armor stand
 
 
 Bugfixes
 --------
-[❌] Kicked for sending too many packets when spam clicking large army (rate-limit in server.properties?)
-
 [❌] Dying in survival puts you in a bugged survival mode
 
 [❌] Villagers with professions don't use the correct texture for their arms, esp. farmers
 
-[❌] Have too-fast mod be built-in
-
-[❌] GUI sometimes still going above size 3 when set to auto
-
+[❌] [Code issue] ResearchHoglinCavalry doesn't overwrite the getItemName method of the base ProductionItem class, resulting in a null name when calling the method
+    - Same with FireResistance, SoulFireball, LabLightningRod, WaterPotions, HealingPotions
 
 
 Quality of Life Features
 ------------------------
-[❌] Added a lot more serverside logging to track player actions
+
+[❌] More serverside logging for major player actions
+    - Building creation
+    - Start/complete research
+    - Created unit
+    - Used ability
 
 [❌] Colours for different players (with toggle under map options for ally/enemy)
 
@@ -61,3 +78,11 @@ Balancing
 ---------
 
 [❌] Soulfires created by blazes need to be made temporary
+
+
+
+
+MOHIST
+------
+Mohist servers causes workers to not move while far away
+

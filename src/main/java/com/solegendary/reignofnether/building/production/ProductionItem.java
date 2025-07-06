@@ -25,30 +25,35 @@ public abstract class ProductionItem {
 
     public static String itemName;
 
-    public ResourceCost cost;
+    public ResourceCost defaultCost;
     public boolean canDuplicate; // is building allowed to build more than one of these? eg. tech upgrades can't be duplicated
     public BiConsumer<Level, ProductionPlacement> onComplete;
 
     public ProductionItem(ResourceCost cost) {
-        this.cost = cost;
+        this.defaultCost = cost;
+    }
+
+    // allows for dynamic costs in subclasses
+    public ResourceCost getCost(boolean isClientSide, String ownerName) {
+        return defaultCost;
     }
 
     public String getItemName() {
-        return ProductionItem.itemName;
+        return itemName;
     }
 
     public boolean canAfford(Level level, String ownerName) {
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName))
-                return (resources.food >= cost.food &&
-                        resources.wood >= cost.wood &&
-                        resources.ore >= cost.ore &&
+                return (resources.food >= getCost(level.isClientSide(), ownerName).food &&
+                        resources.wood >= getCost(level.isClientSide(), ownerName).wood &&
+                        resources.ore >= getCost(level.isClientSide(), ownerName).ore &&
                         canAffordPopulation(level, ownerName));
         return false;
     }
 
     public boolean canAffordPopulation(Level level, String ownerName) {
-        if (cost.population == 0)
+        if (getCost(level.isClientSide(), ownerName).population == 0)
             return true;
 
         int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) level, ownerName);
@@ -56,13 +61,13 @@ public abstract class ProductionItem {
 
         for (Resources resources : ResourcesServerEvents.resourcesList)
             if (resources.ownerName.equals(ownerName))
-                return (currentPop + cost.population) <= popSupply;
+                return (currentPop + getCost(level.isClientSide(), ownerName).population) <= popSupply;
         return false;
     }
 
     // check we didn't dip below pop supply after starting production
     public boolean isBelowPopulationSupply(Level level, String ownerName) {
-        if (cost.population == 0)
+        if (getCost(level.isClientSide(), ownerName).population == 0)
             return true;
 
         int currentPop;
@@ -78,7 +83,7 @@ public abstract class ProductionItem {
     }
 
     public boolean isBelowMaxPopulation(Level level, String ownerName) {
-        if (cost.population == 0)
+        if (getCost(level.isClientSide(), ownerName).population == 0)
             return true;
 
         int currentPop = UnitServerEvents.getCurrentPopulation((ServerLevel) level, ownerName);
@@ -87,9 +92,9 @@ public abstract class ProductionItem {
         for (Resources resources : ResourcesServerEvents.resourcesList) {
             if (resources.ownerName.equals(ownerName)) {
                 if (level.isClientSide())
-                    return (currentPop + cost.population) <= GameruleClient.maxPopulation;
+                    return (currentPop + getCost(level.isClientSide(), ownerName).population) <= GameruleClient.maxPopulation;
                 else
-                    return (currentPop + cost.population) <= UnitServerEvents.maxPopulation;
+                    return (currentPop + getCost(level.isClientSide(), ownerName).population) <= UnitServerEvents.maxPopulation;
             }
         }
         return false;
@@ -100,6 +105,16 @@ public abstract class ProductionItem {
         for (BuildingPlacement building : BuildingClientEvents.getBuildings())
             if (building.ownerName.equals(ownerName) && building instanceof ProductionPlacement prodBuilding)
                 for (ActiveProduction prodItem : prodBuilding.productionQueue)
+                    if (prodItem.item == this)
+                        return true;
+        return false;
+    }
+
+    // check if this is being produced at one particular building
+    public boolean itemIsBeingProducedAt(ProductionPlacement placement) {
+        for (BuildingPlacement building : BuildingClientEvents.getBuildings())
+            if (building == placement)
+                for (ActiveProduction prodItem : placement.productionQueue)
                     if (prodItem.item == this)
                         return true;
         return false;

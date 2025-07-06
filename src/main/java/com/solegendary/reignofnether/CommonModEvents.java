@@ -3,12 +3,12 @@ package com.solegendary.reignofnether;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
+import com.solegendary.reignofnether.entities.models.ThrownMaceModel;
+import com.solegendary.reignofnether.entities.renderers.ThrowableTntRenderer;
+import com.solegendary.reignofnether.entities.renderers.ThrownMaceRenderer;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.registrars.*;
-import com.solegendary.reignofnether.unit.modelling.models.NecromancerModel;
-import com.solegendary.reignofnether.unit.modelling.models.PiglinMerchantModel;
-import com.solegendary.reignofnether.unit.modelling.models.RoyalGuardModel;
-import com.solegendary.reignofnether.unit.modelling.models.VillagerUnitModel;
+import com.solegendary.reignofnether.unit.modelling.models.*;
 import com.solegendary.reignofnether.unit.modelling.renderers.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.neutral.*;
@@ -87,6 +87,7 @@ public class CommonModEvents {
         evt.registerEntityRenderer(EntityRegistrar.BRUTE_UNIT.get(), PiglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.HEADHUNTER_UNIT.get(), PiglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.HOGLIN_UNIT.get(), HoglinRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.ARMOURED_HOGLIN_UNIT.get(), ArmouredHoglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.BLAZE_UNIT.get(), BlazeRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WITHER_SKELETON_UNIT.get(), WitherSkeletonRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.GHAST_UNIT.get(), GhastUnitRenderer::new);
@@ -105,6 +106,10 @@ public class CommonModEvents {
 
         evt.registerEntityRenderer(EntityRegistrar.PHANTOM_SUMMON.get(), PhantomRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.KILLER_RABBIT_UNIT.get(), RabbitRenderer::new);
+
+        evt.registerEntityRenderer(EntityRegistrar.ADJUSTABLE_PRIMED_TNT.get(), TntRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.THROWABLE_TNT_PROJECTILE.get(), ThrowableTntRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.THROWN_MACE_PROJECTILE.get(), ThrownMaceRenderer::new);
     }
 
     @SubscribeEvent
@@ -125,7 +130,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.STRAY_UNIT.get(), StrayUnit.createAttributes().build());
         evt.put(EntityRegistrar.CREEPER_UNIT.get(), CreeperUnit.createAttributes().build());
         evt.put(EntityRegistrar.SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
-        evt.put(EntityRegistrar.POISON_SPIDER_UNIT.get(), PoisonSpiderUnit.createAttributes().build());
+        evt.put(EntityRegistrar.POISON_SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
         evt.put(EntityRegistrar.VILLAGER_UNIT.get(), VillagerUnit.createAttributes().build());
         evt.put(EntityRegistrar.MILITIA_UNIT.get(), MilitiaUnit.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), ZombieVillagerUnit.createAttributes().build());
@@ -142,10 +147,11 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.HEADHUNTER_UNIT.get(), HeadhunterUnit.createAttributes().build());
         evt.put(EntityRegistrar.BRUTE_UNIT.get(), BruteUnit.createAttributes().build());
         evt.put(EntityRegistrar.HOGLIN_UNIT.get(), HoglinUnit.createAttributes().build());
+        evt.put(EntityRegistrar.ARMOURED_HOGLIN_UNIT.get(), ArmouredHoglinUnit.createAttributes().build());
         evt.put(EntityRegistrar.BLAZE_UNIT.get(), BlazeUnit.createAttributes().build());
         evt.put(EntityRegistrar.WITHER_SKELETON_UNIT.get(), WitherSkeletonUnit.createAttributes().build());
         evt.put(EntityRegistrar.GHAST_UNIT.get(), GhastUnit.createAttributes().build());
-        evt.put(EntityRegistrar.MAGMA_CUBE_UNIT.get(), MagmaCubeUnit.createAttributes().build());
+        evt.put(EntityRegistrar.MAGMA_CUBE_UNIT.get(), SlimeUnit.createAttributes().build());
         evt.put(EntityRegistrar.SLIME_UNIT.get(), SlimeUnit.createAttributes().build());
         evt.put(EntityRegistrar.ROYAL_GUARD_UNIT.get(), RoyalGuardUnit.createAttributes().build());
         evt.put(EntityRegistrar.NECROMANCER_UNIT.get(), NecromancerUnit.createAttributes().build());
@@ -164,6 +170,8 @@ public class CommonModEvents {
         event.registerLayerDefinition(RoyalGuardModel.LAYER_LOCATION, RoyalGuardModel::createBodyLayer);
         event.registerLayerDefinition(NecromancerModel.LAYER_LOCATION, NecromancerModel::createBodyLayer);
         event.registerLayerDefinition(PiglinMerchantModel.LAYER_LOCATION, PiglinMerchantModel::createBodyLayer);
+        event.registerLayerDefinition(ArmouredHoglinUnitModel.LAYER_LOCATION, ArmouredHoglinUnitModel::createBodyLayer);
+        event.registerLayerDefinition(ThrownMaceModel.LAYER_LOCATION, ThrownMaceModel::createBodyLayer);
     }
 
     @SubscribeEvent
@@ -213,6 +221,14 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.ROYAL_GUARD_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.NECROMANCER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.PIGLIN_MERCHANT_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.WOLF_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.LLAMA_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.PANDA_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.GRIZZLY_BEAR_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.POLAR_BEAR_UNIT_SPAWN_EGG);
+        }
+        if(BuiltInRegistries.CREATIVE_MODE_TAB.getKey(event.getTab())==CreativeModeTabs.TOOLS_AND_UTILITIES.location()){
+            event.accept(ItemRegistrar.THROWABLE_TNT);
         }
     }
 }

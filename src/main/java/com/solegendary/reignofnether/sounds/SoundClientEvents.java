@@ -27,8 +27,9 @@ public class SoundClientEvents {
     public static void playSoundAtPos(SoundAction soundAction, BlockPos bp, float volume) {
         SoundEvent soundEvent = SOUND_MAP.get(soundAction);
         ClientLevel level = Minecraft.getInstance().level;
-        if (level != null)
-            level.playSound(null, bp.getX(), bp.getY(), bp.getZ(), soundEvent, SoundSource.NEUTRAL, volume, 1.0F);
+        if (level != null) {
+            level.playLocalSound(bp.getX(), bp.getY(), bp.getZ(), soundEvent, SoundSource.NEUTRAL, volume, 1.0F, false);
+        }
     }
 
     public static void playSoundForLocalPlayer(SoundAction soundAction) {
@@ -74,5 +75,7 @@ public class SoundClientEvents {
         SOUND_MAP.put(SoundAction.BEACON_DEACTIVATE, SoundEvents.BEACON_DEACTIVATE);
         SOUND_MAP.put(SoundAction.BEACON_ACTIVATE, SoundEvents.BEACON_ACTIVATE);
         SOUND_MAP.put(SoundAction.LEVEL_UP, SoundEvents.PLAYER_LEVELUP);
+        SOUND_MAP.put(SoundAction.BLOODLUST, SoundRegistrar.BLOODLUST.get());
+        SOUND_MAP.put(SoundAction.HEROISM, SoundRegistrar.HEROISM.get());
     }
 }

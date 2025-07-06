@@ -55,19 +55,19 @@ public class ResearchSilverfish extends ProductionItem {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.STRONGHOLD),
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, ProductionItems.RESEARCH_SILVERFISH),
             null,
-            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.silverfish"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.research_silverfish"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.silverfish.tooltip1",
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_silverfish.tooltip1",
                         SILVERFISH_SPAWN_CHANCE * 100 + "%"
                 ), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.silverfish.tooltip2"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.silverfish.tooltip3"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_silverfish.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_silverfish.tooltip3"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.silverfish.tooltip4"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_silverfish.tooltip4"), Style.EMPTY)
             )
         );
     }

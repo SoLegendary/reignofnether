@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.packets;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -77,7 +78,9 @@ public class UnitActionServerboundPacket {
                 ReignOfNether.LOGGER.warn("Sender for unit action packet was null");
                 success.set(false);
             }
-            else if (!player.getName().getString().equals(ownerName) && !SandboxServer.isSandboxPlayer(ownerName)) {
+            else if (!player.getName().getString().equals(ownerName) &&
+                    !SandboxServer.isSandboxPlayer(ownerName) &&
+                    !AlliancesServerEvents.canControlAlly(player.getName().getString(), ownerName)) {
                 ReignOfNether.LOGGER.warn("UnitActionServerboundPacket: Tried to process packet from " + player.getName() + " for " + ownerName);
                 success.set(false);
             }

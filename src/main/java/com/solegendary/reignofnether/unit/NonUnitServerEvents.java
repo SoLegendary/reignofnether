@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.unit;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
-import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -31,8 +30,8 @@ public class NonUnitServerEvents {
 
     public static final List<Pair<PathfinderMob, BlockPos>> nonUnitMoveTargets = Collections.synchronizedList(new ArrayList<>());
 
-    public static boolean canControlNonUnits(Level level, String playerName) {
-        return SandboxServer.isSandboxPlayer(playerName) || ResearchServerEvents.playerHasCheat(playerName, "wouldyoukindly");
+    public static boolean canControlAllMobs(Level level, String playerName) {
+        return ResearchServerEvents.playerHasCheat(playerName, "wouldyoukindly");
     }
 
     @SubscribeEvent

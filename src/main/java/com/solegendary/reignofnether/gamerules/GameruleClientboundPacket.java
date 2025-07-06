@@ -67,6 +67,10 @@ public class GameruleClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new GameruleClientboundPacket(GameruleAction.SET_SLANTED_BUILDING, "", slantedBuilding ? 1L : 0L));
     }
+    public static void setAllowHeroes(boolean allowHeroes) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new GameruleClientboundPacket(GameruleAction.SET_ALLOW_HEROES, "", allowHeroes ? 1L : 0L));
+    }
 
     public GameruleClientboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
@@ -102,7 +106,7 @@ public class GameruleClientboundPacket {
                             case SET_IMPROVED_PATHFINDING -> GameruleClient.improvedPathfinding = value == 1L;
                             case SET_GROUND_Y_LEVEL -> {
                                 GameruleClient.groundYLevel = value;
-                                OrthoviewClientEvents.setMinOrthoviewY(value);
+                                OrthoviewClientEvents.setMinOrthoviewY(value + 30);
                             }
                             case SET_FLYING_MAX_Y_LEVEL -> GameruleClient.flyingMaxYLevel = value;
                             case SET_ALLOW_BEACONS -> GameruleClient.allowBeacons = value == 1L;
@@ -114,6 +118,7 @@ public class GameruleClientboundPacket {
                             }
                             case SET_BEACON_WIN_MINUTES -> GameruleClient.beaconWinMinutes = value;
                             case SET_SLANTED_BUILDING -> GameruleClient.slantedBuilding = value == 1L;
+                            case SET_ALLOW_HEROES -> GameruleClient.allowHeroes = value == 1L;
                         }
                         success.set(true);
                     });

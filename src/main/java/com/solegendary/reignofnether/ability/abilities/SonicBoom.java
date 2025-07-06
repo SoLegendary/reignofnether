@@ -38,7 +38,7 @@ public class SonicBoom extends Ability {
     }
 
     @Override
-    public boolean isChanneling(Unit unit) {
+    public boolean isCasting(Unit unit) {
         SonicBoomGoal goal = ((WardenUnit)unit).getSonicBoomGoal();
         if (goal == null)
             return false;

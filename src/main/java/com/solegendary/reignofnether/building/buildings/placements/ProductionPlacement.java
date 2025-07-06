@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
 
-public class ProductionPlacement extends BuildingPlacement{
+public class ProductionPlacement extends BuildingPlacement {
     private BlockPos rallyPoint;
     private LivingEntity rallyPointEntity;
     public List<Button> productionButtons;
@@ -238,19 +238,16 @@ public class ProductionPlacement extends BuildingPlacement{
         if (prodItem != null) {
             // only worry about checking affordability on serverside
             if (getLevel().isClientSide()) {
-                ActiveProduction activeProduction = new ActiveProduction(prodItem);
+                ActiveProduction activeProduction = new ActiveProduction(prodItem, true, ownerName);
                 productionQueue.add(activeProduction);
                 success = true;
             }
             else {
                 if (prodItem.canAfford(getLevel(), ownerName)) {
-                    ActiveProduction activeProduction = new ActiveProduction(prodItem);
+                    ActiveProduction activeProduction = new ActiveProduction(prodItem, false, ownerName);
                     productionQueue.add(activeProduction);
                     ResourcesServerEvents.addSubtractResources(new Resources(
                             ownerName,
-                            -prodItem.cost.food,
-                            -prodItem.cost.wood,
-                            -prodItem.cost.ore
                     ));
                     success = true;
                 }
@@ -261,9 +258,9 @@ public class ProductionPlacement extends BuildingPlacement{
                         ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
                     else
                         ResourcesClientboundPacket.warnInsufficientResources(ownerName,
-                                ResourcesServerEvents.canAfford(ownerName, ResourceName.FOOD, prodItem.cost.food),
-                                ResourcesServerEvents.canAfford(ownerName, ResourceName.WOOD, prodItem.cost.wood),
-                                ResourcesServerEvents.canAfford(ownerName, ResourceName.ORE, prodItem.cost.ore)
+                                ResourcesServerEvents.canAfford(ownerName, ResourceName.FOOD, prodItem.getCost(level.isClientSide(), ownerName).food),
+                                ResourcesServerEvents.canAfford(ownerName, ResourceName.WOOD, prodItem.getCost(level.isClientSide(), ownerName).wood),
+                                ResourcesServerEvents.canAfford(ownerName, ResourceName.ORE, prodItem.getCost(level.isClientSide(), ownerName).ore)
                         );
                 }
             }
@@ -282,9 +279,9 @@ public class ProductionPlacement extends BuildingPlacement{
                 if (!getLevel().isClientSide()) {
                     ResourcesServerEvents.addSubtractResources(new Resources(
                             ownerName,
-                            prodItem.item.cost.food,
-                            prodItem.item.cost.wood,
-                            prodItem.item.cost.ore
+                            prodItem.item.getCost(level.isClientSide(), ownerName).food,
+                            prodItem.item.getCost(level.isClientSide(), ownerName).wood,
+                            prodItem.item.getCost(level.isClientSide(), ownerName).ore
                     ));
                 }
                 success = true;
@@ -294,14 +291,14 @@ public class ProductionPlacement extends BuildingPlacement{
                 for (int i = 0; i < productionQueue.size(); i++) {
                     ActiveProduction prodItem = productionQueue.get(i);
                     if (prodItem.item.equals(item) &&
-                            prodItem.ticksLeft >= prodItem.item.cost.ticks) {
+                            prodItem.ticksLeft >= prodItem.item.getCost(level.isClientSide(), ownerName).ticks) {
                         productionQueue.remove(prodItem);
                         if (!getLevel().isClientSide()) {
                             ResourcesServerEvents.addSubtractResources(new Resources(
                                     ownerName,
-                                    prodItem.item.cost.food,
-                                    prodItem.item.cost.wood,
-                                    prodItem.item.cost.ore
+                                    prodItem.item.getCost(level.isClientSide(), ownerName).food,
+                                    prodItem.item.getCost(level.isClientSide(), ownerName).wood,
+                                    prodItem.item.getCost(level.isClientSide(), ownerName).ore
                             ));
                         }
                         success = true;
@@ -333,9 +330,11 @@ public class ProductionPlacement extends BuildingPlacement{
 
     @Override
     public void updateButtons() {
-        super.updateButtons();
-        if (getBuilding() instanceof ProductionBuilding productionBuilding) {
-            productionButtons = productionBuilding.productions.getButtons(this);
+        if (level.isClientSide()) {
+            super.updateButtons();
+            if (getBuilding() instanceof ProductionBuilding productionBuilding) {
+                productionButtons = productionBuilding.productions.getButtons(this);
+            }
         }
     }
 }

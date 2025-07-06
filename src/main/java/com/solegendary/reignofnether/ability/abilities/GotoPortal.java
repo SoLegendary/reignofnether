@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -33,6 +34,7 @@ public class GotoPortal extends Ability {
             0,
             true
         );
+        this.defaultHotkey = Keybindings.keyW;
     }
 
     @Override
@@ -62,11 +64,11 @@ public class GotoPortal extends Ability {
     }
 
     @Override
-    public void use(Level level, BuildingPlacement building, BlockPos targetBp) {
-        if (level.isClientSide() && building instanceof PortalPlacement portal &&
-            portal.hasDestination()) {
-            BuildingPlacement targetBuilding = BuildingUtils.findBuilding(level.isClientSide(), portal.destination);
-            if (targetBuilding instanceof PortalPlacement targetPortal && portal.getPortalType() == PortalPlacement.PortalType.TRANSPORT)
+    public void use(Level level, BuildingPlacement buildingUsing, BlockPos targetBp) {
+        if (level.isClientSide() && buildingUsing instanceof PortalPlacement portalPlacement &&
+            portalPlacement.hasDestination()) {
+            BuildingPlacement targetBuilding = BuildingUtils.findBuilding(level.isClientSide(), portalPlacement.destination);
+            if (targetBuilding instanceof PortalPlacement targetPortal && targetPortal.getPortalType() == PortalPlacement.PortalType.TRANSPORT)
                 OrthoviewClientEvents.centreCameraOnPos(targetPortal.centrePos);
         }
     }

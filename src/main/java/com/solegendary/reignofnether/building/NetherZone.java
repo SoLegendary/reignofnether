@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -83,6 +84,17 @@ public class NetherZone {
         }
     }
 
+    private boolean isBlockInBuilding(ServerLevel level, BlockPos bp) {
+        boolean isBuilding;
+        FluidState fs = level.getBlockState(bp).getFluidState();
+        if (!fs.isEmpty() && !fs.isSource()) {
+            isBuilding = BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), bp);
+        } else {
+            isBuilding = BuildingUtils.isPosPartOfAnyBuilding(level.isClientSide(), bp, true, (int) (maxRange * 2));
+        }
+        return isBuilding;
+    }
+
     // randomly convert nether blocks into overworld blocks at decreasing ranges
     private void overworldRestoreTick(ServerLevel level) {
         double restoreRange = range + 5;
@@ -111,7 +123,8 @@ public class NetherZone {
 
             BlockState bs = NetherBlocks.getOverworldBlock(level, bp);
             BlockState bsPlant = NetherBlocks.getOverworldPlantBlock(level, bp.above(), true);
-            if (bs != null && !BuildingUtils.isPosPartOfAnyBuilding(level.isClientSide(), bp, true, (int) (maxRange * 2))) {
+
+            if (bs != null && !isBlockInBuilding(level, bp)) {
                 level.setBlockAndUpdate(bp, bs);
                 if (bsPlant != null)
                     level.setBlockAndUpdate(bp.above(), bsPlant);
@@ -152,7 +165,8 @@ public class NetherZone {
 
             BlockState bs = NetherBlocks.getNetherBlock(level, bp);
             BlockState bsPlant = NetherBlocks.getNetherPlantBlock(level, bp.above());
-            if (bs != null && !BuildingUtils.isPosPartOfAnyBuilding(level.isClientSide(), bp, true, (int) (maxRange * 2))) {
+
+            if (bs != null && !isBlockInBuilding(level, bp)) {
                 if (bsPlant != null) {
                     level.destroyBlock(bp.above(), false);
                     level.setBlockAndUpdate(bp.above(), bsPlant);

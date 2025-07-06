@@ -39,7 +39,11 @@ public class ProductionItems {
     public static final MagmaCubeProd MAGMA_CUBE = register(new ResourceLocation(ReignOfNether.MOD_ID, "magma_cube"), new MagmaCubeProd());
     public static final GhastProd GHAST = register(new ResourceLocation(ReignOfNether.MOD_ID, "ghast"), new GhastProd());
     public static final RoyalGuardProd ROYAL_GUARD = register(new ResourceLocation(ReignOfNether.MOD_ID, "royal_guard"), new RoyalGuardProd());
+    public static final RoyalGuardReviveProd ROYAL_GUARD_REVIVE = register(new ResourceLocation(ReignOfNether.MOD_ID, "royal_guard_revive"), new RoyalGuardReviveProd());
     public static final NecromancerProd NECROMANCER = register(new ResourceLocation(ReignOfNether.MOD_ID, "necromancer"), new NecromancerProd());
+    public static final NecromancerReviveProd NECROMANCER_REVIVE = register(new ResourceLocation(ReignOfNether.MOD_ID, "necromancer_revive"), new NecromancerReviveProd());
+    public static final PiglinMerchantProd PIGLIN_MERCHANT = register(new ResourceLocation(ReignOfNether.MOD_ID, "piglin_merchant"), new PiglinMerchantProd());
+    public static final PiglinMerchantReviveProd PIGLIN_MERCHANT_REVIVE = register(new ResourceLocation(ReignOfNether.MOD_ID, "piglin_merchant_revive"), new PiglinMerchantReviveProd());
     public static final ZombiePiglinProd ZOMBIE_PIGLIN = register(new ResourceLocation(ReignOfNether.MOD_ID, "zombie_piglin"), new ZombiePiglinProd());
     public static final ZoglinProd ZOGLIN = register(new ResourceLocation(ReignOfNether.MOD_ID, "zoglin"), new ZoglinProd());
     public static final PiglinMerchantProd PIGLIN_MERCHANT = register(new ResourceLocation(ReignOfNether.MOD_ID, "piglin_merchant"), new PiglinMerchantProd());
@@ -55,10 +59,10 @@ public class ProductionItems {
     public static final ResearchLabLightningRod RESEARCH_LAB_LIGHTNING_ROD = register(new ResourceLocation(ReignOfNether.MOD_ID, "lab_lightning_rod"), new ResearchLabLightningRod());
     public static final ResearchResourceCapacity RESEARCH_RESOURCE_CAPACITY = register(new ResourceLocation(ReignOfNether.MOD_ID, "resource_capacity"), new ResearchResourceCapacity());
     public static final ResearchSpiderJockeys RESEARCH_SPIDER_JOCKEYS = register(new ResourceLocation(ReignOfNether.MOD_ID, "spider_jockeys"), new ResearchSpiderJockeys());
-    public static final ResearchPoisonSpiders RESEARCH_POISON_SPIDERS = register(new ResourceLocation(ReignOfNether.MOD_ID, "poison_spiders"), new ResearchPoisonSpiders());
-    public static final ResearchHusks RESEARCH_HUSKS = register(new ResourceLocation(ReignOfNether.MOD_ID, "husks"), new ResearchHusks());
-    public static final ResearchDrowned RESEARCH_DROWNED = register(new ResourceLocation(ReignOfNether.MOD_ID, "drowned"), new ResearchDrowned());
-    public static final ResearchStrays RESEARCH_STRAYS = register(new ResourceLocation(ReignOfNether.MOD_ID, "strays"), new ResearchStrays());
+    public static final ResearchPoisonSpiders RESEARCH_POISON_SPIDERS = register(new ResourceLocation(ReignOfNether.MOD_ID, "research_poison_spiders"), new ResearchPoisonSpiders());
+    public static final ResearchHusks RESEARCH_HUSKS = register(new ResourceLocation(ReignOfNether.MOD_ID, "research_husks"), new ResearchHusks());
+    public static final ResearchDrowned RESEARCH_DROWNED = register(new ResourceLocation(ReignOfNether.MOD_ID, "research_drowned"), new ResearchDrowned());
+    public static final ResearchStrays RESEARCH_STRAYS = register(new ResourceLocation(ReignOfNether.MOD_ID, "research_strays"), new ResearchStrays());
     public static final ResearchSlimeConversion RESEARCH_SLIME_CONVERSION = register(new ResourceLocation(ReignOfNether.MOD_ID, "slime_conversion"), new ResearchSlimeConversion());
     public static final ResearchLingeringPotions RESEARCH_LINGERING_POTIONS = register(new ResourceLocation(ReignOfNether.MOD_ID, "lingering_potions"), new ResearchLingeringPotions());
     public static final ResearchWaterPotions RESEARCH_WATER_POTIONS = register(new ResourceLocation(ReignOfNether.MOD_ID, "water_potions"), new ResearchWaterPotions());

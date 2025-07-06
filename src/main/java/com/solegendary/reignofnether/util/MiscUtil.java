@@ -31,6 +31,8 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -295,20 +297,22 @@ public class MiscUtil {
         return closestBuilding;
     }
 
+    // neutral -> neutral ❌
+    // owned -> neutral ✔ (if neutral aggro on)
+    // neutral -> owned ✔ (if neutral aggro on)
+    // owned -> owned ✔ (if hostile)
     private static boolean isBuildingAttackable(Mob unitMob, BuildingPlacement building) {
-        // Get the relationship between the unit and the building's owner
         Relationship relationship = UnitServerEvents.getUnitToBuildingRelationship((Unit) unitMob, building);
 
-        // If the relationship is FRIENDLY, do not allow the attack
         if (relationship == Relationship.FRIENDLY) {
             return false;
         }
-
         boolean neutralAggro = unitMob.level().getGameRules().getRule(GameRuleRegistrar.NEUTRAL_AGGRO).get();
+        boolean neutralUnit = ((Unit) unitMob).getOwnerName().isBlank();
+
         if (relationship == Relationship.NEUTRAL && neutralAggro)
             return true;
 
-        // Additional attack conditions for hostile or neutral relationships can be added here
         return relationship == Relationship.HOSTILE;
     }
 
@@ -316,6 +320,10 @@ public class MiscUtil {
     private static boolean hasLineOfSightForAttacks(Mob mob, LivingEntity targetEntity) {
         return mob.hasLineOfSight(targetEntity) || mob instanceof GhastUnit ||
                 (mob instanceof Unit unit && GarrisonableBuilding.getGarrison((Unit) mob) != null);
+    }
+
+    public static <T extends Entity> List<T> getEntitiesWithinRange(Vec3 pos, float range, Class<T> entityType, Level level) {
+        return getEntitiesWithinRange(new Vector3d(pos.x, pos.y, pos.z), range, entityType, level);
     }
 
     public static <T extends Entity> List<T> getEntitiesWithinRange(Vector3d pos, float range, Class<T> entityType, Level level) {
@@ -612,5 +620,41 @@ public class MiscUtil {
         spacedStr = spacedStr.replace('-', ' ');
         spacedStr = spacedStr.replace('.', ' ');
         return WordUtils.capitalize(spacedStr);
+    }
+
+    public static float getMaxAbsorptionAmount(LivingEntity entity) {
+        MobEffectInstance mei = entity.getEffect(MobEffects.ABSORPTION);
+        if (mei != null) {
+            return (mei.getAmplifier() + 1) * 4.0f;
+        }
+        return entity.getAbsorptionAmount();
+    }
+
+    // eg. entity.reignofnether.zombie_unit -> zombie
+    public static String getSimpleEntityName(Entity entity) {
+        if (entity instanceof PhantomSummon)
+            return "Phantom";
+
+        if (entity instanceof Unit) {
+            if (entity.hasCustomName()) {
+                return entity.getType()
+                        .getDescription()
+                        .getString()
+                        .replace(" ", "")
+                        .replace("entity.reignofnether.", "")
+                        .replace("_unit", "")
+                        .replace(".none", "");
+            } else {
+                return entity.getName()
+                        .getString()
+                        .replace(" ", "")
+                        .replace("entity.reignofnether.", "")
+                        .replace("_unit", "")
+                        .replace(".none", "");
+            }
+        } else if (entity != null) {
+            return entity.getName().getString().toLowerCase();
+        }
+        return "";
     }
 }

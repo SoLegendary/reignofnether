@@ -241,17 +241,16 @@ public abstract class AbstractArrowMixin extends Projectile {
 
         if (this.getOwner() instanceof PillagerUnit pUnit &&
             !pUnit.level().isClientSide() && pUnit.isPassenger()) {
-            pUnit.level().explode(this, damagesource, null,
+            pUnit.level().explode(this.getOwner(), damagesource, null,
                     pResult.getEntity().getEyePosition().x,
                     pResult.getEntity().getEyePosition().y,
                     pResult.getEntity().getEyePosition().z,
                     1f,
                     false,
-                    Level.ExplosionInteraction.NONE);
+                    Level.ExplosionInteraction.TNT);
         }
     }
 
-    // replace bounce logic (on hitting an enemy at the time as another arrow) with pierce logic instead
     @Inject(
             method = "onHitBlock",
             at = @At("HEAD")
@@ -259,13 +258,13 @@ public abstract class AbstractArrowMixin extends Projectile {
     protected void onHitBlock(BlockHitResult pResult, CallbackInfo ci) {
         if (this.getOwner() instanceof PillagerUnit pUnit &&
                 !pUnit.level().isClientSide() && pUnit.isPassenger()) {
-            pUnit.level().explode(this, null, null,
+            pUnit.level().explode(this.getOwner(), null, null,
                     pResult.getLocation().x,
                     pResult.getLocation().y,
                     pResult.getLocation().z,
                     1f,
                     false,
-                    Level.ExplosionInteraction.NONE);
+                    Level.ExplosionInteraction.TNT);
         }
     }
 }

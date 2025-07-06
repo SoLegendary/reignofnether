@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
+import com.solegendary.reignofnether.building.production.HeroProductionItem;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
@@ -14,40 +15,41 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxAction;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.EntityType;
 
 import java.util.List;
 
-public class PiglinMerchantProd extends ProductionItem {
+public class PiglinMerchantProd extends HeroProductionItem {
 
-    public final static String itemName = "piglin_merchant";
+    public final static String itemName = "Piglin Merchant";
     public final static ResourceCost cost = ResourceCosts.PIGLIN_MERCHANT;
 
     public PiglinMerchantProd() {
-        super(cost);
+        super(cost, itemName, new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin_merchant.png"));
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide())
                 placement.produceUnit((ServerLevel) level, EntityRegistrar.PIGLIN_MERCHANT_UNIT.get(), placement.ownerName, true);
         };
     }
 
-    public String getItemName() {
-        return PiglinMerchantProd.itemName;
+    @Override
+    protected EntityType<? extends HeroUnit> getHeroEntityType() {
+        return EntityRegistrar.PIGLIN_MERCHANT_UNIT.get();
     }
 
     public AbilityButton getPlaceButton() {
         return new AbilityButton(
                 itemName,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin_merchant.png"),
+                iconRl,
                 null,
                 () -> SandboxClientEvents.spawnUnitName.equals(itemName),
                 () -> false,
-                () -> false,
+                () -> true,
                 () -> {
                     CursorClientEvents.setLeftClickSandboxAction(SandboxAction.SPAWN_UNIT);
                     SandboxClientEvents.spawnUnitName = itemName;
@@ -69,12 +71,12 @@ public class PiglinMerchantProd extends ProductionItem {
 
     public Button getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new Button(
-                PiglinMerchantProd.itemName,
+                itemName,
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin_merchant.png"),
+                iconRl,
                 hotkey,
                 () -> false,
-                () -> false,
+                () -> itemIsBeingProduced(prodBuilding.ownerName) || heroOwned(prodBuilding.level.isClientSide(), prodBuilding.ownerName),
                 () -> true,
                 () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, this),
                 null,
@@ -89,21 +91,6 @@ public class PiglinMerchantProd extends ProductionItem {
                         FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.piglin_merchant.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.piglin_merchant.tooltip2"), Style.EMPTY)
                 )
-        );
-    }
-
-    public Button getCancelButton(ProductionPlacement prodBuilding, boolean first) {
-        return new Button(
-                PiglinMerchantProd.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin_merchant.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, this, first),
-                null,
-                null
         );
     }
 }

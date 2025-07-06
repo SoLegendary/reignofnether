@@ -57,14 +57,14 @@ public class EnchantAbilityServerboundPacket {
             BuildingPlacement building = BuildingUtils.findBuilding(false, buildingPos);
             if (building instanceof LibraryPlacement library) {
 
-                if (!player.getName().getString().equals(library.ownerName)) {
+                if (!player.getName().getString().equals(building.ownerName)) {
                     ReignOfNether.LOGGER.warn("EnchantAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + library.ownerName);
                     success.set(false);
                     return;
                 }
 
                 Ability ability = null;
-                for (Ability abl : library.getAbilities())
+                for (Ability abl : building.getAbilities())
                     if (abl.action == abilityAction)
                         ability = abl;
                 if (ability instanceof EnchantAbility enchantAbility) {

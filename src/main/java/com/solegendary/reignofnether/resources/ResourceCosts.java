@@ -44,6 +44,8 @@ public class ResourceCosts {
     public static final ResourceCost NECROMANCER = new ResourceCost(ID, "NECROMANCER");
     public static final ResourceCost ROYAL_GUARD = new ResourceCost(ID, "ROYAL_GUARD");
     public static final ResourceCost PIGLIN_MERCHANT = new ResourceCost(ID, "PIGLIN_MERCHANT");
+    public static final ResourceCost HERO_BASE_REVIVE_COST = new ResourceCost(ID, "HERO_BASE_REVIVE_COST");
+    public static final ResourceCost HERO_EXTRA_REVIVE_COST_PER_LEVEL = new ResourceCost(ID, "HERO_REVIVE_COST_PER_LEVEL");
 
     public static final ResourceCost ENDERMAN = new ResourceCost(ID, "ENDERMAN");
     public static final ResourceCost POLAR_BEAR = new ResourceCost(ID, "POLAR_BEAR");
@@ -71,6 +73,7 @@ public class ResourceCosts {
     public static final ResourceCost DARK_WATCHTOWER = new ResourceCost(ID, "DARK_WATCHTOWER");
     public static final ResourceCost SLIME_PIT = new ResourceCost(ID, "SLIME_PIT");
     public static final ResourceCost STRONGHOLD = new ResourceCost(ID, "STRONGHOLD");
+    public static final ResourceCost ALTAR_OF_DARKNESS = new ResourceCost(ID, "ALTAR_OF_DARKNESS");
     //Villagers
     public static final ResourceCost TOWN_CENTRE = new ResourceCost(ID, "TOWN_CENTRE");
     public static final ResourceCost VILLAGER_HOUSE = new ResourceCost(ID, "VILLAGER_HOUSE");
@@ -82,6 +85,7 @@ public class ResourceCosts {
     public static final ResourceCost WATCHTOWER = new ResourceCost(ID, "WATCHTOWER");
     public static final ResourceCost CASTLE = new ResourceCost(ID, "CASTLE");
     public static final ResourceCost IRON_GOLEM_BUILDING = new ResourceCost(ID, "IRON_GOLEM_BUILDING");
+    public static final ResourceCost SHRINE_OF_PROSPERITY = new ResourceCost(ID, "SHRINE_OF_PROSPERITY");
     //Piglins
     public static final ResourceCost CENTRAL_PORTAL = new ResourceCost(ID, "CENTRAL_PORTAL");
     public static final ResourceCost BASIC_PORTAL = new ResourceCost(ID, "BASIC_PORTAL");
@@ -93,6 +97,7 @@ public class ResourceCosts {
     public static final ResourceCost BASALT_SPRINGS = new ResourceCost(ID, "BASALT_SPRINGS");
     public static final ResourceCost WITHER_SHRINE = new ResourceCost(ID, "WITHER_SHRINE");
     public static final ResourceCost FORTRESS = new ResourceCost(ID, "FORTRESS");
+    public static final ResourceCost INFERNAL_PORTAL = new ResourceCost(ID, "INFERNAL_PORTAL");
 
     // RESEARCH
 
@@ -155,6 +160,9 @@ public class ResourceCosts {
             str += "\uE001  " + resCost.wood + "     ";
         if (resCost.ore > 0)
             str += "\uE002  " + resCost.ore + "     ";
+
+        if (str.isEmpty())
+            str += "\uE000  0     ";
         str = str.trim();
         return FormattedCharSequence.forward(str, MyRenderer.iconStyle);
     }
@@ -221,6 +229,9 @@ public class ResourceCosts {
         WOLF.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WOLF);
         LLAMA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.LLAMA);
 
+        HERO_BASE_REVIVE_COST.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.HERO_BASE_REVIVE_COST);
+        HERO_EXTRA_REVIVE_COST_PER_LEVEL.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.HERO_EXTRA_REVIVE_COST_PER_LEVEL);
+
         // ******************* BUILDINGS ******************* //
         BEACON.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BEACON);
 
@@ -240,6 +251,7 @@ public class ResourceCosts {
         DARK_WATCHTOWER.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.DARK_WATCHTOWER);
         SLIME_PIT.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.SLIME_PIT);
         STRONGHOLD.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.STRONGHOLD);
+        ALTAR_OF_DARKNESS.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.ALTAR_OF_DARKNESS);
         // Villagers
         TOWN_CENTRE.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.TOWN_CENTRE);
         VILLAGER_HOUSE.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.VILLAGER_HOUSE);
@@ -251,6 +263,7 @@ public class ResourceCosts {
         WATCHTOWER.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.WATCHTOWER);
         CASTLE.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.CASTLE);
         IRON_GOLEM_BUILDING.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.IRON_GOLEM_BUILDING);
+        SHRINE_OF_PROSPERITY.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.SHRINE_OF_PROSPERITY);
         // Piglins
         CENTRAL_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.CENTRAL_PORTAL);
         BASIC_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BASIC_PORTAL);
@@ -262,6 +275,7 @@ public class ResourceCosts {
         WITHER_SHRINE.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.WITHER_SHRINE);
         BASALT_SPRINGS.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BASALT_SPRINGS);
         FORTRESS.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.FORTRESS);
+        INFERNAL_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.INFERNAL_PORTAL);
         // ******************* RESEARCH ******************* //
         RESEARCH_GOLEM_SMITHING.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_GOLEM_SMITHING);
         RESEARCH_LAB_LIGHTNING_ROD.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_LAB_LIGHTNING_ROD);

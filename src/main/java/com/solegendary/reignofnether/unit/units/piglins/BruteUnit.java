@@ -23,23 +23,26 @@ import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket
 import com.solegendary.reignofnether.util.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -59,6 +62,10 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
+
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -114,7 +121,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     // combat stats
     public float getMovementSpeed() {return isHoldingUpShield ? movementSpeed * SHIELD_MOVE_MULTIPLIER : movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
-    public float getUnitArmorValue() {return armorValue;}
+
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.BRUTE;}
     public boolean getWillRetaliate() {return willRetaliate;}
@@ -197,7 +204,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Mob.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE, BruteUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, BruteUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, BruteUnit.maxHealth)
@@ -226,6 +233,18 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
 
         if (bloodlustTicks > 0)
             bloodlustTicks -= 1;
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
     }
 
     public void initialiseGoals() {
@@ -259,10 +278,10 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
-        ItemStack axeStack = new ItemStack(Items.GOLDEN_SWORD);
+        ItemStack swordStack = new ItemStack(Items.GOLDEN_SWORD);
         AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
-        axeStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
-        this.setItemSlot(EquipmentSlot.MAINHAND, axeStack);
+        swordStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+        this.setItemSlot(EquipmentSlot.MAINHAND, swordStack);
 
         if (ResearchServerEvents.playerHasResearch(this.getOwnerName(), ProductionItems.RESEARCH_BRUTE_SHIELDS)) {
             ItemStack shieldStack = new ItemStack(Items.SHIELD);
@@ -272,8 +291,37 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
 
     @Override
     public boolean fireImmune() {
-        BuildingPlacement building = BuildingUtils.findBuilding(level().isClientSide(), getOnPos());
-        return super.fireImmune() || (building != null &&(building.getBuilding() instanceof FlameSanctuary || building.getBuilding() instanceof BasaltSprings));
+        BuildingPlacement bpl = BuildingUtils.findBuilding(level().isClientSide(), getOnPos());
+        return super.fireImmune() || (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary || bpl.getBuilding() instanceof BasaltSprings));
+    }
+
+    public boolean hasEnchantedNetheriteSword() {
+        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+        return itemStack.getItem() == Items.NETHERITE_SWORD && itemStack.isEnchanted();
+    }
+
+    @Override
+    public boolean canPickUpEquipment(ItemStack itemStack) {
+        Item item = itemStack.getItem();
+        return (item == Items.GOLDEN_CHESTPLATE ||
+                item == Items.GOLDEN_LEGGINGS ||
+                item == Items.GOLDEN_BOOTS ||
+                item == Items.GOLDEN_HELMET ||
+                item == Items.NETHERITE_CHESTPLATE ||
+                item == Items.NETHERITE_LEGGINGS ||
+                item == Items.NETHERITE_BOOTS ||
+                item == Items.NETHERITE_HELMET ||
+                item == Items.NETHERITE_SWORD) &&
+                getItemBySlot(getEquipmentSlotForItem(itemStack)).getItem() != item;
+    }
+
+    @Override
+    public void onPickupEquipment(ItemStack itemStack) {
+        if (itemStack.getItem() == Items.NETHERITE_SWORD) {
+            AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 2, AttributeModifier.Operation.ADDITION);
+            itemStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+        }
+        setItemSlot(getEquipmentSlotForItem(itemStack), itemStack);
     }
 
     @Override

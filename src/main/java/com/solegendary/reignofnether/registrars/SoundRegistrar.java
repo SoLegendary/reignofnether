@@ -48,6 +48,14 @@ public class SoundRegistrar {
             SOUND_EVENTS.register("blood_moon", () ->
                     SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "blood_moon")));
 
+    public static final RegistryObject<SoundEvent> BLOODLUST =
+            SOUND_EVENTS.register("bloodlust", () ->
+                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "bloodlust")));
+
+    public static final RegistryObject<SoundEvent> HEROISM =
+            SOUND_EVENTS.register("heroism", () ->
+                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "heroism")));
+
     public static void init() {
         SOUND_EVENTS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }

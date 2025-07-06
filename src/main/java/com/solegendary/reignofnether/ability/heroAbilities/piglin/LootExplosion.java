@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.goals.GenericUntargetedSpellGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinMerchantUnit;
@@ -28,12 +29,12 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class LootExplosion extends HeroAbility {
 
-    private static final int CD_MAX_SECONDS = 240 * ResourceCost.TICKS_PER_SECOND;
-    private static final int NUM_ITEMS = 10;
-    private static final int NUM_ITEMS_PER_100_RESOURCES = 3;
+    private static final int CD_MAX_SECONDS = 300 * ResourceCost.TICKS_PER_SECOND;
+    public static final int BASE_ITEMS = 12;
+    public static final int BONUS_ITEMS_PER_100_RESOURCES = 3;
 
     public LootExplosion() {
-        super(1, UnitAction.LOOT_EXPLOSION, CD_MAX_SECONDS, 0, 0, false);
+        super(1, 125, UnitAction.LOOT_EXPLOSION, CD_MAX_SECONDS, 0, 0, false);
     }
 
     @Override
@@ -53,6 +54,16 @@ public class LootExplosion extends HeroAbility {
     }
 
     @Override
+    public boolean isCasting() {
+        if (this.hero instanceof PiglinMerchantUnit piglinMerchantUnit) {
+            GenericUntargetedSpellGoal goal = piglinMerchantUnit.getCastLootExplosionGoal();
+            if (goal != null)
+                return goal.isCasting();
+        }
+        return false;
+    }
+
+    @Override
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Loot Explosion",
@@ -64,11 +75,11 @@ public class LootExplosion extends HeroAbility {
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.loot_explosion") + " " + rankString(), true),
-                fcsIcons(I18n.get("abilities.reignofnether.loot_explosion.stats", CD_MAX_SECONDS / 20)),
+                fcsIcons(I18n.get("abilities.reignofnether.loot_explosion.stats", CD_MAX_SECONDS / 20, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip2")),
-                fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip3", NUM_ITEMS, NUM_ITEMS_PER_100_RESOURCES))
+                fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip3", BASE_ITEMS, BONUS_ITEMS_PER_100_RESOURCES))
         );
     }
 
@@ -79,7 +90,7 @@ public class LootExplosion extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip2")),
-                fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip3", NUM_ITEMS, NUM_ITEMS_PER_100_RESOURCES))
+                fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip3", BASE_ITEMS, BONUS_ITEMS_PER_100_RESOURCES))
         );
     }
 

@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Bloodlust;
 import com.solegendary.reignofnether.ability.abilities.ToggleShield;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -22,7 +23,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -53,6 +53,9 @@ public class DrownedUnit extends Drowned implements Unit, AttackerUnit {
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -116,7 +119,7 @@ public class DrownedUnit extends Drowned implements Unit, AttackerUnit {
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitAttackDamage() {return attackDamage;}
     public float getUnitMaxHealth() {return maxHealth;}
-    public float getUnitArmorValue() {return armorValue;}
+
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.DROWNED;}
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
@@ -170,6 +173,18 @@ public class DrownedUnit extends Drowned implements Unit, AttackerUnit {
         AttackerUnit.tick(this);
     }
 
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
+    }
+
     public void initialiseGoals() {
         this.usePortalGoal = new UsePortalGoal(this);
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
@@ -183,6 +198,15 @@ public class DrownedUnit extends Drowned implements Unit, AttackerUnit {
     @Override
     protected boolean isSunBurnTick() {
         return NightUtils.isSunBurnTick(this);
+    }
+
+    @Override
+    public SunlightEffect getSunlightEffect() {
+        if (hasItemInSlot(EquipmentSlot.HEAD)) {
+            return SunlightEffect.MOVEMENT_SLOWDOWN;
+        } else {
+            return SunlightEffect.FIRE;
+        }
     }
 
     @Override
@@ -229,7 +253,7 @@ public class DrownedUnit extends Drowned implements Unit, AttackerUnit {
     public boolean doHurtTarget(@NotNull Entity pEntity) {
         if (super.doHurtTarget(pEntity)) {
             if (pEntity instanceof LivingEntity)
-                ((LivingEntity)pEntity).addEffect(new MobEffectInstance(MobEffects.HUNGER, CONVERT_DEBUFF_DURATION_SECONDS * 20, 0), this);
+                ((LivingEntity)pEntity).addEffect(new MobEffectInstance(MobEffectRegistrar.ZOMBIE_INFECTED.get(), CONVERT_DEBUFF_DURATION_SECONDS * 20, 0), this);
             return true;
         } else {
             return false;

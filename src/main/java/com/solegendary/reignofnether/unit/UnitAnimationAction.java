@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit;
 
 public enum UnitAnimationAction {
+    EAT_FOOD_ITEM,
     NON_KEYFRAME_START,
     NON_KEYFRAME_STOP,
     NON_KEYFRAME_ATTACK,

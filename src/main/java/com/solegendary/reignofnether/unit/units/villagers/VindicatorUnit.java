@@ -30,7 +30,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -38,6 +37,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -54,6 +54,9 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -117,7 +120,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitAttackDamage() {return attackDamage + (hasSharpnessEnchant() ? 2 : 0);}
     public float getUnitMaxHealth() {return maxHealth;}
-    public float getUnitArmorValue() {return armorValue;}
+
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.VINDICATOR;}
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
@@ -179,7 +182,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Mob.createMobAttributes()
                 .add(Attributes.MOVEMENT_SPEED, VindicatorUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, VindicatorUnit.attackDamage)
                 .add(Attributes.ARMOR, VindicatorUnit.armorValue)
@@ -193,6 +196,18 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         Unit.tick(this);
         AttackerUnit.tick(this);
         PromoteIllager.checkAndApplyBuff(this);
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
     }
 
     public void initialiseGoals() {
@@ -220,20 +235,6 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
-    /*
-    @Override
-    public void setupEquipmentAndUpgradesClient() {
-        if (hasAnyEnchant())
-            return;
-
-        // weapon is purely visual, damage is based solely on entity attribute ATTACK_DAMAGE
-        Item axe = Items.IRON_AXE;
-        //if (ResearchClient.hasResearch(ResearchVindicatorAxes.itemName))
-        //    axe = Items.DIAMOND_AXE;
-        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(axe));
-    }
-     */
-
     @Override
     public void setupEquipmentAndUpgradesServer() {
         if (hasAnyEnchant())
@@ -242,10 +243,6 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         // weapon is purely visual, damage is based solely on entity attribute ATTACK_DAMAGE
         Item axe = Items.IRON_AXE;
         int damageMod = 0;
-        //if (ResearchServerEvents.playerHasResearch(this.getOwnerName(), ResearchVindicatorAxes.itemName)) {
-        //    axe = Items.DIAMOND_AXE;
-        //    damageMod = 2;
-        //}
         ItemStack axeStack = new ItemStack(axe);
         AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), damageMod, AttributeModifier.Operation.ADDITION);
         axeStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);

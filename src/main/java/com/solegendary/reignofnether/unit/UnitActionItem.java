@@ -2,12 +2,16 @@ package com.solegendary.reignofnether.unit;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.HeroAbility;
+import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.building.buildings.placements.FarmPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
@@ -89,6 +93,13 @@ public class UnitActionItem {
         this.selectedBuildingPos = selectedBuildingPos;
     }
 
+    private boolean canAffordManaCost(Ability ability) {
+        if (ability instanceof HeroAbility heroAbility) {
+            return heroAbility.manaCost <= heroAbility.hero.getMana();
+        }
+        return true;
+    }
+
     // can be done server or clientside - but only serverside will have an effect on the world
     // clientside actions are purely for tracking data
     public void action(Level level) {
@@ -104,8 +115,17 @@ public class UnitActionItem {
         ArrayList<Unit> actionableUnits = new ArrayList<>();
         for (int id : unitIds) {
             Entity entity = level.getEntity(id);
-            if (entity instanceof Unit unit && (unit.getOwnerName().equals(this.ownerName) || isSandboxPlayer)) {
-                actionableUnits.add(unit);
+
+            if (entity instanceof Unit unit) {
+                boolean alliedControl;
+                if (level.isClientSide())
+                    alliedControl = AlliancesClient.canControlAlly(unit.getOwnerName());
+                else
+                    alliedControl = AlliancesServerEvents.canControlAlly(this.ownerName, unit.getOwnerName());
+
+                if (unit.getOwnerName().equals(this.ownerName) || isSandboxPlayer || alliedControl) {
+                    actionableUnits.add(unit);
+                }
             }
         }
 
@@ -113,6 +133,13 @@ public class UnitActionItem {
 
         actionableUnitsLoop:
         for (Unit unit : actionableUnits) {
+
+            if (((LivingEntity) unit).getEffect(MobEffectRegistrar.STUN.get()) != null) {
+                Unit.fullResetBehaviours(unit);
+                continue;
+            } else if (((LivingEntity) unit).getEffect(MobEffectRegistrar.UNCONTROLLABLE.get()) != null) {
+                continue;
+            }
 
             // recalculating pathfinding can be expensive, so check if we actually need to first
             if (action == UnitAction.MOVE) {
@@ -335,7 +362,10 @@ public class UnitActionItem {
                 // any other Ability not explicitly defined here
                 default -> {
                     for (Ability ability : unit.getAbilities()) {
-                        if (ability.action == action && (ability.isOffCooldown(unit) || ability.canBypassCooldown(unit))) {
+                        if (ability.action == action &&
+                            (ability.isOffCooldown(unit) || ability.canBypassCooldown(unit)) &&
+                            canAffordManaCost(ability)
+                        ) {
                             if (ability.canTargetEntities && this.unitId > 0) {
                                 ability.use(level, unit, (LivingEntity) level.getEntity(unitId));
                                 usedAbility = ability;
@@ -401,8 +431,8 @@ public class UnitActionItem {
             }
         }
 
-        if ((level.isClientSide() && NonUnitClientEvents.canControlNonUnits()) ||
-            (!level.isClientSide() && NonUnitServerEvents.canControlNonUnits(level, ownerName))) {
+        if ((level.isClientSide() && NonUnitClientEvents.canControlAllMobs()) ||
+            (!level.isClientSide() && NonUnitServerEvents.canControlAllMobs(level, ownerName))) {
 
             for (PathfinderMob mob : actionableNonUnits) {
                 if (mob instanceof Unit)

@@ -67,14 +67,14 @@ public class ResearchHusks extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, ProductionItems.RESEARCH_HUSKS),
             null,
             List.of(
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.husks"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_husks"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.husks.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.husks.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_husks.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_husks.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.husks.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_husks.tooltip3"), Style.EMPTY)
             )
         );
     }

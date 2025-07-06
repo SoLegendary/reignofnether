@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
+import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.Sacrifice;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
 import com.solegendary.reignofnether.time.TimeClientEvents;
@@ -32,6 +34,8 @@ public class SculkCatalystPlacement extends BuildingPlacement implements RangeIn
     private final BlockPos sculkFixBp = null;
     public SculkCatalystPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
+        Ability sacrifice = new Sacrifice(level);
+        abilities.add(sacrifice);
     }
 
     public int getUncappedNightRange() {

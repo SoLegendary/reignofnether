@@ -69,14 +69,14 @@ public class ResearchDrowned extends ProductionItem {
             () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, ProductionItems.RESEARCH_DROWNED),
             null,
             List.of(
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.drowned"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_drowned"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.drowned.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.drowned.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_drowned.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_drowned.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.drowned.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_drowned.tooltip3"), Style.EMPTY)
             )
         );
     }

@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -45,6 +46,7 @@ public class PromoteIllager extends Ability {
 
     public PromoteIllager() {
         super(UnitAction.PROMOTE_ILLAGER, CD_MAX, RANGE, 0, true, true);
+        this.defaultHotkey = Keybindings.keyW;
     }
 
     // checks that the unit has a banner and applies the speed buff to nearby friendly units if it is

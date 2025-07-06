@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -34,6 +35,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -52,6 +54,9 @@ public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -106,7 +111,7 @@ public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
     // combat stats
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
-    public float getUnitArmorValue() {return armorValue;}
+
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.ZOGLIN;}
     public boolean getWillRetaliate() {return willRetaliate;}
@@ -200,6 +205,11 @@ public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
         return NightUtils.isSunBurnTick(this);
     }
 
+    @Override
+    public SunlightEffect getSunlightEffect() {
+        return SunlightEffect.FIRE;
+    }
+
     public void tick() {
         this.setCanPickUpLoot(false);
         super.tick();
@@ -207,7 +217,19 @@ public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
         AttackerUnit.tick(this);
 
         if (isSunBurnTick())
-            this.setSecondsOnFire(8);
+            this.setSecondsOnFire(8); // zoglins dont normally burn so do this manually
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
     }
 
     public void initialiseGoals() {

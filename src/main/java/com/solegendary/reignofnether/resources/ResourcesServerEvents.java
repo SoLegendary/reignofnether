@@ -57,6 +57,7 @@ public class ResourcesServerEvents {
     public static final int STARTING_ORE = 250;
 
     public static final float NEUTRAL_UNIT_BOUNTY_PERCENT = 0.25f;
+    public static final float NEUTRAL_BUILDING_BOUNTY_PERCENT = 0.25f;
 
     // to avoid having to save units too often add on all unit resources here too and just add directly on load
     public static void saveResources(ServerLevel serverLevel) {
@@ -86,9 +87,9 @@ public class ResourcesServerEvents {
             for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                 if (building instanceof ProductionPlacement pBuilding) {
                     for (ActiveProduction item : pBuilding.productionQueue) {
-                        prodFood += item.item.cost.food;
-                        prodWood += item.item.cost.wood;
-                        prodOre += item.item.cost.ore;
+                        prodFood += item.item.getCost(false, pBuilding.ownerName).food;
+                        prodWood += item.item.getCost(false, pBuilding.ownerName).wood;
+                        prodOre += item.item.getCost(false, pBuilding.ownerName).ore;
                     }
                 }
             }
@@ -116,7 +117,7 @@ public class ResourcesServerEvents {
         }
     }
 
-    private static final int SAVE_TICKS_MAX = 1200;
+    private static final int SAVE_TICKS_MAX = 600;
     private static int saveTicks = 0;
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {

@@ -74,6 +74,15 @@ public class SandboxServer {
             }
         }
     }
+
+    public static void setOwner(int entityId, String ownerName) {
+        for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
+            if (entity.getId() == entityId && entity instanceof Unit unit) {
+                unit.setOwnerName(ownerName);
+                UnitSyncClientboundPacket.sendSyncOwnerNamePacket(unit);
+            }
+        }
+    }
 }
 
 

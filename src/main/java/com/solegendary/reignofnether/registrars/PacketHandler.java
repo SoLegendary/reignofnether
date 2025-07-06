@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.AbilityServerboundPacket;
 import com.solegendary.reignofnether.ability.EnchantAbilityServerboundPacket;
 import com.solegendary.reignofnether.alliance.AllianceClientboundAddPacket;
+import com.solegendary.reignofnether.alliance.AllianceClientboundControlPacket;
 import com.solegendary.reignofnether.alliance.AllianceClientboundRemovePacket;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
@@ -19,7 +20,9 @@ import com.solegendary.reignofnether.gamemode.GameModeServerboundPacket;
 import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
 import com.solegendary.reignofnether.gamerules.GameruleServerboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
+import com.solegendary.reignofnether.hero.FallenHeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
+import com.solegendary.reignofnether.hero.HeroServerboundPacket;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
@@ -78,6 +81,14 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(UnitSyncWorkerClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(UnitSyncWorkerClientBoundPacket::encode).decoder(UnitSyncWorkerClientBoundPacket::new)
                 .consumerMainThread(UnitSyncWorkerClientBoundPacket::handle).add();
+
+        INSTANCE.messageBuilder(UnitSyncAbilityClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(UnitSyncAbilityClientboundPacket::encode).decoder(UnitSyncAbilityClientboundPacket::new)
+                .consumerMainThread(UnitSyncAbilityClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(UnitSyncServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(UnitSyncServerboundPacket::encode).decoder(UnitSyncServerboundPacket::new)
+                .consumerMainThread(UnitSyncServerboundPacket::handle).add();
 
         INSTANCE.messageBuilder(UnitAnimationClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(UnitAnimationClientboundPacket::encode).decoder(UnitAnimationClientboundPacket::new)
@@ -175,6 +186,12 @@ public final class PacketHandler {
                 .consumerMainThread(AllianceClientboundRemovePacket::handle)
                 .add();
 
+        INSTANCE.messageBuilder(AllianceClientboundControlPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(AllianceClientboundControlPacket::toBytes)
+                .decoder(AllianceClientboundControlPacket::new)
+                .consumerMainThread(AllianceClientboundControlPacket::handle)
+                .add();
+
         INSTANCE.messageBuilder(GameModeServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(GameModeServerboundPacket::encode)
                 .decoder(GameModeServerboundPacket::new)
@@ -239,6 +256,18 @@ public final class PacketHandler {
                 .encoder(HeroClientboundPacket::encode)
                 .decoder(HeroClientboundPacket::new)
                 .consumerMainThread(HeroClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(HeroServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(HeroServerboundPacket::encode)
+                .decoder(HeroServerboundPacket::new)
+                .consumerMainThread(HeroServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(FallenHeroClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(FallenHeroClientboundPacket::encode)
+                .decoder(FallenHeroClientboundPacket::new)
+                .consumerMainThread(FallenHeroClientboundPacket::handle)
                 .add();
     }
 }

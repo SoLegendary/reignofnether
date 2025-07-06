@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.buildings.placements.LibraryPlacem
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
@@ -33,6 +34,7 @@ public class EnchantQuickCharge extends EnchantAbility {
 
     public EnchantQuickCharge() {
         super(ENCHANT_ACTION, ResourceCosts.ENCHANT_QUICK_CHARGE);
+        this.defaultHotkey = Keybindings.keyW;
     }
 
     @Override

@@ -42,7 +42,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.npc.VillagerDataHolder;
@@ -77,6 +76,9 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     Ability autocast;
 
     // region
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
     private BlockPos anchorPos = new BlockPos(0,0,0);
     public void setAnchor(BlockPos bp) { anchorPos = bp; }
     public BlockPos getAnchor() { return anchorPos; }
@@ -130,7 +132,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     // combat stats
     public float getMovementSpeed() {return movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
-    public float getUnitArmorValue() {return armorValue;}
+
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.VILLAGER;}
     public boolean getWillRetaliate() {return willRetaliate;}
@@ -289,7 +291,8 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     }
 
     public boolean isSwingingArmRepeatedly() {
-        return (this.getGatherResourceGoal().isGathering() || this.getBuildRepairGoal().isBuilding());
+        return ((this.getGatherResourceGoal() != null && this.getGatherResourceGoal().isGathering()) ||
+                (this.getBuildRepairGoal() != null && this.getBuildRepairGoal().isBuilding()));
     }
 
     public static List<AbilityButton> getBuildingButtons() {
@@ -325,7 +328,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Mob.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE, VillagerUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, VillagerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, VillagerUnit.maxHealth)
@@ -355,6 +358,37 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             WorkerUnit.tick(this);
             this.callToArmsGoal.tick();
         }
+    }
+
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        DataResult<Tag> var10000 = VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData());
+        var10000.resultOrPartial((err) -> ReignOfNether.LOGGER.error("Failed to save villager data"))
+                .ifPresent((tag) -> pCompound.put("VillagerData", tag));
+        pCompound.putInt("farmerExp", this.farmerExp);
+        pCompound.putInt("lumberjackExp", this.lumberjackExp);
+        pCompound.putInt("minerExp", this.minerExp);
+        pCompound.putInt("masonExp", this.masonExp);
+        pCompound.putInt("hunterExp", this.hunterExp);
+        pCompound.putBoolean("isVeteran", this.isVeteran);
+        this.addUnitSaveData(pCompound);
+    }
+
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        if (pCompound.contains("VillagerData", 10)) {
+            DataResult<VillagerData> dataresult = VillagerData.CODEC.parse(new Dynamic(NbtOps.INSTANCE, pCompound.get("VillagerData")));
+            dataresult.resultOrPartial((err) -> ReignOfNether.LOGGER.error("Failed to load villager data"))
+                    .ifPresent(this::setVillagerData);
+        }
+        this.farmerExp = pCompound.getInt("farmerExp");
+        this.lumberjackExp = pCompound.getInt("lumberjackExp");
+        this.minerExp = pCompound.getInt("minerExp");
+        this.masonExp = pCompound.getInt("masonExp");
+        this.hunterExp = pCompound.getInt("hunterExp");
+        if (!level().isClientSide() && pCompound.getBoolean("isVeteran"))
+            makeVeteran();
+        this.readUnitSaveData(pCompound);
     }
 
     public void convertToMilitia() {
@@ -458,35 +492,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     }
     public boolean hasUnitProfession() {
         return this.getUnitProfession() != VillagerUnitProfession.NONE;
-    }
-
-    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
-        super.addAdditionalSaveData(pCompound);
-        DataResult<Tag> var10000 = VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData());
-        var10000.resultOrPartial((err) -> ReignOfNether.LOGGER.error("Failed to save villager data"))
-            .ifPresent((tag) -> pCompound.put("VillagerData", tag));
-        pCompound.putInt("farmerExp", this.farmerExp);
-        pCompound.putInt("lumberjackExp", this.lumberjackExp);
-        pCompound.putInt("minerExp", this.minerExp);
-        pCompound.putInt("masonExp", this.masonExp);
-        pCompound.putInt("hunterExp", this.hunterExp);
-        pCompound.putBoolean("isVeteran", this.isVeteran);
-    }
-
-    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
-        super.readAdditionalSaveData(pCompound);
-        if (pCompound.contains("VillagerData", 10)) {
-            DataResult<VillagerData> dataresult = VillagerData.CODEC.parse(new Dynamic(NbtOps.INSTANCE, pCompound.get("VillagerData")));
-            dataresult.resultOrPartial((err) -> ReignOfNether.LOGGER.error("Failed to load villager data"))
-                    .ifPresent(this::setVillagerData);
-        }
-        this.farmerExp = pCompound.getInt("farmerExp");
-        this.lumberjackExp = pCompound.getInt("lumberjackExp");
-        this.minerExp = pCompound.getInt("minerExp");
-        this.masonExp = pCompound.getInt("masonExp");
-        this.hunterExp = pCompound.getInt("hunterExp");
-        if (!level().isClientSide() && pCompound.getBoolean("isVeteran"))
-            makeVeteran();
     }
 
     @Override

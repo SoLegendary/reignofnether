@@ -25,7 +25,7 @@ public class SoulSiphonPassive extends HeroAbility {
     public float soulsMax = 0;
 
     public SoulSiphonPassive() {
-        super(3, UnitAction.NONE, 0, 0, 0, false);
+        super(3, 0, UnitAction.NONE, 0, 0, 0, false);
         this.autocastEnableAction = UnitAction.ENABLE_SOUL_SIPHON_PASSIVE;
         this.autocastDisableAction = UnitAction.DISBLE_SOUL_SIPHON_PASSIVE;
         this.setDefaultAutocast(true);
@@ -57,7 +57,7 @@ public class SoulSiphonPassive extends HeroAbility {
         AbilityButton button = new AbilityButton("Soul Siphon",
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png"),
             hotkey,
-            () -> this.getAutocast(hero),
+            () -> this.isAutocasting(hero),
             () -> rank == 0,
             () -> true,
             () -> toggleAutocast(hero),
@@ -116,7 +116,7 @@ public class SoulSiphonPassive extends HeroAbility {
 
     // returns amount of souls consumed
     public boolean consumeSouls(HeroUnit unit) {
-        if (getAutocast(unit) && souls >= soulsPerCast) {
+        if (isAutocasting(unit) && souls >= soulsPerCast) {
             souls -= soulsPerCast;
             return true;
         }

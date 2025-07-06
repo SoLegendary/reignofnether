@@ -28,12 +28,13 @@ public class GameruleClient {
     public static boolean doUnitGriefing = false; // only for GUI
     public static boolean doPlayerGriefing = true; // only for GUI
     public static boolean improvedPathfinding = true; // only for GUI
-    public static double groundYLevel = 0;
+    public static double groundYLevel = -320;
     public static double flyingMaxYLevel = 320;
     public static boolean allowBeacons = true;
     public static boolean pvpModesOnly = false;
     public static double beaconWinMinutes = 20;
     public static boolean slantedBuilding = true;
+    public static boolean allowHeroes = true;
 
     public static boolean gamerulesMenuOpen = false;
 
@@ -154,6 +155,10 @@ public class GameruleClient {
         buttons.add(new GameruleBooleanButton("slantedBuilding", slantedBuilding,
             () -> GameruleServerboundPacket.setSlantedBuilding(!slantedBuilding),
             I18n.get("commands.reignofnether.gamerule.slanted_buildings")
+        ));
+        buttons.add(new GameruleBooleanButton("allowHeroes (BETA)", allowHeroes,
+            () -> GameruleServerboundPacket.setAllowHeroes(!allowHeroes),
+            I18n.get("commands.reignofnether.gamerule.allow_heroes")
         ));
         buttons.add(new GameruleIntegerButton("maxPopulation: " + Math.round(maxPopulation),
             () -> {

@@ -9,9 +9,13 @@ package com.solegendary.reignofnether.ability.heroAbilities.monster;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
+import com.solegendary.reignofnether.time.TimeClientEvents;
+import com.solegendary.reignofnether.time.TimeServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.goals.GenericUntargetedSpellGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
@@ -30,6 +34,8 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class BloodMoon extends HeroAbility {
 
+    public static final String ENEMY_NAME = "Blood Moon";
+
     public static final int SPAWN_INTERVAL_TICKS = 120; // how often to spawn a unit
     public static final int CHANNEL_TICKS = 40;
     private static final int CD_MAX = 360 * ResourceCost.TICKS_PER_SECOND;
@@ -37,7 +43,17 @@ public class BloodMoon extends HeroAbility {
     public static final int BONUS_DURATION_PER_SOUL_RANK = 10 * ResourceCost.TICKS_PER_SECOND;
 
     public BloodMoon() {
-        super(1, UnitAction.BLOOD_MOON, CD_MAX, 0, 0, false);
+        super(1, 150, UnitAction.BLOOD_MOON, CD_MAX, 0, 0, false);
+    }
+
+    @Override
+    public boolean isCasting() {
+        if (this.hero instanceof NecromancerUnit necromancerUnit) {
+            GenericUntargetedSpellGoal goal = necromancerUnit.getCastBloodMoonGoal();
+            if (goal != null)
+                return goal.isCasting();
+        }
+        return false;
     }
 
     @Override
@@ -68,7 +84,7 @@ public class BloodMoon extends HeroAbility {
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.blood_moon"), true),
-                fcsIcons(I18n.get("abilities.reignofnether.blood_moon.stats", CD_MAX / 20)),
+                fcsIcons(I18n.get("abilities.reignofnether.blood_moon.stats", CD_MAX / 20, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip2")),
@@ -90,13 +106,28 @@ public class BloodMoon extends HeroAbility {
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        ((NecromancerUnit) unitUsing).getCastBloodMoonGoal().setAbility(this);
-        ((NecromancerUnit) unitUsing).getCastBloodMoonGoal().startCasting();
+        use(level, unitUsing);
     }
 
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
-        ((NecromancerUnit) unitUsing).getCastBloodMoonGoal().setAbility(this);
-        ((NecromancerUnit) unitUsing).getCastBloodMoonGoal().startCasting();
+        use(level, unitUsing);
+    }
+
+    private void use(Level level, Unit unitUsing) {
+        boolean isBloodMoonActive;
+        if (level.isClientSide()) {
+            isBloodMoonActive = TimeClientEvents.isBloodMoonActive();
+            if (isBloodMoonActive) {
+                HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.blood_moon.already_active"));
+            }
+        } else {
+            isBloodMoonActive = TimeServerEvents.isBloodMoonActive();
+        }
+
+        if (!isBloodMoonActive) {
+            ((NecromancerUnit) unitUsing).getCastBloodMoonGoal().setAbility(this);
+            ((NecromancerUnit) unitUsing).getCastBloodMoonGoal().startCasting();
+        }
     }
 }

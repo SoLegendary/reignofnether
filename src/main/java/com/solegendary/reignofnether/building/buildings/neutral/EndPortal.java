@@ -4,11 +4,11 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.EndPortalPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
+import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.unit.units.neutral.EndermanProd;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -45,7 +45,7 @@ public class EndPortal extends ProductionBuilding {
 
         this.explodeChance = 0.2f;
 
-        this.productions.add(new EndermanProd(), Keybindings.keyQ);
+        this.productions.add(ProductionItems.ENDERMAN, Keybindings.keyQ);
     }
 
     public Faction getFaction() {return Faction.NONE;}

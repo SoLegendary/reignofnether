@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
+import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.EnchantAbility;
+import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -13,10 +15,21 @@ import org.joml.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LibraryPlacement extends ProductionPlacement{
+public class LibraryPlacement extends ProductionPlacement {
     public EnchantAbility autoCastEnchant = null;
     public LibraryPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
+
+        Ability enchantMaiming = new EnchantMaiming(this);
+        getAbilities().add(enchantMaiming);
+        Ability enchantQuickCharge = new EnchantQuickCharge(this);
+        getAbilities().add(enchantQuickCharge);
+        Ability enchantSharpness = new EnchantSharpness(this);
+        getAbilities().add(enchantSharpness);
+        Ability enchantMultishot = new EnchantMultishot(this);
+        getAbilities().add(enchantMultishot);
+        Ability enchantVigor = new EnchantVigor(this);
+        getAbilities().add(enchantVigor);
     }
 
     @Override

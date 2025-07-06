@@ -55,21 +55,21 @@ public class ConnectPortal extends Ability {
     }
 
     @Override
-    public void use(Level level, BuildingPlacement building, BlockPos targetBp) {
+    public void use(Level level, BuildingPlacement buildingUsing, BlockPos targetBp) {
 
-        if (building instanceof PortalPlacement portal && portal.getPortalType() == PortalPlacement.PortalType.TRANSPORT) {
-            portal.disconnectPortal();
+        if (building instanceof PortalPlacement portalPlacement && portal.getPortalType() == PortalPlacement.PortalType.TRANSPORT) {
+            portalPlacement.disconnectPortal();
 
             BuildingPlacement targetBuilding = BuildingUtils.findBuilding(level.isClientSide(), targetBp);
             if (targetBuilding instanceof PortalPlacement targetPortal && targetPortal.getPortalType() == PortalPlacement.PortalType.TRANSPORT &&
-                targetBuilding != building && targetBuilding.isBuilt &&
-                (targetBuilding.ownerName.equals(building.ownerName) ||
+                targetBuilding != portalPlacement && targetBuilding.isBuilt &&
+                (targetBuilding.ownerName.equals(portalPlacement.ownerName) ||
                 (targetBuilding.getBuilding() instanceof NeutralTransportPortal &&
-                    building.getBuilding() instanceof NeutralTransportPortal))) {
+                    portalPlacement.getBuilding() instanceof NeutralTransportPortal))) {
 
                 targetPortal.disconnectPortal();
-                targetPortal.destination = portal.centrePos;
-                portal.destination = targetPortal.centrePos;
+                targetPortal.destination = portalPlacement.centrePos;
+                portalPlacement.destination = targetPortal.centrePos;
             } else if (level.isClientSide()) {
                 HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.connect_portal.error1"));
             }

@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.goals.GenericTargetedSpellGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.RoyalGuardUnit;
@@ -28,12 +29,23 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class MaceSlam extends HeroAbility {
 
+    public static final float RADIUS = 4.0f;
     public static final float RANGE = 4;
-    private static float damage = 15;
-    private static float stunDuration = 2 * ResourceCost.TICKS_PER_SECOND;
+    public float damage = 10f;
+    public int stunDuration = 2 * ResourceCost.TICKS_PER_SECOND;
 
     public MaceSlam() {
-        super(3, UnitAction.MACE_SLAM, 20 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
+        super(3, 30, UnitAction.MACE_SLAM, 30 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
+    }
+
+    @Override
+    public boolean isCasting() {
+        if (this.hero instanceof RoyalGuardUnit royalGuardUnit) {
+            GenericTargetedSpellGoal goal = royalGuardUnit.getCastMaceSlamGoal();
+            if (goal != null)
+                return goal.isCasting();
+        }
+        return false;
     }
 
     @Override
@@ -47,13 +59,13 @@ public class MaceSlam extends HeroAbility {
 
     public void updateStatsForRank() {
         if (rank == 1) {
-            damage = 15;
+            damage = 10;
             stunDuration = 2 * ResourceCost.TICKS_PER_SECOND;
         } else if (rank == 2) {
-            damage = 20;
+            damage = 15;
             stunDuration = 3 * ResourceCost.TICKS_PER_SECOND;
         } else if (rank == 3) {
-            damage = 25;
+            damage = 20;
             stunDuration = 4 * ResourceCost.TICKS_PER_SECOND;
         }
     }
@@ -86,7 +98,7 @@ public class MaceSlam extends HeroAbility {
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.mace_slam") + " " + rankString(), true),
-                fcsIcons(I18n.get("abilities.reignofnether.mace_slam.stats", damage, cooldownMax / 20)),
+                fcsIcons(I18n.get("abilities.reignofnether.mace_slam.stats", damage, cooldownMax / 20, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.mace_slam.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.mace_slam.tooltip2", stunDuration / 20))

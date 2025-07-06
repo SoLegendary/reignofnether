@@ -32,6 +32,7 @@ public class RoyalGuardRenderer extends MobRenderer<RoyalGuardUnit, RoyalGuardMo
     }
 
     protected void scale(@NotNull RoyalGuardUnit pLivingEntity, PoseStack pMatrixStack, float pPartialTickTime) {
-        pMatrixStack.scale(SCALE_MULT, SCALE_MULT, SCALE_MULT);
+        float bonusScale = pLivingEntity.getScale();
+        pMatrixStack.scale(SCALE_MULT * bonusScale, SCALE_MULT * bonusScale, SCALE_MULT * bonusScale);
     }
 }

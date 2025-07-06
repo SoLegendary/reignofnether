@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamemode.GameModeClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
+import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
@@ -57,6 +58,7 @@ import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -75,7 +77,6 @@ public class PlayerServerEvents {
     private static final Map<String, GameType> playerDefaultGameModes = new HashMap<>();
     private static final Map<String, Boolean> playerGuiOpenStatus = new HashMap<>();
 
-    private static final GameType defaultGameMode = GameType.SPECTATOR;
     public static final ArrayList<ServerPlayer> players = new ArrayList<>();
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
     public static final List<RTSPlayer> rtsPlayers = Collections.synchronizedList(new ArrayList<>()); // players that
@@ -139,6 +140,7 @@ public class PlayerServerEvents {
             for (RTSPlayer rtsPlayer : rtsPlayers) {
                 if (rtsPlayer.faction == Faction.NONE) {
                     GameModeClientboundPacket.setAndLockAllClientGameModes(GameMode.SANDBOX);
+                    enableAllCheats(rtsPlayer.name);
                     break;
                 }
             }
@@ -159,6 +161,16 @@ public class PlayerServerEvents {
         synchronized (rtsPlayers) {
             return rtsPlayers.stream().filter(p -> p.name.equals(playerName)).toList().size() > 0;
         }
+    }
+
+    @Nullable
+    public static RTSPlayer getRTSPlayer(String playerName) {
+        synchronized (rtsPlayers) {
+            for (RTSPlayer rtsPlayer : rtsPlayers)
+                if (rtsPlayer.name.equals(playerName))
+                    return rtsPlayer;
+        }
+        return null;
     }
 
     public static boolean isRTSPlayer(int id) {
@@ -323,8 +335,9 @@ public class PlayerServerEvents {
                 serverPlayer.sendSystemMessage(Component.literal(""));
             }
         }
-        if (isRTSPlayer(playerName)) {
-            PlayerClientboundPacket.enableRTSStatus(playerName);
+        RTSPlayer rtsPlayer = getRTSPlayer(playerName);
+        if (rtsPlayer != null) {
+            PlayerClientboundPacket.enableRTSStatus(playerName, rtsPlayer.faction);
         } else {
             PlayerClientboundPacket.disableRTSStatus(playerName);
         }
@@ -397,7 +410,7 @@ public class PlayerServerEvents {
 
             String playerName = serverPlayer.getName().getString();
             ResourcesServerEvents.assignResources(playerName);
-            PlayerClientboundPacket.enableRTSStatus(playerName);
+            PlayerClientboundPacket.enableRTSStatus(playerName, faction);
 
             ServerLevel level = (ServerLevel) serverPlayer.level();
             ArrayList<Entity> workers = new ArrayList<>();
@@ -662,8 +675,8 @@ public class PlayerServerEvents {
             // Mark that this player has the GUI open
             playerGuiOpenStatus.put(playerName, true);
 
-            // Set game mode to CREATIVE for GUI interaction
-            serverPlayer.setGameMode(GameType.CREATIVE);
+            // Set game mode to SPECTATOR for GUI interaction
+            serverPlayer.setGameMode(GameType.SPECTATOR);
         } else {
             ReignOfNether.LOGGER.warn("serverPlayer is null, cannot open topdown GUI");
         }
@@ -678,12 +691,16 @@ public class PlayerServerEvents {
             // Ensure player had GUI open before attempting to close
             if (Boolean.TRUE.equals(playerGuiOpenStatus.get(playerName))) {
                 // Restore the player’s original game mode if saved
-                GameType originalGameMode = playerDefaultGameModes.remove(playerName);
+                GameType originalGameType = playerDefaultGameModes.remove(playerName);
 
-                if (originalGameMode != null) {
-                    serverPlayer.setGameMode(originalGameMode);
+                if (originalGameType != null) {
+                    serverPlayer.setGameMode(originalGameType);
                 } else {
                     ReignOfNether.LOGGER.warn("No original game mode found for player {}", playerName);
+                }
+
+                if (SandboxServer.isSandboxPlayer(playerName)) {
+                    serverPlayer.setGameMode(GameType.CREATIVE);
                 }
 
                 // Mark that the GUI is now closed
@@ -737,8 +754,25 @@ public class PlayerServerEvents {
         }
     }
 
+    public static void sendMessageToPlayerNoNewLines(String playerName, String msg) {
+        sendMessageToPlayerNoNewLines(playerName, msg, false);
+    }
+
     public static void sendMessageToPlayer(String playerName, String msg) {
         sendMessageToPlayer(playerName, msg, false);
+    }
+
+    public static void sendMessageToPlayerNoNewLines(String playerName, String msg, boolean bold, Object... formatArgs) {
+        for (ServerPlayer player : players) {
+            if (player.getName().getString().equals(playerName)) {
+                if (bold) {
+                    player.sendSystemMessage(Component.translatable(msg, formatArgs).withStyle(Style.EMPTY.withBold(true)));
+                } else {
+                    player.sendSystemMessage(Component.translatable(msg, formatArgs));
+                }
+                return;
+            }
+        }
     }
 
     public static void sendMessageToPlayer(String playerName, String msg, boolean bold, Object... formatArgs) {
@@ -918,7 +952,6 @@ public class PlayerServerEvents {
             saveRTSPlayers();
             saveBuildings(serverLevel);
             BuildingServerEvents.saveNetherZones(serverLevel);
-            UnitServerEvents.saveUnits(serverLevel);
             UnitServerEvents.saveGatherTargets(serverLevel);
             ResourcesServerEvents.saveResources(serverLevel);
             ResearchServerEvents.saveResearch();
@@ -928,6 +961,13 @@ public class PlayerServerEvents {
             AlliancesServerEvents.resetAllAlliances();
             SurvivalServerEvents.reset();
         }
+        HeroClientEvents.fallenHeroes.clear();
+
+        for (ServerPlayer player : serverLevel.players())
+            player.setGameMode(GameType.SPECTATOR);
+
+        playerDefaultGameModes.replaceAll((key, oldValue) -> GameType.SPECTATOR);
+        AlliancesServerEvents.playersWithAlliedControl.clear();
     }
 
     public static void setRTSLock(boolean lock) {

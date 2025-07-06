@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.tps.TPSClientEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -26,6 +27,7 @@ public class Ability {
     private boolean defaultAutocast = false;
     public void setAutocast(boolean value, Unit unit) { unit.setAutocast(value ? this : null); }
     public boolean getAutocast(Unit unit) { return unit.hasAutocast(this); }
+    protected Keybinding defaultHotkey = Keybindings.keyQ;
 
     public Ability(UnitAction action, int cooldownMax, float range, float radius, boolean canTargetEntities) {
         this.action = action;
@@ -100,6 +102,11 @@ public class Ability {
     public void use(Level level, Unit unitUsing, BlockPos targetBp) { }
 
     public void use(Level level, BuildingPlacement buildingUsing, BlockPos targetBp) { }
+
+    // assigns a default hotkey
+    public AbilityButton getButton() {
+        return getButton(defaultHotkey);
+    }
 
     public AbilityButton getButton(Keybinding hotkey, BuildingPlacement placement) {
         return null;

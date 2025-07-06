@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.modelling.models;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
+import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
 import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -101,10 +102,10 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
     }
 
     private ArmPose getArmPose(Entity entity) {
-        if (entity instanceof WorkerUnit workerUnit && workerUnit.getGatherResourceGoal().isGathering()) {
+        if (entity instanceof WorkerUnit workerUnit && workerUnit.getGatherResourceGoal() != null && workerUnit.getGatherResourceGoal().isGathering()) {
             return ArmPose.GATHERING;
         }
-        if (entity instanceof WorkerUnit workerUnit && workerUnit.getBuildRepairGoal().isBuilding()) {
+        if (entity instanceof WorkerUnit workerUnit && workerUnit.getBuildRepairGoal() != null && workerUnit.getBuildRepairGoal().isBuilding()) {
             return ArmPose.BUILDING;
         }
         else if (entity instanceof EvokerUnit evokerUnit) {
@@ -116,7 +117,8 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
             return ArmPose.CROSSBOW_CHARGE;
         }
         else if (entity instanceof AttackerUnit attackerUnit) {
-            if (((Unit) entity).getTargetGoal().getTarget() != null ||
+            SelectedTargetGoal<?> goal = ((Unit) entity).getTargetGoal();
+            if (goal != null && goal.getTarget() != null ||
                 (attackerUnit.getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg && mabg.getBuildingTarget() != null))
                 return ArmPose.ATTACKING;
         }

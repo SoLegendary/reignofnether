@@ -100,9 +100,13 @@ public class ResourceSources {
     // used for unit item pickups and player resource deposits
     public static ResourceSource getFromItem(Item item) {
         for (List<ResourceSource> resourceSources : List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS))
-            for (ResourceSource resourceSource : resourceSources)
+            for (ResourceSource resourceSource : resourceSources) {
                 if (resourceSource.items.contains(item))
                     return resourceSource;
+                for (Block block : resourceSource.validBlocks)
+                    if (block.asItem() == item)
+                        return resourceSource;
+            }
         return null;
     }
 
@@ -130,6 +134,30 @@ public class ResourceSources {
             return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
         }
         return List.of();
+    }
+
+    private static List<Item> edibleFoods = List.of(
+        Items.COOKED_BEEF,
+        Items.COOKED_CHICKEN,
+        Items.COOKED_COD,
+        Items.COOKED_PORKCHOP,
+        Items.COOKED_RABBIT,
+        Items.COOKED_SALMON,
+        Items.COOKED_MUTTON,
+        Items.COOKIE,
+        Items.BREAD,
+        Items.PUMPKIN_PIE,
+        Items.MUSHROOM_STEW,
+        Items.RABBIT_STEW,
+        Items.BEETROOT_SOUP,
+        Items.BAKED_POTATO,
+        Items.GOLDEN_APPLE,
+        Items.ENCHANTED_GOLDEN_APPLE,
+        Items.GOLDEN_CARROT
+    );
+
+    public static boolean isPreparedFood(Item item) {
+        return item.isEdible() && edibleFoods.contains(item);
     }
 
     public static final int REPLANT_TICKS_MAX = 10;
@@ -208,7 +236,7 @@ public class ResourceSources {
             ),
             new ResourceSource("Potatoes",
                     List.of(Blocks.POTATOES),
-                    List.of(Items.POTATO, Items.BAKED_POTATO),
+                    List.of(Items.POTATO),
                     TICKS_PER_SECOND * 2,
                     6,
                     ResourceName.FOOD,
@@ -271,33 +299,25 @@ public class ResourceSources {
                     120,
                     ResourceName.FOOD
             ),
-            new ResourceSource("Extra large food item",
+            new ResourceSource("Misc food item",
                     List.of(),
-                    List.of(Items.COOKED_BEEF,  Items.COOKED_CHICKEN, Items.COOKED_PORKCHOP, Items.COOKED_RABBIT, Items.CHICKEN,
-                            Items.COOKED_MUTTON, Items.CAKE, Items.PUMPKIN_PIE, Items.RABBIT_STEW, Items.ENCHANTED_GOLDEN_APPLE),
+                    List.of(Items.CHICKEN),
                     0,
                     75,
                     ResourceName.FOOD
             ),
             new ResourceSource("Large food item",
                     List.of(),
-                    List.of(Items.BEEF, Items.PORKCHOP, Items.MUTTON, Items.RABBIT, Items.MUSHROOM_STEW, Items.BEETROOT_SOUP, Items.GOLDEN_APPLE, Items.GOLDEN_CARROT),
+                    List.of(Items.BEEF, Items.PORKCHOP, Items.MUTTON, Items.RABBIT),
                     0,
                     50,
                     ResourceName.FOOD
             ),
             new ResourceSource("Medium food item",
                     List.of(),
-                    List.of(Items.LEATHER, Items.EGG, Items.APPLE, Items.BREAD, Items.HONEY_BOTTLE, Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.GLOW_BERRIES),
+                    List.of(Items.LEATHER, Items.EGG, Items.APPLE, Items.HONEY_BOTTLE, Items.COD, Items.SALMON, Items.GLOW_BERRIES),
                     0,
                     25,
-                    ResourceName.FOOD
-            ),
-            new ResourceSource("Small food item",
-                    List.of(),
-                    List.of(Items.ROTTEN_FLESH, Items.MELON_SLICE, Items.SPIDER_EYE, Items.POISONOUS_POTATO),
-                    0,
-                    5,
                     ResourceName.FOOD
             )
     );
@@ -407,7 +427,7 @@ public class ResourceSources {
             ),
             new ResourceSource("Tier 4 Nether Ores",
                     List.of(Blocks.ANCIENT_DEBRIS),
-                    List.of(Items.ANCIENT_DEBRIS),
+                    List.of(Items.ANCIENT_DEBRIS, Items.NETHERITE_SCRAP),
                     TICKS_PER_SECOND * 45,
                     120,
                     ResourceName.ORE
@@ -421,14 +441,14 @@ public class ResourceSources {
             ),
             new ResourceSource("Tier 2 Ores",
                     List.of(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.IRON_ORE, Blocks.LAPIS_ORE, Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.DEEPSLATE_LAPIS_ORE, Blocks.DEEPSLATE_REDSTONE_ORE),
-                    List.of(Items.RAW_IRON, Items.RAW_COPPER, Items.LAPIS_LAZULI, Items.REDSTONE),
+                    List.of(Items.RAW_IRON, Items.RAW_COPPER, Items.LAPIS_LAZULI, Items.REDSTONE, Items.IRON_INGOT),
                     TICKS_PER_SECOND * 45,
                     65,
                     ResourceName.ORE
             ),
             new ResourceSource("Tier 3 Ores",
                     List.of(Blocks.GOLD_ORE, Blocks.EMERALD_ORE, Blocks.DEEPSLATE_GOLD_ORE, Blocks.DEEPSLATE_EMERALD_ORE),
-                    List.of(Items.RAW_GOLD, Items.EMERALD),
+                    List.of(Items.RAW_GOLD, Items.EMERALD, Items.GOLD_INGOT),
                     TICKS_PER_SECOND * 45,
                     80,
                     ResourceName.ORE

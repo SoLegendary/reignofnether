@@ -84,7 +84,7 @@ public class TimeServerEvents {
             BlockPos bp = building.getClosestGroundPos(new BlockPos(x, building.minCorner.getY(), z), 3);
 
             EntityType<? extends Mob> mobType = zombieOrSkeleton ? EntityRegistrar.ZOMBIE_UNIT.get() : EntityRegistrar.SKELETON_UNIT.get();
-            UnitServerEvents.spawnMobs(mobType, (ServerLevel) level, bp, 1, "Blood Moon");
+            UnitServerEvents.spawnMobs(mobType, (ServerLevel) level, bp, 1, BloodMoon.ENEMY_NAME);
         }
         zombieOrSkeleton = !zombieOrSkeleton;
     }

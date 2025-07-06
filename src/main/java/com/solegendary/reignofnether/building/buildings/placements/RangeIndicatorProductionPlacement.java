@@ -17,7 +17,9 @@ public class RangeIndicatorProductionPlacement extends ProductionPlacement imple
     int range;
     boolean showOnlyWhenSelected, checkUpgraded;
     private final Set<BlockPos> borderBps = new HashSet<>();
-    public RangeIndicatorProductionPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol, int range, boolean showOnlyWhenSelected, boolean checkUpgraded) {
+    public RangeIndicatorProductionPlacement(Building building, Level level, BlockPos originPos, Rotation rotation,
+                                             String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol,
+                                             int range, boolean showOnlyWhenSelected, boolean checkUpgraded) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
         this.range = range;
         this.showOnlyWhenSelected = showOnlyWhenSelected;

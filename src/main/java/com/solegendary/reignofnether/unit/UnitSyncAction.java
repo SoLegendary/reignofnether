@@ -7,5 +7,8 @@ public enum UnitSyncAction {
     SYNC_OWNERNAME,
     MAKE_VILLAGER_VETERAN,
     SYNC_ANCHOR_POS,
-    REMOVE_ANCHOR_POS
+    REMOVE_ANCHOR_POS,
+
+    SYNC_ABILITIES,
+    REQUEST_SYNC_ABILITIES, // ask the server to sync cooldowns
 }

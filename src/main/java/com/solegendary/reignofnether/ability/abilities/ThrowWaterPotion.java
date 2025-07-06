@@ -7,7 +7,6 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.researchItems.ResearchWaterPotions;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -52,7 +51,7 @@ public class ThrowWaterPotion extends Ability {
             "Water Potion",
             new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/splash_potion_water.png"),
             hotkey,
-            () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_WATER_POTION || getAutocast(unit),
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_WATER_POTION || isAutocasting(unit),
             () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_WATER_POTIONS),
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_WATER_POTION),
