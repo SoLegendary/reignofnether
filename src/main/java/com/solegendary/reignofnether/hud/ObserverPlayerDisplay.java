@@ -50,6 +50,15 @@ public class ObserverPlayerDisplay {
     public static final int DISPLAY_WIDTH = PLAYER_FRAME_WIDTH + RESOURCE_FRAME_WIDTH * 4 + SUPPLY_DETAIL_FRAME_WIDTH; // total width of a player display
 
     private void renderPlayer(GuiGraphics guiGraphics, int x, int y) {
+
+        MyRenderer.renderFrameWithBg(guiGraphics,
+                x,
+                y,
+                PLAYER_FRAME_WIDTH,
+                Button.DEFAULT_ICON_FRAME_SIZE,
+                frameBgColour
+        );
+        
         if (this.player != null && this.player.isSkinLoaded()) {
             var iconLocation = player.getSkinTextureLocation();
             //RenderSystem.setShaderTexture(0, iconLocation);
@@ -77,14 +86,7 @@ public class ObserverPlayerDisplay {
                     Button.DEFAULT_ICON_SIZE
             );
         }
-
-        MyRenderer.renderFrameWithBg(guiGraphics,
-                x,
-                y,
-                PLAYER_FRAME_WIDTH,
-                Button.DEFAULT_ICON_FRAME_SIZE,
-                frameBgColour
-        );
+        
         guiGraphics.drawString(
                 MC.font,
                 this.resources.ownerName,
