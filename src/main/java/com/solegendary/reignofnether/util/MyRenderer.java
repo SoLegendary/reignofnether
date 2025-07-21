@@ -127,8 +127,8 @@ public class MyRenderer {
         if (rotX > -180 && rotX <= -90) {
             // closest: minX, maxY, maxZ
             // furthest: maxX, minY, minZ
-            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, g, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, g, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
             vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
             vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
             if (!excludeMaxY) {
@@ -165,10 +165,10 @@ public class MyRenderer {
         else if (rotX > 0 && rotX <= 90) {
             // closest: maxX, maxY, minZ
             // furthest: minX, minY, maxZ
-            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, g, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
-            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, g, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
-            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, g, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, g, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
             if (!excludeMaxY) {
                 vertexConsumer.vertex(matrix4f, minX, maxY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
                 vertexConsumer.vertex(matrix4f, minX, maxY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
@@ -185,8 +185,8 @@ public class MyRenderer {
         else if (rotX > -90 && rotX <= 0) {
             // closest: minX, maxY, minZ
             // furthest: maxX, minY, maxZ
-            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, g, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
-            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, g, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+            vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
             vertexConsumer.vertex(matrix4f, minX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
             vertexConsumer.vertex(matrix4f, minX, minY, maxZ).color(r, g, b, a).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
             vertexConsumer.vertex(matrix4f, maxX, minY, minZ).color(r, g, b, a).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
