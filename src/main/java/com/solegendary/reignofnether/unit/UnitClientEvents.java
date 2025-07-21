@@ -734,6 +734,13 @@ public class UnitClientEvents {
             // draw outlines on all (pre)selected units but only draw once per unit based on conditions
             // don't render preselection outlines if mousing over HUD
             if (OrthoviewClientEvents.isEnabled()) {
+                // evaluate conditions that will remain constant during the rendering stage
+                boolean isMouseOverAnyButtonOrHud = HudClientEvents.isMouseOverAnyButtonOrHud();
+                boolean isLeftClickAttack = isLeftClickAttack();
+                boolean targetingSelf = targetingSelf();
+                boolean isRightClickDown = MiscUtil.isRightClickDown(MC);
+
+                // render outline for each selected and preselected entities
                 for (Entity entity : unitsToDraw) {
                     if (!FogOfWarClientEvents.isInBrightChunk(entity))
                         continue;
@@ -744,16 +751,19 @@ public class UnitClientEvents {
                         entityAABB.setMaxY(entityAABB.maxY + 0.8f);
                     }
 
-                    if (preselectedUnits.contains(entity) &&
-                            isLeftClickAttack() &&
-                            !targetingSelf() && !HudClientEvents.isMouseOverAnyButtonOrHud())
+                    boolean isPreselected = preselectedUnits.contains(entity);
+                    boolean isSelected = selectedUnits.contains(entity);
+
+                    if (isPreselected && isLeftClickAttack && !targetingSelf && !isMouseOverAnyButtonOrHud)
                         MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.3f, 0.3f, 1.0f, false);
-                    else if (selectedUnits.contains(entity))
+                    else if (isSelected)
                         MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 1.0f, 1.0f, false);
-                    else if (preselectedUnits.contains(entity) && !HudClientEvents.isMouseOverAnyButtonOrHud())
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB,1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f, false);
+                    else if (isPreselected && !isMouseOverAnyButtonOrHud)
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 1.0f, isRightClickDown ? 1.0f : 0.5f, false);
                 }
             }
+            
+            var selectedEntityIds = selectedUnits.stream().map(u -> u.getId()).toList();
             for (LivingEntity entity : allUnits) {
                 if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
                         entity.isPassenger())
@@ -762,7 +772,7 @@ public class UnitClientEvents {
                 Relationship unitRs = getPlayerToEntityRelationship(entity);
 
                 float alpha = 0.5f;
-                if (selectedUnits.stream().map(u -> u.getId()).toList().contains(entity.getId()))
+                if (selectedEntityIds.contains(entity.getId()))
                     alpha = 1.0f;
 
                 // draw only the bottom of the outline boxes
