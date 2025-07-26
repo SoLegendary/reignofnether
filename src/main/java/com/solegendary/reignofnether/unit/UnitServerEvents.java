@@ -30,6 +30,7 @@ import com.solegendary.reignofnether.unit.packets.UnitIdleWorkerClientBoundPacke
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitSyncWorkerClientBoundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.DrownedUnit;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
@@ -75,6 +76,7 @@ import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -388,16 +390,20 @@ public class UnitServerEvents {
 
         // if a player has no more units, then they are defeated
         synchronized (allUnits) {
-            if (evt.getEntity() instanceof Unit unit) {
-                int unitsOwned = allUnits.stream()
-                        .filter(u -> (u instanceof Unit unit1 && unit1.getOwnerName().equals(unit.getOwnerName())))
-                        .toList()
-                        .size();
-                if (!SandboxServer.isSandboxPlayer(unit.getOwnerName()) &&
-                        unitsOwned == 0 && isRTSPlayer(unit.getOwnerName())
-                        && BuildingUtils.getTotalCompletedBuildingsOwned(false, unit.getOwnerName()) == 0) {
-                    PlayerServerEvents.defeat(unit.getOwnerName(), Component.translatable("server.reignofnether.lost_all").getString());
+            try {
+                if (evt.getEntity() instanceof Unit unit) {
+                    int unitsOwned = allUnits.stream()
+                            .filter(u -> (u instanceof Unit unit1 && unit1.getOwnerName().equals(unit.getOwnerName())))
+                            .toList()
+                            .size();
+                    if (!SandboxServer.isSandboxPlayer(unit.getOwnerName()) &&
+                            unitsOwned == 0 && isRTSPlayer(unit.getOwnerName())
+                            && BuildingUtils.getTotalCompletedBuildingsOwned(false, unit.getOwnerName()) == 0) {
+                        PlayerServerEvents.defeat(unit.getOwnerName(), Component.translatable("server.reignofnether.lost_all").getString());
+                    }
                 }
+            } catch (ConcurrentModificationException e) {
+                System.out.println("Caught ConcurrentModificationException in UnitServerEvents EntityLeaveLevelEvent: " + e.getMessage());
             }
         }
     }
@@ -457,7 +463,7 @@ public class UnitServerEvents {
 
             EntityType<? extends Unit> entityType = null;
 
-            if (drownedInfected) {
+            if (drownedInfected || unit instanceof DrownedUnit) {
                 if (evt.getEntity() instanceof GruntUnit || evt.getEntity() instanceof BruteUnit
                         || evt.getEntity() instanceof HeadhunterUnit) {
                     entityType = EntityRegistrar.ZOMBIE_PIGLIN_UNIT.get();
@@ -470,7 +476,7 @@ public class UnitServerEvents {
                     entityType = EntityRegistrar.DROWNED_UNIT.get();
                 }
             }
-            if (slimeInfected && entityType == null) {
+            if ((slimeInfected || unit instanceof SlimeUnit) && entityType == null) {
                 entityType = EntityRegistrar.SLIME_UNIT.get();
             }
 
@@ -792,11 +798,9 @@ public class UnitServerEvents {
         if (evt.getSource().is(DamageTypeTags.IS_PROJECTILE) &&
             evt.getSource().getEntity() instanceof AttackerUnit attackerUnit) {
             float dmg = attackerUnit.getUnitAttackDamage();
-            if (evt.getAmount() > dmg) {
-                if (evt.getEntity() instanceof Unit unit)
-                    dmg *= (1 - unit.getUnitArmorPercentage());
-                evt.setAmount(dmg);
-            }
+            if (evt.getEntity() instanceof Unit unit)
+                dmg *= (1 - unit.getUnitArmorPercentage());
+            evt.setAmount(dmg);
         }
 
         // ignore added weapon damage for workers

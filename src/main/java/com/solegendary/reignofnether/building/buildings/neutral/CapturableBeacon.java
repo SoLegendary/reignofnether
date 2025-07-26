@@ -1,8 +1,9 @@
 package com.solegendary.reignofnether.building.buildings.neutral;
 
 import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -12,8 +13,10 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CapturableBeacon extends Beacon {
@@ -44,6 +47,11 @@ public class CapturableBeacon extends Beacon {
     }
 
     @Override
+    public ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
+        return BuildingBlockData.getBuildingBlocksFromNbt(structureName, level);
+    }
+
+    @Override
     public Faction getFaction() {
         return Faction.NONE;
     }
@@ -59,11 +67,11 @@ public class CapturableBeacon extends Beacon {
                 () -> BuildingClientEvents.setBuildingToPlace(this),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.upgraded_beacon"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.upgraded_beacon.tooltip3"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.capturable_beacon"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.capturable_beacon.tooltip3"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.upgraded_beacon.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.upgraded_beacon.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.capturable_beacon.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.capturable_beacon.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.beacon.tooltip3"), Style.EMPTY)
                 ),

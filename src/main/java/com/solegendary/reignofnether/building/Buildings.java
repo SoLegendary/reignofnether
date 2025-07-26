@@ -57,7 +57,6 @@ public class Buildings {
     public static final ShrineOfProsperity SHRINE_OF_PROSPERITY = register(new ResourceLocation(ReignOfNether.MOD_ID, "shrine_of_prosperity"), new ShrineOfProsperity());
     public static final InfernalPortal INFERNAL_PORTAL = register(new ResourceLocation(ReignOfNether.MOD_ID, "infernal_portal"), new InfernalPortal());
 
-
     private static <T extends Building> T register(ResourceLocation id, T building) {
         return Registry.register(ReignOfNetherRegistries.BUILDING, id, building);
     }

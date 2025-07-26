@@ -76,6 +76,8 @@ public enum UnitAction {
     CONSUME_SLIME_AUTOCAST_DISABLE,
     ENABLE_SPIDER_CLIMBING,
     DISABLE_SPIDER_CLIMBING,
+    MILITIA_USE_SWORD,
+    MILITIA_USE_BOW,
 
     // hero abilities
     BLOOD_MOON,

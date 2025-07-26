@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.util;
 
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.ability.heroAbilities.monster.BloodMoon;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
@@ -243,8 +244,15 @@ public class MiscUtil {
     // does not cover explicit attack commands
     private static boolean isIdleOrMoveAttackable(Mob unitMob, LivingEntity targetEntity, boolean neutralAggro) {
         Relationship rs = Relationship.NEUTRAL;
-        if (unitMob instanceof Unit)
+        if (unitMob instanceof Unit unit) {
             rs = UnitServerEvents.getUnitToEntityRelationship((Unit) unitMob, targetEntity);
+
+            // don't aggro against blood moon enemies as a ghast so that buildings don't get friendly fired
+            if (targetEntity instanceof Unit targetUnit &&
+                targetUnit.getOwnerName().equals(BloodMoon.ENEMY_NAME) &&
+                unitMob instanceof GhastUnit)
+                return false;
+        }
 
         if (targetEntity instanceof Player player && (player.isCreative() || player.isSpectator()))
             return false;

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
+import com.solegendary.reignofnether.unit.units.piglins.PiglinMerchantUnit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
@@ -150,6 +151,8 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
 
     protected double getAttackReachSqr(LivingEntity target) {
         float width = mob.getBbWidth();
+        if (mob instanceof PiglinMerchantUnit)
+            width += 0.6f;
         if (mob instanceof SlimeUnit slime)
             width -= (0.3f * (Math.max(2, slime.getSize()) - 2));
         float targetWidth = target.getBbWidth();

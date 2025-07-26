@@ -11,7 +11,7 @@ public class AlliancesClient {
 
     private static final Map<String, Set<String>> alliances = new HashMap<>();
 
-    public static final ArrayList<String> playersWithAlliedControl = new ArrayList<>();
+    public static final HashSet<String> playersWithAlliedControl = new HashSet<>();
 
     public static boolean canControlAlly(LivingEntity entity) {
         return entity instanceof Unit unit && canControlAlly(unit.getOwnerName());

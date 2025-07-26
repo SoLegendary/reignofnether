@@ -8,6 +8,8 @@ import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransport
 import com.solegendary.reignofnether.building.buildings.placements.*;
 import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.building.buildings.villagers.Library;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -28,12 +30,12 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.item.PrimedTnt;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
@@ -43,7 +45,6 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
@@ -101,23 +102,25 @@ public class BuildingServerEvents {
         buildingData.buildings.clear();
 
         getBuildings().forEach(b -> {
-            PortalPlacement.PortalType portalType = null;
-            if (b instanceof PortalPlacement portal) {
-                portalType = portal.getPortalType();
+            if (!(b.getBuilding() instanceof CustomBuilding)) {
+                PortalPlacement.PortalType portalType = null;
+                if (b instanceof PortalPlacement portal) {
+                    portalType = portal.getPortalType();
+                }
+                buildingData.buildings.add(new BuildingSave(b.originPos,
+                        level,
+                        b.getBuilding(),
+                        b.ownerName,
+                        b.rotation,
+                        b instanceof ProductionPlacement pb ? pb.getRallyPoint() : b.originPos,
+                        b.isDiagonalBridge,
+                        b.isBuilt,
+                        b.getUpgradeLevel(),
+                        portalType,
+                        b instanceof PortalPlacement portal && portal.hasDestination() ? portal.destination : new BlockPos(0,0,0)
+                ));
+                //ReignOfNether.LOGGER.info("saved buildings/nether in serverevents: " + b.originPos);
             }
-            buildingData.buildings.add(new BuildingSave(b.originPos,
-                level,
-                b.getBuilding(),
-                b.ownerName,
-                b.rotation,
-                b instanceof ProductionPlacement pb ? pb.getRallyPoint() : b.originPos,
-                b.isDiagonalBridge,
-                b.isBuilt,
-                b.getUpgradeLevel(),
-                portalType,
-                b instanceof PortalPlacement portal && portal.hasDestination() ? portal.destination : new BlockPos(0,0,0)
-            ));
-            //ReignOfNether.LOGGER.info("saved buildings/nether in serverevents: " + b.originPos);
         });
         buildingData.save();
         level.getDataStorage().save();
@@ -646,14 +649,15 @@ public class BuildingServerEvents {
         if (building != null) {
             evt.setCanceled(true);
 
-            if (evt.getEntity() instanceof Player player &&
+            if (evt.getEntity() instanceof ServerPlayer player &&
                 !player.isSpectator() &&
                 (AlliancesServerEvents.isAllied(player.getName().getString(), building.ownerName) ||
-                building.getBuilding() instanceof NeutralTransportPortal) &&
+                building.getBuilding() instanceof NeutralTransportPortal ||
+                player.getName().getString().equals(building.ownerName)) &&
                 building instanceof PortalPlacement portal &&
                 portal.hasDestination()) {
 
-                player.moveTo(Vec3.atCenterOf(portal.destination));
+                player.teleportTo(portal.destination.getX(), portal.destination.getY(), portal.destination.getZ());
                 building.level.playSound(null, building.centrePos, SoundEvents.ENDERMAN_TELEPORT,
                         player.getSoundSource(), 1.0F, 1.0F);
                 building.level.playSound(null, portal.destination, SoundEvents.ENDERMAN_TELEPORT,
@@ -675,18 +679,22 @@ public class BuildingServerEvents {
         }
         for (BuildingPlacement building : buildings) {
             if (building.originPos.equals(buildingPos)) {
-                BuildingClientboundPacket.placeBuilding(building.originPos,
-                    building.getBuilding(),
-                    building.rotation,
-                    building.ownerName,
-                    building.blockPlaceQueue.size(),
-                    building instanceof BridgePlacement bridge && bridge.isDiagonalBridge,
-                    building.getUpgradeLevel(),
-                    building.isBuilt,
-                    building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
-                    building instanceof PortalPlacement p && p.getPortalType() == PortalPlacement.PortalType.TRANSPORT ? p.destination : new BlockPos(0,0,0),
-                    false
-                );
+                if (building.getBuilding() instanceof CustomBuilding customBuilding) {
+                    CustomBuildingClientboundPacket.registerCustomBuilding(customBuilding.name, buildingPos, customBuilding.structurePos, customBuilding.structureSize);
+                } else {
+                    BuildingClientboundPacket.placeBuilding(building.originPos,
+                            building.getBuilding(),
+                            building.rotation,
+                            building.ownerName,
+                            building.blockPlaceQueue.size(),
+                            building instanceof BridgePlacement bridge && bridge.isDiagonalBridge,
+                            building.getUpgradeLevel(),
+                            building.isBuilt,
+                            building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
+                            building instanceof PortalPlacement p && p.getPortalType() == PortalPlacement.PortalType.TRANSPORT ? p.destination : new BlockPos(0,0,0),
+                            false
+                    );
+                }
                 return;
             }
         }

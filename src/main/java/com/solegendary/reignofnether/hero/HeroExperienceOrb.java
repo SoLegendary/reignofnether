@@ -22,14 +22,16 @@ public class HeroExperienceOrb extends ExperienceOrb {
     private static final Random RANDOM = new Random();
 
     private LivingEntity followingHero = null;
+    private boolean isNeutral = false;
 
     public HeroExperienceOrb(EntityType<? extends ExperienceOrb> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
 
-    public static HeroExperienceOrb newOrb(Level pLevel, HeroUnit heroUnit, double pX, double pY, double pZ, int pValue) {
+    public static HeroExperienceOrb newOrb(Level pLevel, HeroUnit heroUnit, boolean isNeutral, double pX, double pY, double pZ, int pValue) {
         HeroExperienceOrb expOrb = new HeroExperienceOrb(EntityRegistrar.HERO_EXPERIENCE_ORB.get(), pLevel);
         expOrb.followingHero = (LivingEntity) heroUnit;
+        expOrb.isNeutral = isNeutral;
         expOrb.setPos(pX, pY, pZ);
         expOrb.setYRot((float)(RANDOM.nextDouble() * 360.0));
         expOrb.setDeltaMovement(
@@ -92,7 +94,7 @@ public class HeroExperienceOrb extends ExperienceOrb {
             AABB aabb = followingHero.getBoundingBox().inflate(0.5, 0.25, 0.5);
             if (aabb.contains(this.position())) {
                 followingHero.take(this, count);
-                if (count > 0) {
+                if (count > 0 && (!isNeutral || ((HeroUnit) followingHero).getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL)) {
                     ((HeroUnit) followingHero).addExperience(value * 10);
                 }
                 this.discard();

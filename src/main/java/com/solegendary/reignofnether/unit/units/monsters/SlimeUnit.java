@@ -477,7 +477,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         return pSpawnData;
     }
 
-    private final static int CONVERT_DEBUFF_DURATION_SECONDS = 10;
+    private final static int CONVERT_DEBUFF_DURATION_SECONDS = 3;
 
     @Override
     public boolean doHurtTarget(@NotNull Entity pEntity) {

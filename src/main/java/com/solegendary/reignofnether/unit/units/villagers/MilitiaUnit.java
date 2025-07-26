@@ -3,9 +3,13 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.BackToWorkUnit;
+import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
+import com.solegendary.reignofnether.ability.abilities.WeaponSwapBow;
+import com.solegendary.reignofnether.ability.abilities.WeaponSwapSword;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -17,6 +21,7 @@ import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitConvertClientboundPacket;
@@ -32,6 +37,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -40,9 +46,9 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.entity.npc.*;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
@@ -55,7 +61,7 @@ import java.util.UUID;
 
 import static com.solegendary.reignofnether.survival.SurvivalServerEvents.ENEMY_OWNER_NAME;
 
-public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, VillagerDataHolder, ConvertableUnit {
+public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, RangedAttackerUnit, VillagerDataHolder, ConvertableUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new BackToWorkUnit(), Keybindings.build);
@@ -65,7 +71,6 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Villa
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
 
     Ability autocast;
-
     // region
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -100,6 +105,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Villa
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
     private AbstractMeleeAttackUnitGoal attackGoal;
+    private UnitBowAttackGoal<? extends LivingEntity> rangedAttackGoal;
     private MeleeAttackBuildingGoal attackBuildingGoal;
 
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -119,20 +125,20 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Villa
             SynchedEntityData.defineId(MilitiaUnit.class, EntityDataSerializers.STRING);
 
     // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
+    public float getMovementSpeed() {return isUsingBow() ? rangedMovementSpeed : movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
 
     public ResourceCost getCost() {return ResourceCosts.MILITIA;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public int getAttackCooldown() {return (int) (20 / (isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond));}
+    public float getAttacksPerSecond() {return isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getUnitAttackDamage() {return attackDamage;}
+    public float getAttackRange() {return isUsingBow() ? attackRange : 2;}
+    public float getUnitAttackDamage() {return isUsingBow() ? rangedAttackDamage : attackDamage;}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
-    public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
-    public Goal getAttackGoal() { return attackGoal; }
+    public boolean canAttackBuildings() {return getAttackBuildingGoal() != null && !isUsingBow();}
+    public Goal getAttackGoal() { return isUsingBow() ? rangedAttackGoal : attackGoal; }
     public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
@@ -142,6 +148,10 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Villa
     private boolean shouldDiscard = false;
     public boolean shouldDiscard() { return shouldDiscard; }
     public void setShouldDiscard(boolean discard) { this.shouldDiscard = discard; }
+
+    public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
+    public int getFogRevealDuration() { return fogRevealDuration; }
+    public void setFogRevealDuration(int duration) { fogRevealDuration = duration; }
 
     // endregion
 
@@ -156,16 +166,22 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Villa
     public int hunterExp = 0;
 
     final static public float attackDamage = 3.0f;
+    final static public float rangedAttackDamage = 3.0f;
     final static public float attacksPerSecond = 0.5f;
-    final static public float attackRange = 2; // only used by ranged units or melee building attackers
+    final static public float rangedAttacksPerSecond = 0.3f;
+    final static public float attackRange = 10; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
 
-    final static public float maxHealth = 35.0f;
-    final static public float armorValue = 0.0f;
+    final static public float maxHealth = 30.0f;
+    final static public float armorValue = 5.5f;
+    final static public float rangedArmorValue = 0.0f;
     final static public float movementSpeed = 0.28f;
+    final static public float rangedMovementSpeed = 0.25f;
     public int maxResources = 100;
+
+    public boolean isCaptain = false;
 
     private List<AbilityButton> abilityButtons;
     private List<Ability> abilities;
@@ -173,7 +189,42 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Villa
 
     public MilitiaUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
+        this.abilities.add(new BackToWorkUnit(this));
+        this.abilities.add(new WeaponSwapBow(this));
+        this.abilities.add(new WeaponSwapSword(this));
         updateAbilityButtons();
+    }
+
+    public boolean isUsingBow() {
+        return getItemBySlot(EquipmentSlot.MAINHAND).is(Items.BOW);
+    }
+
+    public void swapWeapons(boolean useBow) {
+        Item weapon = useBow ? Items.BOW : Items.STONE_SWORD;
+        int damageMod = 0;
+        ItemStack weaponStack = new ItemStack(weapon);
+        AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), damageMod, AttributeModifier.Operation.ADDITION);
+        weaponStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+        this.setItemSlot(EquipmentSlot.MAINHAND, weaponStack);
+        AttributeInstance ai1 = getAttribute(Attributes.ATTACK_DAMAGE);
+        if (ai1 != null)
+            ai1.setBaseValue(useBow ? rangedAttackDamage : attackDamage);
+        AttributeInstance ai2 = getAttribute(Attributes.MOVEMENT_SPEED);
+        if (ai2 != null)
+            ai2.setBaseValue(useBow ? rangedMovementSpeed : movementSpeed);
+        AttributeInstance ai3 = getAttribute(Attributes.ARMOR);
+        if (ai3 != null)
+            ai3.setBaseValue(useBow ? rangedArmorValue : armorValue);
+
+        if (rangedAttackGoal != null && attackGoal != null) {
+            if (useBow) {
+                this.goalSelector.removeGoal(attackGoal);
+                this.goalSelector.addGoal(2, rangedAttackGoal);
+            } else {
+                this.goalSelector.removeGoal(rangedAttackGoal);
+                this.goalSelector.addGoal(2, attackGoal);
+            }
+        }
     }
 
     @Override
@@ -230,8 +281,13 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Villa
             super.tick();
             Unit.tick(this);
             AttackerUnit.tick(this);
+            PromoteIllager.checkAndApplyBuff(this);
 
-            if (this.tickCount > 100 && this.tickCount % 10 == 0 && !converted && !level().isClientSide() && !getOwnerName().equals(ENEMY_OWNER_NAME)) {
+            this.isCaptain = getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem;
+
+            if (!this.isCaptain && this.tickCount > 100 && this.tickCount % 10 == 0 && !converted &&
+                !level().isClientSide() && !getOwnerName().equals(ENEMY_OWNER_NAME)) {
+
                 BuildingPlacement building = BuildingUtils.findClosestBuilding(level().isClientSide(), this.getEyePosition(),
                         (b) -> b.isBuilt && b.ownerName.equals(getOwnerName()) && b.getBuilding() instanceof TownCentre);
 
@@ -284,6 +340,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Villa
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this);
         this.attackGoal = new MeleeAttackUnitGoal(this, true);
+        this.rangedAttackGoal = new UnitBowAttackGoal<>(this);
         this.attackBuildingGoal = new MeleeAttackBuildingGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }
@@ -292,7 +349,6 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Villa
     protected void registerGoals() {
         initialiseGoals();
         this.goalSelector.addGoal(2, usePortalGoal);
-
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, attackBuildingGoal);
@@ -318,6 +374,35 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Villa
         swordStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
 
         this.setItemSlot(EquipmentSlot.MAINHAND, swordStack);
+    }
+
+    protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
+        return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
+    }
+
+    @Override
+    public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
+        ItemStack itemstack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this,
+                (item) -> item instanceof BowItem
+        )));
+        AbstractArrow abstractarrow = this.getArrow(itemstack, velocity);
+        if (this.getMainHandItem().getItem() instanceof BowItem) {
+            abstractarrow = ((BowItem)this.getMainHandItem().getItem()).customArrow(abstractarrow);
+        }
+        double d0 = pTarget.getX() - this.getX();
+        double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
+        double d2 = pTarget.getZ() - this.getZ();
+        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+
+        if (pTarget.getEyeHeight() <= 1.0f)
+            d1 -= (1.0f - pTarget.getEyeHeight());
+
+        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, 0);
+        this.playSound(SoundEvents.SKELETON_SHOOT, 3.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.level().addFreshEntity(abstractarrow);
+
+        if (!level().isClientSide() && pTarget instanceof Unit unit)
+            FogOfWarClientboundPacket.revealRangedUnit(unit.getOwnerName(), this.getId());
     }
 
     @Override

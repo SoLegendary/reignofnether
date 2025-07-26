@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.util.Faction;
@@ -44,8 +45,13 @@ class PortraitRendererBuilding {
     public RectZone render(GuiGraphics guiGraphics, int x, int y, BuildingPlacement building) {
         Relationship rs = BuildingClientEvents.getPlayerToBuildingRelationship(building);
 
-        ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding());
-        String name = LanguageUtil.getTranslation("buildings." + (building.getFaction() != null && building.getFaction() != Faction.NONE ? building.getFaction().name().toLowerCase() : "neutral") + "." + key.getNamespace() + "." + key.getPath());
+        String name;
+        if (building.getBuilding() instanceof CustomBuilding customBuilding) {
+            name = customBuilding.name;
+        } else {
+            ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding());
+            name = LanguageUtil.getTranslation("buildings." + (building.getFaction() != null && building.getFaction() != Faction.NONE ? building.getFaction().name().toLowerCase() : "neutral") + "." + key.getNamespace() + "." + key.getPath());
+        }
 
         if (building.getUpgradeLevel() > 0)
             name = building.getUpgradedName();

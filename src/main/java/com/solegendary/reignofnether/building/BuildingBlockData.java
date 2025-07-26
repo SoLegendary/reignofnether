@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -10,6 +11,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,12 +19,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 // a class for static functions related to reading building NBT data (as created by Structure Blocks)
 
 public class BuildingBlockData {
 
-    public static ArrayList<BuildingBlock> getBuildingBlocks(String structureName, LevelAccessor level) {
+    public static ArrayList<BuildingBlock> getBuildingBlocksFromNbt(String structureName, LevelAccessor level) {
         ResourceManager resourceManager;
         if (level.isClientSide())
             resourceManager = Minecraft.getInstance().getResourceManager();
@@ -30,6 +33,15 @@ public class BuildingBlockData {
             resourceManager = level.getServer().getResourceManager();
 
         CompoundTag nbt = getBuildingNbt(structureName, resourceManager);
+        ArrayList<BuildingBlock> blocks = new ArrayList<>();
+
+        // load in blocks (list of blockPos and their palette index)
+        ListTag blocksNbt = nbt.getList("blocks", 10);
+
+        return getBuildingBlocksFromNbt(nbt);
+    }
+
+    public static ArrayList<BuildingBlock> getBuildingBlocksFromNbt(CompoundTag nbt) {
         ArrayList<BuildingBlock> blocks = new ArrayList<>();
 
         // load in blocks (list of blockPos and their palette index)
@@ -51,6 +63,23 @@ public class BuildingBlockData {
             if (bs.getBlock() != Blocks.WATER || bs.getFluidState().isSource())
                 blocks.add(new BuildingBlock(bp, bs));
         }
+        return blocks;
+    }
+
+    // returns absolute values
+    public static ArrayList<BuildingBlock> getBuildingBlocksFromWorld(Level level, BlockPos originPos, BlockPos structurePos, Vec3i structureSize) {
+        ArrayList<BuildingBlock> blocks = new ArrayList<>();
+
+        IntStream.range(originPos.getX() + structurePos.getX(), originPos.getX() + structurePos.getX() + structureSize.getX()).forEachOrdered(x -> {
+            IntStream.range(originPos.getY() + structurePos.getY(), originPos.getY() + structurePos.getY() + structureSize.getY()).forEachOrdered(y -> {
+                IntStream.range(originPos.getZ() + structurePos.getZ(), originPos.getZ() + structurePos.getZ() + structureSize.getZ()).forEachOrdered(z -> {
+                    BlockPos bp = new BlockPos(x,y,z);
+                    BlockState bs = level.getBlockState(bp);
+                    if (bs.getBlock() != Blocks.WATER || bs.getFluidState().isSource())
+                        blocks.add(new BuildingBlock(bp, bs));
+                });
+            });
+        });
         return blocks;
     }
 

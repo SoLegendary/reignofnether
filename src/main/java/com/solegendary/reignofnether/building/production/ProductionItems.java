@@ -56,6 +56,7 @@ public class ProductionItems {
 
     public static final ResearchVindicatorAxes RESEARCH_VINDICATOR_AXES = register(new ResourceLocation(ReignOfNether.MOD_ID, "vindicator_axes"), new ResearchVindicatorAxes());
     public static final ResearchPillagerCrossbows RESEARCH_PILLAGER_CROSSBOWS = register(new ResourceLocation(ReignOfNether.MOD_ID, "pillager_crossbows"), new ResearchPillagerCrossbows());
+    public static final ResearchMilitiaBows RESEARCH_MILITIA_BOWS = register(new ResourceLocation(ReignOfNether.MOD_ID, "militia_bows"), new ResearchMilitiaBows());
     public static final ResearchLabLightningRod RESEARCH_LAB_LIGHTNING_ROD = register(new ResourceLocation(ReignOfNether.MOD_ID, "lab_lightning_rod"), new ResearchLabLightningRod());
     public static final ResearchResourceCapacity RESEARCH_RESOURCE_CAPACITY = register(new ResourceLocation(ReignOfNether.MOD_ID, "resource_capacity"), new ResearchResourceCapacity());
     public static final ResearchSpiderJockeys RESEARCH_SPIDER_JOCKEYS = register(new ResourceLocation(ReignOfNether.MOD_ID, "spider_jockeys"), new ResearchSpiderJockeys());

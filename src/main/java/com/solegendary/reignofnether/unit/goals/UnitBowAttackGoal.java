@@ -26,8 +26,6 @@ import java.util.Random;
 
 // can also be used for generic projectile attacks as long as the mob 'technically' is holding a bow, eg. Blazes and ghasts
 
-// DEPRECATED - USE UNITATTACKGOAL INSTEAD
-
 public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends Goal {
     private final Random random = new Random();
 

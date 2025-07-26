@@ -37,10 +37,7 @@ import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZoglinUnit;
-import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
-import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
-import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
-import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
+import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -741,14 +738,20 @@ public class UnitClientEvents {
                     if (!FogOfWarClientEvents.isInBrightChunk(entity))
                         continue;
 
+                    AABB entityAABB = entity.getBoundingBox();
+                    if (entity instanceof PiglinMerchantUnit) {
+                        entityAABB = entityAABB.inflate(0.6f, 0, 0.6f);
+                        entityAABB.setMaxY(entityAABB.maxY + 0.8f);
+                    }
+
                     if (preselectedUnits.contains(entity) &&
                             isLeftClickAttack() &&
                             !targetingSelf() && !HudClientEvents.isMouseOverAnyButtonOrHud())
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 0.3f, 0.3f, 1.0f, false);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.3f, 0.3f, 1.0f, false);
                     else if (selectedUnits.contains(entity))
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(), 1.0f, 1.0f, 1.0f, 1.0f, false);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 1.0f, 1.0f, false);
                     else if (preselectedUnits.contains(entity) && !HudClientEvents.isMouseOverAnyButtonOrHud())
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entity.getBoundingBox(),1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f, false);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB,1.0f, 1.0f, 1.0f, MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f, false);
                 }
             }
             for (LivingEntity entity : allUnits) {
@@ -764,6 +767,9 @@ public class UnitClientEvents {
 
                 // draw only the bottom of the outline boxes
                 AABB entityAABB = entity.getBoundingBox();
+                if (entity instanceof PiglinMerchantUnit) {
+                    entityAABB = entityAABB.inflate(0.6f, 0, 0.6f);
+                }
                 entityAABB = entityAABB.setMaxY(entityAABB.minY);
                 boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
 

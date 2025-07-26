@@ -93,7 +93,6 @@ public class BuildingSaveData extends SavedData {
         ListTag list = new ListTag();
         this.buildings.forEach(b -> {
             String buildingName = ReignOfNetherRegistries.BUILDING.getKey(b.building).toString();
-
             CompoundTag cTag = new CompoundTag();
             cTag.putString("buildingKey", buildingName);
             cTag.putInt("x", b.originPos.getX());

@@ -1,5 +1,5 @@
 
-1.19.2-1.2.0b
+1.19.2-1.2.1a
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -12,12 +12,6 @@ Necromancer
     [❌] Magical projectile model and sound
     [❌] Allow consumption of souls for healing/mana
 
-Piglin Merchant
-    [❌] Building attack animation not sycned
-
-    - Fancy Feast
-        [❌] Prioritise giving food items to more hurt units
-
 Royal Guard
     - Mace Slam
         [❌] Add hammer throw alternate
@@ -27,30 +21,34 @@ Royal Guard
 
 Features
 --------
-Ron Structure block to register custom neutral buildings
-    1. Create custom block extending StructureBlock
-    2. Mixin StructureTemplate.save to check whether its from a Structure block
-    3. Create a generic Building CustomBuilding with no special abilities
-    4. Create a BuildingPlacement for CustomBuilding
-    5. Add menu options in sandbox that can change the CustomBuilding:
-        - Give it features like production, nether spread, garrisoning, etc.
-        - Toggle indestructible/capturable flags
-
+[✔] Structure block to register custom buildings
+    [❌] test in multiplayer
+    [🟡] test saving (concurrent warning with normal building saves)
+    [❌] new tab in sandbox menu to let you place previously registered custom buildings
+    [❌] button to de-register individual building at bottom left
+    [❌] ability to add generic building features:
+        - garrisonable with special entry/exit blocks
+        - nether spread with adjustable range
+        - night warp with adjustable range
 
 Bugfixes
 --------
 [❌] keyframe animations are cancelled upon being hit
 
-[❌] on a fresh world (easy) survival wave starts way too early (within 1-2 mins of starting)
-
 [❌] Avatar state is reset when unloaded
+
+[❌] When someone relogs, bridges revert to original rotations
+
+
 
 
 Quality of Life
 ---------------
 
-[❌] Convert stairs, slabs, stone bricks and polished blocks to nether/blackstone counterparts
+[❌] Handicap command
+    - Makes all resource costs some % higher than normal
+
+
 
 Balancing
 ---------
-

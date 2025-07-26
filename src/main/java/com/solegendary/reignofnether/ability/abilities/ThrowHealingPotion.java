@@ -26,7 +26,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class ThrowHealingPotion extends Ability {
 
-    public static final int CD_MAX_SECONDS = 10;
+    public static final int CD_MAX_SECONDS = 12;
 
     public final Potion potion = Potions.STRONG_HEALING;
 

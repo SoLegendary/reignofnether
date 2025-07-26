@@ -1,9 +1,11 @@
 package com.solegendary.reignofnether.blocks;
 
-import com.solegendary.reignofnether.building.CustomBuildingClientEvents;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.registrars.BlockEntityRegistrar;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.StructureBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
@@ -60,6 +62,17 @@ public class RTSStructureBlockEntity extends StructureBlockEntity {
         if (result) {
             if (this.getShowBoundingBox()) {
                 CustomBuildingClientEvents.rtsStructuresToRenderBB.add(this.getBlockPos());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean saveStructure(boolean pWriteToDisk) {
+        boolean result = super.saveStructure(pWriteToDisk);
+        if (result && level != null) {
+            if (!level.isClientSide()) {
+                CustomBuildingServerEvents.createNewCustomBuilding(structureName, getStructureName(), (ServerLevel) this.level, getBlockPos());
             }
         }
         return result;

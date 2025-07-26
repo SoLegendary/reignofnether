@@ -62,7 +62,7 @@ public abstract class Building {
     }
 
     public ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
-        return BuildingBlockData.getBuildingBlocks(this.structureName, level);
+        return BuildingBlockData.getBuildingBlocksFromNbt(this.structureName, level);
     }
 
     public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {

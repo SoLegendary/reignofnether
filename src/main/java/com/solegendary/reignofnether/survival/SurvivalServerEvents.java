@@ -234,6 +234,7 @@ public class SurvivalServerEvents {
         Wave.reseedWaves();
         nextWave = Wave.getWave(1);
         SurvivalClientboundPacket.setWaveRandomSeed(Wave.randomSeed);
+        lastTime = -1;
         if (serverLevel != null)
             saveData(serverLevel);
     }

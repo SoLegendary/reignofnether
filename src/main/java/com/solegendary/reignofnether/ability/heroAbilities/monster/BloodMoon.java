@@ -7,6 +7,9 @@ package com.solegendary.reignofnether.ability.heroAbilities.monster;
 // play a cave sound and announce "A blood moon rises" in global chat
 
 import com.solegendary.reignofnether.ability.HeroAbility;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -15,7 +18,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.time.TimeServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.goals.GenericUntargetedSpellGoal;
+import com.solegendary.reignofnether.unit.goals.GenericTargetedSpellGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
@@ -28,7 +31,6 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
@@ -37,19 +39,19 @@ public class BloodMoon extends HeroAbility {
     public static final String ENEMY_NAME = "Blood Moon";
 
     public static final int SPAWN_INTERVAL_TICKS = 120; // how often to spawn a unit
-    public static final int CHANNEL_TICKS = 40;
-    private static final int CD_MAX = 360 * ResourceCost.TICKS_PER_SECOND;
-    public static final int DURATION = 60 * ResourceCost.TICKS_PER_SECOND;
+    public static final int CHANNEL_TICKS = 0;
+    private static final int CD_MAX = 420 * ResourceCost.TICKS_PER_SECOND;
+    public static final int DURATION = 75 * ResourceCost.TICKS_PER_SECOND;
     public static final int BONUS_DURATION_PER_SOUL_RANK = 10 * ResourceCost.TICKS_PER_SECOND;
 
     public BloodMoon() {
-        super(1, 150, UnitAction.BLOOD_MOON, CD_MAX, 0, 0, false);
+        super(1, 175, UnitAction.BLOOD_MOON, CD_MAX, 0, 0, false);
     }
 
     @Override
-    public boolean isCasting() {
-        if (this.hero instanceof NecromancerUnit necromancerUnit) {
-            GenericUntargetedSpellGoal goal = necromancerUnit.getCastBloodMoonGoal();
+    public boolean isCasting(HeroUnit hero) {
+        if (hero instanceof NecromancerUnit necromancerUnit) {
+            GenericTargetedSpellGoal goal = necromancerUnit.getCastBloodMoonGoal();
             if (goal != null)
                 return goal.isCasting();
         }
@@ -59,12 +61,12 @@ public class BloodMoon extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Blood Moon",
-            new ResourceLocation("minecraft", "textures/block/redstone_block.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/redstone_block.png"),
             hotkey,
-            () -> false,
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.BLOOD_MOON,
             () -> rank == 0,
             () -> true,
-            () -> sendUnitCommand(UnitAction.BLOOD_MOON),
+            () -> CursorClientEvents.setLeftClickAction(UnitAction.BLOOD_MOON),
             null,
             getTooltipLines((HeroUnit) hero),
             this,
@@ -76,7 +78,7 @@ public class BloodMoon extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Blood Moon",
-                new ResourceLocation("minecraft", "textures/block/redstone_block.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/redstone_block.png"),
                 hero
         );
     }
@@ -106,15 +108,21 @@ public class BloodMoon extends HeroAbility {
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        use(level, unitUsing);
+        BuildingPlacement bpl = BuildingUtils.findBuilding(level.isClientSide(), targetBp);
+
+        if (bpl != null && !bpl.ownerName.isBlank() && !bpl.ownerName.equals(unitUsing.getOwnerName()))
+            use(level, unitUsing, bpl);
+        else if (level.isClientSide() && (bpl == null || bpl.ownerName.isBlank() || bpl.ownerName.equals(unitUsing.getOwnerName())))
+            HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.blood_moon.error"));
     }
 
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
-        use(level, unitUsing);
+        if (level.isClientSide())
+            HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.blood_moon.error"));
     }
 
-    private void use(Level level, Unit unitUsing) {
+    private void use(Level level, Unit unitUsing, BuildingPlacement targetBpl) {
         boolean isBloodMoonActive;
         if (level.isClientSide()) {
             isBloodMoonActive = TimeClientEvents.isBloodMoonActive();
@@ -128,6 +136,7 @@ public class BloodMoon extends HeroAbility {
         if (!isBloodMoonActive) {
             ((NecromancerUnit) unitUsing).getCastBloodMoonGoal().setAbility(this);
             ((NecromancerUnit) unitUsing).getCastBloodMoonGoal().startCasting();
+            ((NecromancerUnit) unitUsing).getCastBloodMoonGoal().setTarget(targetBpl);
         }
     }
 }

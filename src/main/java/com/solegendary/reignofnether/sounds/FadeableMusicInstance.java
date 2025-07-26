@@ -21,7 +21,7 @@ public class FadeableMusicInstance extends AbstractTickableSoundInstance {
     @Override
     public void tick() {
         if (fadingOut) {
-            volume -= 0.008f;
+            volume -= 0.01f;
             if (volume <= 0f) {
                 volume = 0f;
                 this.stop();

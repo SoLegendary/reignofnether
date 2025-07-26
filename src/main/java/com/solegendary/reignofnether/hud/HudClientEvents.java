@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.config.ConfigClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
@@ -47,6 +48,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
+import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
@@ -165,8 +167,10 @@ public class HudClientEvents {
         if (!(entity instanceof Unit))
             return name.toLowerCase();
 
+        if (entity instanceof MilitiaUnit militiaUnit && militiaUnit.isUsingBow()) {
+            name = I18n.get("units.villagers.reignofnether.militia_archer");
+        }
         ItemStack itemStack = entity.getItemBySlot(EquipmentSlot.HEAD);
-
         if (itemStack.getItem() instanceof BannerItem) {
             name += " " + I18n.get("units.villagers.reignofnether.captain");
         }
@@ -325,7 +329,14 @@ public class HudClientEvents {
                 if (hudSelBuildingOwned && buildingButtons.size() < (buttonsPerRow * 2)) {
                     // mob head icon
 
-                    buildingButtons.add(new Button(ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding()).toString(),
+                    String name;
+                    if (building.getBuilding() instanceof CustomBuilding customBuilding) {
+                        name = customBuilding.name;
+                    } else {
+                        ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding());
+                        name = ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding()).toString();
+                    }
+                    buildingButtons.add(new Button(name,
                         iconSize,
                         building.getBuilding().icon,
                         building,
@@ -594,9 +605,12 @@ public class HudClientEvents {
                 hudZones.add(zone);
                 if (zone.isMouseOver(mouseX, mouseY)) {
                     MyRenderer.renderTooltip(evt.getGuiGraphics(),
-                        heroUnit.getHeroLevel() >= HeroUnit.MAX_HERO_LEVEL ?
+                        heroUnit.getHeroLevel() >= HeroUnit.MAX_LEVEL ?
                             List.of(fcs(I18n.get("hud.hero.reignofnether.max_level"))) :
-                            List.of(fcs(I18n.get("hud.hero.reignofnether.experience", heroUnit.getExpOnCurrentLevel(), heroUnit.getExpToNextlevel()))),
+                            List.of(
+                                    fcs(I18n.get("hud.hero.reignofnether.experience", heroUnit.getExpOnCurrentLevel(), heroUnit.getExpToNextlevel())),
+                                    fcs(I18n.get("hud.hero.reignofnether.experience_warning"))
+                            ),
                         mouseX, mouseY
                     );
                 }
@@ -677,7 +691,9 @@ public class HudClientEvents {
                     () -> true,
                     () -> {
                         // select this one specific unit
-                        if (getModifiedEntityName(hudSelectedEntity).equals(getModifiedEntityName(unit))) {
+                        if (Keybindings.shiftMod.isDown()) {
+                            UnitClientEvents.getSelectedUnits().remove(hudSelectedEntity);
+                        } else if (getModifiedEntityName(hudSelectedEntity).equals(getModifiedEntityName(unit))) {
                             UnitClientEvents.clearSelectedUnits();
                             UnitClientEvents.addSelectedUnit(unit);
                         } else { // click to select this unit type as a group
@@ -1324,12 +1340,34 @@ public class HudClientEvents {
         Button leavesHidingButton = OrthoviewClientEvents.getLeavesHidingButton();
         if (!leavesHidingButton.isHidden.get()) {
             leavesHidingButton.render(evt.getGuiGraphics(),
-                    screenWidth - (camSensitivityButton.iconSize * 6),
-                    screenHeight - (camSensitivityButton.iconSize * 2),
+                    screenWidth - (leavesHidingButton.iconSize * 6),
+                    screenHeight - (leavesHidingButton.iconSize * 2),
                     mouseX,
                     mouseY
             );
             renderedButtons.add(leavesHidingButton);
+        }
+
+        Button rotateCW = MinimapClientEvents.getCameraRotateCWButton();
+        if (!rotateCW.isHidden.get()) {
+            rotateCW.render(evt.getGuiGraphics(),
+                    screenWidth - (rotateCW.iconSize * (MinimapClientEvents.isLargeMap() ? 8 : 4)),
+                    screenHeight - (rotateCW.iconSize * 2),
+                    mouseX,
+                    mouseY
+            );
+            renderedButtons.add(rotateCW);
+        }
+
+        Button rotateCCW = MinimapClientEvents.getCameraRotateCCWButton();
+        if (!rotateCCW.isHidden.get()) {
+            rotateCCW.render(evt.getGuiGraphics(),
+                    screenWidth - (rotateCCW.iconSize * (MinimapClientEvents.isLargeMap() ? 10 : 6)),
+                    screenHeight - (rotateCCW.iconSize * 2),
+                    mouseX,
+                    mouseY
+            );
+            renderedButtons.add(rotateCCW);
         }
 
         // ------------------------------
@@ -1577,12 +1615,10 @@ public class HudClientEvents {
 
     public static boolean isMouseOverAnyButtonOrHud() {
         for (RectZone hudZone : hudZones)
-            if (hudZone.isMouseOver(mouseX, mouseY)) {
+            if (hudZone.isMouseOver(mouseX, mouseY))
                 return true;
-            }
-        if (MinimapClientEvents.isPointInsideMinimap(mouseX, mouseY)) {
+        if (MinimapClientEvents.isPointInsideMinimap(mouseX, mouseY))
             return true;
-        }
         return isMouseOverAnyButton();
     }
 

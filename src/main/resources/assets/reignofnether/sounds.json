@@ -38,5 +38,17 @@
     "heroism": {
         "subtitle": "sounds.reignofnether.heroism",
         "sounds": [ "reignofnether:heroism" ]
+    },
+    "sharpened_grassblades_calm": {
+        "subtitle": "sounds.reignofnether.sharpened_grassblades_calm",
+        "sounds": [ "reignofnether:sharpened_grassblades_calm" ]
+    },
+    "life_scourge_calm": {
+        "subtitle": "sounds.reignofnether.life_scourge_calm",
+        "sounds": [ "reignofnether:life_scourge_calm" ]
+    },
+    "soul_resonance_calm": {
+        "subtitle": "sounds.reignofnether.soul_resonance_calm",
+        "sounds": [ "reignofnether:soul_resonance_calm" ]
     }
 }

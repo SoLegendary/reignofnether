@@ -61,7 +61,8 @@ public class CallLightning extends Ability {
                     FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip1", CD_MAX / 20, RANGE), MyRenderer.iconStyle),
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip2"), Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip3"), Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip3"), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip4"), Style.EMPTY)
             ),
             this,
             placement

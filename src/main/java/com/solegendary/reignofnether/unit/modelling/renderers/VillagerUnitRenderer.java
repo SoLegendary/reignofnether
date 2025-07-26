@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.unit.modelling.renderers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
 import com.solegendary.reignofnether.unit.modelling.models.VillagerUnitModel;
 import com.solegendary.reignofnether.unit.modelling.models.VillagerUnitProfessionLayer;
 import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
@@ -22,17 +21,15 @@ public class VillagerUnitRenderer extends AbstractVillagerUnitRenderer<AbstractI
     public VillagerUnitRenderer(EntityRendererProvider.Context context) {
         super(context, new VillagerUnitModel<>(context.bakeLayer(VillagerUnitModel.LAYER_LOCATION)), 0.5F);
         this.addLayer(new ItemInHandLayer<AbstractIllager, VillagerUnitModel<AbstractIllager>>(this, context.getItemInHandRenderer()) {
-            public void render(PoseStack pose, MultiBufferSource mbs, int p_116354_, AbstractIllager unit, float p_116356_, float p_116357_, float p_116358_, float p_116359_, float p_116360_, float p_116361_) {
-                if (unit instanceof VillagerUnit vUnit &&
+            public void render(PoseStack pose, MultiBufferSource mbs, int pPackedLight, AbstractIllager unit,
+                               float pLimbSwing, float pLimbSwingAmount, float pPartialTicks, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
+                if (unit instanceof MilitiaUnit mUnit) {
+                    super.render(pose, mbs, pPackedLight, unit, pLimbSwing, pLimbSwingAmount, pPartialTicks, pAgeInTicks, pNetHeadYaw, pHeadPitch);
+                } else if (unit instanceof VillagerUnit vUnit &&
                         ((vUnit.getBuildRepairGoal() != null && vUnit.getBuildRepairGoal().isBuilding()) ||
                         (vUnit.getGatherResourceGoal() != null && vUnit.getGatherResourceGoal().isGathering()) ||
                         (vUnit.getTargetGoal() != null && vUnit.getTargetGoal().getTarget() != null))) {
-                    super.render(pose, mbs, p_116354_, unit, p_116356_, p_116357_, p_116358_, p_116359_, p_116360_, p_116361_);
-                } else if (unit instanceof MilitiaUnit mUnit &&
-                        ((mUnit.getTargetGoal() != null && mUnit.getTargetGoal().getTarget() != null) ||
-                        (mUnit.getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg &&
-                        mabg.getBuildingTarget() != null))) {
-                    super.render(pose, mbs, p_116354_, unit, p_116356_, p_116357_, p_116358_, p_116359_, p_116360_, p_116361_);
+                    super.render(pose, mbs, pPackedLight, unit, pLimbSwing, pLimbSwingAmount, pPartialTicks, pAgeInTicks, pNetHeadYaw, pHeadPitch);
                 }
             }
         });

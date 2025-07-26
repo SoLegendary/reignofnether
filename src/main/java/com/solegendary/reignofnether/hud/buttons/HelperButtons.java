@@ -76,14 +76,9 @@ public class HelperButtons {
                     if (Keybindings.ctrlMod.isDown()) {
                         UnitClientEvents.clearSelectedUnits();
                         for (int id : idleWorkerIds) {
-                            if (idleWorkerIndex < idleWorkerIds.size()) {
-                                Entity entity = MC.level.getEntity(idleWorkerIds.get(idleWorkerIndex));
-                                if (entity instanceof WorkerUnit) {
-                                    UnitClientEvents.addSelectedUnit((LivingEntity) entity);
-                                }
-                                idleWorkerIndex += 1;
-                            } else
-                                idleWorkerIndex = 0; // Reset to zero if out of bounds
+                            Entity entity = MC.level.getEntity(id);
+                            if (entity instanceof WorkerUnit)
+                                UnitClientEvents.addSelectedUnit((LivingEntity) entity);
                         }
                     } else {
                         if (idleWorkerIndex >= idleWorkerIds.size())
@@ -103,7 +98,10 @@ public class HelperButtons {
                     }
                 },
                 null,
-                List.of(FormattedCharSequence.forward(I18n.get("hud.helperbuttons.reignofnether.idle_workers"), Style.EMPTY))
+                List.of(
+                        FormattedCharSequence.forward(I18n.get("hud.helperbuttons.reignofnether.idle_workers"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("hud.helperbuttons.reignofnether.idle_workers_shift"), Style.EMPTY)
+                )
         );
         buildingCancelButton = new Button(
                 "Cancel",

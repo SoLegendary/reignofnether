@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -80,22 +81,6 @@ public class PlayerClientEvents {
             }
             return 0;
         }));
-        evt.getDispatcher()
-            .register(Commands.literal("rts-lock").then(Commands.literal("enable").executes((command) -> {
-                if (MC.player != null && MC.player.hasPermissions(4)) {
-                    PlayerServerboundPacket.lockRTS();
-                    return 1;
-                }
-                return 0;
-            })));
-        evt.getDispatcher()
-            .register(Commands.literal("rts-lock").then(Commands.literal("disable").executes((command) -> {
-                if (MC.player != null && MC.player.hasPermissions(4)) {
-                    PlayerServerboundPacket.unlockRTS();
-                    return 1;
-                }
-                return 0;
-            })));
         evt.getDispatcher()
             .register(Commands.literal("rts-syncing").then(Commands.literal("enable").executes((command) -> {
                 if (MC.player != null && MC.player.hasPermissions(4)) {
@@ -185,6 +170,8 @@ public class PlayerClientEvents {
             GameruleClient.gamerulesMenuOpen = false;
             isRTSPlayer = true;
             setFaction(setFaction);
+            if (!SandboxClientEvents.isSandboxPlayer())
+                MC.getMusicManager().stopPlaying();
         }
     }
 
@@ -192,6 +179,7 @@ public class PlayerClientEvents {
         if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
             isRTSPlayer = false;
             setFaction(Faction.NONE);
+            SoundClientEvents.stopFadeableMusicInstance();
         }
     }
 
@@ -279,6 +267,7 @@ public class PlayerClientEvents {
         boolean isSandbox = SandboxClientEvents.isSandboxPlayer();
         isRTSPlayer = false;
         setFaction(Faction.NONE);
+        SoundClientEvents.stopFadeableMusicInstance();
 
         HudClientEvents.controlGroups.clear();
         UnitClientEvents.getSelectedUnits().clear();

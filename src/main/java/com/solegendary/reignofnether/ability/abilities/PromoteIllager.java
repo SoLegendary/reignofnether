@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -63,9 +64,8 @@ public class PromoteIllager extends Ability {
             );
 
             for (Mob mob : nearbyMobs)
-                if (mob instanceof Unit unit && unit.getOwnerName().equals(captainUnit.getOwnerName())) {
+                if (mob instanceof Unit unit && unit.getOwnerName().equals(captainUnit.getOwnerName()))
                     mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 2, 0));
-                }
         }
     }
 
@@ -114,8 +114,8 @@ public class PromoteIllager extends Ability {
             if (level.isClientSide()) {
                 HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.promote_illager.error1"));
             }
-        } else if (targetEntity instanceof VindicatorUnit || targetEntity instanceof PillagerUnit
-            || targetEntity instanceof EvokerUnit) {
+        } else if (targetEntity instanceof VindicatorUnit || targetEntity instanceof PillagerUnit ||
+                   targetEntity instanceof EvokerUnit || targetEntity instanceof MilitiaUnit) {
 
             Unit unit = (Unit) targetEntity;
 

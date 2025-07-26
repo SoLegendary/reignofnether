@@ -83,7 +83,7 @@ public class BackToWorkBuilding extends Ability {
                             new Vector3d(buildingUsing.centrePos.getX(), buildingUsing.centrePos.getY(), buildingUsing.centrePos.getZ()),
                             range, MilitiaUnit.class, buildingUsing.getLevel())
                     .stream()
-                    .filter(u -> u.getOwnerName().equals(buildingUsing.ownerName))
+                    .filter(u -> u.getOwnerName().equals(buildingUsing.ownerName) && !u.isCaptain)
                     .toList();
 
             for (MilitiaUnit mUnit : nearbyMilitia)

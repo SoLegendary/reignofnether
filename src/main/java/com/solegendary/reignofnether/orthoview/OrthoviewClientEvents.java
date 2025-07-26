@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.orthoview;
 
-import org.joml.Matrix4f;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -92,6 +91,11 @@ public class OrthoviewClientEvents {
     private static float forcePanOriginalX = 0;
     private static float forcePanOriginalZ = 0;
     private static float forcePanOriginalZoom = 0;
+
+    private static final int FORCE_ROT_FRAMES_MAX = 20;
+    private static int forceRotFramesLeft = 0;
+    private static float forceRotTargetX = 0;
+    private static float forceRotOriginalX = 0;
 
     private static int cameraLockTicksLeft = 0;
     private static boolean cameraLocked = false;
@@ -292,8 +296,26 @@ public class OrthoviewClientEvents {
             MC.player.move(MoverType.SELF, new Vec3(xDiff, 0, zDiff));
             forcePanTicksLeft -= 1;
         }
+
         if (evt.phase == TickEvent.Phase.END) {
             updateOrthoviewY();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderLevel(RenderLevelStageEvent evt) throws NoSuchFieldException {
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS ||
+            !OrthoviewClientEvents.isEnabled()) {
+            return;
+        }
+        if (forceRotFramesLeft > 0) {
+            float xDiff = (forceRotTargetX - forceRotOriginalX) / FORCE_ROT_FRAMES_MAX;
+            rotateCam(-xDiff, 0);
+            forceRotFramesLeft -= 1;
+            if (forceRotFramesLeft <= 0) {
+                camRotX = -forceRotTargetX;
+                rotateCam(0,0);
+            }
         }
     }
 
@@ -385,6 +407,31 @@ public class OrthoviewClientEvents {
         }
     }
 
+    // rotates the camera to fixed points at -135, -45, 45 and 135 degrees
+    public static void fixedRotateCam(boolean clockwise) {
+        if (forceRotFramesLeft <= 0) {
+            camRotAdjX = 0;
+            int roundedRotX = (Math.round(getCamRotX() / 90.0f) * 90) + 45;
+
+            if (roundedRotX > getCamRotX() && clockwise)
+                forceRotTargetX = roundedRotX;
+            else if (roundedRotX < getCamRotX() && !clockwise)
+                forceRotTargetX = roundedRotX - 90;
+            else if (clockwise)
+                forceRotTargetX = roundedRotX;
+            else
+                forceRotTargetX = roundedRotX - 90;
+
+            if (forceRotTargetX == getCamRotX() && clockwise)
+                forceRotTargetX += 90;
+            else if (forceRotTargetX == getCamRotX())
+                forceRotTargetX -= 90;
+
+            forceRotOriginalX = getCamRotX();
+            forceRotFramesLeft = FORCE_ROT_FRAMES_MAX;
+        }
+    }
+
     public static void tryToToggleEnable() {
         if (!OrthoviewClientEvents.isCameraLocked() && MC.gameMode != null) {
             if (MC.player != null && (
@@ -453,7 +500,6 @@ public class OrthoviewClientEvents {
         if (!enabled || isCameraLocked()) {
             return;
         }
-
         if (Keybindings.altMod.isDown()) {
             zoomCam((float) sign(evt.getScrollDelta()) * -ZOOM_STEP_SCROLL);
         }
@@ -521,7 +567,7 @@ public class OrthoviewClientEvents {
 
         float panKeyStep = 1.5f * (getZoom() / ZOOM_MAX);
 
-        if (!isCameraLocked()) {
+        if (!isCameraLocked() && !Keybindings.altMod.isDown()) {
             // pan camera with keys
             if (Keybindings.panPlusX.isDown()) {
                 panCam(getEdgeCamPanSensitivity(), 0, 0);
@@ -627,10 +673,11 @@ public class OrthoviewClientEvents {
     /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "playerY: " + MC.player.getEyeY()
+        MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[] {
+                "rotX: " + getCamRotX()
         });
-    }*/
+    }
+     */
 
     // OrthoViewMixin uses this to generate a customisation orthographic view to replace the usual view
     // shamelessly copied from ImmersivePortals 1.16

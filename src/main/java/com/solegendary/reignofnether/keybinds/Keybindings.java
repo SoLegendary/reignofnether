@@ -10,6 +10,8 @@ public class Keybindings {
     public static final Keybinding panMinusX = new Keybinding(GLFW.GLFW_KEY_RIGHT, "X-", "Pan map X-");
     public static final Keybinding panPlusZ = new Keybinding(GLFW.GLFW_KEY_UP, "Z+", "Pan map Z+");
     public static final Keybinding panMinusZ = new Keybinding(GLFW.GLFW_KEY_DOWN, "Z-", "Pan map Z-");
+    public static final Keybinding rotCW = new Keybinding(GLFW.GLFW_KEY_RIGHT, "", "Rotate map clockwise");
+    public static final Keybinding rotCCW = new Keybinding(GLFW.GLFW_KEY_LEFT, "", "Rotate map counter-clockwise");
     public static final Keybinding reset = new Keybinding(GLFW.GLFW_KEY_RIGHT_CONTROL, "RC", "Reset");
     public static final Keybinding shiftMod = new Keybinding(GLFW.GLFW_KEY_LEFT_SHIFT, "SHFT", "Shift");
     public static final Keybinding ctrlMod = new Keybinding(GLFW.GLFW_KEY_LEFT_CONTROL, "LC", "Ctrl");

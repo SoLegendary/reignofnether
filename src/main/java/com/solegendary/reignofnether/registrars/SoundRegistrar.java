@@ -44,10 +44,6 @@ public class SoundRegistrar {
             SOUND_EVENTS.register("main_menu", () ->
                     SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "main_menu")));
 
-    public static final RegistryObject<SoundEvent> BLOOD_MOON =
-            SOUND_EVENTS.register("blood_moon", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "blood_moon")));
-
     public static final RegistryObject<SoundEvent> BLOODLUST =
             SOUND_EVENTS.register("bloodlust", () ->
                     SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "bloodlust")));
@@ -55,6 +51,22 @@ public class SoundRegistrar {
     public static final RegistryObject<SoundEvent> HEROISM =
             SOUND_EVENTS.register("heroism", () ->
                     SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "heroism")));
+
+    public static final RegistryObject<SoundEvent> BLOOD_MOON_SONG =
+            SOUND_EVENTS.register("blood_moon", () ->
+                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "blood_moon")));
+
+    public static final RegistryObject<SoundEvent> VILLAGER_CALM_THEME_SONG =
+            SOUND_EVENTS.register("sharpened_grassblades_calm", () ->
+                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "sharpened_grassblades_calm")));
+
+    public static final RegistryObject<SoundEvent> MONSTER_CALM_THEME_SONG =
+            SOUND_EVENTS.register("life_scourge_calm", () ->
+                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "life_scourge_calm")));
+
+    public static final RegistryObject<SoundEvent> PIGLIN_CALM_THEME_SONG =
+            SOUND_EVENTS.register("soul_resonance_calm", () ->
+                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "soul_resonance_calm")));
 
     public static void init() {
         SOUND_EVENTS.register(FMLJavaModLoadingContext.get().getModEventBus());

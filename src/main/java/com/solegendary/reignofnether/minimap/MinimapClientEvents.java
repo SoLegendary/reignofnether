@@ -61,8 +61,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static com.solegendary.reignofnether.hud.HudClientEvents.isMouseOverAnyButton;
 import static com.solegendary.reignofnether.time.TimeClientEvents.getNightCircleModeName;
 import static com.solegendary.reignofnether.time.TimeClientEvents.nightCircleMode;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class MinimapClientEvents {
 
@@ -259,6 +261,42 @@ public class MinimapClientEvents {
                                 ? I18n.get("hud.map.reignofnether.lock_map.tooltip1.enabled")
                                 : I18n.get("hud.map.reignofnether.lock_map.tooltip1.disabled"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("hud.map.reignofnether.lock_map.tooltip2"), Style.EMPTY)
+                )
+        );
+    }
+
+    public static Button getCameraRotateCWButton() {
+        return new Button("Rotate camera clockwise",
+                14,
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/rotate_cw.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                Keybindings.rotCW,
+                () -> false,
+                () -> !Keybindings.altMod.isDown() && !isLargeMap(),
+                () -> Keybindings.altMod.isDown() || isLargeMap(),
+                () -> OrthoviewClientEvents.fixedRotateCam(true),
+                null,
+                List.of(
+                        fcs(I18n.get("hud.map.reignofnether.rotate_cw.tooltip1")),
+                        fcs(I18n.get("hud.map.reignofnether.rotate_cw.tooltip2"))
+                )
+        );
+    }
+
+    public static Button getCameraRotateCCWButton() {
+        return new Button("Rotate camera counter-clockwise",
+                14,
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/rotate_ccw.png"),
+                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                Keybindings.rotCCW,
+                () -> false,
+                () -> !Keybindings.altMod.isDown() && !isLargeMap(),
+                () -> Keybindings.altMod.isDown() || isLargeMap(),
+                () -> OrthoviewClientEvents.fixedRotateCam(false),
+                null,
+                List.of(
+                        fcs(I18n.get("hud.map.reignofnether.rotate_ccw.tooltip1")),
+                        fcs(I18n.get("hud.map.reignofnether.rotate_ccw.tooltip2"))
                 )
         );
     }
@@ -845,7 +883,7 @@ public class MinimapClientEvents {
         }
 
         // when clicking on map move player there
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && !isMouseOverAnyButton()) {
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
             if (MC.player != null && moveTo != null) {
                 if (Keybindings.shiftMod.isDown()) {

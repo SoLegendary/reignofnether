@@ -36,12 +36,13 @@ public class BackToWorkUnit extends Ability {
 
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
+        if (!(unit instanceof MilitiaUnit militiaUnit)) return null;
         return new AbilityButton(
                 "Back to Work (Building)",
-                new ResourceLocation("minecraft", "textures/item/iron_pickaxe.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_pickaxe.png"),
                 hotkey,
                 () -> false,
-                () -> false,
+                () -> militiaUnit.isCaptain,
                 () -> true,
                 () -> sendUnitCommand(UnitAction.BACK_TO_WORK_UNIT),
                 null,

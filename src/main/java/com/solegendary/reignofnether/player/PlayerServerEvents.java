@@ -32,6 +32,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
@@ -551,6 +552,7 @@ public class PlayerServerEvents {
                     if (entity instanceof HeroUnit heroUnit && ((Unit) heroUnit).getOwnerName().equals(playerName)) {
                         heroUnit.addExperience(10000);
                         heroUnit.setSkillPoints(10);
+                        heroUnit.setMana(heroUnit.getMaxMana());
                         HeroClientboundPacket.setExperience(entity.getId(), heroUnit.getExperience());
                         HeroClientboundPacket.setSkillPoints(entity.getId(), 10);
                     }
@@ -905,6 +907,30 @@ public class PlayerServerEvents {
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
         AllyCommand.register(evt.getDispatcher());
+
+        evt.getDispatcher().register(Commands.literal("rts-lock").then(Commands.literal("enable").executes((command) -> {
+            if ((command.getSource() != null &&
+                command.getSource().getPlayer() != null &&
+                command.getSource().getPlayer().hasPermissions(4)) ||
+                (command.getSource() != null &&
+                !command.getSource().isPlayer())) {
+                setRTSLock(true);
+                return 1;
+            }
+            return 0;
+        })));
+
+        evt.getDispatcher().register(Commands.literal("rts-lock").then(Commands.literal("disable").executes((command) -> {
+            if ((command.getSource() != null &&
+                command.getSource().getPlayer() != null &&
+                command.getSource().getPlayer().hasPermissions(4)) ||
+                (command.getSource() != null &&
+                !command.getSource().isPlayer())) {
+                setRTSLock(false);
+                return 1;
+            }
+            return 0;
+        })));
     }
 
     public static void resetRTS(boolean hardReset) {

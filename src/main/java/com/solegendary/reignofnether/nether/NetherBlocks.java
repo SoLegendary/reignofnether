@@ -207,7 +207,35 @@ public class NetherBlocks {
                 Blocks.YELLOW_TERRACOTTA,
                 Blocks.BROWN_TERRACOTTA,
                 Blocks.WHITE_TERRACOTTA,
-                Blocks.LIGHT_GRAY_TERRACOTTA
+                Blocks.LIGHT_GRAY_TERRACOTTA,
+                Blocks.MOSSY_COBBLESTONE,
+                Blocks.PRISMARINE
+            ));
+        MAPPINGS.put(Blocks.NETHER_BRICKS,
+            List.of(
+                Blocks.STONE_BRICKS,
+                Blocks.CRACKED_STONE_BRICKS,
+                Blocks.MOSSY_STONE_BRICKS,
+                Blocks.PRISMARINE_BRICKS,
+                Blocks.DARK_PRISMARINE
+            ));
+        MAPPINGS.put(Blocks.CHISELED_NETHER_BRICKS,
+            List.of(
+                Blocks.CHISELED_STONE_BRICKS,
+                Blocks.CHISELED_DEEPSLATE
+            ));
+        MAPPINGS.put(Blocks.POLISHED_BLACKSTONE_BRICKS,
+            List.of(
+                Blocks.DEEPSLATE_BRICKS
+            ));
+        MAPPINGS.put(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS,
+            List.of(
+                Blocks.CRACKED_DEEPSLATE_BRICKS
+            ));
+        MAPPINGS.put(Blocks.RED_NETHER_BRICKS,
+            List.of(
+                Blocks.BRICKS,
+                Blocks.MUD_BRICKS
             ));
         MAPPINGS.put(Blocks.BASALT,
             List.of(
@@ -226,7 +254,9 @@ public class NetherBlocks {
                 Blocks.SANDSTONE,
                 Blocks.CHISELED_SANDSTONE,
                 Blocks.RED_SANDSTONE,
-                Blocks.FARMLAND
+                Blocks.CHISELED_RED_SANDSTONE,
+                Blocks.FARMLAND,
+                Blocks.CLAY
             ));
         MAPPINGS.put(Blocks.CRIMSON_HYPHAE,
             List.of(

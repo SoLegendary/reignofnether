@@ -4,7 +4,6 @@ import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.heroAbilities.monster.BloodMoon;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
-import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
@@ -23,7 +22,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
@@ -34,20 +32,22 @@ public class TimeServerEvents {
 
     private static int bloodMoonTicksLeft = 0;
     private static LivingEntity bloodMoonOwner = null;
+    private static String bloodMoonTarget = null; // who receives the spawned enemies
     private static boolean zombieOrSkeleton = true;
 
     public static boolean isBloodMoonActive() {
         return bloodMoonTicksLeft > 0;
     }
 
-    public static void startBloodMoon(int tickDuration, Unit owner) {
+    public static void startBloodMoon(int tickDuration, Unit owner, String targetName) {
         bloodMoonTicksLeft = tickDuration;
         bloodMoonOwner = (LivingEntity) owner;
+        bloodMoonTarget = targetName;
         sendMessageToAllPlayers("abilities.reignofnether.blood_moon.start", 0xFF0000, true, owner.getOwnerName());
         SoundClientboundPacket.playSoundForAllPlayers(SoundAction.RANDOM_CAVE_AMBIENCE);
     }
 
-    // spawns one neutral undead unit (zombie or skeleton at random) in each base NOT owned by bloodMoonOwner
+    // spawns one neutral undead unit (zombie or skeleton at random) in each base owned by bloodMoonTarget
     private static void doRandomBloodMoonSpawn(Level level) {
         if (level.isClientSide()) {
             return;
@@ -60,13 +60,8 @@ public class TimeServerEvents {
         BlockPos spawnBp;
         Random random = new Random();
 
-        List<String> enemyPlayerNames = PlayerServerEvents.rtsPlayers.stream()
-                .map(rtsPlayer -> rtsPlayer.name)
-                .filter(name -> !name.equals(((Unit) bloodMoonOwner).getOwnerName()))
-                .toList();
-
         ArrayList<BuildingPlacement> enemyBuildings = new ArrayList<>(BuildingServerEvents.getBuildings().stream()
-                .filter(b -> !b.ownerName.equals(((Unit) bloodMoonOwner).getOwnerName()) && !b.getBuilding().invulnerable)
+                .filter(b -> b.ownerName.equals(bloodMoonTarget) && !b.getBuilding().invulnerable)
                 .toList());
         Collections.shuffle(enemyBuildings);
 

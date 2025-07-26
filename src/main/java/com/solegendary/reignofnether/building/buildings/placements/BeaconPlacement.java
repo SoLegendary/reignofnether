@@ -61,7 +61,7 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
 
     @Override
     public String getUpgradedName() {
-        String name = I18n.get("buildings.neutral.reignofnether.upgraded_beacon");
+        String name = I18n.get("buildings.neutral.reignofnether.capturable_beacon");
         if (getAuraEffect() == MobEffects.LUCK)
             return name + " (" + I18n.get("ability.reignofnether.beacon_aura.wealth") + ")";
         else if (getAuraEffect() == MobEffects.DIG_SPEED)
@@ -268,7 +268,7 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
             case 5 -> Beacon.structureNameT5;
             default -> Beacon.structureName;
         };
-        ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocks(newStructureName, this.getLevel());
+        ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocksFromNbt(newStructureName, this.getLevel());
         this.blocks = getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation);
         super.refreshBlocks();
     }

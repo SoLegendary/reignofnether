@@ -73,7 +73,8 @@ public interface HeroUnit extends Unit {
         return null;
     }
 
-    int MAX_HERO_LEVEL = 10;
+    int MAX_LEVEL = 10;
+    int MAX_NEUTRAL_EXP_LEVEL = 5; // cannot gain exp from neutral enemies at or past this level
 
     float getHealthBonusPerLevel();
     float getAttackBonusPerLevel();
@@ -117,7 +118,7 @@ public interface HeroUnit extends Unit {
         if (((LivingEntity) this).level().isClientSide())
             return;
         int levelBefore = getHeroLevel();
-        if (levelBefore >= MAX_HERO_LEVEL)
+        if (levelBefore >= MAX_LEVEL)
             return;
 
         setExperience(getExperience() + amount);
@@ -145,13 +146,13 @@ public interface HeroUnit extends Unit {
             level += 1;
             exp -= expToNextLevel;
             expToNextLevel += (100 * EXP_REQ_MULTIPLIER);
-        } while (exp >= 0 && level < MAX_HERO_LEVEL);
+        } while (exp >= 0 && level < MAX_LEVEL);
         return level;
     }
 
     // @ 4000 exp, show 500/900 (level 8)
     default int getExpOnCurrentLevel() {
-        if (getHeroLevel() >= MAX_HERO_LEVEL)
+        if (getHeroLevel() >= MAX_LEVEL)
             return 0;
         int expToNextLevel = (int) (200 * EXP_REQ_MULTIPLIER);
         int expCount = 0;
@@ -167,7 +168,7 @@ public interface HeroUnit extends Unit {
     }
 
     default int getExpToNextlevel() {
-        if (getHeroLevel() >= MAX_HERO_LEVEL)
+        if (getHeroLevel() >= MAX_LEVEL)
             return 0;
         return (int) ((getHeroLevel() + 1) * (100 * EXP_REQ_MULTIPLIER));
     }

@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.ArmedModel;
@@ -116,12 +117,23 @@ public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalMo
             // CROSSBOW_CHARGE
             return ArmPose.CROSSBOW_CHARGE;
         }
+        else if (entity instanceof MilitiaUnit militiaUnit) {
+            if (militiaUnit.isUsingBow()) {
+                if (militiaUnit.isAggressive())
+                    return ArmPose.BOW_AND_ARROW;
+                else
+                    return ArmPose.CROSSBOW_CHARGE;
+            }
+            else
+                return ArmPose.ATTACKING;
+        }
         else if (entity instanceof AttackerUnit attackerUnit) {
             SelectedTargetGoal<?> goal = ((Unit) entity).getTargetGoal();
             if (goal != null && goal.getTarget() != null ||
                 (attackerUnit.getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg && mabg.getBuildingTarget() != null))
                 return ArmPose.ATTACKING;
         }
+
         return ArmPose.CROSSED;
     }
 

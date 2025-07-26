@@ -69,19 +69,19 @@ public class IronGolemBuilding extends Building {
             () -> BuildingClientEvents.setBuildingToPlace(Buildings.IRON_GOLEM_BUILDING),
             null,
             List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.iron_golem"),
+                    I18n.get("buildings.villagers.reignofnether.iron_golem_building"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(IronGolemProd.cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.iron_golem.tooltip1"),
+                    I18n.get("buildings.villagers.reignofnether.iron_golem_building.tooltip1"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.iron_golem.tooltip2"),
+                    I18n.get("buildings.villagers.reignofnether.iron_golem_building.tooltip2"),
                     Style.EMPTY
                 )
             ),

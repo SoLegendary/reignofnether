@@ -18,6 +18,8 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 public class ResearchBeaconLevel1 extends ProductionItem {
+
+    public final static String itemName = "Iron Beacon";
     public final static ResourceCost cost = ResourceCosts.RESEARCH_BEACON_LEVEL1;
 
     public ResearchBeaconLevel1() {

@@ -26,7 +26,7 @@ public abstract class AbstractBridge extends Building {
     public float getMeleeDamageMult() { return MELEE_DAMAGE_MULTIPLIER; }
 
     public ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level, boolean diagonal) {
-        return BuildingBlockData.getBuildingBlocks(diagonal ? getDiagonalStructureName() : getOrthogonalStructureName(), level);
+        return BuildingBlockData.getBuildingBlocksFromNbt(diagonal ? getDiagonalStructureName() : getOrthogonalStructureName(), level);
     }
 
     @Override

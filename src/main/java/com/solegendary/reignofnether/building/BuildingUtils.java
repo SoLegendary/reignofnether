@@ -175,8 +175,7 @@ public class BuildingUtils {
         );
     }
 
-    // get BlockPos values with absolute world positions
-    public static ArrayList<BuildingBlock> getAbsoluteBlockData(ArrayList<BuildingBlock> staticBlocks, LevelAccessor level, BlockPos originPos, Rotation rotation) {
+    public static ArrayList<BuildingBlock> getAbsoluteBlockData(ArrayList<BuildingBlock> staticBlocks, LevelAccessor level, BlockPos originPos, Rotation rotation, Vec3i blockOffset) {
         ArrayList<BuildingBlock> blocks = new ArrayList<>();
 
         for (BuildingBlock block : staticBlocks) {
@@ -184,13 +183,18 @@ public class BuildingUtils {
             BlockPos bp = block.getBlockPos();
 
             block.setBlockPos(new BlockPos(
-                    bp.getX() + originPos.getX(),
-                    bp.getY() + originPos.getY() + 1,
-                    bp.getZ() + originPos.getZ()
+                    bp.getX() + originPos.getX() + blockOffset.getX(),
+                    bp.getY() + originPos.getY() + blockOffset.getY() + 1,
+                    bp.getZ() + originPos.getZ() + blockOffset.getZ()
             ));
             blocks.add(block);
         }
         return blocks;
+    }
+
+    // get BlockPos values with absolute world positions
+    public static ArrayList<BuildingBlock> getAbsoluteBlockData(ArrayList<BuildingBlock> staticBlocks, LevelAccessor level, BlockPos originPos, Rotation rotation) {
+        return getAbsoluteBlockData(staticBlocks, level, originPos, rotation, new Vec3i(0,0,0));
     }
 
     // returns whether the given pos is part of ANY building in the level
