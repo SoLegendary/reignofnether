@@ -865,6 +865,9 @@ public class PlayerServerEvents {
                     for (String winner : remainingPlayers) {
                         sendMessageToAllPlayers("server.reignofnether.victory_alliance", true, winner);
                         PlayerClientboundPacket.victory(winner);
+
+                        //перезапуск игры
+                        resetRTS(true);
                     }
                 }
             } else if (rtsPlayers.size() == 1) {
@@ -872,6 +875,9 @@ public class PlayerServerEvents {
                 RTSPlayer winner = rtsPlayers.get(0);
                 sendMessageToAllPlayers("server.reignofnether.victorious", true, winner.name);
                 PlayerClientboundPacket.victory(winner.name);
+
+                //перезапуск игры
+                resetRTS(true);
             }
         }
     }
