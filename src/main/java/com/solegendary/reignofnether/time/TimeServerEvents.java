@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.heroAbilities.monster.BloodMoon;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
@@ -99,6 +100,17 @@ public class TimeServerEvents {
             if (bloodMoonTicksLeft % 20 == 0) {
                 AbilityClientboundPacket.doAbility(bloodMoonOwner.getId(), UnitAction.BLOOD_MOON, bloodMoonTicksLeft);
             }
+        }
+
+        //рестарт игры
+        if (PlayerServerEvents.bresetGame) {
+            if (PlayerServerEvents.timer_process == 100) {
+                sendMessageToAllPlayers("Игра будет скоро сброшена!!!", 0xFFFFFF, false);
+            }
+            if (PlayerServerEvents.timer_process == 200) {
+                PlayerServerEvents.resetGame();
+            }
+            PlayerServerEvents.timer_process ++;
         }
     }
 }

@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.gamemode.GameModeClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
+import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
@@ -74,6 +75,10 @@ import static net.minecraft.world.level.GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_C
 
 public class PlayerServerEvents {
 
+    //MY
+    public static boolean bresetGame = false;//MY
+    public static int timer_process = 0;
+
     // list of what gamemode these players should be in when outside of RTS cam
     private static final Map<String, GameType> playerDefaultGameModes = new HashMap<>();
     private static final Map<String, Boolean> playerGuiOpenStatus = new HashMap<>();
@@ -94,6 +99,13 @@ public class PlayerServerEvents {
     public static long rtsGameTicks = 0; // ticks up as long as there is at least 1 rtsPlayer
 
     public static ServerLevel serverLevel = null;
+
+    //MY
+    public static void resetGame(){
+        bresetGame = false;
+        timer_process = -1;
+        resetRTS(true);
+    }
 
     // warpten - faster building/unit production
     // operationcwal - faster resource gathering
@@ -867,7 +879,8 @@ public class PlayerServerEvents {
                         PlayerClientboundPacket.victory(winner);
 
                         //перезапуск игры
-                        resetRTS(true);
+                        //resetRTS(true);
+                        bresetGame = true;
                     }
                 }
             } else if (rtsPlayers.size() == 1) {
@@ -877,7 +890,11 @@ public class PlayerServerEvents {
                 PlayerClientboundPacket.victory(winner.name);
 
                 //перезапуск игры
-                resetRTS(true);
+                //resetRTS(true);
+                bresetGame = true;
+            } else if (rtsPlayers.isEmpty()) {
+                //перезапуск игры
+                bresetGame = true;
             }
         }
     }
@@ -993,7 +1010,8 @@ public class PlayerServerEvents {
             AlliancesServerEvents.resetAllAlliances();
             SurvivalServerEvents.reset();
         }
-        HeroClientEvents.fallenHeroes.clear();
+        //HeroClientEvents.fallenHeroes.clear();
+        HeroServerEvents.fallenHeroes.clear();
 
         for (ServerPlayer player : serverLevel.players())
             player.setGameMode(GameType.SPECTATOR);
