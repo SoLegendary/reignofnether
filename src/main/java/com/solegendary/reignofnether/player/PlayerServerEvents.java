@@ -76,8 +76,8 @@ import static net.minecraft.world.level.GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_C
 public class PlayerServerEvents {
 
     //MY
-    public static boolean bresetGame = false;//MY
-    public static int timer_process = 0;
+    public static ArrayList<String> leavedPlayersNames = new ArrayList<>();
+    public static Map<String, Timer> leavedPlayersTimers = new HashMap<>();
 
     // list of what gamemode these players should be in when outside of RTS cam
     private static final Map<String, GameType> playerDefaultGameModes = new HashMap<>();
@@ -101,10 +101,35 @@ public class PlayerServerEvents {
     public static ServerLevel serverLevel = null;
 
     //MY
+    //перезапуск игры
     public static void resetGame(){
-        bresetGame = false;
-        timer_process = -1;
-        resetRTS(true);
+        //bresetGame = false;
+        //timer_process = -1;
+
+        //создаём таймер уведомления о перезапуске игры
+        Timer timerResetGameNotify = new Timer();
+        TimerTask timerTaskResetGameNotify = new TimerTask() {
+            public void run() {
+                sendMessageToAllPlayers("Игра будет скоро сброшена!!!", 0xFFFFFF, false);
+            }
+        };
+        //запускаем таймер уведомления о перезапуске игры
+        timerResetGameNotify.schedule(timerTaskResetGameNotify, 5000);
+
+        //создаём таймер перезапуска игры
+        Timer timerResetGame = new Timer();
+        TimerTask timerTaskResetGame = new TimerTask() {
+            public void run() {
+                resetRTS(true);
+            }
+        };
+        //запускаем таймер перезапуска игры
+        timerResetGame.schedule(timerTaskResetGame, 10000);
+    }
+    //проигрыш игрока если вышел из игры
+    public static void defeatLeavedPlayer(String playerName)
+    {
+        defeat(playerName, "слишком долго отсутствовал при запущенной игре");
     }
 
     // warpten - faster building/unit production
@@ -366,6 +391,24 @@ public class PlayerServerEvents {
         } else {
             PlayerClientboundPacket.disableStartRTS(playerName);
         }
+
+        //удалить игрока из списка отключившихся, если он присоединился
+        if (isGameActive()){
+            if ( leavedPlayersNames.contains(playerName) ){
+                leavedPlayersNames.remove(playerName);
+                sendMessageToAllPlayers("Список отключившихся игроков: " + leavedPlayersNames.toString());
+
+                //отключение таймера
+                leavedPlayersTimers.get(playerName).cancel();
+                //удаление из списка таймера
+                leavedPlayersTimers.remove(playerName);
+
+                sendMessageToAllPlayers("Игрок " + playerName + " не будет удалён из игры, т.к. вернулся.", 0x008000, true);
+            }
+            else{
+                //sendMessageToAllPlayers("НЕ ПРОШЁЛ ПРОВЕРКУ В СПИСКЕ. Имя: " + playerName);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -373,6 +416,32 @@ public class PlayerServerEvents {
         int id = evt.getEntity().getId();
         ReignOfNether.LOGGER.info("Player logged out: " + evt.getEntity().getName().getString() + ", id: " + id);
         players.removeIf(player -> player.getId() == id);
+
+        //добавить игрока в список отсоединившихся, если он отключился
+        if (isGameActive()){
+            String playerName = evt.getEntity().getName().getString();
+            if (isRTSPlayer(playerName)){
+                leavedPlayersNames.add(playerName);
+                sendMessageToAllPlayers("Список отключившихся игроков: " + leavedPlayersNames.toString());
+
+                //создаём таймер и записываем его
+                leavedPlayersTimers.put(playerName, new Timer());
+                //присваиваем таймеру событие
+                Timer timerDefeatLeavedPlayer = leavedPlayersTimers.get(playerName);
+                TimerTask timerTaskDefeatLeavedPlayer = new TimerTask() {
+                    public void run() {
+                        defeatLeavedPlayer(playerName);
+                    }
+                };
+                //запускаем таймер уведомления о перезапуске игры
+                timerDefeatLeavedPlayer.schedule(timerTaskDefeatLeavedPlayer, 300000);
+                sendMessageToAllPlayers("Игрок " + playerName + " будет удалён из игры через 5 минут, если не зайдёт!", 0xFF0000, true);
+
+            }
+            else {
+                //sendMessageToAllPlayers("Не прошёл проверку на RTS игрока. Игрок: " + playerName);
+            }
+        }
     }
 
     public static void startRTS(int playerId, Vec3 pos, Faction faction) {
@@ -823,7 +892,7 @@ public class PlayerServerEvents {
             // Remove the defeated player from the list
             rtsPlayers.removeIf(rtsPlayer -> {
                 if (rtsPlayer.name.equals(playerName)) {
-                    sendMessageToAllPlayers(playerName + " has " + reason + " and is defeated!", true);
+                    sendMessageToAllPlayers(playerName + " сейчас " + reason + " и проиграл!", true);
                     sendMessageToAllPlayers("server.reignofnether.players_remaining", false, (rtsPlayers.size() - 1));
 
                     PlayerClientboundPacket.defeat(playerName);
@@ -879,8 +948,7 @@ public class PlayerServerEvents {
                         PlayerClientboundPacket.victory(winner);
 
                         //перезапуск игры
-                        //resetRTS(true);
-                        bresetGame = true;
+                        resetGame();
                     }
                 }
             } else if (rtsPlayers.size() == 1) {
@@ -890,11 +958,10 @@ public class PlayerServerEvents {
                 PlayerClientboundPacket.victory(winner.name);
 
                 //перезапуск игры
-                //resetRTS(true);
-                bresetGame = true;
+                resetGame();
             } else if (rtsPlayers.isEmpty()) {
                 //перезапуск игры
-                bresetGame = true;
+                resetGame();
             }
         }
     }
@@ -957,6 +1024,16 @@ public class PlayerServerEvents {
     }
 
     public static void resetRTS(boolean hardReset) {
+        //сброс списка отключённых игроков и их таймеров
+        leavedPlayersNames.clear();
+        //отключаем все таймеры
+        Collection<Timer> timers = leavedPlayersTimers.values();
+        for (Timer timer : timers){
+            timer.cancel();
+        }
+        //удаляем список таймеров
+        leavedPlayersTimers.clear();
+
         StartPosServerEvents.cancelStartGameCountdown(true);
 
         boolean isSandbox = SandboxServer.isAnyoneASandboxPlayer();
