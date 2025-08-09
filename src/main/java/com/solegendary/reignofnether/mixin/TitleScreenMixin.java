@@ -38,18 +38,18 @@ import java.net.URI;
 public class TitleScreenMixin extends Screen {
 
     private static final ResourceLocation MINECRAFT_LOGO =
-            new ResourceLocation("textures/gui/title/minecraft.png");
+            ResourceLocation.parse("textures/gui/title/minecraft.png");
     private static final ResourceLocation MINECRAFT_EDITION =
-            new ResourceLocation("textures/gui/title/edition.png");
+            ResourceLocation.parse("textures/gui/title/edition.png");
     private static final ResourceLocation DISCORD_TEXTURE =
-            new ResourceLocation( "textures/gui/title/discord.png");
+            ResourceLocation.parse( "textures/gui/title/discord.png");
     private static final ResourceLocation LILYPAD_TEXTURE =
-            new ResourceLocation( "textures/gui/title/lilypad.png");
+            ResourceLocation.parse( "textures/gui/title/lilypad.png");
 
     @Shadow @Final private PanoramaRenderer panorama;
     @Shadow @Final private boolean fading;
     @Shadow private long fadeInStart;
-    @Nullable @Shadow private TitleScreenModUpdateIndicator modUpdateNotification;
+    @Nullable @Shadow(remap = false) private TitleScreenModUpdateIndicator modUpdateNotification;
     private AbstractWidget lilypadButton;
     private AbstractWidget discordButton;
 

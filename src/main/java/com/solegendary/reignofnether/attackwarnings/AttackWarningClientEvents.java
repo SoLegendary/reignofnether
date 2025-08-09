@@ -35,7 +35,7 @@ public class AttackWarningClientEvents {
         return new Button(
             "Go to alert",
             20,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/warning.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/warning.png"),
             null,
             null,
             () -> showFrame,

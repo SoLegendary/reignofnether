@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.heroAbilities.monster.BloodMoon;
 import com.solegendary.reignofnether.ability.heroAbilities.monster.RaiseDead;
@@ -67,8 +68,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;};
+    public Abilities getAbilities() {return abilities;};
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -144,7 +144,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     private MeleeAttackBuildingGoal attackBuildingGoal;
 
     private List<AbilityButton> abilityButtons = new ArrayList<>();
-    private List<Ability> abilities = new ArrayList<>();
+    private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
     public ZombieUnit(EntityType<? extends Zombie> entityType, Level level) {
@@ -270,8 +270,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 

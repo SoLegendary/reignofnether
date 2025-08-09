@@ -4,11 +4,11 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.monsters.*;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -46,9 +46,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -82,8 +82,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;}
-    public List<Ability> getAbilities() {return abilities;}
+    public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -159,8 +158,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     final static public float movementSpeed = 0.25f;
     public int maxResources = 100;
 
-    private List<AbilityButton> abilityButtons = new ArrayList<>();
-    private List<Ability> abilities = new ArrayList<>();
+    private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
     private boolean isSwingingArmOnce = false;
@@ -187,15 +185,15 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
                 (this.getBuildRepairGoal() != null && this.getBuildRepairGoal().isBuilding()));
     }
 
-    public static List<AbilityButton> getBuildingButtons() {
-        List<AbilityButton> buildingButtons = new ArrayList<>();
+    public static List<BuildingPlaceButton> getBuildingButtons() {
+        List<BuildingPlaceButton> buildingButtons = new ArrayList<>();
 
         List<Keybinding> keybindings = BuildingUtils.keybindings;
         int index = 0;
 
         for (Building building : ReignOfNetherRegistries.BUILDING) {
-            if (building.getFaction() == Faction.MONSTERS || building.getFaction() == null) {
-                AbilityButton button = building.getBuildButton(index >= keybindings.size() ? null : keybindings.get(index));
+            if (building.isBuildableBuildingForFaction(Faction.MONSTERS)) {
+                BuildingPlaceButton button = building.getBuildButton(index >= keybindings.size() ? null : keybindings.get(index));
                 if (button != null) {
                     buildingButtons.add(button);
                     index++;
@@ -325,12 +323,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
 
     @Override
     public void updateAbilityButtons() {
-        this.abilities = ABILITIES.get();
-        this.abilityButtons = ABILITIES.getButtons(this);
-        //TODO Remove need for I18n
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            this.abilityButtons.addAll(getBuildingButtons());
-        }
+        this.abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 
@@ -352,5 +345,15 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     @Override
     public Object2ObjectArrayMap<Ability, Integer> getCharges() {
         return charges;
+    }
+
+    @Override
+    public List<Button> getAbilityButtons() {
+        List<Button> abilities = new ArrayList<>(getAbilities().getButtons(this));
+        //TODO Remove need for I18n
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            abilities.addAll(getBuildingButtons());
+        }
+        return abilities;
     }
 }

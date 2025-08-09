@@ -61,7 +61,7 @@ public class AbilityServerboundPacket {
                         return;
                     }
 
-                    for (Ability ability : unit.getAbilities()) {
+                    for (Ability ability : unit.getAbilities().get()) {
                         if (ability.action == this.unitAction && ability instanceof HeroAbility heroAbility && unit instanceof HeroUnit hero) {
                             heroAbility.rankUp(hero);
                         }

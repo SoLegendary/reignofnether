@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.ability.abilities.SonicBoom;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -82,8 +81,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;};
+    public Abilities getAbilities() {return abilities;};
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -157,8 +155,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
 
     public SonicBoomGoal getSonicBoomGoal() { return sonicBoomGoal; }
 
-    private List<AbilityButton> abilityButtons;
-    private List<Ability> abilities;
+    private Abilities abilities;
     private final List<ItemStack> items = new ArrayList<>();
 
     public static final float SONIC_BOOM_DAMAGE = 75f;
@@ -297,7 +294,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
         else
             hasResearch = ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_SCULK_AMPLIFIERS);
 
-        if (hasResearch && targetBuilding.getBuilding() instanceof SculkCatalystPlacement catalyst && targetBuilding.isBuilt) {
+        if (hasResearch && targetBuilding instanceof SculkCatalystPlacement && targetBuilding.isBuilt) {
             List<Mob> nearbyEnemies = MiscUtil.getEntitiesWithinRange(
                             new Vector3d(targetBuilding.centrePos.getX(), targetBuilding.centrePos.getY(), targetBuilding.centrePos.getZ()),
                             ResearchSculkAmplifiers.SPLIT_BOOM_RANGE, Mob.class, this.level())
@@ -325,8 +322,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 

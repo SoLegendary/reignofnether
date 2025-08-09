@@ -27,11 +27,11 @@ public class UnitSyncAbilityClientboundPacket {
                 new UnitSyncAbilityClientboundPacket(
                     UnitSyncAction.SYNC_ABILITIES,
                     entity.getId(),
-                    unit.getAbilities().stream()
-                            .mapToInt(a -> (int) a.getCooldown())
+                    unit.getAbilities().get().stream()
+                            .mapToInt(a -> (int) a.getCooldown(unit))
                             .toArray(),
-                    unit.getAbilities().stream()
-                            .mapToInt(a -> a.charges)
+                    unit.getAbilities().get().stream()
+                            .mapToInt(a -> a.getCharges(unit))
                             .toArray()
                 )
             );
@@ -77,11 +77,11 @@ public class UnitSyncAbilityClientboundPacket {
                         case SYNC_ABILITIES -> {
                             for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
                                 if (entity.getId() == this.entityId && entity instanceof Unit unit) {
-                                    for (int i = 0; i < unit.getAbilities().size(); i++) {
+                                    for (int i = 0; i < unit.getAbilities().get().size(); i++) {
                                         if (this.abilityCooldowns.length > i)
-                                            unit.getAbilities().get(i).setCooldown(this.abilityCooldowns[i], false);
+                                            unit.getAbilities().get().get(i).setCooldown(this.abilityCooldowns[i], false, unit);
                                         if (this.abilityCharges.length > i)
-                                            unit.getAbilities().get(i).charges = this.abilityCharges[i];
+                                            unit.getAbilities().get().get(i).setCharges(unit, this.abilityCharges[i]);
                                     }
                                     break;
                                 }

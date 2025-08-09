@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -49,7 +47,7 @@ public class CallToArmsBuilding extends Ability {
     public AbilityButton getButton(Keybinding hotkey, BuildingPlacement placement) {
         return new AbilityButton(
                 "Call To Arms (Building)",
-                new ResourceLocation("minecraft", "textures/item/bell.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/bell.png"),
                 hotkey,
                 () -> false,
                 () -> false,

@@ -85,7 +85,7 @@ public class BuildingBlockData {
 
     public static CompoundTag getBuildingNbt(String structureName, ResourceManager resManager) {
         try {
-            ResourceLocation rl = new ResourceLocation("reignofnether", "structures/" + structureName + ".nbt");
+            ResourceLocation rl = ResourceLocation.fromNamespaceAndPath("reignofnether", "structures/" + structureName + ".nbt");
             Optional<Resource> rs = resManager.getResource(rl);
             return NbtIo.readCompressed(rs.get().open());
         }

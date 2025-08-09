@@ -76,8 +76,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.PIGLINS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;}
+    public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -148,8 +147,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
 
     public int deathCloudTicks = 0;
 
-    private List<AbilityButton> abilityButtons;
-    private List<Ability> abilities;
+    private Abilities abilities;
     private final List<ItemStack> items = new ArrayList<>();
 
     public WitherSkeletonUnit(EntityType<? extends WitherSkeleton> entityType, Level level) {
@@ -322,8 +320,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 

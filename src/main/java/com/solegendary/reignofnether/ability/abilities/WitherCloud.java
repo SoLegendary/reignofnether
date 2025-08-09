@@ -42,7 +42,7 @@ public class WitherCloud extends Ability {
         WitherSkeletonUnit witherSkeletonUnit = (WitherSkeletonUnit) unit;
         return new AbilityButton(
                 "Death Cloud",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/wither_skeleton.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/wither_skeleton.png"),
                 hotkey,
                 () -> witherSkeletonUnit.deathCloudTicks > 0,
                 () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_WITHER_CLOUDS),

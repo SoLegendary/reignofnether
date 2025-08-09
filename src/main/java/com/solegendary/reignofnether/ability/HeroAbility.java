@@ -34,9 +34,8 @@ public abstract class HeroAbility extends Ability {
         this.manaCost = 0;
     }
 
-    public HeroAbility(HeroUnit hero, int maxRank, int manaCost, UnitAction action, int cooldownMax, float range, float radius, boolean canTargetEntities) {
-        super(action, ((Entity) hero).level(), cooldownMax, range, radius, canTargetEntities);
-        this.hero = hero;
+    public HeroAbility(int maxRank, int manaCost, UnitAction action, int cooldownMax, float range, float radius, boolean canTargetEntities) {
+        super(action, cooldownMax, range, radius, canTargetEntities);
         this.maxRank = maxRank;
         this.manaCost = manaCost;
     }
@@ -86,7 +85,7 @@ public abstract class HeroAbility extends Ability {
     protected Button getRankUpButtonProtected(String name, ResourceLocation resourceLocation, HeroUnit hero) {
         Button button = new Button(name,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/level_up_skill.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/level_up_skill.png"),
             (Keybinding) null,
             () -> false,
             () -> !hero.isRankUpMenuOpen() || rank >= maxRank,
@@ -121,8 +120,8 @@ public abstract class HeroAbility extends Ability {
         Button menuButton = new Button("Rank up abilities",
             14,
             hero.isRankUpMenuOpen() ?
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/cross.png") :
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png") :
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
             Keybindings.keyU,
             () -> false,
             () -> allSkillsLearnt(hero),

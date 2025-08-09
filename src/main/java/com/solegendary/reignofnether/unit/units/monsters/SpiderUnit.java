@@ -10,7 +10,6 @@ import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
@@ -83,8 +82,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;};
+    public Abilities getAbilities() {return abilities;};
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -166,21 +164,17 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
 
     @Nullable
     public SpinWebs getWebAbility() {
-        for (Ability ability : this.getAbilities())
+        for (Ability ability : this.getAbilities().get())
             if (ability instanceof SpinWebs spinWebs)
                 return spinWebs;
         return null;
     }
 
-    private List<AbilityButton> abilityButtons;
-    protected List<Ability> abilities;
+    protected Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
     public SpiderUnit(EntityType<? extends Spider> entityType, Level level) {
         super(entityType, level);
-
-        this.abilities = ABILITIES.get();
-        this.abilityButtons = ABILITIES.getButtons(this);
     }
 
     public boolean isWallClimbing() { return wallClimbing; }
@@ -294,7 +288,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     @Override
     public boolean doHurtTarget(@NotNull Entity pEntity) {
         if (super.doHurtTarget(pEntity)) {
-            if (getWebAbility() != null && getWebAbility().isAutocasting())
+            if (getWebAbility() != null && getWebAbility().isAutocasting(this))
                 getWebAbility().use(this.level(), this, pEntity.getOnPos());
             return true;
         } else {
@@ -344,8 +338,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 

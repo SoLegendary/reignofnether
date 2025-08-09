@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -10,7 +11,6 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.research.researchItems.ResearchWitherClouds;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.Faction;
@@ -32,7 +32,7 @@ public class WitherShrine extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.GILDED_BLACKSTONE;
-        this.icon = new ResourceLocation("minecraft", "textures/block/gilded_blackstone.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/gilded_blackstone.png");
 
         this.canSetRallyPoint = false;
 
@@ -45,19 +45,17 @@ public class WitherShrine extends ProductionBuilding {
 
     public Faction getFaction() {return Faction.PIGLINS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
             name,
-            new ResourceLocation("minecraft", "textures/block/gilded_blackstone.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/gilded_blackstone.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.WITHER_SHRINE,
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BASTION) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.WITHER_SHRINE),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.wither_shrine"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
@@ -67,8 +65,12 @@ public class WitherShrine extends ProductionBuilding {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.wither_shrine.tooltip3"), Style.EMPTY)
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.PIGLINS;
     }
 }

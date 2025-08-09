@@ -12,7 +12,6 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
-import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -95,8 +94,7 @@ public class RoyalGuardUnit extends Vindicator implements Unit, AttackerUnit, He
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;}
+    public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -213,7 +211,7 @@ public class RoyalGuardUnit extends Vindicator implements Unit, AttackerUnit, He
     @Override public float getBaseAttack() { return attackDamage; };
 
     private List<AbilityButton> abilityButtons = new ArrayList<>();
-    private List<Ability> abilities = new ArrayList<>();
+    private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
     public final AnimationState idleAnimState = new AnimationState();
@@ -436,28 +434,28 @@ public class RoyalGuardUnit extends Vindicator implements Unit, AttackerUnit, He
     }
 
     public MaceSlam getMaceSlam() {
-        for (Ability ability : abilities)
+        for (Ability ability : abilities.get())
             if (ability instanceof MaceSlam)
                 return (MaceSlam) ability;
         return null;
     }
 
     public TauntingCry getTauntingCry() {
-        for (Ability ability : abilities)
+        for (Ability ability : abilities.get())
             if (ability instanceof TauntingCry)
                 return (TauntingCry) ability;
         return null;
     }
 
     public BattleRagePassive getBattleRage() {
-        for (Ability ability : abilities)
+        for (Ability ability : abilities.get())
             if (ability instanceof BattleRagePassive)
                 return (BattleRagePassive) ability;
         return null;
     }
 
     public Avatar getAvatar() {
-        for (Ability ability : abilities)
+        for (Ability ability : abilities.get())
             if (ability instanceof Avatar)
                 return (Avatar) ability;
         return null;
@@ -699,8 +697,7 @@ public class RoyalGuardUnit extends Vindicator implements Unit, AttackerUnit, He
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 

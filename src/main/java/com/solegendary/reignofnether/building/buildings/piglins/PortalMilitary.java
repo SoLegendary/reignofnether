@@ -1,10 +1,15 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
+
+import java.util.Arrays;
 
 public class PortalMilitary extends AbstractPortal {
 
@@ -17,32 +22,24 @@ public class PortalMilitary extends AbstractPortal {
         super(structureName, cost);
         this.name = buildingName;
         this.portraitBlock = Blocks.RED_GLAZED_TERRACOTTA;
-        this.icon = new ResourceLocation("minecraft", "textures/block/red_glazed_terracotta.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/red_glazed_terracotta.png");
         this.canSetRallyPoint = true;
+        productions.add(ProductionItems.BRUTE, Keybindings.keyQ);
+        productions.add(ProductionItems.HEADHUNTER, Keybindings.keyW);
+        productions.add(ProductionItems.HOGLIN, Keybindings.keyE);
+        productions.add(ProductionItems.BLAZE, Keybindings.keyR);
+        productions.add(ProductionItems.WITHER_SKELETON, Keybindings.keyT);
+        productions.add(ProductionItems.MAGMA_CUBE, Keybindings.keyY);
+        productions.add(ProductionItems.GHAST, Keybindings.keyU);
     }
 
     @Override
     public int getUpgradeLevel(BuildingPlacement placement) {
         return 1;
     }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return false;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

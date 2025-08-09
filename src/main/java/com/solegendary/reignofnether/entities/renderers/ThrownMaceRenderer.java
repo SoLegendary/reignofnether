@@ -13,6 +13,6 @@ public class ThrownMaceRenderer extends EntityRenderer<ThrownMaceProjectile> {
 
     @Override
     public ResourceLocation getTextureLocation(ThrownMaceProjectile thrownMaceProjectile) {
-        return new ResourceLocation("reignofnether", "textures/entities/royal_guard_unit.png");
+        return ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/royal_guard_unit.png");
     }
 }

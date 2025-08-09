@@ -2,8 +2,8 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
-import com.solegendary.reignofnether.entities.ThrownMaceProjectile;
 import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
+import com.solegendary.reignofnether.entities.ThrownMaceProjectile;
 import com.solegendary.reignofnether.hero.HeroExperienceOrb;
 import com.solegendary.reignofnether.unit.modelling.renderers.GhastUnitRenderer;
 import com.solegendary.reignofnether.unit.modelling.renderers.NecromancerRenderer;
@@ -32,270 +32,270 @@ public class EntityRegistrar {
             () -> EntityType.Builder.of(ZombieVillagerUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.ZOMBIE_VILLAGER.getWidth(), EntityType.ZOMBIE_VILLAGER.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "zombie_villager_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "zombie_villager_unit").toString()));
 
     public static final RegistryObject<EntityType<ZombieUnit>> ZOMBIE_UNIT = ENTITIES.register("zombie_unit",
             // can add other attributes here like sized() for hitbox, no summon, fire immunity, etc.
             () -> EntityType.Builder.of(ZombieUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.ZOMBIE.getWidth(), EntityType.ZOMBIE.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "zombie_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "zombie_unit").toString()));
 
     public static final RegistryObject<EntityType<HuskUnit>> HUSK_UNIT = ENTITIES.register("husk_unit",
             () -> EntityType.Builder.of(HuskUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.HUSK.getWidth(), EntityType.HUSK.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "husk_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "husk_unit").toString()));
 
     public static final RegistryObject<EntityType<DrownedUnit>> DROWNED_UNIT = ENTITIES.register("drowned_unit",
             () -> EntityType.Builder.of(DrownedUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.DROWNED.getWidth(), EntityType.DROWNED.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "drowned_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "drowned_unit").toString()));
 
     public static final RegistryObject<EntityType<ZombiePiglinUnit>> ZOMBIE_PIGLIN_UNIT = ENTITIES.register("zombie_piglin_unit",
             () -> EntityType.Builder.of(ZombiePiglinUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.ZOMBIFIED_PIGLIN.getWidth(), EntityType.ZOMBIFIED_PIGLIN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "zombie_piglin_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "zombie_piglin_unit").toString()));
 
     public static final RegistryObject<EntityType<ZoglinUnit>> ZOGLIN_UNIT = ENTITIES.register("zoglin_unit",
             () -> EntityType.Builder.of(ZoglinUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.ZOGLIN.getWidth(), EntityType.ZOGLIN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "zoglin_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "zoglin_unit").toString()));
 
     public static final RegistryObject<EntityType<SkeletonUnit>> SKELETON_UNIT = ENTITIES.register("skeleton_unit",
             () -> EntityType.Builder.of(SkeletonUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "skeleton_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "skeleton_unit").toString()));
 
     public static final RegistryObject<EntityType<StrayUnit>> STRAY_UNIT = ENTITIES.register("stray_unit",
             () -> EntityType.Builder.of(StrayUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.STRAY.getWidth(), EntityType.STRAY.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "stray_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "stray_unit").toString()));
 
     public static final RegistryObject<EntityType<CreeperUnit>> CREEPER_UNIT = ENTITIES.register("creeper_unit",
             () -> EntityType.Builder.of(CreeperUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.CREEPER.getWidth(), EntityType.CREEPER.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "creeper_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "creeper_unit").toString()));
 
     public static final RegistryObject<EntityType<SpiderUnit>> SPIDER_UNIT = ENTITIES.register("spider_unit",
             () -> EntityType.Builder.of(SpiderUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.SPIDER.getWidth(), EntityType.SPIDER.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "spider_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "spider_unit").toString()));
 
     public static final RegistryObject<EntityType<PoisonSpiderUnit>> POISON_SPIDER_UNIT = ENTITIES.register("cave_spider_unit",
             () -> EntityType.Builder.of(PoisonSpiderUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.SPIDER.getWidth(), EntityType.SPIDER.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "cave_spider_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "cave_spider_unit").toString()));
 
     public static final RegistryObject<EntityType<VillagerUnit>> VILLAGER_UNIT = ENTITIES.register("villager_unit",
             () -> EntityType.Builder.of(VillagerUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.VILLAGER.getWidth(), EntityType.VILLAGER.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "villager_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "villager_unit").toString()));
 
     public static final RegistryObject<EntityType<MilitiaUnit>> MILITIA_UNIT = ENTITIES.register("militia_unit",
             () -> EntityType.Builder.of(MilitiaUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.VILLAGER.getWidth(), EntityType.VILLAGER.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "militia_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "militia_unit").toString()));
 
     public static final RegistryObject<EntityType<VindicatorUnit>> VINDICATOR_UNIT = ENTITIES.register("vindicator_unit",
             () -> EntityType.Builder.of(VindicatorUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.VINDICATOR.getWidth(), EntityType.VINDICATOR.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "vindicator_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "vindicator_unit").toString()));
 
     public static final RegistryObject<EntityType<PillagerUnit>> PILLAGER_UNIT = ENTITIES.register("pillager_unit",
             () -> EntityType.Builder.of(PillagerUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PILLAGER.getWidth(), EntityType.PILLAGER.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "pillager_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "pillager_unit").toString()));
 
     public static final RegistryObject<EntityType<IronGolemUnit>> IRON_GOLEM_UNIT = ENTITIES.register("iron_golem_unit",
             () -> EntityType.Builder.of(IronGolemUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.IRON_GOLEM.getWidth(), EntityType.IRON_GOLEM.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "iron_golem_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "iron_golem_unit").toString()));
 
     public static final RegistryObject<EntityType<WitchUnit>> WITCH_UNIT = ENTITIES.register("witch_unit",
             () -> EntityType.Builder.of(WitchUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.WITCH.getWidth(), EntityType.WITCH.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "witch_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "witch_unit").toString()));
 
     public static final RegistryObject<EntityType<EvokerUnit>> EVOKER_UNIT = ENTITIES.register("evoker_unit",
             () -> EntityType.Builder.of(EvokerUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.EVOKER.getWidth(), EntityType.EVOKER.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "evoker_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "evoker_unit").toString()));
 
     public static final RegistryObject<EntityType<EndermanUnit>> ENDERMAN_UNIT = ENTITIES.register("enderman_unit",
             () -> EntityType.Builder.of(EndermanUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.ENDERMAN.getWidth(), EntityType.ENDERMAN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "enderman_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "enderman_unit").toString()));
 
     public static final RegistryObject<EntityType<RavagerUnit>> RAVAGER_UNIT = ENTITIES.register("ravager_unit",
             () -> EntityType.Builder.of(RavagerUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.RAVAGER.getWidth(), EntityType.RAVAGER.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "ravager_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "ravager_unit").toString()));
 
     public static final RegistryObject<EntityType<WardenUnit>> WARDEN_UNIT = ENTITIES.register("warden_unit",
             () -> EntityType.Builder.of(WardenUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.WARDEN.getWidth(), EntityType.WARDEN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "warden_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "warden_unit").toString()));
 
     public static final RegistryObject<EntityType<SilverfishUnit>> SILVERFISH_UNIT = ENTITIES.register("silverfish_unit",
             () -> EntityType.Builder.of(SilverfishUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.SILVERFISH.getWidth(), EntityType.SILVERFISH.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "silverfish_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "silverfish_unit").toString()));
 
     public static final RegistryObject<EntityType<GruntUnit>> GRUNT_UNIT = ENTITIES.register("grunt_unit",
             () -> EntityType.Builder.of(GruntUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PIGLIN.getWidth(), EntityType.PIGLIN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "grunt_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "grunt_unit").toString()));
 
     public static final RegistryObject<EntityType<BruteUnit>> BRUTE_UNIT = ENTITIES.register("brute_unit",
             () -> EntityType.Builder.of(BruteUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PIGLIN_BRUTE.getWidth(), EntityType.PIGLIN_BRUTE.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "brute_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "brute_unit").toString()));
 
     public static final RegistryObject<EntityType<HeadhunterUnit>> HEADHUNTER_UNIT = ENTITIES.register("headhunter_unit",
             () -> EntityType.Builder.of(HeadhunterUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PIGLIN_BRUTE.getWidth(), EntityType.PIGLIN_BRUTE.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "headhunter_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "headhunter_unit").toString()));
 
     public static final RegistryObject<EntityType<HoglinUnit>> HOGLIN_UNIT = ENTITIES.register("hoglin_unit",
             () -> EntityType.Builder.of(HoglinUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.HOGLIN.getWidth(), EntityType.HOGLIN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "hoglin_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "hoglin_unit").toString()));
 
     public static final RegistryObject<EntityType<HoglinUnit>> ARMOURED_HOGLIN_UNIT = ENTITIES.register("armoured_hoglin_unit",
             () -> EntityType.Builder.of(HoglinUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.HOGLIN.getWidth(), EntityType.HOGLIN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "armoured_hoglin_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "armoured_hoglin_unit").toString()));
 
     public static final RegistryObject<EntityType<BlazeUnit>> BLAZE_UNIT = ENTITIES.register("blaze_unit",
             () -> EntityType.Builder.of(BlazeUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.BLAZE.getWidth(), EntityType.BLAZE.getHeight())
                     .fireImmune()
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "blaze_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "blaze_unit").toString()));
 
     public static final RegistryObject<EntityType<WitherSkeletonUnit>> WITHER_SKELETON_UNIT = ENTITIES.register("wither_skeleton_unit",
             () -> EntityType.Builder.of(WitherSkeletonUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.WITHER_SKELETON.getWidth(), EntityType.WITHER_SKELETON.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "wither_skeleton_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wither_skeleton_unit").toString()));
 
     public static final RegistryObject<EntityType<GhastUnit>> GHAST_UNIT = ENTITIES.register("ghast_unit",
             () -> EntityType.Builder.of(GhastUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.GHAST.getWidth() * GhastUnitRenderer.SCALE_MULT,
                             EntityType.GHAST.getHeight() * GhastUnitRenderer.SCALE_MULT)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "ghast_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "ghast_unit").toString()));
 
     public static final RegistryObject<EntityType<MagmaCubeUnit>> MAGMA_CUBE_UNIT = ENTITIES.register("magma_cube_unit",
             () -> EntityType.Builder.of(MagmaCubeUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.MAGMA_CUBE.getWidth(), EntityType.MAGMA_CUBE.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "magma_cube_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "magma_cube_unit").toString()));
 
     public static final RegistryObject<EntityType<SlimeUnit>> SLIME_UNIT = ENTITIES.register("slime_unit",
             () -> EntityType.Builder.of(SlimeUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.SLIME.getWidth(), EntityType.SLIME.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "slime_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "slime_unit").toString()));
 
     public static final RegistryObject<EntityType<RoyalGuardUnit>> ROYAL_GUARD_UNIT = ENTITIES.register("royal_guard_unit",
             () -> EntityType.Builder.of(RoyalGuardUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.VINDICATOR.getWidth() * RoyalGuardRenderer.SCALE_MULT,
                             EntityType.VINDICATOR.getHeight() * RoyalGuardRenderer.SCALE_MULT)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "royal_guard_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "royal_guard_unit").toString()));
 
     public static final RegistryObject<EntityType<NecromancerUnit>> NECROMANCER_UNIT = ENTITIES.register("necromancer_unit",
             () -> EntityType.Builder.of(NecromancerUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.SKELETON.getWidth() * NecromancerRenderer.SCALE_MULT,
                             EntityType.SKELETON.getHeight() * NecromancerRenderer.SCALE_MULT)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "necromancer_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "necromancer_unit").toString()));
 
     public static final RegistryObject<EntityType<PiglinMerchantUnit>> PIGLIN_MERCHANT_UNIT = ENTITIES.register("piglin_merchant_unit",
             () -> EntityType.Builder.of(PiglinMerchantUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PIGLIN_BRUTE.getWidth(), EntityType.PIGLIN_BRUTE.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "piglin_merchant_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "piglin_merchant_unit").toString()));
 
     public static final RegistryObject<EntityType<PolarBearUnit>> POLAR_BEAR_UNIT = ENTITIES.register("polar_bear_unit",
             () -> EntityType.Builder.of(PolarBearUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.POLAR_BEAR.getWidth(), EntityType.POLAR_BEAR.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "polar_bear_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "polar_bear_unit").toString()));
 
     public static final RegistryObject<EntityType<GrizzlyBearUnit>> GRIZZLY_BEAR_UNIT = ENTITIES.register("grizzly_bear_unit",
             () -> EntityType.Builder.of(GrizzlyBearUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.POLAR_BEAR.getWidth(), EntityType.POLAR_BEAR.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "grizzly_bear_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "grizzly_bear_unit").toString()));
 
     public static final RegistryObject<EntityType<PandaUnit>> PANDA_UNIT = ENTITIES.register("panda_unit",
             () -> EntityType.Builder.of(PandaUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PANDA.getWidth(), EntityType.PANDA.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "panda_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "panda_unit").toString()));
 
     public static final RegistryObject<EntityType<WolfUnit>> WOLF_UNIT = ENTITIES.register("wolf_unit",
             () -> EntityType.Builder.of(WolfUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.WOLF.getWidth(), EntityType.WOLF.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "wolf_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wolf_unit").toString()));
 
     public static final RegistryObject<EntityType<LlamaUnit>> LLAMA_UNIT = ENTITIES.register("llama_unit",
             () -> EntityType.Builder.of(LlamaUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.LLAMA.getWidth(), EntityType.LLAMA.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "llama_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "llama_unit").toString()));
 
     public static final RegistryObject<EntityType<PhantomSummon>> PHANTOM_SUMMON = ENTITIES.register("phantom_summon",
             () -> EntityType.Builder.of(PhantomSummon::new, MobCategory.MONSTER)
                     .sized(EntityType.PHANTOM.getWidth(), EntityType.PHANTOM.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "phantom_summon").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "phantom_summon").toString()));
 
     public static final RegistryObject<EntityType<HeroExperienceOrb>> HERO_EXPERIENCE_ORB = ENTITIES.register("hero_experience_orb",
             () -> EntityType.Builder.of(HeroExperienceOrb::new, MobCategory.MISC)
                     .sized(EntityType.EXPERIENCE_ORB.getWidth(), EntityType.EXPERIENCE_ORB.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "hero_experience_orb").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "hero_experience_orb").toString()));
 
     public static final RegistryObject<EntityType<KillerRabbitUnit>> KILLER_RABBIT_UNIT = ENTITIES.register("killer_rabbit_unit",
             () -> EntityType.Builder.of(KillerRabbitUnit::new, MobCategory.MISC)
                     .sized(EntityType.RABBIT.getWidth(), EntityType.RABBIT.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "killer_rabbit_unit").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "killer_rabbit_unit").toString()));
 
     public static final RegistryObject<EntityType<ThrowableTntProjectile>> THROWABLE_TNT_PROJECTILE = ENTITIES.register("tnt_throwable_projectile",
             () -> EntityType.Builder.<ThrowableTntProjectile>of(ThrowableTntProjectile::new, MobCategory.MISC)
                     .sized(0.98F, 0.98F)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "tnt_throwable_projectile").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "tnt_throwable_projectile").toString()));
 
     public static final RegistryObject<EntityType<AdjustablePrimedTnt>> ADJUSTABLE_PRIMED_TNT = ENTITIES.register("adjustable_primed_tnt",
             () -> EntityType.Builder.<AdjustablePrimedTnt>of(AdjustablePrimedTnt::new, MobCategory.MISC)
@@ -303,7 +303,7 @@ public class EntityRegistrar {
                     .sized(0.98F, 0.98F)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .updateInterval(10)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "adjustable_primed_tnt").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "adjustable_primed_tnt").toString()));
 
     public static final RegistryObject<EntityType<ThrownMaceProjectile>> THROWN_MACE_PROJECTILE = ENTITIES.register("thrown_mace_projectile",
             () -> EntityType.Builder.<ThrownMaceProjectile>of(ThrownMaceProjectile::new, MobCategory.MISC)
@@ -311,11 +311,11 @@ public class EntityRegistrar {
                     .sized(0.5f, 0.5f)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .updateInterval(10)
-                    .build(new ResourceLocation(ReignOfNether.MOD_ID, "thrown_mace_projectile").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "thrown_mace_projectile").toString()));
 
 
-    public static void init() {
-        ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
+    public static void init(FMLJavaModLoadingContext context) {
+        ENTITIES.register(context.getModEventBus());
     }
 
     public static EntityType<? extends Mob> getEntityType(String unitName) {

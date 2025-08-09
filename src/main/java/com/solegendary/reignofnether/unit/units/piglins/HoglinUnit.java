@@ -79,8 +79,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.PIGLINS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;}
+    public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -156,8 +155,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
 
     final static public float BUILDING_DAMAGE_MULTIPLIER = 1.5f;
 
-    private List<AbilityButton> abilityButtons = new ArrayList<>();
-    private List<Ability> abilities = new ArrayList<>();
+    private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
     public HoglinUnit(EntityType<? extends Hoglin> entityType, Level level) {
@@ -283,8 +281,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 

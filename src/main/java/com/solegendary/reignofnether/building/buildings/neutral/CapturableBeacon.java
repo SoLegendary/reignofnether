@@ -4,6 +4,8 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -32,7 +34,7 @@ public class CapturableBeacon extends Beacon {
 
         this.name = buildingName;
         this.portraitBlock = Blocks.BEACON;
-        this.icon = new ResourceLocation("minecraft", "textures/item/nether_star.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/nether_star.png");
 
         this.buildTimeModifier = 1.0f;
 
@@ -56,16 +58,14 @@ public class CapturableBeacon extends Beacon {
         return Faction.NONE;
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
-        return new AbilityButton(
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
+        return new BuildingPlaceButton(
                 buildingName,
-                new ResourceLocation("minecraft", "textures/item/nether_star.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/nether_star.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 TutorialClientEvents::isEnabled,
                 () -> BuildingClientEvents.getBuildings().stream().filter(b -> b.getBuilding() instanceof CapturableBeacon).toList().isEmpty(),
-                () -> BuildingClientEvents.setBuildingToPlace(this),
-                null,
                 List.of(
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.capturable_beacon"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.capturable_beacon.tooltip3"), Style.EMPTY),
@@ -75,9 +75,13 @@ public class CapturableBeacon extends Beacon {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.beacon.tooltip3"), Style.EMPTY)
                 ),
-                null,
-                (BuildingPlacement) null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return false;
     }
 }
 

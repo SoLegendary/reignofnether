@@ -18,57 +18,57 @@ public class SoundRegistrar {
 
     public static final RegistryObject<SoundEvent> UNDER_ATTACK =
             SOUND_EVENTS.register("under_attack", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "under_attack")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "under_attack")));
 
     public static final RegistryObject<SoundEvent> VICTORY =
             SOUND_EVENTS.register("victory", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "victory")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "victory")));
 
     public static final RegistryObject<SoundEvent> DEFEAT =
             SOUND_EVENTS.register("defeat", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "defeat")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "defeat")));
 
     public static final RegistryObject<SoundEvent> ALLY =
             SOUND_EVENTS.register("ally", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "ally")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "ally")));
 
     public static final RegistryObject<SoundEvent> ENEMY =
             SOUND_EVENTS.register("enemy", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "enemy")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "enemy")));
 
     public static final RegistryObject<SoundEvent> CHAT =
             SOUND_EVENTS.register("chat", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "chat")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "chat")));
 
     public static final RegistryObject<SoundEvent> MAIN_MENU =
             SOUND_EVENTS.register("main_menu", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "main_menu")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "main_menu")));
 
     public static final RegistryObject<SoundEvent> BLOODLUST =
             SOUND_EVENTS.register("bloodlust", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "bloodlust")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "bloodlust")));
 
     public static final RegistryObject<SoundEvent> HEROISM =
             SOUND_EVENTS.register("heroism", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "heroism")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "heroism")));
 
     public static final RegistryObject<SoundEvent> BLOOD_MOON_SONG =
             SOUND_EVENTS.register("blood_moon", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "blood_moon")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "blood_moon")));
 
     public static final RegistryObject<SoundEvent> VILLAGER_CALM_THEME_SONG =
             SOUND_EVENTS.register("sharpened_grassblades_calm", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "sharpened_grassblades_calm")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "sharpened_grassblades_calm")));
 
     public static final RegistryObject<SoundEvent> MONSTER_CALM_THEME_SONG =
             SOUND_EVENTS.register("life_scourge_calm", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "life_scourge_calm")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "life_scourge_calm")));
 
     public static final RegistryObject<SoundEvent> PIGLIN_CALM_THEME_SONG =
             SOUND_EVENTS.register("soul_resonance_calm", () ->
-                    SoundEvent.createVariableRangeEvent(new ResourceLocation(ReignOfNether.MOD_ID, "soul_resonance_calm")));
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "soul_resonance_calm")));
 
-    public static void init() {
-        SOUND_EVENTS.register(FMLJavaModLoadingContext.get().getModEventBus());
+    public static void init(FMLJavaModLoadingContext context) {
+        SOUND_EVENTS.register(context.getModEventBus());
     }
 }

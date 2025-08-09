@@ -2,8 +2,9 @@ package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
-import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractFarm;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -19,7 +20,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class WheatFarm extends AbstractFarm {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.HAY_BLOCK;
-        this.icon = new ResourceLocation("minecraft", "textures/block/hay_block_side.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/hay_block_side.png");
 
         this.startingBlockTypes.add(Blocks.OAK_LOG);
 
@@ -42,19 +42,17 @@ public class WheatFarm extends AbstractFarm {
 
     public Faction getFaction() {return Faction.VILLAGERS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
                 name,
-                new ResourceLocation("minecraft", "textures/block/hay_block_side.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/hay_block_side.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.WHEAT_FARM,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Buildings.WHEAT_FARM),
-                null,
                 List.of(
                         FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.wheat_farm"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.wheat_farm.tooltip1", cost.wood, ResourceCosts.REPLANT_WOOD_COST), MyRenderer.iconStyle),
@@ -62,8 +60,12 @@ public class WheatFarm extends AbstractFarm {
                         FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.wheat_farm.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.wheat_farm.tooltip3"), Style.EMPTY)
                 ),
-                null,
-                (BuildingPlacement) null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.VILLAGERS;
     }
 }

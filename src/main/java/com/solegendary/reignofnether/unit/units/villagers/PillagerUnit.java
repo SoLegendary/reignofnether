@@ -81,8 +81,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     public Faction getFaction() { return Faction.VILLAGERS; }
 
-    public List<AbilityButton> getAbilityButtons() { return abilityButtons; }
-    public List<Ability> getAbilities() { return abilities; }
+    public Abilities getAbilities() { return abilities; }
     public List<ItemStack> getItems() { return items; }
 
     public MoveToTargetBlockGoal getMoveGoal() { return moveGoal; }
@@ -172,8 +171,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     private UnitCrossbowAttackGoal<? extends LivingEntity> attackGoal;
     private RangedAttackBuildingGoal<?> attackBuildingGoal;
 
-    private List<AbilityButton> abilityButtons = new ArrayList<>();
-    private List<Ability> abilities = new ArrayList<>();
+    private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
     public PillagerUnit(EntityType<? extends Pillager> entityType, Level level) {
@@ -337,8 +335,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 

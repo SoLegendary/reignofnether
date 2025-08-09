@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.StrongholdPlacement;
@@ -40,7 +41,7 @@ public class Stronghold extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.REINFORCED_DEEPSLATE;
-        this.icon = new ResourceLocation("minecraft", "textures/block/reinforced_deepslate_side.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/reinforced_deepslate_side.png");
 
         this.buildTimeModifier = 0.5f;
 
@@ -61,11 +62,11 @@ public class Stronghold extends ProductionBuilding {
         return new StrongholdPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), true, nightRange,false, true);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(name,
-            new ResourceLocation("minecraft", "textures/block/reinforced_deepslate_side.png"),
+        return new BuildingPlaceButton(name,
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/reinforced_deepslate_side.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.STRONGHOLD,
             () -> false,
@@ -74,8 +75,6 @@ public class Stronghold extends ProductionBuilding {
                     && BuildingClientEvents.hasFinishedBuilding(Buildings.SPIDER_LAIR)
                     && BuildingClientEvents.hasFinishedBuilding(Buildings.DUNGEON)
             ) || ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.STRONGHOLD),
-            null,
             List.of(FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.stronghold"),
                     Style.EMPTY.withBold(true)
                 ),
@@ -96,8 +95,12 @@ public class Stronghold extends ProductionBuilding {
                     Style.EMPTY
                 )
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.MONSTERS;
     }
 }

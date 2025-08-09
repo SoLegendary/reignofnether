@@ -5,9 +5,11 @@ import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -15,6 +17,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxAction;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
@@ -42,42 +45,27 @@ public class StrayProd extends ProductionItem {
         return StrayProd.itemName;
     }
 
-    public AbilityButton getPlaceButton() {
-        return new AbilityButton(
+    public UnitSpawnButton getPlaceButton() {
+        return new UnitSpawnButton(
                 itemName,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
-                null,
-                () -> SandboxClientEvents.spawnUnitName.equals(itemName),
-                () -> false,
-                () -> true,
-                () -> {
-                    CursorClientEvents.setLeftClickSandboxAction(SandboxAction.SPAWN_UNIT);
-                    SandboxClientEvents.spawnUnitName = itemName;
-                },
-                null,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
                 List.of(
                         FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray.tooltip2"), Style.EMPTY)
-                ),
-                null,
-                (Unit) null
+                )
         );
     }
 
-    public Button getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        return new Button(
+    public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
+        return new StartProductionButton(
             StrayProd.itemName,
-            14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
             hotkey,
             () -> false,
-            () -> false,
             () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS),
-            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, ProductionItems.STRAY),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
@@ -88,22 +76,19 @@ public class StrayProd extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray.tooltip3"), Style.EMPTY)
-            )
+            ),
+            prodBuilding,
+            ProductionItems.STRAY
         );
     }
 
-    public Button getCancelButton(ProductionPlacement prodBuilding, boolean first) {
-        return new Button(
+    public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
+        return new StopProductionButton(
             StrayProd.itemName,
-            14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
-            (Keybinding) null,
-            () -> false,
-            () -> false,
-            () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, ProductionItems.STRAY, first),
-            null,
-            null
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
+            prodBuilding,
+            this,
+            first
         );
     }
 }

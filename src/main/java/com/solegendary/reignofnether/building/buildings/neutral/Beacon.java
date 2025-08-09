@@ -55,7 +55,7 @@ public class Beacon extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.BEACON;
-        this.icon = new ResourceLocation("minecraft", "textures/item/nether_star.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/nether_star.png");
 
         this.buildTimeModifier = 2.0f;
 
@@ -89,10 +89,10 @@ public class Beacon extends ProductionBuilding {
         return new BeaconPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
-        return new AbilityButton(
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
+        return new BuildingPlaceButton(
                 buildingName,
-                new ResourceLocation("minecraft", "textures/item/nether_star.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/nether_star.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 () -> TutorialClientEvents.isEnabled() || !GameruleClient.allowBeacons,
@@ -102,8 +102,6 @@ public class Beacon extends ProductionBuilding {
                     BuildingClientEvents.hasFinishedBuilding(Buildings.FORTRESS) ||
                     ResearchClient.hasCheat("modifythephasevariance")
                 ),
-                () -> BuildingClientEvents.setBuildingToPlace(this),
-                null,
                 List.of(
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.beacon"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
@@ -115,8 +113,7 @@ public class Beacon extends ProductionBuilding {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.beacon.tooltip3"), Style.EMPTY)
                 ),
-                null,
-                (BuildingPlacement) null
+                this
         );
     }
 
@@ -138,7 +135,12 @@ public class Beacon extends ProductionBuilding {
 
     @Override
     public Faction getFaction() {
-        return null;
+        return Faction.NONE;
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return true;
     }
 }
 

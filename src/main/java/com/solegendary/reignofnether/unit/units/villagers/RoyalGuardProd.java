@@ -1,25 +1,27 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.HeroProductionItem;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxAction;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
@@ -29,7 +31,7 @@ public class RoyalGuardProd extends HeroProductionItem {
     public final static ResourceCost cost = ResourceCosts.ROYAL_GUARD;
 
     public RoyalGuardProd() {
-        super(cost, itemName, new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/royal_guard.png"));
+        super(cost, itemName, ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/royal_guard.png"));
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide())
                 placement.produceUnit((ServerLevel) level, EntityRegistrar.ROYAL_GUARD_UNIT.get(), placement.ownerName, true);
@@ -41,19 +43,10 @@ public class RoyalGuardProd extends HeroProductionItem {
         return EntityRegistrar.ROYAL_GUARD_UNIT.get();
     }
 
-    public AbilityButton getPlaceButton() {
-        return new AbilityButton(
+    public UnitSpawnButton getPlaceButton() {
+        return new UnitSpawnButton(
                 itemName,
                 iconRl,
-                null,
-                () -> SandboxClientEvents.spawnUnitName.equals(itemName),
-                () -> false,
-                () -> true,
-                () -> {
-                    CursorClientEvents.setLeftClickSandboxAction(SandboxAction.SPAWN_UNIT);
-                    SandboxClientEvents.spawnUnitName = itemName;
-                },
-                null,
                 List.of(
                         FormattedCharSequence.forward(
                                 I18n.get("units.villagers.reignofnether.royal_guard") +
@@ -62,23 +55,17 @@ public class RoyalGuardProd extends HeroProductionItem {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.royal_guard.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.royal_guard.tooltip2"), Style.EMPTY)
-                ),
-                null,
-                (Unit) null
+                )
         );
     }
 
-    public Button getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        return new Button(
+    public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
+        return new StartProductionButton(
                 itemName,
-                14,
                 iconRl,
                 hotkey,
-                () -> false,
                 () -> itemIsBeingProduced(prodBuilding.ownerName) || heroOwned(prodBuilding.level.isClientSide(), prodBuilding.ownerName),
                 () -> true,
-                () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, this),
-                null,
                 List.of(
                         FormattedCharSequence.forward(
                                 I18n.get("units.villagers.reignofnether.royal_guard") +
@@ -89,7 +76,9 @@ public class RoyalGuardProd extends HeroProductionItem {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.royal_guard.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.royal_guard.tooltip2"), Style.EMPTY)
-                )
+                ),
+                prodBuilding,
+                this
         );
     }
 }

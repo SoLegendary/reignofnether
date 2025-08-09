@@ -37,7 +37,7 @@ public class MountRavager extends Ability {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         Entity entity = (Entity) unit;
         return new AbilityButton("Mount Ravager",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/ravager.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/ravager.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_RAVAGER,
             () -> entity.isPassenger() || !ResearchClient.hasResearch(ProductionItems.RESEARCH_RAVAGER_CAVALRY),

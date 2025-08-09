@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.buildings.piglins;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
@@ -32,7 +33,7 @@ public class BlackstoneBridge extends AbstractBridge {
         super(cost);
         this.name = buildingName;
         this.portraitBlock = Blocks.NETHER_BRICK_FENCE;
-        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/netherbrick_fence.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/netherbrick_fence.png");
 
         this.buildTimeModifier = 1.0f;
 
@@ -54,20 +55,18 @@ public class BlackstoneBridge extends AbstractBridge {
         return Faction.PIGLINS;
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
         Minecraft MC = Minecraft.getInstance();
-        return new AbilityButton(
+        return new BuildingPlaceButton(
                 name,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/netherbrick_fence.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/netherbrick_fence.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.BLACKSTONE_BRIDGE,
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.CENTRAL_PORTAL) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Buildings.BLACKSTONE_BRIDGE),
-                null,
                 List.of(
                         FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.blackstone_bridge"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
@@ -77,8 +76,12 @@ public class BlackstoneBridge extends AbstractBridge {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.blackstone_bridge.tooltip3"), Style.EMPTY)
                 ),
-                null,
-                (BuildingPlacement) null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.PIGLINS;
     }
 }

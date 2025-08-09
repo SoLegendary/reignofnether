@@ -59,7 +59,7 @@ public class MyRenderer {
             );
 
 
-    public static final Style iconStyle = Style.EMPTY.withFont(new ResourceLocation(ReignOfNether.MOD_ID, "resource_icons"));
+    public static final Style iconStyle = Style.EMPTY.withFont(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_icons"));
 
     public static void drawBlockOutline(PoseStack matrixStack, BlockPos blockpos, float a) {
         AABB aabb = new AABB(blockpos).move(0,0.01,0);
@@ -207,12 +207,12 @@ public class MyRenderer {
     public static void drawBox(PoseStack matrixStack, BlockPos bp, float r, float g, float b, float a) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
-        drawSolidBox(matrixStack, aabb, null, r, g, b, a, new ResourceLocation("forge:textures/white.png"));
+        drawSolidBox(matrixStack, aabb, null, r, g, b, a, ResourceLocation.parse("forge:textures/white.png"));
     }
     public static void drawBlockFace(PoseStack matrixStack, Direction dir, BlockPos bp, float r, float g, float b, float a) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
-        drawSolidBox(matrixStack, aabb, dir, r, g, b, a, new ResourceLocation("forge:textures/white.png"));
+        drawSolidBox(matrixStack, aabb, dir, r, g, b, a, ResourceLocation.parse("forge:textures/white.png"));
     }
 
     // might be null RL for black.png as of 1.19?
@@ -346,7 +346,7 @@ public class MyRenderer {
         int thickness = 4;
 
         ResourceLocation iconFrameResource;
-        iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame_left" + (height < 50 ? "_small" : "") + ".png");
+        iconFrameResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/unit_frame_left" + (height < 50 ? "_small" : "") + ".png");
         RenderSystem.setShaderTexture(0, iconFrameResource);
         guiGraphics.blit(iconFrameResource,
                 x, y, 0,
@@ -354,7 +354,7 @@ public class MyRenderer {
                 thickness, height, // dimensions of blit texture
                 thickness, height // size of texture itself (if < dimensions, texture is repeated)
         );
-        iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame_right" + (height < 50 ? "_small" : "") + ".png");
+        iconFrameResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/unit_frame_right" + (height < 50 ? "_small" : "") + ".png");
         RenderSystem.setShaderTexture(0, iconFrameResource);
         guiGraphics.blit(iconFrameResource,
                 x + width - thickness, y, 0,
@@ -362,7 +362,7 @@ public class MyRenderer {
                 thickness, height, // dimensions of blit texture
                 thickness, height // size of texture itself (if < dimensions, texture is repeated)
         );
-        iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame_top.png");
+        iconFrameResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/unit_frame_top.png");
         RenderSystem.setShaderTexture(0, iconFrameResource);
         guiGraphics.blit(iconFrameResource,
                 x + thickness, y, 0,
@@ -370,7 +370,7 @@ public class MyRenderer {
                 width - thickness*2, thickness, // dimensions of blit texture
                 width, thickness // size of texture itself (if < dimensions, texture is repeated)
         );
-        iconFrameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/unit_frame_bottom.png");
+        iconFrameResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/unit_frame_bottom.png");
         RenderSystem.setShaderTexture(0, iconFrameResource);
         guiGraphics.blit(iconFrameResource,
                 x + thickness, y + height - thickness, 0,

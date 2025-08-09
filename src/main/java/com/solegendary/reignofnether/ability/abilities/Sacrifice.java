@@ -33,7 +33,7 @@ public class Sacrifice extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey, BuildingPlacement placement) {
         return new AbilityButton("Sacrifice",
-            new ResourceLocation("minecraft", "textures/item/iron_hoe.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_hoe.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.SACRIFICE,
             () -> false,

@@ -3,14 +3,15 @@ package com.solegendary.reignofnether.unit.units.piglins;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -42,6 +43,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -76,8 +79,7 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.PIGLINS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;}
+    public Abilities getAbilities() {return ABILITIES;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -153,8 +155,7 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     final static public float movementSpeed = 0.25f;
     public int maxResources = 100;
 
-    private List<AbilityButton> abilityButtons = new ArrayList<>();
-    private List<Ability> abilities = new ArrayList<>();
+    private Abilities abilities;
     private final List<ItemStack> items = new ArrayList<>();
 
     private boolean isSwingingArmOnce = false;
@@ -179,14 +180,15 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
                 (this.getBuildRepairGoal() != null && this.getBuildRepairGoal().isBuilding()));
     }
 
-    public static List<AbilityButton> getBuildingButtons() {
-        List<AbilityButton> buildingButtons = new ArrayList<>();
+    public static List<BuildingPlaceButton> getBuildingButtons() {
+        List<BuildingPlaceButton> buildingButtons = new ArrayList<>();
+
         List<Keybinding> keybindings = BuildingUtils.keybindings;
         int index = 0;
 
         for (Building building : ReignOfNetherRegistries.BUILDING) {
-            if (building.getFaction() == Faction.PIGLINS || building.getFaction() == null) {
-                AbilityButton button = building.getBuildButton(index >= keybindings.size() ? null : keybindings.get(index));
+            if (building.isBuildableBuildingForFaction(Faction.PIGLINS)) {
+                BuildingPlaceButton button = building.getBuildButton(index >= keybindings.size() ? null : keybindings.get(index));
                 if (button != null) {
                     buildingButtons.add(button);
                     index++;
@@ -299,12 +301,7 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
 
     @Override
     public void updateAbilityButtons() {
-        this.abilities = ABILITIES.get();
-        this.abilityButtons = ABILITIES.getButtons(this);
-        //TODO Remove need for I18n
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            this.abilityButtons.addAll(getBuildingButtons());
-        }
+        this.abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 
@@ -326,5 +323,15 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     @Override
     public Object2ObjectArrayMap<Ability, Integer> getCharges() {
         return charges;
+    }
+
+    @Override
+    public List<Button> getAbilityButtons() {
+        List<Button> abilities = new ArrayList<>(getAbilities().getButtons(this));
+        //TODO Remove need for I18n
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            abilities.addAll(getBuildingButtons());
+        }
+        return abilities;
     }
 }

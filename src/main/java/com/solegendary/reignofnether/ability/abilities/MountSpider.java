@@ -37,7 +37,7 @@ public class MountSpider extends Ability {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         Entity entity = (Entity) unit;
         return new AbilityButton("Mount Spider",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/spider.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/spider.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_SPIDER,
             () -> entity.isPassenger() || !ResearchClient.hasResearch(ProductionItems.RESEARCH_SPIDER_JOCKEYS),

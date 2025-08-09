@@ -12,7 +12,7 @@ public class RoyalGuardReviveProd extends ReviveHeroProductionItem {
     public RoyalGuardReviveProd() {
         super(
             "Revive Royal Guard",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/royal_guard.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/royal_guard.png"),
             "units.villagers.reignofnether.royal_guard.revive"
         );
     }

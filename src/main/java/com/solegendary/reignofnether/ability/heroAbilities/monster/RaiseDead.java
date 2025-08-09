@@ -39,8 +39,8 @@ public class RaiseDead extends HeroAbility {
     }
 
     @Override
-    public boolean isCasting() {
-        if (this.hero instanceof NecromancerUnit necromancerUnit) {
+    public boolean isCasting(Unit unit) {
+        if (unit instanceof NecromancerUnit necromancerUnit) {
             GenericUntargetedSpellGoal goal = necromancerUnit.getCastRaiseDeadGoal();
             if (goal != null)
                 return goal.isCasting();
@@ -51,7 +51,7 @@ public class RaiseDead extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Raise Dead",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
                 hotkey,
                 () -> false,
                 () -> rank <= 0,
@@ -68,7 +68,7 @@ public class RaiseDead extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Raise Dead",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
                 hero
         );
     }

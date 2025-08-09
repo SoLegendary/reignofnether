@@ -77,8 +77,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;};
+    public Abilities getAbilities() {return abilities;};
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -155,7 +154,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
     private MeleeAttackBuildingGoal attackBuildingGoal;
 
     private List<AbilityButton> abilityButtons = new ArrayList<>();
-    private List<Ability> abilities = new ArrayList<>();
+    private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
     public StrayUnit(EntityType<? extends Stray> entityType, Level level) {
@@ -283,8 +282,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 

@@ -51,8 +51,7 @@ import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -91,8 +90,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;}
+    public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -184,14 +182,14 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     public boolean isCaptain = false;
 
     private List<AbilityButton> abilityButtons;
-    private List<Ability> abilities;
+    private Abilities abilities;
     private final List<ItemStack> items = new ArrayList<>();
 
     public MilitiaUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
-        this.abilities.add(new BackToWorkUnit(this));
-        this.abilities.add(new WeaponSwapBow(this));
-        this.abilities.add(new WeaponSwapSword(this));
+        this.abilities.add(new BackToWorkUnit());
+        this.abilities.add(new WeaponSwapBow());
+        this.abilities.add(new WeaponSwapSword());
         updateAbilityButtons();
     }
 
@@ -433,8 +431,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 

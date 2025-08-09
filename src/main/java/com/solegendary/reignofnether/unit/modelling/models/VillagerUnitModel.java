@@ -38,7 +38,7 @@ import java.util.List;
 @OnlyIn(Dist.CLIENT)
 public class VillagerUnitModel<T extends AbstractIllager> extends HierarchicalModel<T> implements ArmedModel, HeadedModel {
 
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ReignOfNether.MOD_ID, "villager_unit_layer"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "villager_unit_layer"), "main");
 
     private final ModelPart root;
     private final ModelPart head;

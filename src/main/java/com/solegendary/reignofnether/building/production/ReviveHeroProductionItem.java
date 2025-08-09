@@ -92,38 +92,31 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
         return HeroUnit.getReviveCost(1);
     }
 
-    public Button getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        return new Button(
+    public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
+        return new StartProductionButton(
                 itemName,
-                14,
                 iconRl,
                 hotkey,
-                () -> false,
                 () -> this.itemIsBeingProduced(prodBuilding.ownerName) ||
                         HeroUnit.getFallenHero(true, prodBuilding.ownerName, getHeroEntityType().getDescriptionId()) == null,
                 () -> true,
-                () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, this),
-                null,
                 List.of(
                         fcs(getTooltip(prodBuilding.ownerName), true),
                         ResourceCosts.getFormattedCost(getCost(prodBuilding.level.isClientSide(), prodBuilding.ownerName)),
                         ResourceCosts.getFormattedPopAndTime(getCost(prodBuilding.level.isClientSide(), prodBuilding.ownerName))
-                )
+                ),
+                prodBuilding,
+                this
         );
     }
 
-    public Button getCancelButton(ProductionPlacement prodBuilding, boolean first) {
-        return new Button(
+    public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
+        return new StopProductionButton(
                 itemName,
-                14,
                 iconRl,
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, this, first),
-                null,
-                null
+                prodBuilding,
+                this,
+                first
         );
     }
 }

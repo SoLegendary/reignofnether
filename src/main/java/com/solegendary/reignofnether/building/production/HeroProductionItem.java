@@ -41,18 +41,13 @@ public abstract class HeroProductionItem extends ProductionItem {
         return null;
     }
 
-    public Button getCancelButton(ProductionPlacement prodBuilding, boolean first) {
-        return new Button(
+    public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
+        return new StopProductionButton(
                 getItemName(),
-                14,
                 iconRl,
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, this, first),
-                null,
-                null
+                prodBuilding,
+                this,
+                first
         );
     }
 }

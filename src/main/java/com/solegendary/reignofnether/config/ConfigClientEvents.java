@@ -53,7 +53,7 @@ public class ConfigClientEvents {
         return new Button(
                 "Configs Changed Warning",
                 Button.itemIconSize,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/warning.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/warning.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> !showDiffsButton || TutorialClientEvents.isEnabled(),

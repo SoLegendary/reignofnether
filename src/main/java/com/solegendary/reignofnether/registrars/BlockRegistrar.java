@@ -198,7 +198,7 @@ public class BlockRegistrar {
 
     public static Map<ResourceKey<CreativeModeTab>, List<Item>> blockItems = new HashMap<>();
 
-    public static void init() {
-        BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
+    public static void init(FMLJavaModLoadingContext context) {
+        BLOCKS.register(context.getModEventBus());
     }
 }

@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.FortressPlacement;
@@ -37,7 +38,7 @@ public class Fortress extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.CHISELED_NETHER_BRICKS;
-        this.icon = new ResourceLocation("minecraft", "textures/block/chiseled_nether_bricks.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/chiseled_nether_bricks.png");
 
         this.buildTimeModifier = 0.5f;
 
@@ -60,20 +61,18 @@ public class Fortress extends ProductionBuilding {
         return new FortressPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
             name,
-            new ResourceLocation("minecraft", "textures/block/chiseled_nether_bricks.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/chiseled_nether_bricks.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.FORTRESS,
             () -> false,
             () -> (BuildingClientEvents.hasFinishedBuilding(Buildings.FLAME_SANCTUARY) &&
                     BuildingClientEvents.hasFinishedBuilding(Buildings.WITHER_SHRINE)) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.FORTRESS),
-            null,
             List.of(
                     FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.fortress"), Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
@@ -83,8 +82,12 @@ public class Fortress extends ProductionBuilding {
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.fortress.tooltip3"), Style.EMPTY)
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.PIGLINS;
     }
 }

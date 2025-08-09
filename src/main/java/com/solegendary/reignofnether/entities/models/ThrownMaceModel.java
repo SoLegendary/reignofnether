@@ -12,7 +12,7 @@ import net.minecraft.world.entity.Entity;
 
 public class ThrownMaceModel<T extends Entity> extends EntityModel<T> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("reignofnether", "mace"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("reignofnether", "mace"), "main");
     private final ModelPart main;
     private final ModelPart mace;
     private final ModelPart head2;

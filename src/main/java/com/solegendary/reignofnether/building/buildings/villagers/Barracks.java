@@ -2,10 +2,11 @@ package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -33,7 +34,7 @@ public class Barracks extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.FLETCHING_TABLE;
-        this.icon = new ResourceLocation("minecraft", "textures/block/fletching_table_front.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/fletching_table_front.png");
 
         this.startingBlockTypes.add(Blocks.POLISHED_ANDESITE_STAIRS);
 
@@ -45,27 +46,29 @@ public class Barracks extends ProductionBuilding {
 
     public Faction getFaction() {return Faction.VILLAGERS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
                 name,
-                new ResourceLocation("minecraft", "textures/block/fletching_table_front.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/fletching_table_front.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.BARRACKS,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Buildings.BARRACKS),
-                null,
                 List.of(
                         FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.barracks"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.barracks.tooltip1"), Style.EMPTY)
                 ),
-                null,
-                (BuildingPlacement) null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.VILLAGERS;
     }
 }

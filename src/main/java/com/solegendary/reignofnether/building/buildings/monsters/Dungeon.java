@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.DungeonPlacement;
@@ -38,7 +39,7 @@ public class Dungeon extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.SPAWNER;
-        this.icon = new ResourceLocation("minecraft", "textures/block/spawner.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/spawner.png");
 
         this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICK_STAIRS);
 
@@ -53,19 +54,17 @@ public class Dungeon extends ProductionBuilding {
         return new DungeonPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
             name,
-            new ResourceLocation("minecraft", "textures/block/spawner.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/spawner.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.DUNGEON,
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.DUNGEON),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dungeon"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
@@ -74,13 +73,17 @@ public class Dungeon extends ProductionBuilding {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dungeon.tooltip2"), Style.EMPTY)
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
     }
 
     @Override
     public BlockPos getIndoorSpawnPoint(ServerLevel level, BlockPos centerPos) {
         return super.getIndoorSpawnPoint(level, centerPos).offset(-1,0,0);
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.MONSTERS;
     }
 }

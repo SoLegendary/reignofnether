@@ -111,7 +111,7 @@ public class WaveEnemy {
     // done every X ticks
     public void periodicCommand() {
         if (unit instanceof RavagerUnit ravagerUnit) {
-            for (Ability ability : ravagerUnit.getAbilities()) {
+            for (Ability ability : ravagerUnit.getAbilities().get()) {
                 if (ability instanceof Roar roar && roar.isOffCooldown(unit) &&
                         ravagerUnit.getHealth() < ravagerUnit.getMaxHealth() / 2) {
                     Unit.fullResetBehaviours(ravagerUnit);
@@ -121,7 +121,7 @@ public class WaveEnemy {
         }
         if (unit instanceof WardenUnit wardenUnit) {
             LivingEntity target = getNearestAttackableUnit();
-            for (Ability ability : wardenUnit.getAbilities()) {
+            for (Ability ability : wardenUnit.getAbilities().get()) {
                 if (ability instanceof SonicBoom boom && boom.isOffCooldown(unit) && target != null &&
                         wardenUnit.distanceToSqr(target) <= (boom.range * boom.range)) {
                     Unit.fullResetBehaviours(wardenUnit);
@@ -131,7 +131,7 @@ public class WaveEnemy {
         }
         if (unit instanceof EvokerUnit evokerUnit) {
             LivingEntity target = getNearestAttackableUnit();
-            for (Ability ability : evokerUnit.getAbilities()) {
+            for (Ability ability : evokerUnit.getAbilities().get()) {
                 if (ability instanceof CastSummonVexes summon && summon.isOffCooldown(unit) && target != null &&
                         evokerUnit.distanceToSqr(target) <= (evokerUnit.getAttackRange() * evokerUnit.getAttackRange())) {
                     Unit.fullResetBehaviours(evokerUnit);
@@ -140,7 +140,7 @@ public class WaveEnemy {
             }
         }
         if (unit instanceof BruteUnit bruteUnit) {
-            for (Ability ability : bruteUnit.getAbilities()) {
+            for (Ability ability : bruteUnit.getAbilities().get()) {
                 if (ability instanceof ToggleShield shield &&
                     ResearchServerEvents.playerHasResearch(bruteUnit.getOwnerName(), ProductionItems.RESEARCH_BRUTE_SHIELDS)) {
 
@@ -157,7 +157,7 @@ public class WaveEnemy {
         }
         if (unit instanceof WitherSkeletonUnit wsUnit) {
             LivingEntity target = wsUnit.getTarget();
-            for (Ability ability : wsUnit.getAbilities()) {
+            for (Ability ability : wsUnit.getAbilities().get()) {
                 LivingEntity nearestAlly = getNearestNonWitherAllyUnit();
                 if (ability instanceof WitherCloud cloud && cloud.isOffCooldown(unit) && target != null &&
                     wsUnit.distanceToSqr(target) <= 16 && (nearestAlly == null || wsUnit.distanceToSqr(nearestAlly) > 16)) {

@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 import static com.solegendary.reignofnether.building.BuildingUtils.findBuilding;
 
 public class BuildingClientboundPacket {
-    public static final ResourceLocation EMPTY = new ResourceLocation("", "");
+    public static final ResourceLocation EMPTY = ResourceLocation.fromNamespaceAndPath("", "");
 
     // pos is used to identify the building object serverside
     public BuildingAction action;

@@ -40,7 +40,7 @@ public class CallToArmsUnit extends Ability {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         return new AbilityButton(
                 "Call To Arms (Building)",
-                new ResourceLocation("minecraft", "textures/item/bell.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/bell.png"),
                 hotkey,
                 () -> false,
                 () -> false,

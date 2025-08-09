@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -95,7 +96,7 @@ public class ControlGroup {
         // assign the icon resource (won't update if the front entity/building dies)
         if (hudSelectedEntity != null) {
             String unitName = MiscUtil.getSimpleEntityName(hudSelectedEntity);
-            iconRl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png");
+            iconRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png");
         } else if (hudSelectedPlacement != null) {
             iconRl = hudSelectedPlacement.getBuilding().icon;
         }
@@ -150,7 +151,7 @@ public class ControlGroup {
         return new Button(
             "Control Group " + getKey(),
             Button.itemIconSize,
-            iconRl == null ? new ResourceLocation("") : iconRl,
+            iconRl == null ? ResourceLocation.parse("") : iconRl,
             this.keybinding,
             () -> false,
             () -> false,
@@ -161,7 +162,7 @@ public class ControlGroup {
                     clearAll();
             },
             List.of(FormattedCharSequence.forward(
-                LanguageUtil.getTranslation("hud.control_group.reignofnether.control_group", keybinding.buttonLabel),
+                I18n.get("hud.control_group.reignofnether.control_group", keybinding.buttonLabel),
                 Style.EMPTY
             ))
         );

@@ -13,10 +13,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class LlamaUnitRenderer extends MobRenderer<Llama, LlamaModel<Llama>> {
     private static final ResourceLocation[] LLAMA_LOCATIONS = new ResourceLocation[]{
-        new ResourceLocation("textures/entity/llama/creamy.png"),
-        new ResourceLocation("textures/entity/llama/white.png"),
-        new ResourceLocation("textures/entity/llama/brown.png"),
-        new ResourceLocation("textures/entity/llama/gray.png")
+        ResourceLocation.parse("textures/entity/llama/creamy.png"),
+        ResourceLocation.parse("textures/entity/llama/white.png"),
+        ResourceLocation.parse("textures/entity/llama/brown.png"),
+        ResourceLocation.parse("textures/entity/llama/gray.png")
     };
 
     public LlamaUnitRenderer(EntityRendererProvider.Context pContext) {

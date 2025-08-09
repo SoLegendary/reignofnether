@@ -82,8 +82,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.PIGLINS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;}
+    public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -168,8 +167,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
 
     public boolean isHoldingUpShield = false;
 
-    private List<AbilityButton> abilityButtons;
-    private List<Ability> abilities;
+    private Abilities abilities;
     private final List<ItemStack> items = new ArrayList<>();
 
     public BruteUnit(EntityType<? extends PiglinBrute> entityType, Level level) {
@@ -326,8 +324,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 

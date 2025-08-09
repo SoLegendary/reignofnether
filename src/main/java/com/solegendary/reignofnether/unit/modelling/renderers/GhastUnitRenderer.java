@@ -24,8 +24,8 @@ public class GhastUnitRenderer extends MobRenderer<Ghast, GhastModel<Ghast>> {
 
     public static final float SCALE_MULT = 0.75f;
 
-    private static final ResourceLocation GHAST_LOCATION = new ResourceLocation("textures/entity/ghast/ghast.png");
-    private static final ResourceLocation GHAST_SHOOTING_LOCATION = new ResourceLocation("textures/entity/ghast/ghast_shooting.png");
+    private static final ResourceLocation GHAST_LOCATION = ResourceLocation.parse("textures/entity/ghast/ghast.png");
+    private static final ResourceLocation GHAST_SHOOTING_LOCATION = ResourceLocation.parse("textures/entity/ghast/ghast_shooting.png");
 
     public GhastUnitRenderer(EntityRendererProvider.Context p_174129_) {
         super(p_174129_, new GhastModel(p_174129_.bakeLayer(ModelLayers.GHAST)), 1.5F);

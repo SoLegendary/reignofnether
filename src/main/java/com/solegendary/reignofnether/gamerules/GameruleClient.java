@@ -42,7 +42,7 @@ public class GameruleClient {
         return new Button(
                 "Game Rules Menu",
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/repeating_command_block_back.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/repeating_command_block_back.png"),
                 (Keybinding) null,
                 () -> gamerulesMenuOpen,
                 () -> false,
@@ -64,8 +64,8 @@ public class GameruleClient {
             super(
                     "Boolean Game Rule",
                     10,
-                    enabled ? new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/tick.png") :
-                            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
+                    enabled ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png") :
+                            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
                     (Keybinding) null,
                     () -> false,
                     () -> false,
@@ -94,7 +94,7 @@ public class GameruleClient {
             super(
                 "Integer Game Rule",
                 10,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,

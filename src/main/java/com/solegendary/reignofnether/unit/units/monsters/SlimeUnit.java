@@ -84,8 +84,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;}
+    public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -166,8 +165,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     private MeleeAttackSlimeUnitGoal attackGoal;
     private MeleeAttackBuildingGoal attackBuildingGoal;
 
-    private List<AbilityButton> abilityButtons;
-    private List<Ability> abilities;
+    private Abilities abilities;
     private final List<ItemStack> items = new ArrayList<>();
 
     public SlimeUnit consumeTarget = null;
@@ -246,7 +244,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     }
 
     public boolean autocastingConsume() {
-        for (Ability ability : abilities)
+        for (Ability ability : abilities.get())
             if (ability instanceof ConsumeSlime consume)
                 return consume.isAutocasting(this);
         return false;
@@ -263,7 +261,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     @Override
     public void resetBehaviours() {
         consumeTarget = null;
-        for (Ability ability : abilities)
+        for (Ability ability : abilities.get())
             if (ability instanceof ConsumeSlime consume)
                 consume.setAutocast(false, this);
     }
@@ -524,8 +522,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 

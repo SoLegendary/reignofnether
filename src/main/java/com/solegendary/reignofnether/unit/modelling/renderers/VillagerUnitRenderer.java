@@ -16,7 +16,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 // based on VindicatorRenderer
 @OnlyIn(Dist.CLIENT)
 public class VillagerUnitRenderer extends AbstractVillagerUnitRenderer<AbstractIllager> {
-    private static final ResourceLocation VILLAGER_UNIT = new ResourceLocation("reignofnether", "textures/entities/villager_unit.png");
+    private static final ResourceLocation VILLAGER_UNIT = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/villager_unit.png");
 
     public VillagerUnitRenderer(EntityRendererProvider.Context context) {
         super(context, new VillagerUnitModel<>(context.bakeLayer(VillagerUnitModel.LAYER_LOCATION)), 0.5F);

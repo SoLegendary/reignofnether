@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -38,24 +39,13 @@ public class GrizzlyBearProd extends ProductionItem {
         return GrizzlyBearProd.itemName;
     }
 
-    public AbilityButton getPlaceButton() {
-        return new AbilityButton(
+    public UnitSpawnButton getPlaceButton() {
+        return new UnitSpawnButton(
                 itemName,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/grizzly_bear.png"),
-                null,
-                () -> SandboxClientEvents.spawnUnitName.equals(itemName),
-                () -> false,
-                () -> true,
-                () -> {
-                    CursorClientEvents.setLeftClickSandboxAction(SandboxAction.SPAWN_UNIT);
-                    SandboxClientEvents.spawnUnitName = itemName;
-                },
-                null,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grizzly_bear.png"),
                 List.of(
                         FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.grizzly_bear"), Style.EMPTY.withBold(true))
-                ),
-                null,
-                (Unit) null
+                )
         );
     }
 }

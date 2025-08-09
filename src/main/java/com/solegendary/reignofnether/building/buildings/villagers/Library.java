@@ -1,15 +1,9 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.research.researchItems.*;
-import org.joml.Vector3d;
-import com.solegendary.reignofnether.ability.EnchantAbility;
 import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingBlock;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.LibraryPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -45,7 +39,7 @@ public class Library extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.ENCHANTING_TABLE;
-        this.icon = new ResourceLocation("minecraft", "textures/block/enchanting_table_top.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/enchanting_table_top.png");
 
         this.buildTimeModifier = 1.1f;
 
@@ -81,18 +75,16 @@ public class Library extends ProductionBuilding {
         return new LibraryPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(name,
-            new ResourceLocation("minecraft", "textures/block/enchanting_table_top.png"),
+        return new BuildingPlaceButton(name,
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/enchanting_table_top.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.LIBRARY,
             TutorialClientEvents::isEnabled,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.LIBRARY),
-            null,
             List.of(FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.library"),
                     Style.EMPTY.withBold(true)
                 ),
@@ -109,8 +101,7 @@ public class Library extends ProductionBuilding {
                     Style.EMPTY
                 )
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
     }
 
@@ -122,5 +113,10 @@ public class Library extends ProductionBuilding {
                 return 1;
             }
         return 0;
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.VILLAGERS;
     }
 }

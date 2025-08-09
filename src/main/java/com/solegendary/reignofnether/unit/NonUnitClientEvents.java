@@ -76,7 +76,7 @@ public class NonUnitClientEvents {
                                 AABB aabb = new AABB(bp);
                                 aabb = aabb.setMaxY(aabb.maxY + 0.13f);
                                 MyRenderer.drawSolidBox(evt.getPoseStack(), aabb, Direction.UP, isMoveCheckpointGreen ? 0 : 1, isMoveCheckpointGreen ? 1 : 0, 0, a * 0.5f,
-                                        new ResourceLocation("forge:textures/white.png"));
+                                        ResourceLocation.parse("forge:textures/white.png"));
                             } else {
                                 MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, isMoveCheckpointGreen ? 0 : 1, isMoveCheckpointGreen ? 1 : 0, 0, a * 0.5f);
                             }

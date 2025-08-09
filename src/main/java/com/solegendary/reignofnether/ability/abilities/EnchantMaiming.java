@@ -7,7 +7,6 @@ import com.solegendary.reignofnether.building.buildings.placements.LibraryPlacem
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -44,7 +43,7 @@ public class EnchantMaiming extends EnchantAbility {
         LibraryPlacement library = (LibraryPlacement) placement;
         return new AbilityButton(
                 "Maiming Enchantment",
-                new ResourceLocation("minecraft", "textures/item/iron_axe.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_axe.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || library.autoCastEnchant == this,
                 () -> false,

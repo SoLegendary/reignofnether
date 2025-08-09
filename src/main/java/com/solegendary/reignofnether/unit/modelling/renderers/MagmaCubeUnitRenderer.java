@@ -19,7 +19,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class MagmaCubeUnitRenderer extends MobRenderer<Slime, LavaSlimeModel<Slime>> {
-    private static final ResourceLocation MAGMACUBE_LOCATION = new ResourceLocation("textures/entity/slime/magmacube.png");
+    private static final ResourceLocation MAGMACUBE_LOCATION = ResourceLocation.parse("textures/entity/slime/magmacube.png");
 
     public MagmaCubeUnitRenderer(EntityRendererProvider.Context p_174391_) {
         super(p_174391_, new LavaSlimeModel<>(p_174391_.bakeLayer(ModelLayers.MAGMA_CUBE)), 0.25F);

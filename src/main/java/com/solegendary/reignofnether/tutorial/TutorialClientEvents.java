@@ -91,7 +91,7 @@ public class TutorialClientEvents {
     public static final Button helpButton = new Button(
         "Tutorial Help",
         18,
-        new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/help.png"),
+        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/help.png"),
         (Keybinding) null,
         () -> false,
         () -> !isEnabled(),

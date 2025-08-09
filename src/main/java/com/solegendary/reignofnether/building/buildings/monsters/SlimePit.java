@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -33,7 +34,7 @@ public class SlimePit extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.SLIME_BLOCK;
-        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/slime.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/slime.png");
 
         this.canSetRallyPoint = true;
 
@@ -47,19 +48,17 @@ public class SlimePit extends ProductionBuilding {
 
     public Faction getFaction() {return Faction.MONSTERS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
             name,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/slime.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/slime.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.SLIME_PIT,
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.SLIME_PIT),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.slime_pit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
@@ -68,12 +67,16 @@ public class SlimePit extends ProductionBuilding {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.slime_pit.tooltip3"), Style.EMPTY)
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
     }
 
     public BlockPos getDefaultOutdoorSpawnPoint(BlockPos minCorner) {
         return minCorner.offset((int) (-spawnRadiusOffset + 4), 0, (int) (-spawnRadiusOffset + 9));
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.MONSTERS;
     }
 }

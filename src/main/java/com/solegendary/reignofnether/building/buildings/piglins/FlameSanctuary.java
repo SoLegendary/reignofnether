@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.buildings.piglins;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.FlameSanctuaryPlacement;
@@ -38,7 +39,7 @@ public class FlameSanctuary extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.MAGMA_BLOCK;
-        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/magma.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/magma.png");
 
         this.canSetRallyPoint = false;
 
@@ -57,19 +58,17 @@ public class FlameSanctuary extends ProductionBuilding {
         return new FlameSanctuaryPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
             name,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/magma.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/magma.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.FLAME_SANCTUARY,
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.HOGLIN_STABLES) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.FLAME_SANCTUARY),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.flame_sanctuary"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
@@ -79,8 +78,12 @@ public class FlameSanctuary extends ProductionBuilding {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.flame_sanctuary.tooltip3"), Style.EMPTY)
             ),
-            null,
-            (BuildingPlacement) null
+            this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.PIGLINS;
     }
 }

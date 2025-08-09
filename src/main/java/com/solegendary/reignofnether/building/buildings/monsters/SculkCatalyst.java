@@ -3,13 +3,11 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Sacrifice;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -43,7 +41,7 @@ public class SculkCatalyst extends Building {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.SCULK_CATALYST;
-        this.icon = new ResourceLocation("minecraft", "textures/block/sculk_catalyst_side.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/sculk_catalyst_side.png");
 
         this.buildTimeModifier = 2.5f;
 
@@ -66,18 +64,16 @@ public class SculkCatalyst extends Building {
         return new SculkCatalystPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(name,
-            new ResourceLocation("minecraft", "textures/block/sculk_catalyst_side.png"),
+        return new BuildingPlaceButton(name,
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/sculk_catalyst_side.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.SCULK_CATALYST,
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) || ResearchClient.hasCheat(
                 "modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.SCULK_CATALYST),
-            null,
             List.of(FormattedCharSequence.forward(
                     I18n.get("buildings.monsters.reignofnether.sculk_catalyst"),
                     Style.EMPTY.withBold(true)
@@ -102,8 +98,12 @@ public class SculkCatalyst extends Building {
                     Style.EMPTY
                 )
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.MONSTERS;
     }
 }

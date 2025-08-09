@@ -2,11 +2,13 @@ package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.util.Faction;
@@ -16,7 +18,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
@@ -49,22 +50,25 @@ public abstract class AbstractPortal extends ProductionBuilding {
 
     // Only basic portals actually have a build button but include this here as a placeholder
     @Override
-    public AbilityButton getBuildButton(Keybinding hotkey) {
-        return new AbilityButton(name,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png"),
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
+        return new BuildingPlaceButton(name,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png"),
                 hotkey,
                 () -> false,
                 () -> false,
                 () -> false,
-                null,
-                null,
                 List.of(),
-                null
+                this
         );
     }
 
     @Override
     public boolean isTypeOf(Building building) {
         return super.isTypeOf(building) || building == Buildings.PORTAL_BASIC;
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.PIGLINS;
     }
 }

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.buildings.villagers;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
@@ -33,7 +34,7 @@ public class OakBridge extends AbstractBridge {
         super(cost);
         this.name = buildingName;
         this.portraitBlock = Blocks.OAK_FENCE;
-        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/oak_fence.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/oak_fence.png");
 
         this.buildTimeModifier = 1.0f;
 
@@ -55,11 +56,11 @@ public class OakBridge extends AbstractBridge {
         return Faction.VILLAGERS;
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(name,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/oak_fence.png"),
+        return new BuildingPlaceButton(name,
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/oak_fence.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.OAK_BRIDGE,
             () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_BRIDGE),
@@ -68,8 +69,6 @@ public class OakBridge extends AbstractBridge {
                     || BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) || ResearchClient.hasCheat(
                     "modifythephasevariance")
             ),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.OAK_BRIDGE),
-            null,
             List.of(FormattedCharSequence.forward(
                     I18n.get("buildings.villagers.reignofnether.oak_bridge"),
                     Style.EMPTY.withBold(true)
@@ -94,8 +93,12 @@ public class OakBridge extends AbstractBridge {
                     Style.EMPTY
                 )
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.VILLAGERS;
     }
 }

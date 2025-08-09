@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -33,7 +34,7 @@ public class ShrineOfProsperity extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.ACACIA_LOG;
-        this.icon = new ResourceLocation("minecraft", "textures/block/acacia_log_top.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/acacia_log_top.png");
 
         this.startingBlockTypes.add(Blocks.COBBLESTONE);
 
@@ -43,19 +44,17 @@ public class ShrineOfProsperity extends ProductionBuilding {
 
     public Faction getFaction() {return Faction.VILLAGERS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
                 name,
-                new ResourceLocation("minecraft", "textures/block/acacia_log_top.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/acacia_log_top.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.SHRINE_OF_PROSPERITY,
                 () -> (!SandboxClientEvents.isSandboxPlayer() && !GameruleClient.allowHeroes) || TutorialClientEvents.isEnabled(),
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Buildings.SHRINE_OF_PROSPERITY),
-                null,
                 List.of(
                         fcs(I18n.get("buildings.villagers.reignofnether.shrine_of_prosperity"), true),
                         ResourceCosts.getFormattedCost(cost),
@@ -63,7 +62,12 @@ public class ShrineOfProsperity extends ProductionBuilding {
                         fcs(I18n.get("buildings.villagers.reignofnether.shrine_of_prosperity.tooltip1")),
                         fcs(I18n.get("buildings.villagers.reignofnether.shrine_of_prosperity.tooltip2"))
                 ),
-                null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.VILLAGERS;
     }
 }

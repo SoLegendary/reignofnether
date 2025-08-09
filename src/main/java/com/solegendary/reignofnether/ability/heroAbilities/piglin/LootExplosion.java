@@ -40,7 +40,7 @@ public class LootExplosion extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Loot Explosion",
-                new ResourceLocation("minecraft", "textures/item/iron_chestplate.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_chestplate.png"),
                 hotkey,
                 () -> false,
                 () -> rank == 0,
@@ -54,8 +54,8 @@ public class LootExplosion extends HeroAbility {
     }
 
     @Override
-    public boolean isCasting() {
-        if (this.hero instanceof PiglinMerchantUnit piglinMerchantUnit) {
+    public boolean isCasting(Unit unit) {
+        if (unit instanceof PiglinMerchantUnit piglinMerchantUnit) {
             GenericUntargetedSpellGoal goal = piglinMerchantUnit.getCastLootExplosionGoal();
             if (goal != null)
                 return goal.isCasting();
@@ -67,7 +67,7 @@ public class LootExplosion extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Loot Explosion",
-                new ResourceLocation("minecraft", "textures/item/iron_chestplate.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_chestplate.png"),
                 hero
         );
     }

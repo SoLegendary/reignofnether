@@ -7,11 +7,6 @@ import com.solegendary.reignofnether.ability.heroAbilities.monster.BloodMoon;
 import com.solegendary.reignofnether.ability.heroAbilities.monster.InsomniaCurse;
 import com.solegendary.reignofnether.ability.heroAbilities.monster.RaiseDead;
 import com.solegendary.reignofnether.ability.heroAbilities.monster.SoulSiphonPassive;
-import com.solegendary.reignofnether.ability.heroAbilities.villager.Avatar;
-import com.solegendary.reignofnether.ability.heroAbilities.villager.BattleRagePassive;
-import com.solegendary.reignofnether.ability.heroAbilities.villager.MaceSlam;
-import com.solegendary.reignofnether.ability.heroAbilities.villager.TauntingCry;
-import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
@@ -94,8 +89,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.MONSTERS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;};
+    public Abilities getAbilities() {return abilities;};
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -224,8 +218,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     private UnitRangedAttackGoal<? extends LivingEntity> attackGoal;
     private MeleeAttackBuildingGoal attackBuildingGoal;
 
-    private List<AbilityButton> abilityButtons = new ArrayList<>();
-    private List<Ability> abilities = new ArrayList<>();
+    private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
     public final AnimationState idleAnimState = new AnimationState();
@@ -336,14 +329,14 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     }
 
     public RaiseDead getRaiseDead() {
-        for (Ability ability : abilities)
+        for (Ability ability : abilities.get())
             if (ability instanceof RaiseDead)
                 return (RaiseDead) ability;
         return null;
     }
 
     public SoulSiphonPassive getSoulSiphon() {
-        for (Ability ability : abilities)
+        for (Ability ability : abilities.get())
             if (ability instanceof SoulSiphonPassive)
                 return (SoulSiphonPassive) ability;
         return null;
@@ -561,8 +554,8 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
+        autocast = ABILITIES.getDefaultAutocast();
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -32,7 +33,7 @@ public class AltarOfDarkness extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.DARK_PRISMARINE;
-        this.icon = new ResourceLocation("minecraft", "textures/block/dark_prismarine.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/dark_prismarine.png");
 
         this.startingBlockTypes.add(Blocks.DARK_PRISMARINE);
         this.startingBlockTypes.add(Blocks.TINTED_GLASS);
@@ -43,19 +44,17 @@ public class AltarOfDarkness extends ProductionBuilding {
 
     public Faction getFaction() {return Faction.MONSTERS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
                 name,
-                new ResourceLocation("minecraft", "textures/block/dark_prismarine.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/dark_prismarine.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.ALTAR_OF_DARKNESS,
                 () -> !SandboxClientEvents.isSandboxPlayer() && !GameruleClient.allowHeroes,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Buildings.ALTAR_OF_DARKNESS),
-                null,
                 List.of(
                         fcs(I18n.get("buildings.monsters.reignofnether.altar_of_darkness"), true),
                         ResourceCosts.getFormattedCost(cost),
@@ -63,7 +62,12 @@ public class AltarOfDarkness extends ProductionBuilding {
                         fcs(I18n.get("buildings.monsters.reignofnether.altar_of_darkness.tooltip1")),
                         fcs(I18n.get("buildings.monsters.reignofnether.altar_of_darkness.tooltip2"))
                 ),
-                null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.MONSTERS;
     }
 }

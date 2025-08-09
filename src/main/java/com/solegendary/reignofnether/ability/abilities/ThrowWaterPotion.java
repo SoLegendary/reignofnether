@@ -49,7 +49,7 @@ public class ThrowWaterPotion extends Ability {
         WitchUnit witchUnit = (WitchUnit) unit;
         return new AbilityButton(
             "Water Potion",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/splash_potion_water.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/splash_potion_water.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_WATER_POTION || isAutocasting(unit),
             () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_WATER_POTIONS),

@@ -9,7 +9,7 @@ import net.minecraft.world.entity.monster.Spider;
 
 public class PoisonSpiderUnitRenderer extends SpiderRenderer<Spider> {
 
-    private static final ResourceLocation CAVE_SPIDER_LOCATION = new ResourceLocation("textures/entity/spider/cave_spider.png");
+    private static final ResourceLocation CAVE_SPIDER_LOCATION = ResourceLocation.parse("textures/entity/spider/cave_spider.png");
 
     public PoisonSpiderUnitRenderer(EntityRendererProvider.Context p_173946_) {
         super(p_173946_, ModelLayers.CAVE_SPIDER);

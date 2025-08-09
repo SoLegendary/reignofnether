@@ -8,6 +8,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(VanillaPacketFilter.class)
 public interface VanillaPacketFilterAccessor {
 
-    @Invoker("isNecessary")
+    @Invoker(value = "isNecessary", remap = false)
     boolean invokeIsNecessary(Connection manager);
 }

@@ -40,7 +40,7 @@ public class Button {
 
     public ResourceLocation iconResource;
     public ResourceLocation bgIconResource = null; // for rendering a background icon (eg. for mounted unit passengers)
-    public ResourceLocation frameResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
+    public ResourceLocation frameResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
 
     public Keybinding hotkey = null; // for action/ability buttons
     public LivingEntity entity = null; // for selected unit buttons
@@ -211,7 +211,7 @@ public class Button {
             ))) {
 
             if (frameResource != null) {
-                ResourceLocation iconFrameSelectedResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_selected.png");
+                ResourceLocation iconFrameSelectedResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_selected.png");
                 guiGraphics.pose().translate(0,0,1);
                 MyRenderer.renderIcon(
                         guiGraphics,

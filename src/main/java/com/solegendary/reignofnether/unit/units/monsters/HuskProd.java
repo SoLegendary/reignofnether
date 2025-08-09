@@ -5,9 +5,11 @@ import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -15,6 +17,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxAction;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
@@ -42,19 +45,10 @@ public class HuskProd extends ProductionItem {
         return HuskProd.itemName;
     }
 
-    public AbilityButton getPlaceButton() {
-        return new AbilityButton(
+    public UnitSpawnButton getPlaceButton() {
+        return new UnitSpawnButton(
                 itemName,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
-                null,
-                () -> SandboxClientEvents.spawnUnitName.equals(itemName),
-                () -> false,
-                () -> true,
-                () -> {
-                    CursorClientEvents.setLeftClickSandboxAction(SandboxAction.SPAWN_UNIT);
-                    SandboxClientEvents.spawnUnitName = itemName;
-                },
-                null,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
                 List.of(
                         FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
@@ -62,23 +56,17 @@ public class HuskProd extends ProductionItem {
                         FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk.tooltip3"), Style.EMPTY)
-                ),
-                null,
-                (Unit) null
+                )
         );
     }
 
-    public Button getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        return new Button(
+    public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
+        return new StartProductionButton(
             HuskProd.itemName,
-            14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
             hotkey,
             () -> false,
-            () -> false,
             () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_HUSKS),
-            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, ProductionItems.HUSK),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
@@ -88,22 +76,19 @@ public class HuskProd extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk.tooltip3"), Style.EMPTY)
-            )
+            ),
+            prodBuilding,
+            this
         );
     }
 
-    public Button getCancelButton(ProductionPlacement prodBuilding, boolean first) {
-        return new Button(
+    public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
+        return new StopProductionButton(
             HuskProd.itemName,
-            14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
-            (Keybinding) null,
-            () -> false,
-            () -> false,
-            () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, ProductionItems.HUSK, first),
-            null,
-            null
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
+            prodBuilding,
+            this,
+            first
         );
     }
 }

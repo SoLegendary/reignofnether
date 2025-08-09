@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.neutral;
 
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.EndPortalPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -33,7 +34,7 @@ public class EndPortal extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.END_PORTAL_FRAME;
-        this.icon = new ResourceLocation("minecraft", "textures/block/end_portal_frame_top.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/end_portal_frame_top.png");
 
         this.selfBuilding = true;
 
@@ -55,24 +56,26 @@ public class EndPortal extends ProductionBuilding {
         return new EndPortalPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
-        return new AbilityButton(
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
+        return new BuildingPlaceButton(
                 buildingName,
-                new ResourceLocation("minecraft", "textures/block/end_portal_frame_top.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/end_portal_frame_top.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 () -> false,
                 () -> true,
-                () -> BuildingClientEvents.setBuildingToPlace(this),
-                null,
                 List.of(
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.end_portal"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.end_portal.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.end_portal.tooltip2"), Style.EMPTY)
                 ),
-                null,
-                (BuildingPlacement) null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return false;
     }
 }

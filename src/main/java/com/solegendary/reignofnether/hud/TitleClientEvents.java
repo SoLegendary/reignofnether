@@ -31,7 +31,7 @@ public class TitleClientEvents {
             case MONSTERS -> dir = "monsters";
             case PIGLINS -> dir = "piglins";
         }
-        return new CubeMap(new ResourceLocation("textures/gui/title/background/" + dir + "/panorama"));
+        return new CubeMap(ResourceLocation.parse("textures/gui/title/background/" + dir + "/panorama"));
     }
 
     private static Faction getRandomFaction() {

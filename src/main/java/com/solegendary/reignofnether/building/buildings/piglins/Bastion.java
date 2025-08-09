@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.BastionPlacement;
@@ -37,7 +38,7 @@ public class Bastion extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.CHISELED_POLISHED_BLACKSTONE;
-        this.icon = new ResourceLocation("minecraft", "textures/block/chiseled_polished_blackstone.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/chiseled_polished_blackstone.png");
 
         this.canSetRallyPoint = false;
 
@@ -60,19 +61,17 @@ public class Bastion extends ProductionBuilding {
         return new BastionPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
                 name,
-                new ResourceLocation("minecraft", "textures/block/chiseled_polished_blackstone.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/chiseled_polished_blackstone.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.BASTION,
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.PORTAL_BASIC) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Buildings.BASTION),
-                null,
                 List.of(
                         FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.bastion"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
@@ -84,8 +83,12 @@ public class Bastion extends ProductionBuilding {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.bastion.tooltip4"), Style.EMPTY)
                 ),
-                null,
-                (BuildingPlacement) null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.PIGLINS;
     }
 }

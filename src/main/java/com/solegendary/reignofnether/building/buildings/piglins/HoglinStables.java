@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.buildings.piglins;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -32,7 +33,7 @@ public class HoglinStables extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.CRIMSON_STEM;
-        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/crimson_stem.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/crimson_stem.png");
 
         this.canSetRallyPoint = false;
 
@@ -45,19 +46,17 @@ public class HoglinStables extends ProductionBuilding {
 
     public Faction getFaction() {return Faction.PIGLINS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
             name,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/crimson_stem.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/crimson_stem.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.HOGLIN_STABLES,
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.PORTAL_BASIC) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.HOGLIN_STABLES),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.hoglin_stables"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
@@ -67,8 +66,12 @@ public class HoglinStables extends ProductionBuilding {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.hoglin_stables.tooltip3"), Style.EMPTY)
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.PIGLINS;
     }
 }

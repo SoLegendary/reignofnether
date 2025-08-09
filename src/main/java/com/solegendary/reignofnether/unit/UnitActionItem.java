@@ -17,10 +17,7 @@ import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.unit.goals.*;
-import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.util.LanguageUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -93,9 +90,9 @@ public class UnitActionItem {
         this.selectedBuildingPos = selectedBuildingPos;
     }
 
-    private boolean canAffordManaCost(Ability ability) {
-        if (ability instanceof HeroAbility heroAbility) {
-            return heroAbility.manaCost <= heroAbility.hero.getMana();
+    private boolean canAffordManaCost(Ability ability, Unit unit) {
+        if (ability instanceof HeroAbility heroAbility && unit instanceof HeroUnit hero) {
+            return heroAbility.manaCost <= hero.getMana();
         }
         return true;
     }
@@ -182,7 +179,7 @@ public class UnitActionItem {
 
                     boolean foundAbility = false;
                     boolean shouldResetBehaviours = true;
-                    for (Ability ability : unit.getAbilities()) {
+                    for (Ability ability : unit.getAbilities().get()) {
                         if (ability.action == action) {
                             foundAbility = true;
                             shouldResetBehaviours = ability.shouldResetBehaviours();
@@ -361,10 +358,10 @@ public class UnitActionItem {
                 }
                 // any other Ability not explicitly defined here
                 default -> {
-                    for (Ability ability : unit.getAbilities()) {
+                    for (Ability ability : unit.getAbilities().get()) {
                         if (ability.action == action &&
                             (ability.isOffCooldown(unit) || ability.canBypassCooldown(unit)) &&
-                            canAffordManaCost(ability)
+                            canAffordManaCost(ability, unit)
                         ) {
                             if (ability.canTargetEntities && this.unitId > 0) {
                                 ability.use(level, unit, (LivingEntity) level.getEntity(unitId));

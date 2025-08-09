@@ -18,7 +18,7 @@ public class CastlePlacement extends ProductionPlacement implements Garrisonable
 
     public CastlePlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
-        Ability promoteIllager = new PromoteIllager(this);
+        Ability promoteIllager = new PromoteIllager();
         abilities.add(promoteIllager);
     }
 

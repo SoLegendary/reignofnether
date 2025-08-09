@@ -43,7 +43,7 @@ public class BackToWorkBuilding extends Ability {
     public AbilityButton getButton(Keybinding hotkey, BuildingPlacement placement) {
         return new AbilityButton(
                 "Back to Work (Building)",
-                new ResourceLocation("minecraft", "textures/item/iron_pickaxe.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_pickaxe.png"),
                 hotkey,
                 () -> false,
                 () -> false,

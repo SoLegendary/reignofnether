@@ -16,7 +16,7 @@ public class NecromancerRenderer extends MobRenderer<NecromancerUnit, Necromance
 
     public static final float SCALE_MULT = 1.25f;
 
-    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("reignofnether", "textures/entities/necromancer_unit.png");
+    private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/necromancer_unit.png");
 
     public NecromancerRenderer(EntityRendererProvider.Context context) {
         super(context, new NecromancerModel<>(context.bakeLayer(NecromancerModel.LAYER_LOCATION)), 0.5F);

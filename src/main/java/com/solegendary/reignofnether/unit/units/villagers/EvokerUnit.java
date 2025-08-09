@@ -86,8 +86,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;}
-    public List<Ability> getAbilities() {return abilities;}
+    public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;}
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -188,8 +187,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     private UnitBowAttackGoal<? extends LivingEntity> attackGoal;
     private MeleeAttackBuildingGoal attackBuildingGoal;
 
-    private List<AbilityButton> abilityButtons = new ArrayList<>();
-    private List<Ability> abilities = new ArrayList<>();
+    private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
     public EvokerUnit(EntityType<? extends Evoker> entityType, Level level) {
@@ -213,7 +211,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     public void resetBehaviours() {
         this.castFangsGoal.stop();
         this.castSummonVexesGoal.stop();
-        if (attackGoal != null && this.abilities.size() > 0 && this.abilities.get(0).isOffCooldown(this))
+        if (attackGoal != null && !this.abilities.get().isEmpty() && this.abilities.get().get(0).isOffCooldown(this))
             this.attackGoal.resetCooldown();
     }
 
@@ -226,7 +224,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         this.castSummonVexesGoal.tick();
         PromoteIllager.checkAndApplyBuff(this);
 
-        for (Ability ability : getAbilities()) {
+        for (Ability ability : getAbilities().get()) {
             if (ability instanceof CastSummonVexes castSummonVexes) {
                 if (castSummonVexes.isAutocasting(this) && !isCastingSpell() && castSummonVexes.isOffCooldown(this) && !level().isClientSide() && isIdle() &&
                     tickCount % 4 == 0 && ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_EVOKER_VEXES)) {
@@ -285,7 +283,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     // controls whether the evoker's arms are up or not
     @Override
     public boolean isCastingSpell() {
-        for (Ability ability : getAbilities())
+        for (Ability ability : getAbilities().get())
             if (ability instanceof SetFangsCircle || ability instanceof SetFangsLine) {
                 if (ability.isOffCooldown(this) && this.getCastFangsGoal() != null && this.getCastFangsGoal().isCasting())
                     return true;
@@ -301,11 +299,11 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
         if (isUsingLineFangs) {
             this.getCastFangsGoal().startCasting();
-            this.getCastFangsGoal().setAbility(this.abilities.get(0));
+            this.getCastFangsGoal().setAbility(this.abilities.get().get(0));
             this.getCastFangsGoal().setTarget(pTarget);
         } else {
             this.getCastFangsGoal().startCasting();
-            this.getCastFangsGoal().setAbility(this.abilities.get(1));
+            this.getCastFangsGoal().setAbility(this.abilities.get().get(1));
             this.getCastFangsGoal().setTarget(pTarget);
         }
         if (!level().isClientSide() && pTarget instanceof Unit unit)
@@ -395,7 +393,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
                 ((ServerLevel) this.level()).addFreshEntityWithPassengers(vex);
             }
         }
-        for (Ability ability : getAbilities())
+        for (Ability ability : getAbilities().get())
             if (ability instanceof CastSummonVexes castSummonVexes)
                 AbilityClientboundPacket.sendSetCooldownPacket(getId(), UnitAction.CAST_SUMMON_VEXES, CastSummonVexes.CD_MAX_SECONDS);
 
@@ -408,7 +406,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         Entity targetEntity = getTargetGoal().getTarget();
         if (this.isCastingSpell() || (targetEntity != null &&
             this.distanceTo(targetEntity) <= getAttackRange()) &&
-            this.getAbilities().get(0).isOffCooldown(this)) {
+            this.getAbilities().get().get(0).isOffCooldown(this)) {
             return VillagerUnitModel.ArmPose.SPELLCASTING;
         }
         return VillagerUnitModel.ArmPose.CROSSED;
@@ -451,8 +449,8 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
+        autocast = ABILITIES.getDefaultAutocast();
     }
 
     @Override

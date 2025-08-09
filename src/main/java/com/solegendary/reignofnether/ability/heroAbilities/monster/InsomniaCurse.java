@@ -67,7 +67,7 @@ public class InsomniaCurse extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Curse of Insomnia",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/phantom.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/phantom.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.INSOMNIA_CURSE,
             () -> rank == 0,
@@ -84,7 +84,7 @@ public class InsomniaCurse extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Curse of Insomnia",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/phantom.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/phantom.png"),
                 hero
         );
     }

@@ -7,7 +7,7 @@ import net.minecraft.world.entity.animal.PolarBear;
 
 public class GrizzlyBearRenderer extends PolarBearRenderer {
 
-    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("reignofnether", "textures/entities/grizzly_bear_unit.png");
+    private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/grizzly_bear_unit.png");
 
     public GrizzlyBearRenderer(EntityRendererProvider.Context p_174356_) {
         super(p_174356_);

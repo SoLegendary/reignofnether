@@ -23,26 +23,22 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 // used by militia to swap between a sword and a bow
 
 public class WeaponSwapBow extends Ability {
-
-    private final MilitiaUnit militiaUnit;
-
-    public WeaponSwapBow(MilitiaUnit militiaUnit) {
+    public WeaponSwapBow() {
         super(
                 UnitAction.MILITIA_USE_BOW,
-                militiaUnit.level(),
                 0,
                 0,
                 0,
                 false
         );
-        this.militiaUnit = militiaUnit;
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey) {
+    public AbilityButton getButton(Keybinding hotkey, Unit unit) {
+        if (!(unit instanceof MilitiaUnit militiaUnit)) return null;
         return new AbilityButton(
                 "Weapon Swap",
-                new ResourceLocation("minecraft", "textures/item/bow.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/bow.png"),
                 hotkey,
                 () -> false,
                 () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_MILITIA_BOWS) || militiaUnit.isUsingBow(),
@@ -55,13 +51,14 @@ public class WeaponSwapBow extends Ability {
                         FormattedCharSequence.forward(I18n.get("abilities.reignofnether.weapon_swap_bow.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("abilities.reignofnether.weapon_swap_bow.tooltip2"), Style.EMPTY)
                 ),
-                this
+                this,
+                unit
         );
     }
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        if (unitUsing == this.militiaUnit)
-            this.militiaUnit.swapWeapons(true);
+        if (unitUsing instanceof MilitiaUnit militiaUnit)
+            militiaUnit.swapWeapons(true);
     }
 }

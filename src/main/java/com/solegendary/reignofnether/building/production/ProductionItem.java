@@ -121,12 +121,12 @@ public abstract class ProductionItem {
     }
 
     // Button object to build
-    public Button getStartButton(ProductionPlacement prodBuilding, Keybinding keybinding) {
+    public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding keybinding) {
         return null;
     }
     // Button object to show in-progress items
     // firstItem means this button will cancel the currently-building item
-    public Button getCancelButton(ProductionPlacement prodBuilding, boolean first) {
+    public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
         return null;
     }
 

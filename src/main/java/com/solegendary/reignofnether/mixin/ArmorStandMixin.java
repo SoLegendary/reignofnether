@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.mixin;
 
-import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import net.minecraft.world.damagesource.DamageSource;

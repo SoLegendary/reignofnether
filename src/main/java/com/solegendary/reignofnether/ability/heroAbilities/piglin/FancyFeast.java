@@ -47,11 +47,11 @@ public class FancyFeast extends HeroAbility {
 
     private ResourceLocation getIcon(int plusRank) {
         if (rank + plusRank == 3)
-            return new ResourceLocation("minecraft", "textures/item/cooked_beef.png");
+            return ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/cooked_beef.png");
         else if (rank + plusRank == 2)
-            return new ResourceLocation("minecraft", "textures/item/cooked_chicken.png");
+            return ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/cooked_chicken.png");
         else
-            return new ResourceLocation("minecraft", "textures/item/bread.png");
+            return ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/bread.png");
     }
 
     public Item getFoodItem() {
@@ -73,8 +73,8 @@ public class FancyFeast extends HeroAbility {
     }
 
     @Override
-    public boolean isCasting() {
-        if (this.hero instanceof PiglinMerchantUnit piglinMerchantUnit) {
+    public boolean isCasting(Unit unit) {
+        if (unit instanceof PiglinMerchantUnit piglinMerchantUnit) {
             GenericTargetedSpellGoal goal = piglinMerchantUnit.getCastFancyFeastGoal();
             if (goal != null)
                 return goal.isCasting();

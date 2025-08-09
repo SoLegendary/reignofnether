@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -31,7 +32,7 @@ public class SpiderLair extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.COBWEB;
-        this.icon = new ResourceLocation("minecraft", "textures/block/cobweb.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/cobweb.png");
 
         this.startingBlockTypes.add(Blocks.DEEPSLATE);
         this.startingBlockTypes.add(Blocks.COBBLED_DEEPSLATE);
@@ -44,19 +45,17 @@ public class SpiderLair extends ProductionBuilding {
 
     public Faction getFaction() {return Faction.MONSTERS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
                 name,
-                new ResourceLocation("minecraft", "textures/block/cobweb.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/cobweb.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.SPIDER_LAIR,
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Buildings.SPIDER_LAIR),
-                null,
                 List.of(
                         FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spider_lair"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
@@ -65,8 +64,12 @@ public class SpiderLair extends ProductionBuilding {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spider_lair.tooltip2"), Style.EMPTY)
                 ),
-                null,
-                (BuildingPlacement) null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.MONSTERS;
     }
 }

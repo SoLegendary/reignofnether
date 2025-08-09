@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.tps.TPSClientEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
@@ -26,7 +25,7 @@ public class Ability {
     public int maxCharges = 1;
     private boolean defaultAutocast = false;
     public void setAutocast(boolean value, Unit unit) { unit.setAutocast(value ? this : null); }
-    public boolean getAutocast(Unit unit) { return unit.hasAutocast(this); }
+    public boolean isAutocasting(Unit unit) { return unit.hasAutocast(this); }
     protected Keybinding defaultHotkey = Keybindings.keyQ;
 
     public Ability(UnitAction action, int cooldownMax, float range, float radius, boolean canTargetEntities) {
@@ -55,12 +54,14 @@ public class Ability {
         if (!unit.level().isClientSide())
             return;
 
-        if (getAutocast(unit) && autocastDisableAction != null) {
+        if (isAutocasting(unit) && autocastDisableAction != null) {
             sendUnitCommand(autocastDisableAction);
-        } else if (!getAutocast(unit) && autocastEnableAction != null) {
+        } else if (!isAutocasting(unit) && autocastEnableAction != null) {
             sendUnitCommand(autocastEnableAction);
         }
     }
+
+    public boolean isCasting(Unit unit) { return false; }
 
     public boolean isChanneling(Unit unit) { return false; }
 
@@ -104,8 +105,12 @@ public class Ability {
     public void use(Level level, BuildingPlacement buildingUsing, BlockPos targetBp) { }
 
     // assigns a default hotkey
-    public AbilityButton getButton() {
-        return getButton(defaultHotkey);
+    public AbilityButton getButton(BuildingPlacement placement) {
+        return getButton(defaultHotkey, placement);
+    }
+
+    public AbilityButton getButton(Unit unit) {
+        return getButton(defaultHotkey, unit);
     }
 
     public AbilityButton getButton(Keybinding hotkey, BuildingPlacement placement) {
@@ -134,5 +139,9 @@ public class Ability {
 
     public int getCharges(BuildingPlacement placement) {
         return placement.getCharges(this);
+    }
+
+    public void setCharges(Unit unit, int charges) {
+        unit.setCharges(this, charges);
     }
 }

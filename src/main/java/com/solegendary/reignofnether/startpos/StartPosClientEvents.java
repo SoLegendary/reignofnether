@@ -55,7 +55,7 @@ public class StartPosClientEvents {
         return new Button("Starting Positions",
                 14,
                 getIcon(),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 Keybindings.stop,
                 () -> false,
                 () -> !isEnabled(),
@@ -93,8 +93,8 @@ public class StartPosClientEvents {
     public static Button getStartButton() {
         return new Button("Start Game",
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
                 () -> !isEnabled() || isStarting,
@@ -121,8 +121,8 @@ public class StartPosClientEvents {
     public static Button getCancelStartButton() {
         return new Button("Cancel Start Game",
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
                 () -> !isEnabled() || !isStarting,
@@ -145,7 +145,7 @@ public class StartPosClientEvents {
 
     private static ResourceLocation getIcon() {
         if (getPos() == null)
-            return new ResourceLocation(ReignOfNether.MOD_ID, "textures/block/rts_start_block_white.png");
+            return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/block/rts_start_block_white.png");
         else
             return getPos().getIcon();
     }
@@ -239,7 +239,7 @@ public class StartPosClientEvents {
     public static Button villagerReadyButton = new Button(
             "Villagers",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
             (Keybinding) null,
             () -> selectedFaction == Faction.VILLAGERS,
             () -> TutorialClientEvents.isEnabled() || !PlayerClientEvents.canStartRTS || !isEnabled(),
@@ -266,7 +266,7 @@ public class StartPosClientEvents {
     public static Button monsterReadyButton = new Button(
             "Monsters",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
             (Keybinding) null,
             () -> selectedFaction == Faction.MONSTERS,
             () -> TutorialClientEvents.isEnabled() || !PlayerClientEvents.canStartRTS || !isEnabled(),
@@ -293,7 +293,7 @@ public class StartPosClientEvents {
     public static Button piglinReadyButton = new Button(
             "Piglins",
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
             (Keybinding) null,
             () -> selectedFaction == Faction.PIGLINS,
             () -> TutorialClientEvents.isEnabled() || !PlayerClientEvents.canStartRTS || !isEnabled(),

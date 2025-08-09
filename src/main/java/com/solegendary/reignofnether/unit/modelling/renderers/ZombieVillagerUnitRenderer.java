@@ -13,7 +13,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 // based on VindicatorRenderer
 @OnlyIn(Dist.CLIENT)
 public class ZombieVillagerUnitRenderer extends AbstractVillagerUnitRenderer<ZombieVillagerUnit> {
-    private static final ResourceLocation ZOMBIE_VILLAGER_UNIT = new ResourceLocation("reignofnether", "textures/entities/zombie_villager_unit.png");
+    private static final ResourceLocation ZOMBIE_VILLAGER_UNIT = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/zombie_villager_unit.png");
 
     public ZombieVillagerUnitRenderer(EntityRendererProvider.Context p_174439_) {
         super(p_174439_, new VillagerUnitModel<>(p_174439_.bakeLayer(VillagerUnitModel.LAYER_LOCATION)), 0.5F);

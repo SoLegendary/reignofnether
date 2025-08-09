@@ -5,12 +5,14 @@ import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.building.production.StartProductionButton;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -35,18 +37,14 @@ public class ResearchFireResistance extends ProductionItem {
         };
     }
 
-    public Button getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        return new Button(ResearchFireResistance.itemName,
-            14,
-            new ResourceLocation("minecraft", "textures/mob_effect/fire_resistance.png"),
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+    public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
+        return new StartProductionButton(ResearchFireResistance.itemName,
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/mob_effect/fire_resistance.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
-            () -> false,
             () -> ProductionItems.RESEARCH_FIRE_RESISTANCE.itemIsBeingProduced(prodBuilding.ownerName)
                 || ResearchClient.hasResearch(ProductionItems.RESEARCH_FIRE_RESISTANCE),
             () -> true,
-            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, ProductionItems.RESEARCH_FIRE_RESISTANCE),
-            null,
             List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.fire_resistance"),
                     Style.EMPTY.withBold(true)
                 ),
@@ -55,22 +53,19 @@ public class ResearchFireResistance extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.fire_resistance.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.fire_resistance.tooltip2"), Style.EMPTY)
-            )
+            ),
+            prodBuilding,
+            this
         );
     }
 
-    public Button getCancelButton(ProductionPlacement prodBuilding, boolean first) {
-        return new Button(ResearchFireResistance.itemName,
-            14,
-            new ResourceLocation("minecraft", "textures/mob_effect/fire_resistance.png"),
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-            null,
-            () -> false,
-            () -> false,
-            () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, ProductionItems.RESEARCH_FIRE_RESISTANCE, first),
-            null,
-            null
+    public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
+        return new StopProductionButton(ResearchFireResistance.itemName,
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/mob_effect/fire_resistance.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            prodBuilding,
+            this,
+            first
         );
     }
 }

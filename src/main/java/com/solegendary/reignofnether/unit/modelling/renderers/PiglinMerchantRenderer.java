@@ -16,7 +16,7 @@ public class PiglinMerchantRenderer extends MobRenderer<PiglinMerchantUnit, Pigl
 
     public static final float SCALE_MULT = 1.5f;
 
-    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("reignofnether", "textures/entities/piglin_merchant_unit.png");
+    private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/piglin_merchant_unit.png");
 
     public PiglinMerchantRenderer(EntityRendererProvider.Context context) {
         super(context, new PiglinMerchantModel<>(context.bakeLayer(PiglinMerchantModel.LAYER_LOCATION)), 0.5F);

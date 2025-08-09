@@ -35,7 +35,7 @@ public class FirewallShot extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         return new AbilityButton("Fire Wall Shot",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/fire.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/fire.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.SHOOT_FIREWALL,
             () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_BLAZE_FIREWALL),

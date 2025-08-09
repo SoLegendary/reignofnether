@@ -40,8 +40,8 @@ public class ThrowTNT extends HeroAbility {
     }
 
     @Override
-    public boolean isCasting() {
-        if (this.hero instanceof PiglinMerchantUnit piglinMerchantUnit) {
+    public boolean isCasting(Unit unit) {
+        if (unit instanceof PiglinMerchantUnit piglinMerchantUnit) {
             GenericTargetedSpellGoal goal = piglinMerchantUnit.getCastTNTGoal();
             if (goal != null)
                 return goal.isCasting();
@@ -71,7 +71,7 @@ public class ThrowTNT extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Throw TNT",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_TNT,
                 () -> rank == 0,
@@ -88,7 +88,7 @@ public class ThrowTNT extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Throw TNT",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
                 hero
         );
     }

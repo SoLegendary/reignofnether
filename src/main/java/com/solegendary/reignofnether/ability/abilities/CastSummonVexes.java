@@ -45,7 +45,7 @@ public class CastSummonVexes extends Ability {
         EvokerUnit evokerUnit = (EvokerUnit) unit;
         return new AbilityButton(
                 "Summon Vexes",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/vex.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/vex.png"),
                 hotkey,
                 () -> {
                     if (evokerUnit.getCastSummonVexesGoal() != null)

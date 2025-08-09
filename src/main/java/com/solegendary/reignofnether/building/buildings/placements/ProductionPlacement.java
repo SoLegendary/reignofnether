@@ -248,6 +248,9 @@ public class ProductionPlacement extends BuildingPlacement {
                     productionQueue.add(activeProduction);
                     ResourcesServerEvents.addSubtractResources(new Resources(
                             ownerName,
+                            -prodItem.getCost(level.isClientSide(), ownerName).food,
+                            -prodItem.getCost(level.isClientSide(), ownerName).wood,
+                            -prodItem.getCost(level.isClientSide(), ownerName).ore
                     ));
                     success = true;
                 }

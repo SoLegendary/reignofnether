@@ -49,7 +49,7 @@ public class BloodMoon extends HeroAbility {
     }
 
     @Override
-    public boolean isCasting(HeroUnit hero) {
+    public boolean isCasting(Unit hero) {
         if (hero instanceof NecromancerUnit necromancerUnit) {
             GenericTargetedSpellGoal goal = necromancerUnit.getCastBloodMoonGoal();
             if (goal != null)

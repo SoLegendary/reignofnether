@@ -12,7 +12,7 @@ public class PiglinMerchantReviveProd extends ReviveHeroProductionItem {
     public PiglinMerchantReviveProd() {
         super(
             "Revive Piglin Merchant",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/piglin_merchant.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/piglin_merchant.png"),
             "units.piglins.reignofnether.piglin_merchant.revive"
         );
     }

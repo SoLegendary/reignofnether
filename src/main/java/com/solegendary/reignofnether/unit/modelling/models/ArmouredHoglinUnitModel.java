@@ -16,7 +16,7 @@ import net.minecraft.world.entity.monster.hoglin.HoglinBase;
 public class ArmouredHoglinUnitModel<T extends Entity> extends EntityModel<T> {
 
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ReignOfNether.MOD_ID, "armoured_hoglin_unit_layer"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "armoured_hoglin_unit_layer"), "main");
 
     private final ModelPart head;
     private final ModelPart head_rotation;

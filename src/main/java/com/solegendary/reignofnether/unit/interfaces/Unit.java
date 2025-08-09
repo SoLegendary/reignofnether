@@ -1,10 +1,12 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
@@ -55,8 +57,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.Map;
+import java.util.Random;
 
 // Defines method bodies for Units
 // workaround for trying to have units inherit from both their base vanilla Mob class and a Unit class
@@ -100,8 +102,10 @@ public interface Unit {
     boolean canUsePortal();
 
     Faction getFaction();
-    List<AbilityButton> getAbilityButtons();
-    List<Ability> getAbilities();
+    Abilities getAbilities();
+    default List<Button> getAbilityButtons() {
+        return getAbilities().getButtons(this);
+    }
     List<ItemStack> getItems();
     int getMaxResources();
 
@@ -530,7 +534,7 @@ public interface Unit {
     }
 
     static Ability getAbility(Unit unit, UnitAction abilityAction) {
-        for (Ability ability : unit.getAbilities())
+        for (Ability ability : unit.getAbilities().get())
             if (ability.action.equals(abilityAction))
                 return ability;
         return null;
@@ -584,9 +588,9 @@ public interface Unit {
     void updateAbilityButtons();
     Level level();
 
-    public default boolean isCasting() {
-        for (Ability ability : getAbilities())
-            if (ability.isCasting())
+    default boolean isCasting() {
+        for (Ability ability : getAbilities().get())
+            if (ability.isCasting(this))
                 return true;
         return false;
     }

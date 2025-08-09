@@ -16,7 +16,7 @@ public class RoyalGuardRenderer extends MobRenderer<RoyalGuardUnit, RoyalGuardMo
 
     public static final float SCALE_MULT = 1.25f;
 
-    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("reignofnether", "textures/entities/royal_guard_unit.png");
+    private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/royal_guard_unit.png");
 
     public RoyalGuardRenderer(EntityRendererProvider.Context context) {
         super(context, new RoyalGuardModel<>(context.bakeLayer(RoyalGuardModel.LAYER_LOCATION)), 0.5F);

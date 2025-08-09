@@ -47,7 +47,7 @@ public class ThrowHealingPotion extends Ability {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         WitchUnit witchUnit = (WitchUnit) unit;
         return new AbilityButton("Healing Potion",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/splash_potion_healing.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/splash_potion_healing.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_HEALING_POTION || isAutocasting(unit),
             () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_HEALING_POTIONS),

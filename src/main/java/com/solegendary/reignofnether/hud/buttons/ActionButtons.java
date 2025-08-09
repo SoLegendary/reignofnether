@@ -37,7 +37,7 @@ public class ActionButtons {
         buildRepair = new Button(
                 "Build/Repair",
                 Button.itemIconSize,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shovel.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/shovel.png"),
                 Keybindings.build,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.BUILD_REPAIR ||
                         HudClientEvents.hudSelectedEntity instanceof WorkerUnit workerUnit &&
@@ -78,7 +78,7 @@ public class ActionButtons {
         attack = new Button(
                 "Attack",
                 Button.itemIconSize,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sword.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/sword.png"),
                 Keybindings.attack,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK,
                 () -> false,
@@ -90,7 +90,7 @@ public class ActionButtons {
         stop = new Button(
                 "Stop",
                 Button.itemIconSize,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
                 Keybindings.stop,
                 () -> false, // except if currently clicked on
                 () -> false,
@@ -102,7 +102,7 @@ public class ActionButtons {
         hold = new Button(
                 "Hold Position",
                 Button.itemIconSize,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/chestplate.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/chestplate.png"),
                 Keybindings.hold,
                 () -> {
                     LivingEntity entity = HudClientEvents.hudSelectedEntity;
@@ -117,7 +117,7 @@ public class ActionButtons {
         move = new Button(
                 "Move",
                 Button.itemIconSize,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/boots.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/boots.png"),
                 Keybindings.move,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOVE,
                 () -> false,
@@ -129,7 +129,7 @@ public class ActionButtons {
         garrison = new Button(
                 "Garrison",
                 Button.itemIconSize,
-                new ResourceLocation("minecraft", "textures/block/ladder.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/ladder.png"),
                 Keybindings.garrison,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.GARRISON,
                 () -> false,
@@ -141,7 +141,7 @@ public class ActionButtons {
         ungarrison = new Button(
                 "Ungarrison",
                 Button.itemIconSize,
-                new ResourceLocation("minecraft", "textures/block/oak_trapdoor.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/oak_trapdoor.png"),
                 Keybindings.garrison,
                 () -> false,
                 () -> false,

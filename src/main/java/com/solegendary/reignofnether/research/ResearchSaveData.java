@@ -106,6 +106,6 @@ public class ResearchSaveData extends SavedData {
             default: yield researchName.toLowerCase().replace(' ', '_');
         };
 
-        return new ResourceLocation(ReignOfNether.MOD_ID, newName);
+        return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, newName);
     }
 }

@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -31,7 +32,7 @@ public class Graveyard extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.MOSSY_STONE_BRICKS;
-        this.icon = new ResourceLocation("minecraft", "textures/block/mossy_stone_bricks.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/mossy_stone_bricks.png");
 
         this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICKS);
 
@@ -46,27 +47,29 @@ public class Graveyard extends ProductionBuilding {
 
     public Faction getFaction() {return Faction.MONSTERS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
             name,
-            new ResourceLocation("minecraft", "textures/block/mossy_stone_bricks.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/mossy_stone_bricks.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.GRAVEYARD,
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.GRAVEYARD),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.graveyard"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.graveyard.tooltip1"), Style.EMPTY)
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.MONSTERS;
     }
 }

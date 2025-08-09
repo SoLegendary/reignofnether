@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building.custombuilding;
 
 import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -25,13 +26,18 @@ public class CustomBuilding extends Building {
         this.structurePos = structurePos;
         this.structureSize = structureSize;
         this.portraitBlock = portraitBlock;
-        this.icon = new ResourceLocation("minecraft", "textures/block/command_block.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/command_block.png");
     }
 
     public Faction getFaction() {return Faction.NONE;}
 
     @Override
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         return null;
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return false;
     }
 }

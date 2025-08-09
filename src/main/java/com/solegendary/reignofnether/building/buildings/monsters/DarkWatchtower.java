@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.WatchTowerPlacement;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -35,7 +32,7 @@ public class DarkWatchtower extends Building {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.DEEPSLATE_BRICKS;
-        this.icon = new ResourceLocation("minecraft", "textures/block/deepslate_bricks.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/deepslate_bricks.png");
 
         this.buildTimeModifier = 1.0f;
 
@@ -51,19 +48,17 @@ public class DarkWatchtower extends Building {
         return new WatchTowerPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
             name,
-            new ResourceLocation("minecraft", "textures/block/deepslate_bricks.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/deepslate_bricks.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.DARK_WATCHTOWER,
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.DARK_WATCHTOWER),
-            null,
             List.of(
                     FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dark_watchtower"), Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
@@ -73,8 +68,12 @@ public class DarkWatchtower extends Building {
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dark_watchtower.tooltip3", WatchTowerPlacement.MAX_OCCUPANTS), Style.EMPTY)
             ),
-            null,
-            (BuildingPlacement) null
+            this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.MONSTERS;
     }
 }

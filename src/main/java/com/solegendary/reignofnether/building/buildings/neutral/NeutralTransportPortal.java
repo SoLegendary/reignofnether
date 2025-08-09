@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.neutral;
 
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalTransport;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -25,7 +26,7 @@ public class NeutralTransportPortal extends PortalTransport {
     public NeutralTransportPortal() {
         this.name = buildingName;
         this.portraitBlock = Blocks.BLUE_GLAZED_TERRACOTTA;
-        this.icon = new ResourceLocation("minecraft", "textures/block/blue_glazed_terracotta.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/blue_glazed_terracotta.png");
         this.startingBlockTypes.add(Blocks.LAPIS_BLOCK);
 
         this.invulnerable = true;
@@ -44,15 +45,13 @@ public class NeutralTransportPortal extends PortalTransport {
     }
 
     @Override
-    public AbilityButton getBuildButton(Keybinding hotkey) {
-        return new AbilityButton(NeutralTransportPortal.buildingName,
-                new ResourceLocation("minecraft", "textures/block/blue_glazed_terracotta.png"),
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
+        return new BuildingPlaceButton(NeutralTransportPortal.buildingName,
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/blue_glazed_terracotta.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 () -> false,
                 () -> true,
-                () -> BuildingClientEvents.setBuildingToPlace(this),
-                null,
                 List.of(FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.neutral_transport_portal"),
                                 Style.EMPTY.withBold(true)
                         ),
@@ -60,9 +59,13 @@ public class NeutralTransportPortal extends PortalTransport {
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.neutral_transport_portal.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.neutral_transport_portal.tooltip2"), Style.EMPTY)
                 ),
-                null,
-                (BuildingPlacement) null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return false;
     }
 }
 

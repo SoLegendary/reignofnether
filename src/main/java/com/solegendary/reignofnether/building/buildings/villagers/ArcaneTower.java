@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -34,7 +35,7 @@ public class ArcaneTower extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.AMETHYST_BLOCK;
-        this.icon = new ResourceLocation("minecraft", "textures/block/amethyst_block.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/amethyst_block.png");
 
         this.startingBlockTypes.add(Blocks.STONE_BRICKS);
         this.startingBlockTypes.add(Blocks.ANDESITE_WALL);
@@ -50,19 +51,17 @@ public class ArcaneTower extends ProductionBuilding {
 
     public Faction getFaction() {return Faction.VILLAGERS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
             name,
-            new ResourceLocation("minecraft", "textures/block/amethyst_block.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/amethyst_block.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.ARCANE_TOWER,
             TutorialClientEvents::isEnabled,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.ARCANE_TOWER),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.arcane_tower"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
@@ -71,13 +70,17 @@ public class ArcaneTower extends ProductionBuilding {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.arcane_tower.tooltip2"), Style.EMPTY)
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
     }
 
     @Override
     public BlockPos getIndoorSpawnPoint(ServerLevel level, BlockPos centrePos) {
         return super.getIndoorSpawnPoint(level, centrePos).offset(0,-10,0);
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.VILLAGERS;
     }
 }

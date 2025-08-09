@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -37,7 +38,7 @@ public class InfernalPortal extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.CRYING_OBSIDIAN;
-        this.icon = new ResourceLocation("minecraft", "textures/block/crying_obsidian.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/crying_obsidian.png");
 
         this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
 
@@ -52,19 +53,17 @@ public class InfernalPortal extends ProductionBuilding {
         return new PortalPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
                 name,
-                new ResourceLocation("minecraft", "textures/block/crying_obsidian.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/crying_obsidian.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.INFERNAL_PORTAL,
                 () -> !SandboxClientEvents.isSandboxPlayer() && !GameruleClient.allowHeroes,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.CENTRAL_PORTAL) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Buildings.INFERNAL_PORTAL),
-                null,
                 List.of(
                         fcs(I18n.get("buildings.piglins.reignofnether.infernal_portal"), true),
                         ResourceCosts.getFormattedCost(cost),
@@ -72,7 +71,12 @@ public class InfernalPortal extends ProductionBuilding {
                         fcs(I18n.get("buildings.piglins.reignofnether.infernal_portal.tooltip1")),
                         fcs(I18n.get("buildings.piglins.reignofnether.infernal_portal.tooltip2"))
                 ),
-                null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.PIGLINS;
     }
 }

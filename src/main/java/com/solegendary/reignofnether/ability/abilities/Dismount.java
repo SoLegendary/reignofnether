@@ -34,7 +34,7 @@ public class Dismount extends Ability {
         LivingEntity entity = (LivingEntity) unit;
         return new AbilityButton(
             "Dismount",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.DISMOUNT,
             () -> entity.getVehicle() == null,

@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.IronGolemPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -38,7 +35,7 @@ public class IronGolemBuilding extends Building {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.IRON_BLOCK;
-        this.icon = new ResourceLocation("minecraft", "textures/block/iron_block.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/iron_block.png");
 
         this.buildTimeModifier = 3.4f;
 
@@ -54,11 +51,11 @@ public class IronGolemBuilding extends Building {
         return new IronGolemPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(name,
-            new ResourceLocation("minecraft", "textures/block/iron_block.png"),
+        return new BuildingPlaceButton(name,
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/iron_block.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.IRON_GOLEM_BUILDING,
             TutorialClientEvents::isEnabled,
@@ -66,8 +63,6 @@ public class IronGolemBuilding extends Building {
                 ResearchClient.hasResearch(ProductionItems.RESEARCH_GOLEM_SMITHING) || ResearchClient.hasCheat(
                     "modifythephasevariance")
             ),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.IRON_GOLEM_BUILDING),
-            null,
             List.of(FormattedCharSequence.forward(
                     I18n.get("buildings.villagers.reignofnether.iron_golem_building"),
                     Style.EMPTY.withBold(true)
@@ -85,8 +80,12 @@ public class IronGolemBuilding extends Building {
                     Style.EMPTY
                 )
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.VILLAGERS;
     }
 }

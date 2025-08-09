@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -31,7 +32,7 @@ public class BasaltSprings extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.POLISHED_BASALT;
-        this.icon = new ResourceLocation("minecraft", "textures/block/polished_basalt_top.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/polished_basalt_top.png");
 
         this.canSetRallyPoint = false;
 
@@ -45,19 +46,17 @@ public class BasaltSprings extends ProductionBuilding {
 
     public Faction getFaction() {return Faction.PIGLINS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
             name,
-            new ResourceLocation("minecraft", "textures/block/polished_basalt_top.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/polished_basalt_top.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.BASALT_SPRINGS,
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BASTION) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.BASALT_SPRINGS),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.basalt_springs"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
@@ -67,8 +66,12 @@ public class BasaltSprings extends ProductionBuilding {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.basalt_springs.tooltip3"), Style.EMPTY)
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.PIGLINS;
     }
 }

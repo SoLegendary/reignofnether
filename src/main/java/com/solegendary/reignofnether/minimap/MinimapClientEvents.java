@@ -179,9 +179,9 @@ public class MinimapClientEvents {
         return new Button(largeMap ? "Close" : "Open large map",
                 14,
                 largeMap
-                        ? new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png")
-                        : new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                        ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png")
+                        : ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 Keybindings.keyM,
                 () -> false,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK),
@@ -197,8 +197,8 @@ public class MinimapClientEvents {
     public static Button getCamSensitivityButton() {
         return new Button("Camera Sensitivity",
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_front.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_front.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
@@ -216,8 +216,8 @@ public class MinimapClientEvents {
     public static Button getNightCirclesModeButton() {
         return new Button("Night Circles Mode",
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/repeating_command_block_front.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/repeating_command_block_front.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
@@ -245,8 +245,8 @@ public class MinimapClientEvents {
     public static Button getMapLockButton() {
         return new Button("Lock Map",
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/chain_command_block_front.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/chain_command_block_front.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
@@ -268,8 +268,8 @@ public class MinimapClientEvents {
     public static Button getCameraRotateCWButton() {
         return new Button("Rotate camera clockwise",
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/rotate_cw.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/rotate_cw.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 Keybindings.rotCW,
                 () -> false,
                 () -> !Keybindings.altMod.isDown() && !isLargeMap(),
@@ -286,8 +286,8 @@ public class MinimapClientEvents {
     public static Button getCameraRotateCCWButton() {
         return new Button("Rotate camera counter-clockwise",
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/rotate_ccw.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/rotate_ccw.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 Keybindings.rotCCW,
                 () -> false,
                 () -> !Keybindings.altMod.isDown() && !isLargeMap(),
@@ -800,7 +800,7 @@ public class MinimapClientEvents {
         float yb_bg = yb + BG_OFFSET;
 
         // render map background first
-        ResourceLocation iconFrameResource = new ResourceLocation(
+        ResourceLocation iconFrameResource = ResourceLocation.fromNamespaceAndPath(
             ReignOfNether.MOD_ID,
             "textures/hud/map_background.png"
         );

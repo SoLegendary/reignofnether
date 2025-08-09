@@ -39,8 +39,8 @@ public class MaceSlam extends HeroAbility {
     }
 
     @Override
-    public boolean isCasting() {
-        if (this.hero instanceof RoyalGuardUnit royalGuardUnit) {
+    public boolean isCasting(Unit unit) {
+        if (unit instanceof RoyalGuardUnit royalGuardUnit) {
             GenericTargetedSpellGoal goal = royalGuardUnit.getCastMaceSlamGoal();
             if (goal != null)
                 return goal.isCasting();
@@ -73,7 +73,7 @@ public class MaceSlam extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Mace Slam",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/mace.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/mace.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.MACE_SLAM,
                 () -> rank == 0,
@@ -90,7 +90,7 @@ public class MaceSlam extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Mace Slam",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/mace.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/mace.png"),
                 hero
         );
     }

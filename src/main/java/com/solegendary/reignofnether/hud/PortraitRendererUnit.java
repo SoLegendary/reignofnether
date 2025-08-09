@@ -40,7 +40,6 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -359,11 +358,11 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         ArrayList<String> statStrings = new ArrayList<>();
 
         if (unit instanceof AttackerUnit attackerUnit) {
-            textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/sword.png")); // DAMAGE
-            textureStatIcons.add(new ResourceLocation("reignofnether",
+            textureStatIcons.add(ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/sword.png")); // DAMAGE
+            textureStatIcons.add(ResourceLocation.fromNamespaceAndPath("reignofnether",
                 "textures/icons/items/sparkler.png"
             )); // ATTACK SPEED
-            textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/bow.png")); // RANGE
+            textureStatIcons.add(ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/bow.png")); // RANGE
             double atkDmg = attackerUnit.getUnitAttackDamage() + AttackerUnit.getWeaponDamageModifier(attackerUnit);
             if (unit instanceof CreeperUnit cUnit && cUnit.isPowered()) {
                 atkDmg *= CreeperUnit.CHARGED_DAMAGE_MULT;
@@ -388,8 +387,8 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                 statStrings.add(String.valueOf((int) (attackerUnit.getAttackRange())));
             }
         }
-        textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"));
-        textureStatIcons.add(new ResourceLocation("reignofnether", "textures/icons/items/boots.png"));
+        textureStatIcons.add(ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/chestplate.png"));
+        textureStatIcons.add(ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/boots.png"));
 
         statStrings.add((int) (unit.getUnitArmorPercentage() * 100) + "%");
         AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
@@ -434,7 +433,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
         y -= HERO_Y_OFFSET;
 
-        ResourceLocation expBarEmptyRl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/experience_bar_empty.png");
+        ResourceLocation expBarEmptyRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/experience_bar_empty.png");
         RenderSystem.setShaderTexture(0, expBarEmptyRl);
         guiGraphics.blit(expBarEmptyRl,
                 x, y, 0,
@@ -442,7 +441,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                 width, height, // dimensions of blit texture
                 width, height // size of texture itself (if < dimensions, texture is repeated)
         );
-        ResourceLocation expBarFullRl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/experience_bar_full.png");
+        ResourceLocation expBarFullRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/experience_bar_full.png");
         RenderSystem.setShaderTexture(0, expBarFullRl);
         float expPercent = (float) heroUnit.getExpOnCurrentLevel() / heroUnit.getExpToNextlevel();
         if (heroUnit.getHeroLevel() >= HeroUnit.MAX_LEVEL)
@@ -479,11 +478,11 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         int blitYIcon = y + 7;
 
         // prep strings/icons to render
-        List<ResourceLocation> textureStatIcons = List.of(new ResourceLocation("reignofnether",
+        List<ResourceLocation> textureStatIcons = List.of(ResourceLocation.fromNamespaceAndPath("reignofnether",
                 "textures/icons/items/wheat.png"
             ),
-            new ResourceLocation("reignofnether", "textures/icons/items/wood.png"),
-            new ResourceLocation("reignofnether", "textures/icons/items/iron_ore.png")
+            ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/wood.png"),
+            ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/iron_ore.png")
         );
 
         List<String> statStrings = List.of(String.valueOf(resources.food),

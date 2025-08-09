@@ -34,7 +34,7 @@ public class Eject extends Ability {
         LivingEntity entity = (LivingEntity) unit;
         return new AbilityButton(
             "Eject",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.EJECT,
             () -> entity.getPassengers().isEmpty(),
@@ -53,7 +53,7 @@ public class Eject extends Ability {
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
         ((LivingEntity) unitUsing).ejectPassengers();
 
-        for (Ability ability : unitUsing.getAbilities())
+        for (Ability ability : unitUsing.getAbilities().get())
             if (ability instanceof SpinWebs spinWebs)
                 spinWebs.setCooldown(spinWebs.getCooldown(unitUsing) / 4f, unitUsing);
     }

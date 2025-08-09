@@ -26,7 +26,7 @@ public class BlockEntityRegistrar {
         return BLOCK_ENTITIES.register(name, blockEntity);
     }
 
-    public static void init() {
-        BLOCK_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
+    public static void init(FMLJavaModLoadingContext context) {
+        BLOCK_ENTITIES.register(context.getModEventBus());
     }
 }

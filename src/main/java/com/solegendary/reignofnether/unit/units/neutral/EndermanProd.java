@@ -4,15 +4,18 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
+import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxAction;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
@@ -41,45 +44,12 @@ public class EndermanProd extends ProductionItem {
         return EndermanProd.itemName;
     }
 
-    public AbilityButton getPlaceButton() {
-        return new AbilityButton(
+    public UnitSpawnButton getPlaceButton() {
+        return new UnitSpawnButton(
                 itemName,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/enderman.png"),
-                null,
-                () -> SandboxClientEvents.spawnUnitName.equals(itemName),
-                () -> false,
-                () -> true,
-                () -> {
-                    CursorClientEvents.setLeftClickSandboxAction(SandboxAction.SPAWN_UNIT);
-                    SandboxClientEvents.spawnUnitName = itemName;
-                },
-                null,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/enderman.png"),
                 List.of(
                         FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman.tooltip2"), Style.EMPTY)
-                ),
-                null,
-                (Unit) null
-        );
-    }
-
-    public Button getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        return new Button(
-                EndermanProd.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/enderman.png"),
-                hotkey,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, this),
-                null,
-                List.of(
-                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman"), Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedPopAndTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman.tooltip2"), Style.EMPTY)
@@ -87,18 +57,33 @@ public class EndermanProd extends ProductionItem {
         );
     }
 
-    public Button getCancelButton(ProductionPlacement prodBuilding, boolean first) {
-        return new Button(
+    public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
+        return new StartProductionButton(
                 EndermanProd.itemName,
-                14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/enderman.png"),
-                (Keybinding) null,
-                () -> false,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/enderman.png"),
+                hotkey,
                 () -> false,
                 () -> true,
-                () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, this, first),
-                null,
-                null
+                List.of(
+                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman"), Style.EMPTY.withBold(true)),
+                        ResourceCosts.getFormattedCost(cost),
+                        ResourceCosts.getFormattedPopAndTime(cost),
+                        FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman.tooltip2"), Style.EMPTY)
+                ),
+                prodBuilding,
+                this
+        );
+    }
+
+    public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
+        return new StopProductionButton(
+                EndermanProd.itemName,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/enderman.png"),
+                prodBuilding,
+                this,
+                first
         );
     }
 }

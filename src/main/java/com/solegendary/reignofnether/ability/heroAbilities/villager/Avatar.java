@@ -45,8 +45,8 @@ public class Avatar extends HeroAbility {
     }
 
     @Override
-    public boolean isCasting() {
-        if (this.hero instanceof RoyalGuardUnit royalGuardUnit) {
+    public boolean isCasting(Unit unit) {
+        if (unit instanceof RoyalGuardUnit royalGuardUnit) {
             GenericUntargetedSpellGoal goal = royalGuardUnit.getCastAvatarGoal();
             if (goal != null)
                 return goal.isCasting();
@@ -57,7 +57,7 @@ public class Avatar extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Avatar",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
                 hotkey,
                 () -> false,
                 () -> rank == 0,
@@ -74,7 +74,7 @@ public class Avatar extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Avatar",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
                 hero
         );
     }

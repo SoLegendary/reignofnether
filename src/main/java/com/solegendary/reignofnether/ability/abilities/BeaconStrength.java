@@ -32,7 +32,7 @@ public class BeaconStrength extends BeaconAbility {
 
         return new AbilityButton(
                 "Strength Aura",
-                new ResourceLocation("minecraft", "textures/mob_effect/strength.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/mob_effect/strength.png"),
                 hotkey,
                 () -> beacon.getAuraEffect() == AURA_EFFECT,
                 () -> false,

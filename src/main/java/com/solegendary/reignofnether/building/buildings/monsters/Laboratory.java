@@ -3,10 +3,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.CallLightning;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingBlock;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.RangeIndicatorProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -46,7 +43,7 @@ public class Laboratory extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.BREWING_STAND;
-        this.icon = new ResourceLocation("minecraft", "textures/block/brewing_stand.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/brewing_stand.png");
 
         this.buildTimeModifier = 0.85f;
 
@@ -98,20 +95,18 @@ public class Laboratory extends ProductionBuilding {
         return new RangeIndicatorProductionPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false, CallLightning.RANGE, true, true);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
             name,
-            new ResourceLocation("minecraft", "textures/block/brewing_stand.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/brewing_stand.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.LABORATORY,
             () -> false,
             () -> (BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) &&
                     BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD)) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.LABORATORY),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.laboratory"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
@@ -121,8 +116,12 @@ public class Laboratory extends ProductionBuilding {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.laboratory.tooltip3"), Style.EMPTY)
             ),
-            null,
-                (BuildingPlacement) null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.MONSTERS;
     }
 }

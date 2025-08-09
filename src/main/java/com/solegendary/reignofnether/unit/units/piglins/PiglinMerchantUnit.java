@@ -93,8 +93,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
     public Faction getFaction() {return Faction.PIGLINS;}
-    public List<AbilityButton> getAbilityButtons() {return abilityButtons;};
-    public List<Ability> getAbilities() {return abilities;}
+    public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -215,8 +214,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     @Override public float getBaseHealth() { return maxHealth; };
     @Override public float getBaseAttack() { return attackDamage; };
 
-    private List<AbilityButton> abilityButtons = new ArrayList<>();
-    private List<Ability> abilities = new ArrayList<>();
+    private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
     public final AnimationState idleAnimState = new AnimationState();
@@ -408,28 +406,28 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     }
 
     public ThrowTNT getThrowTNT() {
-        for (Ability ability : abilities)
+        for (Ability ability : abilities.get())
             if (ability instanceof ThrowTNT)
                 return (ThrowTNT) ability;
         return null;
     }
 
     public FancyFeast getFancyFeast() {
-        for (Ability ability : abilities)
+        for (Ability ability : abilities.get())
             if (ability instanceof FancyFeast)
                 return (FancyFeast) ability;
         return null;
     }
 
     public GreedIsGoodPassive getGreedIsGood() {
-        for (Ability ability : abilities)
+        for (Ability ability : abilities.get())
             if (ability instanceof GreedIsGoodPassive)
                 return (GreedIsGoodPassive) ability;
         return null;
     }
 
     public LootExplosion getLootExplosion() {
-        for (Ability ability : abilities)
+        for (Ability ability : abilities.get())
             if (ability instanceof LootExplosion)
                 return (LootExplosion) ability;
         return null;
@@ -452,12 +450,12 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
-        if (greedIsGood.isAutocasting())
-            resourceBonus = greedIsGood.spendResourcesAndGet100sSpent(ResourceName.WOOD);
+        if (greedIsGood.isAutocasting(this))
+            resourceBonus = greedIsGood.spendResourcesAndGet100sSpent(ResourceName.WOOD, this);
 
         ThrowTNT throwTNT = getThrowTNT();
-        throwTNT.setCooldown(throwTNT.cooldownMax - (resourceBonus * ThrowTNT.LESS_COOLDOWN_PER_100_RESOURCES));
-        AbilityClientboundPacket.sendSetCooldownPacket(getId(), throwTNT.action, throwTNT.getCooldown());
+        throwTNT.setCooldown(throwTNT.cooldownMax - (resourceBonus * ThrowTNT.LESS_COOLDOWN_PER_100_RESOURCES), this);
+        AbilityClientboundPacket.sendSetCooldownPacket(getId(), throwTNT.action, throwTNT.getCooldown(this));
         setMana(getMana() + (resourceBonus * ThrowTNT.LESS_MANA_PER_100_RESOURCES));
     }
 
@@ -466,8 +464,8 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
-        if (greedIsGood.isAutocasting())
-            resourceBonus = greedIsGood.spendResourcesAndGet100sSpent(ResourceName.FOOD);
+        if (greedIsGood.isAutocasting(this))
+            resourceBonus = greedIsGood.spendResourcesAndGet100sSpent(ResourceName.FOOD, this);
 
         int numItems = FancyFeast.BASE_ITEMS + (FancyFeast.BONUS_ITEMS_PER_100_RESOURCES * resourceBonus);
 
@@ -546,8 +544,8 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
-        if (greedIsGood.isAutocasting())
-            resourceBonus = greedIsGood.spendResourcesAndGet100sSpent(ResourceName.ORE);
+        if (greedIsGood.isAutocasting(this))
+            resourceBonus = greedIsGood.spendResourcesAndGet100sSpent(ResourceName.ORE, this);
 
         int numItems = LootExplosion.BASE_ITEMS + (LootExplosion.BONUS_ITEMS_PER_100_RESOURCES * resourceBonus);
         List<ItemStack> items = getRandomLoot(numItems);
@@ -569,8 +567,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
     @Override
     public void updateAbilityButtons() {
-        abilities = ABILITIES.get();
-        abilityButtons = ABILITIES.getButtons(this);
+        abilities = ABILITIES.clone();
         autocast = ABILITIES.getDefaultAutocast();
     }
 

@@ -43,7 +43,7 @@ public class GotoPortal extends Ability {
         PortalPlacement portal = (PortalPlacement) placement;
         return new AbilityButton(
                 "Go to connected portal",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
                 hotkey,
                 () -> false,
                 () -> {

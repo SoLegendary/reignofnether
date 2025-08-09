@@ -14,19 +14,19 @@ public class TutorialRendering {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
-    private static final ResourceLocation TEXTURE_ARROW_RIGHT = new ResourceLocation(
+    private static final ResourceLocation TEXTURE_ARROW_RIGHT = ResourceLocation.fromNamespaceAndPath(
         "reignofnether",
         "textures/hud/tutorial_arrow_right.png"
     );
-    private static final ResourceLocation TEXTURE_ARROW_LEFT = new ResourceLocation(
+    private static final ResourceLocation TEXTURE_ARROW_LEFT = ResourceLocation.fromNamespaceAndPath(
         "reignofnether",
         "textures/hud/tutorial_arrow_left.png"
     );
-    private static final ResourceLocation TEXTURE_ARROW_UP = new ResourceLocation(
+    private static final ResourceLocation TEXTURE_ARROW_UP = ResourceLocation.fromNamespaceAndPath(
         "reignofnether",
         "textures/hud/tutorial_arrow_up.png"
     );
-    private static final ResourceLocation TEXTURE_ARROW_DOWN = new ResourceLocation(
+    private static final ResourceLocation TEXTURE_ARROW_DOWN = ResourceLocation.fromNamespaceAndPath(
         "reignofnether",
         "textures/hud/tutorial_arrow_down.png"
     );

@@ -3,10 +3,7 @@ package com.solegendary.reignofnether.building.buildings.villagers;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingBlock;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.CastlePlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -41,7 +38,7 @@ public class Castle extends ProductionBuilding {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.COBBLESTONE;
-        this.icon = new ResourceLocation("minecraft", "textures/block/cobblestone.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/cobblestone.png");
 
         this.buildTimeModifier = 0.5f;
 
@@ -68,11 +65,11 @@ public class Castle extends ProductionBuilding {
         return new CastlePlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(name,
-            new ResourceLocation("minecraft", "textures/block/cobblestone.png"),
+        return new BuildingPlaceButton(name,
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/cobblestone.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.CASTLE,
             TutorialClientEvents::isEnabled,
@@ -81,8 +78,6 @@ public class Castle extends ProductionBuilding {
                     && BuildingClientEvents.hasFinishedBuilding(Buildings.BLACKSMITH)
                     && BuildingClientEvents.hasFinishedBuilding(Buildings.ARCANE_TOWER)
             ) || ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.CASTLE),
-            null,
             List.of(FormattedCharSequence.forward(
                     I18n.get("buildings.villagers.reignofnether.castle"),
                     Style.EMPTY.withBold(true)
@@ -103,8 +98,7 @@ public class Castle extends ProductionBuilding {
                     Style.EMPTY
                 )
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
     }
 
@@ -118,5 +112,10 @@ public class Castle extends ProductionBuilding {
                 return 1;
             }
         return 0;
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.VILLAGERS;
     }
 }

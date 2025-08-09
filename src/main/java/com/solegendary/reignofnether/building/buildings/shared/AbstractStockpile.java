@@ -22,7 +22,7 @@ public abstract class AbstractStockpile extends ProductionBuilding {
     public AbstractStockpile(String structureName) {
         super(structureName, cost, false);
         this.portraitBlock = Blocks.CHEST;
-        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/chest.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/chest.png");
 
         this.canAcceptResources = true;
         this.canSetRallyPoint = false;

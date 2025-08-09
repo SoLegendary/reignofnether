@@ -66,7 +66,7 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
                     witch.throwPotion(new Vec3(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ()), this.potion);
 
                     if (!this.mob.level().isClientSide())
-                        for (Ability potionAbility : witch.getAbilities())
+                        for (Ability potionAbility : witch.getAbilities().get())
                             AbilityClientboundPacket.sendSetCooldownPacket(this.mob.getId(), potionAbility.action, potionAbility.cooldownMax);
                 }
                 this.stop();
@@ -76,7 +76,7 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
         // autocast
         if (this.targetEntity == null && moveTarget == null && !mob.level().isClientSide() && witch.isIdle() && witch.tickCount % 4 == 0) {
 
-            for (Ability potionAbility : witch.getAbilities()) {
+            for (Ability potionAbility : witch.getAbilities().get()) {
                 if (!potionAbility.isAutocasting(witch) || !potionAbility.isOffCooldown(witch))
                     continue;
 

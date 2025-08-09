@@ -22,7 +22,7 @@ public class MobEffectRegistrar {
 
     public static final RegistryObject<MobEffect> ZOMBIE_INFECTED = MOB_EFFECTS.register("zombie_infected", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0x000000));
 
-    public static void init() {
-        MOB_EFFECTS.register(FMLJavaModLoadingContext.get().getModEventBus());
+    public static void init(FMLJavaModLoadingContext context) {
+        MOB_EFFECTS.register(context.getModEventBus());
     }
 }

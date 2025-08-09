@@ -449,11 +449,11 @@ public class OrthoviewClientEvents {
         return new Button("Hide Leaves Method",
                 14,
                 switch(hideLeavesMethod) {
-                    case NONE -> new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/leaves.png");
-                    case AROUND_UNITS_AND_CURSOR -> new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/lime_stained_glass.png");
-                    case ALL -> new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/glass.png");
+                    case NONE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/leaves.png");
+                    case AROUND_UNITS_AND_CURSOR -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/lime_stained_glass.png");
+                    case ALL -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/glass.png");
                 },
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !MinimapClientEvents.isLargeMap(),

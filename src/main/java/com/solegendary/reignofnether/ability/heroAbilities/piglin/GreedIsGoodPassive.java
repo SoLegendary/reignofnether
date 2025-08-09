@@ -10,9 +10,13 @@ import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -30,7 +34,7 @@ public class GreedIsGoodPassive extends HeroAbility {
         super(3, 0, UnitAction.NONE, 0, 0, 0, false);
         this.autocastEnableAction = UnitAction.ENABLE_GREED_IS_GOOD_PASSIVE;
         this.autocastDisableAction = UnitAction.DISABLE_GREED_IS_GOOD_PASSIVE;
-        this.setAutocast(true);
+        this.setDefaultAutocast(true);
     }
 
     public boolean rankUp(HeroUnit hero) {
@@ -54,7 +58,7 @@ public class GreedIsGoodPassive extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Greed is Good",
-                new ResourceLocation("minecraft", "textures/block/gold_block.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/gold_block.png"),
                 hotkey,
                 () -> isAutocasting(hero),
                 () -> rank == 0,
@@ -71,7 +75,7 @@ public class GreedIsGoodPassive extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Greed is Good",
-                new ResourceLocation("minecraft", "textures/block/gold_block.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/gold_block.png"),
                 hero
         );
     }

@@ -40,6 +40,6 @@ public class ThrowableTntRenderer extends EntityRenderer<ThrowableTntProjectile>
     @Override
     public ResourceLocation getTextureLocation(ThrowableTntProjectile entity) {
         // Block entities don't use this, but it must be implemented
-        return new ResourceLocation(ReignOfNether.MOD_ID, "textures/block/tnt.png");
+        return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/block/tnt.png");
     }
 }

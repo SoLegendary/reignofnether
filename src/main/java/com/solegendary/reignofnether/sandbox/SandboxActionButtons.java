@@ -54,7 +54,7 @@ public class SandboxActionButtons {
         setAnchor = new Button(
                 "Set Anchor",
                 Button.itemIconSize,
-                new ResourceLocation("minecraft", "textures/block/respawn_anchor_side4.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/respawn_anchor_side4.png"),
                 Keybindings.keyQ,
                 () -> CursorClientEvents.getLeftClickSandboxAction() == SandboxAction.SET_ANCHOR,
                 () -> !SandboxClientEvents.isSandboxPlayer(),
@@ -69,7 +69,7 @@ public class SandboxActionButtons {
         resetToAnchor = new Button(
                 "Reset to Anchor",
                 Button.itemIconSize,
-                new ResourceLocation("minecraft", "textures/block/respawn_anchor_top_off.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/respawn_anchor_top_off.png"),
                 Keybindings.keyW,
                 () -> CursorClientEvents.getLeftClickSandboxAction() == SandboxAction.RESET_TO_ANCHOR,
                 () -> !SandboxClientEvents.isSandboxPlayer(),
@@ -92,7 +92,7 @@ public class SandboxActionButtons {
         removeAnchor = new Button(
                 "Remove Anchor",
                 Button.itemIconSize,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
                 Keybindings.keyE,
                 () -> CursorClientEvents.getLeftClickSandboxAction() == SandboxAction.REMOVE_ANCHOR,
                 () -> !SandboxClientEvents.isSandboxPlayer(),
@@ -113,10 +113,10 @@ public class SandboxActionButtons {
                 "Toggle Relationship",
                 Button.itemIconSize,
                 switch (getRelationshipToHudSelectedUnit()) {
-                    case OWNED -> new ResourceLocation("minecraft", "textures/block/lime_wool.png");
-                    case FRIENDLY -> new ResourceLocation("minecraft", "textures/block/blue_wool.png");
-                    case NEUTRAL -> new ResourceLocation("minecraft", "textures/block/yellow_wool.png");
-                    case HOSTILE -> new ResourceLocation("minecraft", "textures/block/red_wool.png");
+                    case OWNED -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/lime_wool.png");
+                    case FRIENDLY -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/blue_wool.png");
+                    case NEUTRAL -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/yellow_wool.png");
+                    case HOSTILE -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/red_wool.png");
                 },
                 (Keybinding) null,
                 () -> false,

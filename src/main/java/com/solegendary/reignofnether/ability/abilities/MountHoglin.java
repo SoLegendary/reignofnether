@@ -36,7 +36,7 @@ public class MountHoglin extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         return new AbilityButton("Mount Hoglin",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/hoglin.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/hoglin.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOUNT_HOGLIN,
             () -> ((Entity)unit).isPassenger() || !ResearchClient.hasResearch(ProductionItems.RESEARCH_HOGLIN_CAVALRY),

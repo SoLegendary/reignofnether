@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -31,7 +28,7 @@ public class VillagerHouse extends Building {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.OAK_LOG;
-        this.icon = new ResourceLocation("minecraft", "textures/block/oak_log.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/oak_log.png");
 
         this.buildTimeModifier = 0.8f;
 
@@ -42,19 +39,17 @@ public class VillagerHouse extends Building {
 
     public Faction getFaction() {return Faction.VILLAGERS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
             name,
-            new ResourceLocation("minecraft", "textures/block/oak_log.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/oak_log.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.VILLAGER_HOUSE,
             () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            () -> BuildingClientEvents.setBuildingToPlace(Buildings.VILLAGER_HOUSE),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.villager_house"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
@@ -62,8 +57,12 @@ public class VillagerHouse extends Building {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.villager_house.tooltip1"), Style.EMPTY)
             ),
-            null,
-                (BuildingPlacement) null
+            this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.VILLAGERS;
     }
 }

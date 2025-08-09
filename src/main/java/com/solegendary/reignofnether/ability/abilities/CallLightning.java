@@ -49,7 +49,7 @@ public class CallLightning extends Ability {
 
         return new AbilityButton(
             "Call Lightning",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_on.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_on.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.CALL_LIGHTNING,
             () -> bpl.getUpgradeLevel() == 0,

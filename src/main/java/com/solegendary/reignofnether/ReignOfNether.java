@@ -57,18 +57,18 @@ public class ReignOfNether {
         .setParents(MarkerManager.getMarker("FMLNETWORK"));
     public static SimpleChannel handshakeChannel;
 
-    public ReignOfNether() {
+    public ReignOfNether(FMLJavaModLoadingContext context) {
         // Registering all components
-        ItemRegistrar.init();
-        EntityRegistrar.init();
-        ContainerRegistrar.init();
-        SoundRegistrar.init();
-        BlockRegistrar.init();
-        BlockEntityRegistrar.init();
+        ItemRegistrar.init(context);
+        EntityRegistrar.init(context);
+        ContainerRegistrar.init(context);
+        SoundRegistrar.init(context);
+        BlockRegistrar.init(context);
+        BlockEntityRegistrar.init(context);
         GameRuleRegistrar.init();
         Buildings.init();
         ProductionItems.init();
-        MobEffectRegistrar.init();
+        MobEffectRegistrar.init(context);
         final ClientEventRegistrar clientRegistrar = new ClientEventRegistrar();
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> clientRegistrar::registerClientEvents);
 
@@ -76,11 +76,10 @@ public class ReignOfNether {
         DistExecutor.safeRunWhenOn(Dist.DEDICATED_SERVER, () -> serverRegistrar::registerServerEvents);
 
         // Registering ClientReset's init
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus bus = context.getModEventBus();
         bus.addListener(ReignOfNether::init);
-        ModLoadingContext mlctx = ModLoadingContext.get();
-        mlctx.registerConfig(ModConfig.Type.COMMON, ReignOfNetherCommonConfigs.SPEC, "reignofnether-common-" + VERSION_STRING + ".toml");
-        mlctx.registerExtensionPoint(
+        context.registerConfig(ModConfig.Type.COMMON, ReignOfNetherCommonConfigs.SPEC, "reignofnether-common-" + VERSION_STRING + ".toml");
+        context.registerExtensionPoint(
             DisplayTest.class,
             () -> new DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true)
         );

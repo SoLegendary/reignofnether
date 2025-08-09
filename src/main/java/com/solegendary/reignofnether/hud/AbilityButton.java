@@ -1,9 +1,10 @@
 package com.solegendary.reignofnether.hud;
 
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.ability.HeroAbility;
-import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.HeroAbility;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
@@ -37,6 +38,8 @@ public class AbilityButton extends Button {
         this.onLeftClick = () -> {
             if (this.ability != null && (this.ability.getCooldown(unit) > 0 && !this.ability.canBypassCooldown(unit)))
                 HudClientEvents.showTemporaryMessage(I18n.get("hud.buttons.reignofnether.on_cooldown"));
+            else if (this.ability instanceof HeroAbility heroAbility && heroAbility.manaCost > 0 && unit instanceof HeroUnit hero && hero.getMana() < heroAbility.manaCost)
+                HudClientEvents.showTemporaryMessage(I18n.get("hud.buttons.reignofnether.not_enough_mana"));
             else if (originalOnLeftClick != null)
                 originalOnLeftClick.run();
         };
@@ -56,8 +59,6 @@ public class AbilityButton extends Button {
         this.onLeftClick = () -> {
             if (this.ability != null && (this.ability.getCooldown(placement) > 0 && !this.ability.canBypassCooldown(building)))
                 HudClientEvents.showTemporaryMessage(I18n.get("hud.buttons.reignofnether.on_cooldown"));
-            if (this.ability instanceof HeroAbility heroAbility && heroAbility.manaCost > 0 && heroAbility.hero.getMana() < heroAbility.manaCost)
-                HudClientEvents.showTemporaryMessage(I18n.get("hud.buttons.reignofnether.not_enough_mana"));
             else if (originalOnLeftClick != null)
                 originalOnLeftClick.run();
         };

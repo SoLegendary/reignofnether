@@ -24,7 +24,7 @@ public class StartButtons {
     public static Button sandboxStartButton = new Button(
             "Sandbox",
             ICON_SIZE,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
             (Keybinding) null,
             () -> false,
             () -> false,
@@ -39,7 +39,7 @@ public class StartButtons {
     public static Button villagerStartButton = new Button(
         "Villagers",
             ICON_SIZE,
-        new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
+        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_VILLAGERS,
         () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.PLACE_WORKERS_B) || !PlayerClientEvents.canStartRTS,
@@ -57,7 +57,7 @@ public class StartButtons {
     public static Button monsterStartButton = new Button(
         "Monsters",
             ICON_SIZE,
-        new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
+        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_MONSTERS,
         () -> TutorialClientEvents.isEnabled() || !PlayerClientEvents.canStartRTS,
@@ -73,7 +73,7 @@ public class StartButtons {
     public static Button piglinStartButton = new Button(
         "Piglins",
         ICON_SIZE,
-        new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
+        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_PIGLINS,
         () -> TutorialClientEvents.isEnabled() || !PlayerClientEvents.canStartRTS,

@@ -30,7 +30,7 @@ public class BeaconWealth extends BeaconAbility {
 
         return new AbilityButton(
                 "Wealth Aura",
-                new ResourceLocation("minecraft", "textures/mob_effect/hero_of_the_village.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/mob_effect/hero_of_the_village.png"),
                 hotkey,
                 () -> beacon.getAuraEffect() == AURA_EFFECT,
                 () -> false,

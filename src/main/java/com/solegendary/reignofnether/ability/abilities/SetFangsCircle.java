@@ -36,7 +36,7 @@ public class SetFangsCircle extends Ability {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         EvokerUnit evokerUnit = (EvokerUnit) unit;
         return new AbilityButton("Evoker Fangs (Circular)",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shears.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/shears.png"),
                 hotkey,
                 () -> !evokerUnit.isUsingLineFangs,
                 () -> false,
@@ -76,7 +76,7 @@ public class SetFangsCircle extends Ability {
             cooldown *= EnchantVigor.cooldownMultiplier;
 
         super.setCooldown(cooldown, unit);
-        for (Ability ability : evokerUnit.getAbilities())
+        for (Ability ability : evokerUnit.getAbilities().get())
             if (ability instanceof SetFangsLine ab) {
                 ab.setCooldownSingle(cooldown, unit);
             }

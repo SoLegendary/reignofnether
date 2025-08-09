@@ -77,7 +77,7 @@ public class TimeClientEvents {
     private static Button getBloodMoonButton() {
         return new Button("Clock",
                 14,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/blood_moon.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/blood_moon.png"),
                 null,
                 null,
                 () -> false,

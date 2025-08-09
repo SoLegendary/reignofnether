@@ -48,6 +48,6 @@ public class StartPos {
     }
 
     private ResourceLocation getIcon(String colorName) {
-        return new ResourceLocation("reignofnether", "textures/block/rts_start_block_" + colorName + ".png");
+        return ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/block/rts_start_block_" + colorName + ".png");
     }
 }

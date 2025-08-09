@@ -5,15 +5,18 @@ import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxAction;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
@@ -41,41 +44,26 @@ public class IronGolemProd extends ProductionItem {
         return IronGolemProd.itemName;
     }
 
-    public AbilityButton getPlaceButton() {
-        return new AbilityButton(
+    public UnitSpawnButton getPlaceButton() {
+        return new UnitSpawnButton(
                 itemName,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
-                null,
-                () -> SandboxClientEvents.spawnUnitName.equals(itemName),
-                () -> false,
-                () -> true,
-                () -> {
-                    CursorClientEvents.setLeftClickSandboxAction(SandboxAction.SPAWN_UNIT);
-                    SandboxClientEvents.spawnUnitName = itemName;
-                },
-                null,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
                 List.of(
                         FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem.tooltip2"), Style.EMPTY)
-                ),
-                null,
-                (Unit) null
+                )
         );
     }
 
-    public Button getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        return new Button(
+    public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
+        return new StartProductionButton(
             IronGolemProd.itemName,
-            14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
                 hotkey,
             () -> false,
-            () -> false,
             () -> true,
-            () -> BuildingServerboundPacket.startProduction(prodBuilding.originPos, ProductionItems.IRON_GOLEM),
-            null,
             List.of(
                 FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
@@ -83,22 +71,19 @@ public class IronGolemProd extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem.tooltip2"), Style.EMPTY)
-            )
+            ),
+            prodBuilding,
+            ProductionItems.IRON_GOLEM
         );
     }
 
-    public Button getCancelButton(ProductionPlacement prodBuilding, boolean first) {
-        return new Button(
+    public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
+        return new StopProductionButton(
             IronGolemProd.itemName,
-            14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
-            (Keybinding) null,
-            () -> false,
-            () -> false,
-            () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.originPos, ProductionItems.IRON_GOLEM, first),
-            null,
-            null
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
+            prodBuilding,
+            this,
+            first
         );
     }
 }

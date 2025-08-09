@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractFarm;
@@ -33,7 +34,7 @@ public class PumpkinFarm extends AbstractFarm {
         super(structureName, cost, false);
         this.name = buildingName;
         this.portraitBlock = Blocks.PUMPKIN;
-        this.icon = new ResourceLocation("minecraft", "textures/block/pumpkin_side.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/pumpkin_side.png");
 
         this.startingBlockTypes.add(Blocks.DARK_OAK_LOG);
 
@@ -42,19 +43,17 @@ public class PumpkinFarm extends AbstractFarm {
 
     public Faction getFaction() {return Faction.MONSTERS;}
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new AbilityButton(
+        return new BuildingPlaceButton(
                 name,
-                new ResourceLocation("minecraft", "textures/block/pumpkin_side.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/pumpkin_side.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.PUMPKIN_FARM,
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Buildings.PUMPKIN_FARM),
-                null,
                 List.of(
                         FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.pumpkin_farm"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.pumpkin_farm.tooltip1", cost.wood, ResourceCosts.REPLANT_WOOD_COST), MyRenderer.iconStyle),
@@ -62,8 +61,12 @@ public class PumpkinFarm extends AbstractFarm {
                         FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.pumpkin_farm.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.pumpkin_farm.tooltip3"), Style.EMPTY)
                 ),
-                null,
-                (BuildingPlacement) null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.MONSTERS;
     }
 }

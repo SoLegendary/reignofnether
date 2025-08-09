@@ -30,21 +30,22 @@ import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Optional;
 
 @OnlyIn(Dist.CLIENT)
 public class VillagerUnitProfessionLayer<T extends LivingEntity & VillagerDataHolder, M extends EntityModel<T> & VillagerHeadModel> extends RenderLayer<T, M> {
-    private static final Int2ObjectMap<ResourceLocation> LEVEL_LOCATIONS = (Int2ObjectMap)Util.make(new Int2ObjectOpenHashMap(), (p_117657_) -> {
-        p_117657_.put(1, new ResourceLocation("stone"));
-        p_117657_.put(2, new ResourceLocation("iron"));
-        p_117657_.put(3, new ResourceLocation("gold"));
-        p_117657_.put(4, new ResourceLocation("emerald"));
-        p_117657_.put(5, new ResourceLocation("diamond"));
+    private static final Int2ObjectMap<ResourceLocation> LEVEL_LOCATIONS = Util.make(new Int2ObjectOpenHashMap<>(), (p_117657_) -> {
+        p_117657_.put(1, ResourceLocation.parse("stone"));
+        p_117657_.put(2, ResourceLocation.parse("iron"));
+        p_117657_.put(3, ResourceLocation.parse("gold"));
+        p_117657_.put(4, ResourceLocation.parse("emerald"));
+        p_117657_.put(5, ResourceLocation.parse("diamond"));
     });
-    private final Object2ObjectMap<VillagerType, VillagerMetaDataSection.Hat> typeHatCache = new Object2ObjectOpenHashMap();
-    private final Object2ObjectMap<VillagerProfession, VillagerMetaDataSection.Hat> professionHatCache = new Object2ObjectOpenHashMap();
+    private final Object2ObjectMap<VillagerType, VillagerMetaDataSection.Hat> typeHatCache = new Object2ObjectOpenHashMap<>();
+    private final Object2ObjectMap<VillagerProfession, VillagerMetaDataSection.Hat> professionHatCache = new Object2ObjectOpenHashMap<>();
     private final ResourceManager resourceManager;
     private final String path;
 
@@ -54,7 +55,7 @@ public class VillagerUnitProfessionLayer<T extends LivingEntity & VillagerDataHo
         this.path = pPath;
     }
 
-    public void render(PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight, T pLivingEntity, float pLimbSwing, float pLimbSwingAmount, float pPartialTicks, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
+    public void render(@NotNull PoseStack pMatrixStack, @NotNull MultiBufferSource pBuffer, int pPackedLight, T pLivingEntity, float pLimbSwing, float pLimbSwingAmount, float pPartialTicks, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
         if (!pLivingEntity.isInvisible()) {
             VillagerData vData = pLivingEntity.getVillagerData();
             VillagerType biomeType = vData.getType();
@@ -78,7 +79,7 @@ public class VillagerUnitProfessionLayer<T extends LivingEntity & VillagerDataHo
     }
 
     private ResourceLocation getResourceLocation(String p_117669_, ResourceLocation p_117670_) {
-        return new ResourceLocation(p_117670_.getNamespace(), "textures/entity/" + this.path + "/" + p_117669_ + "/" + p_117670_.getPath() + ".png");
+        return ResourceLocation.fromNamespaceAndPath(p_117670_.getNamespace(), "textures/entity/" + this.path + "/" + p_117669_ + "/" + p_117670_.getPath() + ".png");
     }
 
     public <K> VillagerMetaDataSection.Hat getHatData(Object2ObjectMap<K, VillagerMetaDataSection.Hat> p_117659_, String p_117660_, DefaultedRegistry<K> p_117661_, K p_117662_) {

@@ -40,7 +40,7 @@ public class DisconnectPortal extends Ability {
         PortalPlacement portal = (PortalPlacement) placement;
         return new AbilityButton(
             "Sever Connection",
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png"),
             hotkey,
             () -> false,
             () -> {

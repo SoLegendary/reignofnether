@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.LanguageUtil;
@@ -31,7 +30,7 @@ public class BeaconHaste extends BeaconAbility {
 
         return new AbilityButton(
                 "Haste Aura",
-                new ResourceLocation("minecraft", "textures/mob_effect/haste.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/mob_effect/haste.png"),
                 hotkey,
                 () -> beacon.getAuraEffect() == AURA_EFFECT,
                 () -> false,

@@ -60,7 +60,7 @@ public class BattleRagePassive extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit hero) {
         return new AbilityButton("Battle Rage",
-                new ResourceLocation("minecraft", "textures/block/redstone_block.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/redstone_block.png"),
                 hotkey,
                 () -> false,
                 () -> rank == 0,
@@ -77,7 +77,7 @@ public class BattleRagePassive extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Battle Rage",
-                new ResourceLocation("minecraft", "textures/block/redstone_block.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/redstone_block.png"),
                 hero
         );
     }

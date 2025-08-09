@@ -8,12 +8,8 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.UnitAnimationAction;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -46,7 +42,7 @@ public class ToggleShield extends Ability {
         BruteUnit bruteUnit = (BruteUnit) unit;
         return new AbilityButton(
                 "Shield Stance",
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shield.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/shield.png"),
                 hotkey,
                 () -> bruteUnit.isHoldingUpShield,
                 () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_BRUTE_SHIELDS) ||

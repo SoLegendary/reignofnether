@@ -112,12 +112,12 @@ public class CursorClientEvents {
         leftClickSandboxAction = actionName;
     }
 
-    private static final ResourceLocation TEXTURE_CURSOR = new ResourceLocation("reignofnether", "textures/cursors/customcursor.png");
-    private static final ResourceLocation TEXTURE_HAND = new ResourceLocation("reignofnether", "textures/cursors/customcursor_hand.png");
-    private static final ResourceLocation TEXTURE_HAND_GRAB = new ResourceLocation("reignofnether", "textures/cursors/customcursor_hand_grab.png");
-    private static final ResourceLocation TEXTURE_SWORD = new ResourceLocation("reignofnether", "textures/cursors/customcursor_sword.png");
-    private static final ResourceLocation TEXTURE_CROSS = new ResourceLocation("reignofnether", "textures/cursors/customcursor_cross.png");
-    private static final ResourceLocation TEXTURE_SHOVEL = new ResourceLocation("reignofnether", "textures/cursors/customcursor_shovel.png");
+    private static final ResourceLocation TEXTURE_CURSOR = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/cursors/customcursor.png");
+    private static final ResourceLocation TEXTURE_HAND = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/cursors/customcursor_hand.png");
+    private static final ResourceLocation TEXTURE_HAND_GRAB = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/cursors/customcursor_hand_grab.png");
+    private static final ResourceLocation TEXTURE_SWORD = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/cursors/customcursor_sword.png");
+    private static final ResourceLocation TEXTURE_CROSS = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/cursors/customcursor_cross.png");
+    private static final ResourceLocation TEXTURE_SHOVEL = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/cursors/customcursor_shovel.png");
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
@@ -430,7 +430,7 @@ public class CursorClientEvents {
                 if (MC.level.getBlockState(getPreselectedBlockPos().offset(0, 1, 0)).getBlock() instanceof SnowLayerBlock) {
                     AABB aabb = new AABB(preselectedBlockPos);
                     aabb = aabb.setMaxY(aabb.maxY + 0.13f);
-                    MyRenderer.drawSolidBox(evt.getPoseStack(), aabb, null, 1, 1, 1, rightClickDown ? 0.3f : 0.15f, new ResourceLocation("forge:textures/white.png"));
+                    MyRenderer.drawSolidBox(evt.getPoseStack(), aabb, null, 1, 1, 1, rightClickDown ? 0.3f : 0.15f, ResourceLocation.parse("forge:textures/white.png"));
                     aabb = new AABB(preselectedBlockPos).move(0, 0.13, 0);
                     MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, rightClickDown ? 1.0f : 0.5f);
                 } else {

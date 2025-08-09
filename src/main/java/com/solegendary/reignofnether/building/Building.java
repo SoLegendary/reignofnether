@@ -110,9 +110,11 @@ public abstract class Building {
         return 0;
     }
 
-    public abstract AbilityButton getBuildButton(Keybinding var1);
+    public abstract BuildingPlaceButton getBuildButton(Keybinding var1);
 
     public boolean isTypeOf(Building building) {
         return this == building;
     }
+
+    public abstract boolean isBuildableBuildingForFaction(Faction faction);
 }

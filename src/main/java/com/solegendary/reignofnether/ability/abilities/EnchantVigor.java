@@ -44,7 +44,7 @@ public class EnchantVigor extends EnchantAbility {
         LibraryPlacement library = (LibraryPlacement) placement;
         return new AbilityButton(
                 "Vigor Enchantment",
-                new ResourceLocation("minecraft", "textures/item/stick.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/stick.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || library.autoCastEnchant == this,
                 () -> false,

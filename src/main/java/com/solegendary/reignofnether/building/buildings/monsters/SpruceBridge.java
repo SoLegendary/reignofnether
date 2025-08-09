@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
@@ -33,7 +34,7 @@ public class SpruceBridge extends AbstractBridge {
 
         this.name = buildingName;
         this.portraitBlock = Blocks.DARK_OAK_FENCE;
-        this.icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/spruce_fence.png");
+        this.icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/spruce_fence.png");
 
         this.buildTimeModifier = 1.0f;
 
@@ -55,21 +56,19 @@ public class SpruceBridge extends AbstractBridge {
         return Faction.MONSTERS;
     }
 
-    public AbilityButton getBuildButton(Keybinding hotkey) {
+    public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
         Minecraft MC = Minecraft.getInstance();
-        return new AbilityButton(
+        return new BuildingPlaceButton(
                 name,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/spruce_fence.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/spruce_fence.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.SPRUCE_BRIDGE,
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                         BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
-                () -> BuildingClientEvents.setBuildingToPlace(Buildings.SPRUCE_BRIDGE),
-                null,
                 List.of(
                         FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spruce_bridge"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
@@ -80,8 +79,12 @@ public class SpruceBridge extends AbstractBridge {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spruce_bridge.tooltip4"), Style.EMPTY)
                 ),
-                null,
-                (BuildingPlacement) null
+                this
         );
+    }
+
+    @Override
+    public boolean isBuildableBuildingForFaction(Faction faction) {
+        return faction == Faction.MONSTERS;
     }
 }

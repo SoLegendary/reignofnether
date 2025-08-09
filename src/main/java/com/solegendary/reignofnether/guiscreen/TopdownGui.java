@@ -2,8 +2,8 @@ package com.solegendary.reignofnether.guiscreen;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
 
 /**
  * Class which overrides the inventory GUI with an RTS-like one where the mouse is always visible and objects on screen

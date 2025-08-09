@@ -5,8 +5,7 @@ import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
-import com.solegendary.reignofnether.building.production.ProductionItem;
-import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.building.production.*;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -16,6 +15,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
+import org.stringtemplate.v4.ST;
 
 import java.util.List;
 
@@ -40,22 +40,15 @@ public class ResearchPortalForMilitary extends ProductionItem {
         return ResearchPortalForMilitary.itemName;
     }
 
-    public Button getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        return new Button(ResearchPortalForMilitary.itemName,
-            14,
-            new ResourceLocation("minecraft", "textures/block/red_glazed_terracotta.png"),
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+    public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
+        return new StartPortalTransformButton(ResearchPortalForMilitary.itemName,
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/red_glazed_terracotta.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
-            () -> false,
-            () -> prodBuilding.productionQueue.size() > 0 || (
+            () -> !prodBuilding.productionQueue.isEmpty() || (
                 prodBuilding instanceof PortalPlacement portal && portal.getUpgradeLevel() > 0
             ),
             () -> true,
-            () -> {
-                if (prodBuilding.productionQueue.isEmpty())
-                    BuildingServerboundPacket.startProduction(prodBuilding.originPos, ProductionItems.RESEARCH_PORTAL_FOR_MILITARY);
-            },
-            null,
             List.of(FormattedCharSequence.forward(
                     I18n.get("research.reignofnether.military_portal"),
                     Style.EMPTY.withBold(true)
@@ -65,22 +58,19 @@ public class ResearchPortalForMilitary extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.military_portal.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.military_portal.tooltip2"), Style.EMPTY)
-            )
+            ),
+            prodBuilding,
+            this
         );
     }
 
-    public Button getCancelButton(ProductionPlacement prodBuilding, boolean first) {
-        return new Button(ResearchPortalForMilitary.itemName,
-            14,
-            new ResourceLocation("minecraft", "textures/block/red_glazed_terracotta.png"),
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
-            null,
-            () -> false,
-            () -> false,
-            () -> true,
-            () -> BuildingServerboundPacket.cancelProduction(prodBuilding.minCorner, ProductionItems.RESEARCH_PORTAL_FOR_MILITARY, first),
-            null,
-            null
+    public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
+        return new StopProductionButton(ResearchPortalForMilitary.itemName,
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/red_glazed_terracotta.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
+            prodBuilding,
+            this,
+            first
         );
     }
 }
