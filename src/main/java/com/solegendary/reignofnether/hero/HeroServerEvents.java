@@ -72,10 +72,10 @@ public class HeroServerEvents {
                     heroUnit.getExperience(),
                     heroUnit.getSkillPoints(),
                     0,
-                    heroUnit.getHeroAbilities().size() > 0 ? heroUnit.getHeroAbilities().get(0).rank : 0,
-                    heroUnit.getHeroAbilities().size() > 1 ? heroUnit.getHeroAbilities().get(1).rank : 0,
-                    heroUnit.getHeroAbilities().size() > 2 ? heroUnit.getHeroAbilities().get(2).rank : 0,
-                    heroUnit.getHeroAbilities().size() > 3 ? heroUnit.getHeroAbilities().get(3).rank : 0
+                    heroUnit.getHeroAbilities().size() > 0 ? heroUnit.getHeroAbilities().get(0).getRank(heroUnit) : 0,
+                    heroUnit.getHeroAbilities().size() > 1 ? heroUnit.getHeroAbilities().get(1).getRank(heroUnit) : 0,
+                    heroUnit.getHeroAbilities().size() > 2 ? heroUnit.getHeroAbilities().get(2).getRank(heroUnit) : 0,
+                    heroUnit.getHeroAbilities().size() > 3 ? heroUnit.getHeroAbilities().get(3).getRank(heroUnit) : 0
             );
             fallenHeroes.add(fallenHero);
             FallenHeroClientboundPacket.addFallenHero(fallenHero);

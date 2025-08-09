@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.units.monsters;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
+import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.heroAbilities.monster.BloodMoon;
 import com.solegendary.reignofnether.ability.heroAbilities.monster.InsomniaCurse;
 import com.solegendary.reignofnether.ability.heroAbilities.monster.RaiseDead;
@@ -66,6 +67,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
+    Object2ObjectArrayMap<HeroAbility, Integer> heroAbilityRanks = new Object2ObjectArrayMap<>();
 
     Ability autocast;
 
@@ -447,7 +449,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
             if (soulSiphon.consumeSouls(this)) {
                 if (!level().isClientSide())
                     AbilityClientboundPacket.doAbility(getId(), UnitAction.SOUL_SIPHON_UPDATE, soulSiphon.souls);
-                return soulSiphon.rank;
+                return soulSiphon.getRank(this);
             }
         }
         return 0;
@@ -458,7 +460,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
             return;
 
         int soulRank = consumeSoulsAndGetSoulRank();
-        int raiseDeadRank = getRaiseDead().rank;
+        int raiseDeadRank = getRaiseDead().getRank(this);
 
         for(int i = 0; i < 2; ++i) {
             BlockPos blockpos = this.blockPosition().offset(-2 + this.random.nextInt(5), 1, -2 + this.random.nextInt(5));
@@ -576,5 +578,10 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     @Override
     public Object2ObjectArrayMap<Ability, Integer> getCharges() {
         return charges;
+    }
+
+    @Override
+    public Object2ObjectArrayMap<HeroAbility, Integer> getHeroAbilityRanks() {
+        return heroAbilityRanks;
     }
 }

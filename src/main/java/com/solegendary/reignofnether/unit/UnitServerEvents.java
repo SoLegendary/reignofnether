@@ -882,7 +882,7 @@ public class UnitServerEvents {
         //  instead just relying on splash damage and fire creation
         if (owner instanceof GhastUnit && hit != null) {
             if (!(hit instanceof GhastUnit)) {
-                evt.setCanceled(true);
+                evt.setCanceled(true); //Not deprecated on the next mc version
             }
         }
 
@@ -893,7 +893,7 @@ public class UnitServerEvents {
                 if (evt.getProjectile() instanceof AbstractArrow arrow && arrow.getPierceLevel() > 0) {
                     return;
                 }
-                evt.setCanceled(true);
+                evt.setCanceled(true); //Not deprecated on the next mc version
             }
         }
     }

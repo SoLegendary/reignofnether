@@ -47,27 +47,28 @@ public class TauntingCry extends HeroAbility {
         return false;
     }
 
-    public void updateStatsForRank() {
-        if (rank == 1) {
+    public void updateStatsForRank(HeroUnit hero) {
+        if (getRank(hero) == 1) {
             duration = 4 * ResourceCost.TICKS_PER_SECOND;
-        } else if (rank == 2) {
+        } else if (getRank(hero) == 2) {
             duration = 6 * ResourceCost.TICKS_PER_SECOND;
-        } else if (rank == 3) {
+        } else if (getRank(hero) == 3) {
             duration= 8 * ResourceCost.TICKS_PER_SECOND;
         }
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit unit) {
+        if (!(unit instanceof HeroUnit hero)) return null;
         return new AbilityButton("Taunting Cry",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/ominous_banner.png"),
                 hotkey,
                 () -> false,
-                () -> rank <= 0,
+                () -> getRank(hero) <= 0,
                 () -> true,
                 () -> sendUnitCommand(UnitAction.TAUNTING_CRY),
                 null,
-                getTooltipLines((HeroUnit) hero),
+                getTooltipLines(hero),
                 this,
                 hero
         );
@@ -84,7 +85,7 @@ public class TauntingCry extends HeroAbility {
 
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
-                fcs(I18n.get("abilities.reignofnether.taunting_cry") + " " + rankString(), true),
+                fcs(I18n.get("abilities.reignofnether.taunting_cry") + " " + rankString(hero), true),
                 fcsIcons(I18n.get("abilities.reignofnether.taunting_cry.stats", CD_MAX_SECONDS / 20, range, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.taunting_cry.tooltip1")),
@@ -96,15 +97,15 @@ public class TauntingCry extends HeroAbility {
     public List<FormattedCharSequence> getRankUpTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.taunting_cry"), true),
-                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement()), getLevelReqStyle(hero)),
+                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement(hero)), getLevelReqStyle(hero)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.taunting_cry.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.taunting_cry.tooltip2", duration / 20)),
                 fcs(I18n.get("abilities.reignofnether.taunting_cry.tooltip3")),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.taunting_cry.rank1"), rank == 0),
-                fcs(I18n.get("abilities.reignofnether.taunting_cry.rank2"), rank == 1),
-                fcs(I18n.get("abilities.reignofnether.taunting_cry.rank3"), rank == 2)
+                fcs(I18n.get("abilities.reignofnether.taunting_cry.rank1"), getRank(hero) == 0),
+                fcs(I18n.get("abilities.reignofnether.taunting_cry.rank2"), getRank(hero) == 1),
+                fcs(I18n.get("abilities.reignofnether.taunting_cry.rank3"), getRank(hero) == 2)
         );
     }
 

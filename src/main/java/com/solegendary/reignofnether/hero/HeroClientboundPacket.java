@@ -103,7 +103,7 @@ public class HeroClientboundPacket {
                             case SET_CHARGES -> hero.setChargesFromSaveData((int) value);
                             case SET_ABILITY_RANK -> {
                                 List<HeroAbility> abls = hero.getHeroAbilities();
-                                if (abls.size() > abilityIndex) abls.get(abilityIndex).rank = (int) value;
+                                if (abls.size() > abilityIndex) abls.get(abilityIndex).setRank(hero, (int)value);
                                 for (HeroAbility abl : abls)
                                     abl.updateStatsForRank();
                                 ((Unit) hero).updateAbilityButtons();

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.units.piglins;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
+import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.heroAbilities.piglin.FancyFeast;
 import com.solegendary.reignofnether.ability.heroAbilities.piglin.GreedIsGoodPassive;
 import com.solegendary.reignofnether.ability.heroAbilities.piglin.LootExplosion;
@@ -71,6 +72,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
+    Object2ObjectArrayMap<HeroAbility, Integer> heroAbilityRanks = new Object2ObjectArrayMap<>();
 
     Ability autocast;
 
@@ -470,7 +472,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         int numItems = FancyFeast.BASE_ITEMS + (FancyFeast.BONUS_ITEMS_PER_100_RESOURCES * resourceBonus);
 
         for (int i = 0; i < numItems; i++) {
-            ItemEntity foodEntity = new ItemEntity(level(), pos.x, pos.y, pos.z, new ItemStack(getFancyFeast().getFoodItem()));
+            ItemEntity foodEntity = new ItemEntity(level(), pos.x, pos.y, pos.z, new ItemStack(getFancyFeast().getFoodItem(this)));
             foodEntity.setThrower(getUUID());
             Vec3 dMove = Vec3.atCenterOf(targetBp).subtract(pos)
                     .multiply(1,0,1)
@@ -589,5 +591,10 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     @Override
     public Object2ObjectArrayMap<Ability, Integer> getCharges() {
         return charges;
+    }
+
+    @Override
+    public Object2ObjectArrayMap<HeroAbility, Integer> getHeroAbilityRanks() {
+        return heroAbilityRanks;
     }
 }

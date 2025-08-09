@@ -259,13 +259,13 @@ public class PlayerServerEvents {
                 HeroClientboundPacket.setCharges(entity.getId(), hero.getChargesForSaveData());
                 List<HeroAbility> abls = hero.getHeroAbilities();
                 if (abls.size() > 0)
-                    HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(0).rank, 0);
+                    HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(0).getRank(hero), 0);
                 if (abls.size() > 1)
-                    HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(1).rank, 1);
+                    HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(1).getRank(hero), 1);
                 if (abls.size() > 2)
-                    HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(2).rank, 2);
+                    HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(2).getRank(hero), 2);
                 if (abls.size() > 3)
-                    HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(3).rank, 3);
+                    HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(3).getRank(hero), 3);
             }
         }
     }

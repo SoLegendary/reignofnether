@@ -57,26 +57,27 @@ public class MaceSlam extends HeroAbility {
         return false;
     }
 
-    public void updateStatsForRank() {
-        if (rank == 1) {
+    public void updateStatsForRank(HeroUnit hero) {
+        if (getRank(hero) == 1) {
             damage = 10;
             stunDuration = 2 * ResourceCost.TICKS_PER_SECOND;
-        } else if (rank == 2) {
+        } else if (getRank(hero) == 2) {
             damage = 15;
             stunDuration = 3 * ResourceCost.TICKS_PER_SECOND;
-        } else if (rank == 3) {
+        } else if (getRank(hero) == 3) {
             damage = 20;
             stunDuration = 4 * ResourceCost.TICKS_PER_SECOND;
         }
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit unit) {
+        if (!(unit instanceof HeroUnit hero)) return null;
         return new AbilityButton("Mace Slam",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/mace.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.MACE_SLAM,
-                () -> rank == 0,
+                () -> getRank(hero) == 0,
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.MACE_SLAM),
                 null,
@@ -97,7 +98,7 @@ public class MaceSlam extends HeroAbility {
 
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
-                fcs(I18n.get("abilities.reignofnether.mace_slam") + " " + rankString(), true),
+                fcs(I18n.get("abilities.reignofnether.mace_slam") + " " + rankString(hero), true),
                 fcsIcons(I18n.get("abilities.reignofnether.mace_slam.stats", damage, cooldownMax / 20, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.mace_slam.tooltip1")),
@@ -108,14 +109,14 @@ public class MaceSlam extends HeroAbility {
     public List<FormattedCharSequence> getRankUpTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.mace_slam"), true),
-                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement()), getLevelReqStyle(hero)),
+                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement(hero)), getLevelReqStyle(hero)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.mace_slam.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.mace_slam.tooltip2", stunDuration / 20)),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.mace_slam.rank1"), rank == 0),
-                fcs(I18n.get("abilities.reignofnether.mace_slam.rank2"), rank == 1),
-                fcs(I18n.get("abilities.reignofnether.mace_slam.rank3"), rank == 2)
+                fcs(I18n.get("abilities.reignofnether.mace_slam.rank1"), getRank(hero) == 0),
+                fcs(I18n.get("abilities.reignofnether.mace_slam.rank2"), getRank(hero) == 1),
+                fcs(I18n.get("abilities.reignofnether.mace_slam.rank3"), getRank(hero) == 2)
         );
     }
 

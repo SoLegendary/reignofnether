@@ -24,7 +24,6 @@ public abstract class HeroAbility extends Ability {
     // can be ranked up when the hero levels up
     // requires a HeroUnit to be passed
 
-    public int rank = 0; // 0 == not learnt
     public final int maxRank;
     public int manaCost = 0;
 
@@ -40,17 +39,17 @@ public abstract class HeroAbility extends Ability {
         this.manaCost = manaCost;
     }
 
-    public int getLevelRequirement() {
+    public int getLevelRequirement(HeroUnit hero) {
         if (maxRank <= 1) {
            return 6;
         } else {
-            return (rank * 2) + 1;
+            return (getRank(hero) * 2) + 1;
         }
     }
 
     public boolean rankUp(HeroUnit hero) {
-        if (rank < maxRank && hero.getSkillPoints() > 0 && hero.getHeroLevel() >= getLevelRequirement()) {
-            rank += 1;
+        if (getRank(hero) < maxRank && hero.getSkillPoints() > 0 && hero.getHeroLevel() >= getLevelRequirement(hero)) {
+            setRank(hero, getRank(hero) + 1);
             hero.setSkillPoints(hero.getSkillPoints() - 1);
             if (((LivingEntity) hero).level().isClientSide)
                 ((Unit) hero).updateAbilityButtons();
@@ -61,8 +60,8 @@ public abstract class HeroAbility extends Ability {
 
     public void updateStatsForRank() { }
 
-    protected String rankString() {
-        return rank > 0 ? I18n.get("abilities.reignofnether.rank", rank) : I18n.get("abilities.reignofnether.unlearnt");
+    protected String rankString(HeroUnit hero) {
+        return getRank(hero) > 0 ? I18n.get("abilities.reignofnether.rank", getRank(hero)) : I18n.get("abilities.reignofnether.unlearnt");
     }
 
     public List<FormattedCharSequence> getRankUpTooltipLines(HeroUnit hero) {
@@ -88,12 +87,12 @@ public abstract class HeroAbility extends Ability {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/level_up_skill.png"),
             (Keybinding) null,
             () -> false,
-            () -> !hero.isRankUpMenuOpen() || rank >= maxRank,
-            () -> hero.getSkillPoints() > 0 && hero.getHeroLevel() >= getLevelRequirement(),
+            () -> !hero.isRankUpMenuOpen() || getRank(hero) >= maxRank,
+            () -> hero.getSkillPoints() > 0 && hero.getHeroLevel() >= getLevelRequirement(hero),
             () -> {
                 if (rankUp(hero)) {
                     AbilityServerboundPacket.rankUpAbility(((Entity) hero).getId(), action);
-                    ((Unit) hero).updateAbilityButtons();
+                    hero.updateAbilityButtons();
                 }
                 if (hero.getSkillPoints() <= 0)
                     hero.showRankUpMenu(false);
@@ -110,7 +109,7 @@ public abstract class HeroAbility extends Ability {
             return true;
         int totalSkillRanks = 0;
         for (HeroAbility ability : hero.getHeroAbilities()) {
-            totalSkillRanks += ability.rank;
+            totalSkillRanks += ability.getRank(hero);
         }
         return totalSkillRanks >= 10;
     }
@@ -135,6 +134,14 @@ public abstract class HeroAbility extends Ability {
     }
 
     public Style getLevelReqStyle(HeroUnit hero) {
-        return Style.EMPTY.withColor(hero.getHeroLevel() >= getLevelRequirement() ? 0x00FF00 : 0xFF0000);
+        return Style.EMPTY.withColor(hero.getHeroLevel() >= getLevelRequirement(hero) ? 0x00FF00 : 0xFF0000);
+    }
+
+    public int getRank(HeroUnit hero) {
+        return hero.getHeroAbilityRank(this);
+    }
+
+    public void setRank(HeroUnit hero, int rank) {
+        hero.setHeroAbilityRank(this, rank);
     }
 }

@@ -55,12 +55,13 @@ public class Avatar extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit unit) {
+        if (!(unit instanceof HeroUnit hero)) return null;
         return new AbilityButton("Avatar",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
                 hotkey,
                 () -> false,
-                () -> rank == 0,
+                () -> getRank(hero) == 0,
                 () -> true,
                 () -> sendUnitCommand(UnitAction.AVATAR),
                 null,
@@ -93,7 +94,7 @@ public class Avatar extends HeroAbility {
     public List<FormattedCharSequence> getRankUpTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.avatar"), true),
-                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement()), getLevelReqStyle(hero)),
+                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement(hero)), getLevelReqStyle(hero)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.avatar.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.avatar.tooltip2", BONUS_HEALTH)),

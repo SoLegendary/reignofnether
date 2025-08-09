@@ -45,23 +45,24 @@ public class GreedIsGoodPassive extends HeroAbility {
         return false;
     }
 
-    public void updateStatsForRank() {
-        if (rank == 1) {
+    public void updateStatsForRank(HeroUnit hero) {
+        if (getRank(hero) == 1) {
             maxResourcesPerCast = 100;
-        } else if (rank == 2) {
+        } else if (getRank(hero) == 2) {
             maxResourcesPerCast = 200;
-        } else if (rank == 3) {
+        } else if (getRank(hero) == 3) {
             maxResourcesPerCast = 300;
         }
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit unit) {
+        if (!(unit instanceof HeroUnit hero)) return null;
         return new AbilityButton("Greed is Good",
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/gold_block.png"),
                 hotkey,
                 () -> isAutocasting(hero),
-                () -> rank == 0,
+                () -> getRank(hero) == 0,
                 () -> true,
                 () -> toggleAutocast(hero),
                 null,
@@ -82,7 +83,7 @@ public class GreedIsGoodPassive extends HeroAbility {
 
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
-                fcs(I18n.get("abilities.reignofnether.greed_is_good") + " " + rankString(), true),
+                fcs(I18n.get("abilities.reignofnether.greed_is_good") + " " + rankString(hero), true),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.greed_is_good.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.greed_is_good.tooltip2", maxResourcesPerCast)),
@@ -94,16 +95,16 @@ public class GreedIsGoodPassive extends HeroAbility {
     public List<FormattedCharSequence> getRankUpTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.greed_is_good"), true),
-                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement()), getLevelReqStyle(hero)),
+                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement(hero)), getLevelReqStyle(hero)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.greed_is_good.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.greed_is_good.tooltip2", maxResourcesPerCast)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.can_be_toggled")),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.greed_is_good.rank1"), rank == 0),
-                fcs(I18n.get("abilities.reignofnether.greed_is_good.rank2"), rank == 1),
-                fcs(I18n.get("abilities.reignofnether.greed_is_good.rank3"), rank == 2)
+                fcs(I18n.get("abilities.reignofnether.greed_is_good.rank1"), getRank(hero) == 0),
+                fcs(I18n.get("abilities.reignofnether.greed_is_good.rank2"), getRank(hero) == 1),
+                fcs(I18n.get("abilities.reignofnether.greed_is_good.rank3"), getRank(hero) == 2)
         );
     }
 
@@ -116,7 +117,7 @@ public class GreedIsGoodPassive extends HeroAbility {
         if (isAutocasting(hero)) {
             for (Resources resources : resourcesList) {
                 if (resources.ownerName.equals(ownerName)) {
-                    for (int i = 0; i < rank; i++) {
+                    for (int i = 0; i < getRank(hero); i++) {
                         Resources resToSpend = new Resources(hero.getOwnerName(), 0, 0, 0);
                         if (resName == ResourceName.FOOD && resources.food >= 100) {
                             resToSpend.food -= 100;

@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.ability.heroAbilities.villager.Avatar;
 import com.solegendary.reignofnether.ability.heroAbilities.villager.BattleRagePassive;
@@ -60,7 +61,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class RoyalGuardUnit extends Vindicator implements Unit, AttackerUnit, HeroUnit, KeyframeAnimated {
+public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit, KeyframeAnimated {
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new MaceSlam());
@@ -71,6 +72,7 @@ public class RoyalGuardUnit extends Vindicator implements Unit, AttackerUnit, He
 
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
+    Object2ObjectArrayMap<HeroAbility, Integer> heroAbilityRanks = new Object2ObjectArrayMap<>();
 
     Ability autocast;
 
@@ -316,7 +318,7 @@ public class RoyalGuardUnit extends Vindicator implements Unit, AttackerUnit, He
 
         boolean result = super.hurt(pSource, pAmount);
         BattleRagePassive battleRage = getBattleRage();
-        if (result && battleRage.rank > 0 &&
+        if (result && battleRage.getRank(this) > 0 &&
             pSource.getEntity() instanceof Unit unit &&
             !List.of(Relationship.OWNED, Relationship.FRIENDLY)
                     .contains(UnitServerEvents.getUnitToEntityRelationship(unit, this))) {
@@ -542,7 +544,7 @@ public class RoyalGuardUnit extends Vindicator implements Unit, AttackerUnit, He
                 .toList();
 
         MaceSlam maceSlam = getMaceSlam();
-        if (maceSlam != null && maceSlam.rank > 0) {
+        if (maceSlam != null && maceSlam.getRank(this) > 0) {
             level().explode(null, null, null, blockPos.getX(), blockPos.getY(), blockPos.getZ(),
                     2.0f, false, Level.ExplosionInteraction.NONE);
 
@@ -591,7 +593,7 @@ public class RoyalGuardUnit extends Vindicator implements Unit, AttackerUnit, He
                 .toList();
 
         TauntingCry tauntingCry = getTauntingCry();
-        if (tauntingCry != null && tauntingCry.rank > 0) {
+        if (tauntingCry != null && tauntingCry.getRank(this) > 0) {
             for (AttackerUnit unit : tauntableUnits) {
                 Unit.fullResetBehaviours((Unit) unit);
                 unit.setUnitAttackTargetForced(this);
@@ -617,7 +619,7 @@ public class RoyalGuardUnit extends Vindicator implements Unit, AttackerUnit, He
         if (tickCount % 20 != 0)
             return;
         BattleRagePassive battleRage = getBattleRage();
-        if (battleRage != null && battleRage.rank > 0) {
+        if (battleRage != null && battleRage.getRank(this) > 0) {
             float percentRage = 1 - (getHealth() / getMaxHealth());
             heal(percentRage * battleRage.maxHpRegen);
             updateAbilityButtons();
@@ -693,6 +695,11 @@ public class RoyalGuardUnit extends Vindicator implements Unit, AttackerUnit, He
                 avatarScalingStarted = false;
             }
         }
+    }
+
+    @Override
+    public Object2ObjectArrayMap<HeroAbility, Integer> getHeroAbilityRanks() {
+        return heroAbilityRanks;
     }
 
     @Override

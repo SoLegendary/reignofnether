@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -87,7 +88,7 @@ public class SandboxClientEvents {
         };
     }
 
-    public static List<AbilityButton> getUnitButtons() {
+    public static List<UnitSpawnButton> getUnitButtons() {
         return switch (faction) {
             case VILLAGERS -> List.of(
                 ProductionItems.VILLAGER.getPlaceButton(),

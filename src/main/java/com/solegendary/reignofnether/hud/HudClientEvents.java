@@ -975,9 +975,8 @@ public class HudClientEvents {
                 default -> List.copyOf(SandboxClientEvents.getUnitButtons());
             };
 
-            List<AbilityButton> shownAbilities = abilityButtons.stream()
-                    .filter(b -> !b.isHidden.get() && b instanceof AbilityButton ab && !(ab.ability instanceof CallToArmsUnit))
-                    .map(b -> (AbilityButton)b)
+            List<Button> shownAbilities = abilityButtons.stream()
+                    .filter(b -> !b.isHidden.get() && !(b instanceof AbilityButton ab && ab.ability instanceof CallToArmsUnit))
                     .toList();
 
             int rowsUp = (int) Math.floor((float) (shownAbilities.size() - 1) / MAX_BUTTONS_PER_ROW);
@@ -985,11 +984,11 @@ public class HudClientEvents {
             blitY -= iconFrameSize * rowsUp;
 
             int i = 0;
-            for (AbilityButton abilityButton : shownAbilities) {
-                if (!abilityButton.isHidden.get()) {
+            for (Button button : shownAbilities) {
+                if (!button.isHidden.get()) {
                     i += 1;
-                    abilityButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
-                    renderedButtons.add(abilityButton);
+                    button.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
+                    renderedButtons.add(button);
                     blitX += iconFrameSize;
                     if (i % MAX_BUTTONS_PER_ROW == 0) {
                         blitX = 0;

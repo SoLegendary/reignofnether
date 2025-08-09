@@ -38,16 +38,17 @@ public class LootExplosion extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit unit) {
+        if (!(unit instanceof HeroUnit hero)) return null;
         return new AbilityButton("Loot Explosion",
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_chestplate.png"),
                 hotkey,
                 () -> false,
-                () -> rank == 0,
+                () -> getRank(hero) == 0,
                 () -> true,
                 () -> sendUnitCommand(UnitAction.LOOT_EXPLOSION),
                 null,
-                getTooltipLines((HeroUnit) hero),
+                getTooltipLines(hero),
                 this,
                 hero
         );
@@ -74,7 +75,7 @@ public class LootExplosion extends HeroAbility {
 
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
-                fcs(I18n.get("abilities.reignofnether.loot_explosion") + " " + rankString(), true),
+                fcs(I18n.get("abilities.reignofnether.loot_explosion") + " " + rankString(hero), true),
                 fcsIcons(I18n.get("abilities.reignofnether.loot_explosion.stats", CD_MAX_SECONDS / 20, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip1")),
@@ -86,7 +87,7 @@ public class LootExplosion extends HeroAbility {
     public List<FormattedCharSequence> getRankUpTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.loot_explosion"), true),
-                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement()), getLevelReqStyle(hero)),
+                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement(hero)), getLevelReqStyle(hero)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip2")),

@@ -49,16 +49,17 @@ public class RaiseDead extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit unit) {
+        if (!(unit instanceof HeroUnit hero)) return null;
         return new AbilityButton("Raise Dead",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
                 hotkey,
                 () -> false,
-                () -> rank <= 0,
+                () -> getRank(hero) <= 0,
                 () -> true,
                 () -> sendUnitCommand(UnitAction.RAISE_DEAD),
                 null,
-                getTooltipLines((HeroUnit) hero),
+                getTooltipLines(hero),
                 this,
                 hero
         );
@@ -75,7 +76,7 @@ public class RaiseDead extends HeroAbility {
 
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
-                fcs(I18n.get("abilities.reignofnether.raise_dead") + " " + rankString(), true),
+                fcs(I18n.get("abilities.reignofnether.raise_dead") + " " + rankString(hero), true),
                 fcsIcons(I18n.get("abilities.reignofnether.raise_dead.stats", CD_MAX_SECONDS / 20, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.raise_dead.tooltip1")),
@@ -87,14 +88,14 @@ public class RaiseDead extends HeroAbility {
     public List<FormattedCharSequence> getRankUpTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.raise_dead"), true),
-                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement()), getLevelReqStyle(hero)),
+                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement(hero)), getLevelReqStyle(hero)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.raise_dead.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.raise_dead.tooltip2")),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.raise_dead.rank1"), rank == 0),
-                fcs(I18n.get("abilities.reignofnether.raise_dead.rank2"), rank == 1),
-                fcs(I18n.get("abilities.reignofnether.raise_dead.rank3"), rank == 2)
+                fcs(I18n.get("abilities.reignofnether.raise_dead.rank1"), getRank(hero) == 0),
+                fcs(I18n.get("abilities.reignofnether.raise_dead.rank2"), getRank(hero) == 1),
+                fcs(I18n.get("abilities.reignofnether.raise_dead.rank3"), getRank(hero) == 2)
         );
     }
 

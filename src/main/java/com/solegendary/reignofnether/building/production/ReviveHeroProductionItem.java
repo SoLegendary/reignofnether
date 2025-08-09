@@ -49,16 +49,16 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
                     HeroClientboundPacket.setSkillPoints(entity.getId(), oldHero.skillPoints);
                     newHero.setStatsForLevel(true);
                     if (newHero.getHeroAbilities().size() > 0) {
-                        newHero.getHeroAbilities().get(0).rank = oldHero.ability1Rank;
+                        newHero.getHeroAbilities().get(0).setRank(newHero, oldHero.ability1Rank);
                         HeroClientboundPacket.setAbilityRank(entity.getId(), oldHero.ability1Rank, 0);
                     } if (newHero.getHeroAbilities().size() > 1) {
-                        newHero.getHeroAbilities().get(1).rank = oldHero.ability2Rank;
+                        newHero.getHeroAbilities().get(1).setRank(newHero, oldHero.ability2Rank);
                         HeroClientboundPacket.setAbilityRank(entity.getId(), oldHero.ability2Rank, 1);
                     } if (newHero.getHeroAbilities().size() > 2) {
-                        newHero.getHeroAbilities().get(2).rank = oldHero.ability3Rank;
+                        newHero.getHeroAbilities().get(2).setRank(newHero, oldHero.ability3Rank);
                         HeroClientboundPacket.setAbilityRank(entity.getId(), oldHero.ability3Rank, 2);
                     } if (newHero.getHeroAbilities().size() > 3) {
-                        newHero.getHeroAbilities().get(3).rank = oldHero.ability4Rank;
+                        newHero.getHeroAbilities().get(3).setRank(newHero, oldHero.ability4Rank);
                         HeroClientboundPacket.setAbilityRank(entity.getId(), oldHero.ability4Rank, 3);
                     }
                 }

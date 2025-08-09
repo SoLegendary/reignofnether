@@ -59,12 +59,13 @@ public class BloodMoon extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit unit) {
+        if (!(unit instanceof HeroUnit hero)) return null;
         return new AbilityButton("Blood Moon",
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/redstone_block.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.BLOOD_MOON,
-            () -> rank == 0,
+            () -> getRank(hero) == 0,
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.BLOOD_MOON),
             null,
@@ -98,7 +99,7 @@ public class BloodMoon extends HeroAbility {
     public List<FormattedCharSequence> getRankUpTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.blood_moon"), true),
-                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement()), getLevelReqStyle(hero)),
+                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement(hero)), getLevelReqStyle(hero)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip2")),

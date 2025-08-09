@@ -39,14 +39,14 @@ public class BattleRagePassive extends HeroAbility {
         return false;
     }
 
-    public void updateStatsForRank() {
-        if (rank == 1) {
+    public void updateStatsForRank(HeroUnit hero) {
+        if (getRank(hero) == 1) {
             maxHpRegen = 1.2f;
             manaPerDmgTaken = 0.4f;
-        } else if (rank == 2) {
+        } else if (getRank(hero) == 2) {
             maxHpRegen = 1.8f;
             manaPerDmgTaken = 0.6f;
-        } else if (rank == 3) {
+        } else if (getRank(hero) == 3) {
             maxHpRegen = 2.4f;
             manaPerDmgTaken = 0.8f;
         }
@@ -58,12 +58,13 @@ public class BattleRagePassive extends HeroAbility {
     }
 
     @Override
-    public AbilityButton getButton(Keybinding hotkey, Unit hero) {
+    public AbilityButton getButton(Keybinding hotkey, Unit unit) {
+        if (!(unit instanceof HeroUnit hero)) return null;
         return new AbilityButton("Battle Rage",
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/redstone_block.png"),
                 hotkey,
                 () -> false,
-                () -> rank == 0,
+                () -> getRank(hero) == 0,
                 () -> true,
                 null,
                 null,
@@ -84,7 +85,7 @@ public class BattleRagePassive extends HeroAbility {
 
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
-                fcs(I18n.get("abilities.reignofnether.battle_rage") + " " + rankString(), true),
+                fcs(I18n.get("abilities.reignofnether.battle_rage") + " " + rankString(hero), true),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip1", maxHpRegen)),
                 fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip2", manaPerDmgTaken)),
@@ -95,14 +96,14 @@ public class BattleRagePassive extends HeroAbility {
     public List<FormattedCharSequence> getRankUpTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.battle_rage"), true),
-                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement()), getLevelReqStyle(hero)),
+                fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement(hero)), getLevelReqStyle(hero)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip1", maxHpRegen)),
                 fcs(I18n.get("abilities.reignofnether.battle_rage.tooltip2", manaPerDmgTaken)),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.battle_rage.rank1"), rank == 0),
-                fcs(I18n.get("abilities.reignofnether.battle_rage.rank2"), rank == 1),
-                fcs(I18n.get("abilities.reignofnether.battle_rage.rank3"), rank == 2)
+                fcs(I18n.get("abilities.reignofnether.battle_rage.rank1"), getRank(hero) == 0),
+                fcs(I18n.get("abilities.reignofnether.battle_rage.rank2"), getRank(hero) == 1),
+                fcs(I18n.get("abilities.reignofnether.battle_rage.rank3"), getRank(hero) == 2)
         );
     }
 }
