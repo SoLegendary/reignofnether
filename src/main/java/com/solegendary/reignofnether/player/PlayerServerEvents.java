@@ -39,6 +39,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.commands.ResetChunksCommand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -125,7 +126,27 @@ public class PlayerServerEvents {
         };
         //запускаем таймер перезапуска игры
         timerResetGame.schedule(timerTaskResetGame, 10000);
+
+//        //создаём таймер сброса мира
+//        Timer timerResetWorld = new Timer();
+//        TimerTask timerTaskResetWorld = new TimerTask() {
+//            public void run() {
+//                resetWorld(5);
+//            }
+//        };
+//        //запускаем таймер сброса мира
+//        timerResetWorld.schedule(timerTaskResetWorld, 12000);
     }
+    //сброс мира
+    public static void resetWorld(int range) {
+//        sendMessageToAllPlayers("Мир в процессе сброса...", 0xFFFFFF, false);
+//
+//        ServerLevel _level = serverLevel;
+//
+//        _level.getServer().getCommands().performPrefixedCommand(new CommandSourceStack(CommandSource.NULL, new Vec3(0, 0, 0), Vec2.ZERO, _level, 4, "", Component.literal(""), _level.getServer(), null).withSuppressedOutput(), "resetchunks " + range + " false");
+//
+//        sendMessageToAllPlayers("Мир сброшен!", 0xFFFFFF, false);
+     }
     //проигрыш игрока если вышел из игры
     public static void defeatLeavedPlayer(String playerName)
     {
@@ -997,6 +1018,9 @@ public class PlayerServerEvents {
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
         AllyCommand.register(evt.getDispatcher());
+
+        //команда сброса чанков
+        ResetChunksCommand.register(evt.getDispatcher());
 
         evt.getDispatcher().register(Commands.literal("rts-lock").then(Commands.literal("enable").executes((command) -> {
             if ((command.getSource() != null &&

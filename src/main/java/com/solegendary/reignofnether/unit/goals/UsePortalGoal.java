@@ -25,21 +25,23 @@ public class UsePortalGoal extends MoveToTargetBlockGoal {
     public void tick() {
         if (buildingTarget instanceof PortalPlacement portal && moveTarget != null) {
             calcMoveTarget();
-            if (buildingTarget.getBlocksPlaced() <= 0) {
-                stopUsingPortal();
-            }
-            if (this.mob.distanceToSqr(new Vec3(moveTarget.getX() + 0.5f,
-                moveTarget.getY() + 0.5f,
-                moveTarget.getZ() + 0.5f
-            )) <= 3f) {
-                // teleport to destination
-                if (portal.hasDestination()) {
-                    BlockPos bp = portal.destination;
-                    SoundClientboundPacket.playSoundAtPos(SoundAction.USE_PORTAL, bp);
-                    mob.teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
-                    SoundClientboundPacket.playSoundAtPos(SoundAction.USE_PORTAL, portal.destination);
+            if (moveTarget != null) {
+                if (buildingTarget.getBlocksPlaced() <= 0) {
+                    stopUsingPortal();
                 }
-                this.stopUsingPortal();
+                if (this.mob.distanceToSqr(new Vec3(moveTarget.getX() + 0.5f,
+                        moveTarget.getY() + 0.5f,
+                        moveTarget.getZ() + 0.5f
+                )) <= 3f) {
+                    // teleport to destination
+                    if (portal.hasDestination()) {
+                        BlockPos bp = portal.destination;
+                        SoundClientboundPacket.playSoundAtPos(SoundAction.USE_PORTAL, bp);
+                        mob.teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
+                        SoundClientboundPacket.playSoundAtPos(SoundAction.USE_PORTAL, portal.destination);
+                    }
+                    this.stopUsingPortal();
+                }
             }
         } else {
             this.moveTarget = null;
