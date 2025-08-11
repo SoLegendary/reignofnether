@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.alliance;
 
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -30,7 +33,19 @@ public class AlliancesServerEvents {
             alliances.computeIfAbsent(owner1, k -> new HashSet<>()).add(owner2);
             alliances.computeIfAbsent(owner2, k -> new HashSet<>()).add(owner1);
 
-            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new AllianceClientboundAddPacket(owner1, owner2));
+            //пометить на клиенте игрока дружественными всех игроков в альянсе
+            Set<String> allAlliesPlayers = getAllConnectedAllies(owner1);
+            for (String alliesPlayer : allAlliesPlayers)
+            {
+                if (!owner1.equals(alliesPlayer)) {
+                    PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new AllianceClientboundAddPacket(owner1, alliesPlayer));
+                }
+            }
+
+            //закончить игру если в альянсе все оставшиеся игроки + если не игра против ботов
+            if (!SurvivalServerEvents.isEnabled()) {
+                PlayerServerEvents.setVictorySingleOrAllyPlayers();
+            }
         }
     }
 
@@ -51,7 +66,18 @@ public class AlliancesServerEvents {
             }
         }
 
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new AllianceClientboundRemovePacket(owner1, owner2));
+        //пометить всех игроков не из альянса врагами
+        for (ServerPlayer player : PlayerServerEvents.players)
+        {
+            String playerName = player.getName().getString();
+            if (!isAllied(owner1, playerName) || !isAllied(playerName, owner1)) {
+                PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new AllianceClientboundRemovePacket(owner1, playerName));
+            }
+            if (!isAllied(owner2, playerName) || !isAllied(playerName, owner2)) {
+                PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new AllianceClientboundRemovePacket(owner2, playerName));
+            }
+        }
+
     }
 
     public static boolean isAllied(String owner1, String owner2) {

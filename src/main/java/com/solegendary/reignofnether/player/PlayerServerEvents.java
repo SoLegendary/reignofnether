@@ -103,7 +103,7 @@ public class PlayerServerEvents {
 
     //MY
     //перезапуск игры
-    public static void resetGame(){
+    public static synchronized void resetGame(){
         //bresetGame = false;
         //timer_process = -1;
 
@@ -138,19 +138,59 @@ public class PlayerServerEvents {
 //        timerResetWorld.schedule(timerTaskResetWorld, 12000);
     }
     //сброс мира
-    public static void resetWorld(int range) {
+    public static synchronized void resetWorld(int range) {
 //        sendMessageToAllPlayers("Мир в процессе сброса...", 0xFFFFFF, false);
 //
 //        ServerLevel _level = serverLevel;
 //
-//        _level.getServer().getCommands().performPrefixedCommand(new CommandSourceStack(CommandSource.NULL, new Vec3(0, 0, 0), Vec2.ZERO, _level, 4, "", Component.literal(""), _level.getServer(), null).withSuppressedOutput(), "resetchunks " + range + " false");
+//        synchronized (_level) {
+//            _level.getServer().getCommands().performPrefixedCommand(new CommandSourceStack(CommandSource.NULL, new Vec3(0, 0, 0), Vec2.ZERO, _level, 4, "", Component.literal(""), _level.getServer(), null).withSuppressedOutput(), "resetchunks 5 false");
 //
-//        sendMessageToAllPlayers("Мир сброшен!", 0xFFFFFF, false);
+//            sendMessageToAllPlayers("Мир сброшен!", 0xFFFFFF, false);
+//        }
      }
     //проигрыш игрока если вышел из игры
     public static void defeatLeavedPlayer(String playerName)
     {
         defeat(playerName, "слишком долго отсутствовал при запущенной игре");
+    }
+    //вычисление результата игры после победы команды или одного игрока
+    public static void setVictorySingleOrAllyPlayers(){
+        synchronized (rtsPlayers) {
+            // Check if only allied players are left or if a single player remains
+            if (rtsPlayers.size() > 1) {
+                // Get the set of remaining player names
+                Set<String> remainingPlayers = rtsPlayers.stream()
+                        .map(player -> player.name)
+                        .collect(Collectors.toSet());
+
+                // Use the first remaining player as a reference to find all connected allies
+                String referencePlayer = remainingPlayers.iterator().next();
+                Set<String> factionGroup = AlliancesServerEvents.getAllConnectedAllies(referencePlayer);
+
+                // Check if all remaining players are part of the same alliance group
+                if (remainingPlayers.equals(factionGroup)) {
+                    // Declare victory for all players in the faction group
+                    for (String winner : remainingPlayers) {
+                        sendMessageToAllPlayers("server.reignofnether.victory_alliance", true, winner);
+                        PlayerClientboundPacket.victory(winner);
+                    }
+                    //перезапуск игры
+                    resetGame();
+                }
+            } else if (rtsPlayers.size() == 1) {
+                // Single remaining player - declare victory
+                RTSPlayer winner = rtsPlayers.get(0);
+                sendMessageToAllPlayers("server.reignofnether.victorious", true, winner.name);
+                PlayerClientboundPacket.victory(winner.name);
+
+                //перезапуск игры
+                resetGame();
+            } else if (rtsPlayers.isEmpty()) {
+                //перезапуск игры
+                resetGame();
+            }
+        }
     }
 
     // warpten - faster building/unit production
@@ -950,41 +990,10 @@ public class PlayerServerEvents {
             ResearchServerEvents.removeAllCheatsFor(playerName);
             ResourcesServerEvents.resourcesList.removeIf(rl -> rl.ownerName.equals(playerName));
 
-            // Check if only allied players are left or if a single player remains
-            if (rtsPlayers.size() > 1) {
-                // Get the set of remaining player names
-                Set<String> remainingPlayers = rtsPlayers.stream()
-                        .map(player -> player.name)
-                        .collect(Collectors.toSet());
-
-                // Use the first remaining player as a reference to find all connected allies
-                String referencePlayer = remainingPlayers.iterator().next();
-                Set<String> factionGroup = AlliancesServerEvents.getAllConnectedAllies(referencePlayer);
-
-                // Check if all remaining players are part of the same alliance group
-                if (remainingPlayers.equals(factionGroup)) {
-                    // Declare victory for all players in the faction group
-                    for (String winner : remainingPlayers) {
-                        sendMessageToAllPlayers("server.reignofnether.victory_alliance", true, winner);
-                        PlayerClientboundPacket.victory(winner);
-
-                        //перезапуск игры
-                        resetGame();
-                    }
-                }
-            } else if (rtsPlayers.size() == 1) {
-                // Single remaining player - declare victory
-                RTSPlayer winner = rtsPlayers.get(0);
-                sendMessageToAllPlayers("server.reignofnether.victorious", true, winner.name);
-                PlayerClientboundPacket.victory(winner.name);
-
-                //перезапуск игры
-                resetGame();
-            } else if (rtsPlayers.isEmpty()) {
-                //перезапуск игры
-                resetGame();
-            }
         }
+
+        //закончить игру если победил игрок или альянс
+        setVictorySingleOrAllyPlayers();
     }
 
     public static void beaconVictory(String playerName) {
@@ -1047,7 +1056,7 @@ public class PlayerServerEvents {
         })));
     }
 
-    public static void resetRTS(boolean hardReset) {
+    public static synchronized void resetRTS(boolean hardReset) {
         //сброс списка отключённых игроков и их таймеров
         leavedPlayersNames.clear();
         //отключаем все таймеры
