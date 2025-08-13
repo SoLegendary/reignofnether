@@ -33,7 +33,15 @@
     "item.reignofnether.royal_guard_unit_spawn_egg": "Generar unidad de Guardia Real",
     "item.reignofnether.necromancer_unit_spawn_egg": "Generar unidad de Nigromante",
     "item.reignofnether.piglin_merchant_unit_spawn_egg": "Generar unidad de Piglin Mercante",
+    "item.reignofnether.wolf_unit_spawn_egg": "Generar unidad de Lobo",
+    "item.reignofnether.polar_bear_unit_spawn_egg": "Generar unidad de Oso Polar",
+    "item.reignofnether.grizzly_bear_unit_spawn_egg": "Generar unidad de Oso Grizzly",
+    "item.reignofnether.panda_unit_spawn_egg": "Generar unidad de Panda",
+    "item.reignofnether.llama_unit_spawn_egg": "Generar unidad de Llama",
 
+    "item.reignofnether.throwable_tnt": "TNT Lanzable",
+
+    
     "sounds.reignofnether.under_attack": "!Bajo ataque!",
     "sounds.reignofnether.victory": "¡Victoria!",
     "sounds.reignofnether.defeat": "Derrota",
@@ -42,7 +50,8 @@
     "sounds.reignofnether.neutral": "Neutro",
     "sounds.reignofnether.enemy": "Enemigo",
     "sounds.reignofnether.main_menu": "Menu Principal",
-
+    "sounds.reignofnether.blood_moon": "Luna de sangre",
+    
     "abilities.reignofnether.attack_ground": "Ataque terrestre",
     "abilities.reignofnether.call_lightning": "Invocar Rayo",
     "abilities.reignofnether.call_lightning.tooltip1": "\uE004  %ds  \uE005  %d",
@@ -244,9 +253,9 @@
     "abilities.reignofnether.rank_up_menu": "Subes de Nivel (%d)",
     "abilities.reignofnether.rank": "[Rango %d]",
     "abilities.reignofnether.unlearnt": "[No aprendido]",
-
     "abilities.reignofnether.autocast": "Clic derecho para autolanzar",
-
+    "abilities.reignofnether.charges": "Puede almacenar hasta %d cargas",
+    
     "ability.reignofnether.enchant.error1": "Solo puedes encantar tus propias unidades",
     "ability.reignofnether.enchant.error2": "La unidad está fuera de alcance",
     "ability.reignofnether.enchant.error3": "No puedes encantar ese tipo de unidad",
@@ -343,6 +352,10 @@
     "buildings.monsters.reignofnether.sculk_catalyst.tooltip2": "Distorsiona el tiempo hasta medianoche en un radio de %d bloques.",
     "buildings.monsters.reignofnether.sculk_catalyst.tooltip3": "El sculk cercano extiende este rango hasta %d y",
     "buildings.monsters.reignofnether.sculk_catalyst.tooltip4": "otorga salud de absorción al catalizador.",
+    "buildings.monsters.reignofnether.altar_of_darkness": "Altar de la Oscuridad",
+    "buildings.monsters.reignofnether.altar_of_darkness.tooltip1": "Una fuente de energía oscura para manifestar los horrores de la oscuridad.",
+    "buildings.monsters.reignofnether.altar_of_darkness.tooltip2": "Entrena a nuevos héroes monstruos y revive a los caídos héroes monstruos.",
+
     
     "buildings.piglins.reignofnether.bastion": "Bastión",
     "buildings.piglins.reignofnether.bastion.tooltip1": "Un cuartel fortificado para albergar piglins cazacabezas,",
@@ -387,7 +400,10 @@
     "buildings.piglins.reignofnether.wither_shrine.tooltip1": "Un santuario oscuro dedicado al poder de los Withers.",
     "buildings.piglins.reignofnether.wither_shrine.tooltip2": "Permite la producción de esqueletos wither en portales militares.",
     "buildings.piglins.reignofnether.wither_shrine.tooltip3": "Requiere un Bastión.",
-
+    "buildings.piglins.reignofnether.infernal_portal": "Portal Infernal",
+    "buildings.piglins.reignofnether.infernal_portal.tooltip1": "Un portal decorado reservado para los campeones del Nether.",
+    "buildings.piglins.reignofnether.infernal_portal.tooltip2": "Entrena a nuevos héroes Piglin y revive a los caídos héroes Piglin.",
+    
     "buildings.villagers.reignofnether.arcane_tower": "Torre Arcana",
     "buildings.villagers.reignofnether.arcane_tower.tooltip1": "Una torre mágica hogar de Brujas y Evocadores.",
     "buildings.villagers.reignofnether.arcane_tower.tooltip2": "Requiere un Cuartel.",
@@ -428,6 +444,10 @@
     "buildings.villagers.reignofnether.wheat_farm.tooltip1": "\uE001  %d  +  %d  por  cultivo  plantado",
     "buildings.villagers.reignofnether.wheat_farm.tooltip2": "Un campo de trigo que puede labrarse para recolectar comida.",
     "buildings.villagers.reignofnether.wheat_farm.tooltip3": "Los trabajadores replantan semillas automáticamente usando madera mientras trabajan.",
+    "buildings.villagers.reignofnether.shrine_of_prosperity": "Santuario de la Prosperidad",
+    "buildings.villagers.reignofnether.shrine_of_prosperity.tooltip1": "Un símbolo de la alianza entre los aldeanos y los saqueadores.",
+    "buildings.villagers.reignofnether.shrine_of_prosperity.tooltip2": "Entrena a nuevos héroes aldeanos y revive a los que han caído.",
+    
     "buildings.neutral.reignofnether.capturable_beacon": "Faro",
     "buildings.neutral.reignofnether.capturable_beacon.tooltip1": "Una pirámide que otorga una variedad de auras poderosas.",
     "buildings.neutral.reignofnether.capturable_beacon.tooltip2": "Controlarlo durante suficiente tiempo otorga la victoria.",
@@ -487,7 +507,7 @@
     "controls.reignofnether.rotate": "Scroll - Rotar un edificio para colocarlo",
 
     "titles.reignofnether.defeated": "¡Has sido derrotado!",
-    "titles.reignofnether.victorious": "¡Eres victorioso!",
+    "titles.reignofnether.victorious": "¡Has ganado!",
 
     "fogofwar.reignofnether.warning": "[ADVERTENCIA]",
     "fogofwar.reignofnether.experimental": "Estás a punto de activar la niebla de guerra para todos los jugadores. Esta es una función experimental con varios problemas:",
@@ -497,7 +517,8 @@
     "fogofwar.reignofnether.to_confirm": "Usa /rts-fog enable nuevamente para confirmar.",
 
     "hud.buttons.reignofnether.on_cooldown": "Esta habilidad aún está en enfriamiento",
-
+    "hud.buttons.reignofnether.not_enough_mana": "No tienes suficiente maná",
+    
     "hud.control_group.reignofnether.control_group": "Grupo de control %s (Shift + clic derecho para eliminar)",
 
     "hud.actionbuttons.reignofnether.build_repair": "Construir/Reparar",
