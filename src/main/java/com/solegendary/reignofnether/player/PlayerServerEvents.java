@@ -64,6 +64,8 @@ import net.minecraftforge.network.NetworkHooks;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -77,8 +79,10 @@ import static net.minecraft.world.level.GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_C
 public class PlayerServerEvents {
 
     //MY
+    public static boolean bbResetGame = false;
     public static ArrayList<String> leavedPlayersNames = new ArrayList<>();
     public static Map<String, Timer> leavedPlayersTimers = new HashMap<>();
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     // list of what gamemode these players should be in when outside of RTS cam
     private static final Map<String, GameType> playerDefaultGameModes = new HashMap<>();
@@ -103,42 +107,19 @@ public class PlayerServerEvents {
 
     //MY
     //перезапуск игры
-    public static synchronized void resetGame(){
-        //bresetGame = false;
-        //timer_process = -1;
+    public static void resetGame() {
+        //таймер сообщения о сбросе матча
+        scheduler.schedule(() -> {
+            sendMessageToAllPlayers("Игра будет скоро сброшена!!!", 0xFFFFFF, false);
+        }, 10, TimeUnit.SECONDS);
 
-        //создаём таймер уведомления о перезапуске игры
-        Timer timerResetGameNotify = new Timer();
-        TimerTask timerTaskResetGameNotify = new TimerTask() {
-            public void run() {
-                sendMessageToAllPlayers("Игра будет скоро сброшена!!!", 0xFFFFFF, false);
-            }
-        };
-        //запускаем таймер уведомления о перезапуске игры
-        timerResetGameNotify.schedule(timerTaskResetGameNotify, 5000);
-
-        //создаём таймер перезапуска игры
-        Timer timerResetGame = new Timer();
-        TimerTask timerTaskResetGame = new TimerTask() {
-            public void run() {
-                resetRTS(true);
-            }
-        };
-        //запускаем таймер перезапуска игры
-        timerResetGame.schedule(timerTaskResetGame, 10000);
-
-//        //создаём таймер сброса мира
-//        Timer timerResetWorld = new Timer();
-//        TimerTask timerTaskResetWorld = new TimerTask() {
-//            public void run() {
-//                resetWorld(5);
-//            }
-//        };
-//        //запускаем таймер сброса мира
-//        timerResetWorld.schedule(timerTaskResetWorld, 12000);
+        //таймер сброса матча
+        scheduler.schedule(() -> {
+            bbResetGame = true;
+        }, 20, TimeUnit.SECONDS);
     }
     //сброс мира
-    public static synchronized void resetWorld(int range) {
+    public static void resetWorld(int range) {
 //        sendMessageToAllPlayers("Мир в процессе сброса...", 0xFFFFFF, false);
 //
 //        ServerLevel _level = serverLevel;
@@ -156,6 +137,9 @@ public class PlayerServerEvents {
     }
     //вычисление результата игры после победы команды или одного игрока
     public static void setVictorySingleOrAllyPlayers(){
+        //для запуска сброса игры
+        boolean bResetGame = false;
+
         synchronized (rtsPlayers) {
             // Check if only allied players are left or if a single player remains
             if (rtsPlayers.size() > 1) {
@@ -176,7 +160,8 @@ public class PlayerServerEvents {
                         PlayerClientboundPacket.victory(winner);
                     }
                     //перезапуск игры
-                    resetGame();
+                    //resetGame();
+                    bResetGame = true;
                 }
             } else if (rtsPlayers.size() == 1) {
                 // Single remaining player - declare victory
@@ -185,11 +170,18 @@ public class PlayerServerEvents {
                 PlayerClientboundPacket.victory(winner.name);
 
                 //перезапуск игры
-                resetGame();
+                //resetGame();
+                bResetGame = true;
             } else if (rtsPlayers.isEmpty()) {
                 //перезапуск игры
-                resetGame();
+                //resetGame();
+                bResetGame = true;
             }
+        }
+
+        //перезапуск игры
+        if (bResetGame){
+            resetGame();
         }
     }
 
@@ -305,6 +297,12 @@ public class PlayerServerEvents {
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
         serverLevel = evt.getServer().getLevel(Level.OVERWORLD);
+
+        //перезапуск матча
+        if (bbResetGame) {
+            resetRTS(true);
+            bbResetGame = false;
+        }
 
         synchronized (rtsPlayers) {
             if (evt.phase == TickEvent.Phase.END) {
@@ -1056,7 +1054,7 @@ public class PlayerServerEvents {
         })));
     }
 
-    public static synchronized void resetRTS(boolean hardReset) {
+    public static void resetRTS(boolean hardReset) {
         //сброс списка отключённых игроков и их таймеров
         leavedPlayersNames.clear();
         //отключаем все таймеры
