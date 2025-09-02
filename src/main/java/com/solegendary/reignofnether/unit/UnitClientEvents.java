@@ -21,6 +21,7 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -75,7 +76,9 @@ import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getPlayerToBuildingRelationship;
 import static com.solegendary.reignofnether.cursor.CursorClientEvents.getPreselectedBlockPos;
@@ -105,12 +108,17 @@ public class UnitClientEvents {
     // tracking of all existing units
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
-    @Nullable private static UnitActionItem lastClientUAIActioned = null;
+    @Nullable
+    private static UnitActionItem lastClientUAIActioned = null;
 
-    public static ArrayList<LivingEntity> getPreselectedUnits() { return preselectedUnits; }
+    public static ArrayList<LivingEntity> getPreselectedUnits() {
+        return preselectedUnits;
+    }
+
     public static ArrayList<LivingEntity> getSelectedUnits() {
         return selectedUnits;
     }
+
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
     }
@@ -729,8 +737,7 @@ public class UnitClientEvents {
         if (MC.level == null)
             return;
 
-        if (evt.getStage() == stage)
-        {
+        if (evt.getStage() == stage) {
             ArrayList<LivingEntity> selectedUnits = getSelectedUnits();
             ArrayList<LivingEntity> preselectedUnits = getPreselectedUnits();
 
@@ -758,15 +765,22 @@ public class UnitClientEvents {
                         entityAABB.setMaxY(entityAABB.maxY + 0.8f);
                     }
 
+                    var colorHex = entity instanceof Unit unit
+                            ? new Color(PlayerColors.getPlayerDisplayColor(unit.getOwnerName()))
+                            : new Color(0xFFFFFF, false);
+                    float r = colorHex.getRed() / 255.0f;
+                    float g = colorHex.getGreen() / 255.0f;
+                    float b = colorHex.getBlue() / 255.0f;
+
                     boolean isPreselected = preselectedUnits.contains(entity);
                     boolean isSelected = selectedUnits.contains(entity);
 
                     if (isPreselected && isLeftClickAttack && !targetingSelf && !isMouseOverAnyButtonOrHud)
                         MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.3f, 0.3f, 1.0f, false);
                     else if (isSelected)
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 1.0f, 1.0f, false);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, r, g, b, 1.0f, false);
                     else if (isPreselected && !isMouseOverAnyButtonOrHud)
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 1.0f, isRightClickDown ? 1.0f : 0.5f, false);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, r, g, b, isRightClickDown ? 1.0f : 0.5f, false);
                 }
             }
             
@@ -775,8 +789,6 @@ public class UnitClientEvents {
                 if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
                         entity.isPassenger())
                     continue;
-
-                Relationship unitRs = getPlayerToEntityRelationship(entity);
 
                 float alpha = 0.5f;
                 if (selectedEntityIds.contains(entity.getId()))
@@ -790,16 +802,20 @@ public class UnitClientEvents {
                 entityAABB = entityAABB.setMaxY(entityAABB.minY);
                 boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
 
+                var colorHex = entity instanceof Unit unit
+                        ? new Color(PlayerColors.getPlayerDisplayColor(unit.getOwnerName()))
+                        : new Color(0xFFFFFF, false);
+                float r = colorHex.getRed() / 255.0f;
+                float g = colorHex.getGreen() / 255.0f;
+                float b = colorHex.getBlue() / 255.0f;
+
                 // always-shown highlights to indicate unit relationships
                 if (OrthoviewClientEvents.isEnabled()) {
-                    switch (unitRs) {
-                        case OWNED -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 1.0f, 0.2f, alpha, excludeMaxY);
-                        case FRIENDLY -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 0.2f, 0.2f, 1.0f, alpha, excludeMaxY);
-                        case HOSTILE -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.2f, 0.2f, alpha, excludeMaxY);
-                        case NEUTRAL -> MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 0.1f, alpha, excludeMaxY);
-                    }
+                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, r, g, b, alpha, excludeMaxY);
                 }
             }
+
+            // render items in front of face for eating units
             for (LivingEntity entity : getAllUnits()) {
                 if (entity instanceof Unit unit && unit.isEatingFood()) {
                     MyRenderer.renderItemInFrontOfEntityFace(evt.getPoseStack(), entity, evt.getPartialTick(), new ItemStack(unit.getFoodBeingEaten()));
@@ -884,6 +900,25 @@ public class UnitClientEvents {
                 selectedUnits.get(0).equals(preselectedUnits.get(0));
     }
 
+    public static Relationship getPlayerToPlayerRelationship(String ownerName) {
+        if (MC.level != null && MC.player != null) {
+            if (ownerName == null || ownerName.isBlank()) {
+                return Relationship.NEUTRAL;
+            }
+
+            String playerName = MC.player.getName().getString();
+            if (playerName.equals(ownerName)) {
+                return Relationship.OWNED;
+            } else if (AlliancesClient.isAllied(playerName, ownerName)) {
+                return Relationship.FRIENDLY;
+            } else {
+                return Relationship.HOSTILE;
+            }
+        }
+
+        // If the world or player is null, return NEUTRAL
+        return Relationship.NEUTRAL;
+    }
     public static Relationship getPlayerToEntityRelationship(LivingEntity entity) {
         if (MC.level != null && MC.player != null) {
             String playerName = MC.player.getName().getString();

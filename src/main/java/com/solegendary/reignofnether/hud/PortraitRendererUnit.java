@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.ability.abilities.EnchantVigor;
 import com.solegendary.reignofnether.ability.abilities.ToggleShield;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
@@ -158,13 +159,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
         Relationship rs = UnitClientEvents.getPlayerToEntityRelationship(entity);
 
-        int bgCol = 0x0;
-        switch (rs) {
-            case OWNED -> bgCol = 0x90000000;
-            case FRIENDLY -> bgCol = 0x90202090;
-            case NEUTRAL -> bgCol = 0x90909000;
-            case HOSTILE -> bgCol = 0x90900000;
-        }
+        int bgCol = 0x90000000 | PlayerColors.getPlayerDisplayColor(entity instanceof Unit u ? u.getOwnerName() : null);
         int frameHeightPlus = 0;
         if (entity instanceof HeroUnit) {
             frameHeightPlus = HERO_Y_OFFSET;

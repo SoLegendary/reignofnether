@@ -609,6 +609,9 @@
     "hud.orthoview.reignofnether.hiding_leaves_all": "Hiding leaves: all",
     "hud.orthoview.reignofnether.disabled_hiding_leaves": "Disabled hiding leaves",
     "hud.orthoview.reignofnether.ortho_error": "\n You must be in creative or spectator for RTS mode \n",
+    "hud.orthoview.reignofnether.using_player_team_color": "Using player colors",
+    "hud.orthoview.reignofnether.using_relation_color": "Using alliance colors",
+    "hud.orthoview.reignofnether.color_type_toggle": "(Click to change)",
 
     "hud.reignofnether.drop_off_resources": "Drop off resources",
     "hud.reignofnether.gather_resources": "Gather Resources (%s)",

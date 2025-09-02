@@ -304,6 +304,7 @@ public class PlayerClientEvents {
         StartPosClientEvents.resetAll();
         HeroClientEvents.fallenHeroes.clear();
         AlliancesClient.playersWithAlliedControl.clear();
+        PlayerColors.reset();
     }
 
     public static void setRTSLock(boolean lock) {

@@ -117,7 +117,7 @@ public class MyRenderer {
 
         float rotX = OrthoviewClientEvents.getCamRotX();
         // convert angle to +-180deg (orthoView uses +- 360)
-        if (rotX <= 180)
+        if (rotX <= -180)
             rotX += 360;
         if (rotX > 180)
             rotX -= 360;

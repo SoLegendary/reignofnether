@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.LanguageUtil;
@@ -72,13 +73,7 @@ class PortraitRendererBuilding {
                 x+4,y-9,
                 0xFFFFFFFF
         );
-        int bgCol = 0x0;
-        switch (rs) {
-            case OWNED    -> bgCol = 0x90000000;
-            case FRIENDLY -> bgCol = 0x90000090;
-            case NEUTRAL  -> bgCol = 0x90909000;
-            case HOSTILE  -> bgCol = 0x90900000;
-        }
+        int bgCol = 0x90000000 | PlayerColors.getPlayerDisplayColor(building.ownerName);
         MyRenderer.renderFrameWithBg(guiGraphics, x, y,
                 frameWidth,
                 frameHeight,

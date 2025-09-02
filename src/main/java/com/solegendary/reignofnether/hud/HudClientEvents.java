@@ -26,6 +26,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
@@ -1080,7 +1081,7 @@ public class HudClientEvents {
 
         if (resources != null) {
             for (String resourceName : new String[] { "food", "wood", "ore", "pop" }) {
-                String rlPath = "";
+                ResourceLocation rl;
                 String resValueStr = "";
                 ResourceName resName;
 
@@ -1088,22 +1089,24 @@ public class HudClientEvents {
 
                 switch (resourceName) {
                     case "food" -> {
-                        rlPath = "textures/icons/items/wheat.png";
+                        rl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/wheat.png");
                         resValueStr = String.valueOf(resources.food);
                         resName = ResourceName.FOOD;
                     }
                     case "wood" -> {
-                        rlPath = "textures/icons/items/wood.png";
+                        rl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/wood.png");
                         resValueStr = String.valueOf(resources.wood);
                         resName = ResourceName.WOOD;
                     }
                     case "ore" -> {
-                        rlPath = "textures/icons/items/iron_ore.png";
+                        rl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
                         resValueStr = String.valueOf(resources.ore);
                         resName = ResourceName.ORE;
                     }
                     default -> {
-                        rlPath = "textures/icons/items/bed.png";
+                        rl = PlayerColors.usePlayerTeamColor
+                            ? PlayerColors.getPlayerTeamColorBedIcon(MC.player.getName().getString())
+                            : new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/bed.png");
                         resValueStr = UnitClientEvents.getCurrentPopulation(selPlayerName) + "/"
                             + BuildingClientEvents.getTotalPopulationSupply(selPlayerName);
                         resName = ResourceName.NONE;
@@ -1126,7 +1129,7 @@ public class HudClientEvents {
                 ));
 
                 MyRenderer.renderIcon(evt.getGuiGraphics(),
-                    new ResourceLocation(ReignOfNether.MOD_ID, rlPath),
+                    rl,
                     blitX + 4,
                     blitY + 4,
                     iconSize
@@ -1351,6 +1354,16 @@ public class HudClientEvents {
                     mouseY
             );
             renderedButtons.add(leavesHidingButton);
+        }
+        Button toggleTeamColorsButton = PlayerColors.getToggleTeamColorsButton();
+        if (!toggleTeamColorsButton.isHidden.get()) {
+            toggleTeamColorsButton.render(evt.getGuiGraphics(),
+                    screenWidth - (toggleTeamColorsButton.iconSize * 6),
+                    screenHeight - (toggleTeamColorsButton.iconSize * 4),
+                    mouseX,
+                    mouseY
+            );
+            renderedButtons.add(toggleTeamColorsButton);
         }
 
         Button rotateCW = MinimapClientEvents.getCameraRotateCWButton();

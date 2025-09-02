@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -17,6 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 
+import java.math.BigInteger;
+
 public class ObserverPlayerDisplay {
 
     private static final Minecraft MC = Minecraft.getInstance();
@@ -24,6 +27,8 @@ public class ObserverPlayerDisplay {
     public final Resources resources;
     public final AbstractClientPlayer player;
     public final ResourceLocation defaultIconLocation = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png");
+    private int color;
+    private int backgroundColor;
 
     public ObserverPlayerDisplay(Resources resources) {
         this.resources = resources;
@@ -37,10 +42,6 @@ public class ObserverPlayerDisplay {
             this.player = null;
         }
     }
-
-    private final static int iconBgColour = 0x64000000;
-    private final static int frameBgColour = 0xA0000000;
-
 
     private static final int PLAYER_FRAME_WIDTH = Button.DEFAULT_ICON_FRAME_SIZE * 5; // frame containing player name + player icon + race icon
     private static final int PLAYER_VALUE_WIDTH = Button.DEFAULT_ICON_FRAME_SIZE * 4; // name of the player
@@ -56,9 +57,9 @@ public class ObserverPlayerDisplay {
                 y,
                 PLAYER_FRAME_WIDTH,
                 Button.DEFAULT_ICON_FRAME_SIZE,
-                frameBgColour
+                this.backgroundColor
         );
-        
+
         if (this.player != null && this.player.isSkinLoaded()) {
             var iconLocation = player.getSkinTextureLocation();
             //RenderSystem.setShaderTexture(0, iconLocation);
@@ -86,7 +87,7 @@ public class ObserverPlayerDisplay {
                     Button.DEFAULT_ICON_SIZE
             );
         }
-        
+
         guiGraphics.drawString(
                 MC.font,
                 this.resources.ownerName,
@@ -96,28 +97,30 @@ public class ObserverPlayerDisplay {
         );
     }
 
+    private final static int frameBgColour = 0xA0000000;
+
     private void renderResource(GuiGraphics guiGraphics, int x, int y, ResourceName resource) {
-        String iconPath;
+        ResourceLocation icon;
         String value;
         int color = 0xFFFFFF;
         switch (resource) {
             case FOOD -> {
-                iconPath = "textures/icons/items/wheat.png";
+                icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/wheat.png");
                 value = String.valueOf(resources.food);
                 color = 0xE8BC5F;
             }
             case WOOD -> {
-                iconPath = "textures/icons/items/wood.png";
+                icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/wood.png");
                 value = String.valueOf(resources.wood);
                 color = 0xA3753B;
             }
             case ORE -> {
-                iconPath = "textures/icons/items/iron_ore.png";
+                icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
                 value = String.valueOf(resources.ore);
                 color = 0xFFF4ED;
             }
             default -> {
-                iconPath = "textures/icons/items/bed.png";
+                icon = PlayerColors.getPlayerTeamColorBedIcon(this.resources.ownerName);
                 var used = UnitClientEvents.getCurrentPopulation(this.resources.ownerName);
                 var produced = BuildingClientEvents.getTotalPopulationSupply(this.resources.ownerName);
                 value = used + "/" + produced;
@@ -136,7 +139,7 @@ public class ObserverPlayerDisplay {
         );
 
         MyRenderer.renderIcon(guiGraphics,
-                new ResourceLocation(ReignOfNether.MOD_ID, iconPath),
+                icon,
                 x + 4,
                 y + 4,
                 Button.DEFAULT_ICON_SIZE
@@ -213,11 +216,25 @@ public class ObserverPlayerDisplay {
     }
 
     public void render(GuiGraphics guiGraphics, int x, int y) {
+        var baseX = x;
+        Integer color = PlayerColors.getPlayerTeamColor(this.resources.ownerName);
+        this.color = color != null ? 0xFF000000 | color : 0xFF000000;
+        this.backgroundColor = color != null ? 0xA0000000 | color : 0xA0000000;
         this.renderPlayer(guiGraphics, x, y); // icon, name
         this.renderResource(guiGraphics, x += PLAYER_FRAME_WIDTH, y, ResourceName.FOOD);
         this.renderResource(guiGraphics, x += RESOURCE_FRAME_WIDTH, y, ResourceName.WOOD);
         this.renderResource(guiGraphics, x += RESOURCE_FRAME_WIDTH, y, ResourceName.ORE);
         this.renderResource(guiGraphics, x += RESOURCE_FRAME_WIDTH, y, ResourceName.NONE); // supply
         this.renderSupplyDetail(guiGraphics, x += RESOURCE_FRAME_WIDTH, y);
+
+        x = baseX;
+        guiGraphics.fill(x - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        guiGraphics.fill((x += PLAYER_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        guiGraphics.fill((x += RESOURCE_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        guiGraphics.fill((x += RESOURCE_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        guiGraphics.fill((x += RESOURCE_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        guiGraphics.fill((x += RESOURCE_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        guiGraphics.fill((x += SUPPLY_DETAIL_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        //guiGraphics.fill(baseX, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, baseX + DISPLAY_WIDTH, y + Button.DEFAULT_ICON_FRAME_SIZE, this.color);
     }
 }
