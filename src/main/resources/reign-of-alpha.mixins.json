@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.shoto290.reignofalpha.mixins",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "reign-of-alpha.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
