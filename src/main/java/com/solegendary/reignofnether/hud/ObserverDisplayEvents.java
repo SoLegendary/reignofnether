@@ -24,8 +24,8 @@ public class ObserverDisplayEvents {
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
 
         if (!OrthoviewClientEvents.isEnabled() ||
-            !(evt.getScreen() instanceof TopdownGui) ||
-            !(Keybindings.tab.isDown())) {
+                !(evt.getScreen() instanceof TopdownGui) ||
+                !(Keybindings.tab.isDown())) {
             return;
         }
 
@@ -53,7 +53,10 @@ public class ObserverDisplayEvents {
         var trackedResources = playerDisplays.stream().map(d -> d.resources).collect(Collectors.toCollection(ArrayList::new));
         for (Resources resources : ResourcesClientEvents.resourcesList) {
             if (!trackedResources.contains(resources)) {
-                playerDisplays.add(new ObserverPlayerDisplay(resources));
+                var rtsPlayer = PlayerClientEvents.getPlayer(resources.ownerName);
+                if (rtsPlayer != null) {
+                    playerDisplays.add(new ObserverPlayerDisplay(rtsPlayer));
+                }
             }
         }
 

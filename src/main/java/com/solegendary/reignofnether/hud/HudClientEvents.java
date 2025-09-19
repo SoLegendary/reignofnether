@@ -1104,8 +1104,8 @@ public class HudClientEvents {
                         resName = ResourceName.ORE;
                     }
                     default -> {
-                        rl = PlayerColors.usePlayerTeamColor
-                            ? PlayerColors.getPlayerTeamColorBedIcon(MC.player.getName().getString())
+                        rl = PlayerColors.usePlayerTeamColor()
+                            ? PlayerColors.getPlayerColorBedIcon(MC.player.getName().getString())
                             : new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/bed.png");
                         resValueStr = UnitClientEvents.getCurrentPopulation(selPlayerName) + "/"
                             + BuildingClientEvents.getTotalPopulationSupply(selPlayerName);

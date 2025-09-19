@@ -65,6 +65,41 @@ public class PlayerClientEvents {
         return Faction.NONE;
     }
 
+    public static RTSPlayer getPlayer(String playerName)
+    {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (rtsPlayer.name.equals(playerName))
+                return rtsPlayer;
+        return null;
+    }
+
+    public static Integer getPlayerId(String playerName) {
+        var player = getPlayer(playerName);
+        if (player == null) {
+            return null;
+        }
+
+        return player.id;
+    }
+
+    public static int getPlayerMapColorId(String playerName) {
+        var player = getPlayer(playerName);
+        if (player == null) {
+            return 0;
+        }
+
+        return player.startPosColorId; // corresponds to a MapColor.id
+    }
+
+    public static Faction getPlayerFaction(String playerName) {
+        var player = getPlayer(playerName);
+        if (player == null) {
+            return Faction.NONE;
+        }
+
+        return player.faction;
+    }
+
     public static String getPlayerName() {
         return MC.player != null ? MC.player.getName().getString() : "";
     }

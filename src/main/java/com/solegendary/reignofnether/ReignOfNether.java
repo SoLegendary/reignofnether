@@ -2,6 +2,7 @@ package com.solegendary.reignofnether;
 
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.config.ReignOfNetherCommonConfigs;
 import com.solegendary.reignofnether.mixin.DownloadPackSourceAccessor;
 import com.solegendary.reignofnether.network.S2CReset;
@@ -17,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -25,7 +27,9 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.*;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -80,10 +84,14 @@ public class ReignOfNether {
         bus.addListener(ReignOfNether::init);
         ModLoadingContext mlctx = ModLoadingContext.get();
         mlctx.registerConfig(ModConfig.Type.COMMON, ReignOfNetherCommonConfigs.SPEC, "reignofnether-common-" + VERSION_STRING + ".toml");
+        mlctx.registerConfig(ModConfig.Type.CLIENT, ReignOfNetherClientConfigs.SPEC, "reignofnether-client-" + VERSION_STRING + ".toml");
         mlctx.registerExtensionPoint(
             DisplayTest.class,
             () -> new DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true)
         );
+        mlctx.registerExtensionPoint(
+            ConfigScreenHandler.ConfigScreenFactory.class,
+            ReignOfNetherClientConfigs::createConfigScreen);
     }
 
     @SubscribeEvent
