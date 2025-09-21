@@ -137,7 +137,7 @@ public class ResourcesClientboundPacket {
     }
 
     public ResourcesClientboundPacket(
-        ResourcesAction action, String ownerName, int food, int wood, int ore, BlockPos pos, String msg
+            ResourcesAction action, String ownerName, int food, int wood, int ore, BlockPos pos, String msg
     ) {
         this.action = action;
         this.ownerName = ownerName;

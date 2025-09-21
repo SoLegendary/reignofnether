@@ -13,7 +13,7 @@ public class Keybindings {
     public static final Keybinding rotCW = new Keybinding(GLFW.GLFW_KEY_RIGHT, "", "Rotate map clockwise");
     public static final Keybinding rotCCW = new Keybinding(GLFW.GLFW_KEY_LEFT, "", "Rotate map counter-clockwise");
     public static final Keybinding reset = new Keybinding(GLFW.GLFW_KEY_RIGHT_CONTROL, "RC", "Reset");
-    public static final Keybinding shiftMod = new Keybinding(GLFW.GLFW_KEY_LEFT_SHIFT, "SHFT", "Shift");
+    public static final Keybinding shiftMod = new Keybinding(GLFW.GLFW_KEY_LEFT_SHIFT, "", "Shift");
     public static final Keybinding ctrlMod = new Keybinding(GLFW.GLFW_KEY_LEFT_CONTROL, "LC", "Ctrl");
     public static final Keybinding altMod = new Keybinding(GLFW.GLFW_KEY_LEFT_ALT, "ALT", "Alt");
     public static final Keybinding cancelBuild = new Keybinding(GLFW.GLFW_KEY_DELETE, "DEL", "Cancel");
@@ -43,9 +43,9 @@ public class Keybindings {
     public static final Keybinding build = new Keybinding(GLFW.GLFW_KEY_B, "B", "Build");
     public static final Keybinding gather = new Keybinding(GLFW.GLFW_KEY_G, "G", "Gather");
     public static final Keybinding garrison = new Keybinding(GLFW.GLFW_KEY_N, "N", "Garrison");
-    public static final Keybinding chat = new Keybinding(GLFW.GLFW_KEY_ENTER, "ENTR", "Chat");
-    public static final Keybinding deselect = new Keybinding(GLFW.GLFW_KEY_GRAVE_ACCENT, "TILDE", "Deselect");
-    public static final Keybinding tab = new Keybinding(GLFW.GLFW_KEY_TAB, "TAB", "tab");
+    public static final Keybinding chat = new Keybinding(GLFW.GLFW_KEY_ENTER, "", "Chat");
+    public static final Keybinding deselect = new Keybinding(GLFW.GLFW_KEY_GRAVE_ACCENT, "~", "Deselect");
+    public static final Keybinding tab = new Keybinding(GLFW.GLFW_KEY_TAB, "", "tab");
 
     public static final Keybinding[] nums = {
         new Keybinding(GLFW.GLFW_KEY_0, "0", "0"),

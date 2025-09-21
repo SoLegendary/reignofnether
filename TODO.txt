@@ -35,13 +35,21 @@ CODE QUALITY
 Bugfixes
 --------
 [❌] Spectators can now see hero abilities as intended
+    - works when relogging, so do that on every rank up
 [❌] Militia don't convert back to villagers even without a nearby town center (with a captain?)
 [❌] Ravager artillery attacking buildings has too long a range
 [❌] Pillager shots are too inaccurate
+[❌] Building on top of a worker no longer cancels that units' commands
 [?] Check that avatar is not cancelled by being attacked
 
 [❌] Cheats persist when exiting a singleplayer world?
     - Maybe because logout from singleplayer code didn't run?
+
+[❌] Don't let farm blocks drop food when broken (potatoes, carrots, etc.)
+
+[❌] Sonic boom doing too low damage to buildings (should be 37.5 damage)
+
+[❌] when turning into a jockey, spider climb is turned back on
 
 Quality of Life
 ---------------
@@ -51,3 +59,4 @@ Quality of Life
 Balancing
 ---------
 
+[❌] raise witch potion projectile speed?

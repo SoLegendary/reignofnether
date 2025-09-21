@@ -314,14 +314,38 @@ public class ResourcesServerEvents {
         Player sendingPlayer = context.getSource().getPlayer();
         Player receivingPlayer = EntityArgument.getPlayer(context, "player");
         int amount = IntegerArgumentType.getInteger(context, "amount");
-        if (sendingPlayer == null)
+        if (sendingPlayer == null) {
             return 0;
-        String sendingPlayerName = sendingPlayer.getName().getString();
-        String receivingPlayerName = receivingPlayer.getName().getString();
+        } else {
+            String sendingPlayerName = sendingPlayer.getName().getString();
+            String receivingPlayerName = receivingPlayer.getName().getString();
+            return trySendingResources(sendingPlayerName, receivingPlayerName, resourceName, amount);
+        }
+    }
 
+    // send resources including any available when you don't have enough
+    public static void trySendingAnyResources(String receivingPlayerName, Resources sentResources) {
         Resources res = null;
         for (Resources resources : resourcesList)
-            if (resources.ownerName.equals(sendingPlayer.getName().getString()))
+            if (resources.ownerName.equals(sentResources.ownerName))
+                res = resources;
+        if (res != null) {
+            int foodAmount = Math.min(res.food, sentResources.food);
+            if (foodAmount > 0)
+                trySendingResources(sentResources.ownerName,receivingPlayerName, ResourceName.FOOD, foodAmount);
+            int woodAmount = Math.min(res.wood, sentResources.wood);
+            if (woodAmount > 0)
+                trySendingResources(sentResources.ownerName,receivingPlayerName, ResourceName.WOOD, woodAmount);
+            int oreAmount = Math.min(res.ore, sentResources.ore);
+            if (oreAmount > 0)
+                trySendingResources(sentResources.ownerName,receivingPlayerName, ResourceName.ORE, oreAmount);
+        }
+    }
+
+    public static int trySendingResources(String sendingPlayerName, String receivingPlayerName, ResourceName resourceName, int amount) {
+        Resources res = null;
+        for (Resources resources : resourcesList)
+            if (resources.ownerName.equals(sendingPlayerName))
                 res = resources;
         if (res == null)
             return 0;

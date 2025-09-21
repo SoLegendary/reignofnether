@@ -30,7 +30,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -670,5 +672,19 @@ public class MiscUtil {
     public static boolean isOnNetherTerrain(LivingEntity le) {
         return (le.getVehicle() != null && NetherBlocks.isNetherBlock(le.level(), le.getVehicle().getOnPos())) ||
                 (NetherBlocks.isNetherBlock(le.level(), le.getOnPos())) && !(le instanceof GhastUnit);
+    }
+
+    public static void runServerCommand(MinecraftServer server, String command) {
+        server.getCommands().performPrefixedCommand(
+                server.createCommandSourceStack(),
+                command
+        );
+    }
+
+    public static void runPlayerCommand(ServerPlayer player, String command) {
+        player.server.getCommands().performPrefixedCommand(
+                player.createCommandSourceStack(),
+                command
+        );
     }
 }

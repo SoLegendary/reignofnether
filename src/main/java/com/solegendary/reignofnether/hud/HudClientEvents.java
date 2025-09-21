@@ -84,6 +84,8 @@ import static com.solegendary.reignofnether.tutorial.TutorialClientEvents.helpBu
 import static com.solegendary.reignofnether.unit.UnitClientEvents.*;
 import static com.solegendary.reignofnether.util.MiscUtil.capitaliseAndSpace;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.hud.PlayerDisplayClientEvents.diplomacyButton;
+import static com.solegendary.reignofnether.hud.PlayerDisplayClientEvents.observerButton;
 
 public class HudClientEvents {
 
@@ -1577,6 +1579,24 @@ public class HudClientEvents {
             helpButton.render(evt.getGuiGraphics(), xi, yi, mouseX, mouseY);
             renderedButtons.add(helpButton);
         }
+        // -----------------------
+        // Observer Players Toggle
+        // -----------------------
+        else if (!observerButton.isHidden.get()) {
+            int xi = screenWidth - (observerButton.iconSize * 2);
+            int yi = 40;
+            observerButton.render(evt.getGuiGraphics(), xi, yi, mouseX, mouseY);
+            renderedButtons.add(observerButton);
+        }
+        // -----------------------
+        // Diplomacy Screen Toggle
+        // -----------------------
+        else if (!diplomacyButton.isHidden.get()) {
+            int xi = screenWidth - (diplomacyButton.iconSize * 2);
+            int yi = 40;
+            diplomacyButton.render(evt.getGuiGraphics(), xi, yi, mouseX, mouseY);
+            renderedButtons.add(diplomacyButton);
+        }
         // -----------
         // Chat button
         // -----------
@@ -1616,9 +1636,8 @@ public class HudClientEvents {
         // Button tooltips (has to be rendered last to be on top)
         // ------------------------------------------------------
         for (Button button : renderedButtons)
-            if (button.isMouseOver(mouseX, mouseY)) {
+            if (button.isMouseOver(mouseX, mouseY))
                 button.renderTooltip(evt.getGuiGraphics(), mouseX, mouseY);
-            }
 
         TutorialClientEvents.checkAndRenderNextAction(evt.getGuiGraphics(), renderedButtons);
     }

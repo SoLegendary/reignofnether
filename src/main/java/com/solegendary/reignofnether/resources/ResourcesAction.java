@@ -7,4 +7,5 @@ public enum ResourcesAction {
     ADD_SUBTRACT_INSTANT, // add/subtract the given resources instantly without showing the amount
     SHOW_WARNING, // shows a message on the screen that fades
     SHOW_FLOATING_TEXT, // renders a floating message in the world that flies up and fades
+    SEND_RESOURCES
 }

@@ -10,7 +10,7 @@ public class AlliancesClient {
     private static final Minecraft MC = Minecraft.getInstance();
 
     private static final Map<String, Set<String>> alliances = new HashMap<>();
-
+    public static final Set<String> pendingAlliances = new HashSet<>();
     public static final HashSet<String> playersWithAlliedControl = new HashSet<>();
 
     public static boolean canControlAlly(LivingEntity entity) {
@@ -28,6 +28,17 @@ public class AlliancesClient {
     public static void addAlliance(String owner1, String owner2) {
         alliances.computeIfAbsent(owner1, k -> new HashSet<>()).add(owner2);
         alliances.computeIfAbsent(owner2, k -> new HashSet<>()).add(owner1);
+        pendingAlliances.removeIf(p -> p.equals(owner1) || p.equals(owner2));
+    }
+
+    public static void addPendingAlliance(String toPlayer, String fromPlayer) {
+        if (MC.player != null && MC.player.getName().getString().equals(toPlayer))
+            pendingAlliances.add(fromPlayer);
+    }
+
+    public static void cancelPendingAlliance(String toPlayer, String fromPlayer) {
+        if (MC.player != null && MC.player.getName().getString().equals(toPlayer))
+            pendingAlliances.removeIf(p -> p.equals(fromPlayer));
     }
 
     public static void removeAlliance(String owner1, String owner2) {

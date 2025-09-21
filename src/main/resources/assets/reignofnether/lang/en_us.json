@@ -1267,5 +1267,16 @@
     "unitstats.reignofnether.armour_ranged": "%d%% vs ranged",
     "unitstats.reignofnether.armour_magic": "%d%% vs magic",
     "unitstats.reignofnether.armour_all": "%d%% vs everything",
-    "unitstats.reignofnether.movement_speed": "Movement speed"
+    "unitstats.reignofnether.movement_speed": "Movement speed",
+
+    "alliances.reignofnether.tooltip.change_resources": "Left/right click to adjust",
+    "alliances.reignofnether.tooltip.confirm_send_resources": "Confirm",
+    "alliances.reignofnether.tooltip.cancel_send_resources": "Cancel",
+    "alliances.reignofnether.tooltip.request_alliance": "Request Alliance",
+    "alliances.reignofnether.tooltip.cancel_request_alliance": "Cancel Request",
+    "alliances.reignofnether.tooltip.accept_alliance": "Accept Alliance",
+    "alliances.reignofnether.tooltip.disband_alliance": "Disband Alliance",
+
+    "alliances.reignofnether.tooltip.toggle_observer_player_displays": "Observer Menu (Tab)",
+    "alliances.reignofnether.tooltip.toggle_diplomacy_player_displays": "Diplomacy Menu (Tab)"
 }

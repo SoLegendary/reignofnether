@@ -4,9 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.AbilityServerboundPacket;
 import com.solegendary.reignofnether.ability.EnchantAbilityServerboundPacket;
-import com.solegendary.reignofnether.alliance.AllianceClientboundAddPacket;
-import com.solegendary.reignofnether.alliance.AllianceClientboundControlPacket;
-import com.solegendary.reignofnether.alliance.AllianceClientboundRemovePacket;
+import com.solegendary.reignofnether.alliance.*;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
@@ -29,6 +27,7 @@ import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServerboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
+import com.solegendary.reignofnether.resources.ResourcesServerboundPacket;
 import com.solegendary.reignofnether.sandbox.SandboxServerboundPacket;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPosClientboundPacket;
@@ -143,6 +142,12 @@ public final class PacketHandler {
                 .encoder(ResourcesClientboundPacket::encode).decoder(ResourcesClientboundPacket::new)
                 .consumerMainThread(ResourcesClientboundPacket::handle).add();
 
+        INSTANCE.messageBuilder(ResourcesServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ResourcesServerboundPacket::encode)
+                .decoder(ResourcesServerboundPacket::new)
+                .consumerMainThread(ResourcesServerboundPacket::handle)
+                .add();
+
         INSTANCE.messageBuilder(AbilityClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(AbilityClientboundPacket::encode).decoder(AbilityClientboundPacket::new)
                 .consumerMainThread(AbilityClientboundPacket::handle).add();
@@ -175,22 +180,17 @@ public final class PacketHandler {
                 .encoder(TutorialServerboundPacket::encode).decoder(TutorialServerboundPacket::new)
                 .consumerMainThread(TutorialServerboundPacket::handle).add();
 
-        INSTANCE.messageBuilder(AllianceClientboundAddPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(AllianceClientboundAddPacket::toBytes)
-                .decoder(AllianceClientboundAddPacket::new)
-                .consumerMainThread(AllianceClientboundAddPacket::handle)
+        INSTANCE.messageBuilder(AllianceClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(AllianceClientboundPacket::encode)
+                .decoder(AllianceClientboundPacket::new)
+                .consumerMainThread(AllianceClientboundPacket::handle)
                 .add();
 
-        INSTANCE.messageBuilder(AllianceClientboundRemovePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(AllianceClientboundRemovePacket::toBytes)
-                .decoder(AllianceClientboundRemovePacket::new)
-                .consumerMainThread(AllianceClientboundRemovePacket::handle)
-                .add();
 
-        INSTANCE.messageBuilder(AllianceClientboundControlPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(AllianceClientboundControlPacket::toBytes)
-                .decoder(AllianceClientboundControlPacket::new)
-                .consumerMainThread(AllianceClientboundControlPacket::handle)
+        INSTANCE.messageBuilder(AllianceServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(AllianceServerboundPacket::encode)
+                .decoder(AllianceServerboundPacket::new)
+                .consumerMainThread(AllianceServerboundPacket::handle)
                 .add();
 
         INSTANCE.messageBuilder(GameModeServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)

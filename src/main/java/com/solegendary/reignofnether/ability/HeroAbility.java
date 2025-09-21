@@ -89,7 +89,7 @@ public abstract class HeroAbility extends Ability {
     protected Button getRankUpButtonProtected(String name, ResourceLocation resourceLocation) {
         Button button = new Button(name,
             14,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/level_up_skill.png"),
+            new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/corner_plus.png"),
             (Keybinding) null,
             () -> false,
             () -> !hero.isRankUpMenuOpen() || rank >= maxRank,
