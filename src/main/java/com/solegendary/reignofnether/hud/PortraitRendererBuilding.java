@@ -73,7 +73,7 @@ class PortraitRendererBuilding {
                 x+4,y-9,
                 0xFFFFFFFF
         );
-        int bgCol = 0x90000000 | PlayerColors.getPlayerDisplayColor(building.ownerName);
+        int bgCol = PlayerColors.getPlayerPortraitDisplayColorHex(building.ownerName);
         MyRenderer.renderFrameWithBg(guiGraphics, x, y,
                 frameWidth,
                 frameHeight,

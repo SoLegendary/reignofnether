@@ -82,6 +82,15 @@ public class PlayerClientEvents {
         return player.id;
     }
 
+    public static Integer getPlayerIndex(String playerName) {
+        var player = getPlayer(playerName);
+        if (player == null) {
+            return null;
+        }
+
+        return rtsPlayers.indexOf(player);
+    }
+
     public static int getPlayerMapColorId(String playerName) {
         var player = getPlayer(playerName);
         if (player == null) {

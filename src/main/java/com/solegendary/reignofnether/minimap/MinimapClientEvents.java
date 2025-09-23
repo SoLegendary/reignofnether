@@ -13,7 +13,6 @@ import com.solegendary.reignofnether.building.buildings.placements.BridgePlaceme
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.Button;
-import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -25,7 +24,6 @@ import com.solegendary.reignofnether.time.NightCircleMode;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
-import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -584,7 +582,7 @@ public class MinimapClientEvents {
 
             int xc = building.centrePos.getX() + (BUILDING_RADIUS / 2);
             int zc = building.centrePos.getZ() + (BUILDING_RADIUS / 2);
-            var rgb = PlayerColors.getPlayerDisplayColor(building.ownerName);
+            var rgb = PlayerColors.getPlayerDisplayColorHex(building.ownerName);
             if (!FogOfWarClientEvents.isBuildingInBrightChunk(building)) {
                 var color = new Color(rgb);
                 color = new Color(color.getRed() / 2, color.getGreen() / 2, color.getBlue() / 2);
@@ -614,7 +612,7 @@ public class MinimapClientEvents {
         for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
             if (!FogOfWarClientEvents.isInBrightChunk(entity))
                 continue;
-            var colorHex = PlayerColors.getPlayerDisplayColor(entity instanceof Unit unit ? unit.getOwnerName() : null);
+            var colorHex = PlayerColors.getPlayerDisplayColorHex(entity instanceof Unit unit ? unit.getOwnerName() : null);
             drawUnitOnMap(entity.getOnPos().getX(),
                     entity.getOnPos().getZ(),
                     colorHex
@@ -625,7 +623,7 @@ public class MinimapClientEvents {
                 continue;
 
             String unitOwnerName = minimapUnit.ownerName;
-            var colorHex = PlayerColors.getPlayerDisplayColor(unitOwnerName);
+            var colorHex = PlayerColors.getPlayerDisplayColorHex(unitOwnerName);
 
             drawUnitOnMap(
                     minimapUnit.pos.getX(),
@@ -735,7 +733,7 @@ public class MinimapClientEvents {
                         if (!(x0 < START_POS_THICKNESS || x0 >= (START_POS_RADIUS * 2) - START_POS_THICKNESS ||
                                 z0 < START_POS_THICKNESS || z0 >= (START_POS_RADIUS * 2) - START_POS_THICKNESS
                         )) {
-                            rgb = PlayerColors.getPlayerDisplayColor(startPos.playerName);
+                            rgb = PlayerColors.getPlayerDisplayColorHex(startPos.playerName);
                             if (startPos.faction == Faction.NONE)
                                 rgb = 0xFFFF00;
                         }

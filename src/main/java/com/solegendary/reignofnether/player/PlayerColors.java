@@ -22,11 +22,18 @@ public class PlayerColors {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
-    public static boolean usePlayerTeamColor() {
+    /**
+     * Indicates which color mode is used. This affects unit/buildings outlines, as well as some UI elements.
+     * @return true if using player colors, false if using relation colors
+     */
+    public static boolean isUsingPlayerColors() {
         return ReignOfNetherClientConfigs.USE_PLAYER_COLORS.get();
     }
 
-    public static void togglePlayerTeamColor() {
+    /**
+     * Switch color mode between Player Colors and Relation Colors.
+     */
+    public static void toggleColorMode() {
         ReignOfNetherClientConfigs.USE_PLAYER_COLORS.set(!ReignOfNetherClientConfigs.USE_PLAYER_COLORS.get());
     }
 
@@ -64,6 +71,7 @@ public class PlayerColors {
         }
     }
 
+    // colors available for players to choose - they all have an associated startBlock
     public static final PlayerColor COLOR_RED = PlayerColor.fromName(MapColor.COLOR_RED.id, 0xA12722, "red");
     public static final PlayerColor COLOR_BLUE = PlayerColor.fromName(MapColor.COLOR_BLUE.id, 0x35399D, "blue");
     public static final PlayerColor COLOR_CYAN = PlayerColor.fromName(MapColor.COLOR_CYAN.id, 0x158991, "cyan");
@@ -72,16 +80,16 @@ public class PlayerColors {
     public static final PlayerColor COLOR_ORANGE = PlayerColor.fromName(MapColor.COLOR_ORANGE.id, 0xF07613, "orange");
     public static final PlayerColor COLOR_LIME = PlayerColor.fromName(MapColor.COLOR_LIGHT_GREEN.id, 0x70B919, "lime");
     public static final PlayerColor COLOR_PINK = PlayerColor.fromName(MapColor.COLOR_PINK.id, 0xED8DAC, "pink");
-    public static final PlayerColor COLOR_LIGHT_GREY = PlayerColor.fromName(MapColor.COLOR_LIGHT_GRAY.id, 0x8E8E86, "light_gray");
+    public static final PlayerColor COLOR_MAGENTA = PlayerColor.fromName(MapColor.COLOR_MAGENTA.id, 0xBD44B3, "magenta");
     public static final PlayerColor COLOR_LIGHT_BLUE = PlayerColor.fromName(MapColor.COLOR_LIGHT_BLUE.id, 0x3AAFD9, "light_blue");
     public static final PlayerColor COLOR_GREEN = PlayerColor.fromName(MapColor.COLOR_GREEN.id, 0x546D1B, "green");
     public static final PlayerColor COLOR_BROWN = PlayerColor.fromName(MapColor.COLOR_BROWN.id, 0x724728, "brown");
-    public static final PlayerColor COLOR_GRAY = PlayerColor.fromName(MapColor.COLOR_GRAY.id, 0x3E4447, "gray");
-    public static final PlayerColor COLOR_MAGENTA = PlayerColor.fromName(MapColor.COLOR_MAGENTA.id, 0xBD44B3, "magenta");
     public static final int PLAYER_COLOR_COUNT = PlayerColor.colourCount;
 
-    public static final PlayerColor COLOR_BLACK = PlayerColor.fromName(MapColor.COLOR_BLACK.id, 0x141519, "black"); // should use for hostile creeps?
-    public static final PlayerColor COLOR_WHITE = PlayerColor.fromName(-1, 0xE9ECEC, "white"); // fallback color
+    public static final PlayerColor COLOR_LIGHT_GREY = PlayerColor.fromName(MapColor.COLOR_LIGHT_GRAY.id, 0x8E8E86, "light_gray");
+    public static final PlayerColor COLOR_GRAY = PlayerColor.fromName(MapColor.COLOR_GRAY.id, 0x3E4447, "gray");
+    public static final PlayerColor COLOR_BLACK = PlayerColor.fromName(MapColor.COLOR_BLACK.id, 0x141519, "black");
+    public static final PlayerColor COLOR_WHITE = PlayerColor.fromName(MapColor.SNOW.id, 0xE9ECEC, "white");
     public static final int PLAYER_COLOR_SPECIAL_COUNT = PlayerColor.colourCount;
 
     public static final PlayerColor COLOR_OWNED = new PlayerColor(-1, 0x33FF33, "owned", new ResourceLocation("minecraft", "textures/block/lime_wool.png"), COLOR_LIME.bedIcon);
@@ -99,13 +107,13 @@ public class PlayerColors {
             COLOR_ORANGE,
             COLOR_LIME,
             COLOR_PINK,
-            COLOR_LIGHT_GREY,
+            COLOR_MAGENTA,
             COLOR_LIGHT_BLUE,
             COLOR_GREEN,
             COLOR_BROWN,
-            COLOR_GRAY,
-            COLOR_MAGENTA,
 
+            COLOR_LIGHT_GREY,
+            COLOR_GRAY,
             COLOR_BLACK,
             COLOR_WHITE,
 
@@ -116,7 +124,7 @@ public class PlayerColors {
     };
 
     private static HashMap<String, Integer> playerColorId = new HashMap<>();
-    private static int getPlayerColorId(String playerName) {
+    public static int getPlayerColorId(String playerName) {
         if (playerName == null || playerName.isBlank()) {
             // fallback color - white
             return COLOR_WHITE.id;
@@ -130,18 +138,19 @@ public class PlayerColors {
 
         // find the colorId for the player and cache it
         var mapColorId = PlayerClientEvents.getPlayerMapColorId(playerName);
-        if (mapColorId > 0) {
-            var color = mappedColors.getOrDefault(mapColorId, null);
+        if (mapColorId > 0 && mappedColors.containsKey(mapColorId)) {
+            var color = mappedColors.get(mapColorId);
             playerColorId.put(playerName, color.id); // only cache a real id
             return color.id;
         }
 
-        var playerId = PlayerClientEvents.getPlayerId(playerName);
+        var playerId = PlayerClientEvents.getPlayerIndex(playerName);
         if (playerId != null) {
-            playerId = Math.abs(playerId) % PLAYER_COLOR_COUNT; // we shift up for AIs that use negative ids
+            playerId = playerId % PLAYER_COLOR_COUNT;
             playerColorId.put(playerName, playerId); // only cache a real id
             return playerId;
         }
+
         // fallback color - white
         return COLOR_WHITE.id;
     }
@@ -185,8 +194,8 @@ public class PlayerColors {
         return colors[colorId].bedIcon;
     }
 
-    public static int getPlayerDisplayColor(String playerName) {
-        if (PlayerColors.usePlayerTeamColor()) {
+    public static int getPlayerDisplayColorHex(String playerName) {
+        if (PlayerColors.isUsingPlayerColors()) {
             return PlayerColors.getPlayerColorHex(playerName);
         }
 
@@ -203,22 +212,40 @@ public class PlayerColors {
         };
     }
 
+    public static int getPlayerPortraitDisplayColorHex(String playerName) {
+        if (PlayerColors.isUsingPlayerColors()) {
+            return 0x90000000 | PlayerColors.getPlayerColorHex(playerName);
+        }
+
+        // fall back on alliance color
+        Relationship unitRs = getPlayerToPlayerRelationship(playerName);
+        return switch (unitRs) {
+            case OWNED -> 0x90000000;
+            case FRIENDLY ->
+                    0x90000000 | colors[ReignOfNetherClientConfigs.PLAYER_COLOR_ALLY.get() % PLAYER_COLOR_TOTAL_COUNT].hexCode;
+            case NEUTRAL ->
+                    0x90000000 | colors[ReignOfNetherClientConfigs.PLAYER_COLOR_NEUTRAL.get() % PLAYER_COLOR_TOTAL_COUNT].hexCode;
+            case HOSTILE ->
+                    0x90000000 | colors[ReignOfNetherClientConfigs.PLAYER_COLOR_ENEMY.get() % PLAYER_COLOR_TOTAL_COUNT].hexCode;
+        };
+    }
+
     public static Button getToggleTeamColorsButton() {
         return new Button(I18n.get("hud.orthoview.reignofnether.toggle_team_colors"),
                 14,
-                usePlayerTeamColor()
-                        ? PlayerColors.getPlayerColorIcon(MC.player.getName().getString())
-                        : new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sword_and_bow.png"),
+                isUsingPlayerColors()
+                        ? new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/toggle_color_mode_players.png")
+                        : new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/toggle_color_mode_relations.png"),
                 new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !MinimapClientEvents.isLargeMap(),
                 () -> true,
-                PlayerColors::togglePlayerTeamColor,
+                PlayerColors::toggleColorMode,
                 null,
                 List.of(
-                        fcs(I18n.get("hud.orthoview.reignofnether.using_player_team_color"), usePlayerTeamColor()),
-                        fcs(I18n.get("hud.orthoview.reignofnether.using_relation_color"), !usePlayerTeamColor()),
+                        fcs(I18n.get("hud.orthoview.reignofnether.using_player_team_color"), isUsingPlayerColors()),
+                        fcs(I18n.get("hud.orthoview.reignofnether.using_relation_color"), !isUsingPlayerColors()),
                         fcs(I18n.get("hud.orthoview.reignofnether.color_type_toggle"), false)
                 )
         );

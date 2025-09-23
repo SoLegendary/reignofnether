@@ -27,7 +27,6 @@ import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -68,7 +67,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.solegendary.reignofnether.hud.HudClientEvents.*;
-import static com.solegendary.reignofnether.unit.Checkpoint.CHECKPOINT_TICKS_FADE;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
 
 public class BuildingClientEvents {
@@ -623,30 +621,28 @@ public class BuildingClientEvents {
 
             AABB aabb = new AABB(building.minCorner, building.maxCorner.offset(1, 1, 1));
 
-            var colorHex = new Color(PlayerColors.getPlayerDisplayColor(building.ownerName));
+            var colorHex = new Color(PlayerColors.getPlayerDisplayColorHex(building.ownerName));
             float r = colorHex.getRed() / 255.0f;
             float g = colorHex.getGreen() / 255.0f;
             float b = colorHex.getBlue() / 255.0f;
 
             if (isInBrightChunk) {
                 if (selectedBuildings.contains(building)) {
-                    MyRenderer.drawLineBox(evt.getPoseStack(), aabb, r, g, b, 1.0f);
+                    MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
                 } else if (building.equals(preselectedBuilding) && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
                     if (hudSelectedEntity instanceof WorkerUnit && MiscUtil.isRightClickDown(MC)) {
-                        MyRenderer.drawLineBox(evt.getPoseStack(), aabb, r, g, b, 1.0f);
+                        MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
                     } else {
                         MyRenderer.drawLineBox(evt.getPoseStack(),
                                 aabb,
-                                r,
-                                g,
-                                b,
+                                1.0f, 1.0f, 1.0f,
                                 MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f
                         );
                     }
                 }
             }
 
-            MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, r, g, b, 0.2f);
+            MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, r, g, b, 0.5f);
         }
 
         // draw rally points and lines

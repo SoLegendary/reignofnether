@@ -45,7 +45,7 @@ public class ObserverPlayerDisplay {
         }
     }
 
-    private static final int PLAYER_FRAME_WIDTH = Button.DEFAULT_ICON_FRAME_SIZE * 5; // frame containing player name + player icon + race icon
+    private static final int PLAYER_FRAME_WIDTH = Button.DEFAULT_ICON_FRAME_SIZE * 6; // frame containing player name + player icon + race icon
     private static final int PLAYER_VALUE_WIDTH = Button.DEFAULT_ICON_FRAME_SIZE * 4; // name of the player
     private static final int RESOURCE_FRAME_WIDTH = Button.DEFAULT_ICON_FRAME_SIZE * 3; // frame containing a resource value + icon
     private static final int RESOURCE_VALUE_WIDTH = Button.DEFAULT_ICON_FRAME_SIZE * 2; // value of the resource
@@ -59,7 +59,7 @@ public class ObserverPlayerDisplay {
     public static final ResourceLocation factionPiglinIconLocation = new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
 
     private void renderPlayer(GuiGraphics guiGraphics, int x, int y) {
-
+        // render colored background
         MyRenderer.renderFrameWithBg(guiGraphics,
                 x,
                 y,
@@ -68,42 +68,7 @@ public class ObserverPlayerDisplay {
                 this.backgroundColor
         );
 
-        if (this.player != null && this.player.isSkinLoaded()) {
-            var iconLocation = player.getSkinTextureLocation();
-            //RenderSystem.setShaderTexture(0, iconLocation);
-            // draw base layer
-            guiGraphics.blit(iconLocation,
-                    x + 4, y + 4,
-                    Button.DEFAULT_ICON_SIZE, Button.DEFAULT_ICON_SIZE,
-                    8.0f, 8.0f, // where on texture to start drawing from
-                    8, 8, // dimensions of blit texture
-                    64, 64 // size of texture itself (if < dimensions, texture is repeated)
-            );
-            // draw hat
-            guiGraphics.blit(iconLocation,
-                    x + 4, y + 4,
-                    Button.DEFAULT_ICON_SIZE, Button.DEFAULT_ICON_SIZE,
-                    40.0f, 8.0f, // where on texture to start drawing from
-                    8, 8, // dimensions of blit texture
-                    64, 64 // size of texture itself (if < dimensions, texture is repeated)
-            );
-        } else {
-            MyRenderer.renderIcon(guiGraphics,
-                    defaultIconLocation,
-                    x + 4,
-                    y + 4,
-                    Button.DEFAULT_ICON_SIZE
-            );
-        }
-
-        guiGraphics.drawString(
-                MC.font,
-                this.resources.ownerName,
-                x + (Button.DEFAULT_ICON_FRAME_SIZE),
-                y + (Button.DEFAULT_ICON_SIZE / 2) + 1,
-                0xFFFFFF
-        );
-
+        // render faction icon
         ResourceLocation factionIcon;
         switch (this.rtsPlayer.faction) {
             case VILLAGERS -> factionIcon = factionVillagerIconLocation;
@@ -114,11 +79,51 @@ public class ObserverPlayerDisplay {
         if(factionIcon != null) {
             MyRenderer.renderIcon(guiGraphics,
                     factionIcon,
-                    x + 4 + PLAYER_FRAME_WIDTH - Button.DEFAULT_ICON_FRAME_SIZE,
+                    x + 4,
                     y + 4,
                     Button.DEFAULT_ICON_SIZE
             );
         }
+
+        // render player head
+        if (this.player != null && this.player.isSkinLoaded()) {
+            var iconLocation = player.getSkinTextureLocation();
+            //RenderSystem.setShaderTexture(0, iconLocation);
+            // draw base layer
+            guiGraphics.blit(iconLocation,
+                    x + 4 + Button.DEFAULT_ICON_FRAME_SIZE,
+                    y + 4,
+                    Button.DEFAULT_ICON_SIZE, Button.DEFAULT_ICON_SIZE,
+                    8.0f, 8.0f, // where on texture to start drawing from
+                    8, 8, // dimensions of blit texture
+                    64, 64 // size of texture itself (if < dimensions, texture is repeated)
+            );
+            // draw hat
+            guiGraphics.blit(iconLocation,
+                    x + 4 + Button.DEFAULT_ICON_FRAME_SIZE,
+                    y + 4,
+                    Button.DEFAULT_ICON_SIZE, Button.DEFAULT_ICON_SIZE,
+                    40.0f, 8.0f, // where on texture to start drawing from
+                    8, 8, // dimensions of blit texture
+                    64, 64 // size of texture itself (if < dimensions, texture is repeated)
+            );
+        } else {
+            MyRenderer.renderIcon(guiGraphics,
+                    defaultIconLocation,
+                    x + 4 + Button.DEFAULT_ICON_FRAME_SIZE,
+                    y + 4,
+                    Button.DEFAULT_ICON_SIZE
+            );
+        }
+
+        // render player name
+        guiGraphics.drawString(
+                MC.font,
+                this.resources.ownerName,
+                x + (Button.DEFAULT_ICON_FRAME_SIZE * 2),
+                y + (Button.DEFAULT_ICON_SIZE / 2) + 1,
+                0xFFFFFF
+        );
     }
 
     private final static int frameBgColour = 0xA0000000;
@@ -240,10 +245,10 @@ public class ObserverPlayerDisplay {
     }
 
     public void render(GuiGraphics guiGraphics, int x, int y) {
-        var baseX = x;
-        Integer color = PlayerColors.getPlayerColorHex(this.rtsPlayer.name);
-        this.color = color != null ? 0xFF000000 | color : 0xFF000000;
-        this.backgroundColor = color != null ? 0xA0000000 | color : 0xA0000000;
+        //var baseX = x;
+        int playerColorHex = PlayerColors.getPlayerColorHex(this.rtsPlayer.name);
+        this.color = 0xFF000000 | playerColorHex;
+        this.backgroundColor = 0xA0000000 | playerColorHex;
         this.renderPlayer(guiGraphics, x, y); // icon, name
         this.renderResource(guiGraphics, x += PLAYER_FRAME_WIDTH, y, ResourceName.FOOD);
         this.renderResource(guiGraphics, x += RESOURCE_FRAME_WIDTH, y, ResourceName.WOOD);
@@ -251,14 +256,14 @@ public class ObserverPlayerDisplay {
         this.renderResource(guiGraphics, x += RESOURCE_FRAME_WIDTH, y, ResourceName.NONE); // supply
         this.renderSupplyDetail(guiGraphics, x += RESOURCE_FRAME_WIDTH, y);
 
-        x = baseX;
-        guiGraphics.fill(x - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
-        guiGraphics.fill((x += PLAYER_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
-        guiGraphics.fill((x += RESOURCE_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
-        guiGraphics.fill((x += RESOURCE_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
-        guiGraphics.fill((x += RESOURCE_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
-        guiGraphics.fill((x += RESOURCE_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
-        guiGraphics.fill((x += SUPPLY_DETAIL_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        //x = baseX;
+        //guiGraphics.fill(x - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        //guiGraphics.fill((x += PLAYER_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        //guiGraphics.fill((x += RESOURCE_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        //guiGraphics.fill((x += RESOURCE_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        //guiGraphics.fill((x += RESOURCE_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        //guiGraphics.fill((x += RESOURCE_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
+        //guiGraphics.fill((x += SUPPLY_DETAIL_FRAME_WIDTH) - 2, y + 2, x + 2, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, this.color);
         //guiGraphics.fill(baseX, y + Button.DEFAULT_ICON_FRAME_SIZE - 2, baseX + DISPLAY_WIDTH, y + Button.DEFAULT_ICON_FRAME_SIZE, this.color);
     }
 }

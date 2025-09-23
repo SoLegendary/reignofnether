@@ -765,22 +765,15 @@ public class UnitClientEvents {
                         entityAABB.setMaxY(entityAABB.maxY + 0.8f);
                     }
 
-                    var colorHex = entity instanceof Unit unit
-                            ? new Color(PlayerColors.getPlayerDisplayColor(unit.getOwnerName()))
-                            : new Color(0xFFFFFF, false);
-                    float r = colorHex.getRed() / 255.0f;
-                    float g = colorHex.getGreen() / 255.0f;
-                    float b = colorHex.getBlue() / 255.0f;
-
                     boolean isPreselected = preselectedUnits.contains(entity);
                     boolean isSelected = selectedUnits.contains(entity);
 
                     if (isPreselected && isLeftClickAttack && !targetingSelf && !isMouseOverAnyButtonOrHud)
                         MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.3f, 0.3f, 1.0f, false);
                     else if (isSelected)
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, r, g, b, 1.0f, false);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 1.0f, 1.0f, false);
                     else if (isPreselected && !isMouseOverAnyButtonOrHud)
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, r, g, b, isRightClickDown ? 1.0f : 0.5f, false);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 1.0f, isRightClickDown ? 1.0f : 0.5f, false);
                 }
             }
             
@@ -803,7 +796,7 @@ public class UnitClientEvents {
                 boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
 
                 var colorHex = entity instanceof Unit unit
-                        ? new Color(PlayerColors.getPlayerDisplayColor(unit.getOwnerName()))
+                        ? new Color(PlayerColors.getPlayerDisplayColorHex(unit.getOwnerName()))
                         : new Color(0xFFFFFF, false);
                 float r = colorHex.getRed() / 255.0f;
                 float g = colorHex.getGreen() / 255.0f;
@@ -811,8 +804,10 @@ public class UnitClientEvents {
 
                 // always-shown highlights to indicate unit relationships
                 if (OrthoviewClientEvents.isEnabled()) {
-                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, r, g, b, alpha, excludeMaxY);
+                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 1.0f, alpha, excludeMaxY);
                 }
+
+                MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, r, g, b, 0.5f);
             }
 
             // render items in front of face for eating units

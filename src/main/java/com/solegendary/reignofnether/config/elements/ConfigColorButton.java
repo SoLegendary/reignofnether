@@ -4,19 +4,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class ConfigColorButton implements Renderable, GuiEventListener, NarratableEntry {
 
@@ -40,7 +37,7 @@ public class ConfigColorButton implements Renderable, GuiEventListener, Narratab
         var hovering = isMouseOver(pMouseX, pMouseY);
         var texture = PlayerColors.getColorIcon(configValue.get());
 
-        if (!hovering && PlayerColors.usePlayerTeamColor()) {
+        if (!hovering && PlayerColors.isUsingPlayerColors()) {
             RenderSystem.setShaderColor(0.5f, 0.5f, 0.5f, 0.5f);
         }
 
