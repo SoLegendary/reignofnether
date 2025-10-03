@@ -129,12 +129,12 @@ public class SoulSiphonPassive extends HeroAbility {
     }
 
     // returns whether the consumption was successful
-    public boolean consumeSoulsForCast(HeroUnit unit) {
-        if (isAutocasting(unit) && souls >= soulsPerCast) {
+    public boolean consumeSoulsForCast(HeroUnit hero) {
+        if (isAutocasting(hero) && souls >= soulsPerCast) {
             souls -= soulsPerCast;
-            if (!level.isClientSide())
+            if (!hero.level().isClientSide())
                 AbilityClientboundPacket.doAbility(((LivingEntity) hero).getId(), UnitAction.SOUL_SIPHON_UPDATE, souls);
-            addUnitPoofs((int) (soulsPerCast * 2));
+            addUnitPoofs((int) (soulsPerCast * 2), hero);
             return true;
         }
         return false;
@@ -142,7 +142,7 @@ public class SoulSiphonPassive extends HeroAbility {
 
     // consume souls for health
     @Override
-    public void use(Level level, Unit unitUsing, BlockPos targetBp) {
+    public void use(Level level, Unit hero, BlockPos targetBp) {
         int soulsConsumed = (int) Math.min(souls, soulsConsumedForHealth);
         if (soulsConsumed > 0) {
             LivingEntity entity = (LivingEntity) hero;
@@ -152,18 +152,18 @@ public class SoulSiphonPassive extends HeroAbility {
                 UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.CAST_SPELL, entity);
             }
             entity.heal(soulsConsumed * healthPerSoul);
-            addUnitPoofs(soulsConsumed * 2);
+            addUnitPoofs(soulsConsumed * 2, hero);
         }
     }
 
-    private void addUnitPoofs(int amount) {
+    private void addUnitPoofs(int amount, Unit hero) {
         RandomSource rand = RandomSource.create();
         LivingEntity entity = (LivingEntity) hero;
         for(int j = 0; j < amount; ++j) {
             double d0 = rand.nextGaussian() * 0.2;
             double d1 = rand.nextGaussian() * 0.2;
             double d2 = rand.nextGaussian() * 0.2;
-            level.addParticle(ParticleTypes.POOF, entity.getX(), entity.getY(), entity.getZ(), d0, d1, d2);
+            hero.level().addParticle(ParticleTypes.POOF, entity.getX(), entity.getY(), entity.getZ(), d0, d1, d2);
         }
     }
 

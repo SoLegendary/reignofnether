@@ -61,7 +61,6 @@ public class ResearchSpiderWebs extends ProductionItem {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("research.reignofnether.sticky_webbing.tooltip3"), Style.EMPTY)
                 ),
-                prodBuilding,
                 this
         );
     }

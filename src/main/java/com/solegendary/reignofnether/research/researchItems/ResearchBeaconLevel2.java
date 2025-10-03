@@ -59,7 +59,6 @@ public class ResearchBeaconLevel2 extends ProductionItem {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("research.reignofnether.beacon_level_win"), Style.EMPTY)
                 ),
-                prodBuilding,
                 this
         );
     }

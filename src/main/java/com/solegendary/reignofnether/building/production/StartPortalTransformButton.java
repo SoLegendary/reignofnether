@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 public class StartPortalTransformButton extends StartProductionButton {
     public StartPortalTransformButton(String name, ResourceLocation rl, Keybinding hotkey, Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, List<FormattedCharSequence> tooltipLines, ProductionPlacement placement, ProductionItem production) {
-        super(name, rl, hotkey, isHidden, isEnabled, tooltipLines, placement, production);
+        super(name, rl, hotkey, isHidden, isEnabled, tooltipLines, production);
 
         Runnable startTransform = onLeftClick;
         onLeftClick = () -> {
@@ -22,7 +22,7 @@ public class StartPortalTransformButton extends StartProductionButton {
     }
 
     public StartPortalTransformButton(String name, ResourceLocation iconRl, ResourceLocation frameRl, Keybinding hotkey, Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, List<FormattedCharSequence> tooltipLines, ProductionPlacement placement, ProductionItem production) {
-        super(name, iconRl, frameRl, hotkey, isHidden, isEnabled, tooltipLines, placement, production);
+        super(name, iconRl, frameRl, hotkey, isHidden, isEnabled, tooltipLines, production);
 
         Runnable startTransform = onLeftClick;
         onLeftClick = () -> {

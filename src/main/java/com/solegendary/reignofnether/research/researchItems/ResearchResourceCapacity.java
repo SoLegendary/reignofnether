@@ -76,7 +76,6 @@ public class ResearchResourceCapacity extends ProductionItem {
                     Style.EMPTY
                 )
             ),
-            prodBuilding,
             this
         );
     }

@@ -100,8 +100,7 @@ public class ZombieProd extends ProductionItem {
                     FormattedCharSequence.forward("", Style.EMPTY),
                     FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie.tooltip2"), Style.EMPTY)
                 ),
-                prodBuilding,
-                ProductionItems.ZOMBIE
+                this
         );
     }
 

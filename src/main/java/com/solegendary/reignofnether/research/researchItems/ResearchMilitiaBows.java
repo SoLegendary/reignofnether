@@ -59,7 +59,6 @@ public class ResearchMilitiaBows extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.militia_bows.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.militia_bows.tooltip2"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

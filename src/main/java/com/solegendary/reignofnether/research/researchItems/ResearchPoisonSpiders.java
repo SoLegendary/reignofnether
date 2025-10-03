@@ -76,7 +76,6 @@ public class ResearchPoisonSpiders extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.research_poison_spiders.tooltip3"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

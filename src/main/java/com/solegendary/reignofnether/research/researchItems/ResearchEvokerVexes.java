@@ -58,7 +58,6 @@ public class ResearchEvokerVexes extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.evoker_vexes.tooltip1"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

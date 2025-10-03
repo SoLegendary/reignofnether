@@ -68,7 +68,6 @@ public class ResearchSilverfish extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.research_silverfish.tooltip4"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

@@ -79,8 +79,7 @@ public class HoglinProd extends ProductionItem {
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.HOGLIN_STABLES),
                 tooltipLines,
-                prodBuilding,
-                ProductionItems.HOGLIN
+                this
         );
     }
 

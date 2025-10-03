@@ -82,8 +82,7 @@ public class SkeletonProd extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.skeleton.tooltip2"), Style.EMPTY)
             ),
-            prodBuilding,
-            ProductionItems.SKELETON
+            this
         );
     }
 

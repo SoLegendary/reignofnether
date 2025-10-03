@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
+import com.solegendary.reignofnether.ability.abilities.Sacrifice;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;

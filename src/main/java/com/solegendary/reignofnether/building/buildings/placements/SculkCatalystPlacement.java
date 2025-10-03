@@ -102,7 +102,7 @@ public class SculkCatalystPlacement extends BuildingPlacement implements RangeIn
             if (tickAgeAfterBuilt % 30 == 0) {
                 for (Ability ability : abilities) {
                     if (ability instanceof Sacrifice sacrifice &&
-                        sacrifice.isAutocasting() &&
+                        sacrifice.isAutocasting(this) &&
                         getNightRange() < SculkCatalyst.nightRangeMax) {
                         sacrifice.autoSacrifice(this);
                     }

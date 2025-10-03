@@ -72,8 +72,7 @@ public class VindicatorProd extends ProductionItem {
             () -> false,
             () -> true,
             tooltipLines,
-            prodBuilding,
-            ProductionItems.VINDICATOR
+            this
         );
     }
 

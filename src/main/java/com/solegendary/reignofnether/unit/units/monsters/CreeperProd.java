@@ -77,7 +77,6 @@ public class CreeperProd extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.creeper.tooltip3"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

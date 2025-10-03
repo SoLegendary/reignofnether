@@ -65,7 +65,6 @@ public class ResearchVindicatorAxes extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.vindicator_axes.tooltip1"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

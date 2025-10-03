@@ -358,9 +358,9 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
             pushAttackCd -= 1;
 
         if (autocastingConsume() && getSize() == MAX_SIZE) {
-            for (Ability ability : abilities)
+            for (Ability ability : abilities.get())
                 if (ability instanceof ConsumeSlime consume)
-                    consume.setAutocast(false);
+                    consume.setAutocast(false, this);
         }
         else if (autocastingConsume() && getSize() < MAX_SIZE && getTargetGoal().getTarget() == null) {
 

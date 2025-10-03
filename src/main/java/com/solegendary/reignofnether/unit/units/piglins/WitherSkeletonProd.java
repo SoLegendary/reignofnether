@@ -79,8 +79,7 @@ public class WitherSkeletonProd extends ProductionItem {
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.WITHER_SHRINE),
                 tooltipLines,
-                prodBuilding,
-                ProductionItems.WITHER_SKELETON
+                this
         );
     }
 

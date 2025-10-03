@@ -55,7 +55,6 @@ public class ResearchSoulFireballs extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.soul_fireballs.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.soul_fireballs.tooltip2"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

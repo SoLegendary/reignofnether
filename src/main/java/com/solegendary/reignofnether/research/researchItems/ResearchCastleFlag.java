@@ -59,7 +59,6 @@ public class ResearchCastleFlag extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.castle_flag.tooltip3"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

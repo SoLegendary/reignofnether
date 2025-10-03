@@ -25,7 +25,9 @@ public class Ability {
     public int maxCharges = 1;
     private boolean defaultAutocast = false;
     public void setAutocast(boolean value, Unit unit) { unit.setAutocast(value ? this : null); }
+    public void setAutocast(boolean value, BuildingPlacement placement) { placement.setAutocast(value ? this : null); }
     public boolean isAutocasting(Unit unit) { return unit.hasAutocast(this); }
+    public boolean isAutocasting(BuildingPlacement placement) { return placement.hasAutocast(this); }
     protected Keybinding defaultHotkey = Keybindings.keyQ;
 
     public Ability(UnitAction action, int cooldownMax, float range, float radius, boolean canTargetEntities) {
@@ -57,6 +59,17 @@ public class Ability {
         if (isAutocasting(unit) && autocastDisableAction != null) {
             sendUnitCommand(autocastDisableAction);
         } else if (!isAutocasting(unit) && autocastEnableAction != null) {
+            sendUnitCommand(autocastEnableAction);
+        }
+    }
+
+    protected void toggleAutocast(BuildingPlacement placement) {
+        if (!placement.level.isClientSide())
+            return;
+
+        if (isAutocasting(placement) && autocastDisableAction != null) {
+            sendUnitCommand(autocastDisableAction);
+        } else if (!isAutocasting(placement) && autocastEnableAction != null) {
             sendUnitCommand(autocastEnableAction);
         }
     }

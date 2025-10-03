@@ -55,7 +55,6 @@ public class ResearchFireResistance extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.fire_resistance.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.fire_resistance.tooltip2"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

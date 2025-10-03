@@ -74,8 +74,7 @@ public class EvokerProd extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.evoker.tooltip2"), Style.EMPTY)
             ),
-            prodBuilding,
-            ProductionItems.EVOKER
+            this
         );
     }
 

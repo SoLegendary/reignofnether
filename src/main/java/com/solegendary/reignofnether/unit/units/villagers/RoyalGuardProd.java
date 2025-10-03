@@ -77,7 +77,6 @@ public class RoyalGuardProd extends HeroProductionItem {
                         FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.royal_guard.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.royal_guard.tooltip2"), Style.EMPTY)
                 ),
-                prodBuilding,
                 this
         );
     }

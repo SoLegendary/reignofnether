@@ -67,7 +67,6 @@ public class ResearchBruteShields extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.brute_shields.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.brute_shields.tooltip3"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

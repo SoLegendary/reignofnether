@@ -79,8 +79,7 @@ public class BlazeProd extends ProductionItem {
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.FLAME_SANCTUARY),
                 tooltipLines,
-                prodBuilding,
-                ProductionItems.BLAZE
+                this
         );
     }
 

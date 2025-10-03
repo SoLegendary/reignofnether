@@ -73,8 +73,7 @@ public class WardenProd extends ProductionItem {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.warden.tooltip1"), Style.EMPTY)
                 ),
-                prodBuilding,
-                ProductionItems.WARDEN
+                this
         );
     }
 

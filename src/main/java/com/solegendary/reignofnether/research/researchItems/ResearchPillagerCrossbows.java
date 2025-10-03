@@ -67,7 +67,6 @@ public class ResearchPillagerCrossbows extends ProductionItem {
                     Style.EMPTY
                 )
             ),
-            prodBuilding,
             this
         );
     }

@@ -108,7 +108,6 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
                         ResourceCosts.getFormattedCost(getCost(prodBuilding.level.isClientSide(), prodBuilding.ownerName)),
                         ResourceCosts.getFormattedPopAndTime(getCost(prodBuilding.level.isClientSide(), prodBuilding.ownerName))
                 ),
-                prodBuilding,
                 this
         );
     }

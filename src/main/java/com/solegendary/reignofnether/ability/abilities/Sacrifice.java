@@ -39,24 +39,24 @@ public class Sacrifice extends Ability {
         return new AbilityButton("Sacrifice",
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_hoe.png"),
             hotkey,
-            () -> CursorClientEvents.getLeftClickAction() == UnitAction.SACRIFICE || isAutocasting(),
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.SACRIFICE || isAutocasting(placement),
             () -> false,
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.SACRIFICE),
-            this::toggleAutocast,
+            () -> toggleAutocast(placement),
             List.of(FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice"),
-                    Style.EMPTY.withBold(true)
-                ),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip1", RANGE),
-                    MyRenderer.iconStyle
-                ),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip2"), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY),
-                !autoSacrificeUnitType.isBlank() && isAutocasting() ?
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip4", autoSacrificeUnitType), Style.EMPTY) :
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip3"), Style.EMPTY)
+                            Style.EMPTY.withBold(true)
+                    ),
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip1", RANGE),
+                            MyRenderer.iconStyle
+                    ),
+                    FormattedCharSequence.forward("", Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip2"), Style.EMPTY),
+                    FormattedCharSequence.forward("", Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY),
+                    !autoSacrificeUnitType.isBlank() && isAutocasting(placement) ?
+                            FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip4", autoSacrificeUnitType), Style.EMPTY) :
+                            FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip3"), Style.EMPTY)
             ),
             this,
             placement
@@ -84,7 +84,7 @@ public class Sacrifice extends Ability {
 
     @Override
     public void use(Level level, BuildingPlacement buildingUsing, LivingEntity targetEntity) {
-        if (targetEntity instanceof Unit && isAutocasting()) {
+        if (targetEntity instanceof Unit && isAutocasting(buildingUsing)) {
             autoSacrificeUnitType = getGenericName(targetEntity);
             if (level.isClientSide())
                 HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.sacrifice.set_autocast_target", autoSacrificeUnitType));
@@ -111,7 +111,7 @@ public class Sacrifice extends Ability {
     }
 
     public void autoSacrifice(BuildingPlacement buildingUsing) {
-        List<LivingEntity> entities = MiscUtil.getEntitiesWithinRange(Vec3.atCenterOf(buildingUsing.centrePos), range, LivingEntity.class, level);
+        List<LivingEntity> entities = MiscUtil.getEntitiesWithinRange(Vec3.atCenterOf(buildingUsing.centrePos), range, LivingEntity.class, buildingUsing.level);
         for (LivingEntity le : entities) {
             if (le instanceof Unit && getGenericName(le).equals(autoSacrificeUnitType)) {
                 le.kill();

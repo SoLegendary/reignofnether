@@ -421,9 +421,9 @@ public class UnitActionItem {
                         ability.use(level, actionableBuilding, preselectedBlockPos);
                     }
                 } else if (ability.autocastEnableAction == action) {
-                    ability.setAutocast(true);
+                    ability.setAutocast(true, actionableBuilding);
                 } else if (ability.autocastDisableAction == action) {
-                    ability.setAutocast(false);
+                    ability.setAutocast(false, actionableBuilding);
                 }
             }
         }

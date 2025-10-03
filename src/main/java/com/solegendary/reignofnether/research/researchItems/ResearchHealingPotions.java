@@ -56,7 +56,6 @@ public class ResearchHealingPotions extends ProductionItem {
                     Style.EMPTY
                 )
             ),
-            prodBuilding,
             this
         );
     }

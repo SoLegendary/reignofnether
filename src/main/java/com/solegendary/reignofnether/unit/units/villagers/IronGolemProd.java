@@ -72,8 +72,7 @@ public class IronGolemProd extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem.tooltip2"), Style.EMPTY)
             ),
-            prodBuilding,
-            ProductionItems.IRON_GOLEM
+            this
         );
     }
 

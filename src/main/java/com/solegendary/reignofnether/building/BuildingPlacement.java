@@ -164,6 +164,8 @@ public class BuildingPlacement {
 
     public boolean allowProdWhileBuilding = false;
 
+    public Ability autocast;
+
     private ArmorStand targetStand = null;
     public ArmorStand getTargetStand() {
         if (targetStand == null)
@@ -1200,5 +1202,13 @@ public class BuildingPlacement {
         if (!charges.containsKey(ability))
             charges.put(ability, ability.maxCharges);
         return charges.get(ability);
+    }
+
+    public boolean hasAutocast(Ability ability) {
+        return autocast == ability;
+    }
+
+    public void setAutocast(Ability autocast) {
+        this.autocast = autocast;
     }
 }

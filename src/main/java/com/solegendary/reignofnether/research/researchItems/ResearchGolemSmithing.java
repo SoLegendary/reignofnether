@@ -58,7 +58,6 @@ public class ResearchGolemSmithing extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.golem_smithing.tooltip1"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

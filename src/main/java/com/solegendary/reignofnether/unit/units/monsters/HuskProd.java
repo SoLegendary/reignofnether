@@ -77,7 +77,6 @@ public class HuskProd extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk.tooltip3"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

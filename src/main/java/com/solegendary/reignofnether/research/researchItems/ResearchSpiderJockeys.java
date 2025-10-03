@@ -62,7 +62,6 @@ public class ResearchSpiderJockeys extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.spider_jockeys.tooltip2"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

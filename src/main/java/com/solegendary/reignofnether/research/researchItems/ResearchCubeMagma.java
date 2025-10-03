@@ -59,7 +59,6 @@ public class ResearchCubeMagma extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.cube_magma.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.cube_magma.tooltip2"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

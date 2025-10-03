@@ -77,7 +77,6 @@ public class PiglinMerchantProd extends HeroProductionItem {
                         FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.piglin_merchant.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.piglin_merchant.tooltip2"), Style.EMPTY)
                 ),
-                prodBuilding,
                 this
         );
     }

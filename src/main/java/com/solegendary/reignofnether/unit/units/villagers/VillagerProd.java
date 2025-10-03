@@ -74,8 +74,7 @@ public class VillagerProd extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.villager.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.villager.tooltip3"), Style.EMPTY)
             ),
-            prodBuilding,
-            ProductionItems.VILLAGER
+            this
         );
     }
 

@@ -60,7 +60,6 @@ public class ResearchLingeringPotions extends ProductionItem {
                     Style.EMPTY
                 )
             ),
-            prodBuilding,
             this
         );
     }

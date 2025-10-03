@@ -54,7 +54,6 @@ public class ResearchLabLightningRod extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.lightning_rod.tooltip3"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

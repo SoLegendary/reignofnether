@@ -77,8 +77,7 @@ public class PoisonSpiderProd extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.poison_spider.tooltip3"), Style.EMPTY)
             ),
-            prodBuilding,
-            ProductionItems.POISON_SPIDER
+            this
         );
     }
 

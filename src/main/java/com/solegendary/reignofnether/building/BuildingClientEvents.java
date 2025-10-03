@@ -663,7 +663,7 @@ public class BuildingClientEvents {
                             AABB aabb = new AABB(bp);
                             aabb = aabb.setMaxY(aabb.maxY + 0.13f);
                             MyRenderer.drawSolidBox(evt.getPoseStack(), aabb, Direction.UP, 0, 1, 0, a,
-                                    new ResourceLocation("forge:textures/white.png"));
+                                    ResourceLocation.fromNamespaceAndPath("forge", "textures/white.png"));
                         } else {
                             MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, 0, 1, 0, a);
                         }

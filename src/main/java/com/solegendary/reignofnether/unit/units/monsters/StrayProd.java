@@ -77,8 +77,7 @@ public class StrayProd extends ProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray.tooltip3"), Style.EMPTY)
             ),
-            prodBuilding,
-            ProductionItems.STRAY
+            this
         );
     }
 

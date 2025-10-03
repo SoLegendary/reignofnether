@@ -81,7 +81,6 @@ public class NecromancerProd extends HeroProductionItem {
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.necromancer.tooltip3"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

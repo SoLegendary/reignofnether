@@ -81,8 +81,7 @@ public class GhastProd extends ProductionItem {
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.FORTRESS),
                 tooltipLines,
-                prodBuilding,
-                ProductionItems.GHAST
+                this
         );
     }
 

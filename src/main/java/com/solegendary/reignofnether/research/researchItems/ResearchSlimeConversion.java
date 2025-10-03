@@ -59,7 +59,6 @@ public class ResearchSlimeConversion extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.slime_conversion.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.slime_conversion.tooltip2"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

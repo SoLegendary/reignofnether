@@ -72,8 +72,7 @@ public class PillagerProd extends ProductionItem {
             () -> false,
             () -> true,
             tooltipLines,
-            prodBuilding,
-            ProductionItems.PILLAGER
+            this
         );
     }
 

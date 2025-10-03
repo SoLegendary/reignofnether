@@ -64,7 +64,6 @@ public class ResearchAdvancedPortals extends ProductionItem {
                 ),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.advanced_portals.tooltip3"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

@@ -59,7 +59,6 @@ public class ResearchRavagerCavalry extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.ravager_cavalry.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.ravager_cavalry.tooltip2"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

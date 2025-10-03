@@ -79,8 +79,7 @@ public class MagmaCubeProd extends ProductionItem {
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BASALT_SPRINGS),
                 tooltipLines,
-                prodBuilding,
-                ProductionItems.MAGMA_CUBE
+                this
         );
     }
 

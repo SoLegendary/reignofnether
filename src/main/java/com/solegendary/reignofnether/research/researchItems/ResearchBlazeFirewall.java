@@ -59,7 +59,6 @@ public class ResearchBlazeFirewall extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.blaze_firewall.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.blaze_firewall.tooltip2"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

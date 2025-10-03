@@ -396,7 +396,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                 atkStr += "+" + (int) passenger.getUnitAttackDamage();
             }
             renderedStats.add(new RenderedStat(
-                    new ResourceLocation("reignofnether", "textures/icons/items/sword.png"),
+                    ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/sword.png"),
                     atkStr,
                     UnitStatType.ATTACK_DAMAGE,
                     unit.hasBonusDamage() ? 0xFF2BFF2B : 0xFFFFFFFF,
@@ -404,7 +404,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             ));
             DecimalFormat df2 = new DecimalFormat("###.##");
             renderedStats.add(new RenderedStat(
-                    new ResourceLocation("reignofnether","textures/icons/items/sparkler.png"),
+                    ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/sparkler.png"),
                     String.valueOf(df2.format(attackerUnit.getAttacksPerSecond())),
                     UnitStatType.ATTACK_SPEED,
                     unit.hasBonusAttackSpeed() ? 0xFF2BFF2B : 0xFFFFFFFF,
@@ -418,7 +418,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                 rangeStr = String.valueOf((int) (attackerUnit.getAttackRange()));
             }
             renderedStats.add(new RenderedStat(
-                    new ResourceLocation("reignofnether","textures/icons/items/bow.png"),
+                    ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/bow.png"),
                     rangeStr,
                     UnitStatType.RANGE
             ));
@@ -464,7 +464,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         }
 
         renderedStats.add(new RenderedStat(
-                new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"),
+                ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/chestplate.png"),
                 armourStr,
                 UnitStatType.ARMOUR,
                 armourColor,
@@ -486,7 +486,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             msColour = 0xFF2BFF2B;
         }
         renderedStats.add(new RenderedStat(
-                new ResourceLocation("reignofnether","textures/icons/items/boots.png"),
+                ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/boots.png"),
                 String.valueOf(msInt),
                 UnitStatType.MOVEMENT_SPEED,
                 msColour,

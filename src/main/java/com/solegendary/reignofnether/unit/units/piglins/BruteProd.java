@@ -73,8 +73,7 @@ public class BruteProd extends ProductionItem {
                 () -> false,
                 () -> true,
                 tooltipLines,
-                prodBuilding,
-                ProductionItems.BRUTE
+                this
         );
     }
 

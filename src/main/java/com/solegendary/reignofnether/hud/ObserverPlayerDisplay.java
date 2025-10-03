@@ -23,7 +23,7 @@ public class ObserverPlayerDisplay {
 
     public final Resources resources;
     public final AbstractClientPlayer player;
-    public final ResourceLocation defaultIconLocation = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png");
+    public final ResourceLocation defaultIconLocation = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png");
 
     public ObserverPlayerDisplay(Resources resources) {
         this.resources = resources;
@@ -136,7 +136,7 @@ public class ObserverPlayerDisplay {
         );
 
         MyRenderer.renderIcon(guiGraphics,
-                new ResourceLocation(ReignOfNether.MOD_ID, iconPath),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, iconPath),
                 x + 4,
                 y + 4,
                 Button.DEFAULT_ICON_SIZE
@@ -182,7 +182,7 @@ public class ObserverPlayerDisplay {
         MyRenderer.renderIcon(guiGraphics,
                 //new ResourceLocation(ReignOfNether.MOD_ID, "textures/cursors/customcursor_shovel.png"),
                 //new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/pickaxe.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/shovel.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/shovel.png"),
                 x + 4,
                 y + 4,
                 Button.DEFAULT_ICON_SIZE
@@ -197,7 +197,7 @@ public class ObserverPlayerDisplay {
         );
 
         MyRenderer.renderIcon(guiGraphics,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sword_and_bow.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/sword_and_bow.png"),
                 x + SUPPLY_DETAIL_FRAME_WIDTH / 2 + 4,
                 y + 4,
                 Button.DEFAULT_ICON_SIZE

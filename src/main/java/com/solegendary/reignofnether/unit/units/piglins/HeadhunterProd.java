@@ -77,8 +77,7 @@ public class HeadhunterProd extends ProductionItem {
                 () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BASTION),
                 tooltipLines,
-                prodBuilding,
-                ProductionItems.HEADHUNTER
+                this
         );
     }
 

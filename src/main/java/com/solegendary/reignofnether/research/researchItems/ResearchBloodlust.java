@@ -59,7 +59,6 @@ public class ResearchBloodlust extends ProductionItem {
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.bloodlust.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.bloodlust.tooltip2"), Style.EMPTY)
             ),
-            prodBuilding,
             this
         );
     }

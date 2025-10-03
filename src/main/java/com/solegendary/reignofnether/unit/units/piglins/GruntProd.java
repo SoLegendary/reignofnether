@@ -75,8 +75,7 @@ public class GruntProd extends ProductionItem {
             () -> false,
             () -> true,
             tooltipLines,
-            prodBuilding,
-            ProductionItems.GRUNT
+            this
         );
     }
 
