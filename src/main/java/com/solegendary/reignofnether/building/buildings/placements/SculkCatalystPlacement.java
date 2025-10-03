@@ -25,7 +25,7 @@ public class SculkCatalystPlacement extends BuildingPlacement implements RangeIn
 
     private final static int SCULK_SEARCH_RANGE = 30;
     private final static float HP_PER_SCULK = 0.5f;
-    private final static float RANGE_PER_SCULK = 0.25f;
+    private final static float RANGE_PER_SCULK = 0.30f;
 
     public final ArrayList<BlockPos> sculkBps = new ArrayList<>();
 
@@ -91,13 +91,26 @@ public class SculkCatalystPlacement extends BuildingPlacement implements RangeIn
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
 
-        if (tickAgeAfterBuilt > 0 && tickAgeAfterBuilt % 100 == 0) {
-            if (tickLevel.isClientSide()) {
-                updateBorderBps();
-            } else {
-                updateSculkBps();
+        if (tickAgeAfterBuilt > 0) {
+            if (tickAgeAfterBuilt % 100 == 0) {
+                if (tickLevel.isClientSide()) {
+                    updateBorderBps();
+                } else {
+                    updateSculkBps();
+                }
+            }
+            if (tickAgeAfterBuilt % 30 == 0) {
+                for (Ability ability : abilities) {
+                    if (ability instanceof Sacrifice sacrifice &&
+                        sacrifice.isAutocasting() &&
+                        getNightRange() < SculkCatalyst.nightRangeMax) {
+                        sacrifice.autoSacrifice(this);
+                    }
+                }
             }
         }
+        if (tickAgeAfterBuilt % 10 == 0)
+            updateButtons();
     }
 
     @Override

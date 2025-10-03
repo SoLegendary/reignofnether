@@ -10,6 +10,7 @@ import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.abilities.EnchantMaiming;
 import com.solegendary.reignofnether.ability.abilities.EnchantVigor;
+import com.solegendary.reignofnether.ability.abilities.ToggleShield;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.resources.ResourceSource;
@@ -17,6 +18,7 @@ import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.UnitStatType;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -45,6 +47,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
@@ -212,9 +215,6 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         if (entity instanceof EvokerUnit pUnit && pUnit.getEnchant() == EnchantVigor.actualEnchantment) {
             name += " (V)";
         }
-        if (entity instanceof EvokerUnit pUnit && pUnit.getEnchant() == EnchantVigor.actualEnchantment) {
-            name += " (V)";
-        }
         if (entity instanceof ZombieUnit pUnit && pUnit.getThornsLevel() > 0) {
             name += " (Thorns ";
             for (int i = 0; i < pUnit.getThornsLevel(); i++)
@@ -342,7 +342,28 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         guiGraphics.pose().popPose();
     }
 
-    public RectZone renderStats(GuiGraphics guiGraphics, String name, int x, int y, Unit unit) {
+    private class RenderedStat {
+        public ResourceLocation icon;
+        public String text;
+        public UnitStatType type;
+        public int colour = 0xFFFFFF;
+        public int textXOffset = 0;
+
+        public RenderedStat(ResourceLocation icon, String text, UnitStatType type) {
+            this.icon = icon;
+            this.text = text;
+            this.type = type;
+        }
+        public RenderedStat(ResourceLocation icon, String text, UnitStatType type, int colour, int xOffset) {
+            this.icon = icon;
+            this.text = text;
+            this.type = type;
+            this.colour = colour;
+            this.textXOffset = xOffset;
+        }
+    }
+
+    public RectZone renderStats(GuiGraphics guiGraphics, String name, int x, int y, int mouseX, int mouseY, Unit unit) {
         int statsHeightPlus = 0;
         if (unit instanceof HeroUnit) {
             y -= HERO_Y_OFFSET;
@@ -353,16 +374,9 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         int blitXIcon = x + 6;
         int blitYIcon = y + 7;
 
-        // prep strings/icons to render
-        ArrayList<ResourceLocation> textureStatIcons = new ArrayList<>();
-        ArrayList<String> statStrings = new ArrayList<>();
+        ArrayList<RenderedStat> renderedStats = new ArrayList<>();
 
         if (unit instanceof AttackerUnit attackerUnit) {
-            textureStatIcons.add(ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/sword.png")); // DAMAGE
-            textureStatIcons.add(ResourceLocation.fromNamespaceAndPath("reignofnether",
-                "textures/icons/items/sparkler.png"
-            )); // ATTACK SPEED
-            textureStatIcons.add(ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/bow.png")); // RANGE
             double atkDmg = attackerUnit.getUnitAttackDamage() + AttackerUnit.getWeaponDamageModifier(attackerUnit);
             if (unit instanceof CreeperUnit cUnit && cUnit.isPowered()) {
                 atkDmg *= CreeperUnit.CHARGED_DAMAGE_MULT;
@@ -371,34 +385,113 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                 atkDmg = (int) attackerUnit.getUnitAttackDamage();
             }
             double atkDmgRounded = Math.round(atkDmg);
+            String atkStr;
             if (Math.abs(atkDmgRounded - atkDmg) < 0.1d) {
-                statStrings.add(String.valueOf((int) atkDmgRounded)); // attacks per second
+                atkStr = String.valueOf((int) atkDmgRounded); // attacks per second
             } else {
                 DecimalFormat df1 = new DecimalFormat("###.#");
-                statStrings.add(String.valueOf(df1.format(atkDmg))); // attacks per second
+                atkStr = String.valueOf(df1.format(atkDmg)); // attacks per second
             }
+            if (unit instanceof Mob mob && mob.isVehicle() && mob.getFirstPassenger() instanceof AttackerUnit passenger) {
+                atkStr += "+" + (int) passenger.getUnitAttackDamage();
+            }
+            renderedStats.add(new RenderedStat(
+                    new ResourceLocation("reignofnether", "textures/icons/items/sword.png"),
+                    atkStr,
+                    UnitStatType.ATTACK_DAMAGE,
+                    unit.hasBonusDamage() ? 0xFF2BFF2B : 0xFFFFFFFF,
+                    0
+            ));
             DecimalFormat df2 = new DecimalFormat("###.##");
-            statStrings.add(String.valueOf(df2.format(attackerUnit.getAttacksPerSecond()))); // attacks per second
-
+            renderedStats.add(new RenderedStat(
+                    new ResourceLocation("reignofnether","textures/icons/items/sparkler.png"),
+                    String.valueOf(df2.format(attackerUnit.getAttacksPerSecond())),
+                    UnitStatType.ATTACK_SPEED,
+                    unit.hasBonusAttackSpeed() ? 0xFF2BFF2B : 0xFFFFFFFF,
+                    0
+            ));
+            String rangeStr;
             GarrisonableBuilding garr = GarrisonableBuilding.getGarrison(unit);
             if (garr != null) {
-                statStrings.add(String.valueOf(garr.getAttackRange()));
+                rangeStr = String.valueOf(garr.getAttackRange());
             } else {
-                statStrings.add(String.valueOf((int) (attackerUnit.getAttackRange())));
+                rangeStr = String.valueOf((int) (attackerUnit.getAttackRange()));
             }
+            renderedStats.add(new RenderedStat(
+                    new ResourceLocation("reignofnether","textures/icons/items/bow.png"),
+                    rangeStr,
+                    UnitStatType.RANGE
+            ));
         }
-        textureStatIcons.add(ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/chestplate.png"));
-        textureStatIcons.add(ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/boots.png"));
 
-        statStrings.add((int) (unit.getUnitArmorPercentage() * 100) + "%");
+        int armourColor = 0xFFFFFFFF;
+        float physicalArmour = unit.getUnitPhysicalArmorPercentage();
+        float rangedArmour = unit.getUnitRangedArmorPercentage();
+        float magicArmour = unit.getUnitMagicArmorPercentage();
+        float resistArmour = unit.getUnitResistPercentage();
+        float avgArmourInv = 1;
+
+        String armourStr = "0%";
+        int nonZeroArmourTypes = 0;
+
+        if (physicalArmour > 0) {
+            armourStr = (int) (physicalArmour * 100) + "%";
+            armourColor = 0xFF2BFF2B;
+            avgArmourInv *= (1 - physicalArmour);
+            nonZeroArmourTypes += 1;
+        }
+        if (rangedArmour > 0) {
+            armourStr = (int) (rangedArmour * 100) + "%";
+            armourColor = 0xFFFCFC2B;
+            avgArmourInv *= (1 - rangedArmour);
+            nonZeroArmourTypes += 1;
+        }
+        if (resistArmour > 0) {
+            armourStr = (int) (resistArmour * 100) + "%";
+            armourColor = 0xFF42DDDD;
+            avgArmourInv *= (1 - resistArmour);
+            nonZeroArmourTypes += 1;
+        }
+        if (magicArmour > 0 && resistArmour <= 0) { // resistArmour includes magicArmour
+            armourStr = (int) (magicArmour * 100) + "%";
+            armourColor = 0xFF5B5BFC;
+            avgArmourInv *= (1 - magicArmour);
+            nonZeroArmourTypes += 1;
+        }
+        if (nonZeroArmourTypes > 1) {
+            armourStr = "~" + (int) ((1 - avgArmourInv) * 100) + "%";
+            armourColor = 0xFF42DDDD;
+        }
+
+        renderedStats.add(new RenderedStat(
+                new ResourceLocation("reignofnether", "textures/icons/items/chestplate.png"),
+                armourStr,
+                UnitStatType.ARMOUR,
+                armourColor,
+                armourStr.startsWith("~") ? -4 : 0
+        ));
         AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
-
         int msInt = ms != null ? (int) (ms.getValue() * 101) : 0;
-        if ((unit instanceof BruteUnit pbUnit && pbUnit.isHoldingUpShield) ||
-            unit instanceof Slime) {
+        if (unit instanceof Slime) {
             msInt *= 0.45f;
         }
-        statStrings.add(String.valueOf(msInt)); // prevent rounding errors
+        if (unit instanceof BruteUnit pbUnit && pbUnit.isHoldingUpShield) {
+            msInt *= ToggleShield.MOVESPEED_MULTIPLIER;
+        }
+        int msColour = 0xFFFFFFFF;
+        double msAttr = ((Mob) unit).getAttributeValue(Attributes.MOVEMENT_SPEED);
+        if (msAttr < unit.getMovementSpeed() || (unit instanceof BruteUnit bruteUnit && bruteUnit.isHoldingUpShield)) {
+            msColour = 0xFFFC3838;
+        } else if (msAttr > unit.getMovementSpeed()) {
+            msColour = 0xFF2BFF2B;
+        }
+        renderedStats.add(new RenderedStat(
+                new ResourceLocation("reignofnether","textures/icons/items/boots.png"),
+                String.valueOf(msInt),
+                UnitStatType.MOVEMENT_SPEED,
+                msColour,
+                0
+        ));
 
         if (unit instanceof HeroUnit heroUnit) {
             int heroLvl = heroUnit.getHeroLevel();
@@ -407,20 +500,38 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                     fcs((heroLvl >= 10 ? "Lv " : "Lvl ") + heroLvl, true),
                     blitXIcon + 1,
                     blitYIcon - 1,
-                    0xFFFFFF
+                    0xFFFFFFFF
             );
             blitYIcon += HERO_Y_OFFSET + 1;
         }
 
         // render based on prepped strings/icons
-        for (int i = 0; i < statStrings.size(); i++) {
-            MyRenderer.renderIcon(guiGraphics, textureStatIcons.get(i), blitXIcon, blitYIcon, 8);
+        for (RenderedStat renderedStat : renderedStats) {
+            MyRenderer.renderIcon(guiGraphics, renderedStat.icon, blitXIcon, blitYIcon, 8);
+
+            boolean isMouseOver =
+                    mouseX >= blitXIcon - 1 &&
+                    mouseY >= blitYIcon - 1 &&
+                    mouseX < blitXIcon + statsWidth - 11 &&
+                    mouseY < blitYIcon + 9;
+
+            // highlight on hover
+            if (isMouseOver) {
+                guiGraphics.fill( // x1,y1, x2,y2,
+                    blitXIcon - 1,
+                    blitYIcon - 1,
+                    blitXIcon + statsWidth - 11,
+                    blitYIcon + 9,
+                    0x32FFFFFF);
+                MyRenderer.renderTooltip(guiGraphics, unit.getStatTooltip(renderedStat.type), mouseX, mouseY);
+            }
+
             guiGraphics.drawString(
                 Minecraft.getInstance().font,
-                statStrings.get(i),
-                blitXIcon + 13,
+                renderedStat.text,
+                blitXIcon + 13 + renderedStat.textXOffset,
                 blitYIcon,
-                0xFFFFFF
+                renderedStat.colour
             );
             blitYIcon += 10;
         }

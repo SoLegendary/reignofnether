@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.research.researchItems;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.production.ProdDupeRule;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
@@ -30,7 +31,7 @@ public class ResearchPillagerCrossbows extends ProductionItem {
     public final static ResourceCost cost = ResourceCosts.RESEARCH_PILLAGER_CROSSBOWS;
 
     public ResearchPillagerCrossbows() {
-        super(cost);
+        super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (level.isClientSide()) {
                 ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_PILLAGER_CROSSBOWS);

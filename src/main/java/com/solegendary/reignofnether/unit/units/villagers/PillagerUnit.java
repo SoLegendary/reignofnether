@@ -2,6 +2,8 @@ package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.EnchantQuickCharge;
+import com.solegendary.reignofnether.ability.abilities.EnchantVigor;
 import com.solegendary.reignofnether.ability.abilities.MountRavager;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
@@ -128,15 +130,17 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     // combat stats
     public boolean getWillRetaliate() { return willRetaliate; }
-    public int getAttackCooldown() { return (int) (20 / attacksPerSecond); }
-    public float getAttacksPerSecond() { return 20f / (getAttackCooldown() + 25); } // crossbow charge time is 25 ticks
+    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
+    public float getAttacksPerSecond() { return 20f / (getAttackCooldown() + (hasQuickChargeEnchant() ? 15 : 25)); } // crossbow charge time is 25 ticks
     public float getAggroRange() { return aggroRange; }
     public boolean getAggressiveWhenIdle() { return aggressiveWhenIdle && !isVehicle(); }
     public float getAttackRange() { return attackRange; }
     public float getMovementSpeed() { return movementSpeed; }
-    public float getUnitAttackDamage() { return attackDamage; }
+    public float getUnitAttackDamage() {
+        return isPassenger() ? attackDamage + 1 : attackDamage;
+    }
     public float getUnitMaxHealth() { return maxHealth; }
-    public float getUnitArmorPercentage() { return armorValue; }
+    public float getUnitPhysicalArmorPercentage() { return armorValue; }
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.PILLAGER;}
 
@@ -150,7 +154,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     final static public float attacksPerSecond = 0.8f; // excludes crossbow charge time
     final static public float maxHealth = 45.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.25f;
+    final static public float movementSpeed = 0.24f;
     final static public float attackRange = 16.0F; // only used by ranged units or melee building attackers
     final static public float aggroRange = 16;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -200,6 +204,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         AttackerUnit.tick(this);
         this.mountGoal.tick();
         PromoteIllager.checkAndApplyBuff(this);
+
     }
 
     @Override
@@ -279,6 +284,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
             this.playSound(SoundEvents.CROSSBOW_SHOOT, 3.0F, 0);
         }
         this.onCrossbowAttackPerformed();
+        getMainHandItem().setDamageValue(0);
     }
 
     @Override
@@ -331,6 +337,11 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
         return pSpawnData;
+    }
+
+    public boolean hasQuickChargeEnchant() {
+        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+        return itemStack.getAllEnchantments().containsKey(EnchantQuickCharge.actualEnchantment);
     }
 
     @Override

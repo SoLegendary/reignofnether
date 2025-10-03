@@ -127,7 +127,9 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
+    public int getAttackCooldown() {
+        return (int) (20 * (hasVigorEnchant() ? EnchantVigor.cooldownMultiplier : 1) / attacksPerSecond);
+    }
     public float getAttacksPerSecond() {return 20f / (getAttackCooldown() + 25);}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
@@ -177,6 +179,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     final static public float movementSpeed = 0.25f;
 
     public boolean isUsingLineFangs = true; // toggle between line and circular fangs
+    public boolean lastCastedCircleFangs = false; // double damage to make up for circle fangs not overlapping
 
     public int maxResources = 100;
 
@@ -329,6 +332,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
             double d2 = 1.25 * (double)(k + 1);
             createEvokerFang(this.getX() + (double)Mth.cos(f) * d2, this.getZ() + (double)Mth.sin(f) * d2, d0, d1, f, k);
         }
+        lastCastedCircleFangs = false;
     }
 
     // based on Evoker.EvokerAttackSpellGoal.performSpellCasting
@@ -343,6 +347,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
             f2 = (float)k * (float) Math.PI * 2.0F / 8.0F + 1.2566371F;
             createEvokerFang(this.getX() + (double)Mth.cos(f2) * 2.5, this.getZ() + (double)Mth.sin(f2) * 2.5, this.getY(), this.getY() + 1, f2, 3);
         }
+        lastCastedCircleFangs = true;
     }
 
     // based on Evoker.EvokerAttackSpellGoal.createSpellEntity
@@ -367,8 +372,10 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
             blockpos = blockpos.below();
         } while(blockpos.getY() >= Mth.floor(pMinY) - 1);
 
-        if (flag)
-            this.level().addFreshEntity(new EvokerFangs(this.level(), pX, (double)blockpos.getY() + d0, pZ, pYRot, pWarmupDelay, this));
+        if (flag) {
+            EvokerFangs fangs = new EvokerFangs(this.level(), pX, (double)blockpos.getY() + d0, pZ, pYRot, pWarmupDelay, this);
+            this.level().addFreshEntity(fangs);
+        }
     }
 
     public int getVexTargetRange() {
@@ -395,13 +402,12 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         }
         for (Ability ability : getAbilities().get())
             if (ability instanceof CastSummonVexes castSummonVexes)
-                AbilityClientboundPacket.sendSetCooldownPacket(getId(), UnitAction.CAST_SUMMON_VEXES, CastSummonVexes.CD_MAX_SECONDS);
+                AbilityClientboundPacket.sendSetCooldownPacket(getId(), UnitAction.CAST_SUMMON_VEXES, CastSummonVexes.CD_MAX_SECONDS * 20);
 
         if (getCastFangsGoal() != null)
             getCastFangsGoal().stopCasting();
     }
 
-    // TODO: when a target is autoacquired serverside this is not updated clientside
     public VillagerUnitModel.ArmPose getEvokerArmPose() {
         Entity targetEntity = getTargetGoal().getTarget();
         if (this.isCastingSpell() || (targetEntity != null &&
@@ -445,6 +451,11 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
         return pSpawnData;
+    }
+
+    @Override
+    public boolean hasBonusAttackSpeed() {
+        return hasVigorEnchant();
     }
 
     @Override

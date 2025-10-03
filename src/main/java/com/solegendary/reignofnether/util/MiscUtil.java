@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.time.NightCircleMode;
@@ -664,5 +665,10 @@ public class MiscUtil {
             return entity.getName().getString().toLowerCase();
         }
         return "";
+    }
+
+    public static boolean isOnNetherTerrain(LivingEntity le) {
+        return (le.getVehicle() != null && NetherBlocks.isNetherBlock(le.level(), le.getVehicle().getOnPos())) ||
+                (NetherBlocks.isNetherBlock(le.level(), le.getOnPos())) && !(le instanceof GhastUnit);
     }
 }

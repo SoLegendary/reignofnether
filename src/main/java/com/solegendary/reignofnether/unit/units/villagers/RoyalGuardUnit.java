@@ -36,6 +36,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -153,7 +154,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public float getUnitMaxHealth() {return maxHealth + (maxHealthBonusPerLevel * getHeroLevel());}
 
     @Nullable
-    public ResourceCost getCost() {return ResourceCosts.VINDICATOR;}
+    public ResourceCost getCost() {return ResourceCosts.ROYAL_GUARD;}
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
@@ -281,6 +282,14 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
 
         updateAbilityButtons();
         setStatsForLevel();
+    }
+
+    @Override
+    public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
+        pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
+        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO))
+            pDamage *= 0.7F;
+        return pDamage;
     }
 
     @Override
@@ -600,6 +609,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 ((LivingEntity) unit).addEffect(new MobEffectInstance(MobEffectRegistrar.UNCONTROLLABLE.get(), tauntingCry.duration));
             }
             this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, tauntingCry.duration, 2));
+            this.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, tauntingCry.duration, 2));
             tauntingCryTicksLeft = tauntingCry.duration;
             updateKnockbackResistance();
             SoundClientboundPacket.playSoundAtPos(SoundAction.HEROISM, this.getOnPos().above());

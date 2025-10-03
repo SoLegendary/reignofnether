@@ -35,6 +35,7 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
 
     public PortalPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
+        this.allowProdWhileBuilding = true;
     }
 
     public PortalType getPortalType() {

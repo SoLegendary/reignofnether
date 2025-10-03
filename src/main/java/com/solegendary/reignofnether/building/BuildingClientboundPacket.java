@@ -282,8 +282,7 @@ public class BuildingClientboundPacket {
                     case SYNC_BLOCKS_AND_OWNER -> BuildingClientEvents.syncBuilding(building, this.blocksPlaced, this.ownerName);
                     case START_PRODUCTION -> {
                         ((ProductionPlacement) building).startProductionItem(
-                            ReignOfNetherRegistries.PRODUCTION_ITEM.get(itemKey),
-                            this.buildingPos
+                            ReignOfNetherRegistries.PRODUCTION_ITEM.get(itemKey)
                         );
                     }
                     case CANCEL_PRODUCTION -> {

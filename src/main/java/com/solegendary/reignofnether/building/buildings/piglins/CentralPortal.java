@@ -40,7 +40,7 @@ public class CentralPortal extends ProductionBuilding {
         this.portraitBlock = Blocks.OBSIDIAN;
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/obsidian.png");
 
-        this.buildTimeModifier = 0.32f; // 100s total build time with 1 villager
+        this.buildTimeModifier = 0.32f; // 60s total build time with 3 villagers
         this.canAcceptResources = true;
 
         this.startingBlockTypes.add(Blocks.NETHER_BRICKS);

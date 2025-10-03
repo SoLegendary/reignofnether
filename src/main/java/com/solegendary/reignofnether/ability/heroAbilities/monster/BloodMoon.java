@@ -43,6 +43,7 @@ public class BloodMoon extends HeroAbility {
     private static final int CD_MAX = 420 * ResourceCost.TICKS_PER_SECOND;
     public static final int DURATION = 75 * ResourceCost.TICKS_PER_SECOND;
     public static final int BONUS_DURATION_PER_SOUL_RANK = 10 * ResourceCost.TICKS_PER_SECOND;
+    public static final int RADIUS = 25;
 
     public BloodMoon() {
         super(1, 175, UnitAction.BLOOD_MOON, CD_MAX, 0, 0, false);

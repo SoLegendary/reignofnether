@@ -26,10 +26,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.unit.packets.UnitConvertClientboundPacket;
-import com.solegendary.reignofnether.unit.packets.UnitIdleWorkerClientBoundPacket;
-import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
-import com.solegendary.reignofnether.unit.packets.UnitSyncWorkerClientBoundPacket;
+import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.monsters.DrownedUnit;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
@@ -44,6 +41,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
@@ -593,6 +592,15 @@ public class UnitServerEvents {
                 if (entity instanceof Unit unit) {
                     UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                     UnitSyncClientboundPacket.sendSyncStatsPacket(entity);
+
+                    for (MobEffect me : List.of(MobEffects.DAMAGE_RESISTANCE, MobEffectRegistrar.STUN.get())) {
+                        MobEffectInstance mei = entity.getEffect(me);
+                        if (mei != null)
+                            UnitSyncMobEffectsClientboundPacket.addEffectClientside(entity, mei);
+                        else
+                            UnitSyncMobEffectsClientboundPacket.removeEffectClientside(entity, me);
+                    }
+
                     if (unit.getAnchor() != null)
                         UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
                     else
@@ -799,8 +807,11 @@ public class UnitServerEvents {
         if (evt.getSource().is(DamageTypeTags.IS_PROJECTILE) &&
             evt.getSource().getEntity() instanceof AttackerUnit attackerUnit) {
             float dmg = attackerUnit.getUnitAttackDamage();
-            if (evt.getEntity() instanceof Unit unit)
-                dmg *= (1 - unit.getUnitArmorPercentage());
+            if (evt.getEntity() instanceof Unit unit) {
+                dmg *= (1 - unit.getUnitPhysicalArmorPercentage());
+                dmg *= (1 - unit.getUnitRangedArmorPercentage());
+                dmg *= (1 - unit.getUnitResistPercentage());
+            }
             evt.setAmount(dmg);
         }
 
@@ -808,10 +819,6 @@ public class UnitServerEvents {
         if (evt.getSource().getEntity() instanceof WorkerUnit && evt.getSource()
             .getEntity() instanceof AttackerUnit attackerUnit) {
             evt.setAmount(attackerUnit.getUnitAttackDamage());
-        }
-
-        if (evt.getEntity() instanceof BruteUnit brute && brute.isHoldingUpShield && (evt.getSource().is(DamageTypeTags.IS_PROJECTILE))) {
-            evt.setAmount(evt.getAmount() / 4);
         }
 
         if (evt.getSource() == evt.getEntity().damageSources().lightningBolt()) {
@@ -826,10 +833,6 @@ public class UnitServerEvents {
         if (evt.getSource().getEntity() instanceof WorkerUnit && evt.getSource()
             .getEntity() instanceof AttackerUnit attackerUnit) {
             evt.setAmount(attackerUnit.getUnitAttackDamage());
-        }
-
-        if (evt.getEntity() instanceof BruteUnit brute && brute.isHoldingUpShield && (evt.getSource().is(DamageTypeTags.IS_PROJECTILE))) {
-            evt.setAmount(evt.getAmount() / 3);
         }
         
         if (evt.getSource() == evt.getEntity().damageSources().lightningBolt()) {

@@ -52,6 +52,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.solegendary.reignofnether.ability.abilities.Bloodlust.BLOODLUST_ATTACK_SPEED_MULTIPLIER;
+
 public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, RangedAttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
@@ -152,8 +154,6 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
         return (int) (20 / attacksPerSecond);
     }
 
-    final static public float BLOODLUST_ATTACK_SPEED_MULTIPLIER = 1.6f;
-
     final static public float attackDamage = 6.0f;
     final static public float attacksPerSecond = 0.3f;
     final static public float attackRange = 12; // only used by ranged units or melee building attackers
@@ -163,7 +163,7 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
 
     final static public float maxHealth = 40.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.25f;
+    final static public float movementSpeed = 0.24f;
     public int maxResources = 100;
 
     public int bloodlustTicks = 0;
@@ -351,8 +351,15 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
 
     @Override
     public void onPickupEquipment(ItemStack itemStack) {
-        AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
-        itemStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+        if (itemStack.getItem() == Items.TRIDENT) {
+            AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
+            itemStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+        }
         setItemSlot(getEquipmentSlotForItem(itemStack), itemStack);
+    }
+
+    @Override
+    public boolean hasBonusAttackSpeed() {
+        return bloodlustTicks > 0;
     }
 }

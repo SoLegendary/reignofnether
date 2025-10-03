@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.production.ProdDupeRule;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
@@ -28,7 +29,7 @@ public class ResearchLabLightningRod extends ProductionItem {
     public final static ResourceCost cost = ResourceCosts.RESEARCH_LAB_LIGHTNING_ROD;
 
     public ResearchLabLightningRod() {
-        super(cost);
+        super(cost, ProdDupeRule.DISALLOW_FOR_BUILDING);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             placement.changeStructure(Laboratory.upgradedStructureName);
         };

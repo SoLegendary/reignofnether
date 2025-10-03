@@ -49,6 +49,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.solegendary.reignofnether.ability.abilities.Bloodlust.BLOODLUST_ATTACK_SPEED_MULTIPLIER;
+
 public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
@@ -118,7 +120,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     }
 
     // combat stats
-    public float getMovementSpeed() {return isHoldingUpShield ? movementSpeed * SHIELD_MOVE_MULTIPLIER : movementSpeed;}
+    public float getMovementSpeed() {return isHoldingUpShield ? movementSpeed * ToggleShield.MOVESPEED_MULTIPLIER : movementSpeed;}
     public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
@@ -148,19 +150,17 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
         return (int) (20 / attacksPerSecond);
     }
 
-    final static public float BLOODLUST_ATTACK_SPEED_MULTIPLIER = 1.6f;
-    final static public float SHIELD_MOVE_MULTIPLIER = 0.5f;
-
     final static public float attackDamage = 5.0f;
     final static public float attacksPerSecond = 0.5f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-
     final static public float maxHealth = 50.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.28f;
+    final static public float rangedDamageResist = 0.2f;
+
     public int maxResources = 100;
 
     public int bloodlustTicks = 0;
@@ -174,6 +174,15 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
         super(entityType, level);
 
         updateAbilityButtons();
+    }
+
+    @Override
+    public float getUnitRangedArmorPercentage() {
+        if (isHoldingUpShield) {
+            return 1 - ((1 - ToggleShield.PROJECTILE_DAMAGE_RESIST) * (1 - rangedDamageResist));
+        } else {
+            return rangedDamageResist;
+        }
     }
 
     public void toggleShield() {
@@ -320,6 +329,11 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
             itemStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
         }
         setItemSlot(getEquipmentSlotForItem(itemStack), itemStack);
+    }
+
+    @Override
+    public boolean hasBonusAttackSpeed() {
+        return bloodlustTicks > 0;
     }
 
     @Override

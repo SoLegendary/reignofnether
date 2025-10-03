@@ -56,8 +56,9 @@ public class Teleport extends Ability {
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
         BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(((LivingEntity) unitUsing).getOnPos(), targetBp, range);
-        ((EndermanUnit) unitUsing).teleport(limitedBp);
-
-        this.setToMaxCooldown(unitUsing);
+        if (!level.getWorldBorder().isWithinBounds(targetBp)) {
+            ((EndermanUnit) unitUsing).teleport(limitedBp);
+            this.setToMaxCooldown(unitUsing);
+        }
     }
 }

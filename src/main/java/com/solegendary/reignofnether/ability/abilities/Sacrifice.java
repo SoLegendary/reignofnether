@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
@@ -25,9 +26,12 @@ public class Sacrifice extends Ability {
 
     private static final int CD_MAX = 0;
     private static final int RANGE = 8;
+    private String autoSacrificeUnitType = "";
 
     public Sacrifice() {
         super(UnitAction.SACRIFICE, CD_MAX, RANGE, 0, true, true);
+        this.autocastEnableAction = UnitAction.SACRIFICE_AUTOCAST_ENABLE;
+        this.autocastDisableAction = UnitAction.SACRIFICE_AUTOCAST_DISABLE;
     }
 
     @Override
@@ -35,11 +39,11 @@ public class Sacrifice extends Ability {
         return new AbilityButton("Sacrifice",
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_hoe.png"),
             hotkey,
-            () -> CursorClientEvents.getLeftClickAction() == UnitAction.SACRIFICE,
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.SACRIFICE || isAutocasting(),
             () -> false,
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.SACRIFICE),
-            null,
+            this::toggleAutocast,
             List.of(FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice"),
                     Style.EMPTY.withBold(true)
                 ),
@@ -47,24 +51,48 @@ public class Sacrifice extends Ability {
                     MyRenderer.iconStyle
                 ),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY),
+                !autoSacrificeUnitType.isBlank() && isAutocasting() ?
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip4", autoSacrificeUnitType), Style.EMPTY) :
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip3"), Style.EMPTY)
             ),
             this,
             placement
         );
     }
 
+    public boolean isValidTarget(Level level, BuildingPlacement buildingUsing, LivingEntity targetEntity) {
+        return targetEntity instanceof Unit unit && unit.getOwnerName().equals(buildingUsing.ownerName) &&
+                !level.getBlockState(targetEntity.getOnPos()).isAir() &&
+                !BuildingUtils.isWithinRangeOfMaxedCatalyst(targetEntity) &&
+                !BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), targetEntity.getOnPos().above()) &&
+                targetEntity.distanceToSqr(Vec3.atCenterOf(buildingUsing.centrePos)) < RANGE * RANGE;
+    }
+
+    public String getGenericName(LivingEntity le) {
+        String name = MiscUtil.getSimpleEntityName(le).toLowerCase();
+        if (name.equals("husk") || name.equals("drowned"))
+            return "zombie";
+        if (name.equals("stray"))
+            return "skeleton";
+        if (name.equals("poison spider"))
+            return "spider";
+        return name;
+    }
+
     @Override
     public void use(Level level, BuildingPlacement buildingUsing, LivingEntity targetEntity) {
-
-        if (!level.isClientSide() && buildingUsing instanceof SculkCatalystPlacement && targetEntity instanceof Unit unit
-            && unit.getOwnerName().equals(buildingUsing.ownerName) && !level.getBlockState(targetEntity.getOnPos())
-            .isAir() && !BuildingUtils.isWithinRangeOfMaxedCatalyst(targetEntity)
-            && !BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), targetEntity.getOnPos().above())) {
-
-            if (targetEntity.distanceToSqr(Vec3.atCenterOf(buildingUsing.centrePos)) < RANGE * RANGE) {
-                targetEntity.kill();
-            }
+        if (targetEntity instanceof Unit && isAutocasting()) {
+            autoSacrificeUnitType = getGenericName(targetEntity);
+            if (level.isClientSide())
+                HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.sacrifice.set_autocast_target", autoSacrificeUnitType));
+            return;
+        }
+        if (!level.isClientSide() && buildingUsing instanceof SculkCatalystPlacement &&
+                isValidTarget(level, buildingUsing, targetEntity)) {
+            targetEntity.kill();
         } else if (level.isClientSide()) {
             if (!(
                 targetEntity instanceof Unit unit && unit.getOwnerName().equals(buildingUsing.ownerName)
@@ -78,6 +106,16 @@ public class Sacrifice extends Ability {
                 HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.sacrifice.max_spread"));
             } else if (BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), targetEntity.getOnPos().above())) {
                 HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.sacrifice.not_spreadable"));
+            }
+        }
+    }
+
+    public void autoSacrifice(BuildingPlacement buildingUsing) {
+        List<LivingEntity> entities = MiscUtil.getEntitiesWithinRange(Vec3.atCenterOf(buildingUsing.centrePos), range, LivingEntity.class, level);
+        for (LivingEntity le : entities) {
+            if (le instanceof Unit && getGenericName(le).equals(autoSacrificeUnitType)) {
+                le.kill();
+                return;
             }
         }
     }

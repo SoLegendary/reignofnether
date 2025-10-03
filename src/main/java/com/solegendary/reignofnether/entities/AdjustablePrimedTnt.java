@@ -14,7 +14,7 @@ public class AdjustablePrimedTnt extends PrimedTnt {
 
     private float explosionPower;
 
-    private final int DEFAULT_FUSE_TICKS = 60;
+    private final int DEFAULT_FUSE_TICKS = 50;
 
     public AdjustablePrimedTnt(EntityType<? extends PrimedTnt> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);

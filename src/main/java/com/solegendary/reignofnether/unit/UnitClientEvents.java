@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -50,6 +51,8 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -484,8 +487,12 @@ public class UnitClientEvents {
 
     @SubscribeEvent
     public static void onEntityLeaveEvent(EntityLeaveLevelEvent evt) {
-        synchronized (idleWorkerIds) {
-            idleWorkerIds.removeIf(id -> id == evt.getEntity().getId());
+        try {
+            synchronized (idleWorkerIds) {
+                idleWorkerIds.removeIf(id -> id == evt.getEntity().getId());
+            }
+        } catch (Exception e) {
+            ReignOfNether.LOGGER.warn("Error while trying to remove an idleWorkerId");
         }
     }
 
@@ -1136,6 +1143,19 @@ public class UnitClientEvents {
             if (unitId == entity.getId() && entity instanceof Unit unit) {
                 unit.getItems().add(new ItemStack(BuiltInRegistries.ITEM.byId(itemId)));
                 break;
+            }
+        }
+    }
+
+    public static void syncMobEffect(int entityId, int effectId, int amplifier, int duration) {
+        for (LivingEntity entity : getAllUnits()) {
+            MobEffect effect = MobEffect.byId(effectId);
+            if (effect != null && entityId == entity.getId() && entity instanceof Unit) {
+                if (duration > 0) {
+                    entity.addEffect(new MobEffectInstance(effect, duration, amplifier));
+                } else if (entity.getEffect(effect) != null) {
+                    entity.removeEffect(effect);
+                }
             }
         }
     }

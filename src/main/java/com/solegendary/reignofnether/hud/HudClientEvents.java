@@ -523,54 +523,57 @@ public class HudClientEvents {
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
 
-            if (hudSelectedPlacement != null && (hudSelBuildingOwned) && !hudSelectedPlacement.isBuilt) {
-                if (!buildingCancelButton.isHidden.get()) {
-                    buildingCancelButton.render(evt.getGuiGraphics(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
-                    renderedButtons.add(buildingCancelButton);
+            if (hudSelectedPlacement != null && (hudSelBuildingOwned || !PlayerClientEvents.isRTSPlayer)) {
+                if (!hudSelectedPlacement.isBuilt) {
+                    if (!buildingCancelButton.isHidden.get()) {
+                        buildingCancelButton.render(evt.getGuiGraphics(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
+                        renderedButtons.add(buildingCancelButton);
+                    }
                 }
-            } else if (hudSelBuildingOwned) {
+                if (hudSelectedPlacement.isBuilt || hudSelectedPlacement.allowProdWhileBuilding) {
 
-                List<AbilityButton> buildingAbilities = List.of();
-                if (hudSelectedPlacement != null) {
-                    buildingAbilities = hudSelectedPlacement.getAbilityButtons()
-                        .stream()
-                        .filter(b -> !b.isHidden.get())
-                        .toList();
-                }
-                if (buildingAbilities.size() > 0) {
-                    blitY -= Button.DEFAULT_ICON_FRAME_SIZE;
-                }
+                    if (!hudSelectedPlacement.isBuilt)
+                        blitX += Button.DEFAULT_ICON_FRAME_SIZE;
 
-                // production buttons on bottom row
-                if (hudSelectedPlacement instanceof ProductionPlacement selProdPlacement) {
-                    List<Button> visibleProdButtons = selProdPlacement.productionButtons.stream()
-                        .filter(b -> !b.isHidden.get())
-                        .toList();
-                    if (visibleProdButtons.size() > MAX_BUTTONS_PER_ROW) {
+                    List<AbilityButton> buildingAbilities = hudSelectedPlacement.getAbilityButtons()
+                            .stream()
+                            .filter(b -> !b.isHidden.get())
+                            .toList();
+                    if (buildingAbilities.size() > 0) {
                         blitY -= Button.DEFAULT_ICON_FRAME_SIZE;
                     }
 
-                    int rowButtons = 0;
-                    for (Button prodButton : visibleProdButtons) {
-                        rowButtons += 1;
-                        if (rowButtons > MAX_BUTTONS_PER_ROW) {
-                            rowButtons = 0;
-                            blitX = 0;
-                            blitY += Button.DEFAULT_ICON_FRAME_SIZE;
+                    // production buttons on bottom row
+                    if (hudSelectedPlacement instanceof ProductionPlacement selProdPlacement) {
+                        List<Button> visibleProdButtons = selProdPlacement.productionButtons.stream()
+                                .filter(b -> !b.isHidden.get())
+                                .toList();
+                        if (visibleProdButtons.size() > MAX_BUTTONS_PER_ROW) {
+                            blitY -= Button.DEFAULT_ICON_FRAME_SIZE;
                         }
-                        prodButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
-                        productionButtons.add(prodButton);
-                        renderedButtons.add(prodButton);
-                        blitX += iconFrameSize;
+
+                        int rowButtons = 0;
+                        for (Button prodButton : visibleProdButtons) {
+                            rowButtons += 1;
+                            if (rowButtons > MAX_BUTTONS_PER_ROW) {
+                                rowButtons = 0;
+                                blitX = 0;
+                                blitY += Button.DEFAULT_ICON_FRAME_SIZE;
+                            }
+                            prodButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
+                            productionButtons.add(prodButton);
+                            renderedButtons.add(prodButton);
+                            blitX += iconFrameSize;
+                        }
                     }
-                }
-                blitY += Button.DEFAULT_ICON_FRAME_SIZE;
-                blitX = 0;
-                for (AbilityButton abilityButton : buildingAbilities) {
-                    if (!abilityButton.isHidden.get()) {
-                        abilityButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
-                        renderedButtons.add(abilityButton);
-                        blitX += iconFrameSize;
+                    blitY += Button.DEFAULT_ICON_FRAME_SIZE;
+                    blitX = 0;
+                    for (AbilityButton abilityButton : buildingAbilities) {
+                        if (!abilityButton.isHidden.get()) {
+                            abilityButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
+                            renderedButtons.add(abilityButton);
+                            blitX += iconFrameSize;
+                        }
                     }
                 }
             }
@@ -618,7 +621,7 @@ public class HudClientEvents {
             blitX += portraitRendererUnit.frameWidth;
 
             if (hudSelectedEntity instanceof Unit unit) {
-                hudZones.add(portraitRendererUnit.renderStats(evt.getGuiGraphics(), nameCap, blitX, blitY, unit));
+                hudZones.add(portraitRendererUnit.renderStats(evt.getGuiGraphics(), nameCap, blitX, blitY, mouseX, mouseY, unit));
 
                 blitX += portraitRendererUnit.statsWidth;
 
@@ -824,7 +827,9 @@ public class HudClientEvents {
         // --------------------------------------------------------
         if (selUnits.size() > 0 &&
                 (getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED ||
-                        NonUnitClientEvents.canControlAllMobs() || AlliancesClient.canControlAlly(selUnits.get(0))) &&
+                        !PlayerClientEvents.isRTSPlayer ||
+                        NonUnitClientEvents.canControlAllMobs() ||
+                        AlliancesClient.canControlAlly(selUnits.get(0))) &&
                 hudSelectedEntity instanceof Unit unit) {
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
@@ -893,7 +898,7 @@ public class HudClientEvents {
 
             // includes worker building buttons
             if (TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_INTRO) &&
-                    (getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED) ||
+                    (getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED || !PlayerClientEvents.isRTSPlayer) ||
                     AlliancesClient.canControlAlly(selUnits.get(0))) {
                 List<Button> abilityButtons = List.of();
                 for (LivingEntity livingEntity : selUnits) {
@@ -1748,9 +1753,19 @@ public class HudClientEvents {
         // Access and save to controlGroups if index is within bounds
         for (Keybinding keybinding : Keybindings.nums) {
             int index = Integer.parseInt(keybinding.buttonLabel);
-            if (index >= 0 && index < controlGroups.size()) {  // Bounds check
-                if (Keybindings.ctrlMod.isDown() && evt.getKeyCode() == keybinding.key) {
-                    controlGroups.get(index).saveFromSelected(keybinding);
+            if (index >= 0 && index < controlGroups.size() && evt.getKeyCode() == keybinding.key) {  // Bounds check
+                if (Keybindings.ctrlMod.isDown()) {
+                    controlGroups.get(index).saveFromSelected(keybinding, true);
+                } else if (Keybindings.shiftMod.isDown()) {
+                    controlGroups.get(index).saveFromSelected(keybinding, false);
+                } else if (Keybindings.altMod.isDown()) {
+                    for (ControlGroup controlGroup : controlGroups) {
+                        for (LivingEntity le : getSelectedUnits())
+                            controlGroup.entityIds.removeIf(id -> id == le.getId());
+                        for (BuildingPlacement bpl : BuildingClientEvents.getSelectedBuildings())
+                            controlGroup.buildingBps.removeIf(bp -> bp.equals(bpl.originPos));
+                    }
+                    controlGroups.get(index).saveFromSelected(keybinding, true);
                 }
             }
         }

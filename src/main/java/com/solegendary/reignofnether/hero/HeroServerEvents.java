@@ -32,30 +32,34 @@ public class HeroServerEvents {
 
         Level level = evt.getEntity().level();
         if (evt.getEntity() instanceof Unit deadUnit) {
-            for (LivingEntity unit : UnitServerEvents.getAllUnits()) {
-                boolean inRange = unit.distanceToSqr((LivingEntity) deadUnit) < HeroExperienceOrb.RANGE * HeroExperienceOrb.RANGE;
-                if (unit instanceof HeroUnit heroUnit && inRange && heroUnit != evt.getEntity()) {
-                    String heroOwner = ((Unit) heroUnit).getOwnerName();
-                    String deadOwner = deadUnit.getOwnerName();
+            int popCost = deadUnit.getCost().population;
+            if (popCost > 0) {
+                for (LivingEntity unit : UnitServerEvents.getAllUnits()) {
+                    boolean inRange = unit.distanceToSqr((LivingEntity) deadUnit) < HeroExperienceOrb.RANGE * HeroExperienceOrb.RANGE;
+                    if (unit instanceof HeroUnit heroUnit && inRange && heroUnit != evt.getEntity()) {
+                        String heroOwner = ((Unit) heroUnit).getOwnerName();
+                        String deadOwner = deadUnit.getOwnerName();
 
-                    if (!AlliancesServerEvents.isAllied(heroOwner, deadOwner) && !heroOwner.equals(deadOwner) &&
-                        heroUnit.getHeroLevel() < HeroUnit.MAX_LEVEL &&
-                        (heroUnit.getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL || !deadOwner.isBlank())) {
-                        int expValue = (deadUnit.getCost().population + 1) * 5;
-                        if (evt.getEntity() instanceof HeroUnit killedHero)
-                            expValue += killedHero.getHeroLevel() * 5;
+                        if (!AlliancesServerEvents.isAllied(heroOwner, deadOwner) && !heroOwner.equals(deadOwner) &&
+                                heroUnit.getHeroLevel() < HeroUnit.MAX_LEVEL &&
+                                (heroUnit.getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL || !deadOwner.isBlank())) {
 
-                        while (expValue > 0) {
-                            HeroExperienceOrb expOrb = HeroExperienceOrb.newOrb(level,
-                                heroUnit,
-                                deadOwner.isBlank(),
-                                evt.getEntity().getX(),
-                                evt.getEntity().getY(),
-                                evt.getEntity().getZ(),
-                                expValue >= 2 ? 2 : 1
-                            );
-                            expValue -= expValue >= 2 ? 2 : 1;
-                            evt.getEntity().level().addFreshEntity(expOrb);
+                            int expValue = (popCost + 1) * 5;
+                            if (evt.getEntity() instanceof HeroUnit killedHero)
+                                expValue += killedHero.getHeroLevel() * 5;
+
+                            while (expValue > 0) {
+                                HeroExperienceOrb expOrb = HeroExperienceOrb.newOrb(level,
+                                        heroUnit,
+                                        deadOwner.isBlank(),
+                                        evt.getEntity().getX(),
+                                        evt.getEntity().getY(),
+                                        evt.getEntity().getZ(),
+                                        expValue >= 2 ? 2 : 1
+                                );
+                                expValue -= expValue >= 2 ? 2 : 1;
+                                evt.getEntity().level().addFreshEntity(expOrb);
+                            }
                         }
                     }
                 }

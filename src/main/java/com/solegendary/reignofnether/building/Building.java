@@ -45,6 +45,8 @@ public abstract class Building {
     // used to control size of initial foundations while keeping it symmetrical
     public final ArrayList<Block> startingBlockTypes = new ArrayList();
 
+    public int foundationYLayers = 1; // how many Y layers from the bottom are part of the foundation
+
     protected final Abilities abilities = new Abilities();
 
     public Abilities getAbilities() {

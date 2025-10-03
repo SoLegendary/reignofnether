@@ -263,7 +263,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
 
     public static final int WITHER_SECONDS = 6;
     public static final int WITHER_MAX_AMPLIFIER = 5; // amplifier starts at 0
-    public static final int WITHER_MAX_AMPLIFIER_HERO = 2;
+    public static final int WITHER_MAX_AMPLIFIER_HERO = 3;
 
     public static void applyStackingWither(LivingEntity le) {
         int amplifier = 0;

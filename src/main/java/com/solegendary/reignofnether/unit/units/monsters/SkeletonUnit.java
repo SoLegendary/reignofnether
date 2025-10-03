@@ -144,7 +144,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     final static public float attacksPerSecond = 0.35f;
     final static public float maxHealth = 30.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.25f;
+    final static public float movementSpeed = 0.24f;
     final static public float attackRange = 12.0F; // only used by ranged units or melee building attackers
     final static public float aggroRange = 12;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -221,7 +221,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     @Override
     public SunlightEffect getSunlightEffect() {
         if (hasItemInSlot(EquipmentSlot.HEAD)) {
-            return SunlightEffect.MOVEMENT_SLOWDOWN;
+            return SunlightEffect.SLOWNESS_II;
         } else {
             return SunlightEffect.FIRE;
         }
@@ -281,6 +281,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
 
         if (!level().isClientSide() && pTarget instanceof Unit unit)
             FogOfWarClientboundPacket.revealRangedUnit(unit.getOwnerName(), this.getId());
+        getMainHandItem().setDamageValue(0);
     }
 
     @Override

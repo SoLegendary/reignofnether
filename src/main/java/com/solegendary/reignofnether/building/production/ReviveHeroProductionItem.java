@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.production;
 
+import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
@@ -61,6 +62,8 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
                         newHero.getHeroAbilities().get(3).setRank(newHero, oldHero.ability4Rank);
                         HeroClientboundPacket.setAbilityRank(entity.getId(), oldHero.ability4Rank, 3);
                     }
+                    for (HeroAbility abl : newHero.getHeroAbilities())
+                        abl.updateStatsForRank();
                 }
                 HeroServerEvents.fallenHeroes.remove(oldHero);
             } else {

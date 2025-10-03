@@ -102,8 +102,8 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
-    @Shadow protected float getDamageAfterArmorAbsorb(DamageSource pDamageSource, float pDamageAmount) { return 0f; }
-    @Shadow protected float getDamageAfterMagicAbsorb(DamageSource pDamageSource, float pDamageAmount) { return 0f; }
+    @Shadow public float getDamageAfterArmorAbsorb(DamageSource pDamageSource, float pDamageAmount) { return 0f; }
+    @Shadow public float getDamageAfterMagicAbsorb(DamageSource pDamageSource, float pDamageAmount) { return 0f; }
     @Shadow public float getAbsorptionAmount() { return 0f; }
     @Shadow public void setAbsorptionAmount(float pAbsorptionAmount) { }
     @Shadow public CombatTracker getCombatTracker() { return null; }
@@ -121,17 +121,20 @@ public abstract class LivingEntityMixin extends Entity {
             pDamageSource.getEntity() instanceof AttackerUnit attackerUnit &&
             this.getAbsorptionAmount() > 0) {
 
-            float dmg = attackerUnit.getUnitAttackDamage();
-            if (this instanceof Unit unit)
-                dmg *= (1 - unit.getUnitArmorPercentage());
             ci.cancel();
+
+            float dmg = attackerUnit.getUnitAttackDamage();
+            if (this instanceof Unit unit) {
+                dmg *= (1 - unit.getUnitPhysicalArmorPercentage());
+                dmg *= (1 - unit.getUnitRangedArmorPercentage());
+                dmg *= (1 - unit.getUnitResistPercentage());
+            }
 
             if (!this.isInvulnerableTo(pDamageSource)) {
                 dmg = ForgeHooks.onLivingHurt((LivingEntity) (Object) this, pDamageSource, dmg);
                 if (dmg <= 0.0F) {
                     return;
                 }
-
                 dmg = this.getDamageAfterArmorAbsorb(pDamageSource, dmg);
                 dmg = this.getDamageAfterMagicAbsorb(pDamageSource, dmg);
                 float f1 = Math.max(dmg - this.getAbsorptionAmount(), 0.0F);
@@ -144,12 +147,10 @@ public abstract class LivingEntityMixin extends Entity {
                         serverplayer.awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(f * 10.0F));
                     }
                 }
-
-                f1 = ForgeHooks.onLivingDamage((LivingEntity) (Object) this, pDamageSource, f1);
+                ForgeHooks.onLivingDamage((LivingEntity) (Object) this, pDamageSource, f1);
                 if (f1 != 0.0F) {
-                    this.getCombatTracker().recordDamage(pDamageSource, f1);
                     this.setHealth(this.getHealth() - f1);
-                    this.setAbsorptionAmount(this.getAbsorptionAmount() - f1);
+                    this.getCombatTracker().recordDamage(pDamageSource, f1);
                     this.gameEvent(GameEvent.ENTITY_DAMAGE);
                 }
             }

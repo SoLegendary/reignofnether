@@ -46,6 +46,7 @@ public class BuildingServerboundPacket {
     private final static List<BuildingAction> existingBuildingAuthActions = List.of(
             BuildingAction.DESTROY,
             BuildingAction.SET_RALLY_POINT,
+            BuildingAction.ADD_RALLY_POINT,
             BuildingAction.SET_RALLY_POINT_ENTITY,
             BuildingAction.START_PRODUCTION,
             BuildingAction.CANCEL_PRODUCTION,
@@ -75,18 +76,23 @@ public class BuildingServerboundPacket {
                 BuildingAction.SET_RALLY_POINT,
                 "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
     }
+    public static void addRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.ADD_RALLY_POINT,
+                "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
+    }
     public static void setRallyPointEntity(BlockPos buildingPos, int entityId) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.SET_RALLY_POINT_ENTITY,
                 "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[]{ entityId }, false));
     }
-    public static void startProduction(BlockPos buildingPos, ProductionItem item) {
+    public static void startProduction(ProductionItem item) {
         BuildingClientEvents.switchHudToIdlestBuilding();
-
-        if (HudClientEvents.hudSelectedPlacement != null) {
-            PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
-                    BuildingAction.START_PRODUCTION,
-                    ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item).toString(), HudClientEvents.hudSelectedPlacement.originPos, BlockPos.ZERO, Rotation.NONE, "", new int[0], false));
+        if (HudClientEvents.hudSelectedPlacement instanceof ProductionPlacement pp) {
+                PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                        BuildingAction.START_PRODUCTION,
+                        ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item).toString(),
+                        pp.originPos, BlockPos.ZERO, Rotation.NONE, "", new int[0], false));
         }
     }
     public static void cancelProduction(BlockPos buildingPos, ProductionItem item, boolean frontItem) {
@@ -181,6 +187,10 @@ public class BuildingServerboundPacket {
                     if (building instanceof ProductionPlacement productionBuilding)
                         productionBuilding.setRallyPoint(rallyPos);
                 }
+                case ADD_RALLY_POINT -> {
+                    if (building instanceof ProductionPlacement productionBuilding)
+                        productionBuilding.addRallyPoint(rallyPos);
+                }
                 case SET_RALLY_POINT_ENTITY -> {
                     if (building instanceof ProductionPlacement productionBuilding) {
                         Entity e = building.level.getEntity(this.builderUnitIds[0]);
@@ -189,7 +199,7 @@ public class BuildingServerboundPacket {
                     }
                 }
                 case START_PRODUCTION -> {
-                    boolean prodSuccess = ((ProductionPlacement) building).startProductionItem(ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName)), this.buildingPos);
+                    boolean prodSuccess = ((ProductionPlacement) building).startProductionItem(ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName)));
                     if (prodSuccess)
                         BuildingClientboundPacket.startProduction(buildingPos, ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(itemName)));
                 }

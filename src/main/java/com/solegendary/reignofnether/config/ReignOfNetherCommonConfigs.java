@@ -166,7 +166,7 @@ public class ReignOfNetherCommonConfigs {
     public static class UnitCosts implements Costs {
         //Monsters
         public static final ResourceCostConfigEntry CREEPER = ResourceCostConfigEntry.Unit(50, 0, 100, 35, 2, ResourceCosts.CREEPER, "Creeper Config");
-        public static final ResourceCostConfigEntry ZOMBIE = ResourceCostConfigEntry.Unit(75, 0, 0, 10, 1, ResourceCosts.ZOMBIE, "Zombie Config");
+        public static final ResourceCostConfigEntry ZOMBIE = ResourceCostConfigEntry.Unit(75, 0, 0, 18, 1, ResourceCosts.ZOMBIE, "Zombie Config");
         public static final ResourceCostConfigEntry ZOMBIE_VILLAGER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.ZOMBIE_VILLAGER, "Zombie Villager Config");
         public static final ResourceCostConfigEntry SKELETON = ResourceCostConfigEntry.Unit(50,45,0,18,1, ResourceCosts.SKELETON, "Skeleton Config");
         public static final ResourceCostConfigEntry STRAY = ResourceCostConfigEntry.Unit(50,45,0,18,1, ResourceCosts.STRAY, "Stray Config");
@@ -284,17 +284,17 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry RESEARCH_RAVAGER_ARTILLERY = ResourceCostConfigEntry.Research(400,0,350, 140, ResourceCosts.RESEARCH_RAVAGER_ARTILLERY, "Ravager Artillery Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BRUTE_SHIELDS = ResourceCostConfigEntry.Research(0,300,300, 150, ResourceCosts.RESEARCH_BRUTE_SHIELDS, "Brute Shields Research Config");
         public static final ResourceCostConfigEntry RESEARCH_HOGLIN_CAVALRY = ResourceCostConfigEntry.Research(300,250,0, 100, ResourceCosts.RESEARCH_HOGLIN_CAVALRY, "Hoglin Cavalry Research Config");
-        public static final ResourceCostConfigEntry RESEARCH_HEAVY_TRIDENTS = ResourceCostConfigEntry.Research(0, 250, 250, 120, ResourceCosts.RESEARCH_HEAVY_TRIDENTS, "Heavy Tridents Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_HEAVY_TRIDENTS = ResourceCostConfigEntry.Research(0, 300, 300, 150, ResourceCosts.RESEARCH_HEAVY_TRIDENTS, "Heavy Tridents Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BLAZE_FIRE_WALL = ResourceCostConfigEntry.Research(400, 0, 300, 150, ResourceCosts.RESEARCH_BLAZE_FIRE_WALL, "Blaze Fire Wall Research Config");
         public static final ResourceCostConfigEntry RESEARCH_FIRE_RESISTANCE = ResourceCostConfigEntry.Research(0, 200, 200, 100, ResourceCosts.RESEARCH_FIRE_RESISTANCE, "Fire Resistance Research Config");
         public static final ResourceCostConfigEntry RESEARCH_WITHER_CLOUDS = ResourceCostConfigEntry.Research(250, 0, 350, 150, ResourceCosts.RESEARCH_WITHER_CLOUDS, "Wither Clouds Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BLOODLUST = ResourceCostConfigEntry.Research(250, 250, 250, 150, ResourceCosts.RESEARCH_BLOODLUST, "Bloodlust Research Config");
         public static final ResourceCostConfigEntry RESEARCH_ADVANCED_PORTALS = ResourceCostConfigEntry.Research(0, 300, 300, 150, ResourceCosts.RESEARCH_ADVANCED_PORTALS, "Advanced Portals Research Config");
         public static final ResourceCostConfigEntry RESEARCH_CIVILIAN_PORTAL = ResourceCostConfigEntry.Research(0, 75, 0, 20, ResourceCosts.RESEARCH_CIVILIAN_PORTAL, "Civilian Portal Research Config");
-        public static final ResourceCostConfigEntry RESEARCH_MILITARY_PORTAL = ResourceCostConfigEntry.Research(0, 125, 0, 30, ResourceCosts.RESEARCH_MILITARY_PORTAL, "Military Portal Research Config");
-        public static final ResourceCostConfigEntry RESEARCH_TRANSPORT_PORTAL = ResourceCostConfigEntry.Research(0, 175, 0, 40, ResourceCosts.RESEARCH_TRANSPORT_PORTAL, "Transport Portal Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_MILITARY_PORTAL = ResourceCostConfigEntry.Research(0, 125, 0, 25, ResourceCosts.RESEARCH_MILITARY_PORTAL, "Military Portal Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_TRANSPORT_PORTAL = ResourceCostConfigEntry.Research(0, 175, 0, 30, ResourceCosts.RESEARCH_TRANSPORT_PORTAL, "Transport Portal Research Config");
         public static final ResourceCostConfigEntry RESEARCH_CUBE_MAGMA = ResourceCostConfigEntry.Research(300, 0, 300, 140, ResourceCosts.RESEARCH_CUBE_MAGMA, "Cube Magma Research Config");
-        public static final ResourceCostConfigEntry RESEARCH_SOUL_FIREBALLS = ResourceCostConfigEntry.Research(0, 300, 300, 140, ResourceCosts.RESEARCH_SOUL_FIREBALLS, "Soul Fireballs Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_SOUL_FIREBALLS = ResourceCostConfigEntry.Research(0, 250, 250, 120, ResourceCosts.RESEARCH_SOUL_FIREBALLS, "Soul Fireballs Research Config");
 
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL1 = ResourceCostConfigEntry.Research(0, 0, 200, 120, ResourceCosts.RESEARCH_BEACON_LEVEL1, "Beacon Level 1 Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL2 = ResourceCostConfigEntry.Research(0, 0, 300, 120, ResourceCosts.RESEARCH_BEACON_LEVEL2, "Beacon Level 2 Research Config");

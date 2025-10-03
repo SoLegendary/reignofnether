@@ -29,13 +29,13 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class MaceSlam extends HeroAbility {
 
-    public static final float RADIUS = 4.0f;
-    public static final float RANGE = 4;
+    public static final float RADIUS = 3.0f;
+    public static final float RANGE = 3;
     public float damage = 10f;
     public int stunDuration = 2 * ResourceCost.TICKS_PER_SECOND;
 
     public MaceSlam() {
-        super(3, 30, UnitAction.MACE_SLAM, 30 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
+        super(3, 40, UnitAction.MACE_SLAM, 30 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
     }
 
     @Override

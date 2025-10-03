@@ -109,6 +109,7 @@ public class CommonModEvents {
 
         evt.registerEntityRenderer(EntityRegistrar.ADJUSTABLE_PRIMED_TNT.get(), TntRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.THROWABLE_TNT_PROJECTILE.get(), ThrowableTntRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get(), ThrownItemRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.THROWN_MACE_PROJECTILE.get(), ThrownMaceRenderer::new);
     }
 
@@ -229,6 +230,7 @@ public class CommonModEvents {
         }
         if(BuiltInRegistries.CREATIVE_MODE_TAB.getKey(event.getTab())==CreativeModeTabs.TOOLS_AND_UTILITIES.location()){
             event.accept(ItemRegistrar.THROWABLE_TNT);
+            event.accept(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE);
         }
     }
 }

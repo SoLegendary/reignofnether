@@ -22,7 +22,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getPlayerToBuildingRelationship;
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getSelectedBuildings;
@@ -42,7 +44,7 @@ public class ControlGroup {
     public long lastClickTime = 0;
 
     public final ArrayList<Integer> entityIds = new ArrayList<>();
-    private final ArrayList<BlockPos> buildingBps = new ArrayList<>(); // origin pos
+    public final ArrayList<BlockPos> buildingBps = new ArrayList<>(); // origin pos
     private Keybinding keybinding = null;
     private ResourceLocation iconRl = null;
 
@@ -72,33 +74,39 @@ public class ControlGroup {
     }
 
     // assigns selected entities/buildings to this control group
-    public void saveFromSelected(Keybinding keybinding) {
-        int numSaveableUnits = getSelectedUnits().stream().filter(
-                e -> getPlayerToEntityRelationship(e) == Relationship.OWNED || AlliancesClient.canControlAlly(e)).toList().size();
-        int numSaveableBuildings = getSelectedBuildings().stream().filter(
-                b -> getPlayerToBuildingRelationship(b) == Relationship.OWNED).toList().size();
-
-        if (numSaveableUnits == 0 && numSaveableBuildings == 0)
-            return;
-
-        this.clearAll();
-        this.keybinding = keybinding;
-
-        ArrayList<LivingEntity> selUnits = UnitClientEvents.getSelectedUnits();
-        ArrayList<BuildingPlacement> selBuildings = BuildingClientEvents.getSelectedBuildings();
-
-        if (selUnits.size() > 0 && (getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED || AlliancesClient.canControlAlly(selUnits.get(0)))) {
-            this.entityIds.addAll(selUnits.stream().map(Entity::getId).toList());
+    public void saveFromSelected(Keybinding keybinding, boolean newGroup) {
+        if (newGroup) {
+            this.clearAll();
+            this.keybinding = keybinding;
         }
-        else if (selBuildings.size() > 0 && getPlayerToBuildingRelationship(selBuildings.get(0)) == Relationship.OWNED) {
-            this.buildingBps.addAll(selBuildings.stream().map(b -> b.originPos).toList());
+        List<Integer> saveableUnits = getSelectedUnits().stream().filter(
+                e -> ((getPlayerToEntityRelationship(e) == Relationship.OWNED || AlliancesClient.canControlAlly(e)) &&
+                    (!entityIds.contains(e.getId())))
+                )
+                .map(Entity::getId)
+                .toList();
+
+        List<BlockPos> saveableBuildings = getSelectedBuildings().stream().filter(
+                b -> getPlayerToBuildingRelationship(b) == Relationship.OWNED &&
+                    !buildingBps.contains(b.originPos)
+                )
+                .map(b -> b.originPos)
+                .toList();
+
+        if (saveableUnits.size() > 0 && (!this.entityIds.isEmpty() || newGroup)) {
+            this.entityIds.addAll(saveableUnits);
+        }
+        else if (saveableBuildings.size() > 0 && (!this.buildingBps.isEmpty() || newGroup)) {
+            this.buildingBps.addAll(saveableBuildings);
         }
         // assign the icon resource (won't update if the front entity/building dies)
-        if (hudSelectedEntity != null) {
-            String unitName = MiscUtil.getSimpleEntityName(hudSelectedEntity);
-            iconRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png");
-        } else if (hudSelectedPlacement != null) {
-            iconRl = hudSelectedPlacement.getBuilding().icon;
+        if (newGroup) {
+            if (hudSelectedEntity != null) {
+                String unitName = MiscUtil.getSimpleEntityName(hudSelectedEntity);
+                iconRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png");
+            } else if (hudSelectedPlacement != null) {
+                iconRl = hudSelectedPlacement.getBuilding().icon;
+            }
         }
     }
 
@@ -156,7 +164,10 @@ public class ControlGroup {
             () -> false,
             () -> false,
             () -> true,
-            this::loadToSelected,
+            () -> {
+                if (!Keybindings.shiftMod.isDown())
+                    loadToSelected();
+            },
             () -> {
                 if (Keybindings.shiftMod.isDown())
                     clearAll();

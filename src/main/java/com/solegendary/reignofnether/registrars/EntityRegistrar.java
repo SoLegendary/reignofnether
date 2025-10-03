@@ -2,8 +2,9 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
-import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
+import com.solegendary.reignofnether.entities.ThrownHeroExperienceBottle;
 import com.solegendary.reignofnether.entities.ThrownMaceProjectile;
+import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
 import com.solegendary.reignofnether.hero.HeroExperienceOrb;
 import com.solegendary.reignofnether.unit.modelling.renderers.GhastUnitRenderer;
 import com.solegendary.reignofnether.unit.modelling.renderers.NecromancerRenderer;
@@ -296,6 +297,12 @@ public class EntityRegistrar {
                     .sized(0.98F, 0.98F)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "tnt_throwable_projectile").toString()));
+
+    public static final RegistryObject<EntityType<ThrownHeroExperienceBottle>> THROWN_HERO_EXPERIENCE_BOTTLE = ENTITIES.register("thrown_hero_experience_bottle",
+            () -> EntityType.Builder.<ThrownHeroExperienceBottle>of(ThrownHeroExperienceBottle::new, MobCategory.MISC)
+                    .sized(0.25F, 0.25F)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "thrown_hero_experience_bottle").toString()));
 
     public static final RegistryObject<EntityType<AdjustablePrimedTnt>> ADJUSTABLE_PRIMED_TNT = ENTITIES.register("adjustable_primed_tnt",
             () -> EntityType.Builder.<AdjustablePrimedTnt>of(AdjustablePrimedTnt::new, MobCategory.MISC)

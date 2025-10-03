@@ -586,7 +586,7 @@ public class TutorialClientEvents {
                 } else if (stageProgress == 3 && BuildingClientEvents.getBuildings().size() > 0) {
                     if (BuildingClientEvents.getBuildings().get(0).getBuilding() instanceof TownCentre
                         && BuildingClientEvents.getBuildings().get(0) instanceof ProductionPlacement townCentre
-                        && townCentre.getRallyPoint() != null) {
+                        && townCentre.getFinalRallyPoint() != null) {
                         msg("tutorial.reignofnether.make_villager");
                         setHelpButtonText("tutorial.reignofnether.make_villager2");
                         TutorialRendering.setButtonName(VillagerProd.itemName);

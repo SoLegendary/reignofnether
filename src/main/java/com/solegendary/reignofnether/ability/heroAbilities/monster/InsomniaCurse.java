@@ -57,6 +57,7 @@ public class InsomniaCurse extends HeroAbility {
             cooldownMax = 20 * ResourceCost.TICKS_PER_SECOND;
         } else if (getRank(hero) == 2) {
             maxCharges = 4;
+            maxCharges = 4;
             cooldownMax = 17 * ResourceCost.TICKS_PER_SECOND;
         } else if (getRank(hero) == 3) {
             maxCharges = 5;

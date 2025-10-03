@@ -12,10 +12,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
-import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
+import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
@@ -64,7 +61,8 @@ public class PromoteIllager extends Ability {
             );
 
             for (Mob mob : nearbyMobs)
-                if (mob instanceof Unit unit && unit.getOwnerName().equals(captainUnit.getOwnerName()))
+                if (mob instanceof Unit unit && unit.getOwnerName().equals(captainUnit.getOwnerName()) &&
+                    !(mob instanceof RavagerUnit))
                     mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 2, 0));
         }
     }

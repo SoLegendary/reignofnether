@@ -19,7 +19,9 @@ public abstract class HeroProductionItem extends ProductionItem {
     public HeroProductionItem(ResourceCost cost, String itemName, ResourceLocation iconRl) {
         super(cost);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (!level.isClientSide() && !heroOwned(level.isClientSide(), placement.ownerName))
+            boolean notClientSide = !level.isClientSide();
+            boolean noHeroOwned = !heroOwned(level.isClientSide(), placement.ownerName);
+            if (notClientSide && noHeroOwned)
                 placement.produceUnit((ServerLevel) level, getHeroEntityType(), placement.ownerName, true);
         };
         this.itemName = itemName;

@@ -162,6 +162,8 @@ public class BuildingPlacement {
 
     public Mob lastAttacker = null;
 
+    public boolean allowProdWhileBuilding = false;
+
     private ArmorStand targetStand = null;
     public ArmorStand getTargetStand() {
         if (targetStand == null)
@@ -701,7 +703,7 @@ public class BuildingPlacement {
             TutorialClientEvents.updateStage();
             if (this.isCapitol && !SandboxClientEvents.isSandboxPlayer() &&
                 getTotalCompletedBuildingsOwned(this.level.isClientSide(), ownerName) == 1)
-                SoundClientEvents.playFactionCalmTheme(this.getFaction());
+                SoundClientEvents.playFactionCalmTheme(this.getFaction(), ownerName);
         }
 
         // prevent showing blocks on minimap unless previously explored
@@ -985,7 +987,8 @@ public class BuildingPlacement {
                 || spawnBp.distSqr(centrePos) > range * range
                 || Math.abs(spawnBp.getY() - minCorner.getY()) >= 4
                 || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp)
-                || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp.above()));
+                || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp.above())
+                || !level.getWorldBorder().isWithinBounds(spawnBp));
 
         EntityType<? extends Animal> animalType = null;
         int spawnQty = 1;

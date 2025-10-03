@@ -15,12 +15,9 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class ThrowableTntProjectile extends ThrowableItemProjectile {
+
     public ThrowableTntProjectile(EntityType<? extends ThrowableItemProjectile> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-    }
-
-    public ThrowableTntProjectile(Level pLevel) {
-        super(EntityRegistrar.THROWABLE_TNT_PROJECTILE.get(), pLevel);
     }
 
     public ThrowableTntProjectile(Level pLevel, LivingEntity livingEntity) {

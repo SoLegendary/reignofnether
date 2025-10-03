@@ -18,6 +18,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.util.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -25,6 +26,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -53,6 +55,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttackerUnit {
     final static public float attackRange = 30; // only used by ranged units or melee building attackers
@@ -185,7 +189,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     }
 
     @Override
-    protected float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
+    public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
         if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO))
             pDamage *= 0.5F;
@@ -361,6 +365,18 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     @Override
     public void setupEquipmentAndUpgradesServer() {
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+    }
+
+    @Override
+    public List<FormattedCharSequence> getAttackDamageStatTooltip() {
+        return List.of(
+                fcs(I18n.get("unitstats.reignofnether.attack_damage"), true),
+                fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_buildings", "300%"))
+        );
+    }
+    @Override
+    public boolean hasBonusDamage() {
+        return true;
     }
 
     @Override

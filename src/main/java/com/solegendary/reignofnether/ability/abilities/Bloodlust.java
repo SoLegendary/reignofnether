@@ -31,6 +31,8 @@ public class Bloodlust extends Ability {
     private static final int HEALTH_COST = 12;
     private static final int DURATION_SECONDS = 10;
 
+    public static final float BLOODLUST_ATTACK_SPEED_MULTIPLIER = 1.6f;
+
     public Bloodlust() {
         super(
                 UnitAction.BLOOD_LUST,

@@ -32,36 +32,30 @@ public class TimeServerEvents {
 
     private static int bloodMoonTicksLeft = 0;
     private static LivingEntity bloodMoonOwner = null;
-    private static String bloodMoonTarget = null; // who receives the spawned enemies
+    private static BlockPos bloodMoonTarget = null; // area to spawn enemies
     private static boolean zombieOrSkeleton = true;
 
     public static boolean isBloodMoonActive() {
         return bloodMoonTicksLeft > 0;
     }
 
-    public static void startBloodMoon(int tickDuration, Unit owner, String targetName) {
+    public static void startBloodMoon(int tickDuration, Unit owner, BlockPos targetPos) {
         bloodMoonTicksLeft = tickDuration;
         bloodMoonOwner = (LivingEntity) owner;
-        bloodMoonTarget = targetName;
+        bloodMoonTarget = targetPos;
         sendMessageToAllPlayers("abilities.reignofnether.blood_moon.start", 0xFF0000, true, owner.getOwnerName());
         SoundClientboundPacket.playSoundForAllPlayers(SoundAction.RANDOM_CAVE_AMBIENCE);
     }
 
     // spawns one neutral undead unit (zombie or skeleton at random) in each base owned by bloodMoonTarget
     private static void doRandomBloodMoonSpawn(Level level) {
-        if (level.isClientSide()) {
+        if (level.isClientSide() || bloodMoonTarget == null) {
             return;
         }
-        int retries = 0;
-        final int MAX_RETRIES = 3;
-
-        int spawnAttempts = 0;
-        BlockState spawnBs;
-        BlockPos spawnBp;
         Random random = new Random();
 
         ArrayList<BuildingPlacement> enemyBuildings = new ArrayList<>(BuildingServerEvents.getBuildings().stream()
-                .filter(b -> b.ownerName.equals(bloodMoonTarget) && !b.getBuilding().invulnerable)
+                .filter(b -> b.centrePos.distSqr(bloodMoonTarget) < (BloodMoon.RADIUS * BloodMoon.RADIUS) && !b.getBuilding().invulnerable)
                 .toList());
         Collections.shuffle(enemyBuildings);
 

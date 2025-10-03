@@ -58,6 +58,11 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
     }
 
     @Override
+    public SunlightEffect getSunlightEffect() {
+        return SunlightEffect.NONE;
+    }
+
+    @Override
     protected void spawnTinySlime() { }
 
     public void tick() {

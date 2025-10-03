@@ -115,8 +115,9 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
             if (isInRange()) {
                 if (moveTarget != null)
                     castTarget = moveTarget;
-                if (!isCasting)
+                if (!isCasting) {
                     startCasting();
+                }
                 this.stopMoving();
             } else {
                 this.stopCasting();

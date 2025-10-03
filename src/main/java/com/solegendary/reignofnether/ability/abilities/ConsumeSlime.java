@@ -50,7 +50,8 @@ public class ConsumeSlime extends Ability {
                 FormattedCharSequence.forward(I18n.get("abilities.reignofnether.consume.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("abilities.reignofnether.consume.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.consume.tooltip3"), Style.EMPTY)
             ),
             this,
             unit

@@ -11,11 +11,13 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -31,6 +33,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -202,6 +206,18 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
+    }
+
+    @Override
+    public List<FormattedCharSequence> getAttackDamageStatTooltip() {
+        return List.of(
+                fcs(I18n.get("unitstats.reignofnether.attack_damage"), true),
+                fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_buildings", "100%"))
+        );
+    }
+    @Override
+    public boolean hasBonusDamage() {
+        return true;
     }
 
     @Override

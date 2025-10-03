@@ -276,5 +276,11 @@ public final class PacketHandler {
                 .decoder(CustomBuildingClientboundPacket::new)
                 .consumerMainThread(CustomBuildingClientboundPacket::handle)
                 .add();
+
+        INSTANCE.messageBuilder(UnitSyncMobEffectsClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(UnitSyncMobEffectsClientboundPacket::encode)
+                .decoder(UnitSyncMobEffectsClientboundPacket::new)
+                .consumerMainThread(UnitSyncMobEffectsClientboundPacket::handle)
+                .add();
     }
 }

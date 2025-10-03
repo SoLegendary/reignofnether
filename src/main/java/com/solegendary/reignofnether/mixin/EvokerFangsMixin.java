@@ -47,8 +47,13 @@ public abstract class EvokerFangsMixin extends Entity {
             return;
 
         // set to the damage amount we want and set us as the owner to ensure knockback
-        if (pTarget.isAlive() && !pTarget.isInvulnerable() && pTarget != this.getOwner())
-            pTarget.hurt(damageSources().indirectMagic(this.getOwner(), this.getOwner()), EvokerUnit.FANGS_DAMAGE);
+        if (pTarget.isAlive() && !pTarget.isInvulnerable() && pTarget != this.getOwner()) {
+            float dmg = EvokerUnit.FANGS_DAMAGE;
+            if (this.getOwner() instanceof EvokerUnit evokerUnit && evokerUnit.lastCastedCircleFangs) {
+                dmg *= 2;
+            }
+            pTarget.hurt(damageSources().indirectMagic(this.getOwner(), this.getOwner()), dmg);
+        }
     }
 
     // increase AOE size (originally inflate(0.2, 0.0, 0.2))

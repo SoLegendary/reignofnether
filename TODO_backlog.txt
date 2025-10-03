@@ -6,8 +6,7 @@
 Features
 --------
 
-[❌] Villager upgrade
-    - For stats and at blacksmith?
+[❌] Let villagers repair iron golems with ore for 1hp per ore, masons repair faster
 
 [❌] Custom structure block to register new buildings
     - That are also saved to the level
@@ -38,14 +37,24 @@ Bugfixes
 --------
 [❌] Dying in survival puts you in a bugged survival mode
 
-[❌] Villagers with professions don't use the correct texture for their arms, esp. farmers
-
-[❌] [Code issue] ResearchHoglinCavalry doesn't overwrite the getItemName method of the base ProductionItem class, resulting in a null name when calling the method
+[❌] [Code issue] ResearchHoglinCavalry doesn't overwrite the getItemName method of the base ProductionItem class,
+        resulting in a null name when calling the method in the prod queue
     - Same with FireResistance, SoulFireball, LabLightningRod, WaterPotions, HealingPotions
+
+[❌] keyframe animations are cancelled upon being hit
+[❌] Avatar state is reset when unloaded
+[❌] When someone relogs, bridges revert to original rotations
+[❌] heroes are not resetting when switching worlds until /rts-reset is used
 
 
 Quality of Life Features
 ------------------------
+
+[❌] players starting at the same colour of RTS Start Blocks are automatically allied at the start of a match
+    - including a tooltip showing who will be on your own team
+
+[❌] Handicap command
+    - Makes all resource costs some % higher than normal
 
 [❌] More serverside logging for major player actions
     - Building creation
@@ -65,12 +74,6 @@ Quality of Life Features
 
 [❌] restore ores on /rts-reset
     - Have to track each ore block when it is mined or converted into nether terrain
-
-[❌] buff/debuff icons in vertical list to right of unit stats
-    - potion effects
-    - auras
-    - hero passives
-    - enchantments
 
 
 

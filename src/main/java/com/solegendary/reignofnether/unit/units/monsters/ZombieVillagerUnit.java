@@ -279,7 +279,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
 
     @Override
     public SunlightEffect getSunlightEffect() {
-        return SunlightEffect.MOVEMENT_SLOWDOWN;
+        return SunlightEffect.SLOWNESS_II;
     }
 
     public void initialiseGoals() {

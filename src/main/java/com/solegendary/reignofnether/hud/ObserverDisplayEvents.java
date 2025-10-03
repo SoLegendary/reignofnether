@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.resources.Resources;
@@ -22,7 +23,9 @@ public class ObserverDisplayEvents {
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
 
-        if (!OrthoviewClientEvents.isEnabled() || !(evt.getScreen() instanceof TopdownGui)) {
+        if (!OrthoviewClientEvents.isEnabled() ||
+            !(evt.getScreen() instanceof TopdownGui) ||
+            !(Keybindings.tab.isDown())) {
             return;
         }
 
@@ -41,7 +44,7 @@ public class ObserverDisplayEvents {
         int screenHeight = MC.getWindow().getGuiScaledHeight();
 
         int blitX = screenWidth / 2 - ObserverPlayerDisplay.DISPLAY_WIDTH / 2;
-        int blitY = 0;
+        int blitY = 70;
 
         var guiGraphics = evt.getGuiGraphics();
 

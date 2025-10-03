@@ -215,7 +215,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
 
     @Override
     public SunlightEffect getSunlightEffect() {
-        return SunlightEffect.MOVEMENT_SLOWDOWN;
+        return SunlightEffect.SLOWNESS_II;
     }
 
     public void initialiseGoals() {
@@ -260,7 +260,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
         this.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 1.0F);
         if (!this.level().isClientSide()) {
             ServerLevel level = (ServerLevel) this.level();
-            for(int i = 1; i < Mth.floor(targetPos.length()) + 7; ++i) {
+            for(int i = 1; i < Mth.floor(targetPos.length()) + 5; ++i) {
                 Vec3 particlePos = startPos.add(normTargetPos.scale(i));
                 level.sendParticles(ParticleTypes.SONIC_BOOM, particlePos.x, particlePos.y, particlePos.z, 1, 0,0,0,0);
             }

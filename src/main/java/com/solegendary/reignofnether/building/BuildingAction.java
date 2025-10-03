@@ -7,6 +7,7 @@ public enum BuildingAction {
     DESTROY, // WIP building cancelled by owner or destroyed by someone
     SYNC_BLOCKS_AND_OWNER, // sync client building health with server (client doesn't always have the blocks loaded to check natively)
     SET_RALLY_POINT,
+    ADD_RALLY_POINT,
     SET_RALLY_POINT_ENTITY,
     START_PRODUCTION, // start ProductionItem
     COMPLETE_PRODUCTION, // don't let client complete items themselves, only via reflected clientbound packets for consistency

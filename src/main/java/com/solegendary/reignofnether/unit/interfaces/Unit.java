@@ -16,10 +16,7 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.tps.TPSClientEvents;
-import com.solegendary.reignofnether.unit.Checkpoint;
-import com.solegendary.reignofnether.unit.Relationship;
-import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
@@ -27,6 +24,8 @@ import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.util.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import com.solegendary.reignofnether.util.MiscUtil;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -37,7 +36,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.damagesource.CombatRules;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -59,6 +60,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 // Defines method bodies for Units
 // workaround for trying to have units inherit from both their base vanilla Mob class and a Unit class
@@ -150,9 +153,32 @@ public interface Unit {
     String getOwnerName();
     void setOwnerName(String name);
 
-    default float getUnitArmorPercentage() {
+    // SOURCE: armour attribute and armour items
+    default float getUnitPhysicalArmorPercentage() {
         Mob mob = (Mob) this;
         return 1 - CombatRules.getDamageAfterAbsorb(1, (float)mob.getArmorValue(), (float)mob.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
+    }
+
+    // SOURCE: inherent unit stats and abilities
+    default float getUnitRangedArmorPercentage() {
+        return 0;
+    }
+
+    // SOURCE: inherent unit stats and vanilla mechanics (like resistance)
+    default float getUnitMagicArmorPercentage() {
+        Mob mob = (Mob) this;
+        return 1 - mob.getDamageAfterMagicAbsorb(mob.damageSources().magic(), 1);
+    }
+
+    // SOURCE: resistance mob effect
+    default float getUnitResistPercentage() {
+        Mob mob = (Mob) this;
+        MobEffectInstance mei = mob.getEffect(MobEffects.DAMAGE_RESISTANCE);
+        if (mei != null) {
+            return (float) (0.2 * (mei.getAmplifier() + 1));
+        } else {
+            return 0;
+        }
     }
 
     public static void tick(Unit unit) {
@@ -244,10 +270,7 @@ public interface Unit {
                 le.heal(1);
             } else if (unit.getFaction() == Faction.PIGLINS &&
                     le.tickCount % PIGLIN_HEALING_TICKS == 0 &&
-                    !(unit instanceof Slime) &&
-                    ((le.getVehicle() != null && NetherBlocks.isNetherBlock(le.level(), le.getVehicle().getOnPos())) ||
-                            NetherBlocks.isNetherBlock(le.level(), le.getOnPos()) ||
-                            unit instanceof GhastUnit)) {
+                    (MiscUtil.isOnNetherTerrain(le) || unit instanceof GhastUnit)) {
                 le.heal(1);
             }
         }
@@ -263,12 +286,15 @@ public interface Unit {
         if (unitMob.tickCount % 50 == 0)
             checkAndRetreatToAnchor(unit);
 
-        if (unit.getSunlightEffect() == SunlightEffect.MOVEMENT_SLOWDOWN) {
-            // apply slowness level 2 during daytime for a short time repeatedly
+        if (unit.getSunlightEffect() == SunlightEffect.SLOWNESS_II ||
+            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I) {
+            // apply slowness during daytime for a short time repeatedly
             if (unitMob.tickCount % 10 == 0 && !unitMob.level().isClientSide() && unitMob.level().isDay() &&
                     !NightUtils.isInRangeOfNightSource(unitMob.getEyePosition(), false) &&
                     !ResearchServerEvents.playerHasCheat(unit.getOwnerName(), "slipslopslap"))
-                unitMob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15, 1));
+                unitMob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15,
+                        unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I ? 0 : 1
+                ));
         }
 
         if (unitMob.tickCount % 20 == 0) {
@@ -313,6 +339,12 @@ public interface Unit {
         }
         if (unitMob.hasEffect(MobEffects.ABSORPTION) && unitMob.getAbsorptionAmount() <= 0)
             unitMob.removeEffect(MobEffects.ABSORPTION);
+
+        if (unitMob.tickCount % 10 == 0 &&
+            unit.getFaction() == Faction.PIGLINS &&
+            MiscUtil.isOnNetherTerrain(unitMob)) {
+            unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(), 15, 1, true, false));
+        }
     }
 
     private static void checkAndPickupResources(Unit unit) {
@@ -369,6 +401,8 @@ public interface Unit {
 
     default void onPickupEquipment(ItemStack itemStack) { }
 
+    static int HOSTILE_FOOD_DELAY_TICKS = 200;
+
     private static void checkAndPickupEdibleFood(Unit unit) {
         Mob unitMob = (Mob) unit;
         if (!unit.isHoldingEdibleFood()) {
@@ -383,7 +417,7 @@ public interface Unit {
                 }
                 Relationship rl = UnitServerEvents.getUnitToEntityRelationship(unit, itementity);
                 if (!itementity.isRemoved() && !itemstack.isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive() &&
-                    (rl != Relationship.HOSTILE || itementity.tickCount > 100) && ResourceSources.isPreparedFood(itemstack.getItem())) {
+                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ResourceSources.isPreparedFood(itemstack.getItem())) {
                     if (ResourceSources.isPreparedFood(itemstack.getItem()) &&
                             (unitMob.getHealth() < unitMob.getMaxHealth() || itemstack.getItem() == Items.ENCHANTED_GOLDEN_APPLE)) {
                         unitMob.onItemPickup(itementity);
@@ -429,7 +463,8 @@ public interface Unit {
 
     public enum SunlightEffect {
         NONE,
-        MOVEMENT_SLOWDOWN,
+        SLOWNESS_II,
+        SLOWNESS_I,
         FIRE
     }
 
@@ -593,6 +628,58 @@ public interface Unit {
             if (ability.isCasting(this))
                 return true;
         return false;
+    }
+
+    public default List<FormattedCharSequence> getAttackDamageStatTooltip() {
+        return List.of(fcs(I18n.get("unitstats.reignofnether.attack_damage"), true));
+    }
+
+    public default boolean hasBonusDamage() {
+        return false;
+    }
+
+    public default boolean hasBonusAttackSpeed() {
+        return false;
+    }
+
+    public default List<FormattedCharSequence> getAttackSpeedStatTooltip() {
+        return List.of(fcs(I18n.get("unitstats.reignofnether.attack_speed"), true));
+    }
+
+    public default List<FormattedCharSequence> getRangeStatTooltip() {
+        return List.of(fcs(I18n.get("unitstats.reignofnether.range"), true));
+    }
+
+    public default List<FormattedCharSequence> getArmourStatTooltip() {
+        ArrayList<FormattedCharSequence> fcsList = new ArrayList<>();
+        fcsList.add(fcs(I18n.get("unitstats.reignofnether.armour"), true));
+        if (getUnitPhysicalArmorPercentage() > 0) {
+            fcsList.add(fcs(I18n.get("unitstats.reignofnether.armour_melee_and_ranged", (int) (getUnitPhysicalArmorPercentage() * 100)), false));
+        }
+        if (getUnitRangedArmorPercentage() > 0) {
+            fcsList.add(fcs(I18n.get("unitstats.reignofnether.armour_ranged", (int) (getUnitRangedArmorPercentage() * 100)), false));
+        }
+        if (getUnitResistPercentage() > 0) {
+            fcsList.add(fcs(I18n.get("unitstats.reignofnether.armour_all", (int) (getUnitResistPercentage() * 100)), false));
+        }
+        else if (getUnitMagicArmorPercentage() > 0) {
+            fcsList.add(fcs(I18n.get("unitstats.reignofnether.armour_magic", (int) (getUnitMagicArmorPercentage() * 100)), false));
+        }
+        return fcsList;
+    }
+
+    public default List<FormattedCharSequence> getMovementSpeedStatTooltip() {
+        return List.of(fcs(I18n.get("unitstats.reignofnether.movement_speed"), true));
+    }
+
+    public default List<FormattedCharSequence> getStatTooltip(UnitStatType unitStatType) {
+        return switch (unitStatType) {
+            case ATTACK_DAMAGE -> getAttackDamageStatTooltip();
+            case ATTACK_SPEED -> getAttackSpeedStatTooltip();
+            case RANGE -> getRangeStatTooltip();
+            case ARMOUR -> getArmourStatTooltip();
+            case MOVEMENT_SPEED -> getMovementSpeedStatTooltip();
+        };
     }
 
     default void setCooldown(Ability abilityClass, float cooldown) {

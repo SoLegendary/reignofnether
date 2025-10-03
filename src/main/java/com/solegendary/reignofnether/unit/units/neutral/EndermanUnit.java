@@ -200,7 +200,12 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
             double d0 = this.getX() + (this.random.nextDouble() - 0.5) * 16.0;
             double d1 = this.getY() + (double)(this.random.nextInt(16) - 8);
             double d2 = this.getZ() + (this.random.nextDouble() - 0.5) * 16.0;
-            return this.teleport(d0, d1, d2);
+
+            if (level().getWorldBorder().isWithinBounds(d0, d2)) {
+                return this.teleport(d0, d1, d2);
+            } else {
+                return false;
+            }
         } else {
             return false;
         }

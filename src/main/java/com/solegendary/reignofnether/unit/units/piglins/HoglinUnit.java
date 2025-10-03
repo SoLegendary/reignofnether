@@ -19,12 +19,14 @@ import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitConvertClientboundPacket;
 import com.solegendary.reignofnether.util.Faction;
+import net.minecraft.client.resources.language.I18n;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
@@ -49,6 +51,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, ConvertableUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -322,5 +326,17 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
             LivingEntity newEntity = this.convertToUnit(EntityRegistrar.ARMOURED_HOGLIN_UNIT.get());
             UnitConvertClientboundPacket.syncConvertedUnits(getOwnerName(), List.of(getId()), List.of(newEntity.getId()));
         }
+    }
+
+    @Override
+    public List<FormattedCharSequence> getAttackDamageStatTooltip() {
+        return List.of(
+                fcs(I18n.get("unitstats.reignofnether.attack_damage"), true),
+                fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_buildings", "50%"))
+        );
+    }
+    @Override
+    public boolean hasBonusDamage() {
+        return true;
     }
 }

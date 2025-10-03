@@ -32,7 +32,9 @@ public class ThrowTNT extends HeroAbility {
 
     public static final int RANGE = 12;
     public float explosionPower = 2;
-    public static int LESS_COOLDOWN_PER_100_RESOURCES = 5 * ResourceCost.TICKS_PER_SECOND;
+
+    // for some reason 0 and negative cooldown values cause this to stop working
+    public static int LESS_COOLDOWN_PER_100_RESOURCES = 6 * (ResourceCost.TICKS_PER_SECOND + 2);
     public static int LESS_MANA_PER_100_RESOURCES = 5;
 
     public ThrowTNT() {

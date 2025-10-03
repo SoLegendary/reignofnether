@@ -26,6 +26,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -65,6 +66,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.solegendary.reignofnether.hud.HudClientEvents.*;
+import static com.solegendary.reignofnether.unit.Checkpoint.CHECKPOINT_TICKS_FADE;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
 
 public class BuildingClientEvents {
@@ -648,28 +650,25 @@ public class BuildingClientEvents {
             }
         }
 
-        // draw rally point and line
+        // draw rally points and lines
         for (BuildingPlacement selBuilding : selectedBuildings) {
             if (selBuilding instanceof ProductionPlacement selProdBuilding) {
                 float a = MiscUtil.getOscillatingFloat(0.25f, 0.75f);
 
-                if (selProdBuilding.getRallyPoint() != null) {
-                    MyRenderer.drawBlockFace(evt.getPoseStack(),
-                        Direction.UP,
-                        selProdBuilding.getRallyPoint(),
-                        0,
-                        1,
-                        0,
-                        a
-                    );
-                    MyRenderer.drawLine(evt.getPoseStack(),
-                        selBuilding.centrePos,
-                        selProdBuilding.getRallyPoint(),
-                        0,
-                        1,
-                        0,
-                        a
-                    );
+                if (!selProdBuilding.getRallyPoints().isEmpty() && MC.level != null) {
+                    Vec3 lastPos = Vec3.atBottomCenterOf(selProdBuilding.centrePos.above());
+                    for (BlockPos bp : selProdBuilding.getRallyPoints()) {
+                        MyRenderer.drawLine(evt.getPoseStack(), lastPos, Vec3.atBottomCenterOf(bp.above()), 0, 1, 0, a);
+                        if (MC.level.getBlockState(bp.offset(0,1,0)).getBlock() instanceof SnowLayerBlock) {
+                            AABB aabb = new AABB(bp);
+                            aabb = aabb.setMaxY(aabb.maxY + 0.13f);
+                            MyRenderer.drawSolidBox(evt.getPoseStack(), aabb, Direction.UP, 0, 1, 0, a,
+                                    new ResourceLocation("forge:textures/white.png"));
+                        } else {
+                            MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, 0, 1, 0, a);
+                        }
+                        lastPos = Vec3.atBottomCenterOf(bp.above());
+                    }
                 } else if (selProdBuilding.getRallyPointEntity() != null) {
                     LivingEntity le = selProdBuilding.getRallyPointEntity();
                     MyRenderer.drawLine(evt.getPoseStack(), new Vec3(selBuilding.centrePos.getX(),
@@ -887,8 +886,13 @@ public class BuildingClientEvents {
                             );
                         } else {
                             BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();
-                            selProdBuilding.setRallyPoint(rallyPoint);
-                            BuildingServerboundPacket.setRallyPoint(selBuilding.originPos, rallyPoint);
+                            if (Keybindings.shiftMod.isDown()) {
+                                selProdBuilding.addRallyPoint(rallyPoint);
+                                BuildingServerboundPacket.addRallyPoint(selBuilding.originPos, rallyPoint);
+                            } else {
+                                selProdBuilding.setRallyPoint(rallyPoint);
+                                BuildingServerboundPacket.setRallyPoint(selBuilding.originPos, rallyPoint);
+                            }
                         }
                     }
                 }

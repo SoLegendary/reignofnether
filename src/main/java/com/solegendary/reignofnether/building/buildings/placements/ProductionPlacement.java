@@ -23,6 +23,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -31,12 +32,11 @@ import java.util.concurrent.TimeUnit;
 import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
 
 public class ProductionPlacement extends BuildingPlacement {
-    private BlockPos rallyPoint;
+    private ArrayList<BlockPos> rallyPoints = new ArrayList<>();
     private LivingEntity rallyPointEntity;
     public List<Button> productionButtons;
     public final List<ActiveProduction> productionQueue = new ArrayList<>();
     private ActiveProduction active;
-
 
     public ProductionPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
@@ -45,7 +45,17 @@ public class ProductionPlacement extends BuildingPlacement {
         }
     }
 
-    public BlockPos getRallyPoint() { return this.rallyPoint; }
+    @Nullable
+    public BlockPos getFinalRallyPoint() {
+        if (this.rallyPoints.size() > 0)
+            return this.rallyPoints.get(this.rallyPoints.size() - 1);
+        else
+            return null;
+    }
+
+    public ArrayList<BlockPos> getRallyPoints() {
+        return rallyPoints;
+    }
 
     public LivingEntity getRallyPointEntity() {
         if (this.rallyPointEntity == null)
@@ -58,13 +68,19 @@ public class ProductionPlacement extends BuildingPlacement {
     }
 
     public void setRallyPoint(BlockPos rallyPoint) {
-        ProductionBuilding building = (ProductionBuilding) getBuilding();
+        this.rallyPoints = new ArrayList<>();
         if (!canSetRallyPoint())
             return;
-        if (isPosInsideBuilding(rallyPoint))
-            this.rallyPoint = null;
-        else
-            this.rallyPoint = rallyPoint;
+        if (!isPosInsideBuilding(rallyPoint))
+            this.rallyPoints.add(rallyPoint);
+        this.rallyPointEntity = null;
+    }
+
+    public void addRallyPoint(BlockPos rallyPoint) {
+        if (!canSetRallyPoint())
+            return;
+        if (!isPosInsideBuilding(rallyPoint))
+            this.rallyPoints.add(rallyPoint);
         this.rallyPointEntity = null;
     }
 
@@ -78,7 +94,7 @@ public class ProductionPlacement extends BuildingPlacement {
             return;
         else if (!(entity instanceof Unit unit) || unit.getOwnerName().equals(this.ownerName))
             this.rallyPointEntity = entity;
-        this.rallyPoint = null;
+        this.rallyPoints.clear();
     }
 
     private boolean isProducing() {
@@ -105,8 +121,8 @@ public class ProductionPlacement extends BuildingPlacement {
             if (entityType == EntityRegistrar.GHAST_UNIT.get())
                 spawnPoint = spawnPoint.offset(0,5,0);
         }
-        else if (rallyPoint != null)
-            spawnPoint = getClosestGroundPos(rallyPoint, (int) building.spawnRadiusOffset);
+        else if (!rallyPoints.isEmpty())
+            spawnPoint = getClosestGroundPos(rallyPoints.get(0), (int) building.spawnRadiusOffset);
         else if (rallyPointEntity != null)
             spawnPoint = getClosestGroundPos(rallyPointEntity.getOnPos(), (int) building.spawnRadiusOffset);
         else
@@ -121,7 +137,7 @@ public class ProductionPlacement extends BuildingPlacement {
         );
         BlockPos defaultRallyPoint = getDefaultOutdoorSpawnPoint();
 
-        BlockPos rallyPoint = this.rallyPoint == null ? defaultRallyPoint : this.rallyPoint;
+        final List<BlockPos> fRallyPoints = this.rallyPoints.isEmpty() ? List.of(defaultRallyPoint) : this.rallyPoints;
 
         if (entity instanceof Unit unit) {
             unit.setOwnerName(ownerName);
@@ -130,111 +146,56 @@ public class ProductionPlacement extends BuildingPlacement {
             if (rallyEntity != null) {
                 if (ResourceSources.isHuntableAnimal(rallyEntity)) {
                     CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
-                        UnitServerEvents.addActionItem(
-                                this.ownerName,
-                                UnitAction.ATTACK,
-                                rallyEntity.getId(),
-                                new int[] { entity.getId() },
-                                rallyPoint,
-                                new BlockPos(0,0,0)
-                        );
+                        if (!fRallyPoints.isEmpty()) {
+                            UnitServerEvents.addActionItem(
+                                    this.ownerName,
+                                    UnitAction.ATTACK,
+                                    rallyEntity.getId(),
+                                    new int[] { entity.getId() },
+                                    fRallyPoints.get(0),
+                                    new BlockPos(0,0,0)
+                            );
+                        }
                     });
                 } else {
                     CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
-                        UnitServerEvents.addActionItem(
-                                this.ownerName,
-                                UnitAction.FOLLOW,
-                                rallyEntity.getId(),
-                                new int[] { entity.getId() },
-                                rallyPoint,
-                                new BlockPos(0,0,0)
-                        );
+                        if (!fRallyPoints.isEmpty()) {
+                            UnitServerEvents.addActionItem(
+                                    this.ownerName,
+                                    UnitAction.FOLLOW,
+                                    rallyEntity.getId(),
+                                    new int[] { entity.getId() },
+                                    fRallyPoints.get(0),
+                                    new BlockPos(0,0,0)
+                            );
+                        }
                     });
                 }
             } else {
-                CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
-                    UnitServerEvents.addActionItem(
-                            this.ownerName,
-                            UnitAction.MOVE,
-                            -1,
-                            new int[] { entity.getId() },
-                            rallyPoint,
-                            new BlockPos(0,0,0)
-                    );
-                });
+                for (int i = 0; i < fRallyPoints.size(); i++) {
+                    final int fi = i;
+                    CompletableFuture.delayedExecutor(500L * fi, TimeUnit.MILLISECONDS).execute(() -> {
+                        if (fRallyPoints.size() > fi)
+                            UnitServerEvents.addActionItem(
+                                    this.ownerName,
+                                    UnitAction.MOVE,
+                                    -1,
+                                    new int[] { entity.getId() },
+                                    fRallyPoints.get(fi),
+                                    new BlockPos(0,0,0),
+                                    fi > 0
+                            );
+                    });
+                }
             }
         }
         return entity;
     }
 
     // return true if successful
-    public boolean startProductionItem(ProductionItem prodItem, BlockPos pos) {
+    public boolean startProductionItem(ProductionItem prodItem) {
         boolean success = false;
 
-        /*ProductionItem prodItem = null;
-        switch(itemName) {
-            case CreeperProd.itemName -> prodItem = new CreeperProd(this);
-            case SkeletonProd.itemName -> prodItem = new SkeletonProd(this);
-            case ZombieProd.itemName -> prodItem = new ZombieProd(this);
-            case StrayProd.itemName -> prodItem = new StrayProd(this);
-            case HuskProd.itemName -> prodItem = new HuskProd(this);
-            case DrownedProd.itemName -> prodItem = new DrownedProd(this);
-            case SpiderProd.itemName -> prodItem = new SpiderProd(this);
-            case PoisonSpiderProd.itemName -> prodItem = new PoisonSpiderProd(this);
-            case VillagerProd.itemName -> prodItem = new VillagerProd(this);
-            case ZombieVillagerProd.itemName -> prodItem = new ZombieVillagerProd(this);
-            case VindicatorProd.itemName -> prodItem = new VindicatorProd(this);
-            case PillagerProd.itemName -> prodItem = new PillagerProd(this);
-            case IronGolemProd.itemName -> prodItem = new IronGolemProd(this);
-            case WitchProd.itemName -> prodItem = new WitchProd(this);
-            case EvokerProd.itemName -> prodItem = new EvokerProd(this);
-            case SlimeProd.itemName -> prodItem = new SlimeProd(this);
-            case WardenProd.itemName -> prodItem = new WardenProd(this);
-            case RavagerProd.itemName -> prodItem = new RavagerProd(this);
-
-            case GruntProd.itemName -> prodItem = new GruntProd(this);
-            case BruteProd.itemName -> prodItem = new BruteProd(this);
-            case HeadhunterProd.itemName -> prodItem = new HeadhunterProd(this);
-            case HoglinProd.itemName -> prodItem = new HoglinProd(this);
-            case BlazeProd.itemName -> prodItem = new BlazeProd(this);
-            case WitherSkeletonProd.itemName -> prodItem = new WitherSkeletonProd(this);
-            case MagmaCubeProd.itemName -> prodItem = new MagmaCubeProd(this);
-            case GhastProd.itemName -> prodItem = new GhastProd(this);
-
-            case ResearchVindicatorAxes.itemName -> prodItem = new ResearchVindicatorAxes(this);
-            case ResearchPillagerCrossbows.itemName -> prodItem = new ResearchPillagerCrossbows(this);
-            case ResearchLabLightningRod.itemName -> prodItem = new ResearchLabLightningRod(this);
-            case ResearchResourceCapacity.itemName -> prodItem = new ResearchResourceCapacity(this);
-            case ResearchSpiderJockeys.itemName -> prodItem = new ResearchSpiderJockeys(this);
-            case ResearchPoisonSpiders.itemName -> prodItem = new ResearchPoisonSpiders(this);
-            case ResearchHusks.itemName -> prodItem = new ResearchHusks(this);
-            case ResearchDrowned.itemName -> prodItem = new ResearchDrowned(this);
-            case ResearchStrays.itemName -> prodItem = new ResearchStrays(this);
-            case ResearchSlimeConversion.itemName -> prodItem = new ResearchSlimeConversion(this);
-            case ResearchLingeringPotions.itemName -> prodItem = new ResearchLingeringPotions(this);
-            case ResearchEvokerVexes.itemName -> prodItem = new ResearchEvokerVexes(this);
-            case ResearchGolemSmithing.itemName -> prodItem = new ResearchGolemSmithing(this);
-            case ResearchSilverfish.itemName -> prodItem = new ResearchSilverfish(this);
-            case ResearchSculkAmplifiers.itemName -> prodItem = new ResearchSculkAmplifiers(this);
-            case ResearchCastleFlag.itemName -> prodItem = new ResearchCastleFlag(this);
-            case ResearchRavagerCavalry.itemName -> prodItem = new ResearchRavagerCavalry(this);
-            case ResearchBruteShields.itemName -> prodItem = new ResearchBruteShields(this);
-            case ResearchHoglinCavalry.itemName -> prodItem = new ResearchHoglinCavalry(this);
-            case ResearchHeavyTridents.itemName -> prodItem = new ResearchHeavyTridents(this);
-            case ResearchBlazeFirewall.itemName -> prodItem = new ResearchBlazeFirewall(this);
-            case ResearchWitherClouds.itemName -> prodItem = new ResearchWitherClouds(this);
-            case ResearchAdvancedPortals.itemName -> prodItem = new ResearchAdvancedPortals(this);
-            case ResearchFireResistance.itemName -> prodItem = new ResearchFireResistance(this);
-            case ResearchGrandLibrary.itemName -> prodItem = new ResearchGrandLibrary(this);
-            case ResearchSpiderWebs.itemName -> prodItem = new ResearchSpiderWebs(this);
-            case ResearchBloodlust.itemName -> prodItem = new ResearchBloodlust(this);
-            case ResearchCubeMagma.itemName -> prodItem = new ResearchCubeMagma(this);
-            case ResearchSoulFireballs.itemName -> prodItem = new ResearchSoulFireballs(this);
-
-            case ResearchPortalForCivilian.itemName -> prodItem = new ResearchPortalForCivilian(this);
-            case ResearchPortalForMilitary.itemName -> prodItem = new ResearchPortalForMilitary(this);
-            case ResearchPortalForTransport.itemName -> prodItem = new ResearchPortalForTransport(this);
-        }*/
         if (prodItem != null) {
             // only worry about checking affordability on serverside
             if (getLevel().isClientSide()) {
@@ -243,7 +204,13 @@ public class ProductionPlacement extends BuildingPlacement {
                 success = true;
             }
             else {
-                if (prodItem.canAfford(getLevel(), ownerName)) {
+                boolean allow = switch (prodItem.dupeRule) {
+                    case DISALLOW -> !prodItem.itemIsBeingProduced(false, ownerName);
+                    case DISALLOW_FOR_BUILDING -> !prodItem.itemIsBeingProducedAt(false, this);
+                    case ALLOW -> true;
+                };
+
+                if (allow && prodItem.canAfford(getLevel(), ownerName)) {
                     ActiveProduction activeProduction = new ActiveProduction(prodItem, false, ownerName);
                     productionQueue.add(activeProduction);
                     ResourcesServerEvents.addSubtractResources(new Resources(

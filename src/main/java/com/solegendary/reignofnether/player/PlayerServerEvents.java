@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.gamemode.GameModeClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
+import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
@@ -987,7 +988,7 @@ public class PlayerServerEvents {
             AlliancesServerEvents.resetAllAlliances();
             SurvivalServerEvents.reset();
         }
-        HeroClientEvents.fallenHeroes.clear();
+        HeroServerEvents.fallenHeroes.clear();
 
         for (ServerPlayer player : serverLevel.players())
             player.setGameMode(GameType.SPECTATOR);

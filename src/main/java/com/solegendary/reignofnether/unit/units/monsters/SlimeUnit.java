@@ -130,7 +130,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public float getMovementSpeed() {return movementSpeed;}
 
     public ResourceCost getCost() {
-        int popCost = getSize();
+        int popCost = Math.min(getSize(), MAX_POP_COST);
         if (getSize() == 1)
             popCost = 0;
 
@@ -148,10 +148,11 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     final public int STARTING_SIZE = 2;
     final public int MAX_SIZE = 6;
+    final static public int MAX_POP_COST = 5;
 
     final static public float attackDamagePerSize = 2.0f;
     final static public float attacksPerSecond = 0.5f;
-    final static public float armorValue = 0.0f;
+    final static public float armorPerSize = 1.2f;
     final static public float movementSpeed = 0.6f; // needs to be 2x other units
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -218,7 +219,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     }
 
     @Override
-    protected float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
+    public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
         if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO))
             pDamage *= 0.5F;
@@ -276,6 +277,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(getMovementSpeed());
         this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(getUnitAttackDamage());
         this.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(getKnockbackResistance());
+        this.getAttribute(Attributes.ARMOR).setBaseValue(pSize == 1 ? 0 : armorPerSize * pSize);
 
         if (pResetHealth)
             this.setHealth(this.getMaxHealth());
@@ -341,7 +343,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MOVEMENT_SPEED, SlimeUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, SlimeUnit.attackDamagePerSize)
-                .add(Attributes.ARMOR, SlimeUnit.armorValue)
+                .add(Attributes.ARMOR, SlimeUnit.armorPerSize)
                 .add(Attributes.MAX_HEALTH, 10)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange());
     }
@@ -355,7 +357,12 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         if (pushAttackCd > 0)
             pushAttackCd -= 1;
 
-        if (autocastingConsume() && getSize() < MAX_SIZE && getTargetGoal().getTarget() == null) {
+        if (autocastingConsume() && getSize() == MAX_SIZE) {
+            for (Ability ability : abilities)
+                if (ability instanceof ConsumeSlime consume)
+                    consume.setAutocast(false);
+        }
+        else if (autocastingConsume() && getSize() < MAX_SIZE && getTargetGoal().getTarget() == null) {
 
             Vector3d unitPosition = new Vector3d(position().x, position().y, position().z);
             List<SlimeUnit> nearbyEntities = MiscUtil.getEntitiesWithinRange(unitPosition, aggroRange, SlimeUnit.class, level());
@@ -364,7 +371,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
             SlimeUnit closestTarget = null;
 
             for (SlimeUnit slime : nearbyEntities) {
-                if (slime.getOwnerName().equals(getOwnerName()) && slime != this && slime.getSize() <= getSize() && !slime.isTiny()) {
+                if (slime.getOwnerName().equals(getOwnerName()) && slime != this && slime.getSize() == STARTING_SIZE) {
                     double dist = position().distanceTo(slime.position());
                     if (dist < closestDist) {
                         closestDist = dist;
@@ -393,7 +400,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     @Override
     public SunlightEffect getSunlightEffect() {
-        return SunlightEffect.MOVEMENT_SLOWDOWN;
+        return SunlightEffect.SLOWNESS_II;
     }
 
     // break leaves that are touched

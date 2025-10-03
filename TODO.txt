@@ -1,23 +1,17 @@
 
-1.19.2-1.2.1a
+1.19.2-1.2.1e
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
 [❌] Not done, including unmerged PRs
 
 
-
 Necromancer
-    [❌] Purple particles on soul usage and soul gain
     [❌] Magical projectile model and sound
-    [❌] Allow consumption of souls for healing/mana
 
 Royal Guard
     - Mace Slam
-        [❌] Add hammer throw alternate
         [❌] Raise ground blocks with block displays?
-
-    [❌] Proper sound effects for taunt and avatar
 
 Features
 --------
@@ -33,22 +27,57 @@ Features
 
 Bugfixes
 --------
-[❌] keyframe animations are cancelled upon being hit
-
-[❌] Avatar state is reset when unloaded
-
-[❌] When someone relogs, bridges revert to original rotations
-
-
-
 
 Quality of Life
 ---------------
-
-[❌] Handicap command
-    - Makes all resource costs some % higher than normal
-
-
+[✔] Pressing Shift + number adds a unit or building to an existing control group
+[✔] Pressing Alt + number adds a unit or building to a new control group and removes it from all other groups
+[✔] Building rally points can now be shift-queued
+[✔] Spectators can now see RTS players' unit and hero abilities
 
 Balancing
 ---------
+[✔] All Heroes now have 30% magic resistance
+
+Piglins
+-------
+[✔] Piglin Merchant
+    - Greed is Good's TNT cooldown reduction per level increased from 5s to 7s (this means the cooldown is 0 at level 3)
+    - Thrown TNT fuse time reduced from 3s to 2.5s
+    - Delay before enemies can eat thrown food raised from 5s to 10s
+
+[✔] All piglin units now gain +10% movement speed while on nether terrain
+[✔] Wood value of all nether logs raised from 17 to 18
+[✔] Basic portals under construction can now queue their upgrade so it begins immediately upon completion
+    - This will cost wood up front
+[✔] Military portal upgrade time reduced from 30s to 25s
+[✔] Transport portal upgrade time reduced from 40s to 30s
+[✔] Wither skeletons can stack +1 wither on heroes (3 to 4)
+[✔] Magma cubes gain ~5% physical armor per size above 1 (max size 6 = ~25% armor)
+[✔] Heavy Tridents cost raised from (250 wood, 250 ore, 120s) to (300 wood, 300 ore, 150s)
+[✔] Soul Fireballs cost reduced from (300 wood, 300 ore, 140s) to (250 wood, 250 ore, 120s)
+
+Villagers
+---------
+[✔] Royal Guard
+    - Taunting cry now also grants Resistance III for its duration (60% global armour)
+    - Mace slam range and radius reduced from 4 to 3, and mana cost raised from 30 to 40
+
+Monsters
+--------
+Necromancer
+    [✔] Zombie summons are no longer worth experience or population cost
+    [✔] Blood Moon now only spawns units at buildings within 30 blocks of the targeted building
+        - this was previously spawning units at any random buildings owned by the targeted player
+
+[✔] Sculk amplifier sonic boom range reduced from 20 to 15 and damage penalty increased from -33% to -40% (45 damage)
+[✔] Sculk catalyst night range and bonus HP per nearby sculk block raised by 20% (max range is still 50)
+[✔] Sculk catalysts can now autocast sacrifice
+    - It will only target the same type of unit you last manually sacrificed
+    - Autocast turns off once at max night range
+
+[✔] Slimes gain ~5% physical armor per size above 1 (max size 6 = ~25% armor)
+[✔] Spider movement speed raised from 33 to 34 and damage from 4 to 5
+[✔] Silverfish movement speed raised from 25 to 28 and are no longer worth experience
+[✔] Mausoleum construction time reduced by 8s (to match other factions)
+[✔] Creeper bonus speed duration after being charged reduced from 60s to 30s

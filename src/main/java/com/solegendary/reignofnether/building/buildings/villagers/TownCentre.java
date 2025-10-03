@@ -48,7 +48,7 @@ public class TownCentre extends ProductionBuilding {
         this.portraitBlock = Blocks.POLISHED_GRANITE;
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/polished_granite.png");
 
-        this.buildTimeModifier = 0.331f; // 100s total build time with 1 villager
+        this.buildTimeModifier = 0.331f; // 60s total build time with 3 villagers
         this.canAcceptResources = true;
 
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);
