@@ -65,8 +65,8 @@ public class PlayerColors {
                     mapColorId,
                     hexCode,
                     name,
-                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/block/rts_start_block_" + name + ".png"),
-                    new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/beds/" + name + ".png"));
+                    ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/block/rts_start_block_" + name + ".png"),
+                    ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/beds/" + name + ".png"));
         }
     }
 
@@ -91,10 +91,10 @@ public class PlayerColors {
     public static final PlayerColor COLOR_WHITE = PlayerColor.fromName(MapColor.SNOW.id, 0xE9ECEC, "white");
     public static final int PLAYER_COLOR_SPECIAL_COUNT = PlayerColor.colourCount;
 
-    public static final PlayerColor COLOR_OWNED = new PlayerColor(-1, 0x33FF33, "owned", new ResourceLocation("minecraft", "textures/block/lime_wool.png"), COLOR_LIME.bedIcon);
-    public static final PlayerColor COLOR_FRIENDLY = new PlayerColor(-1, 0x3333FF, "friendly", new ResourceLocation("minecraft", "textures/block/blue_wool.png"), COLOR_BLUE.bedIcon);
-    public static final PlayerColor COLOR_NEUTRAL = new PlayerColor(-1, 0xFFFF19, "neutral", new ResourceLocation("minecraft", "textures/block/yellow_wool.png"), COLOR_YELLOW.bedIcon);
-    public static final PlayerColor COLOR_HOSTILE = new PlayerColor(-1, 0xFF3333, "hostile", new ResourceLocation("minecraft", "textures/block/red_wool.png"), COLOR_RED.bedIcon);
+    public static final PlayerColor COLOR_OWNED = new PlayerColor(-1, 0x33FF33, "owned", ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/lime_wool.png"), COLOR_LIME.bedIcon);
+    public static final PlayerColor COLOR_FRIENDLY = new PlayerColor(-1, 0x3333FF, "friendly", ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/blue_wool.png"), COLOR_BLUE.bedIcon);
+    public static final PlayerColor COLOR_NEUTRAL = new PlayerColor(-1, 0xFFFF19, "neutral", ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/yellow_wool.png"), COLOR_YELLOW.bedIcon);
+    public static final PlayerColor COLOR_HOSTILE = new PlayerColor(-1, 0xFF3333, "hostile", ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/red_wool.png"), COLOR_RED.bedIcon);
     public static final int PLAYER_COLOR_TOTAL_COUNT = PlayerColor.colourCount;
 
     public static final PlayerColor[] colors = new PlayerColor[]{
@@ -237,9 +237,9 @@ public class PlayerColors {
         return new Button(I18n.get("hud.orthoview.reignofnether.toggle_team_colors"),
                 14,
                 isUsingPlayerColors()
-                        ? new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/toggle_color_mode_players.png")
-                        : new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/toggle_color_mode_relations.png"),
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                        ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/toggle_color_mode_players.png")
+                        : ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/toggle_color_mode_relations.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !MinimapClientEvents.isLargeMap(),

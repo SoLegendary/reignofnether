@@ -21,7 +21,7 @@ public abstract class VexMixin extends Mob {
 
     @Unique private static final Random reignofnether$random = new Random();
 
-    @Shadow public abstract Entity getOwner();
+    @Shadow public abstract Mob getOwner();
 
     protected VexMixin(EntityType<? extends Mob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);

@@ -54,7 +54,7 @@ import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.*;
 public abstract class LevelRendererMixin {
 
     @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
-    @Final @Shadow private AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
+    @Final @Shadow private final AtomicReference<LevelRenderer.RenderChunkStorage> renderChunkStorage = new AtomicReference<>();
     @Final @Shadow private Minecraft minecraft;
     @Final @Shadow private RenderBuffers renderBuffers;
     @Final @Shadow private Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress;
@@ -270,7 +270,7 @@ public abstract class LevelRendererMixin {
         lastRenderChunksInFrustum.addAll(renderChunksInFrustum);
     }
 
-    @Shadow @Final private AtomicBoolean needsFrustumUpdate = new AtomicBoolean(false);
+    @Shadow @Final private final AtomicBoolean needsFrustumUpdate = new AtomicBoolean(false);
 
     // always recheck chunks being in frustum - without this normally only checks when the camera moves
     @Inject(

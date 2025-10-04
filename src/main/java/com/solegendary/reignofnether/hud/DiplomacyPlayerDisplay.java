@@ -95,7 +95,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
         Button changeResourceButton = new Button(
                 "Change resources",
                 Button.DEFAULT_ICON_SIZE,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/corner_plus.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/corner_plus.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,
@@ -130,7 +130,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                     case NONE -> null;
                 }
         );
-        changeResourceButton.bgIconResource = new ResourceLocation(ReignOfNether.MOD_ID, iconPath);
+        changeResourceButton.bgIconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, iconPath);
         changeResourceButton.render(guiGraphics, x + RESOURCE_FRAME_WIDTH, y, mouseX, mouseY);
 
         if (!isPlayerLoggedIn()) {
@@ -148,7 +148,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
         Button confirmButton = new Button(
                 "Confirm trade",
                 Button.DEFAULT_ICON_SIZE,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,
@@ -162,7 +162,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
         Button cancelButton = new Button(
                 "Cancel trade",
                 Button.DEFAULT_ICON_SIZE,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,
@@ -180,7 +180,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
         Button allyRequestButton = new Button(
                 "Request Alliance",
                 Button.DEFAULT_ICON_SIZE,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sweet_berries.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/sweet_berries.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,
@@ -192,7 +192,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
         Button allyCancelRequestButton = new Button(
                 "Cancel Request Alliance",
                 Button.DEFAULT_ICON_SIZE,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,
@@ -201,11 +201,11 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                 null,
                 List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.cancel_request_alliance"), Style.EMPTY))
         );
-        allyCancelRequestButton.bgIconResource = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sweet_berries.png");
+        allyCancelRequestButton.bgIconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/sweet_berries.png");
         Button allyConfirmButton = new Button(
                 "Accept Alliance",
                 Button.DEFAULT_ICON_SIZE,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,
@@ -217,7 +217,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
         Button disbandButton = new Button(
                 "Disband Alliance",
                 Button.DEFAULT_ICON_SIZE,
-                new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/crossed_swords.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/crossed_swords.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> true,

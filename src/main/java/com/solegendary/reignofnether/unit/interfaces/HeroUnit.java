@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
-import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
@@ -234,6 +233,8 @@ public interface HeroUnit extends Unit {
 
     default int getHeroAbilityRank(HeroAbility ability) {
         return getHeroAbilityRanks().getOrDefault(ability, 0);
+    }
+
     public default void syncToClients() {
         Entity entity = (Entity) this;
         if (!entity.level().isClientSide()) {
@@ -242,16 +243,15 @@ public interface HeroUnit extends Unit {
             HeroClientboundPacket.setCharges(entity.getId(), this.getChargesForSaveData());
             List<HeroAbility> abls = this.getHeroAbilities();
             if (abls.size() > 0)
-                HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(0).rank, 0);
+                HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(0).getRank(this), 0);
             if (abls.size() > 1)
-                HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(1).rank, 1);
+                HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(1).getRank(this), 1);
             if (abls.size() > 2)
-                HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(2).rank, 2);
+                HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(2).getRank(this), 2);
             if (abls.size() > 3)
-                HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(3).rank, 3);
+                HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(3).getRank(this), 3);
         }
     }
-}
 
     default void setHeroAbilityRank(HeroAbility ability, int rank) {
         getHeroAbilityRanks().put(ability, rank);

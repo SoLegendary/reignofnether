@@ -49,7 +49,7 @@ public class PlayerDisplayClientEvents {
     public static final Button observerButton = new Button(
             "Toggle Observer Displays",
             Button.DEFAULT_ICON_SIZE,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/observer.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/observer.png"),
             Keybindings.keyZ,
             () -> displayType == DisplayType.OBSERVER,
             () -> PlayerClientEvents.isRTSPlayer() || PlayerClientEvents.rtsPlayers.isEmpty(),
@@ -67,7 +67,7 @@ public class PlayerDisplayClientEvents {
     public static final Button diplomacyButton = new Button(
             "Toggle Diplomacy Displays",
             Button.DEFAULT_ICON_SIZE,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/sweet_berries.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/sweet_berries.png"),
             Keybindings.keyZ,
             () -> displayType == DisplayType.DIPLOMACY,
             () -> !PlayerClientEvents.isRTSPlayer() || PlayerClientEvents.rtsPlayers.size() <= 1,
@@ -85,7 +85,7 @@ public class PlayerDisplayClientEvents {
     public static final Button shareUnitControlButton = new Button(
             "Toggle Share Unit Control",
             Button.DEFAULT_ICON_SIZE,
-            new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/chain_command_block_back.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/chain_command_block_back.png"),
             (Keybinding) null,
             AlliancesClient::sharingAllyControl,
             () -> !PlayerClientEvents.isRTSPlayer() || PlayerClientEvents.rtsPlayers.size() <= 1,

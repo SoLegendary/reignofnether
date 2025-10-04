@@ -59,16 +59,16 @@ public class ReignOfNether {
 
     public ReignOfNether(FMLJavaModLoadingContext mlctx) {
         // Registering all components
-        ItemRegistrar.init(context);
-        EntityRegistrar.init(context);
-        ContainerRegistrar.init(context);
-        SoundRegistrar.init(context);
-        BlockRegistrar.init(context);
-        BlockEntityRegistrar.init(context);
+        ItemRegistrar.init(mlctx);
+        EntityRegistrar.init(mlctx);
+        ContainerRegistrar.init(mlctx);
+        SoundRegistrar.init(mlctx);
+        BlockRegistrar.init(mlctx);
+        BlockEntityRegistrar.init(mlctx);
         GameRuleRegistrar.init();
         Buildings.init();
         ProductionItems.init();
-        MobEffectRegistrar.init(context);
+        MobEffectRegistrar.init(mlctx);
         final ClientEventRegistrar clientRegistrar = new ClientEventRegistrar();
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> clientRegistrar::registerClientEvents);
 
@@ -76,11 +76,16 @@ public class ReignOfNether {
         DistExecutor.safeRunWhenOn(Dist.DEDICATED_SERVER, () -> serverRegistrar::registerServerEvents);
 
         // Registering ClientReset's init
-        IEventBus bus = context.getModEventBus();
+        IEventBus bus = mlctx.getModEventBus();
         bus.addListener(ReignOfNether::init);
         mlctx.registerConfig(ModConfig.Type.COMMON, ReignOfNetherCommonConfigs.SPEC, "reignofnether-common-" + VERSION_STRING + ".toml");
         // client-only config
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ClientModConfigs::registerClientConfigs);
+        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> new DistExecutor.SafeRunnable(){  //workaround to prevent Unsafe Referent usage; See DistExecutor.validateSafeReferent
+            @Override
+            public void run() {
+                ClientModConfigs.registerClientConfigs(mlctx);
+            }
+        });
         mlctx.registerExtensionPoint(
             DisplayTest.class,
             () -> new DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true)

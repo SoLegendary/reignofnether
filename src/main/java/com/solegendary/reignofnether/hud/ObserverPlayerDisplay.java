@@ -43,17 +43,17 @@ public class ObserverPlayerDisplay extends AbstractPlayerDisplay {
         int color = 0xFFFFFF;
         switch (resource) {
             case FOOD -> {
-                icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/wheat.png");
+                icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat.png");
                 value = String.valueOf(resources.food);
                 color = 0xE8BC5F;
             }
             case WOOD -> {
-                icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/wood.png");
+                icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wood.png");
                 value = String.valueOf(resources.wood);
                 color = 0xA3753B;
             }
             case ORE -> {
-                icon = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
+                icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
                 value = String.valueOf(resources.ore);
                 color = 0xFFF4ED;
             }

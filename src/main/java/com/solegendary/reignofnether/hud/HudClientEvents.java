@@ -1088,17 +1088,17 @@ public class HudClientEvents {
 
                 switch (resourceName) {
                     case "food" -> {
-                        rl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/wheat.png");
+                        rl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat.png");
                         resValueStr = String.valueOf(resources.food);
                         resName = ResourceName.FOOD;
                     }
                     case "wood" -> {
-                        rl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/wood.png");
+                        rl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wood.png");
                         resValueStr = String.valueOf(resources.wood);
                         resName = ResourceName.WOOD;
                     }
                     case "ore" -> {
-                        rl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
+                        rl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
                         resValueStr = String.valueOf(resources.ore);
                         resName = ResourceName.ORE;
                     }

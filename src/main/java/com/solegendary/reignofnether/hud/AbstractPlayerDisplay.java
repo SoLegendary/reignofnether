@@ -48,11 +48,11 @@ public abstract class AbstractPlayerDisplay {
 
     public static final int PLAYER_FRAME_WIDTH = Button.DEFAULT_ICON_FRAME_SIZE * 6; // frame containing player name + player icon + race icon
 
-    public static final ResourceLocation defaultIconLocation = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png");
+    public static final ResourceLocation defaultIconLocation = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png");
 
-    public static final ResourceLocation factionVillagerIconLocation = new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
-    public static final ResourceLocation factionMonsterIconLocation = new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png");
-    public static final ResourceLocation factionPiglinIconLocation = new ResourceLocation(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
+    public static final ResourceLocation factionVillagerIconLocation = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
+    public static final ResourceLocation factionMonsterIconLocation = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png");
+    public static final ResourceLocation factionPiglinIconLocation = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
 
     private void renderPlayer(GuiGraphics guiGraphics, int x, int y) {
         // render colored background
