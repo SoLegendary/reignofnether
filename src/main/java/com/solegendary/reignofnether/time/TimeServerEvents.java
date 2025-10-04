@@ -35,6 +35,11 @@ public class TimeServerEvents {
     private static BlockPos bloodMoonTarget = null; // area to spawn enemies
     private static boolean zombieOrSkeleton = true;
 
+    public static void resetBloodMoon() {
+        bloodMoonTicksLeft = 0;
+        bloodMoonOwner = null;
+    }
+
     public static boolean isBloodMoonActive() {
         return bloodMoonTicksLeft > 0;
     }

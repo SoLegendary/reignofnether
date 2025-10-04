@@ -83,6 +83,7 @@ public class UnitSyncAbilityClientboundPacket {
                                         if (this.abilityCharges.length > i)
                                             unit.getAbilities().get().get(i).setCharges(unit, this.abilityCharges[i]);
                                     }
+                                    unit.updateAbilityButtons();
                                     break;
                                 }
                             }

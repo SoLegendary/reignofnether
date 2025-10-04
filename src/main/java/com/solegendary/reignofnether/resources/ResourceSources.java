@@ -112,9 +112,7 @@ public class ResourceSources {
 
     // return a list of food items that a worker gets when killing a huntable animal to make it more consistent
     public static List<ItemStack> getFoodItemsFromAnimal(Animal animal) {
-        if (animal instanceof PolarBear) {
-            return List.of(new ItemStack(Items.SALMON, 12)); // 300 food / 30hp
-        } else if (animal instanceof Cow) {
+        if (animal instanceof Cow) {
             return List.of(new ItemStack(Items.BEEF, 2), new ItemStack(Items.LEATHER, 2)); // 150 food / 10hp
         } else if (animal instanceof Pig) {
             return List.of(new ItemStack(Items.PORKCHOP, 3)); // 150 food / 10hp

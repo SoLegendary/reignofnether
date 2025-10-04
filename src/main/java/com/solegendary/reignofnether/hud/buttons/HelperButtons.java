@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -164,7 +165,7 @@ public class HelperButtons {
     }
 
     private static ResourceLocation getIdleWorkerIcon() {
-        return switch (PlayerClientEvents.faction) {
+        return switch (PlayerClientEvents.getFaction()) {
             case MONSTERS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png");
             case PIGLINS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
             default -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
@@ -184,8 +185,8 @@ public class HelperButtons {
             fcsList.add(fcs(I18n.get("hud.helperbuttons.reignofnether.beacon.player_controls", ownerName), true));
         } else {
             boolean noController = true;
-            for (Long time : PlayerClientEvents.beaconOwnerTicks.values()) {
-                if (time > 0) {
+            for (RTSPlayer rtsPlayer : PlayerClientEvents.rtsPlayers) {
+                if (rtsPlayer.beaconOwnerTicks > 0) {
                     noController = false;
                     break;
                 }
@@ -193,11 +194,11 @@ public class HelperButtons {
             if (noController) {
                 fcsList.add(fcs(I18n.get("hud.helperbuttons.reignofnether.beacon.no_controller")));
             } else {
-                for (String playerName : PlayerClientEvents.beaconOwnerTicks.keySet()) {
-                    long ticksToWin = Math.max(0, Beacon.getTicksToWin(beacon.getLevel()) - PlayerClientEvents.beaconOwnerTicks.get(playerName));
+                for (RTSPlayer rtsPlayer : PlayerClientEvents.rtsPlayers) {
+                    long ticksToWin = Math.max(0, Beacon.getTicksToWin(beacon.getLevel()) - rtsPlayer.beaconOwnerTicks);
                     String timeToWin = TimeUtils.getTimeStrFromTicks(ticksToWin);
                     fcsList.add(fcs(I18n.get("hud.helperbuttons.reignofnether.beacon.player_wins_in",
-                            playerName, timeToWin), ownerName.equals(playerName)));
+                            rtsPlayer.name, timeToWin), ownerName.equals(rtsPlayer.name)));
                 }
             }
         }

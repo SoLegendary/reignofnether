@@ -8,16 +8,19 @@ import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.hud.buttons.HelperButtons;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
+import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
@@ -34,23 +37,79 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class PlayerClientEvents {
 
-    public static boolean isRTSPlayer = false;
     public static long rtsGameTicks = 0;
     private static final Minecraft MC = Minecraft.getInstance();
     public static boolean rtsLocked = false;
     public static boolean canStartRTS = true;
-    public static Faction faction = Faction.NONE;
+    public static final List<RTSPlayer> rtsPlayers = Collections.synchronizedList(new ArrayList<>());
 
-    public static Map<String, Long> beaconOwnerTicks = new HashMap<>();
+    public static boolean isRTSPlayer() {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (MC.player != null && rtsPlayer.name.equals(MC.player.getName().getString()))
+                return true;
+        return false;
+    }
 
-    private static void setFaction(Faction setFaction) {
-        faction = setFaction;
-        HelperButtons.updateButtons();
+    public static boolean isRTSPlayer(String playerName) {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (rtsPlayer.name.equals(playerName))
+                return true;
+        return false;
+    }
+
+    public static Faction getFaction() {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (MC.player != null && rtsPlayer.name.equals(MC.player.getName().getString()))
+                return rtsPlayer.faction;
+        return Faction.NONE;
+    }
+
+    public static RTSPlayer getPlayer(String playerName)
+    {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (rtsPlayer.name.equals(playerName))
+                return rtsPlayer;
+        return null;
+    }
+
+    public static Integer getPlayerId(String playerName) {
+        var player = getPlayer(playerName);
+        if (player == null) {
+            return null;
+        }
+
+        return player.id;
+    }
+
+    public static Integer getPlayerIndex(String playerName) {
+        var player = getPlayer(playerName);
+        if (player == null) {
+            return null;
+        }
+
+        return rtsPlayers.indexOf(player);
+    }
+
+    public static int getPlayerMapColorId(String playerName) {
+        var player = getPlayer(playerName);
+        if (player == null) {
+            return 0;
+        }
+
+        return player.startPosColorId; // corresponds to a MapColor.id
+    }
+
+    public static Faction getPlayerFaction(String playerName) {
+        var player = getPlayer(playerName);
+        if (player == null) {
+            return Faction.NONE;
+        }
+
+        return player.faction;
     }
 
     public static String getPlayerName() {
@@ -142,11 +201,14 @@ public class PlayerClientEvents {
             if (building.ownerName.equals(playerName))
                 building.ownerName = "";
 
+        if (isRTSPlayer())
+            PlayerDisplayClientEvents.resetDisplay();
+
+        removeRTSPlayer(playerName);
+        ResourcesClientEvents.resourcesList.removeIf(r -> r.ownerName.equals(playerName));
+
         if (!MC.player.getName().getString().equals(playerName))
             return;
-
-        disableRTS(playerName);
-        ResourcesClientEvents.resourcesList.removeIf(r -> r.ownerName.equals(MC.player.getName().getString()));
 
         if (!SandboxClientEvents.isSandboxPlayer(playerName)) {
             MC.gui.setTitle(Component.translatable("titles.reignofnether.defeated"));
@@ -165,20 +227,25 @@ public class PlayerClientEvents {
         MC.player.playSound(SoundRegistrar.VICTORY.get(), 0.5f, 1.0f);
     }
 
-    public static void enableRTS(String playerName, Faction setFaction) {
-        if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
-            GameruleClient.gamerulesMenuOpen = false;
-            isRTSPlayer = true;
-            setFaction(setFaction);
-            if (!SandboxClientEvents.isSandboxPlayer())
-                MC.getMusicManager().stopPlaying();
+    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId) {
+        if (!isRTSPlayer(playerName)) {
+            rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId));
+            if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
+                GameruleClient.gamerulesMenuOpen = false;
+                if (!SandboxClientEvents.isSandboxPlayer()) {
+                    MC.getMusicManager().stopPlaying();
+                    ResearchClient.removeAllCheats();
+                }
+            }
+        }
+        if (isRTSPlayer() && MC.player != null && MC.player.getName().getString().equals(playerName)) {
+            PlayerDisplayClientEvents.resetDisplay();
         }
     }
 
-    public static void disableRTS(String playerName) {
-        if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
-            isRTSPlayer = false;
-            setFaction(Faction.NONE);
+    public static void removeRTSPlayer(String playerName) {
+        boolean removed = rtsPlayers.removeIf(p -> p.name.equals(playerName));
+        if (removed && MC.player != null && MC.player.getName().getString().equals(playerName)) {
             SoundClientEvents.stopFadeableMusicInstance();
         }
     }
@@ -195,6 +262,8 @@ public class PlayerClientEvents {
             FogOfWarClientEvents.semiFrozenChunks.clear();
             OrthoviewClientEvents.unlockCam();
             HeroClientEvents.fallenHeroes.clear();
+            PlayerDisplayClientEvents.resetDisplay();
+            PlayerColors.reset();
         }
     }
 
@@ -217,6 +286,8 @@ public class PlayerClientEvents {
             FogOfWarClientEvents.frozenChunks.clear();
             FogOfWarClientEvents.semiFrozenChunks.clear();
             HeroClientEvents.fallenHeroes.clear();
+            PlayerDisplayClientEvents.resetDisplay();
+            PlayerColors.reset();
         }
     }
 
@@ -265,8 +336,8 @@ public class PlayerClientEvents {
 
     public static void resetRTS(boolean hardReset) {
         boolean isSandbox = SandboxClientEvents.isSandboxPlayer();
-        isRTSPlayer = false;
-        setFaction(Faction.NONE);
+        rtsPlayers.clear();
+        HelperButtons.updateButtons();
         SoundClientEvents.stopFadeableMusicInstance();
 
         HudClientEvents.controlGroups.clear();
@@ -288,11 +359,13 @@ public class PlayerClientEvents {
         ResourcesClientEvents.resourcesList.clear();
         ClientGameModeHelper.gameMode = ClientGameModeHelper.DEFAULT_GAMEMODE;
         ClientGameModeHelper.gameModeLocked = false;
-        PlayerClientEvents.beaconOwnerTicks.clear();
         SurvivalClientEvents.reset();
         StartPosClientEvents.resetAll();
         HeroClientEvents.fallenHeroes.clear();
         AlliancesClient.playersWithAlliedControl.clear();
+        PlayerColors.reset();
+        PlayerDisplayClientEvents.resetDisplay();
+        TimeClientEvents.resetBloodMoon();
     }
 
     public static void setRTSLock(boolean lock) {
@@ -304,7 +377,9 @@ public class PlayerClientEvents {
     }
 
     public static void syncBeaconOwnerTicks(String playerName, long ticks) {
-        beaconOwnerTicks.put(playerName, ticks);
+        for (int i = 0; i < rtsPlayers.size(); i++)
+            if (rtsPlayers.get(i).name.equals(playerName))
+                rtsPlayers.get(i).beaconOwnerTicks = (int) ticks;
     }
 
 

@@ -97,6 +97,25 @@ public class UnitActionItem {
         return true;
     }
 
+    private boolean isRedundantMove(Unit unit, BlockPos targetPos) {
+        LivingEntity le = (LivingEntity) unit;
+        MoveToTargetBlockGoal goal = unit.getMoveGoal();
+
+        if (goal != null && !le.level().isClientSide()) {
+            BlockPos bp = goal.getMoveTarget();
+            if (bp != null) {
+                double distToTarget = bp.distSqr(le.getOnPos());
+                if (distToTarget > 400) {
+                    double ignoreDist = Math.min(5, Math.sqrt(distToTarget) / 10);
+                    return bp.distSqr(targetPos) < ignoreDist * ignoreDist;
+                } else {
+                    return bp.equals(targetPos);
+                }
+            }
+        }
+        return false;
+    }
+
     // can be done server or clientside - but only serverside will have an effect on the world
     // clientside actions are purely for tracking data
     public void action(Level level) {
@@ -137,22 +156,9 @@ public class UnitActionItem {
             } else if (((LivingEntity) unit).getEffect(MobEffectRegistrar.UNCONTROLLABLE.get()) != null) {
                 continue;
             }
-
             // recalculating pathfinding can be expensive, so check if we actually need to first
-            if (action == UnitAction.MOVE) {
-                MoveToTargetBlockGoal goal = unit.getMoveGoal();
-
-                if (goal != null && !level.isClientSide()) {
-                    BlockPos bp = goal.getMoveTarget();
-                    if (bp != null) {
-                        double distToTarget = bp.distSqr(((Mob) unit).getOnPos());
-                        if (distToTarget > 400) {
-                            double ignoreDist = Math.min(5, Math.sqrt(distToTarget) / 10);
-                            if (bp.distSqr(preselectedBlockPos) < ignoreDist * ignoreDist)
-                                return;
-                        }
-                    }
-                }
+            if (action == UnitAction.MOVE && isRedundantMove(unit, preselectedBlockPos)) {
+                continue;
             }
 
             // have to do this before resetBehaviours so we can assign the correct resourceName first
@@ -189,7 +195,6 @@ public class UnitActionItem {
                     //if (unit instanceof MagmaCubeUnit && unit.getMoveGoal().getMoveTarget() != null) {
                     //    shouldResetBehaviours = false;
                     //}
-
                     if (shouldResetBehaviours && (nonAbilityActions.contains(action) || foundAbility)) {
                         Unit.fullResetBehaviours(unit);
                     }
@@ -308,7 +313,7 @@ public class UnitActionItem {
                             goal.setTargetResourceName(ResourceName.FOOD);
                             goal.setMoveTarget(preselectedBlockPos);
                             BuildingPlacement building = BuildingUtils.findBuilding(level.isClientSide(), preselectedBlockPos);
-                            if (building != null && building instanceof FarmPlacement) {
+                            if (building instanceof FarmPlacement) {
                                 goal.setTargetFarm(building);
                                 if (Unit.atMaxResources((Unit) workerUnit)) {
                                     if (level.isClientSide()) {
@@ -394,6 +399,10 @@ public class UnitActionItem {
             for (Pair<LivingEntity, BlockPos> pair : formationPairs) {
                 LivingEntity le = pair.getFirst();
                 BlockPos targetPos = pair.getSecond();
+
+                if (isRedundantMove((Unit) le, targetPos))
+                    continue;
+
                 if (le instanceof Unit unit)
                     unit.setMoveTarget(targetPos);
             }
@@ -445,6 +454,7 @@ public class UnitActionItem {
 
                 mob.getNavigation().stop();
                 mob.setTarget(null);
+
                 if (!level.isClientSide()) {
                     synchronized (NonUnitServerEvents.nonUnitMoveTargets) {
                         NonUnitServerEvents.nonUnitMoveTargets.removeIf(p -> p.getFirst() == mob);

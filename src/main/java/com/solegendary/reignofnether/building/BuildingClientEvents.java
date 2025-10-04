@@ -23,10 +23,10 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -61,12 +61,12 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import static com.solegendary.reignofnether.hud.HudClientEvents.*;
-import static com.solegendary.reignofnether.unit.Checkpoint.CHECKPOINT_TICKS_FADE;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
 
 public class BuildingClientEvents {
@@ -621,6 +621,11 @@ public class BuildingClientEvents {
 
             AABB aabb = new AABB(building.minCorner, building.maxCorner.offset(1, 1, 1));
 
+            var colorHex = new Color(PlayerColors.getPlayerDisplayColorHex(building.ownerName));
+            float r = colorHex.getRed() / 255.0f;
+            float g = colorHex.getGreen() / 255.0f;
+            float b = colorHex.getBlue() / 255.0f;
+
             if (isInBrightChunk) {
                 if (selectedBuildings.contains(building)) {
                     MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -629,25 +634,15 @@ public class BuildingClientEvents {
                         MyRenderer.drawLineBox(evt.getPoseStack(), aabb, 1.0f, 1.0f, 1.0f, 1.0f);
                     } else {
                         MyRenderer.drawLineBox(evt.getPoseStack(),
-                            aabb,
-                            1.0f,
-                            1.0f,
-                            1.0f,
-                            MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f
+                                aabb,
+                                1.0f, 1.0f, 1.0f,
+                                MiscUtil.isRightClickDown(MC) ? 1.0f : 0.5f
                         );
                     }
                 }
             }
-            Relationship buildingRs = getPlayerToBuildingRelationship(building);
 
-            if (isInBrightChunk) {
-                switch (buildingRs) {
-                    case OWNED -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.3f, 1.0f, 0.3f, 0.2f);
-                    case FRIENDLY -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 0.2f, 0.2f, 1.0f, 0.3f);
-                    case HOSTILE -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 1.0f, 0.3f, 0.3f, 0.2f);
-                    case NEUTRAL -> MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, 1.0f, 1.0f, 0.15f, 0.2f);
-                }
-            }
+            MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, r, g, b, 0.5f);
         }
 
         // draw rally points and lines

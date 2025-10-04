@@ -283,6 +283,7 @@ public class Button {
         }
     }
 
+
     // must be done from key press event
     public void checkPressed(int key) {
         if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())

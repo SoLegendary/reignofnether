@@ -131,7 +131,10 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     // combat stats
     public boolean getWillRetaliate() { return willRetaliate; }
     public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() { return 20f / (getAttackCooldown() + (hasQuickChargeEnchant() ? 15 : 25)); } // crossbow charge time is 25 ticks
+    public float getAttacksPerSecond() {
+        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+        return 20f / (getAttackCooldown() + (CrossbowItem.getChargeDuration(itemStack)));
+    }
     public float getAggroRange() { return aggroRange; }
     public boolean getAggressiveWhenIdle() { return aggressiveWhenIdle && !isVehicle(); }
     public float getAttackRange() { return attackRange; }
@@ -151,7 +154,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     // endregion
 
     final static public float attackDamage = 7.0f;
-    final static public float attacksPerSecond = 0.8f; // excludes crossbow charge time
+    final static public float attacksPerSecond = 0.632f; // excludes crossbow charge time
     final static public float maxHealth = 45.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.24f;
@@ -204,7 +207,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         AttackerUnit.tick(this);
         this.mountGoal.tick();
         PromoteIllager.checkAndApplyBuff(this);
-
+        this.attackGoal.tickChargeCrossbow();
     }
 
     @Override
@@ -233,6 +236,9 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     @Override
     public void resetBehaviours() {
         this.mountGoal.stop();
+        if (this.attackGoal != null) {
+            this.attackGoal.stop();
+        }
     }
 
     @Override
@@ -310,7 +316,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
             d1 -= (1.0f - pTarget.getEyeHeight());
 
         Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
-        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, (float) (14 - pUser.level().getDifficulty().getId() * 4));
+        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
         pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
 
         if (!level().isClientSide() && pTarget instanceof Unit unit)
@@ -326,7 +332,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         double d3 = rabg.getBuildingTarget().centrePos.getY();
 
         Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
-        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, (float) (14 - pUser.level().getDifficulty().getId() * 4));
+        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
         pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
 
         if (!level().isClientSide())
@@ -342,6 +348,11 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     public boolean hasQuickChargeEnchant() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
         return itemStack.getAllEnchantments().containsKey(EnchantQuickCharge.actualEnchantment);
+    }
+
+    @Override
+    public boolean hasBonusAttackSpeed() {
+        return hasQuickChargeEnchant();
     }
 
     @Override

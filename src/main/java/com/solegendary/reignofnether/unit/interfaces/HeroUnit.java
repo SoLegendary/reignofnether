@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -26,7 +27,7 @@ import java.util.List;
 
 public interface HeroUnit extends Unit {
 
-    float EXP_REQ_MULTIPLIER = 1.2f;
+    float EXP_REQ_MULTIPLIER = 1.6f;
 
     static void tick(HeroUnit heroUnit) {
         if (((LivingEntity) heroUnit).tickCount % 20 == 0) {
@@ -233,7 +234,24 @@ public interface HeroUnit extends Unit {
 
     default int getHeroAbilityRank(HeroAbility ability) {
         return getHeroAbilityRanks().getOrDefault(ability, 0);
+    public default void syncToClients() {
+        Entity entity = (Entity) this;
+        if (!entity.level().isClientSide()) {
+            HeroClientboundPacket.setExperience(entity.getId(), this.getExperience());
+            HeroClientboundPacket.setSkillPoints(entity.getId(), this.getSkillPoints());
+            HeroClientboundPacket.setCharges(entity.getId(), this.getChargesForSaveData());
+            List<HeroAbility> abls = this.getHeroAbilities();
+            if (abls.size() > 0)
+                HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(0).rank, 0);
+            if (abls.size() > 1)
+                HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(1).rank, 1);
+            if (abls.size() > 2)
+                HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(2).rank, 2);
+            if (abls.size() > 3)
+                HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(3).rank, 3);
+        }
     }
+}
 
     default void setHeroAbilityRank(HeroAbility ability, int rank) {
         getHeroAbilityRanks().put(ability, rank);

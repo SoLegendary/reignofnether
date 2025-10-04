@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.packets.UnitSyncAbilityClientboundPacket;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -53,7 +54,9 @@ public abstract class HeroAbility extends Ability {
             setRank(hero, getRank(hero) + 1);
             hero.setSkillPoints(hero.getSkillPoints() - 1);
             if (((LivingEntity) hero).level().isClientSide)
-                ((Unit) hero).updateAbilityButtons();
+                hero.updateAbilityButtons();
+            else
+                hero.syncToClients();
             return true;
         }
         return false;
@@ -85,7 +88,7 @@ public abstract class HeroAbility extends Ability {
     protected Button getRankUpButtonProtected(String name, ResourceLocation resourceLocation, HeroUnit hero) {
         Button button = new Button(name,
             14,
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/level_up_skill.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/corner_plus.png"),
             (Keybinding) null,
             () -> false,
             () -> !hero.isRankUpMenuOpen() || getRank(hero) >= maxRank,
@@ -124,7 +127,7 @@ public abstract class HeroAbility extends Ability {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
             Keybindings.keyU,
             () -> false,
-            () -> allSkillsLearnt(hero) || !PlayerClientEvents.isRTSPlayer,
+            () -> allSkillsLearnt(hero) || !PlayerClientEvents.isRTSPlayer(),
             () -> true,
             () -> hero.showRankUpMenu(!hero.isRankUpMenuOpen()),
             null,

@@ -10,7 +10,6 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamemode.GameModeClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
-import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -23,6 +22,8 @@ import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
+import com.solegendary.reignofnether.time.TimeClientEvents;
+import com.solegendary.reignofnether.time.TimeServerEvents;
 import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -81,14 +82,12 @@ public class PlayerServerEvents {
 
     public static final ArrayList<ServerPlayer> players = new ArrayList<>();
     public static final ArrayList<ServerPlayer> orthoviewPlayers = new ArrayList<>();
-    public static final List<RTSPlayer> rtsPlayers = Collections.synchronizedList(new ArrayList<>()); // players that
-    // have run /startrts
+    // players that are currently playing a match
+    public static final List<RTSPlayer> rtsPlayers = Collections.synchronizedList(new ArrayList<>());
     public static boolean rtsLocked = false; // can players join as RTS players or not?
     public static boolean rtsSyncingEnabled = true; // will logging in players sync units and buildings?
 
     private static final int MONSTER_START_TIME_OF_DAY = 500; // 500 = dawn, 6500 = noon, 12500 = dusk
-
-    public static final int ORTHOVIEW_PLAYER_BASE_Y = 85;
 
     public static final int TICKS_TO_REVEAL = 60 * ResourceCost.TICKS_PER_SECOND;
 
@@ -212,7 +211,7 @@ public class PlayerServerEvents {
         synchronized (rtsPlayers) {
             if (evt.phase == TickEvent.Phase.END) {
                 for (RTSPlayer rtsPlayer : rtsPlayers)
-                    rtsPlayer.tick();
+                    rtsPlayer.serverTick();
 
                 for (RTSPlayer rtsPlayer : rtsPlayers) {
                     if (rtsPlayer.beaconOwnerTicks == Beacon.getTicksToWin(serverLevel)) {
@@ -325,8 +324,7 @@ public class PlayerServerEvents {
                 serverPlayer.sendSystemMessage(Component.literal(""));
                 serverPlayer.sendSystemMessage(Component.translatable("tutorial.reignofnether.op_commands"));
                 serverPlayer.sendSystemMessage(Component.translatable("tutorial.reignofnether.fog"));
-                serverPlayer.sendSystemMessage(Component.translatable("tutorial.reignofnether.lock"));
-                serverPlayer.sendSystemMessage(Component.translatable("tutorial.reignofnether.syncing"));
+                serverPlayer.sendSystemMessage(Component.translatable("tutorial.reignofnether.lock"));;
                 serverPlayer.sendSystemMessage(Component.translatable("tutorial.reignofnether.reset"));
                 serverPlayer.sendSystemMessage(Component.literal(""));
             }
@@ -337,11 +335,11 @@ public class PlayerServerEvents {
                 serverPlayer.sendSystemMessage(Component.literal(""));
             }
         }
-        RTSPlayer rtsPlayer = getRTSPlayer(playerName);
-        if (rtsPlayer != null) {
-            PlayerClientboundPacket.enableRTSStatus(playerName, rtsPlayer.faction);
-        } else {
-            PlayerClientboundPacket.disableRTSStatus(playerName);
+        if (getRTSPlayer(playerName) == null) {
+            PlayerClientboundPacket.removeRTSPlayer(playerName);
+        }
+        for (RTSPlayer rtsPlayer : rtsPlayers) {
+            PlayerClientboundPacket.addRTSPlayer(rtsPlayer.name, rtsPlayer.faction, (long) rtsPlayer.id, rtsPlayer.startPosColorId);
         }
 
         if (rtsLocked) {
@@ -365,20 +363,21 @@ public class PlayerServerEvents {
     }
 
     public static void startRTS(int playerId, Vec3 pos, Faction faction) {
-        startRTS(playerId, pos, faction, false);
+        startRTS(playerId, pos, faction, 0);
     }
 
     // readied start is a simultaneous start from players using RTS start pos blocks, difference being:
     // - places the capitol foundations automatically
     // - spawns workers outside the foundations
     // - no start messages are sent other than the one from the countdown
-    public static void startRTS(int playerId, Vec3 pos, Faction faction, boolean readiedStart) {
+    public static void startRTS(int playerId, Vec3 pos, Faction faction, int startPosColorId) {
         synchronized (rtsPlayers) {
+            boolean readiedStart = startPosColorId != 0;
+
             ServerPlayer serverPlayer = null;
             for (ServerPlayer player : players)
-                if (player.getId() == playerId) {
+                if (player.getId() == playerId)
                     serverPlayer = player;
-                }
 
             if (serverPlayer == null) {
                 return;
@@ -408,11 +407,15 @@ public class PlayerServerEvents {
                 case PIGLINS -> EntityRegistrar.GRUNT_UNIT.get();
                 case NONE -> null;
             };
-            rtsPlayers.add(RTSPlayer.getNewPlayer(serverPlayer, faction));
-
+            rtsPlayers.add(RTSPlayer.getNewPlayer(
+                    serverPlayer.getName().getString(),
+                    faction,
+                    serverPlayer.getId(),
+                    startPosColorId
+            ));
             String playerName = serverPlayer.getName().getString();
             ResourcesServerEvents.assignResources(playerName);
-            PlayerClientboundPacket.enableRTSStatus(playerName, faction);
+            PlayerClientboundPacket.addRTSPlayer(playerName, faction, (long) serverPlayer.getId(), startPosColorId);
 
             ServerLevel level = (ServerLevel) serverPlayer.level();
             ArrayList<Entity> workers = new ArrayList<>();
@@ -439,6 +442,7 @@ public class PlayerServerEvents {
                 } else {
                     level.setDayTime(MONSTER_START_TIME_OF_DAY);
                 }
+                ResearchServerEvents.removeAllCheatsFor(playerName);
             } else {
                 enableAllCheats(playerName);
             }
@@ -470,6 +474,13 @@ public class PlayerServerEvents {
                     }
                     int[] workerIds = workers.stream().map(Entity::getId).mapToInt(Integer::intValue).toArray();
                     BuildingServerEvents.placeBuilding(building, bp, Rotation.NONE, playerName, workerIds, false, false);
+                }
+                for (RTSPlayer rtsPlayer : rtsPlayers) {
+                    String playerName1 = rtsPlayer.name;
+                    String playerName2 = serverPlayer.getName().getString();
+                    if (!playerName1.equals(playerName2) && rtsPlayer.startPosColorId == startPosColorId) {
+                        AlliancesServerEvents.addAlliance(playerName1, playerName2);
+                    }
                 }
             }
 
@@ -995,6 +1006,7 @@ public class PlayerServerEvents {
 
         playerDefaultGameModes.replaceAll((key, oldValue) -> GameType.SPECTATOR);
         AlliancesServerEvents.playersWithAlliedControl.clear();
+        TimeServerEvents.resetBloodMoon();
     }
 
     public static void setRTSLock(boolean lock) {

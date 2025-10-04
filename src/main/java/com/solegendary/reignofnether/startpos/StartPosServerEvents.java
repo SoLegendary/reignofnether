@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.startpos;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.RTSStartBlock;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.util.Faction;
@@ -130,9 +132,19 @@ public class StartPosServerEvents {
                                         serverPlayer.getId(),
                                         new Vec3(startPos.pos.getX(), startPos.pos.getY(), startPos.pos.getZ()),
                                         startPos.faction,
-                                        true
+                                        startPos.colorId
                                 );
                                 break;
+                            }
+                        }
+                    }
+                    // ally all players who start at the same color of start block
+                    for (int i = 0; i < PlayerServerEvents.rtsPlayers.size(); i++) {
+                        RTSPlayer p1 = PlayerServerEvents.rtsPlayers.get(i);
+                        for (int j = i + 1; j < PlayerServerEvents.rtsPlayers.size(); j++) {
+                            RTSPlayer p2 = PlayerServerEvents.rtsPlayers.get(j);
+                            if (p1.startPosColorId == p2.startPosColorId) {
+                                AlliancesServerEvents.addAlliance(p1.name, p2.name);
                             }
                         }
                     }

@@ -156,7 +156,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-    final static public float maxHealth = 50.0f;
+    final static public float maxHealth = 55.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.28f;
     final static public float rangedDamageResist = 0.2f;

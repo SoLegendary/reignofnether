@@ -1,17 +1,15 @@
 package com.solegendary.reignofnether.alliance;
 
-import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 
 public class AlliancesServerEvents {
     private static final Map<String, Set<String>> alliances = new HashMap<>();
-
+    public static final Map<String, Set<String>> pendingAlliances = new HashMap<>();
     public static final HashSet<String> playersWithAlliedControl = new HashSet<>();
 
     public static boolean canControlAlly(String player, LivingEntity entity) {
@@ -29,8 +27,7 @@ public class AlliancesServerEvents {
         if (!owner1.equals(owner2)) {
             alliances.computeIfAbsent(owner1, k -> new HashSet<>()).add(owner2);
             alliances.computeIfAbsent(owner2, k -> new HashSet<>()).add(owner1);
-
-            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new AllianceClientboundAddPacket(owner1, owner2));
+            AllianceClientboundPacket.addAlliance(owner1, owner2);
         }
     }
 
@@ -42,7 +39,6 @@ public class AlliancesServerEvents {
                 alliances.remove(owner1);
             }
         }
-
         Set<String> alliesOfOwner2 = alliances.get(owner2);
         if (alliesOfOwner2 != null) {
             alliesOfOwner2.remove(owner1);
@@ -50,8 +46,7 @@ public class AlliancesServerEvents {
                 alliances.remove(owner2);
             }
         }
-
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new AllianceClientboundRemovePacket(owner1, owner2));
+        AllianceClientboundPacket.removeAlliance(owner1, owner2);
     }
 
     public static boolean isAllied(String owner1, String owner2) {
@@ -80,21 +75,20 @@ public class AlliancesServerEvents {
     }
     public static void resetAllAlliances() {
         alliances.clear();
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new AllianceClientboundRemovePacket());
+        AllianceClientboundPacket.resetAlliances();
     }
 
     public static void syncAlliances() {
         for (String player1 : alliances.keySet())
             for (String player2 : alliances.get(player1))
-                PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new AllianceClientboundAddPacket(player1, player2));
+                AllianceClientboundPacket.addAlliance(player1, player2);
     }
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         syncAlliances();
         for (String playerName : playersWithAlliedControl) {
-            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                    new AllianceClientboundControlPacket(playerName, true));
+            AllianceClientboundPacket.setAllyControl(playerName, true);
         }
     }
 }

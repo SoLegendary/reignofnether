@@ -196,7 +196,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
         }
     }
 
-    private boolean isSummonedByNecromancer() {
+    public boolean isSummonedByNecromancer() {
         return hasItemInSlot(EquipmentSlot.HEAD) &&
                 hasItemInSlot(EquipmentSlot.CHEST) &&
                 hasItemInSlot(EquipmentSlot.LEGS) &&

@@ -12,10 +12,12 @@ import com.solegendary.reignofnether.building.RangeIndicator;
 import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
@@ -23,9 +25,9 @@ import com.solegendary.reignofnether.time.NightCircleMode;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
-import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
@@ -57,6 +59,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -580,41 +583,15 @@ public class MinimapClientEvents {
 
             int xc = building.centrePos.getX() + (BUILDING_RADIUS / 2);
             int zc = building.centrePos.getZ() + (BUILDING_RADIUS / 2);
-
-            for (int x = xc - BUILDING_RADIUS; x < xc + BUILDING_RADIUS; x++) {
-                for (int z = zc - BUILDING_RADIUS; z < zc + BUILDING_RADIUS; z++) {
-                    if (isWorldXZinsideMap(x,z)) {
-                        int x0 = x - xc + BUILDING_RADIUS;
-                        int z0 = z - zc + BUILDING_RADIUS;
-                        int rgb = 0x000000;
-
-                        // if pixel is on the edge of the square keep it coloured black
-                        if (!(x0 < BUILDING_THICKNESS || x0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS ||
-                                z0 < BUILDING_THICKNESS || z0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS)) {
-
-                            if (FogOfWarClientEvents.isBuildingInBrightChunk(building)) {
-                                switch (BuildingClientEvents.getPlayerToBuildingRelationship(building)) {
-                                    case OWNED -> rgb = 0x00FF00;
-                                    case FRIENDLY -> rgb = 0x3232FF;
-                                    case HOSTILE -> rgb = 0xFF0000;
-                                    case NEUTRAL -> rgb = 0xFFFF00;
-                                }
-                            } else {
-                                switch (BuildingClientEvents.getPlayerToBuildingRelationship(building)) {
-                                    case OWNED -> rgb = 0x008800;
-                                    case FRIENDLY -> rgb = 0x0000AA;
-                                    case HOSTILE -> rgb = 0x880000;
-                                    case NEUTRAL -> rgb = 0x888800;
-                                }
-                            }
-                        }
-                        int xN = x - xc_world + (mapGuiRadius * 2);
-                        int zN = z - zc_world + (mapGuiRadius * 2);
-
-                        mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
-                    }
-                }
+            var rgb = PlayerColors.getPlayerDisplayColorHex(building.ownerName);
+            if (!FogOfWarClientEvents.isBuildingInBrightChunk(building)) {
+                var color = new Color(rgb);
+                color = new Color(color.getRed() / 2, color.getGreen() / 2, color.getBlue() / 2);
+                rgb = color.getRGB();
             }
+
+
+            drawBuildingOnMap(xc, zc, rgb);
         }
         // draw starting locations
         if (MC.level != null && StartPosClientEvents.isEnabled() &&
@@ -636,58 +613,63 @@ public class MinimapClientEvents {
         for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
             if (!FogOfWarClientEvents.isInBrightChunk(entity))
                 continue;
+            var colorHex = PlayerColors.getPlayerDisplayColorHex(entity instanceof Unit unit ? unit.getOwnerName() : null);
             drawUnitOnMap(entity.getOnPos().getX(),
                     entity.getOnPos().getZ(),
-                    UnitClientEvents.getPlayerToEntityRelationship(entity)
+                    colorHex
             );
         }
         for (MinimapUnit minimapUnit : minimapUnits) {
             if (!FogOfWarClientEvents.isInBrightChunk(minimapUnit.pos) || MC.player == null)
                 continue;
 
-            String playerName = MC.player.getName().getString();
             String unitOwnerName = minimapUnit.ownerName;
-            Relationship relationship = Relationship.HOSTILE;
+            var colorHex = PlayerColors.getPlayerDisplayColorHex(unitOwnerName);
 
-            // Determine relationship based on ownership and alliances
-            if (playerName.equals(unitOwnerName)) {
-                relationship = Relationship.OWNED;
-            } else if (unitOwnerName.isBlank()) {
-                relationship = Relationship.NEUTRAL;
-            } else if (AlliancesClient.isAllied(playerName, unitOwnerName)) {
-                relationship = Relationship.FRIENDLY;
-            }
-
-            // Draw the unit on the map based on its relationship
             drawUnitOnMap(
                     minimapUnit.pos.getX(),
                     minimapUnit.pos.getZ(),
-                    relationship
+                    colorHex
             );
         }
 
     }
 
-    private static void drawUnitOnMap(int xc, int zc, Relationship relationship) {
+    private static void drawBuildingOnMap(int xc, int zc, int color) {
+        for (int x = xc - BUILDING_RADIUS; x < xc + BUILDING_RADIUS; x++) {
+            for (int z = zc - BUILDING_RADIUS; z < zc + BUILDING_RADIUS; z++) {
+                if (isWorldXZinsideMap(x, z)) {
+                    int x0 = x - xc + BUILDING_RADIUS;
+                    int z0 = z - zc + BUILDING_RADIUS;
+
+                    // if pixel is on the edge of the square keep it coloured black
+                    var rgb = (x0 < BUILDING_THICKNESS || x0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS ||
+                            z0 < BUILDING_THICKNESS || z0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS)
+                            ? 0x000000
+                            : color;
+
+                    int xN = x - xc_world + (mapGuiRadius * 2);
+                    int zN = z - zc_world + (mapGuiRadius * 2);
+
+                    mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
+                }
+            }
+        }
+    }
+
+    private static void drawUnitOnMap(int xc, int zc, int color) {
         for (int x = xc - UNIT_RADIUS; x < xc + UNIT_RADIUS; x++) {
             for (int z = zc - UNIT_RADIUS; z < zc + UNIT_RADIUS; z++) {
                 if (isWorldXZinsideMap(x, z)) {
                     int x0 = x - xc + UNIT_RADIUS;
                     int z0 = z - zc + UNIT_RADIUS;
-                    int rgb = 0x000000;
 
                     // if pixel is on the edge of the square keep it coloured black
-                    if (!(
-                            x0 < UNIT_THICKNESS || x0 >= (UNIT_RADIUS * 2) - UNIT_THICKNESS ||
-                                    z0 < UNIT_THICKNESS || z0 >= (UNIT_RADIUS * 2) - UNIT_THICKNESS
-                    )) {
-                        switch (relationship) {
-                            case OWNED -> rgb = 0x00FF00;
-                            case FRIENDLY -> rgb = 0x3232FF;
-                            case HOSTILE -> rgb = 0xFF0000;
-                            case NEUTRAL -> rgb = 0xFFFF00;
-                        }
-                    }
+                    var rgb = (x0 < UNIT_THICKNESS || x0 >= (UNIT_RADIUS * 2) - UNIT_THICKNESS ||
+                            z0 < UNIT_THICKNESS || z0 >= (UNIT_RADIUS * 2) - UNIT_THICKNESS)
+                            ? 0x000000
+                            : color;
+
                     int xN = x - xc_world + (mapGuiRadius * 2);
                     int zN = z - zc_world + (mapGuiRadius * 2);
 
@@ -750,14 +732,9 @@ public class MinimapClientEvents {
 
                         // if pixel is on the edge of the square keep it coloured black
                         if (!(x0 < START_POS_THICKNESS || x0 >= (START_POS_RADIUS * 2) - START_POS_THICKNESS ||
-                              z0 < START_POS_THICKNESS || z0 >= (START_POS_RADIUS * 2) - START_POS_THICKNESS
+                                z0 < START_POS_THICKNESS || z0 >= (START_POS_RADIUS * 2) - START_POS_THICKNESS
                         )) {
-                            rgb = switch (MiscUtil.getClientsideRelationship(MC.player.getName().getString(), startPos.playerName)) {
-                                case OWNED -> 0x00FF00;
-                                case FRIENDLY -> 0x3232FF;
-                                case HOSTILE -> 0xFF0000;
-                                case NEUTRAL -> 0xFFFF00;
-                            };
+                            rgb = PlayerColors.getPlayerDisplayColorHex(startPos.playerName);
                             if (startPos.faction == Faction.NONE)
                                 rgb = 0xFFFF00;
                         }
@@ -859,8 +836,14 @@ public class MinimapClientEvents {
 
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
+        if (!OrthoviewClientEvents.isEnabled() ||
+                OrthoviewClientEvents.isCameraLocked() ||
+                !(MC.screen instanceof TopdownGui)) {
+            return;
+        }
+
         // when clicking on map move player there
-        if (OrthoviewClientEvents.isEnabled() && evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 &&
+        if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 &&
             !Keybindings.shiftMod.isDown() && !OrthoviewClientEvents.isCameraLocked() &&
             lastDragTeleportTimestamp < System.currentTimeMillis() - 100) {
 
@@ -878,7 +861,9 @@ public class MinimapClientEvents {
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre evt) {
-        if (!OrthoviewClientEvents.isEnabled() || OrthoviewClientEvents.isCameraLocked()) {
+        if (!OrthoviewClientEvents.isEnabled() ||
+            OrthoviewClientEvents.isCameraLocked() ||
+            !(MC.screen instanceof TopdownGui)) {
             return;
         }
 

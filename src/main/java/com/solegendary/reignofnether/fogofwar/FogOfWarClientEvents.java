@@ -89,7 +89,7 @@ public class FogOfWarClientEvents {
     }
 
     public static boolean isPlayerRevealed(String name) {
-        if (!PlayerClientEvents.isRTSPlayer)
+        if (!PlayerClientEvents.isRTSPlayer())
             return true;
 
         return revealedPlayerNames.contains(name);

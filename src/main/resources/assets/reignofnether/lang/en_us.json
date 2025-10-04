@@ -609,6 +609,10 @@
     "hud.orthoview.reignofnether.hiding_leaves_all": "Hiding leaves: all",
     "hud.orthoview.reignofnether.disabled_hiding_leaves": "Disabled hiding leaves",
     "hud.orthoview.reignofnether.ortho_error": "\n You must be in creative or spectator for RTS mode \n",
+    "hud.orthoview.reignofnether.using_player_team_color": "Using player colors",
+    "hud.orthoview.reignofnether.using_relation_color": "Using alliance colors",
+    "hud.orthoview.reignofnether.color_type_toggle": "(Click to change)",
+    "hud.orthoview.reignofnether.locked_for_observers": "(Locked for observers)",
 
     "hud.reignofnether.drop_off_resources": "Drop off resources",
     "hud.reignofnether.gather_resources": "Gather Resources (%s)",
@@ -833,8 +837,8 @@
     "time.reignofnether.time": "Time: %s",
     "time.reignofnether.time_is_distorted": "Time is distorted to midnight",
     "time.reignofnether.real_time": "Real time: %s",
-    "time.reignofnether.time_until_day": "%s until day",
-    "time.reignofnether.time_until_night": "%s until night",
+    "time.reignofnether.time_until_day": "%s to day",
+    "time.reignofnether.time_until_night": "%s to night",
     "time.reignofnether.day": "day",
     "time.reignofnether.night": "night",
     "time.reignofnether.night_circles": "Night Circles: %s",
@@ -1134,9 +1138,11 @@
 
     "alliance.reignofnether.sent_request": "\nAlliance request sent to %s.\n",
     "alliance.reignofnether.ally_self": "\nYou can't ally with yourself!\n",
-    "alliance.reignofnether.ally_confirm": "\n%s wants to ally with you. Type /allyconfirm %s to confirm.\n",
+    "alliance.reignofnether.ally_confirm": "\n%s wants to ally with you. Accept in the Diplomacy menu.\n",
     "alliance.reignofnether.now_allied": "\nYou are now allied with %s.\n",
     "alliance.reignofnether.ally_accepted": "\n%s has accepted your alliance request.\n",
+    "alliance.reignofnether.ally_request_cancelled_self": "\nRetracted alliance request to %s.\n",
+    "alliance.reignofnether.ally_request_cancelled": "\n%s has retracted their alliance request.\n",
     "alliance.reignofnether.no_request": "\nNo pending alliance request from %s.\n",
     "alliance.reignofnether.disbanded": "\nYour alliance with %s has been disbanded.\n",
     "alliance.reignofnether.disbanding": "\nDisbanding alliance with %s in 30 seconds...\n",
@@ -1257,6 +1263,7 @@
 
     "unitstats.reignofnether.attack_damage": "Attack damage",
     "unitstats.reignofnether.attack_damage_bonus_buildings": "+%s to buildings",
+    "unitstats.reignofnether.attack_damage_bonus_animals": "+%s to animals",
     "unitstats.reignofnether.attack_speed": "Attacks per second",
     "unitstats.reignofnether.range": "Range",
     "unitstats.reignofnether.armour": "Armor",
@@ -1264,5 +1271,19 @@
     "unitstats.reignofnether.armour_ranged": "%d%% vs ranged",
     "unitstats.reignofnether.armour_magic": "%d%% vs magic",
     "unitstats.reignofnether.armour_all": "%d%% vs everything",
-    "unitstats.reignofnether.movement_speed": "Movement speed"
+    "unitstats.reignofnether.movement_speed": "Movement speed",
+
+    "alliances.reignofnether.tooltip.send_food": "Send Food",
+    "alliances.reignofnether.tooltip.send_wood": "Send Wood",
+    "alliances.reignofnether.tooltip.send_ore": "Send Ore",
+    "alliances.reignofnether.tooltip.confirm_send_resources": "Confirm",
+    "alliances.reignofnether.tooltip.cancel_send_resources": "Cancel",
+    "alliances.reignofnether.tooltip.request_alliance": "Request Alliance",
+    "alliances.reignofnether.tooltip.cancel_request_alliance": "Cancel Request",
+    "alliances.reignofnether.tooltip.accept_alliance": "Accept Alliance",
+    "alliances.reignofnether.tooltip.disband_alliance": "Disband Alliance",
+
+    "alliances.reignofnether.tooltip.toggle_observer_player_displays": "Observer Menu (Z)",
+    "alliances.reignofnether.tooltip.toggle_diplomacy_player_displays": "Diplomacy Menu (Z)",
+    "alliances.reignofnether.tooltip.toggle_shared_unit_control": "Toggle whether allies can control your units"
 }

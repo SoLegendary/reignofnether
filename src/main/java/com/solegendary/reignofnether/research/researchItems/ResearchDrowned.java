@@ -46,8 +46,9 @@ public class ResearchDrowned extends ProductionItem {
                 UnitServerEvents.convertAllToUnit(
                         placement.ownerName,
                     (ServerLevel) level,
-                    (LivingEntity entity) -> entity instanceof ZombieUnit zUnit && zUnit.getOwnerName()
-                        .equals(placement.ownerName),
+                    (LivingEntity entity) -> entity instanceof ZombieUnit zUnit &&
+                            zUnit.getOwnerName().equals(placement.ownerName) &&
+                            !zUnit.isSummonedByNecromancer(),
                     EntityRegistrar.DROWNED_UNIT.get()
                 );
             }

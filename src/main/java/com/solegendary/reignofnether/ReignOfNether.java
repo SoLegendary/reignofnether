@@ -47,7 +47,7 @@ import java.util.function.Supplier;
 public class ReignOfNether {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "reignofnether";
-    public static final String VERSION_STRING = "1.2.1e";
+    public static final String VERSION_STRING = "1.2.2";
 
     // Fields from ClientReset
     public static final Field handshakeField;
@@ -57,7 +57,7 @@ public class ReignOfNether {
         .setParents(MarkerManager.getMarker("FMLNETWORK"));
     public static SimpleChannel handshakeChannel;
 
-    public ReignOfNether(FMLJavaModLoadingContext context) {
+    public ReignOfNether(FMLJavaModLoadingContext mlctx) {
         // Registering all components
         ItemRegistrar.init(context);
         EntityRegistrar.init(context);
@@ -78,8 +78,10 @@ public class ReignOfNether {
         // Registering ClientReset's init
         IEventBus bus = context.getModEventBus();
         bus.addListener(ReignOfNether::init);
-        context.registerConfig(ModConfig.Type.COMMON, ReignOfNetherCommonConfigs.SPEC, "reignofnether-common-" + VERSION_STRING + ".toml");
-        context.registerExtensionPoint(
+        mlctx.registerConfig(ModConfig.Type.COMMON, ReignOfNetherCommonConfigs.SPEC, "reignofnether-common-" + VERSION_STRING + ".toml");
+        // client-only config
+        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ClientModConfigs::registerClientConfigs);
+        mlctx.registerExtensionPoint(
             DisplayTest.class,
             () -> new DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true)
         );

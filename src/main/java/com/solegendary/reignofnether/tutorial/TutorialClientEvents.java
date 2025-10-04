@@ -444,7 +444,7 @@ public class TutorialClientEvents {
                     setHelpButtonText("tutorial.reignofnether.spawn_villagers2");
                     TutorialRendering.setButtonName("tutorial.reignofnether.villagers");
                     progressStage();
-                } else if (stageProgress == 1 && PlayerClientEvents.isRTSPlayer) {
+                } else if (stageProgress == 1 && PlayerClientEvents.isRTSPlayer()) {
                     TutorialRendering.clearButtonName();
                     specialMsg("tutorial.reignofnether.excellent");
                     OrthoviewClientEvents.unlockCam();

@@ -30,6 +30,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -202,6 +203,11 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
         super(entityType, level);
 
         updateAbilityButtons();
+    }
+
+    @Override
+    protected boolean onSoulSpeedBlock() {
+        return false;
     }
 
     @Override

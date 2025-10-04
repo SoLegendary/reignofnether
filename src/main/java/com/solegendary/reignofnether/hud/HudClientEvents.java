@@ -26,6 +26,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
@@ -77,12 +78,15 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.hud.buttons.HelperButtons.*;
 import static com.solegendary.reignofnether.tutorial.TutorialClientEvents.helpButton;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.*;
 import static com.solegendary.reignofnether.util.MiscUtil.capitaliseAndSpace;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.hud.PlayerDisplayClientEvents.diplomacyButton;
+import static com.solegendary.reignofnether.hud.PlayerDisplayClientEvents.observerButton;
 
 public class HudClientEvents {
 
@@ -327,13 +331,10 @@ public class HudClientEvents {
             // ---------------------------
             for (BuildingPlacement building : selBuildings) {
                 if (hudSelBuildingOwned && buildingButtons.size() < (buttonsPerRow * 2)) {
-                    // mob head icon
-
                     String name;
                     if (building.getBuilding() instanceof CustomBuilding customBuilding) {
                         name = customBuilding.name;
                     } else {
-                        ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding());
                         name = ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding()).toString();
                     }
                     buildingButtons.add(new Button(name,
@@ -408,7 +409,6 @@ public class HudClientEvents {
                                     nextBuilding = nextPlacement.getBuilding();
                                 }
                                 if (building != nextBuilding) {
-                                    //TODO
                                     tooltipLines.add(FormattedCharSequence.forward("x" + numBuildings + " " + I18n.get(ReignOfNetherRegistries.BUILDING.getKey(nextBuilding).getPath()),
                                         Style.EMPTY
                                     ));
@@ -435,7 +435,7 @@ public class HudClientEvents {
             // ---------------------------------------------------------------
             // Building production queue (show only if 1 building is selected)
             // ---------------------------------------------------------------
-            else if ((hudSelBuildingOwned || !PlayerClientEvents.isRTSPlayer) && hudSelectedPlacement instanceof ProductionPlacement selProdBuilding) {
+            else if ((hudSelBuildingOwned || !PlayerClientEvents.isRTSPlayer()) && hudSelectedPlacement instanceof ProductionPlacement selProdBuilding) {
                 blitY = screenHeight - iconFrameSize * 2 - 5;
 
                 for (int i = 0; i < selProdBuilding.productionQueue.size(); i++) {
@@ -523,7 +523,7 @@ public class HudClientEvents {
             blitX = 0;
             blitY = screenHeight - iconFrameSize;
 
-            if (hudSelectedPlacement != null && (hudSelBuildingOwned || !PlayerClientEvents.isRTSPlayer)) {
+            if (hudSelectedPlacement != null && (hudSelBuildingOwned || !PlayerClientEvents.isRTSPlayer())) {
                 if (!hudSelectedPlacement.isBuilt) {
                     if (!buildingCancelButton.isHidden.get()) {
                         buildingCancelButton.render(evt.getGuiGraphics(), 0, screenHeight - iconFrameSize, mouseX, mouseY);
@@ -827,7 +827,7 @@ public class HudClientEvents {
         // --------------------------------------------------------
         if (selUnits.size() > 0 &&
                 (getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED ||
-                        !PlayerClientEvents.isRTSPlayer ||
+                        !PlayerClientEvents.isRTSPlayer() ||
                         NonUnitClientEvents.canControlAllMobs() ||
                         AlliancesClient.canControlAlly(selUnits.get(0))) &&
                 hudSelectedEntity instanceof Unit unit) {
@@ -898,7 +898,7 @@ public class HudClientEvents {
 
             // includes worker building buttons
             if (TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_INTRO) &&
-                    (getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED || !PlayerClientEvents.isRTSPlayer) ||
+                    (getPlayerToEntityRelationship(selUnits.get(0)) == Relationship.OWNED || !PlayerClientEvents.isRTSPlayer()) ||
                     AlliancesClient.canControlAlly(selUnits.get(0))) {
                 List<Button> abilityButtons = List.of();
                 for (LivingEntity livingEntity : selUnits) {
@@ -1042,19 +1042,19 @@ public class HudClientEvents {
         boolean isSelPlayer = MC.player != null && MC.player.getName().getString().equals(selPlayerName);
 
         // during a match if nothing is selected, then show your own resources by default
-        if (MC.player != null && !isSelPlayer && PlayerClientEvents.isRTSPlayer && selPlayerName == null) {
+        if (MC.player != null && !isSelPlayer && PlayerClientEvents.isRTSPlayer() && selPlayerName == null) {
             selPlayerName = MC.player.getName().getString();
             isSelPlayer = true;
         }
 
-        if (selPlayerName != null && (isSelPlayer || alliedWithSelPlayer || !PlayerClientEvents.isRTSPlayer || SandboxClientEvents.isSandboxPlayer())) {
+        if (selPlayerName != null && (isSelPlayer || alliedWithSelPlayer || !PlayerClientEvents.isRTSPlayer() || SandboxClientEvents.isSandboxPlayer())) {
             resources = ResourcesClientEvents.getResources(selPlayerName);
         }
 
         blitX = 0;
         blitY = 0;
 
-        if ((!PlayerClientEvents.isRTSPlayer || alliedWithSelPlayer || SandboxClientEvents.isSandboxPlayer()) && !isSelPlayer) {
+        if ((!PlayerClientEvents.isRTSPlayer() || alliedWithSelPlayer || SandboxClientEvents.isSandboxPlayer()) && !isSelPlayer) {
             if (resources != null) {
                 evt.getGuiGraphics().drawString(
                     MC.font,
@@ -1078,9 +1078,9 @@ public class HudClientEvents {
 
         int resourceBlitYStart = blitY;
 
-        if (resources != null) {
+        if (resources != null && MC.player != null) {
             for (String resourceName : new String[] { "food", "wood", "ore", "pop" }) {
-                String rlPath = "";
+                ResourceLocation rl;
                 String resValueStr = "";
                 ResourceName resName;
 
@@ -1088,22 +1088,22 @@ public class HudClientEvents {
 
                 switch (resourceName) {
                     case "food" -> {
-                        rlPath = "textures/icons/items/wheat.png";
+                        rl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/wheat.png");
                         resValueStr = String.valueOf(resources.food);
                         resName = ResourceName.FOOD;
                     }
                     case "wood" -> {
-                        rlPath = "textures/icons/items/wood.png";
+                        rl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/wood.png");
                         resValueStr = String.valueOf(resources.wood);
                         resName = ResourceName.WOOD;
                     }
                     case "ore" -> {
-                        rlPath = "textures/icons/items/iron_ore.png";
+                        rl = new ResourceLocation(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
                         resValueStr = String.valueOf(resources.ore);
                         resName = ResourceName.ORE;
                     }
                     default -> {
-                        rlPath = "textures/icons/items/bed.png";
+                        rl = PlayerColors.getPlayerColorBedIcon(selPlayerName);
                         resValueStr = UnitClientEvents.getCurrentPopulation(selPlayerName) + "/"
                             + BuildingClientEvents.getTotalPopulationSupply(selPlayerName);
                         resName = ResourceName.NONE;
@@ -1126,7 +1126,7 @@ public class HudClientEvents {
                 ));
 
                 MyRenderer.renderIcon(evt.getGuiGraphics(),
-                    ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, rlPath),
+                    rl,
                     blitX + 4,
                     blitY + 4,
                     iconSize
@@ -1352,6 +1352,16 @@ public class HudClientEvents {
             );
             renderedButtons.add(leavesHidingButton);
         }
+        Button toggleTeamColorsButton = PlayerColors.getToggleTeamColorsButton();
+        if (!toggleTeamColorsButton.isHidden.get()) {
+            toggleTeamColorsButton.render(evt.getGuiGraphics(),
+                    screenWidth - (toggleTeamColorsButton.iconSize * 6),
+                    screenHeight - (toggleTeamColorsButton.iconSize * 4),
+                    mouseX,
+                    mouseY
+            );
+            renderedButtons.add(toggleTeamColorsButton);
+        }
 
         Button rotateCW = MinimapClientEvents.getCameraRotateCWButton();
         if (!rotateCW.isHidden.get()) {
@@ -1378,7 +1388,7 @@ public class HudClientEvents {
         // ------------------------------
         // Start buttons (spectator only)
         // ------------------------------
-        if (!PlayerClientEvents.isRTSPlayer && !PlayerClientEvents.rtsLocked) {
+        if (!PlayerClientEvents.isRTSPlayer() && !PlayerClientEvents.rtsLocked) {
 
             Button startPosButton = StartPosClientEvents.getPositionsButton();
             if (!startPosButton.isHidden.get()) {
@@ -1564,6 +1574,24 @@ public class HudClientEvents {
             helpButton.render(evt.getGuiGraphics(), xi, yi, mouseX, mouseY);
             renderedButtons.add(helpButton);
         }
+        // ---------------------------------
+        // Observer/Diplomacy Players Toggle
+        // ---------------------------------
+        else if (!observerButton.isHidden.get()) {
+            int xi = screenWidth - (observerButton.iconSize * 2);
+            int yi = 40;
+            observerButton.render(evt.getGuiGraphics(), xi, yi, mouseX, mouseY);
+            renderedButtons.add(observerButton);
+        }
+        else if (!diplomacyButton.isHidden.get()) {
+            int xi = screenWidth - (diplomacyButton.iconSize * 2);
+            int yi = 40;
+            diplomacyButton.render(evt.getGuiGraphics(), xi, yi, mouseX, mouseY);
+            renderedButtons.add(diplomacyButton);
+        }
+        else {
+            PlayerDisplayClientEvents.resetDisplay();
+        }
         // -----------
         // Chat button
         // -----------
@@ -1603,9 +1631,8 @@ public class HudClientEvents {
         // Button tooltips (has to be rendered last to be on top)
         // ------------------------------------------------------
         for (Button button : renderedButtons)
-            if (button.isMouseOver(mouseX, mouseY)) {
+            if (button.isMouseOver(mouseX, mouseY))
                 button.renderTooltip(evt.getGuiGraphics(), mouseX, mouseY);
-            }
 
         TutorialClientEvents.checkAndRenderNextAction(evt.getGuiGraphics(), renderedButtons);
     }
@@ -1623,6 +1650,8 @@ public class HudClientEvents {
             if (hudZone.isMouseOver(mouseX, mouseY))
                 return true;
         if (MinimapClientEvents.isPointInsideMinimap(mouseX, mouseY))
+            return true;
+        if (PlayerDisplayClientEvents.isMouseOverHud(mouseX, mouseY))
             return true;
         return isMouseOverAnyButton();
     }
@@ -1683,21 +1712,7 @@ public class HudClientEvents {
         if (hudSelectedEntity != null && hudSelectedEntity.isRemoved())
             hudSelectedEntity = null;
 
-        ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
-
-        // sort and hudSelect the first unit type in the list, putting heroes first
-        units.sort(Comparator.comparing(MiscUtil::getSimpleEntityName));
-
-        ArrayList<LivingEntity> heroUnits = new ArrayList<>();
-        units.removeIf(le -> {
-            if (le instanceof HeroUnit heroUnit) {
-                heroUnits.add(le);
-                return true;
-            }
-            return false;
-        });
-        for (LivingEntity heroUnit : heroUnits)
-            units.add(0, heroUnit);
+        ArrayList<LivingEntity> units = UnitClientEvents.getSortedSelectedUnits();
 
         if (units.size() <= 0) {
             HudClientEvents.setHudSelectedEntity(null);
@@ -1783,64 +1798,91 @@ public class HudClientEvents {
     }
 
     private static void cycleUnitSubgroups() {
-        List<LivingEntity> entities = new ArrayList<>(getSelectedUnits().stream()
-                .filter(e -> e instanceof Unit)
-                .sorted(Comparator.comparing(MiscUtil::getSimpleEntityName))
-                .toList());
+        List<LivingEntity> selUnits = UnitClientEvents.getSortedSelectedUnits();
+        List<String> unitNames = selUnits
+                .stream()
+                .map(HudClientEvents::getModifiedEntityName)
+                .distinct()
+                .collect(Collectors.toList());
 
-        if (entities.isEmpty())
+        if (unitNames.size() <= 1 || hudSelectedEntity == null)
             return;
 
-        if (Keybindings.shiftMod.isDown())
-            Collections.reverse(entities);
+        boolean reversed = Keybindings.shiftMod.isDown();
+        String selUnitName = getModifiedEntityName(hudSelectedEntity);
 
-        if (hudSelectedEntity != null) {
-            String hudSelectedEntityName = HudClientEvents.getModifiedEntityName(hudSelectedEntity);
-            String lastEntityName = "";
-            boolean cycled = false;
-            for (LivingEntity entity : entities) {
-                String currentEntityName = HudClientEvents.getModifiedEntityName(entity);
-                if (lastEntityName.equals(hudSelectedEntityName) && !currentEntityName.equals(lastEntityName)) {
-                    HudClientEvents.setHudSelectedEntity(entity);
-                    cycled = true;
+        if (reversed)
+            Collections.reverse(unitNames);
+
+        // find the next unit name
+        String newUnitName = "";
+        boolean foundSelected = false;
+        for (String uname : unitNames) {
+            if (foundSelected) {
+                newUnitName = uname;
+                break;
+            } else if (uname.equals(selUnitName)) {
+                foundSelected = true;
+            }
+        }
+        if (newUnitName.isBlank() && !selUnits.isEmpty()) {
+            if (reversed) {
+                setHudSelectedEntity(selUnits.get(selUnits.size() - 1));
+            } else {
+                setHudSelectedEntity(selUnits.get(0));
+            }
+        } else {
+            for (LivingEntity le : selUnits) {
+                String bplName = getModifiedEntityName(le);
+                if (bplName.equals(newUnitName)) {
+                    setHudSelectedEntity(le);
                     break;
                 }
-                lastEntityName = currentEntityName;
-            }
-            if (!cycled) {
-                HudClientEvents.setHudSelectedEntity(entities.get(0));
-            } else {
-                HudClientEvents.setLowestCdHudEntity();
             }
         }
     }
 
     private static void cycleBuildingSubgroups() {
-        List<BuildingPlacement> buildings = new ArrayList<>(BuildingClientEvents.getSelectedBuildings().stream()
-                .sorted(Comparator.comparing(b -> ReignOfNetherRegistries.BUILDING.getKey(b.getBuilding()).toString()))
-                .toList());
+        List<BuildingPlacement> selBuildings = BuildingClientEvents.getSelectedBuildings();
+        List<String> buildingNames = selBuildings
+                .stream().map(b -> ReignOfNetherRegistries.BUILDING.getKey(b.getBuilding()).toString())
+                .distinct().sorted(Comparator.comparing(b -> b))
+                .collect(Collectors.toList());
 
-        if (buildings.isEmpty())
+        if (buildingNames.size() <= 1 || hudSelectedPlacement == null)
             return;
 
-        if (Keybindings.shiftMod.isDown())
-            Collections.reverse(buildings);
+        boolean reversed = Keybindings.shiftMod.isDown();
+        String selBuildingName = ReignOfNetherRegistries.BUILDING.getKey(hudSelectedPlacement.getBuilding()).toString();
 
-        if (hudSelectedPlacement != null) {
-            Building hudSelectedBuilding = hudSelectedPlacement.getBuilding();
-            Building lastBuilding = null;
-            boolean cycled = false;
-            for (BuildingPlacement building : buildings) {
-                Building currentBuilding = building.getBuilding();
-                if (lastBuilding != null && lastBuilding != hudSelectedBuilding && currentBuilding != lastBuilding) {
-                    hudSelectedPlacement = building;
-                    cycled = true;
+        if (reversed)
+            Collections.reverse(buildingNames);
+
+        // find the next building name
+        String newBuildingName = "";
+        boolean foundSelected = false;
+        for (String bname : buildingNames) {
+            if (foundSelected) {
+                newBuildingName = bname;
+                break;
+            } else if (bname.equals(selBuildingName)) {
+                foundSelected = true;
+            }
+        }
+        if (newBuildingName.isBlank() && !selBuildings.isEmpty()) {
+            if (reversed) {
+                hudSelectedPlacement = selBuildings.get(selBuildings.size() - 1);
+            } else {
+                hudSelectedPlacement = selBuildings.get(0);
+            }
+        } else {
+            for (BuildingPlacement bpl : selBuildings) {
+                String bplName = ReignOfNetherRegistries.BUILDING.getKey(bpl.getBuilding()).toString();
+                if (bplName.equals(newBuildingName)) {
+                    hudSelectedPlacement = bpl;
                     break;
                 }
-                lastBuilding = currentBuilding;
             }
-            if (!cycled)
-                hudSelectedPlacement = buildings.get(0);
         }
     }
 

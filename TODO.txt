@@ -1,5 +1,5 @@
 
-1.19.2-1.2.1e
+1.19.2-1.2.2
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -25,59 +25,73 @@ Features
         - nether spread with adjustable range
         - night warp with adjustable range
 
+
+
+[✔] Alliance Menu
+    - Pressing tab as an RTS player now brings up a menu where you can send resources and ally other players
+    - You can still use the old commands if you need to (/ally, /sendfood, etc.)
+    - Player names are coloured according to the new Player Colours system
+
+[✔] Player Colours
+    - Players are now coloured based on the order they join the game
+    - If you started using RTS Start blocks, your player colour is the same as that block
+    - You can toggle between player colours or the old alliance-based colours at the bottom right
+    - You can also change the colours of alliances (self, ally, enemy, neutral) in the mods config menu
+    - Thanks to @Daratrix for the coding and design
+
 Bugfixes
 --------
+[✔] Building on top of a unit no longer cancels its commands if it was already moving away
+[✔] Fixed spiders' shift-queued movements not being shown
+[✔] Cheats are now reset whenever a new game begins
+[✔] Carrot and Potato crops no longer drop items when broken by hand or building damage
+[✔] Polar Bears are no longer worth 300 food when killed by workers
+[✔] Pillagers can no longer fire while out of range of a target (including when mounted)
+[✔] Fixed units sometimes stopping if moved to the same place they were already going
+[✔] Necromancer zombies are no longer upgraded into Husks or Drowned when research completes
+[✔] Fixed tab cycling and shift-tab cycling for units and buildings
 
 Quality of Life
 ---------------
-[✔] Pressing Shift + number adds a unit or building to an existing control group
-[✔] Pressing Alt + number adds a unit or building to a new control group and removes it from all other groups
-[✔] Building rally points can now be shift-queued
-[✔] Spectators can now see RTS players' unit and hero abilities
+[✔] Camera sensitivty is now saved to your local configs
+[✔] Players who start at the same colour of starting block are now automatically allied
+[✔] While a worker is selected, mousing over resource blocks shows their values
+[✔] The clock is now clickable to toggle showing the tooltip permanently
 
 Balancing
 ---------
-[✔] All Heroes now have 30% magic resistance
+[✔] All hero experience requirements raised by 33%
+[✔] All panicking animals' speed bonuses reduced to 20% (previously 25% to 100%)
+[✔] Beacon base cost reduced from (1000 wood, 1000 ore) to (500 wood, 500 ore)
+[✔] Default time to win with a fully upgraded beacon reduced from 20mins to 10mins
+    - You can still change this with /gamerule beaconWinMinutes
 
 Piglins
 -------
-[✔] Piglin Merchant
-    - Greed is Good's TNT cooldown reduction per level increased from 5s to 7s (this means the cooldown is 0 at level 3)
-    - Thrown TNT fuse time reduced from 3s to 2.5s
-    - Delay before enemies can eat thrown food raised from 5s to 10s
-
-[✔] All piglin units now gain +10% movement speed while on nether terrain
-[✔] Wood value of all nether logs raised from 17 to 18
-[✔] Basic portals under construction can now queue their upgrade so it begins immediately upon completion
-    - This will cost wood up front
-[✔] Military portal upgrade time reduced from 30s to 25s
-[✔] Transport portal upgrade time reduced from 40s to 30s
-[✔] Wither skeletons can stack +1 wither on heroes (3 to 4)
-[✔] Magma cubes gain ~5% physical armor per size above 1 (max size 6 = ~25% armor)
-[✔] Heavy Tridents cost raised from (250 wood, 250 ore, 120s) to (300 wood, 300 ore, 150s)
-[✔] Soul Fireballs cost reduced from (300 wood, 300 ore, 140s) to (250 wood, 250 ore, 120s)
+[✔] Brute HP raised from 50 to 55
+[✔] Military portal cost reduced from (125 wood) to (100 wood)
+[✔] Hoglin cost reduced from (150 food, 75 ore) to (140 food, 70 ore)
+[✔] Hoglin HP raised from 70 to 75 and move speed from 30 to 31
+[✔] Hoglin Cavalry cost increased from (300 food, 250 wood, 100s) to (350 food, 300 wood, 120s)
+[✔] Hoglin Stables cost reduced from (250 wood) to (150 wood, 50 ore)
+[✔] Flame Sanctuary, Basalt Springs and Wither Shrine costs all changed to (150 wood, 200 ore)
+[✔] Blaze attack damage raised from 0 to 0.5
+[✔] Ghasts now also gain the +10% movement speed bonus over nether terrain
+[✔] Food thrown by the Piglin Merchant can no longer be picked up by neutral units
 
 Villagers
 ---------
-[✔] Royal Guard
-    - Taunting cry now also grants Resistance III for its duration (60% global armour)
-    - Mace slam range and radius reduced from 4 to 3, and mana cost raised from 30 to 40
+[✔] Hunter villagers now have only 1.5 damage against animals (2 for veterans)
+    - This is now also specified in their attack damage tooltip
+[✔] Iron Golems now have 20% ranged armour
+[✔] Iron Golem health reduced from 150 to 140
+[✔] Pillagers are now much more accurate
+[✔] Pillagers now reload their crossbows even when out of combat
+    - While reloading, movement speed is reduced by 20%
+[✔] Pillager attack speed reduced from 0.4 to 0.3
+[✔] Vexes now follow their parent evoker if the evoker is not in combat, instead of remaining where they are
 
-Monsters
---------
-Necromancer
-    [✔] Zombie summons are no longer worth experience or population cost
-    [✔] Blood Moon now only spawns units at buildings within 30 blocks of the targeted building
-        - this was previously spawning units at any random buildings owned by the targeted player
-
-[✔] Sculk amplifier sonic boom range reduced from 20 to 15 and damage penalty increased from -33% to -40% (45 damage)
-[✔] Sculk catalyst night range and bonus HP per nearby sculk block raised by 20% (max range is still 50)
-[✔] Sculk catalysts can now autocast sacrifice
-    - It will only target the same type of unit you last manually sacrificed
-    - Autocast turns off once at max night range
-
-[✔] Slimes gain ~5% physical armor per size above 1 (max size 6 = ~25% armor)
-[✔] Spider movement speed raised from 33 to 34 and damage from 4 to 5
-[✔] Silverfish movement speed raised from 25 to 28 and are no longer worth experience
-[✔] Mausoleum construction time reduced by 8s (to match other factions)
-[✔] Creeper bonus speed duration after being charged reduced from 60s to 30s
+Languages
+---------
+[✔] Updated Traditional Chinese (zh-tw)
+[✔] Updated Simplified Chinese (zh-cn)

@@ -7,7 +7,6 @@ import com.solegendary.reignofnether.building.buildings.placements.BeaconPlaceme
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.util.Faction;
-import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collections;
 
@@ -19,11 +18,19 @@ public class RTSPlayer {
     public int ticksWithoutCapitol = 0;
     public Faction faction;
     public int beaconOwnerTicks = 0; // ticks owning a beacon - will win upon reaching
+    public int startPosColorId = 0;
 
-    private RTSPlayer(ServerPlayer player, Faction faction) {
-        this.name = player.getName().getString();
-        this.id = player.getId();
+    private RTSPlayer(String playerName, Faction faction, int id) {
+        this.name = playerName;
+        this.id = id;
         this.faction = faction;
+    }
+
+    private RTSPlayer(String playerName, Faction faction, int id, int startPosColorId) {
+        this.name = playerName;
+        this.id = id;
+        this.faction = faction;
+        this.startPosColorId = startPosColorId;
     }
 
     // bot
@@ -53,8 +60,12 @@ public class RTSPlayer {
         return new RTSPlayer(name, id, ticksWithoutCapitol, faction, beaconOwnerTicks);
     }
 
-    public static RTSPlayer getNewPlayer(ServerPlayer player, Faction faction) {
-        return new RTSPlayer(player, faction);
+    public static RTSPlayer getNewPlayer(String playerName, Faction faction, int id) {
+        return new RTSPlayer(playerName, faction, id);
+    }
+
+    public static RTSPlayer getNewPlayer(String playerName, Faction faction, int id, int startPosColorId) {
+        return new RTSPlayer(playerName, faction, id, startPosColorId);
     }
 
     public static RTSPlayer getNewBot(String name, Faction faction) {
@@ -65,7 +76,7 @@ public class RTSPlayer {
         return id < 0;
     }
 
-    public void tick() {
+    public void serverTick() {
         int numBuildingsOwned = BuildingServerEvents.getBuildings()
             .stream()
             .filter(b -> b.ownerName.equals(this.name))

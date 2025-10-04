@@ -30,12 +30,15 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.AbstractFish;
@@ -100,7 +103,7 @@ public class MiscUtil {
     }
 
     public static void addUnitCheckpoint(Unit unit, BlockPos blockPos, boolean green) {
-        if (((Entity) unit).level().isClientSide()) {
+        if (((Entity) unit).level().isClientSide() && !unit.getOwnerName().isEmpty()) {
             boolean clearExisting = !Keybindings.shiftMod.isDown();
             if (clearExisting)
                 unit.getCheckpoints().clear();
@@ -109,7 +112,7 @@ public class MiscUtil {
     }
     public static void addUnitCheckpoint(Unit unit, int id, boolean green) {
         Level level = ((Entity) unit).level();
-        if (level.isClientSide() && !Keybindings.shiftMod.isDown()) {
+        if (level.isClientSide() && !Keybindings.shiftMod.isDown() && !unit.getOwnerName().isEmpty()) {
             unit.getCheckpoints().clear();
             unit.getCheckpoints().add(new Checkpoint(level.getEntity(id), green));
         }
@@ -668,7 +671,25 @@ public class MiscUtil {
     }
 
     public static boolean isOnNetherTerrain(LivingEntity le) {
+        if (le instanceof FlyingMob) {
+            BlockPos groundPos = getHighestNonAirBlock(le.level(), le.getOnPos(), false);
+            return NetherBlocks.isNetherBlock(le.level(), groundPos);
+        }
         return (le.getVehicle() != null && NetherBlocks.isNetherBlock(le.level(), le.getVehicle().getOnPos())) ||
-                (NetherBlocks.isNetherBlock(le.level(), le.getOnPos())) && !(le instanceof GhastUnit);
+                (NetherBlocks.isNetherBlock(le.level(), le.getOnPos()));
+    }
+
+    public static void runServerCommand(MinecraftServer server, String command) {
+        server.getCommands().performPrefixedCommand(
+                server.createCommandSourceStack(),
+                command
+        );
+    }
+
+    public static void runPlayerCommand(ServerPlayer player, String command) {
+        player.server.getCommands().performPrefixedCommand(
+                player.createCommandSourceStack(),
+                command
+        );
     }
 }

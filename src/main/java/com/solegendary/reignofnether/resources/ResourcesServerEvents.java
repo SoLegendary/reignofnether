@@ -12,16 +12,21 @@ import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.sounds.SoundAction;
+import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -29,6 +34,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
@@ -230,6 +236,15 @@ public class ResourcesServerEvents {
     }
 
     @SubscribeEvent
+    public static void onEntityJoin(EntityJoinLevelEvent evt) {
+        if (evt.getEntity() instanceof ItemEntity ie &&
+                (ie.getItem().getItem() == Items.POTATO || ie.getItem().getItem() == Items.CARROT) &&
+                BuildingUtils.isPosInsideAnyBuilding(false, ie.getOnPos())) {
+            evt.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
     public static void onPlayerBlockBreak(BlockEvent.BreakEvent evt) {
         if (BuildingUtils.isPosInsideAnyBuilding(false, evt.getPos())) {
             evt.setCanceled(true);
@@ -314,14 +329,41 @@ public class ResourcesServerEvents {
         Player sendingPlayer = context.getSource().getPlayer();
         Player receivingPlayer = EntityArgument.getPlayer(context, "player");
         int amount = IntegerArgumentType.getInteger(context, "amount");
-        if (sendingPlayer == null)
+        if (sendingPlayer == null) {
             return 0;
-        String sendingPlayerName = sendingPlayer.getName().getString();
-        String receivingPlayerName = receivingPlayer.getName().getString();
+        } else {
+            String sendingPlayerName = sendingPlayer.getName().getString();
+            String receivingPlayerName = receivingPlayer.getName().getString();
+            return trySendingResources(sendingPlayerName, receivingPlayerName, resourceName, amount);
+        }
+    }
 
+    // send resources including any available when you don't have enough
+    public static void trySendingAnyResources(String receivingPlayerName, Resources sentResources) {
         Resources res = null;
         for (Resources resources : resourcesList)
-            if (resources.ownerName.equals(sendingPlayer.getName().getString()))
+            if (resources.ownerName.equals(sentResources.ownerName))
+                res = resources;
+        if (res != null) {
+            int foodAmount = Math.min(res.food, sentResources.food);
+            if (foodAmount > 0)
+                trySendingResources(sentResources.ownerName,receivingPlayerName, ResourceName.FOOD, foodAmount);
+            int woodAmount = Math.min(res.wood, sentResources.wood);
+            if (woodAmount > 0)
+                trySendingResources(sentResources.ownerName,receivingPlayerName, ResourceName.WOOD, woodAmount);
+            int oreAmount = Math.min(res.ore, sentResources.ore);
+            if (oreAmount > 0)
+                trySendingResources(sentResources.ownerName,receivingPlayerName, ResourceName.ORE, oreAmount);
+
+            if (sentResources.getTotalValue() > 0)
+                SoundClientboundPacket.playSoundForPlayer(SoundAction.CHAT, receivingPlayerName);
+        }
+    }
+
+    public static int trySendingResources(String sendingPlayerName, String receivingPlayerName, ResourceName resourceName, int amount) {
+        Resources res = null;
+        for (Resources resources : resourcesList)
+            if (resources.ownerName.equals(sendingPlayerName))
                 res = resources;
         if (res == null)
             return 0;

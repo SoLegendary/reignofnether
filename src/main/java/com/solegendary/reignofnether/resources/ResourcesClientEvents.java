@@ -2,10 +2,15 @@ package com.solegendary.reignofnether.resources;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -14,11 +19,13 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -26,11 +33,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResourcesClientEvents {
 
     // tracks all players' resources
     public static ArrayList<Resources> resourcesList = new ArrayList<>();
+
+    private final static Minecraft MC = Minecraft.getInstance();
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
@@ -40,6 +50,29 @@ public class ResourcesClientEvents {
 
         for (Resources resources : resourcesList)
             resources.tick();
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(ScreenEvent.Render evt) {
+        if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit workerUnit &&
+            UnitClientEvents.getPlayerToEntityRelationship((LivingEntity) workerUnit) == Relationship.OWNED &&
+            MC.level != null) {
+
+            BlockPos preSelBp = CursorClientEvents.getPreselectedBlockPos();
+            ResourceSource res = ResourceSources.getFromBlockPos(preSelBp, MC.level);
+            if (res != null && res.resourceValue > 0 && !BuildingUtils.isPosInsideAnyBuilding(true, preSelBp)) {
+                String str = switch (res.resourceName) {
+                    case FOOD -> "\uE000  " + res.resourceValue;
+                    case WOOD -> "\uE001  " + res.resourceValue;
+                    case ORE -> "\uE002  " + res.resourceValue;
+                    case NONE -> "";
+                };
+                MyRenderer.renderTooltip(evt.getGuiGraphics(),
+                        List.of(FormattedCharSequence.forward(str, MyRenderer.iconStyle)),
+                        evt.getMouseX(), evt.getMouseY()
+                );
+            }
+        }
     }
 
     public static void syncResources(Resources serverResources) {

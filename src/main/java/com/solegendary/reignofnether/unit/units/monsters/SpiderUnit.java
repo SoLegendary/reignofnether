@@ -215,7 +215,6 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
         this.getMoveGoal().setMoveTarget(this.getOnPos());
         if (getWebGoal() != null)
             getWebGoal().stop();
-        this.getCheckpoints().clear();
     }
 
     public void tick() {

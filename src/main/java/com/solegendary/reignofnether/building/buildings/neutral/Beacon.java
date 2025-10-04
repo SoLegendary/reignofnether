@@ -45,7 +45,7 @@ public class Beacon extends ProductionBuilding {
 
     public static int getTicksToWin(Level level) {
         if (level.isClientSide)
-            return (int) (GameruleClient.beaconWinMinutes * 20 * 60);
+            return (int) (GameruleClient.beaconWinMinutes * 10 * 60);
         else if (level.getServer() != null)
             return level.getServer().getGameRules().getRule(GameRuleRegistrar.BEACON_WIN_MINUTES).get() * 20 * 60;
         return 24000;

@@ -784,7 +784,10 @@ public class UnitServerEvents {
             evt.getSource().getEntity() instanceof VillagerUnit vUnit &&
             vUnit.getUnitProfession() == VillagerUnitProfession.HUNTER
         )) {
-            evt.setAmount(2);
+            if (vUnit.isVeteran())
+                evt.setAmount(2);
+            else
+                evt.setAmount(1.5f);
             return;
         }
 

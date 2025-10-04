@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
@@ -109,8 +110,6 @@ public class OrthoviewClientEvents {
     private static float mouseRightDownY = 0;
     private static float mouseLeftDownX = 0;
     private static float mouseLeftDownY = 0;
-
-    private static float panSensitivityMult = 1.0f;
     public static final float MAX_PAN_SENSITIVITY = 3.0f;
 
     // by default orthoview players stay at BASE_Y, but can be raised to as high as MAX_Y if they are clipping terrain
@@ -126,14 +125,16 @@ public class OrthoviewClientEvents {
     }
 
     private static float getEdgeCamPanSensitivity() {
-        return (float) (Math.sqrt(getZoom()) / (Math.sqrt(ZOOM_MAX))) * panSensitivityMult;
+        return (float) (Math.sqrt(getZoom()) / (Math.sqrt(ZOOM_MAX))) * getPanSensitivityMult();
     }
-    public static float getPanSensitivityMult() { return panSensitivityMult; }
+    public static float getPanSensitivityMult() {
+        return (float) ReignOfNetherClientConfigs.CAMERA_SENSITIVITY.get() / 10f;
+    }
     public static void adjustPanSensitivityMult(boolean increase) {
-        if (increase && Math.round(panSensitivityMult * 10) < (MAX_PAN_SENSITIVITY * 10))
-            panSensitivityMult += 0.1f;
-        else if (!increase && Math.round(panSensitivityMult * 10) > 1)
-            panSensitivityMult -= 0.1f;
+        if (increase && Math.round(getPanSensitivityMult() * 10) < (MAX_PAN_SENSITIVITY * 10))
+            ReignOfNetherClientConfigs.CAMERA_SENSITIVITY.set(ReignOfNetherClientConfigs.CAMERA_SENSITIVITY.get() + 1);
+        else if (!increase && Math.round(getPanSensitivityMult() * 10) > 1)
+            ReignOfNetherClientConfigs.CAMERA_SENSITIVITY.set(ReignOfNetherClientConfigs.CAMERA_SENSITIVITY.get() - 1);
     }
 
     public static void updateOrthoviewY() {
@@ -638,8 +639,8 @@ public class OrthoviewClientEvents {
             || evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_3) {
             cameraMovingByMouse = true;
 
-            float moveX = (float) evt.getDragX() * 0.20f * (zoom / ZOOM_MAX) * panSensitivityMult; //* winWidth/1920;
-            float moveZ = (float) evt.getDragY() * 0.20f * (zoom / ZOOM_MAX) * panSensitivityMult; //* winHeight/1080;
+            float moveX = (float) evt.getDragX() * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult();
+            float moveZ = (float) evt.getDragY() * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult();
             panCam(moveX, 0, moveZ);
         } else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;

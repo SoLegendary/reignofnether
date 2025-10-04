@@ -55,11 +55,11 @@ public class SandboxClientEvents {
 
     public static boolean isSandboxPlayer(String playerName) {
         return MC.player != null && playerName.equals(MC.player.getName().getString()) &&
-                PlayerClientEvents.isRTSPlayer && ClientGameModeHelper.gameMode == GameMode.SANDBOX;
+                PlayerClientEvents.isRTSPlayer() && ClientGameModeHelper.gameMode == GameMode.SANDBOX;
     }
 
     public static boolean isSandboxPlayer() {
-        return PlayerClientEvents.isRTSPlayer && ClientGameModeHelper.gameMode == GameMode.SANDBOX;
+        return PlayerClientEvents.isRTSPlayer() && ClientGameModeHelper.gameMode == GameMode.SANDBOX;
     }
 
     public static List<BuildingPlaceButton> getNeutralBuildingButtons() {

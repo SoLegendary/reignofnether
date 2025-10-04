@@ -290,8 +290,10 @@ public class BuildingServerEvents {
 
                 UnitServerEvents.getAllUnits()
                         .stream()
-                        .filter(entity -> entity instanceof Unit unit && unit.getOwnerName().equals(ownerName)
-                                && newBuilding.isPosInsideBuilding(entity.getOnPos().above().above()))
+                        .filter(entity -> entity instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
+                                newBuilding.isPosInsideBuilding(entity.getOnPos().above().above()) &&
+                                (unit.getMoveGoal().getMoveTarget() == null ||
+                                newBuilding.isPosInsideBuilding(unit.getMoveGoal().getMoveTarget())))
                         .forEach(entity -> moveNonBuildersAwayFromBuildingFoundations(entity, builderUnitIds, newBuilding));
 
             } else if (!PlayerServerEvents.isBot(ownerName)) {
