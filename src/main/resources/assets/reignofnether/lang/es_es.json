@@ -40,8 +40,8 @@
     "item.reignofnether.llama_unit_spawn_egg": "Generar unidad de Llama",
 
     "item.reignofnether.throwable_tnt": "TNT Lanzable",
+    "item.reignofnether.thrown_hero_experience_bottle": "Botella de experiencia heróica",
 
-    
     "sounds.reignofnether.under_attack": "!Bajo ataque!",
     "sounds.reignofnether.victory": "¡Victoria!",
     "sounds.reignofnether.defeat": "Derrota",
@@ -130,11 +130,14 @@
     "abilities.reignofnether.sacrifice": "Sacrificio",
     "abilities.reignofnether.sacrifice.tooltip1": "\uE005  %d",
     "abilities.reignofnether.sacrifice.tooltip2": "Mata una unidad aliada cercana para esparcir sculk.",
+    "abilities.reignofnether.sacrifice.tooltip3": "Dirige una unidad a auto-sacrificar ese tipo de unidad",
+    "abilities.reignofnether.sacrifice.tooltip4": "Auto-sacrificando: %s",
     "abilities.reignofnether.sacrifice.only_own": "Solo puedes sacrificar tus propias unidades",
     "abilities.reignofnether.sacrifice.out_of_range": "La unidad está fuera de alcance",
     "abilities.reignofnether.sacrifice.in_air": "No se pueden sacrificar unidades en el aire",
     "abilities.reignofnether.sacrifice.max_spread": "Ya alcanzó la máxima expansión de sculk",
     "abilities.reignofnether.sacrifice.not_spreadable": "La unidad no está en un bloque expandible",
+    "abilities.reignofnether.sacrifice.set_autocast_target": "Auto-sacrificando: %s",
     "abilities.reignofnether.spin_webs": "Tejer Telarañas",
     "abilities.reignofnether.spin_webs.tooltip1": "Lanza un grupo de telarañas pegajosas al campo",
     "abilities.reignofnether.spin_webs.tooltip2": "que se desintegran después de %d segundos.",
