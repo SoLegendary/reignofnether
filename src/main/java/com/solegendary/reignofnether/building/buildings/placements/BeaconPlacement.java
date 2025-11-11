@@ -200,11 +200,11 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
             BeaconPlacement beacon = BuildingUtils.getBeacon(level.isClientSide);
             if (beacon != null && msg.equals("upgraded_warning")) {
                 String upgradeName = "";
-                if (beacon.getUpgradeLevel() == 1) upgradeName = "Iron";
-                else if (beacon.getUpgradeLevel() == 2) upgradeName = "Gold";
-                else if (beacon.getUpgradeLevel() == 3) upgradeName = "Emerald";
-                else if (beacon.getUpgradeLevel() == 4) upgradeName = "Diamond";
-                else if (beacon.getUpgradeLevel() == 5) upgradeName = "Netherite";
+                if (beacon.getUpgradeLevel() == 1) upgradeName = I18n.get("buildings.neutral.reignofnether.beacon.upgrade.beacon_level1");
+                else if (beacon.getUpgradeLevel() == 2) upgradeName = I18n.get("buildings.neutral.reignofnether.beacon.upgrade.beacon_level2");
+                else if (beacon.getUpgradeLevel() == 3) upgradeName = I18n.get("buildings.neutral.reignofnether.beacon.upgrade.beacon_level3");
+                else if (beacon.getUpgradeLevel() == 4) upgradeName = I18n.get("buildings.neutral.reignofnether.beacon.upgrade.beacon_level4");
+                else if (beacon.getUpgradeLevel() == 5) upgradeName = I18n.get("buildings.neutral.reignofnether.beacon.upgrade.beacon_level5");
 
                 PlayerServerEvents.sendMessageToAllPlayersNoNewlines("buildings.neutral.reignofnether.beacon.upgrade_warning",
                         true, ownerName, upgradeName, beacon.getUpgradeLevel(), Beacon.MAX_UPGRADE_LEVEL);
