@@ -230,7 +230,6 @@
     "abilities.reignofnether.fancy_feast.stats": "\uE007  %d   \uE004  %ds   \uE008  %d",
     "abilities.reignofnether.fancy_feast.tooltip1": "Throws out a pile of food that units eat to heal.",
     "abilities.reignofnether.fancy_feast.tooltip2": "Throws %d items + %d & %d mana refund per 100 food spent.",
-    "abilities.reignofnether.fancy_feast.tooltip3": "Throws %d items + %d items & %d mana refund per 100 food spent.",
     "abilities.reignofnether.fancy_feast.rank1": "Rank 1: Throws bread for +10 hp per item",
     "abilities.reignofnether.fancy_feast.rank2": "Rank 2: Throws chicken for +15 hp per item",
     "abilities.reignofnether.fancy_feast.rank3": "Rank 3: Throws beef for +20 hp per item",
