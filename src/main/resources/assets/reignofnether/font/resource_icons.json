@@ -92,6 +92,10 @@
                 " ": 4,
                 "\u200c": 0
             }
+        },
+        {
+          "type": "reference",
+          "id": "minecraft:uniform"
         }
     ]
 }
