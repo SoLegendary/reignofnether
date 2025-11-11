@@ -199,7 +199,7 @@
     "abilities.reignofnether.blood_moon.tooltip2": "призывая нейтральную нежить по всей карте,",
     "abilities.reignofnether.blood_moon.tooltip3": "которая атакует вражеские базы пока активно.",
     "abilities.reignofnether.blood_moon.tooltip4": "Длится %dс + %dс за каждую использованную душу.",
-    "abilities.reignofnether.blood_moon.start": "Кровавая луна %d поднимается...",
+    "abilities.reignofnether.blood_moon.start": "Кровавая луна %s поднимается...",
     "abilities.reignofnether.blood_moon.end": "Кровавая луна исчезает.",
     "abilities.reignofnether.blood_moon.already_active": "Кровавая луна уже активна",
     "abilities.reignofnether.blood_moon.clock_warning1": "Кровавая луна взошла",

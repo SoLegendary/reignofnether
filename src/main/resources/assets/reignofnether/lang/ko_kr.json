@@ -211,7 +211,7 @@
     "abilities.reignofnether.blood_moon.tooltip2": "활성화된 동안 목표 적 기지 내부에 ",
     "abilities.reignofnether.blood_moon.tooltip3": "중립 언데드가 주기적으로 생성되게 합니다.",
     "abilities.reignofnether.blood_moon.tooltip4": "%ds + 영혼 흡수 등급당 %ds 지속.",
-    "abilities.reignofnether.blood_moon.start": "%d의 붉은 달이 떠오르고 있습니다...",
+    "abilities.reignofnether.blood_moon.start": "%s의 붉은 달이 떠오르고 있습니다...",
     "abilities.reignofnether.blood_moon.end": "붉은 달이 사라집니다.",
     "abilities.reignofnether.blood_moon.error": "적 건물을 목표로 지정해야 합니다",
     "abilities.reignofnether.blood_moon.already_active": "이미 붉은 달이 활성화되어 있습니다",

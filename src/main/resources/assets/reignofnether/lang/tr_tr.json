@@ -211,7 +211,7 @@
     "abilities.reignofnether.blood_moon.tooltip2": "etkin olduğu sürece tarafsız ölülerin periyodik olarak ",
     "abilities.reignofnether.blood_moon.tooltip3": "hedeflenen düşman üssünde ortaya çıkmasına neden olur.",
     "abilities.reignofnether.blood_moon.tooltip4": "%ds + Ruh Süzülmesi seviyesi başına %ds sürer.",
-    "abilities.reignofnether.blood_moon.start": "%d'nin Kanlı Ay'ı yükseliyor...",
+    "abilities.reignofnether.blood_moon.start": "%s'nin Kanlı Ay'ı yükseliyor...",
     "abilities.reignofnether.blood_moon.end": "Kanlı Ay çekiliyor.",
     "abilities.reignofnether.blood_moon.error": "Bir düşman yapısını hedeflemelisin.",
     "abilities.reignofnether.blood_moon.already_active": "Bir Kanlı Ay zaten etkin.",

@@ -211,7 +211,7 @@
     "abilities.reignofnether.blood_moon.tooltip2": "provocando que aparezcan periódicamente muertos vivientes neutrales ",
     "abilities.reignofnether.blood_moon.tooltip3": "dentro de la base enemiga objetivo mientras esté activo.",
     "abilities.reignofnether.blood_moon.tooltip4": "Dura %ds + %ds por cada rango de Sifón de Almas.",
-    "abilities.reignofnether.blood_moon.start": "La luna de sangre de %d está saliendo...",
+    "abilities.reignofnether.blood_moon.start": "La luna de sangre de %s está saliendo...",
     "abilities.reignofnether.blood_moon.end": "La luna de sangre se desvanece.",
     "abilities.reignofnether.blood_moon.error": "Debes apuntar a un edificio enemigo.",
     "abilities.reignofnether.blood_moon.already_active": "La luna de sangre ya está activa.",

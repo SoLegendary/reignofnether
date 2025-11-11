@@ -199,7 +199,7 @@
     "abilities.reignofnether.blood_moon.clock_warning2": "Залишилось часу: %s",
     "abilities.reignofnether.blood_moon.clock_warning3": "Власник: %s",
     "abilities.reignofnether.blood_moon.end": "Кривавий місяць згасає.",
-    "abilities.reignofnether.blood_moon.start": "Кривавий місяць %d зіймається...",
+    "abilities.reignofnether.blood_moon.start": "Кривавий місяць %s зіймається...",
 
     "abilities.reignofnether.throw_tnt": "Кидання TNT",
     "abilities.reignofnether.throw_tnt.stats": "\uE006  %d   \uE004  %ds   \uE005  %d",

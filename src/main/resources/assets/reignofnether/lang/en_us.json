@@ -211,7 +211,7 @@
     "abilities.reignofnether.blood_moon.tooltip2": "causing neutral undead to periodically spawn ",
     "abilities.reignofnether.blood_moon.tooltip3": "inside the targeted enemy base while active.",
     "abilities.reignofnether.blood_moon.tooltip4": "Lasts %ds + %ds per Soul Siphon rank.",
-    "abilities.reignofnether.blood_moon.start": "%d's blood moon is rising...",
+    "abilities.reignofnether.blood_moon.start": "%s's blood moon is rising...",
     "abilities.reignofnether.blood_moon.end": "The blood moon fades.",
     "abilities.reignofnether.blood_moon.error": "Must target an enemy building",
     "abilities.reignofnether.blood_moon.already_active": "A blood moon is already active",
@@ -243,7 +243,7 @@
     "abilities.reignofnether.greed_is_good.rank3": "Rank 3: Spells spend up to 300 resources",
     "abilities.reignofnether.loot_explosion": "Loot Explosion (Ultimate)",
     "abilities.reignofnether.loot_explosion.stats": "\uE004  %ds   \uE008  %d",
-    "abilities.reignofnether.loot_explosion.tooltip1": "Share a hoard of powerful items that that ",
+    "abilities.reignofnether.loot_explosion.tooltip1": "Share a hoard of powerful items that",
     "abilities.reignofnether.loot_explosion.tooltip2": "friendly piglins units can use in battle.",
     "abilities.reignofnether.loot_explosion.tooltip3": "Throws %d items + %d items & %d mana refund per 100 ore spent.",
 
