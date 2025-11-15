@@ -275,7 +275,7 @@
     "abilities.reignofnether.avatar.tooltip1": "體型和力量增長，成爲戰爭的化身。",
     "abilities.reignofnether.avatar.tooltip2": "獲得 +%d 最大生命值、更快的移動速度、爆炸性範圍攻擊",
     "abilities.reignofnether.avatar.tooltip3": "和緩慢免疫，持續 %d 秒",
-    
+
     "abilities.reignofnether.can_be_toggled": "可切換開啓或關閉",
     "abilities.reignofnether.level_req": "[需要等級 %d]",
     "abilities.reignofnether.rank_up_menu": "已升級（%d）",
@@ -383,7 +383,7 @@
     "buildings.monsters.reignofnether.altar_of_darkness": "黑暗祭壇（英雄）",
     "buildings.monsters.reignofnether.altar_of_darkness.tooltip1": "一座黑暗能量的泉源，可顯現恐怖生物。",
     "buildings.monsters.reignofnether.altar_of_darkness.tooltip2": "訓練新的幷復活陣亡的怪物英雄。",
-    
+
     "buildings.piglins.reignofnether.bastion": "豬布林堡壘",
     "buildings.piglins.reignofnether.bastion.tooltip1": "一座堅固的軍營，容納獵頭者豬布林，",
     "buildings.piglins.reignofnether.bastion.tooltip2": "使其可在軍事傳送門訓練。",
@@ -524,7 +524,7 @@
     "commands.reignofnether.gamerule.improved_pathfinding": "提升單位路徑尋找精確度和 CPU 使用率",
     "commands.reignofnether.gamerule.allow_beacons": "允許工人建造烽火臺",
     "commands.reignofnether.gamerule.pvp_modes_only": "禁用波次生存和沙盒模式",
-    "commands.reignofnether.gamerule.beacon_win_minutes": "控制烽火臺獲勝所需的時間",
+    "commands.reignofnether.gamerule.beacon_win_minutes": "控制烽火臺獲勝所需的時間（分鐘）",
     "commands.reignofnether.gamerule.slanted_buildings": "允許在非平坦地形上建造",
     "commands.reignofnether.gamerule.allow_heroes": "允許建造祭壇和生產英雄",
 
@@ -703,12 +703,12 @@
     "server.resources.reignofnether.not_enough_pop": "你的人口供給不足",
     "server.resources.reignofnether.max_pop": "你已達到最大人口上限",
 
-    "server.resources.reignofnether.sent_food": "你嚮%s給予了 %d 食物！",
-    "server.resources.reignofnether.received_food": "你從%s收到 %d 食物！",
-    "server.resources.reignofnether.sent_wood": "你嚮%s給予了 %d 木材！",
-    "server.resources.reignofnether.received_wood": "你從%s收到 %d 木材！",
-    "server.resources.reignofnether.sent_ore": "你嚮%s給予了 %d 礦物！",
-    "server.resources.reignofnether.received_ore": "你從%s收到 %d 礦物！",
+    "server.resources.reignofnether.sent_food": "你嚮%2$s給予了 %1$d 食物！",
+    "server.resources.reignofnether.received_food": "你從%2$s收到 %1$d 食物！",
+    "server.resources.reignofnether.sent_wood": "你嚮%2$s給予了 %1$d 木材！",
+    "server.resources.reignofnether.received_wood": "你從%2$s收到 %1$d 木材！",
+    "server.resources.reignofnether.sent_ore": "你嚮%2$s給予了 %1$d 礦物！",
+    "server.resources.reignofnether.received_ore": "你從%2$s收到 %1$d 礦物！",
     "server.resources.reignofnether.not_allies": "你只能嚮盟友發送資源",
     "server.resources.reignofnether.not_rts_player": "該玩家不是 RTS 玩家",
     "server.resources.reignofnether.sending_to_self": "你無法嚮自己發送資源",
@@ -1106,7 +1106,7 @@
     "units.piglins.reignofnether.piglin_merchant.tooltip1": "一位擁有無限食物、",
     "units.piglins.reignofnether.piglin_merchant.tooltip2": "戰利品和爆炸物的快樂豬布林商人，只要你有錢。",
     "units.piglins.reignofnether.piglin_merchant.revive": "復活豬布靈商隊（等級 %d）",
-    
+
     "units.villagers.reignofnether.evoker": "喚魔者",
     "units.villagers.reignofnether.evoker.tooltip1": "一位可施放戰鬥魔法的學識淵博的巫師。",
     "units.villagers.reignofnether.evoker.tooltip2": "需要圖書館。",
