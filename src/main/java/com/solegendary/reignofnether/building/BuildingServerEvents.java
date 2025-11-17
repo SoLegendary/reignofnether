@@ -220,7 +220,33 @@ public class BuildingServerEvents {
         boolean queue,
         boolean isDiagonalBridge
     ) {
-        BuildingPlacement newBuilding = BuildingUtils.getNewBuildingPlacement(building,
+        return placeBuilding(
+            building,
+            pos,
+            rotation,
+            ownerName,
+            builderUnitIds,
+            queue,
+            isDiagonalBridge,
+            false,
+            false
+        );
+    }
+
+    @Nullable
+    public static BuildingPlacement placeBuilding(
+        Building building,
+        BlockPos pos,
+        Rotation rotation,
+        String ownerName,
+        int[] builderUnitIds,
+        boolean queue,
+        boolean isDiagonalBridge,
+        boolean ignoreCosts,
+        boolean ignorePopulationRequirement
+    ) {
+        BuildingPlacement newBuilding = BuildingUtils.getNewBuildingPlacement(
+            building,
             serverLevel,
             pos,
             rotation,
@@ -231,7 +257,7 @@ public class BuildingServerEvents {
 
         if (newBuilding != null && !buildingExists) {
             // Handle special building (Iron Golem)
-            if (newBuilding instanceof IronGolemPlacement) {
+            if (!ignorePopulationRequirement && newBuilding instanceof IronGolemPlacement) {
                 int currentPop = UnitServerEvents.getCurrentPopulation(serverLevel, ownerName);
                 int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
 
@@ -245,7 +271,7 @@ public class BuildingServerEvents {
                 }
             }
 
-            if (newBuilding.canAfford(ownerName)) {
+            if (ignoreCosts || newBuilding.canAfford(ownerName)) {
                 if (serverLevel.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get() &&
                     !(newBuilding instanceof BridgePlacement)) {
                     BuildingUtils.clearBuildingArea(newBuilding);
@@ -276,16 +302,20 @@ public class BuildingServerEvents {
                     pos,
                     false
                 );
-                ResourcesServerEvents.addSubtractResources(new Resources(ownerName,
-                    -newBuilding.getBuilding().cost.food,
-                    -newBuilding.getBuilding().cost.wood,
-                    -newBuilding.getBuilding().cost.ore
-                ));
+                if (!ignoreCosts) {
+                    ResourcesServerEvents.addSubtractResources(new Resources(ownerName,
+                        -newBuilding.getBuilding().cost.food,
+                        -newBuilding.getBuilding().cost.wood,
+                        -newBuilding.getBuilding().cost.ore
+                    ));
+                }
 
                 if (ownerName.isEmpty() || ownerName.equals("Enemy"))
                     newBuilding.selfBuilding = true;
 
-                assignBuilderUnits(builderUnitIds, queue, newBuilding);
+                if (builderUnitIds != null) {
+                    assignBuilderUnits(builderUnitIds, queue, newBuilding);
+                }
 
                 UnitServerEvents.getAllUnits()
                         .stream()
@@ -295,10 +325,11 @@ public class BuildingServerEvents {
                                 newBuilding.isPosInsideBuilding(unit.getMoveGoal().getMoveTarget())))
                         .forEach(entity -> moveNonBuildersAwayFromBuildingFoundations(entity, builderUnitIds, newBuilding));
 
-            } else if (!PlayerServerEvents.isBot(ownerName)) {
+            } else if (!ignoreCosts && !PlayerServerEvents.isBot(ownerName)) {
                 warnInsufficientResources(newBuilding);
             }
-            if (SandboxServer.isAnyoneASandboxPlayer() && builderUnitIds.length == 0) {
+            int builderCount = builderUnitIds == null ? 0 : builderUnitIds.length;
+            if (SandboxServer.isAnyoneASandboxPlayer() && builderCount == 0) {
                 newBuilding.getBuilding().shouldDestroyOnReset = false;
                 saveBuildings(getServerLevel());
             }
@@ -367,7 +398,8 @@ public class BuildingServerEvents {
     private static void moveNonBuildersAwayFromBuildingFoundations(
         LivingEntity entity, int[] builderUnitIds, BuildingPlacement newBuilding
     ) {
-        if (Arrays.stream(builderUnitIds).noneMatch(id -> id == entity.getId())) {
+        int[] ids = builderUnitIds == null ? new int[0] : builderUnitIds;
+        if (Arrays.stream(ids).noneMatch(id -> id == entity.getId())) {
             UnitServerEvents.addActionItem(((Unit) entity).getOwnerName(),
                 UnitAction.MOVE,
                 -1,
@@ -379,14 +411,27 @@ public class BuildingServerEvents {
     }
 
     public static void cancelBuilding(BuildingPlacement building, String playerName) {
-        if (building == null)
-            return;
-        if (building.isBuilt && !SandboxServer.isSandboxPlayer(playerName) &&
-            BuildingUtils.getTotalCompletedBuildingsOwned(false, building.ownerName) == 1)
-            return;
+        destroyBuilding(building, playerName, false, true);
+    }
 
-        // remove from tracked buildings, all of its leftover queued blocks and then blow it up
-        buildings.remove(building);
+    public static boolean destroyBuilding(
+        BuildingPlacement building,
+        String playerName,
+        boolean ignoreCapitolRestriction,
+        boolean refundResources
+    ) {
+        if (building == null) {
+            return false;
+        }
+        boolean isSandboxPlayer = playerName != null && !playerName.isBlank() && SandboxServer.isSandboxPlayer(playerName);
+        if (!ignoreCapitolRestriction && building.isBuilt && !isSandboxPlayer &&
+            BuildingUtils.getTotalCompletedBuildingsOwned(false, building.ownerName) == 1) {
+            return false;
+        }
+
+        if (!buildings.remove(building)) {
+            return false;
+        }
         if (building instanceof NetherConvertingBuilding nb && nb.getZone() != null) {
             nb.getZone().startRestoring();
             saveNetherZones(serverLevel);
@@ -396,7 +441,7 @@ public class BuildingServerEvents {
         // AOE2-style refund: return the % of the non-built portion of the building
         // eg. cancelling a building at 70% completion will refund only 30% cost
         // in survival, refund 50% of this amount
-        if (!building.isBuilt || SurvivalServerEvents.isEnabled()) {
+        if (refundResources && (!building.isBuilt || SurvivalServerEvents.isEnabled())) {
 
             float buildPercent = building.getBlocksPlacedPercent();
             int food = Math.round(building.getBuilding().cost.food * (1 - buildPercent));
@@ -414,7 +459,42 @@ public class BuildingServerEvents {
                 ResourcesClientboundPacket.showFloatingText(res, building.centrePos);
             }
         }
-        building.destroy((ServerLevel) building.getLevel());
+        Level level = building.getLevel();
+        if (level instanceof ServerLevel serverLevel1) {
+            building.destroy(serverLevel1);
+        }
+        return true;
+    }
+
+    public static boolean setBuildingOwner(BuildingPlacement building, String ownerName) {
+        if (building == null) {
+            return false;
+        }
+        building.ownerName = ownerName;
+        syncBuildingPlacement(building.originPos);
+        return true;
+    }
+
+    public static void completeBuildingInstantly(BuildingPlacement building) {
+        if (building == null || building.isBuilt) {
+            return;
+        }
+        Level level = building.getLevel();
+        if (!(level instanceof ServerLevel serverLevel1)) {
+            return;
+        }
+        for (BuildingBlock block : building.getBlocks()) {
+            BlockState state = block.getBlockState();
+            if (!state.isAir()) {
+                serverLevel1.setBlockAndUpdate(block.getBlockPos(), state);
+            }
+        }
+        building.blockPlaceQueue.clear();
+        building.serverBlocksPlaced = building.getBlocksTotal();
+        building.highestBlockCountReached = building.getBlocksTotal();
+        building.isBuilt = true;
+        building.onBuilt();
+        BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksTotal(), building.ownerName);
     }
 
     public static int getTotalPopulationSupply(String ownerName) {
