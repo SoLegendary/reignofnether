@@ -46,7 +46,7 @@ public class RtsCommands {
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 
-        dispatcher.register(Commands.literal("rts-place-building")
+        dispatcher.register(Commands.literal("rtsapi-place-building")
             .requires(source -> source.hasPermission(2))
             .then(Commands.argument("buildingName", StringArgumentType.string())
                 .then(Commands.argument("ownerName", StringArgumentType.string())
@@ -64,14 +64,14 @@ public class RtsCommands {
             )
         );
 
-        dispatcher.register(Commands.literal("rts-destroy-building")
+        dispatcher.register(Commands.literal("rtsapi-destroy-building")
             .requires(source -> source.hasPermission(2))
             .then(Commands.argument("pos", BlockPosArgument.blockPos())
                 .executes(ctx -> destroyBuildingsAt(BlockPosArgument.getLoadedBlockPos(ctx, "pos"), ctx.getSource()))
             )
         );
 
-        dispatcher.register(Commands.literal("rts-set-unit-owner")
+        dispatcher.register(Commands.literal("rtsapi-set-unit-owner")
             .requires(source -> source.hasPermission(2))
             .then(Commands.argument("ownerName", StringArgumentType.string())
                 .then(Commands.argument("from", BlockPosArgument.blockPos())
@@ -87,7 +87,7 @@ public class RtsCommands {
             )
         );
 
-        dispatcher.register(Commands.literal("rts-set-building-owner")
+        dispatcher.register(Commands.literal("rtsapi-set-building-owner")
             .requires(source -> source.hasPermission(2))
             .then(Commands.argument("ownerName", StringArgumentType.string())
                 .then(Commands.argument("from", BlockPosArgument.blockPos())
@@ -103,7 +103,7 @@ public class RtsCommands {
             )
         );
 
-        dispatcher.register(Commands.literal("rts-set-anchor")
+        dispatcher.register(Commands.literal("rtsapi-set-anchor")
             .requires(source -> source.hasPermission(2))
             .then(Commands.argument("from", BlockPosArgument.blockPos())
                 .then(Commands.argument("to", BlockPosArgument.blockPos())
@@ -119,7 +119,7 @@ public class RtsCommands {
             )
         );
 
-        dispatcher.register(Commands.literal("rts-remove-anchor")
+        dispatcher.register(Commands.literal("rtsapi-remove-anchor")
             .requires(source -> source.hasPermission(2))
             .then(Commands.argument("from", BlockPosArgument.blockPos())
                 .then(Commands.argument("to", BlockPosArgument.blockPos())
@@ -132,7 +132,7 @@ public class RtsCommands {
             )
         );
 
-        dispatcher.register(Commands.literal("rts-change-resources")
+        dispatcher.register(Commands.literal("rtsapi-change-resources")
             .requires(source -> source.hasPermission(2))
             .then(Commands.argument("resource", StringArgumentType.string())
                 .then(Commands.argument("amount", IntegerArgumentType.integer())
