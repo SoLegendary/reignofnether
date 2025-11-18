@@ -4,6 +4,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -21,12 +23,14 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -50,16 +54,10 @@ public class RtsCommands {
             .requires(source -> source.hasPermission(2))
             .then(Commands.argument("buildingName", StringArgumentType.string())
                 .then(Commands.argument("ownerName", StringArgumentType.string())
-                    .then(Commands.argument("autoBuild", BoolArgumentType.bool())
-                        .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                            .executes(ctx -> placeBuilding(ctx,
-                                StringArgumentType.getString(ctx, "buildingName"),
-                                StringArgumentType.getString(ctx, "ownerName"),
-                                BoolArgumentType.getBool(ctx, "autoBuild"),
-                                BlockPosArgument.getLoadedBlockPos(ctx, "pos")
-                            ))
-                        )
-                    )
+                    .then(placeBuildingTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+                )
+                .then(Commands.argument("ownerSelector", EntityArgument.player())
+                    .then(placeBuildingTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
                 )
             )
         );
@@ -74,32 +72,20 @@ public class RtsCommands {
         dispatcher.register(Commands.literal("rtsapi-set-unit-owner")
             .requires(source -> source.hasPermission(2))
             .then(Commands.argument("ownerName", StringArgumentType.string())
-                .then(Commands.argument("from", BlockPosArgument.blockPos())
-                    .then(Commands.argument("to", BlockPosArgument.blockPos())
-                        .executes(ctx -> setUnitOwner(
-                            ctx,
-                            StringArgumentType.getString(ctx, "ownerName"),
-                            BlockPosArgument.getLoadedBlockPos(ctx, "from"),
-                            BlockPosArgument.getLoadedBlockPos(ctx, "to")
-                        ))
-                    )
-                )
+                .then(unitSelectionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+            )
+            .then(Commands.argument("ownerSelector", EntityArgument.player())
+                .then(unitSelectionTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
             )
         );
 
         dispatcher.register(Commands.literal("rtsapi-set-building-owner")
             .requires(source -> source.hasPermission(2))
             .then(Commands.argument("ownerName", StringArgumentType.string())
-                .then(Commands.argument("from", BlockPosArgument.blockPos())
-                    .then(Commands.argument("to", BlockPosArgument.blockPos())
-                        .executes(ctx -> setBuildingOwner(
-                            ctx,
-                            StringArgumentType.getString(ctx, "ownerName"),
-                            BlockPosArgument.getLoadedBlockPos(ctx, "from"),
-                            BlockPosArgument.getLoadedBlockPos(ctx, "to")
-                        ))
-                    )
-                )
+                .then(buildingSelectionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+            )
+            .then(Commands.argument("ownerSelector", EntityArgument.player())
+                .then(buildingSelectionTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
             )
         );
 
@@ -144,9 +130,63 @@ public class RtsCommands {
                             StringArgumentType.getString(ctx, "playerName")
                         ))
                     )
+                    .then(Commands.argument("playerSelector", EntityArgument.player())
+                        .executes(ctx -> changeResources(
+                            ctx,
+                            StringArgumentType.getString(ctx, "resource"),
+                            IntegerArgumentType.getInteger(ctx, "amount"),
+                            getPlayerName(EntityArgument.getPlayer(ctx, "playerSelector"))
+                        ))
+                    )
                 )
             )
         );
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> placeBuildingTail(NameResolver ownerResolver) {
+        return Commands.argument("autoBuild", BoolArgumentType.bool())
+            .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                .executes(ctx -> placeBuilding(
+                    ctx,
+                    StringArgumentType.getString(ctx, "buildingName"),
+                    ownerResolver.resolve(ctx),
+                    BoolArgumentType.getBool(ctx, "autoBuild"),
+                    BlockPosArgument.getLoadedBlockPos(ctx, "pos")
+                ))
+            );
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> unitSelectionTail(NameResolver ownerResolver) {
+        return Commands.argument("from", BlockPosArgument.blockPos())
+            .then(Commands.argument("to", BlockPosArgument.blockPos())
+                .executes(ctx -> setUnitOwner(
+                    ctx,
+                    ownerResolver.resolve(ctx),
+                    BlockPosArgument.getLoadedBlockPos(ctx, "from"),
+                    BlockPosArgument.getLoadedBlockPos(ctx, "to")
+                ))
+            );
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildingSelectionTail(NameResolver ownerResolver) {
+        return Commands.argument("from", BlockPosArgument.blockPos())
+            .then(Commands.argument("to", BlockPosArgument.blockPos())
+                .executes(ctx -> setBuildingOwner(
+                    ctx,
+                    ownerResolver.resolve(ctx),
+                    BlockPosArgument.getLoadedBlockPos(ctx, "from"),
+                    BlockPosArgument.getLoadedBlockPos(ctx, "to")
+                ))
+            );
+    }
+
+    private static String getPlayerName(ServerPlayer player) {
+        return player.getName().getString();
+    }
+
+    @FunctionalInterface
+    private interface NameResolver {
+        String resolve(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException;
     }
 
     private static int placeBuilding(
