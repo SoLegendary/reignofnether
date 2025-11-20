@@ -1333,6 +1333,22 @@ public class HudClientEvents {
             );
             renderedButtons.add(toggleMapSizeButton);
         }
+
+        Button markerModeButton = MinimapClientEvents.getMarkerModeButton();
+        if (!markerModeButton.isHidden.get()) {
+            int mapRadius = MinimapClientEvents.getMapGuiRadius();
+            // Centre of minimap in screen coordinates (matches MinimapClientEvents.renderMap)
+            int mapCenterX = screenWidth - mapRadius - MinimapClientEvents.CORNER_OFFSET;
+            int mapTopY = screenHeight - (mapRadius * 2) - MinimapClientEvents.CORNER_OFFSET;
+
+            // Place the button slightly above and to the right of the minimap, similar to bottom buttons
+            int markerX = mapCenterX + mapRadius - markerModeButton.iconSize - MinimapClientEvents.CORNER_OFFSET / 2;
+            int markerY = mapTopY - (markerModeButton.iconSize * 2); // a bit above the top point
+
+            markerModeButton.render(evt.getGuiGraphics(), markerX, markerY, mouseX, mouseY);
+            renderedButtons.add(markerModeButton);
+        }
+
         Button camSensitivityButton = MinimapClientEvents.getCamSensitivityButton();
         if (!camSensitivityButton.isHidden.get()) {
             camSensitivityButton.render(evt.getGuiGraphics(),
@@ -1347,7 +1363,7 @@ public class HudClientEvents {
         if (!mapLockButton.isHidden.get()) {
             mapLockButton.render(evt.getGuiGraphics(),
                     screenWidth - (mapLockButton.iconSize * 2),
-                    screenHeight - (mapLockButton.iconSize * 4),
+                    screenHeight - (mapLockButton.iconSize * 6), // Moved up to make room for marker button
                     mouseX,
                     mouseY
             );

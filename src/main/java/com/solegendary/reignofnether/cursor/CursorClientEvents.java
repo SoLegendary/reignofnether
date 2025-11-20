@@ -77,6 +77,17 @@ public class CursorClientEvents {
     private static UnitAction leftClickAction = null;
     private static SandboxAction leftClickSandboxAction = null;
 
+    private static int cursorHotspotX = 0;
+    private static int cursorHotspotY = 0;
+
+    public static int getCursorHotspotX() {
+        return cursorHotspotX;
+    }
+
+    public static int getCursorHotspotY() {
+        return cursorHotspotY;
+    }
+
 
     public static Vector3d getCursorWorldPos() {
         return cursorWorldPos;
@@ -153,6 +164,9 @@ public class CursorClientEvents {
         cursorDrawX = Math.max(0, cursorDrawX);
         cursorDrawY = Math.max(0, cursorDrawY);
         ResourceLocation texture;
+        int hotspotX = 0;
+        int hotspotY = 0;
+
         if (Keybindings.altMod.isDown() && (leftClickDown || rightClickDown)) {
             RenderSystem.setShaderTexture(0, TEXTURE_HAND_GRAB);
             texture = TEXTURE_HAND_GRAB;
@@ -168,12 +182,16 @@ public class CursorClientEvents {
         } else if (leftClickAction != null || leftClickSandboxAction != null) {
             RenderSystem.setShaderTexture(0, TEXTURE_CROSS);
             texture = TEXTURE_CROSS;
-            cursorDrawX -= 8;
-            cursorDrawY -= 8;
+            hotspotX = 8;
+            hotspotY = 8;
         } else {
             RenderSystem.setShaderTexture(0, TEXTURE_CURSOR);
             texture = TEXTURE_CURSOR;
         }
+        cursorHotspotX = hotspotX;
+        cursorHotspotY = hotspotY;
+        cursorDrawX -= hotspotX;
+        cursorDrawY -= hotspotY;
         evt.getGuiGraphics().pose().translate(0,0,2500);
         evt.getGuiGraphics().blit(texture,
                 cursorDrawX, cursorDrawY,

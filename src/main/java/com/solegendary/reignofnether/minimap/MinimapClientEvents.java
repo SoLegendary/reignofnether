@@ -19,6 +19,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.time.NightCircleMode;
@@ -80,6 +81,7 @@ public class MinimapClientEvents {
     private static boolean largeMap = false;
     public static boolean isLargeMap() { return largeMap; }
     private static boolean shouldToggleSize = false;
+    private static boolean markerMode = false;
 
     private static final int UNIT_RADIUS = 3;
     private static final int UNIT_THICKNESS = 1;
@@ -89,6 +91,8 @@ public class MinimapClientEvents {
     private static final int BUILDING_THICKNESS = 2;
     private static final int START_POS_RADIUS = 7;
     private static final int START_POS_THICKNESS = 2;
+    private static final int MARKER_RADIUS = 10;
+    private static final int MARKER_THICKNESS = 2;
 
     // rate-limit teleporting from dragging the minimap to prevent being kicked from packet spamming
     private static long lastDragTeleportTimestamp = System.currentTimeMillis();
@@ -114,6 +118,7 @@ public class MinimapClientEvents {
     private static float xl, xc, xr, yt, yc, yb;
 
     public static final ArrayList<MinimapUnit> minimapUnits = new ArrayList<>();
+    public static final ArrayList<MapMarker> mapMarkers = new ArrayList<>();
 
     private static final float DARK = 0.40f;
     private static final float EXTRA_DARK = 0.10f;
@@ -131,6 +136,24 @@ public class MinimapClientEvents {
             this.id = id;
             this.ownerName = ownerName;
         }
+    }
+
+    private static class MapMarker {
+        public final int x;
+        public final int z;
+        public final String playerName;
+        public int ticksRemaining;
+
+        public MapMarker(int x, int z, String playerName) {
+            this.x = x;
+            this.z = z;
+            this.playerName = playerName;
+            this.ticksRemaining = 200; // 10 seconds
+        }
+    }
+
+    public static void addMapMarker(int x, int z, String playerName) {
+        mapMarkers.add(new MapMarker(x, z, playerName));
     }
 
     public static void removeMinimapUnit(int id) {
@@ -193,6 +216,23 @@ public class MinimapClientEvents {
                 List.of(FormattedCharSequence.forward(largeMap
                         ? I18n.get("hud.map.reignofnether.close")
                         : I18n.get("hud.map.reignofnether.open"), Style.EMPTY))
+        );
+    }
+
+    public static Button getMarkerModeButton() {
+        return new Button("Marker",
+                14,
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/target_top.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                null,
+                () -> markerMode,
+                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK),
+                () -> true,
+                () -> markerMode = !markerMode,
+                null,
+                List.of(FormattedCharSequence.forward(markerMode
+                        ? "Marker mode enabled"
+                        : "Marker mode disabled", Style.EMPTY))
         );
     }
 
@@ -634,6 +674,12 @@ public class MinimapClientEvents {
             );
         }
 
+        // draw map markers
+        for (MapMarker marker : mapMarkers) {
+            int color = PlayerColors.getPlayerDisplayColorHex(marker.playerName);
+            drawMapMarker(marker.x, marker.z, color);
+        }
+
     }
 
     private static void drawBuildingOnMap(int xc, int zc, int color) {
@@ -750,6 +796,32 @@ public class MinimapClientEvents {
         }
     }
 
+    private static void drawMapMarker(int xc, int zc, int color) {
+        for (int x = xc - MARKER_RADIUS; x < xc + MARKER_RADIUS; x++) {
+            for (int z = zc - MARKER_RADIUS; z < zc + MARKER_RADIUS; z++) {
+                if (isWorldXZinsideMap(x, z)) {
+                    double dist = Math.sqrt(Math.pow(x - xc, 2) + Math.pow(z - zc, 2));
+
+                    boolean draw = false;
+
+                    // Draw concentric rings
+                    if (dist > MARKER_RADIUS - MARKER_THICKNESS && dist < MARKER_RADIUS) draw = true;
+                    if (dist > MARKER_RADIUS * 0.6 - MARKER_THICKNESS && dist < MARKER_RADIUS * 0.6) draw = true;
+                    if (dist > MARKER_RADIUS * 0.2 - MARKER_THICKNESS && dist < MARKER_RADIUS * 0.2) draw = true;
+
+                    if (draw) {
+                        int xN = x - xc_world + (mapGuiRadius * 2);
+                        int zN = z - zc_world + (mapGuiRadius * 2);
+                        if (xN >= 0 && xN < mapColoursOverlays.length && zN >= 0 && zN < mapColoursOverlays[0].length) {
+                            mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(color) | (0xFF << 24);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     // checks whether a given X Z in the world is part of our map
     public static boolean isWorldXZinsideMap(int x, int z) {
         return x >= xc_world - worldRadius && x < xc_world + worldRadius && z >= zc_world - worldRadius
@@ -852,7 +924,9 @@ public class MinimapClientEvents {
             lastDragTeleportTimestamp < System.currentTimeMillis() - 100) {
 
             lastDragTeleportTimestamp = System.currentTimeMillis();
-            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
+            float hotspotX = CursorClientEvents.getCursorHotspotX();
+            float hotspotY = CursorClientEvents.getCursorHotspotY();
+            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX() - hotspotX, (float) evt.getMouseY() - hotspotY, true);
             if (MC.player != null && moveTo != null) {
                 PlayerServerboundPacket.teleportPlayer(
                     (double) moveTo.getX(),
@@ -871,11 +945,17 @@ public class MinimapClientEvents {
             return;
         }
 
+        float hotspotX = CursorClientEvents.getCursorHotspotX();
+        float hotspotY = CursorClientEvents.getCursorHotspotY();
+
         // when clicking on map move player there
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && !isMouseOverAnyButton()) {
-            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
+            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX() - hotspotX, (float) evt.getMouseY() - hotspotY, true);
             if (MC.player != null && moveTo != null) {
-                if (Keybindings.shiftMod.isDown()) {
+                if (markerMode) {
+                    PacketHandler.INSTANCE.sendToServer(new MapMarkerServerboundPacket(moveTo.getX(), moveTo.getZ()));
+                    // markerMode = false; // Keep mode enabled as per user request
+                } else if (Keybindings.shiftMod.isDown()) {
                     setMapCentre(moveTo.getX(), moveTo.getZ());
                     forceUpdateAllPartitions = true;
                     TutorialClientEvents.clickedMinimap = true;
@@ -894,13 +974,15 @@ public class MinimapClientEvents {
                 }
             }
         } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
+            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX() - hotspotX, (float) evt.getMouseY() - hotspotY, false);
             if (UnitClientEvents.getSelectedUnits().size() > 0 && moveTo != null) {
                 UnitClientEvents.sendUnitCommandManual(UnitAction.MOVE,
                     -1,
                     UnitClientEvents.getSelectedUnits().stream().mapToInt(Entity::getId).toArray(),
                     moveTo
                 );
+            } else if (moveTo != null) {
+                // PacketHandler.INSTANCE.sendToServer(new MapMarkerServerboundPacket(moveTo.getX(), moveTo.getZ()));
             }
         }
     }
@@ -934,6 +1016,13 @@ public class MinimapClientEvents {
         mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
         if (TimeClientEvents.nightCircleMode != NightCircleMode.OFF)
             updateNightCircles();
+        
+        // Update map markers
+        mapMarkers.removeIf(marker -> {
+            marker.ticksRemaining--;
+            return marker.ticksRemaining <= 0;
+        });
+
         updateMapUnitsAndBuildings();
         updateMapViewQuad();
 
