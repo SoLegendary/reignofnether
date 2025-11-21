@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.keybinds.ModKeyMappings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
@@ -52,6 +53,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.Vec2;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -984,6 +986,22 @@ public class MinimapClientEvents {
             } else if (moveTo != null) {
                 // PacketHandler.INSTANCE.sendToServer(new MapMarkerServerboundPacket(moveTo.getX(), moveTo.getZ()));
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMarkerKey(InputEvent.Key evt) {
+        if (!OrthoviewClientEvents.isEnabled() ||
+            !(MC.screen instanceof TopdownGui)) {
+            return;
+        }
+
+        if (evt.getAction() != GLFW.GLFW_PRESS) {
+            return;
+        }
+
+        if (evt.getKey() == ModKeyMappings.MARKER_KEY.getKey().getValue()) {
+            markerMode = !markerMode;
         }
     }
 

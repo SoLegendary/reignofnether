@@ -1308,5 +1308,8 @@
 
     "alliances.reignofnether.tooltip.toggle_observer_player_displays": "Observer Menu (Z)",
     "alliances.reignofnether.tooltip.toggle_diplomacy_player_displays": "Diplomacy Menu (Z)",
-    "alliances.reignofnether.tooltip.toggle_shared_unit_control": "Toggle whether allies can control your units"
+    "alliances.reignofnether.tooltip.toggle_shared_unit_control": "Toggle whether allies can control your units",
+
+    "key.category.reignofnether": "Reign of Nether",
+    "key.reignofnether.marker": "Toggle Marker Mode"
 }
