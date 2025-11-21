@@ -19,6 +19,7 @@ public class RTSPlayer {
     public Faction faction;
     public int beaconOwnerTicks = 0; // ticks owning a beacon - will win upon reaching
     public int startPosColorId = 0;
+    public RTSPlayerScores scores = new RTSPlayerScores();
 
     private RTSPlayer(String playerName, Faction faction, int id) {
         this.name = playerName;

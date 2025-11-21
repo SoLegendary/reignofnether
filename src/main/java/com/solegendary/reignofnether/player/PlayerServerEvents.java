@@ -117,6 +117,10 @@ public class PlayerServerEvents {
         "wouldyoukindly"
     );
 
+    public static List<RTSPlayer> getRTSPlayers() {
+        return rtsPlayers;
+    }
+
     public static void saveRTSPlayers() {
         if (serverLevel == null) {
             return;
