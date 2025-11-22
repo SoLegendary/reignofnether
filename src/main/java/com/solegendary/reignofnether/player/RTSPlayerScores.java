@@ -3,20 +3,19 @@ package com.solegendary.reignofnether.player;
 import java.util.LinkedHashMap;
 
 public class RTSPlayerScores {
-    public LinkedHashMap<String, Integer> scoreList = new LinkedHashMap<>();
+    public LinkedHashMap<RTSPlayerScoresEnum, Integer> scoreList = new LinkedHashMap<>();
 
     public RTSPlayerScores() {
-        scoreList.put("Total buildings constructed", 0);
-        scoreList.put("Total units produced", 0);
+        scoreList.put(RTSPlayerScoresEnum.TOTAL_BUILDINGS_CONSTRUCTED, 0);
+        scoreList.put(RTSPlayerScoresEnum.TOTAL_UNITS_PRODUCED, 0);
     }
 
-    public String displayScores(String playerName) {
-        String text = playerName + "\n\n";
-
-        for (int i : scoreList.values()) {
-            text += Integer.toString(i) + "\n";
-        }
-
-        return text;
+    public LinkedHashMap<RTSPlayerScoresEnum, Integer> getScoreList() {
+        return scoreList;
     }
+
+    // May be redundant
+    /* public int getScore(RTSPlayerScoresEnum scoreEnum) {
+        return scoreList.get(scoreEnum);
+    } */
 }
