@@ -7,6 +7,9 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -149,6 +152,13 @@ public abstract class ProductionItem {
         return null;
     }
 
+    public void onItemProduced(ProductionPlacement placement) {
+        if (placement.getLevel().isClientSide()) {
+            RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(placement.ownerName);
+            rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.TOTAL_UNITS_PRODUCED);
+        }
+    }
+
     // return true if the tick finished
     public boolean tick(ProductionPlacement placement, ActiveProduction active) {
         if (active.ticksLeft > 0 && isBelowPopulationSupply(placement.getLevel(), placement.ownerName) && placement.isBuilt) {
@@ -170,6 +180,7 @@ public abstract class ProductionItem {
                 active.ticksLeft = 0;
         }
         if (active.ticksLeft <= 0 && isBelowPopulationSupply(placement.getLevel(), placement.ownerName)) {
+            this.onItemProduced(placement);
             if (!active.completed) {
                 onComplete.accept(placement.getLevel(), placement);
                 active.completed = true;
