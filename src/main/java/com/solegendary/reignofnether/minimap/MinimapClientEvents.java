@@ -108,6 +108,9 @@ public class MinimapClientEvents {
     private static final int MARKER_RADIUS = 16;
     private static final int MARKER_THICKNESS = 3;
     private static final int MARKER_PIXEL_OFFSET = 4; // shift rendered marker to better align with cursor
+    // Marker placement only happens while holding ALT, which forces the hand cursor (hotspot at origin).
+    private static final float MARKER_CURSOR_HOTSPOT_X = 0f;
+    private static final float MARKER_CURSOR_HOTSPOT_Y = 0f;
 
     // rate-limit teleporting from dragging the minimap to prevent being kicked from packet spamming
     private static long lastDragTeleportTimestamp = System.currentTimeMillis();
@@ -964,8 +967,8 @@ public class MinimapClientEvents {
         }
 
         if (Keybindings.altMod.isDown()) {
-            float hotspotX = CursorClientEvents.getCursorHotspotX();
-            float hotspotY = CursorClientEvents.getCursorHotspotY();
+            float hotspotX = MARKER_CURSOR_HOTSPOT_X;
+            float hotspotY = MARKER_CURSOR_HOTSPOT_Y;
             BlockPos hoverPos = getWorldPosOnMinimap((float) evt.getMouseX() - hotspotX, (float) evt.getMouseY() - hotspotY, false);
             altOnMinimap = hoverPos != null;
         }
@@ -976,8 +979,8 @@ public class MinimapClientEvents {
             lastDragTeleportTimestamp < System.currentTimeMillis() - 100) {
 
             lastDragTeleportTimestamp = System.currentTimeMillis();
-            float hotspotX = CursorClientEvents.getCursorHotspotX();
-            float hotspotY = CursorClientEvents.getCursorHotspotY();
+            float hotspotX = MARKER_CURSOR_HOTSPOT_X;
+            float hotspotY = MARKER_CURSOR_HOTSPOT_Y;
             BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX() - hotspotX, (float) evt.getMouseY() - hotspotY, true);
             if (MC.player != null && moveTo != null) {
                 PlayerServerboundPacket.teleportPlayer(
@@ -997,8 +1000,8 @@ public class MinimapClientEvents {
             return;
         }
 
-        float hotspotX = CursorClientEvents.getCursorHotspotX();
-        float hotspotY = CursorClientEvents.getCursorHotspotY();
+        float hotspotX = MARKER_CURSOR_HOTSPOT_X;
+        float hotspotY = MARKER_CURSOR_HOTSPOT_Y;
 
         boolean altDown = Keybindings.altMod.isDown();
 
