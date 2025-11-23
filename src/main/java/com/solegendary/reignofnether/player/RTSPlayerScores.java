@@ -14,6 +14,12 @@ public class RTSPlayerScores {
         return scoreList;
     }
 
+    public void addToScore(RTSPlayerScoresEnum scoresEnum) {
+        // On built, add 1 to score
+        int score = scoreList.get(scoresEnum) + 1;
+        scoreList.put(scoresEnum, score);
+    }
+
     // May be redundant
     /* public int getScore(RTSPlayerScoresEnum scoreEnum) {
         return scoreList.get(scoreEnum);
