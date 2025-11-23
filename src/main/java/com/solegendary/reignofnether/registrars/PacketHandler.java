@@ -23,6 +23,8 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.hero.FallenHeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerboundPacket;
+import com.solegendary.reignofnether.minimap.MapMarkerClientboundPacket;
+import com.solegendary.reignofnether.minimap.MapMarkerServerboundPacket;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
@@ -288,6 +290,18 @@ public final class PacketHandler {
                 .encoder(UnitSyncMobEffectsClientboundPacket::encode)
                 .decoder(UnitSyncMobEffectsClientboundPacket::new)
                 .consumerMainThread(UnitSyncMobEffectsClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(MapMarkerServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(MapMarkerServerboundPacket::encode)
+                .decoder(MapMarkerServerboundPacket::new)
+                .consumerMainThread(MapMarkerServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(MapMarkerClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(MapMarkerClientboundPacket::encode)
+                .decoder(MapMarkerClientboundPacket::new)
+                .consumerMainThread(MapMarkerClientboundPacket::handle)
                 .add();
     }
 }

@@ -167,7 +167,7 @@ public class CommonModEvents {
 
     @SubscribeEvent
     public static void onClientSetupEvent(FMLClientSetupEvent evt) {
-        MenuScreens.register(ContainerRegistrar.TOPDOWNGUI_CONTAINER.get(), TopdownGui::new);
+        evt.enqueueWork(() -> MenuScreens.register(ContainerRegistrar.TOPDOWNGUI_CONTAINER.get(), TopdownGui::new));
     }
 
     @SubscribeEvent
