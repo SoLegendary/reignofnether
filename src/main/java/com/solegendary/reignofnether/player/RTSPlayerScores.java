@@ -10,10 +10,10 @@ public class RTSPlayerScores {
         scoreList.put(RTSPlayerScoresEnum.TOTAL_UNITS_PRODUCED, 0);
         scoreList.put(RTSPlayerScoresEnum.WORKER_UNITS_PRODUCED, 0);
         scoreList.put(RTSPlayerScoresEnum.MILITARY_UNITS_PRODUCED, 0);
-        scoreList.put(RTSPlayerScoresEnum.TOTAL_RESOURCES_PRODUCED, 0);
-        scoreList.put(RTSPlayerScoresEnum.FOOD_PRODUCED, 0);
-        scoreList.put(RTSPlayerScoresEnum.WOOD_PRODUCED, 0);
-        scoreList.put(RTSPlayerScoresEnum.ORES_PRODUCED, 0);
+        scoreList.put(RTSPlayerScoresEnum.TOTAL_RESOURCES_HARVESTED, 0);
+        scoreList.put(RTSPlayerScoresEnum.FOOD_HARVESTED, 0);
+        scoreList.put(RTSPlayerScoresEnum.WOOD_HARVESTED, 0);
+        scoreList.put(RTSPlayerScoresEnum.ORES_HARVESTED, 0);
     }
 
     public LinkedHashMap<RTSPlayerScoresEnum, Integer> getScoreList() {
@@ -22,6 +22,11 @@ public class RTSPlayerScores {
 
     public void addToScore(RTSPlayerScoresEnum scoresEnum) {
         int score = scoreList.get(scoresEnum) + 1;
+        scoreList.put(scoresEnum, score);
+    }
+
+    public void addToScore(RTSPlayerScoresEnum scoresEnum, int amount) {
+        int score = scoreList.get(scoresEnum) + amount;
         scoreList.put(scoresEnum, score);
     }
 

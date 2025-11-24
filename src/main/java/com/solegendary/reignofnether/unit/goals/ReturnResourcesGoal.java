@@ -2,6 +2,9 @@ package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
@@ -36,6 +39,10 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
                 res.ownerName = unit.getOwnerName();
                 ResourcesServerEvents.addSubtractResources(res);
                 ResourcesClientboundPacket.showFloatingText(res, this.moveTarget != null ? this.moveTarget : this.mob.getOnPos());
+
+                RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(res.ownerName);
+                rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.TOTAL_RESOURCES_HARVESTED, res.getTotalValue());
+
                 unit.getItems().clear();
                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                 this.stopReturning();
