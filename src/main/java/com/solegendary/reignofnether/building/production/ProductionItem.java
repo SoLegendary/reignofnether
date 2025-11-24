@@ -152,10 +152,18 @@ public abstract class ProductionItem {
         return null;
     }
 
-    public void onItemProduced(ProductionPlacement placement) {
-        if (placement.getLevel().isClientSide()) {
+    public void onItemProduced(ProductionPlacement placement, ActiveProduction active) {
+        if (!placement.getLevel().isClientSide()) {
             RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(placement.ownerName);
             rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.TOTAL_UNITS_PRODUCED);
+            if (
+                    active.item.getItemName() == "Villager"
+                    || active.item.getItemName() == "Zombie Villager"
+                    || active.item.getItemName() == "Grunt"
+            )
+                rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.WORKER_UNITS_PRODUCED);
+            else
+                rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.MILITARY_UNITS_PRODUCED);
         }
     }
 
@@ -180,7 +188,7 @@ public abstract class ProductionItem {
                 active.ticksLeft = 0;
         }
         if (active.ticksLeft <= 0 && isBelowPopulationSupply(placement.getLevel(), placement.ownerName)) {
-            this.onItemProduced(placement);
+            this.onItemProduced(placement, active);
             if (!active.completed) {
                 onComplete.accept(placement.getLevel(), placement);
                 active.completed = true;

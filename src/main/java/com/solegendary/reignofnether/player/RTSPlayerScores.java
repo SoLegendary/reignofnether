@@ -8,6 +8,12 @@ public class RTSPlayerScores {
     public RTSPlayerScores() {
         scoreList.put(RTSPlayerScoresEnum.TOTAL_BUILDINGS_CONSTRUCTED, 0);
         scoreList.put(RTSPlayerScoresEnum.TOTAL_UNITS_PRODUCED, 0);
+        scoreList.put(RTSPlayerScoresEnum.WORKER_UNITS_PRODUCED, 0);
+        scoreList.put(RTSPlayerScoresEnum.MILITARY_UNITS_PRODUCED, 0);
+        scoreList.put(RTSPlayerScoresEnum.TOTAL_RESOURCES_PRODUCED, 0);
+        scoreList.put(RTSPlayerScoresEnum.FOOD_PRODUCED, 0);
+        scoreList.put(RTSPlayerScoresEnum.WOOD_PRODUCED, 0);
+        scoreList.put(RTSPlayerScoresEnum.ORES_PRODUCED, 0);
     }
 
     public LinkedHashMap<RTSPlayerScoresEnum, Integer> getScoreList() {
@@ -15,7 +21,6 @@ public class RTSPlayerScores {
     }
 
     public void addToScore(RTSPlayerScoresEnum scoresEnum) {
-        // On built, add 1 to score
         int score = scoreList.get(scoresEnum) + 1;
         scoreList.put(scoresEnum, score);
     }
