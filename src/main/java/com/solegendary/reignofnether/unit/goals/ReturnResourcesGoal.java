@@ -43,6 +43,13 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
                 RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(res.ownerName);
                 rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.TOTAL_RESOURCES_HARVESTED, res.getTotalValue());
 
+                if (res.food > 0)
+                    rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.FOOD_HARVESTED, res.getTotalValue());
+                else if (res.wood > 0)
+                    rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.WOOD_HARVESTED, res.getTotalValue());
+                else if (res.ore > 0)
+                    rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.ORES_HARVESTED, res.getTotalValue());
+
                 unit.getItems().clear();
                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                 this.stopReturning();
