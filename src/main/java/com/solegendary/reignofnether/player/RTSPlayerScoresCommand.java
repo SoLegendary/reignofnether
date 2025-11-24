@@ -3,8 +3,10 @@ package com.solegendary.reignofnether.player;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
@@ -15,7 +17,20 @@ public class RTSPlayerScoresCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("rts-scores").executes((command) -> {
             return execute(command);
-        }));
+        }).then(Commands.argument("target", EntityArgument.player()).executes((command) -> {
+            return executeOnPlayer(command, EntityArgument.getPlayer(command, "target"));
+        })));
+    }
+
+    public static int executeOnPlayer(CommandContext<CommandSourceStack> command, Player targetPlayer) throws CommandSyntaxException {
+        if (command.getSource().getEntity() instanceof Player) {
+            Player player = (Player) command.getSource().getEntity();
+            RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(targetPlayer.getDisplayName().getString());
+
+            player.sendSystemMessage(Component.literal(displayScores(rtsPlayer)));
+        }
+
+        return Command.SINGLE_SUCCESS;
     }
 
     public static int execute(CommandContext<CommandSourceStack> command) {
@@ -27,6 +42,19 @@ public class RTSPlayerScoresCommand {
         }
 
         return Command.SINGLE_SUCCESS;
+    }
+
+    public static String displayScores(RTSPlayer rtsPlayer) {
+        String scores = "";
+        HashMap<RTSPlayerScoresEnum, Integer> playerScoreList = rtsPlayer.scores.getScoreList();
+
+        scores += rtsPlayer.name + "\n";
+
+        for (RTSPlayerScoresEnum i : RTSPlayerScoresEnum.values()) {
+            scores += i.toString() + ": " + playerScoreList.get(i) + "\n";
+        }
+
+        return scores;
     }
 
     public static String displayScores(List<RTSPlayer> rtsPlayerList) {

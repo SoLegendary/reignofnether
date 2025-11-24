@@ -923,6 +923,7 @@ public class PlayerServerEvents {
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
         AllyCommand.register(evt.getDispatcher());
+        RTSPlayerScoresCommand.register(evt.getDispatcher());
 
         evt.getDispatcher().register(Commands.literal("rts-lock").then(Commands.literal("enable").executes((command) -> {
             if ((command.getSource() != null &&

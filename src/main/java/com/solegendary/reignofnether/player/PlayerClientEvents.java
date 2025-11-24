@@ -129,7 +129,6 @@ public class PlayerClientEvents {
 
     @SubscribeEvent
     public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
-        RTSPlayerScoresCommand.register(evt.getDispatcher());
         evt.getDispatcher().register(Commands.literal("rts-camera").executes((command) -> {
             OrthoviewClientEvents.tryToToggleEnable();
             return 1;
