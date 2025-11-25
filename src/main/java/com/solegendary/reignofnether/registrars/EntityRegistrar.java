@@ -6,9 +6,7 @@ import com.solegendary.reignofnether.entities.ThrownHeroExperienceBottle;
 import com.solegendary.reignofnether.entities.NecromancerProjectile;
 import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
 import com.solegendary.reignofnether.hero.HeroExperienceOrb;
-import com.solegendary.reignofnether.unit.modelling.renderers.GhastUnitRenderer;
-import com.solegendary.reignofnether.unit.modelling.renderers.NecromancerRenderer;
-import com.solegendary.reignofnether.unit.modelling.renderers.RoyalGuardRenderer;
+import com.solegendary.reignofnether.unit.modelling.renderers.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.neutral.*;
 import com.solegendary.reignofnether.unit.units.piglins.*;
@@ -231,6 +229,13 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "royal_guard_unit").toString()));
 
+    public static final RegistryObject<EntityType<EnchanterUnit>> ENCHANTER_UNIT = ENTITIES.register("enchanter_unit",
+            () -> EntityType.Builder.of(EnchanterUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.VINDICATOR.getWidth() * EnchanterRenderer.SCALE_MULT,
+                            EntityType.VINDICATOR.getHeight() * EnchanterRenderer.SCALE_MULT)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "enchanter_unit").toString()));
+
     public static final RegistryObject<EntityType<NecromancerUnit>> NECROMANCER_UNIT = ENTITIES.register("necromancer_unit",
             () -> EntityType.Builder.of(NecromancerUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.SKELETON.getWidth() * NecromancerRenderer.SCALE_MULT,
@@ -238,11 +243,26 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "necromancer_unit").toString()));
 
+    public static final RegistryObject<EntityType<WretchedWraithUnit>> WRETCHED_WRAITH_UNIT = ENTITIES.register("wretched_wraith_unit",
+            () -> EntityType.Builder.of(WretchedWraithUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.ZOMBIE.getWidth() * WretchedWraithRenderer.SCALE_MULT,
+                            EntityType.ZOMBIE.getHeight() * WretchedWraithRenderer.SCALE_MULT)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wretched_wraith_unit").toString()));
+
     public static final RegistryObject<EntityType<PiglinMerchantUnit>> PIGLIN_MERCHANT_UNIT = ENTITIES.register("piglin_merchant_unit",
             () -> EntityType.Builder.of(PiglinMerchantUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.PIGLIN_BRUTE.getWidth(), EntityType.PIGLIN_BRUTE.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "piglin_merchant_unit").toString()));
+
+    public static final RegistryObject<EntityType<WildfireUnit>> WILDFIRE_UNIT = ENTITIES.register("wildfire_unit",
+            () -> EntityType.Builder.of(WildfireUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.BLAZE.getWidth() * WildfireRenderer.SCALE_MULT,
+                            EntityType.BLAZE.getHeight() * WildfireRenderer.SCALE_MULT)
+                    .fireImmune()
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wildfire_unit").toString()));
 
     public static final RegistryObject<EntityType<PolarBearUnit>> POLAR_BEAR_UNIT = ENTITIES.register("polar_bear_unit",
             () -> EntityType.Builder.of(PolarBearUnit::new, MobCategory.CREATURE)
@@ -355,7 +375,10 @@ public class EntityRegistrar {
             case GhastProd.itemName -> EntityRegistrar.GHAST_UNIT.get();
             case NecromancerProd.itemName -> EntityRegistrar.NECROMANCER_UNIT.get();
             case PiglinMerchantProd.itemName -> EntityRegistrar.PIGLIN_MERCHANT_UNIT.get();
+            case WildfireProd.itemName -> EntityRegistrar.WILDFIRE_UNIT.get();
             case RoyalGuardProd.itemName -> EntityRegistrar.ROYAL_GUARD_UNIT.get();
+            case EnchanterProd.itemName -> EntityRegistrar.ENCHANTER_UNIT.get();
+            case WretchedWraithProd.itemName -> EntityRegistrar.WRETCHED_WRAITH_UNIT.get();
             case EndermanProd.itemName -> EntityRegistrar.ENDERMAN_UNIT.get();
             case ZombiePiglinProd.itemName -> EntityRegistrar.ZOMBIE_PIGLIN_UNIT.get();
             case ZoglinProd.itemName -> EntityRegistrar.ZOGLIN_UNIT.get();

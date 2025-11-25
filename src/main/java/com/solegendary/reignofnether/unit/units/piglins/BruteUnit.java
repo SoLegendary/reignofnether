@@ -294,11 +294,12 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
-        ItemStack swordStack = new ItemStack(Items.GOLDEN_SWORD);
-        AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
-        swordStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
-        this.setItemSlot(EquipmentSlot.MAINHAND, swordStack);
-
+        if (!hasEnchantedNetheriteSword()) {
+            ItemStack swordStack = new ItemStack(Items.GOLDEN_SWORD);
+            AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
+            swordStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+            this.setItemSlot(EquipmentSlot.MAINHAND, swordStack);
+        }
         if (ResearchServerEvents.playerHasResearch(this.getOwnerName(), ProductionItems.RESEARCH_BRUTE_SHIELDS)) {
             ItemStack shieldStack = new ItemStack(Items.SHIELD);
             this.setItemSlot(EquipmentSlot.OFFHAND, shieldStack);
@@ -350,6 +351,8 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
         return bloodlustTicks > 0;
     }
 
-
-
+    @Override
+    public boolean hasBonusDamage() {
+        return hasEnchantedNetheriteSword();
+    }
 }

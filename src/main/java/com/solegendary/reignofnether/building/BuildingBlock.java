@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -10,12 +11,14 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.Tags;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Predicate;
 
 public class BuildingBlock {
     private BlockPos blockPos;
     private BlockState blockState; // ideal blockstate when placed, not actual world state
+    private CompoundTag blockNbt = null;
 
     private List<Predicate<BlockState>> materialsThatIgnoreState = List.of(
             (s)-> SculkCatalystPlacement.isSculk(s.getBlock()),
@@ -37,8 +40,15 @@ public class BuildingBlock {
         this.blockState = blockState;
     }
 
+    public BuildingBlock(BlockPos blockPos, BlockState blockState, CompoundTag blockNbt) {
+        this.blockPos = blockPos;
+        this.blockState = blockState;
+        this.blockNbt = blockNbt;
+    }
+
     public BlockPos getBlockPos() { return blockPos; }
     public BlockState getBlockState() { return blockState; }
+    @Nullable public CompoundTag getBlockNbt() { return blockNbt; }
 
     public void setBlockPos(BlockPos bp) { this.blockPos = bp; }
     public void setBlockState(BlockState bs) { this.blockState = bs; }
@@ -47,14 +57,16 @@ public class BuildingBlock {
     public BuildingBlock rotate(LevelAccessor level, Rotation rotation) {
         return new BuildingBlock(
             this.blockPos.rotate(rotation),
-            this.blockState.rotate(level, blockPos, rotation)
+            this.blockState.rotate(level, blockPos, rotation),
+            this.blockNbt
         );
     }
 
     public BuildingBlock move(LevelAccessor level, BlockPos offset) {
         return new BuildingBlock(
             this.blockPos.offset(offset),
-            this.blockState
+            this.blockState,
+            this.blockNbt
         );
     }
 

@@ -10,14 +10,34 @@ Features
 --------
 Custom structures
 
+[✔] Custom structures can now save NBT data from block entities
+    - This means that command block content can now be saved
+
+
 
 Bugfixes
 --------
-[❌] Weapons and armour aren't saved on restart
+[✔] All weapons and armour on units are now saved on restart
+[✔] Fixed Hoglins sometimes duplicating when picking up armour
+[✔] Destroyed buildings no longer breaks blocks that weren't part of its structure
+    - This was sometimes breaking surrounding terrain blocks
+[✔] Fixed Ravager artillery shots not causing damage to obsidian and deepslate buildings
+[✔] Fixed a crash when a beacon is upgraded in multiplayer wave survival
+[✔] Fixed nether conversion zones not saving properly when their portal was destroyed
+
 
 Quality of Life
 ---------------
 [❌] Allow overlapping of custom structures (if possible, only with air blocks)
+
+[❌] Postgame stats from @ThatBusyBoi
+
+[✔] Command block API from @PerseoJ
+    - Test @p and @s arguments
+    - Rename appropriately
+
+[✔] Minimap pings from @PerseoJ
+
 
 Balance
 -------
@@ -25,3 +45,4 @@ Balance
 
 Languages
 ---------
+[✔] Persian by Alizera

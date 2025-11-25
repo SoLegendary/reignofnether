@@ -275,8 +275,4 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     public void setupEquipmentAndUpgradesServer() {
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
     }
-
-
-
-
 }

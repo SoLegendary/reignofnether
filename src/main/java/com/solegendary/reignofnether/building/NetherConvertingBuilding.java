@@ -8,5 +8,5 @@ public interface NetherConvertingBuilding {
 
     NetherZone getZone();
 
-    void setNetherZone(NetherZone nz);
+    void setNetherZone(NetherZone nz, boolean save);
 }

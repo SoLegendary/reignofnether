@@ -129,6 +129,7 @@ public class SandboxClientEvents {
                 ProductionItems.EVOKER.getPlaceButton(),
                 ProductionItems.RAVAGER.getPlaceButton(),
                 ProductionItems.ROYAL_GUARD.getPlaceButton()
+                //ProductionItems.ENCHANTER.getPlaceButton()
             );
             case MONSTERS -> List.of(
                 ProductionItems.ZOMBIE_VILLAGER.getPlaceButton(),
@@ -142,28 +143,30 @@ public class SandboxClientEvents {
                 ProductionItems.CREEPER.getPlaceButton(),
                 ProductionItems.SLIME.getPlaceButton(),
                 ProductionItems.WARDEN.getPlaceButton(),
-                ProductionItems.NECROMANCER.getPlaceButton(),
                 ProductionItems.ZOMBIE_PIGLIN.getPlaceButton(),
-                ProductionItems.ZOGLIN.getPlaceButton()
+                ProductionItems.ZOGLIN.getPlaceButton(),
+                ProductionItems.NECROMANCER.getPlaceButton()
+                //ProductionItems.WRETCHED_WRAITH.getPlaceButton(),
             );
             case PIGLINS -> List.of(
-                    ProductionItems.GRUNT.getPlaceButton(),
-                    ProductionItems.BRUTE.getPlaceButton(),
-                    ProductionItems.HEADHUNTER.getPlaceButton(),
-                    ProductionItems.HOGLIN.getPlaceButton(),
-                    ProductionItems.BLAZE.getPlaceButton(),
-                    ProductionItems.WITHER_SKELETON.getPlaceButton(),
-                    ProductionItems.MAGMA_CUBE.getPlaceButton(),
-                    ProductionItems.GHAST.getPlaceButton(),
-                    ProductionItems.PIGLIN_MERCHANT.getPlaceButton()
+                ProductionItems.GRUNT.getPlaceButton(),
+                ProductionItems.BRUTE.getPlaceButton(),
+                ProductionItems.HEADHUNTER.getPlaceButton(),
+                ProductionItems.HOGLIN.getPlaceButton(),
+                ProductionItems.BLAZE.getPlaceButton(),
+                ProductionItems.WITHER_SKELETON.getPlaceButton(),
+                ProductionItems.MAGMA_CUBE.getPlaceButton(),
+                ProductionItems.GHAST.getPlaceButton(),
+                ProductionItems.PIGLIN_MERCHANT.getPlaceButton()
+                //ProductionItems.WILDFIRE.getPlaceButton()
             );
             case NONE -> List.of(
-                    ProductionItems.ENDERMAN.getPlaceButton(),
-                    ProductionItems.POLAR_BEAR.getPlaceButton(),
-                    ProductionItems.GRIZZLY_BEAR.getPlaceButton(),
-                    ProductionItems.PANDA.getPlaceButton(),
-                    ProductionItems.WOLF.getPlaceButton(),
-                    ProductionItems.LLAMA.getPlaceButton()
+                ProductionItems.ENDERMAN.getPlaceButton(),
+                ProductionItems.POLAR_BEAR.getPlaceButton(),
+                ProductionItems.GRIZZLY_BEAR.getPlaceButton(),
+                ProductionItems.PANDA.getPlaceButton(),
+                ProductionItems.WOLF.getPlaceButton(),
+                ProductionItems.LLAMA.getPlaceButton()
             );
         };
     }

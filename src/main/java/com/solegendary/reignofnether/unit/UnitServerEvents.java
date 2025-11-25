@@ -336,10 +336,6 @@ public class UnitServerEvents {
             mob.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 1.0f);
-            mob.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
-            mob.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
-            mob.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY);
-            mob.setItemSlot(EquipmentSlot.FEET, ItemStack.EMPTY);
         }
 
         if (evt.getEntity() instanceof Unit unit && evt.getEntity() instanceof LivingEntity entity

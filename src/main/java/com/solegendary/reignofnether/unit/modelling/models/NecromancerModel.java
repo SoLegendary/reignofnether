@@ -121,9 +121,6 @@ public class NecromancerModel<T extends Entity> extends KeyframeHierarchicalMode
 		// any once-off animation like attack or cast spell
 		if (necromancer.activeAnimDef != null && necromancer.activeAnimState != null && necromancer.animateTicks > 0) {
 			restartThenAnimate(necromancer, necromancer.activeAnimState, necromancer.activeAnimDef, ageInTicks, necromancer.animateScale);
-			//System.out.println("activeAnimDef: " + necromancer.activeAnimDef.toString());
-			//System.out.println("animateTicks: " + necromancer.animateTicks);
-			//System.out.println("animateScale: " + necromancer.animateScale);
 		}
 		// walk animation
 		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {

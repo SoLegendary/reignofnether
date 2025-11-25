@@ -44,6 +44,9 @@ public class ResourceCosts {
     public static final ResourceCost NECROMANCER = new ResourceCost(ID, "NECROMANCER");
     public static final ResourceCost ROYAL_GUARD = new ResourceCost(ID, "ROYAL_GUARD");
     public static final ResourceCost PIGLIN_MERCHANT = new ResourceCost(ID, "PIGLIN_MERCHANT");
+    public static final ResourceCost WRETCHED_WRAITH = new ResourceCost(ID, "WRETCHED_WRAITH");
+    public static final ResourceCost ENCHANTER = new ResourceCost(ID, "ENCHANTER");
+    public static final ResourceCost WILDFIRE = new ResourceCost(ID, "WILDFIRE");
     public static final ResourceCost HERO_BASE_REVIVE_COST = new ResourceCost(ID, "HERO_BASE_REVIVE_COST");
     public static final ResourceCost HERO_EXTRA_REVIVE_COST_PER_LEVEL = new ResourceCost(ID, "HERO_REVIVE_COST_PER_LEVEL");
 
@@ -200,6 +203,7 @@ public class ResourceCosts {
         SLIME.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SLIME);
         WARDEN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WARDEN);
         NECROMANCER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.NECROMANCER);
+        WRETCHED_WRAITH.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WRETCHED_WRAITH);
         ZOMBIE_PIGLIN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ZOMBIE_PIGLIN);
         ZOGLIN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ZOGLIN);
         // Villagers
@@ -212,6 +216,7 @@ public class ResourceCosts {
         EVOKER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.EVOKER);
         RAVAGER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.RAVAGER);
         ROYAL_GUARD.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ROYAL_GUARD);
+        ENCHANTER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ENCHANTER);
         // Piglins
         GRUNT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.GRUNT);
         BRUTE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BRUTE);
@@ -222,6 +227,7 @@ public class ResourceCosts {
         GHAST.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.GHAST);
         MAGMA_CUBE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.MAGMA_CUBE);
         PIGLIN_MERCHANT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.PIGLIN_MERCHANT);
+        WILDFIRE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WILDFIRE);
 
         ENDERMAN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ENDERMAN);
         POLAR_BEAR.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.POLAR_BEAR);

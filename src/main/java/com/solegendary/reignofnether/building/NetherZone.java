@@ -63,6 +63,7 @@ public class NetherZone {
 
     public void tick(ServerLevel level) {
         if (!level.isClientSide()) {
+
             ticksLeft -= 1;
             if (ticksLeft <= 0 && convertsAfterConstantRange < MAX_CONVERTS_AFTER_CONSTANT_RANGE) {
                 if (!isRestoring) {

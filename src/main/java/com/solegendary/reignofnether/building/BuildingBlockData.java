@@ -15,6 +15,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
@@ -56,30 +57,16 @@ public class BuildingBlockData {
                     blockPosNbt.getInt(2)
             );
             BlockState bs = palette.get(blockNbt.getInt("state"));
-
+            CompoundTag bNbt = null;
+            if (blockNbt.contains("nbt")) {
+                bNbt = blockNbt.getCompound("nbt");
+            }
             if (BlockUtils.isFallingLogBlock(bs))
                 bs = BlockUtils.getNonFallingLog(bs);
 
             if (bs.getBlock() != Blocks.WATER || bs.getFluidState().isSource())
-                blocks.add(new BuildingBlock(bp, bs));
+                blocks.add(new BuildingBlock(bp, bs, bNbt));
         }
-        return blocks;
-    }
-
-    // returns absolute values
-    public static ArrayList<BuildingBlock> getBuildingBlocksFromWorld(Level level, BlockPos originPos, BlockPos structurePos, Vec3i structureSize) {
-        ArrayList<BuildingBlock> blocks = new ArrayList<>();
-
-        IntStream.range(originPos.getX() + structurePos.getX(), originPos.getX() + structurePos.getX() + structureSize.getX()).forEachOrdered(x -> {
-            IntStream.range(originPos.getY() + structurePos.getY(), originPos.getY() + structurePos.getY() + structureSize.getY()).forEachOrdered(y -> {
-                IntStream.range(originPos.getZ() + structurePos.getZ(), originPos.getZ() + structurePos.getZ() + structureSize.getZ()).forEachOrdered(z -> {
-                    BlockPos bp = new BlockPos(x,y,z);
-                    BlockState bs = level.getBlockState(bp);
-                    if (bs.getBlock() != Blocks.WATER || bs.getFluidState().isSource())
-                        blocks.add(new BuildingBlock(bp, bs));
-                });
-            });
-        });
         return blocks;
     }
 

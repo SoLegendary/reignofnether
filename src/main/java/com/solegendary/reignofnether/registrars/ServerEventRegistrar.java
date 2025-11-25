@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.attackwarnings.AttackWarningServerEvents;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
+import com.solegendary.reignofnether.commands.CommandsServerEvents;
 import com.solegendary.reignofnether.config.ConfigVanillaServerEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.gamemode.GameModeServerEvents;
@@ -57,5 +58,6 @@ public class ServerEventRegistrar {
         vanillaEventBus.register(NonUnitServerEvents.class);
         vanillaEventBus.register(TimeServerEvents.class);
         vanillaEventBus.register(CustomBuildingServerEvents.class);
+        vanillaEventBus.register(CommandsServerEvents.class);
     }
 }

@@ -528,6 +528,10 @@
     "commands.reignofnether.gamerule.slanted_buildings": "Allow building on non-flat terrain",
     "commands.reignofnether.gamerule.allow_heroes": "Allow building of altars and heroes",
 
+    "commands.reignofnether.error.unknown_building": "Unknown building name",
+    "commands.reignofnether.error.unknown_resource": "Unknown resource name",
+    "commands.reignofnether.error.no_server_level": "Server level is not ready yet",
+
     "controls.reignofnether.toggle_cam": "F12 - Toggle RTS camera",
     "controls.reignofnether.refresh_chunks": "F8 - Refresh chunks",
     "controls.reignofnether.toggle_fps_tps": "F7 - Toggle FPS/TPS counters",
@@ -599,6 +603,8 @@
     "hud.map.reignofnether.rotate_cw.tooltip2": "(Alt + right-arrow)",
     "hud.map.reignofnether.rotate_ccw.tooltip1": "Rotate camera counter-clockwise",
     "hud.map.reignofnether.rotate_ccw.tooltip2": "(Alt + left-arrow)",
+    "hud.map.reignofnether.marker_mode_enabled": "Marker mode enabled",
+    "hud.map.reignofnether.marker_mode_disabled": "Marker mode disabled",
 
     "hud.startbuttons.villagers.reignofnether.first": "Join the game as Villagers",
     "hud.startbuttons.villagers.reignofnether.second": "Spawns 3 villagers at the target location.",
@@ -1070,8 +1076,13 @@
     "units.monsters.reignofnether.necromancer": "The Necromancer",
     "units.monsters.reignofnether.necromancer.tooltip1": "A dark mage adept in summoning other monsters and ",
     "units.monsters.reignofnether.necromancer.tooltip2": "manipulating the night using the souls of the dead. ",
-    "units.monsters.reignofnether.necromancer.tooltip3": "The Necromancer will burn under sunlight.",
+    "units.monsters.reignofnether.necromancer.tooltip3": "The Necromancer will be slowed under sunlight.",
     "units.monsters.reignofnether.necromancer.revive": "Revive the Necromancer (Level %d)",
+    "units.monsters.reignofnether.wretched_wraith": "The Wretched Wraith",
+    "units.monsters.reignofnether.wretched_wraith.tooltip1": "A chilling spectre capable of summoning storms ",
+    "units.monsters.reignofnether.wretched_wraith.tooltip2": "and blankets of snow to freeze all living things.",
+    "units.monsters.reignofnether.wretched_wraith.tooltip3": "The Wraith will be slowed under sunlight.",
+    "units.monsters.reignofnether.wretched_wraith.revive": "Revive the Wretched Wraith (Level %d)",
 
     "units.piglins.reignofnether.blaze": "Blaze",
     "units.piglins.reignofnether.blaze.tooltip1": "A fiery elemental that shoots fireballs from afar.",
@@ -1106,6 +1117,10 @@
     "units.piglins.reignofnether.piglin_merchant.tooltip1": "A jolly piglin trader with endless supplies of food, ",
     "units.piglins.reignofnether.piglin_merchant.tooltip2": "loot and explosives, as long as you have the money.",
     "units.piglins.reignofnether.piglin_merchant.revive": "Revive the Piglin Merchant (Level %d)",
+    "units.piglins.reignofnether.wildfire": "The Wildfire",
+    "units.piglins.reignofnether.wildfire.tooltip1": "A greater blaze of untamed flames with the power to",
+    "units.piglins.reignofnether.wildfire.tooltip2": "stoke the fire in the souls of enemies and allies alike.",
+    "units.piglins.reignofnether.wildfire.revive": "Revive the Wildfire (Level %d)",
 
     "units.villagers.reignofnether.evoker": "Evoker",
     "units.villagers.reignofnether.evoker.tooltip1": "A learned wizard that can cast combat spells.",
@@ -1134,6 +1149,10 @@
     "units.villagers.reignofnether.royal_guard.tooltip1": "A heavily armoured illager ready for war, smashing ",
     "units.villagers.reignofnether.royal_guard.tooltip2": "through front lines and empowering themselves in battle.",
     "units.villagers.reignofnether.royal_guard.revive": "Revive the Royal Guard (Level %d)",
+    "units.villagers.reignofnether.enchanter": "The Enchanter",
+    "units.villagers.reignofnether.enchanter.tooltip1": "A wise illager dedicated to the art of enchanting, able",
+    "units.villagers.reignofnether.enchanter.tooltip2": "to enhance the abilities of both workers and soldiers.",
+    "units.villagers.reignofnether.enchanter.revive": "Revive the Enchanter (Level %d)",
 
     "units.neutral.reignofnether.enderman": "Enderman",
     "units.neutral.reignofnether.enderman.tooltip1": "An enigmatic creature from the end. Can teleport ",

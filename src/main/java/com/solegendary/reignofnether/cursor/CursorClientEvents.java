@@ -77,7 +77,6 @@ public class CursorClientEvents {
     private static UnitAction leftClickAction = null;
     private static SandboxAction leftClickSandboxAction = null;
 
-
     public static Vector3d getCursorWorldPos() {
         return cursorWorldPos;
     }
@@ -153,6 +152,7 @@ public class CursorClientEvents {
         cursorDrawX = Math.max(0, cursorDrawX);
         cursorDrawY = Math.max(0, cursorDrawY);
         ResourceLocation texture;
+
         if (Keybindings.altMod.isDown() && (leftClickDown || rightClickDown)) {
             RenderSystem.setShaderTexture(0, TEXTURE_HAND_GRAB);
             texture = TEXTURE_HAND_GRAB;
@@ -168,8 +168,6 @@ public class CursorClientEvents {
         } else if (leftClickAction != null || leftClickSandboxAction != null) {
             RenderSystem.setShaderTexture(0, TEXTURE_CROSS);
             texture = TEXTURE_CROSS;
-            cursorDrawX -= 8;
-            cursorDrawY -= 8;
         } else {
             RenderSystem.setShaderTexture(0, TEXTURE_CURSOR);
             texture = TEXTURE_CURSOR;

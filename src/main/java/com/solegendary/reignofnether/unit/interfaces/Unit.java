@@ -31,6 +31,8 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
@@ -42,6 +44,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -444,6 +447,12 @@ public interface Unit {
         }
         if (this instanceof HeroUnit heroUnit)
             heroUnit.addHeroUnitSaveData(pCompound);
+
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            ItemStack itemStack = ((LivingEntity) this).getItemBySlot(slot);
+            if (itemStack.getItem() != Items.AIR)
+                pCompound.put(slot.name() + "Item", itemStack.serializeNBT());
+        }
     }
 
     // call from readAdditionalSaveData
@@ -459,6 +468,16 @@ public interface Unit {
         }
         if (this instanceof HeroUnit heroUnit)
             heroUnit.readHeroUnitSaveData(pCompound);
+
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            String keyName = slot.name() + "Item";
+            if (pCompound.contains(keyName)) {
+                CompoundTag itemNbt = (CompoundTag) pCompound.get(keyName);
+                if (itemNbt != null) {
+                    ((LivingEntity) this).setItemSlot(slot, ItemStack.of(itemNbt));
+                }
+            }
+        }
     }
 
     public enum SunlightEffect {

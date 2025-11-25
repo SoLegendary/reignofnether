@@ -76,12 +76,13 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
     }
 
     @Override
-    public void setNetherZone(NetherZone nz) {
+    public void setNetherZone(NetherZone nz, boolean save) {
         if (netherConversionZone == null) {
             netherConversionZone = nz;
             if (!level.isClientSide()) {
                 BuildingServerEvents.netherZones.add(netherConversionZone);
-                BuildingServerEvents.saveNetherZones((ServerLevel) level);
+                if (save)
+                    BuildingServerEvents.saveNetherZones((ServerLevel) level);
             }
         }
     }
@@ -89,7 +90,7 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
     @Override
     public void onBuilt() {
         super.onBuilt();
-        setNetherZone(new NetherZone(centrePos.offset(0, -2, 0), getMaxRange(), getStartingRange()));
+        setNetherZone(new NetherZone(centrePos.offset(0, -2, 0), getMaxRange(), getStartingRange()), true);
     }
 
     public void disconnectPortal() {

@@ -95,8 +95,11 @@ public class CommonModEvents {
         evt.registerEntityRenderer(EntityRegistrar.SLIME_UNIT.get(), SlimeRenderer::new);
 
         evt.registerEntityRenderer(EntityRegistrar.ROYAL_GUARD_UNIT.get(), RoyalGuardRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.ENCHANTER_UNIT.get(), EnchanterRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.NECROMANCER_UNIT.get(), NecromancerRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.WRETCHED_WRAITH_UNIT.get(), WretchedWraithRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.PIGLIN_MERCHANT_UNIT.get(), PiglinMerchantRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.WILDFIRE_UNIT.get(), WildfireRenderer::new);
 
         evt.registerEntityRenderer(EntityRegistrar.POLAR_BEAR_UNIT.get(), PolarBearRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.GRIZZLY_BEAR_UNIT.get(), GrizzlyBearRenderer::new);
@@ -121,7 +124,6 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.WOLF_UNIT.get(), WolfUnit.createAttributes().build());
         evt.put(EntityRegistrar.LLAMA_UNIT.get(), WolfUnit.createAttributes().build());
         evt.put(EntityRegistrar.PHANTOM_SUMMON.get(), PhantomSummon.createAttributes().build());
-
         evt.put(EntityRegistrar.ZOMBIE_UNIT.get(), ZombieUnit.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_PIGLIN_UNIT.get(), ZombiePiglinUnit.createAttributes().build());
         evt.put(EntityRegistrar.ZOGLIN_UNIT.get(), ZoglinUnit.createAttributes().build());
@@ -155,14 +157,17 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.MAGMA_CUBE_UNIT.get(), SlimeUnit.createAttributes().build());
         evt.put(EntityRegistrar.SLIME_UNIT.get(), SlimeUnit.createAttributes().build());
         evt.put(EntityRegistrar.ROYAL_GUARD_UNIT.get(), RoyalGuardUnit.createAttributes().build());
+        evt.put(EntityRegistrar.ENCHANTER_UNIT.get(), EnchanterUnit.createAttributes().build());
         evt.put(EntityRegistrar.NECROMANCER_UNIT.get(), NecromancerUnit.createAttributes().build());
+        evt.put(EntityRegistrar.WRETCHED_WRAITH_UNIT.get(), WretchedWraithUnit.createAttributes().build());
         evt.put(EntityRegistrar.PIGLIN_MERCHANT_UNIT.get(), PiglinMerchantUnit.createAttributes().build());
+        evt.put(EntityRegistrar.WILDFIRE_UNIT.get(), WildfireUnit.createAttributes().build());
         evt.put(EntityRegistrar.KILLER_RABBIT_UNIT.get(), KillerRabbitUnit.createAttributes().build());
     }
 
     @SubscribeEvent
     public static void onClientSetupEvent(FMLClientSetupEvent evt) {
-        MenuScreens.register(ContainerRegistrar.TOPDOWNGUI_CONTAINER.get(), TopdownGui::new);
+        evt.enqueueWork(() -> MenuScreens.register(ContainerRegistrar.TOPDOWNGUI_CONTAINER.get(), TopdownGui::new));
     }
 
     @SubscribeEvent
@@ -173,6 +178,9 @@ public class CommonModEvents {
         event.registerLayerDefinition(PiglinMerchantModel.LAYER_LOCATION, PiglinMerchantModel::createBodyLayer);
         event.registerLayerDefinition(ArmouredHoglinUnitModel.LAYER_LOCATION, ArmouredHoglinUnitModel::createBodyLayer);
         event.registerLayerDefinition(NecromancerProjectileModel.LAYER_LOCATION, NecromancerProjectileModel::createBodyLayer);
+        event.registerLayerDefinition(EnchanterModel.LAYER_LOCATION, EnchanterModel::createBodyLayer);
+        event.registerLayerDefinition(WretchedWraithModel.LAYER_LOCATION, WretchedWraithModel::createBodyLayer);
+        event.registerLayerDefinition(WildfireModel.LAYER_LOCATION, WildfireModel::createBodyLayer);
     }
 
     @SubscribeEvent

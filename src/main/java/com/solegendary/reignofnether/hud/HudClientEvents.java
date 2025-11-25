@@ -1333,6 +1333,17 @@ public class HudClientEvents {
             );
             renderedButtons.add(toggleMapSizeButton);
         }
+
+        Button markerModeButton = MinimapClientEvents.getMarkerModeButton();
+        if (!markerModeButton.isHidden.get()) {
+            markerModeButton.render(evt.getGuiGraphics(),
+                screenWidth - (markerModeButton.iconSize * (MinimapClientEvents.isLargeMap() ? 12 : 8)),
+                screenHeight - (markerModeButton.iconSize * 2),
+                mouseX, mouseY
+            );
+            renderedButtons.add(markerModeButton);
+        }
+
         Button camSensitivityButton = MinimapClientEvents.getCamSensitivityButton();
         if (!camSensitivityButton.isHidden.get()) {
             camSensitivityButton.render(evt.getGuiGraphics(),

@@ -39,12 +39,13 @@ public class CentralPortalPlacement extends ProductionPlacement implements Nethe
     }
 
     @Override
-    public void setNetherZone(NetherZone nz) {
+    public void setNetherZone(NetherZone nz, boolean save) {
         if (netherConversionZone == null) {
             netherConversionZone = nz;
             if (!level.isClientSide()) {
                 BuildingServerEvents.netherZones.add(netherConversionZone);
-                BuildingServerEvents.saveNetherZones((ServerLevel) level);
+                if (save)
+                    BuildingServerEvents.saveNetherZones((ServerLevel) level);
             }
         }
     }
@@ -53,7 +54,7 @@ public class CentralPortalPlacement extends ProductionPlacement implements Nethe
     public void onBuilt() {
         super.onBuilt();
         if (getMaxRange() > 0)
-            setNetherZone(new NetherZone(centrePos.offset(0,-6,0), getMaxRange(), getStartingRange()));
+            setNetherZone(new NetherZone(centrePos.offset(0,-6,0), getMaxRange(), getStartingRange()), true);
     }
 
     @Override

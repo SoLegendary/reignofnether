@@ -308,10 +308,6 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
         return super.fireImmune() || (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary || bpl.getBuilding() instanceof BasaltSprings));
     }
 
-
-
-
-
     @Override
     public boolean canPickUpEquipment(ItemStack itemStack) {
         Item item = itemStack.getItem();
@@ -328,6 +324,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
             !level().isClientSide()) {
             LivingEntity newEntity = this.convertToUnit(EntityRegistrar.ARMOURED_HOGLIN_UNIT.get());
             UnitConvertClientboundPacket.syncConvertedUnits(getOwnerName(), List.of(getId()), List.of(newEntity.getId()));
+            discard();
         }
     }
 

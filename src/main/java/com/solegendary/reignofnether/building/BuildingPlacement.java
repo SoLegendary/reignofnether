@@ -46,6 +46,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -64,6 +65,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -533,9 +535,10 @@ public class BuildingPlacement {
         this.forceChunk(false);
 
         this.blocks.forEach((BuildingBlock block) -> {
-            if (!block.getBlockState().getFluidState().isEmpty() ||
+            if ((!block.getBlockState().getFluidState().isEmpty() ||
                     (block.getBlockState().hasProperty(BlockStateProperties.WATERLOGGED) &&
-                            block.getBlockState().getValue(BlockStateProperties.WATERLOGGED)))
+                            block.getBlockState().getValue(BlockStateProperties.WATERLOGGED))) &&
+                    !block.getBlockState().isAir())
             {
                 BlockState air = Blocks.AIR.defaultBlockState();
                 serverLevel.setBlockAndUpdate(block.getBlockPos(), air);
@@ -547,7 +550,8 @@ public class BuildingPlacement {
             if (block.isPlaced(serverLevel) && x % 2 == 0 && z % 2 != 0) {
                 serverLevel.explode(null, null, null, x, y, z, 1.0f, false, Level.ExplosionInteraction.TNT);
             }
-            serverLevel.destroyBlock(block.getBlockPos(), false);
+            if (!block.getBlockState().isAir())
+                serverLevel.destroyBlock(block.getBlockPos(), false);
         });
 
         this.scaffoldBlocks.forEach((BuildingBlock block) -> {
@@ -897,9 +901,14 @@ public class BuildingPlacement {
             BuildingBlock nextBlock = blockPlaceQueue.get(0);
             BlockPos bp = nextBlock.getBlockPos();
             BlockState bs = nextBlock.getBlockState();
+            CompoundTag bNbt = nextBlock.getBlockNbt();
             if (level.isLoaded(bp)) {
                 level.setBlockAndUpdate(bp, bs);
-
+                if (bNbt != null) {
+                    BlockEntity be = BlockEntity.loadStatic(bp, bs, bNbt);
+                    if (be != null)
+                        level.setBlockEntity(be);
+                }
                 // avoid creating a bubble column block
                 if (bs.getFluidState().is(FluidTags.WATER)) {
                     if (level.getBlockState(bp.below()).getBlock() == Blocks.SOUL_SAND) {

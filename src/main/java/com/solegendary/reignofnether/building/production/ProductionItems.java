@@ -40,10 +40,16 @@ public class ProductionItems {
     public static final GhastProd GHAST = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "ghast"), new GhastProd());
     public static final RoyalGuardProd ROYAL_GUARD = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "royal_guard"), new RoyalGuardProd());
     public static final RoyalGuardReviveProd ROYAL_GUARD_REVIVE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "royal_guard_revive"), new RoyalGuardReviveProd());
+    public static final EnchanterProd ENCHANTER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "enchanter"), new EnchanterProd());
+    public static final EnchanterReviveProd ENCHANTER_REVIVE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "enchanter_revive"), new EnchanterReviveProd());
     public static final NecromancerProd NECROMANCER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "necromancer"), new NecromancerProd());
     public static final NecromancerReviveProd NECROMANCER_REVIVE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "necromancer_revive"), new NecromancerReviveProd());
+    public static final WretchedWraithProd WRETCHED_WRAITH = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wretched_wraith"), new WretchedWraithProd());
+    public static final WretchedWraithReviveProd WRETCHED_WRAITH_REVIVE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wretched_wraith_revive"), new WretchedWraithReviveProd());
     public static final PiglinMerchantProd PIGLIN_MERCHANT = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "piglin_merchant"), new PiglinMerchantProd());
     public static final PiglinMerchantReviveProd PIGLIN_MERCHANT_REVIVE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "piglin_merchant_revive"), new PiglinMerchantReviveProd());
+    public static final WildfireProd WILDFIRE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wildfire"), new WildfireProd());
+    public static final WildfireReviveProd WILDFIRE_REVIVE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wildfire_revive"), new WildfireReviveProd());
     public static final ZombiePiglinProd ZOMBIE_PIGLIN = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "zombie_piglin"), new ZombiePiglinProd());
     public static final ZoglinProd ZOGLIN = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "zoglin"), new ZoglinProd());
     public static final EndermanProd ENDERMAN = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "enderman"), new EndermanProd());

@@ -43,6 +43,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
@@ -92,6 +93,7 @@ public class BuildingServerEvents {
             ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
             if (level != null) {
                 saveBuildings(level);
+                saveNetherZones(level);
                 saveTicks = 0;
             }
         }
@@ -131,7 +133,7 @@ public class BuildingServerEvents {
         netherData.save();
         level.getDataStorage().save();
 
-        //ReignOfNether.LOGGER.info("saved " + netherZones.size() + " netherzones in serverevents");
+        ReignOfNether.LOGGER.info("saved " + netherZones.size() + " netherzones in serverevents");
     }
 
     @SubscribeEvent
@@ -183,7 +185,7 @@ public class BuildingServerEvents {
                     if (building instanceof NetherConvertingBuilding ncb) {
                         for (NetherZone nz : netherData.netherZones)
                             if (building.isPosInsideBuilding(nz.getOrigin())) {
-                                ncb.setNetherZone(nz);
+                                ncb.setNetherZone(nz, false);
                                 placedNZs.add(nz.getOrigin());
                                 ReignOfNether.LOGGER.info("loaded netherzone for: " + b.building.name + "|" + b.originPos);
                                 break;
@@ -195,9 +197,11 @@ public class BuildingServerEvents {
             netherData.netherZones.forEach(nz -> {
                 if (!placedNZs.contains(nz.getOrigin())) {
                     BuildingServerEvents.netherZones.add(nz);
+                    nz.startRestoring();
                     ReignOfNether.LOGGER.info("loaded orphaned netherzone: " + nz.getOrigin());
                 }
             });
+            saveNetherZones(level);
         }
     }
 
@@ -592,6 +596,12 @@ public class BuildingServerEvents {
         // this is dealt in addition to the actual blocks destroyed by the explosion itself
         if (creeperUnit != null || ghastUnit != null || pillagerUnit != null || exp.getExploder() instanceof PrimedTnt) {
             Set<BuildingPlacement> affectedBuildings = new HashSet<>();
+
+            if (pillagerUnit != null) {
+                Vec3 pos = evt.getExplosion().getPosition();
+                evt.getAffectedBlocks().add(new BlockPos((int) pos.x, (int) pos.y - 1, (int) pos.z));
+            }
+
             for (BlockPos bp : evt.getAffectedBlocks()) {
                 BuildingPlacement building = BuildingUtils.findBuilding(false, bp);
 

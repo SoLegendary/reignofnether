@@ -18,6 +18,7 @@ import com.solegendary.reignofnether.unit.packets.BeaconSyncClientboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -200,11 +201,11 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
             BeaconPlacement beacon = BuildingUtils.getBeacon(level.isClientSide);
             if (beacon != null && msg.equals("upgraded_warning")) {
                 String upgradeName = "";
-                if (beacon.getUpgradeLevel() == 1) upgradeName = I18n.get("buildings.neutral.reignofnether.beacon.upgrade.beacon_level1");
-                else if (beacon.getUpgradeLevel() == 2) upgradeName = I18n.get("buildings.neutral.reignofnether.beacon.upgrade.beacon_level2");
-                else if (beacon.getUpgradeLevel() == 3) upgradeName = I18n.get("buildings.neutral.reignofnether.beacon.upgrade.beacon_level3");
-                else if (beacon.getUpgradeLevel() == 4) upgradeName = I18n.get("buildings.neutral.reignofnether.beacon.upgrade.beacon_level4");
-                else if (beacon.getUpgradeLevel() == 5) upgradeName = I18n.get("buildings.neutral.reignofnether.beacon.upgrade.beacon_level5");
+                if (beacon.getUpgradeLevel() == 1) upgradeName = Component.translatable("buildings.neutral.reignofnether.beacon.upgrade.beacon_level1").getString();
+                else if (beacon.getUpgradeLevel() == 2) upgradeName = Component.translatable("buildings.neutral.reignofnether.beacon.upgrade.beacon_level2").getString();
+                else if (beacon.getUpgradeLevel() == 3) upgradeName = Component.translatable("buildings.neutral.reignofnether.beacon.upgrade.beacon_level3").getString();
+                else if (beacon.getUpgradeLevel() == 4) upgradeName = Component.translatable("buildings.neutral.reignofnether.beacon.upgrade.beacon_level4").getString();
+                else if (beacon.getUpgradeLevel() == 5) upgradeName = Component.translatable("buildings.neutral.reignofnether.beacon.upgrade.beacon_level5").getString();
 
                 PlayerServerEvents.sendMessageToAllPlayersNoNewlines("buildings.neutral.reignofnether.beacon.upgrade_warning",
                         true, ownerName, upgradeName, beacon.getUpgradeLevel(), Beacon.MAX_UPGRADE_LEVEL);

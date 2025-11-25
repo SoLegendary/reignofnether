@@ -247,7 +247,7 @@ public abstract class AbstractArrowMixin extends Projectile {
                     pResult.getEntity().getEyePosition().z,
                     1f,
                     false,
-                    Level.ExplosionInteraction.TNT);
+                    Level.ExplosionInteraction.BLOCK);
         }
     }
 
