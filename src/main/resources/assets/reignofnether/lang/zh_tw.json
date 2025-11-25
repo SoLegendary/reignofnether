@@ -1070,7 +1070,7 @@
     "units.monsters.reignofnether.necromancer": "不死法師護衛",
     "units.monsters.reignofnether.necromancer.tooltip1": "一位擅長召喚其他怪物和",
     "units.monsters.reignofnether.necromancer.tooltip2": "利用不死生物靈魂操控夜晚的黑暗法師。",
-    "units.monsters.reignofnether.necromancer.tooltip3": "不死法師護衛在陽光下會燃燒。",
+    "units.monsters.reignofnether.necromancer.tooltip3": "不死法師護衛在陽光下會減速。",
     "units.monsters.reignofnether.necromancer.revive": "復活不死法師護衛（等級 %d）",
 
     "units.piglins.reignofnether.blaze": "烈焰使者",
