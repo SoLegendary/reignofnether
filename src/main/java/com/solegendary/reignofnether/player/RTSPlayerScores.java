@@ -30,6 +30,17 @@ public class RTSPlayerScores {
         scoreList.put(scoresEnum, score);
     }
 
+    public static String getScoreInitials(RTSPlayerScoresEnum scoresEnum) {
+        String[] words = scoresEnum.toString().split("_");
+        StringBuilder initials = new StringBuilder();
+
+        for (String word : words) {
+            initials.append(word.charAt(0));
+        }
+
+        return initials.toString();
+    }
+
     // May be redundant
     /* public int getScore(RTSPlayerScoresEnum scoreEnum) {
         return scoreList.get(scoreEnum);

@@ -58,7 +58,7 @@ public class RTSPlayerScoresCommand {
     }
 
     public static String displayScores(List<RTSPlayer> rtsPlayerList) {
-        String scores = "";
+        String scores = "      ";
 
         for (RTSPlayer rtsPlayer : rtsPlayerList) {
             scores += rtsPlayer.name + "   ";
@@ -67,6 +67,7 @@ public class RTSPlayerScoresCommand {
         scores += "\n";
 
         for (RTSPlayerScoresEnum i : RTSPlayerScoresEnum.values()) {
+            scores += RTSPlayerScores.getScoreInitials(i) + ": ";
             for (RTSPlayer j : rtsPlayerList) {
                 HashMap<RTSPlayerScoresEnum, Integer> playerScoreList = j.scores.getScoreList();
                 scores += playerScoreList.get(i) + "   ";
