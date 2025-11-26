@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 public class RTSPlayerScores {
@@ -39,6 +40,23 @@ public class RTSPlayerScores {
         }
 
         return initials.toString();
+    }
+
+    public ArrayList<Integer> getScoreListAsArray() {
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        for (RTSPlayerScoresEnum scoresEnum : RTSPlayerScoresEnum.values()) {
+            arrayList.add(scoreList.get(scoresEnum));
+        }
+
+        return arrayList;
+    }
+
+    public void setScoreListFromArray(int[] arrayList) {
+        int i = 0;
+        for (RTSPlayerScoresEnum scoresEnum : RTSPlayerScoresEnum.values()) {
+            scoreList.put(scoresEnum, arrayList[i]);
+            i++;
+        }
     }
 
     // May be redundant
