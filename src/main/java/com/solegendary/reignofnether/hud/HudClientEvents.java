@@ -237,10 +237,10 @@ public class HudClientEvents {
         if (count <= 1) {
             return;
         }
-        String countText = "x" + count;
+        String countText = String.valueOf(count);
         int textWidth = MC.font.width(countText);
         int padding = 2;
-        int textX = x + iconFrameSize - textWidth - padding - 3;
+        int textX = x + iconFrameSize - textWidth - padding - 1;
         int textY = y + iconFrameSize - 10;
         guiGraphics.drawString(MC.font, countText, textX, textY, 0xFFFFFF);
     }
@@ -621,17 +621,16 @@ public class HudClientEvents {
             else if ((hudSelBuildingOwned || !PlayerClientEvents.isRTSPlayer()) && hudSelectedPlacement instanceof ProductionPlacement selProdBuilding) {
                 blitY = screenHeight - iconFrameSize * 2 - 5;
 
-                List<ProductionQueueGroup> groupedQueue = groupProductionQueue(selProdBuilding);
-                ActiveProduction firstProdItem = null;
+                List<ActiveProduction> queue = selProdBuilding.productionQueue;
+                ActiveProduction firstProdItem = queue.isEmpty() ? null : queue.get(0);
                 float percentageDoneInv = 0f;
-                if (!groupedQueue.isEmpty()) {
-                    ProductionQueueGroup firstGroup = groupedQueue.get(0);
-                    firstProdItem = firstGroup.getRepresentative() != null ? firstGroup.getRepresentative() : selProdBuilding.productionQueue.get(0);
+                if (firstProdItem != null) {
                     percentageDoneInv = firstProdItem.ticksLeft / firstProdItem.item.getCost(true, selProdBuilding.ownerName).ticks;
                 }
 
-                for (ProductionQueueGroup group : groupedQueue) {
-                    Button button = group.getItem().getCancelButton(selProdBuilding, group.includesFront());
+                for (int i = 0; i < queue.size(); i++) {
+                    ActiveProduction activeProduction = queue.get(i);
+                    Button button = activeProduction.item.getCancelButton(selProdBuilding, i == 0);
                     if (!hudSelBuildingOwned) {
                         button.onLeftClick = () -> { };
                         button.onRightClick = () -> { };
@@ -639,7 +638,7 @@ public class HudClientEvents {
                     productionButtons.add(button);
                 }
 
-                if (!groupedQueue.isEmpty()) {
+                if (!queue.isEmpty()) {
                     // background frame
                     hudZones.add(MyRenderer.renderFrameWithBg(evt.getGuiGraphics(),
                         blitX - 5,
@@ -666,20 +665,18 @@ public class HudClientEvents {
                     );
 
                     int buttonsRendered = 0;
-                    for (int i = 0; i < groupedQueue.size(); i++) {
+                    for (int i = 0; i < productionButtons.size(); i++) {
                         Button prodButton = productionButtons.get(i);
-                        ProductionQueueGroup group = groupedQueue.get(i);
 
                         // top row for currently-in-progress item
                         if (buttonsRendered == 0) {
                             prodButton.greyPercent = 1 - percentageDoneInv;
                             prodButton.render(evt.getGuiGraphics(), blitX, blitY - 5, mouseX, mouseY);
-                            renderQueueGroupCount(evt.getGuiGraphics(), blitX, blitY - 5, iconFrameSize, group.getCount());
                             renderedButtons.add(prodButton);
                         }
                         // replace last icon with a +X number of production items left in queue
-                        else if (buttonsRendered >= buttonsPerRow && groupedQueue.size() > (buttonsPerRow + 1)) {
-                            int numExtraItems = groupedQueue.size() - buttonsPerRow;
+                        else if (buttonsRendered >= buttonsPerRow && productionButtons.size() > (buttonsPerRow + 1)) {
+                            int numExtraItems = productionButtons.size() - buttonsPerRow;
                             MyRenderer.renderIconFrameWithBg(evt.getGuiGraphics(),
                                 prodButton.frameResource,
                                 blitX,
@@ -699,7 +696,6 @@ public class HudClientEvents {
                         // bottom row for all other queued items
                         else {
                             prodButton.render(evt.getGuiGraphics(), blitX, blitY + iconFrameSize, mouseX, mouseY);
-                            renderQueueGroupCount(evt.getGuiGraphics(), blitX, blitY + iconFrameSize, iconFrameSize, group.getCount());
                             renderedButtons.add(prodButton);
                             blitX += iconFrameSize;
                         }
