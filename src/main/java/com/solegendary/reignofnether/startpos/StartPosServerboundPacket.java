@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.startpos;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;

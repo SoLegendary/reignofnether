@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.survival;
 
-import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 

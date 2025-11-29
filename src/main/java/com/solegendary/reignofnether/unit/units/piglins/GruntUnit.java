@@ -2,14 +2,12 @@ package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.hud.Button;
-import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -21,14 +19,13 @@ import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.faction.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -189,20 +186,7 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     }
 
     public static List<BuildingPlaceButton> getBuildingButtons() {
-        return List.of(
-                Buildings.CENTRAL_PORTAL.getBuildButton(Keybindings.keyQ),
-                Buildings.PORTAL_BASIC.getBuildButton(Keybindings.keyW),
-                Buildings.NETHERWART_FARM.getBuildButton(Keybindings.keyE),
-                Buildings.BASTION.getBuildButton(Keybindings.keyR),
-                Buildings.HOGLIN_STABLES.getBuildButton(Keybindings.keyT),
-                Buildings.FLAME_SANCTUARY.getBuildButton(Keybindings.keyY),
-                Buildings.WITHER_SHRINE.getBuildButton(Keybindings.keyU),
-                Buildings.BASALT_SPRINGS.getBuildButton(Keybindings.keyI),
-                Buildings.FORTRESS.getBuildButton(Keybindings.keyO),
-                Buildings.INFERNAL_PORTAL.getBuildButton(Keybindings.keyF),
-                Buildings.BLACKSTONE_BRIDGE.getBuildButton(Keybindings.keyC),
-                Buildings.BEACON.getBuildButton(null)
-        );
+        return FactionRegistries.PIGLINS.getBuildingButtons();
     }
 
     public GruntUnit(EntityType<? extends Piglin> entityType, Level level) {

@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.mixin.fire;
 import com.solegendary.reignofnether.blocks.WalkableMagmaBlock;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GruntUnit;
-import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;

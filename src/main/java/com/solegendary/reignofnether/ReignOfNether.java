@@ -3,6 +3,7 @@ package com.solegendary.reignofnether;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.config.ReignOfNetherCommonConfigs;
+import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.mixin.DownloadPackSourceAccessor;
 import com.solegendary.reignofnether.network.S2CReset;
 import com.solegendary.reignofnether.registrars.*;
@@ -68,6 +69,7 @@ public class ReignOfNether {
         BlockEntityRegistrar.init(mlctx);
         GameRuleRegistrar.init();
         Buildings.init();
+        FactionRegistries.register();
         ProductionItems.init();
         MobEffectRegistrar.init(mlctx);
         final ClientEventRegistrar clientRegistrar = new ClientEventRegistrar();
@@ -81,11 +83,8 @@ public class ReignOfNether {
         bus.addListener(ReignOfNether::init);
         mlctx.registerConfig(ModConfig.Type.COMMON, ReignOfNetherCommonConfigs.SPEC, "reignofnether-common-" + VERSION_STRING + ".toml");
         // client-only config
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> new DistExecutor.SafeRunnable(){  //workaround to prevent Unsafe Referent usage; See DistExecutor.validateSafeReferent
-            @Override
-            public void run() {
-                ClientModConfigs.registerClientConfigs(mlctx);
-            }
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {  //workaround to prevent Unsafe Referent usage; See DistExecutor.validateSafeReferent
+            ClientModConfigs.registerClientConfigs(mlctx);
         });
         mlctx.registerExtensionPoint(
             DisplayTest.class,

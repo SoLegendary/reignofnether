@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.mixin.SplashRendererAccessor;
-import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.CubeMap;

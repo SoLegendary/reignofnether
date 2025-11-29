@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.hud.Button;
@@ -19,7 +20,6 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
-import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerboundPacket;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -27,7 +27,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GruntUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
-import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -65,20 +65,7 @@ public class SandboxClientEvents {
     }
 
     public static List<BuildingPlaceButton> getNeutralBuildingButtons() {
-        List<BuildingPlaceButton> buildingButtons = new ArrayList<>();
-        List<Keybinding> keybindings = BuildingUtils.keybindings;
-        int index = 0;
-
-        for (Building building : ReignOfNetherRegistries.BUILDING) {
-            if (building.getFaction() == Faction.NONE) {
-                BuildingPlaceButton button = building.getBuildButton(index >= keybindings.size() ? null : keybindings.get(index));
-                if (button != null) {
-                    buildingButtons.add(button);
-                    index++;
-                }
-            }
-        }
-        return buildingButtons;
+        return FactionRegistries.NONE.getBuildingButtons();
     }
 
     public static List<BuildingPlaceButton> getBuildingButtons() {

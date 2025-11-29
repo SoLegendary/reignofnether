@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.startpos;
 
-import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.MapColor;

@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;

@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Vec3i;
@@ -78,7 +78,7 @@ public class CustomBuilding extends Building {
     }
 
     public void setIconAndPortrait(String blockRegistryKey) {
-        this.portraitBlock = BuiltInRegistries.BLOCK.get(new ResourceLocation(blockRegistryKey));
+        this.portraitBlock = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(ResourceLocation.DEFAULT_NAMESPACE, blockRegistryKey));
     }
 
     public void cycleIconAndPortrait(boolean reverse) {

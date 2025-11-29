@@ -2,15 +2,11 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.hud.Button;
-import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -24,7 +20,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.modelling.models.VillagerUnitModel;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
-import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.faction.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -197,23 +193,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     }
 
     public static List<BuildingPlaceButton> getBuildingButtons() {
-        return List.of(
-                Buildings.MAUSOLEUM.getBuildButton(Keybindings.keyQ),
-                Buildings.SPRUCE_STOCKPILE.getBuildButton(Keybindings.keyW),
-                Buildings.HAUNTED_HOUSE.getBuildButton(Keybindings.keyE),
-                Buildings.PUMPKIN_FARM.getBuildButton(Keybindings.keyR),
-                Buildings.DARK_WATCHTOWER.getBuildButton(Keybindings.keyT),
-                Buildings.GRAVEYARD.getBuildButton(Keybindings.keyY),
-                Buildings.DUNGEON.getBuildButton(Keybindings.keyU),
-                Buildings.SPIDER_LAIR.getBuildButton(Keybindings.keyI),
-                Buildings.SLIME_PIT.getBuildButton(Keybindings.keyO),
-                Buildings.LABORATORY.getBuildButton(Keybindings.keyP),
-                Buildings.STRONGHOLD.getBuildButton(Keybindings.keyL),
-                Buildings.ALTAR_OF_DARKNESS.getBuildButton(Keybindings.keyF),
-                Buildings.SPRUCE_BRIDGE.getBuildButton(Keybindings.keyC),
-                Buildings.SCULK_CATALYST.getBuildButton(Keybindings.keyV),
-                Buildings.BEACON.getBuildButton(null)
-        );
+        return FactionRegistries.MONSTERS.getBuildingButtons();
     }
 
     public ZombieVillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {

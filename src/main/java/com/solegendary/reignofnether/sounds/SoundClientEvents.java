@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.sounds;
 
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
-import com.solegendary.reignofnether.util.Faction;
+import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;

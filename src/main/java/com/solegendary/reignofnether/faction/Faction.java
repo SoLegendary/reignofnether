@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.util;
+package com.solegendary.reignofnether.faction;
 
 public enum Faction {
     VILLAGERS,
